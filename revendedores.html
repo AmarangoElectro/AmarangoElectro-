@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>Amara · Revendedores AmarangoElectro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FC;--bor:#E8EBF4;--gr:#25D366;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--red:#EF4444}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
+body{background:var(--bg);color:var(--txt);max-width:480px;margin:0 auto;display:flex;flex-direction:column;overflow-x:hidden;height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.header{background:linear-gradient(135deg,var(--az),#1a3a8a);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--nar);flex-shrink:0}
+.header-info{flex:1}
+.header-title{color:#fff;font-weight:800;font-size:.95rem}
+.header-sub{color:rgba(255,255,255,.55);font-size:.62rem;margin-top:2px}
+.rev-badge{background:rgba(255,122,0,.2);border:1px solid var(--nar);border-radius:20px;padding:3px 10px;font-size:.58rem;font-weight:800;color:var(--nar);letter-spacing:1px;white-space:nowrap}
+.chat{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px}
+.msg-row{display:flex;align-items:flex-end;gap:8px;animation:fadeUp .2s ease}
+.msg-row.usr{flex-direction:row-reverse}
+.bubble{max-width:82%;padding:10px 14px;font-size:.82rem;line-height:1.65;white-space:pre-wrap;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.bubble.bot{background:var(--wh);border:1px solid var(--bor);border-radius:16px 16px 16px 4px;color:var(--txt)}
+.bubble.usr{background:var(--az);border-radius:16px 16px 4px 16px;color:#fff;font-weight:600;white-space:normal}
+.prod-card{background:var(--wh);border-radius:12px;border:1px solid var(--bor);overflow:hidden;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.05);max-width:85%;cursor:pointer;transition:transform .15s}
+.prod-card:active{transform:scale(.97)}
+.prod-header{background:linear-gradient(135deg,var(--az),#1a3a8a);padding:9px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.prod-nombre{color:#fff;font-weight:800;font-size:.78rem;flex:1}
+.prod-precio{color:var(--nar);font-weight:900;font-size:.85rem;white-space:nowrap}
+.prod-mem{color:rgba(255,255,255,.6);font-size:.58rem;margin-top:1px}
+.prod-body{padding:9px 12px}
+.cuotas-row{display:flex;gap:5px;margin-bottom:6px}
+.cuota-pill{flex:1;background:var(--bg);border-radius:8px;padding:6px 4px;text-align:center;border:1px solid var(--bor)}
+.cuota-n{font-size:.6rem;font-weight:800;color:var(--nar)}
+.cuota-v{font-size:.7rem;font-weight:700;color:var(--az);margin-top:2px}
+.tap-hint{font-size:.58rem;color:var(--nar);text-align:right;font-weight:700}
+.detalle-card{background:var(--wh);border-radius:14px;border:2px solid var(--nar);overflow:hidden;max-width:90%;box-shadow:0 4px 16px rgba(255,122,0,.15)}
+.detalle-header{background:linear-gradient(135deg,var(--az),#1a3a8a);padding:14px;text-align:center}
+.detalle-nombre{color:#fff;font-weight:900;font-size:1rem}
+.detalle-mem{color:rgba(255,255,255,.6);font-size:.72rem;margin-top:3px}
+.detalle-precio{color:var(--nar);font-weight:900;font-size:1.4rem;margin-top:6px}
+.detalle-body{padding:12px}
+.detalle-cuotas{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.detalle-cuota-row{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:10px;padding:10px 14px;border-left:4px solid var(--nar)}
+.det-cuota-label{font-size:.78rem;font-weight:700;color:var(--az)}
+.det-cuota-val{font-size:1rem;font-weight:900;color:var(--az)}
+.det-cuota-sub{font-size:.6rem;color:var(--sub);margin-top:1px}
+.detalle-nota{font-size:.62rem;color:var(--sub);text-align:center;background:#FFF4EA;border-radius:8px;padding:8px;border:1px solid #FFE0B2;line-height:1.6}
+.typing-dots{display:flex;gap:4px;padding:11px 14px;background:var(--wh);border:1px solid var(--bor);border-radius:16px 16px 16px 4px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--nar);animation:bounce .8s infinite}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+.btns{padding:8px 12px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.abtn{background:var(--wh);border:2px solid var(--az);border-radius:22px;padding:10px 16px;font-size:.8rem;font-weight:700;color:var(--az);cursor:pointer;font-family:inherit;text-align:left;transition:all .15s}
+.abtn:active{background:var(--az);color:#fff}
+.abtn.back{border-color:var(--bor);color:var(--sub);font-size:.75rem}
+.abtn.green{border-color:var(--gr);color:var(--gr)}
+.abtn.green:active{background:var(--gr);color:#fff}
+.inp-wrap{display:none;gap:8px;padding:10px 12px 14px;background:var(--wh);border-top:2px solid var(--bor);flex-shrink:0;align-items:center}
+.inp-wrap input{flex:1;border:2px solid var(--bor);border-radius:22px;padding:10px 14px;font-size:.88rem;outline:none;font-family:inherit;background:var(--bg);color:var(--txt)}
+.inp-wrap input:focus{border-color:var(--nar)}
+.inp-send{width:42px;height:42px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--az),#2563EB);color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.footer{background:var(--wh);border-top:1px solid var(--bor);padding:7px;text-align:center;font-size:.58rem;color:var(--sub);flex-shrink:0}
+.footer span{color:var(--nar);font-weight:700}
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--az),#1a3a8a);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:24px}
+.login-box{background:var(--wh);border-radius:22px;padding:28px 22px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-title{font-size:1.1rem;font-weight:900;color:var(--az);margin-bottom:4px;text-align:center}
+.login-badge{display:inline-block;background:rgba(255,122,0,.15);border:1px solid var(--nar);border-radius:20px;padding:3px 12px;font-size:.6rem;font-weight:800;color:var(--nar);letter-spacing:1px;margin-bottom:12px}
+.login-sub{font-size:.72rem;color:var(--sub);text-align:center;margin-bottom:20px}
+.login-field{margin-bottom:12px}
+.login-label{font-size:.68rem;font-weight:700;color:var(--sub);margin-bottom:5px;display:block;letter-spacing:.3px}
+.login-input{width:100%;border:2px solid var(--bor);border-radius:10px;padding:11px 13px;font-size:.88rem;font-family:inherit;outline:none;background:var(--bg);color:var(--txt);transition:border-color .2s}
+.login-input:focus{border-color:var(--nar)}
+.login-btn{width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:13px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;margin-top:6px}
+.login-error{display:none;color:var(--red);font-size:.68rem;font-weight:600;text-align:center;margin-top:8px;padding:7px;background:#FEF2F2;border-radius:8px}
+.login-error.show{display:block}
+/* ADMIN */
+.admin-screen{position:fixed;inset:0;background:var(--bg);z-index:998;display:none;flex-direction:column;max-width:480px;margin:0 auto}
+.admin-header-bar{background:var(--az);padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:3px solid var(--nar)}
+.admin-content{flex:1;overflow-y:auto;padding:14px}
+.admin-card{background:var(--wh);border-radius:12px;border:1px solid var(--bor);padding:13px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
+.admin-av{width:40px;height:40px;border-radius:50%;background:var(--az);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:.8rem;flex-shrink:0}
+.admin-info{flex:1}
+.admin-name{font-weight:700;font-size:.85rem;color:var(--az)}
+.admin-user{font-size:.65rem;color:var(--sub)}
+.toggle-btn{width:46px;height:26px;border-radius:13px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle-btn.on{background:var(--gr)}
+.toggle-btn.off{background:#D1D5DB}
+.toggle-btn::after{content:'';position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.toggle-btn.on::after{left:23px}
+.toggle-btn.off::after{left:3px}
+.add-rev-btn{width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:13px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div style="text-align:center;margin-bottom:16px">
+      <svg width="60" height="60" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 64 Q30 57 40 57 Q50 57 60 64 L60 78 Q40 82 20 78Z" fill="#0B2D6B"/><polygon points="40,59 44.5,66 35.5,66" fill="#FF7A00" opacity=".95"/><rect x="35.5" y="53.5" width="9" height="4.5" rx="2.2" fill="#FDBF8A"/><ellipse cx="40" cy="37" rx="17.5" ry="18.5" fill="#FDBF8A"/><ellipse cx="40" cy="23" rx="17.5" ry="9.5" fill="#2C1204"/><ellipse cx="23.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="56.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="32.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="47.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="33" cy="37" rx="2.5" ry="3" fill="#1a0800"/><ellipse cx="48" cy="37" rx="2.5" ry="3" fill="#1a0800"/><path d="M33 47 Q40 53.5 47 47" stroke="#C0704A" stroke-width="1.9" fill="none" stroke-linecap="round"/><path d="M34 48 Q40 54.5 46 48 L46 49.5 Q40 56 34 49.5Z" fill="#fff"/></svg>
+    </div>
+    <div class="login-title">AmarangoElectro</div>
+    <div style="text-align:center;margin-bottom:16px"><span class="login-badge">PORTAL REVENDEDORES</span></div>
+    <div class="login-sub">Ingresá la contraseña para acceder</div>
+    <div class="login-field"><label class="login-label">CONTRASEÑA</label><input class="login-input" id="login-pass" type="password" placeholder="Contraseña..." onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-error" id="login-error">Contraseña incorrecta</div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+  </div>
+</div>
+
+<div class="admin-screen" id="admin-screen">
+  <div class="admin-header-bar">
+    <span onclick="hideAdmin()" style="color:rgba(255,255,255,.7);cursor:pointer;font-size:1.1rem">←</span>
+    <div style="color:#fff;font-weight:800;font-size:.95rem;flex:1">Panel Admin</div>
+    <button onclick="hideAdmin()" style="background:rgba(255,255,255,.15);border:none;border-radius:7px;padding:5px 10px;font-size:.62rem;font-weight:700;cursor:pointer;color:#fff">Cerrar</button>
+  </div>
+  <div class="admin-content">
+    <button class="add-rev-btn" onclick="agregarRevendedor()">+ Agregar revendedor</button>
+    <div style="font-size:.68rem;color:var(--sub);margin-bottom:10px;padding:8px 10px;background:var(--wh);border-radius:8px;border:1px solid var(--bor)">
+      El toggle activa el acceso la primera vez y da de baja cuando querés expulsar al revendedor.
+    </div>
+    <div id="rev-list"></div>
+  </div>
+</div>
+
+<div class="header" id="main-header">
+  <svg width="42" height="42" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 64 Q30 57 40 57 Q50 57 60 64 L60 78 Q40 82 20 78Z" fill="#0B2D6B"/><polygon points="40,59 44.5,66 35.5,66" fill="#FF7A00" opacity=".95"/><rect x="35.5" y="53.5" width="9" height="4.5" rx="2.2" fill="#FDBF8A"/><ellipse cx="40" cy="37" rx="17.5" ry="18.5" fill="#FDBF8A"/><ellipse cx="40" cy="23" rx="17.5" ry="9.5" fill="#2C1204"/><ellipse cx="23.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="56.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="32.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="47.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="33" cy="37" rx="2.5" ry="3" fill="#1a0800"/><ellipse cx="48" cy="37" rx="2.5" ry="3" fill="#1a0800"/><path d="M33 47 Q40 53.5 47 47" stroke="#C0704A" stroke-width="1.9" fill="none" stroke-linecap="round"/><path d="M34 48 Q40 54.5 46 48 L46 49.5 Q40 56 34 49.5Z" fill="#fff"/><ellipse cx="26.5" cy="44.5" rx="4.5" ry="2.4" fill="#FF9999" opacity=".32"/><ellipse cx="53.5" cy="44.5" rx="4.5" ry="2.4" fill="#FF9999" opacity=".32"/></svg>
+  <div class="header-info">
+    <div class="header-title">Amara · AmarangoElectro</div>
+    <div class="header-sub">🟢 En línea · Asesora de revendedores</div>
+  </div>
+  <div class="rev-badge">REVENDEDOR</div>
+</div>
+
+<div class="chat" id="chat"></div>
+<div class="btns" id="btns"></div>
+<div class="inp-wrap" id="inp-wrap">
+  <input type="text" id="inp" placeholder="Escribí acá..." onkeydown="if(event.key==='Enter')enviar()">
+  <button class="inp-send" onclick="enviar()">➤</button>
+</div>
+<div class="footer">Portal exclusivo para revendedores de <span>AmarangoElectro</span></div>
+
+<script>
+var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
+function calcCuotas(p){var p2=p*1.15,p4=p2*1.35,p6=p4*1.15;return{c2:Math.round(p2/2/500)*500,c4:Math.round(p4/4/500)*500,c6:Math.round(p6/6/500)*500};}
+
+var REVENDEDORES=[
+  {id:1,nombre:"Maxi",usuario:"maxi",pass:"Amarango2025!",activo:true,admin:true},
+  {id:2,nombre:"Angela",usuario:"angela",pass:"Angela2025!",activo:true,admin:true},
+  {id:3,nombre:"Selene",usuario:"selene",pass:"Selene2025!",activo:true,admin:true}
+];
+
+var CATALOGO=[
+  {cat:"Samsung",items:[
+    {n:"Samsung A06",m:"64GB · 4GB RAM",p:247500},
+    {n:"Samsung A06",m:"128GB · 4GB RAM",p:292500},
+    {n:"Samsung A07",m:"64GB · 4GB RAM",p:259000},
+    {n:"Samsung A07",m:"128GB · 4GB RAM",p:304000},
+    {n:"Samsung A16",m:"128GB · 4GB RAM",p:337500},
+    {n:"Samsung A17",m:"128GB · 4GB RAM",p:357000},
+    {n:"Samsung A17",m:"256GB · 8GB RAM",p:483000},
+    {n:"Samsung A26 5G",m:"256GB · 8GB RAM",p:565500},
+    {n:"Samsung A36 5G",m:"256GB · 8GB RAM",p:663000},
+    {n:"Samsung A37 5G",m:"256GB · 8GB RAM",p:760500},
+    {n:"Samsung A56 5G",m:"256GB · 8GB RAM",p:780000},
+    {n:"Samsung A56 5G",m:"256GB · 12GB RAM",p:819000},
+    {n:"Samsung A57 5G",m:"256GB · 8GB RAM",p:907000},
+    {n:"Samsung S25 Ultra 5G",m:"256GB · 12GB RAM",p:1813500},
+    {n:"Samsung S25 Ultra 5G",m:"512GB · 12GB RAM",p:1911000},
+    {n:"Samsung S26 5G",m:"256GB · 12GB RAM",p:1511000},
+    {n:"Samsung S26 5G",m:"512GB · 12GB RAM",p:1755000},
+    {n:"Samsung S26 Ultra 5G",m:"256GB · 12GB RAM",p:2067000},
+    {n:"Samsung S26 Ultra 5G",m:"512GB · 12GB RAM",p:2340000},
+    {n:"Samsung S26 Ultra 5G",m:"1TB · 16GB RAM",p:2847000}
+  ]},
+  {cat:"Motorola",items:[
+    {n:"Moto E15",m:"64GB · 2GB RAM",p:236000},
+    {n:"Moto G04S",m:"256GB · 4GB RAM",p:337500},
+    {n:"Moto G05",m:"128GB · 4GB RAM",p:292500},
+    {n:"Moto G05",m:"256GB · 4GB RAM",p:315000},
+    {n:"Moto G06",m:"128GB · 4GB RAM",p:292500},
+    {n:"Moto G06",m:"256GB · 4GB RAM",p:304000},
+    {n:"Moto G15",m:"128GB · 4GB RAM",p:337500},
+    {n:"Moto G15",m:"256GB · 4GB RAM",p:357000},
+    {n:"Moto G15",m:"512GB · 4GB RAM",p:367500},
+    {n:"Moto G17",m:"256GB · 4GB RAM",p:420000},
+    {n:"Moto G17 Power",m:"256GB · 8GB RAM",p:472500},
+    {n:"Moto G35 5G",m:"128GB · 4GB RAM",p:349000},
+    {n:"Moto G35 5G",m:"256GB · 4GB RAM",p:367500},
+    {n:"Moto G56 5G",m:"256GB · 8GB RAM",p:472500},
+    {n:"Moto G57 Power 5G",m:"256GB · 12GB RAM",p:536000},
+    {n:"Moto G75 5G",m:"256GB · 8GB RAM",p:483000},
+    {n:"Moto G77 5G",m:"256GB · 8GB RAM",p:556000},
+    {n:"Moto G86 5G",m:"256GB · 8GB RAM",p:507000},
+    {n:"Moto G86 Power 5G",m:"256GB · 8GB RAM",p:517000},
+    {n:"Moto Edge 50 5G",m:"512GB · 12GB RAM",p:712000},
+    {n:"Moto Edge 60 Fusion 5G",m:"256GB · 8GB RAM",p:575000},
+    {n:"Moto Edge 70 5G",m:"256GB · 8GB RAM",p:926000}
+  ]},
+  {cat:"Xiaomi / Poco / Redmi",items:[
+    {n:"Redmi A5",m:"64GB · 3GB RAM",p:259000},
+    {n:"Redmi A7 Pro",m:"128GB · 4GB RAM",p:304000},
+    {n:"Poco C71",m:"64GB · 3GB RAM",p:225000},
+    {n:"Redmi 15C",m:"128GB · 4GB RAM",p:315000},
+    {n:"Redmi 15C",m:"256GB · 4GB RAM",p:360000},
+    {n:"Redmi 15C",m:"256GB · 8GB RAM",p:369000},
+    {n:"Xiaomi Note 14",m:"128GB · 6GB RAM",p:367500},
+    {n:"Xiaomi Note 14",m:"256GB · 8GB RAM",p:420000},
+    {n:"Xiaomi Note 15",m:"128GB · 6GB RAM",p:420000},
+    {n:"Xiaomi Note 15",m:"256GB · 8GB RAM",p:462000},
+    {n:"Poco C81 Pro",m:"128GB · 4GB RAM",p:371000},
+    {n:"Poco C81 Pro",m:"256GB · 4GB RAM",p:380000},
+    {n:"Poco C85",m:"128GB · 4GB RAM",p:315000},
+    {n:"Xiaomi Note 14 Pro 5G",m:"256GB · 8GB RAM",p:575000},
+    {n:"Xiaomi Note 14 Pro Plus 5G",m:"512GB · 12GB RAM",p:799500},
+    {n:"Xiaomi Note 15 Pro",m:"256GB · 8GB RAM",p:556000},
+    {n:"Xiaomi Note 15 Pro 5G",m:"512GB · 8GB RAM",p:673000},
+    {n:"Xiaomi Note 15 Pro Plus",m:"256GB · 8GB RAM",p:770000},
+    {n:"Xiaomi Note 15 Pro Plus 5G",m:"512GB · 12GB RAM",p:907000},
+    {n:"Poco M8 5G",m:"256GB · 8GB RAM",p:487500},
+    {n:"Poco M8 5G",m:"512GB · 8GB RAM",p:546000},
+    {n:"Poco M8 Pro 5G",m:"256GB · 8GB RAM",p:585000},
+    {n:"Poco M8 Pro 5G",m:"512GB · 12GB RAM",p:741000},
+    {n:"Poco X7 Pro 5G",m:"256GB · 8GB RAM",p:721500},
+    {n:"Poco X7 Pro 5G",m:"512GB · 12GB RAM",p:790000},
+    {n:"Poco X8 Pro 5G",m:"256GB · 8GB RAM",p:721500},
+    {n:"Poco X8 Pro 5G",m:"512GB · 12GB RAM",p:780000},
+    {n:"Poco X8 Pro Max 5G",m:"256GB · 12GB RAM",p:985000},
+    {n:"Poco X8 Pro Max 5G",m:"512GB · 12GB RAM",p:1131000}
+  ]},
+  {cat:"Infinix",items:[
+    {n:"Infinix Smart 10",m:"128GB · 4GB RAM",p:281000},
+    {n:"Infinix Smart 20",m:"128GB · 4GB RAM",p:367500},
+    {n:"Infinix Hot 50i",m:"256GB · 8GB RAM",p:326000},
+    {n:"Infinix Hot 60i",m:"256GB · 8GB RAM",p:367500},
+    {n:"Infinix Hot 60 Pro NFC",m:"256GB · 8GB RAM",p:472500},
+    {n:"Infinix Note 50 Pro NFC",m:"256GB · 8GB RAM",p:546000},
+    {n:"Infinix GT30 Pro",m:"256GB · 12GB RAM",p:712000}
+  ]},
+  {cat:"iPhone",items:[
+    {n:"iPhone 13",m:"128GB - Sin gtia oficial",p:897000},
+    {n:"iPhone 15 Plus",m:"128GB",p:1384500},
+    {n:"iPhone 16",m:"128GB",p:1443000},
+    {n:"iPhone 16 Pro Max",m:"256GB",p:2379000},
+    {n:"iPhone 16 Pro Max",m:"512GB",p:2496000},
+    {n:"iPhone 17 Air",m:"256GB",p:1891500},
+    {n:"iPhone 17",m:"256GB",p:1813500},
+    {n:"iPhone 17 E",m:"256GB",p:1267500},
+    {n:"iPhone 17 Pro",m:"256GB",p:2418000},
+    {n:"iPhone 17 Pro",m:"512GB",p:2925000},
+    {n:"iPhone 17 Pro Max",m:"256GB",p:2535000},
+    {n:"iPhone 17 Pro Max",m:"512GB",p:3120000},
+    {n:"iPhone 17 Pro Max",m:"1TB",p:3510000},
+    {n:"iPhone 17 Pro Max",m:"2TB",p:4153500}
+  ]}
+];
+
+var nombre="",step="inicio",currentUser=null,_inputHandler=null;
+
+function avatarSVG(){return'<svg width="30" height="30" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 64 Q30 57 40 57 Q50 57 60 64 L60 78 Q40 82 20 78Z" fill="#0B2D6B"/><polygon points="40,59 44.5,66 35.5,66" fill="#FF7A00" opacity=".95"/><rect x="35.5" y="53.5" width="9" height="4.5" rx="2.2" fill="#FDBF8A"/><ellipse cx="40" cy="37" rx="17.5" ry="18.5" fill="#FDBF8A"/><ellipse cx="40" cy="23" rx="17.5" ry="9.5" fill="#2C1204"/><ellipse cx="23.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="56.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="32.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="47.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="33" cy="37" rx="2.5" ry="3" fill="#1a0800"/><ellipse cx="48" cy="37" rx="2.5" ry="3" fill="#1a0800"/><path d="M33 47 Q40 53.5 47 47" stroke="#C0704A" stroke-width="1.9" fill="none" stroke-linecap="round"/><path d="M34 48 Q40 54.5 46 48 L46 49.5 Q40 56 34 49.5Z" fill="#fff"/></svg>';}
+
+function msgBot(txt){
+  var chat=document.getElementById("chat");
+  var row=document.createElement("div");row.className="msg-row";
+  var av=document.createElement("div");av.style.cssText="flex-shrink:0;width:30px;height:30px";av.innerHTML=avatarSVG();
+  var bbl=document.createElement("div");bbl.className="bubble bot";bbl.style.whiteSpace="pre-wrap";bbl.textContent=txt;
+  row.appendChild(av);row.appendChild(bbl);
+  chat.appendChild(row);chat.scrollTop=chat.scrollHeight;
+}
+
+function msgUsr(txt){
+  var chat=document.getElementById("chat");
+  var row=document.createElement("div");row.className="msg-row usr";
+  var bbl=document.createElement("div");bbl.className="bubble usr";bbl.textContent=txt;
+  row.appendChild(bbl);chat.appendChild(row);chat.scrollTop=chat.scrollHeight;
+}
+
+function msgCard(prod,catIdx){
+  var chat=document.getElementById("chat");
+  var row=document.createElement("div");row.className="msg-row";
+  var av=document.createElement("div");av.style.cssText="flex-shrink:0;width:30px;height:30px";av.innerHTML=avatarSVG();
+  var c=calcCuotas(prod.p);
+  var card=document.createElement("div");card.className="prod-card";
+  card.innerHTML='<div class="prod-header"><div><div class="prod-nombre">'+prod.n+'</div><div class="prod-mem">'+prod.m+'</div></div><div class="prod-precio">'+fmt(prod.p)+'</div></div><div class="prod-body"><div class="cuotas-row"><div class="cuota-pill"><div class="cuota-n">2 cuotas</div><div class="cuota-v">'+fmt(c.c2)+'</div></div><div class="cuota-pill"><div class="cuota-n">4 cuotas</div><div class="cuota-v">'+fmt(c.c4)+'</div></div><div class="cuota-pill"><div class="cuota-n">6 cuotas</div><div class="cuota-v">'+fmt(c.c6)+'</div></div></div><div class="tap-hint">Toca para ver detalle y enviar pedido</div></div>';
+  card.onclick=(function(p,ci){return function(){msgUsr(p.n+" "+p.m);typing(function(){mostrarDetalle(p,ci);});};})(prod,catIdx);
+  row.appendChild(av);row.appendChild(card);
+  chat.appendChild(row);chat.scrollTop=chat.scrollHeight;
+}
+
+function msgDetalle(prod,catIdx){
+  var chat=document.getElementById("chat");
+  var row=document.createElement("div");row.className="msg-row";
+  var av=document.createElement("div");av.style.cssText="flex-shrink:0;width:30px;height:30px";av.innerHTML=avatarSVG();
+  var c=calcCuotas(prod.p);
+  var card=document.createElement("div");card.className="detalle-card";
+  card.innerHTML='<div class="detalle-header"><div class="detalle-nombre">'+prod.n+'</div><div class="detalle-mem">'+prod.m+'</div><div class="detalle-precio">'+fmt(prod.p)+'</div></div><div class="detalle-body"><div class="detalle-cuotas"><div class="detalle-cuota-row"><div><div class="det-cuota-label">2 cuotas fijas</div><div class="det-cuota-sub">Retira con la 1ra cuota</div></div><div class="det-cuota-val">'+fmt(c.c2)+'</div></div><div class="detalle-cuota-row"><div><div class="det-cuota-label">4 cuotas fijas</div><div class="det-cuota-sub">Retira con la 1ra cuota</div></div><div class="det-cuota-val">'+fmt(c.c4)+'</div></div><div class="detalle-cuota-row"><div><div class="det-cuota-label">6 cuotas fijas</div><div class="det-cuota-sub">Retira con la 1ra cuota</div></div><div class="det-cuota-val">'+fmt(c.c6)+'</div></div></div><div class="detalle-nota">Consulta stock y colores con Angie, Max o Sechu\nEnvio sin cargo segun la zona\nRetira dentro de las 48hs de entregar la 1ra cuota</div></div>';
+  row.appendChild(av);row.appendChild(card);
+  chat.appendChild(row);chat.scrollTop=chat.scrollHeight;
+}
+
+function setBtns(lista){
+  var el=document.getElementById("btns");el.innerHTML="";
+  lista.forEach(function(b){
+    var btn=document.createElement("button");
+    btn.className="abtn"+(b.back?" back":"")+(b.green?" green":"");
+    btn.textContent=b.label;btn.onclick=b.fn;el.appendChild(btn);
+  });
+}
+
+function showInput(ph){
+  var el=document.getElementById("inp-wrap");el.style.display="flex";
+  document.getElementById("inp").placeholder=ph||"Escribi aca...";
+  document.getElementById("inp").value="";
+  document.getElementById("btns").innerHTML="";
+  setTimeout(function(){document.getElementById("inp").focus();},100);
+}
+function hideInput(){document.getElementById("inp-wrap").style.display="none";document.getElementById("inp").value="";}
+
+function typing(cb){
+  var chat=document.getElementById("chat");
+  var row=document.createElement("div");row.className="msg-row";row.id="typing-row";
+  var av=document.createElement("div");av.style.cssText="flex-shrink:0;width:30px;height:30px";av.innerHTML=avatarSVG();
+  var dots=document.createElement("div");dots.className="typing-dots";dots.innerHTML='<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  row.appendChild(av);row.appendChild(dots);chat.appendChild(row);chat.scrollTop=chat.scrollHeight;
+  setTimeout(function(){var t=document.getElementById("typing-row");if(t)t.remove();cb();},600);
+}
+
+function enviar(){
+  var val=document.getElementById("inp").value.trim();if(!val)return;
+  hideInput();msgUsr(val);typing(function(){procesarInput(val);});
+}
+
+function procesarInput(val){
+  if(_inputHandler){var h=_inputHandler;_inputHandler=null;h(val);return;}
+  if(step==="precio"){
+    var precio=parseFloat(val.replace(/\./g,"").replace(/,/g,"."))||0;
+    if(!precio||precio<1000){
+      msgBot("No entendi el precio. Escribi solo el numero, por ejemplo: 350000");
+      showInput("Ej: 350000");return;
+    }
+    var c=calcCuotas(precio);
+    msgBot("Listo! Para un producto de "+fmt(precio)+":\n\n2 cuotas de "+fmt(c.c2)+"\n4 cuotas de "+fmt(c.c4)+"\n6 cuotas de "+fmt(c.c6)+"\n\nEl cliente retira dentro de las 48hs de entregar la 1ra cuota.\nEnvio sin cargo segun la zona.");
+    step="menu";
+    setBtns([
+      {label:"Calcular otro precio",fn:function(){msgUsr("Calcular otro precio");typing(pedirPrecio);}},
+      {label:"Ver catalogo",fn:function(){msgUsr("Ver catalogo");typing(mostrarCats);}},
+      {label:"Hablar con un vendedor",fn:function(){msgUsr("Hablar con vendedor");typing(mostrarVendedores);}},
+      {label:"Volver al menu",back:true,fn:function(){typing(menuPrincipal);}}
+    ]);
+  }
+}
+
+function menuPrincipal(){
+  step="menu";
+  msgBot("En que mas te puedo ayudar, "+nombre+"?");
+  setBtns([
+    {label:"Ver celulares y precios",fn:function(){msgUsr("Ver celulares");typing(mostrarCats);}},
+    {label:"Calcular cuotas de un precio",fn:function(){msgUsr("Calcular cuotas");typing(pedirPrecio);}},
+    {label:"Hablar con un vendedor",fn:function(){msgUsr("Hablar con vendedor");typing(mostrarVendedores);}}
+  ]);
+}
+
+function pedirPrecio(){
+  step="precio";
+  msgBot("Dale! A que precio queres calcular las cuotas?\n\nEscribi solo el numero, por ejemplo: 350000");
+  showInput("Ej: 350000");
+}
+
+function mostrarCats(){
+  step="cats";
+  msgBot("Que marca queres ver?");
+  var btns=CATALOGO.map(function(cat,i){
+    return{label:cat.cat,fn:(function(c,idx){return function(){msgUsr(c.cat);typing(function(){mostrarProductos(c,idx);});};})(cat,i)};
+  });
+  btns.push({label:"Volver al menu",back:true,fn:function(){typing(menuPrincipal);}});
+  setBtns(btns);
+}
+
+function mostrarProductos(cat,catIdx){
+  step="prods";
+  msgBot("Modelos de "+cat.cat+" - toca uno para ver el detalle y enviar el pedido");
+  cat.items.forEach(function(p){msgCard(p,catIdx);});
+  setBtns([
+    {label:"Ver otra marca",fn:function(){msgUsr("Ver otra marca");typing(mostrarCats);}},
+    {label:"Calcular cuotas de un precio",fn:function(){msgUsr("Calcular cuotas");typing(pedirPrecio);}},
+    {label:"Volver al menu",back:true,fn:function(){typing(menuPrincipal);}}
+  ]);
+}
+
+function mostrarDetalle(prod,catIdx){
+  step="detalle";
+  msgBot("Detalle de "+prod.n+" - toca el boton verde para enviar el pedido");
+  msgDetalle(prod,catIdx);
+  setBtns([
+    {label:"Enviar pedido a Angie",green:true,fn:(function(p){return function(){enviarPedido(p,"Angie","5491168746034");};})(prod)},
+    {label:"Enviar pedido a Max",green:true,fn:(function(p){return function(){enviarPedido(p,"Max","5491168610532");};})(prod)},
+    {label:"Enviar pedido a Sechu",green:true,fn:(function(p){return function(){enviarPedido(p,"Sechu","5491162107212");};})(prod)},
+    {label:"Ver otros modelos",fn:(function(ci){return function(){msgUsr("Ver otros modelos");typing(function(){mostrarProductos(CATALOGO[ci],ci);});};})(catIdx)},
+    {label:"Volver al menu",back:true,fn:function(){typing(menuPrincipal);}}
+  ]);
+}
+
+function enviarPedido(prod,vendNombre,vendNum){
+  var c=calcCuotas(prod.p);
+  var msg="Hola "+vendNombre+"! Te paso un pedido via Amara.\n\n";
+  msg+="PRODUCTO:\n"+prod.n+" - "+prod.m+"\n";
+  msg+="Precio contado: "+fmt(prod.p)+"\n\n";
+  msg+="CUOTAS:\n";
+  msg+="2 cuotas de "+fmt(c.c2)+"\n";
+  msg+="4 cuotas de "+fmt(c.c4)+"\n";
+  msg+="6 cuotas de "+fmt(c.c6)+"\n\n";
+  msg+="El cliente retira dentro de las 48hs de entregar la 1ra cuota.\n";
+  msg+="Envio sin cargo segun la zona.\n\n";
+  msg+="Revendedor: "+nombre;
+  window.open("https://wa.me/"+vendNum+"?text="+encodeURIComponent(msg),"_blank");
+  msgUsr("Enviado a "+vendNombre);
+  typing(function(){
+    msgBot("Listo, "+nombre+"! El pedido fue enviado a "+vendNombre+" por WhatsApp.\n\nNecesitas algo mas?");
+    menuPrincipal();
+  });
+}
+
+function mostrarVendedores(){
+  step="vendedores";
+  msgBot("Con quien queres hablar?");
+  setBtns([
+    {label:"Angie (Angela)",fn:function(){window.open("https://wa.me/5491168746034","_blank");}},
+    {label:"Max (Maximiliano)",fn:function(){window.open("https://wa.me/5491168610532","_blank");}},
+    {label:"Sechu (Selene)",fn:function(){window.open("https://wa.me/5491162107212","_blank");}},
+    {label:"Volver al menu",back:true,fn:function(){typing(menuPrincipal);}}
+  ]);
+}
+
+// LOGIN - contraseña única
+var PASS_GENERAL = "Amara2026";
+function doLogin(){
+  var p=document.getElementById("login-pass").value;
+  if(p!==PASS_GENERAL){
+    document.getElementById("login-error").classList.add("show");
+    document.getElementById("login-pass").value="";
+    return;
+  }
+  document.getElementById("login-screen").style.display="none";
+  typing(function(){
+    msgBot("Hola! Bienvenido/a al portal de revendedores de AmarangoElectro.\nSoy Amara, tu asesora.\n\nEn que te puedo ayudar? Celu o algun plan de cuotas?");
+    setBtns([
+      {label:"Ver celulares y precios",fn:function(){msgUsr("Ver celulares");typing(mostrarCats);}},
+      {label:"Calcular cuotas de un precio",fn:function(){msgUsr("Calcular cuotas");typing(pedirPrecio);}}
+    ]);
+  });
+}
+
+function showAdmin(){
+  document.getElementById("admin-screen").style.display="flex";
+  renderRevList();
+}
+function hideAdmin(){document.getElementById("admin-screen").style.display="none";}
+
+function renderRevList(){
+  var el=document.getElementById("rev-list");el.innerHTML="";
+  var noAdmins=REVENDEDORES.filter(function(r){return !r.admin;});
+  if(!noAdmins.length){
+    el.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:20px">No hay revendedores cargados aun.</div>';
+    return;
+  }
+  noAdmins.forEach(function(rev){
+    var card=document.createElement("div");card.className="admin-card";
+    var wa=rev.whatsapp||"-";
+    var estado=rev.activo?'<span style="color:var(--gr);font-size:.6rem;font-weight:700">ACTIVO</span>':'<span style="color:var(--red);font-size:.6rem;font-weight:700">INACTIVO</span>';
+    card.innerHTML='<div class="admin-av">'+rev.nombre.charAt(0)+'</div><div class="admin-info"><div class="admin-name">'+rev.nombre+' '+estado+'</div><div class="admin-user">WA: '+wa+'</div><div class="admin-user">Pass: '+rev.pass+'</div></div>';
+    var toggle=document.createElement("button");
+    toggle.className="toggle-btn "+(rev.activo?"on":"off");
+    toggle.title=rev.activo?"Dar de baja":"Activar acceso";
+    toggle.onclick=(function(r,t){return function(){
+      if(r.activo){
+        if(!confirm("Dar de baja a "+r.nombre+"? Ya no podra ingresar."))return;
+      }
+      r.activo=!r.activo;
+      t.className="toggle-btn "+(r.activo?"on":"off");
+      renderRevList();
+    };})(rev,toggle);
+    card.appendChild(toggle);el.appendChild(card);
+  });
+}
+
+function agregarRevendedor(){
+  var n=prompt("Nombre del revendedor:");if(!n)return;
+  var wa=prompt("WhatsApp (ej: 5491168610532):");if(!wa)return;
+  var p=prompt("Contraseña para que ingrese:");if(!p)return;
+  REVENDEDORES.push({id:Date.now(),nombre:n,whatsapp:wa,pass:p,activo:false,admin:false});
+  renderRevList();
+  alert("Revendedor "+n+" agregado!\n\nActiva el toggle para darle acceso la primera vez.");
+}
+</script>
+</body>
+</html>
