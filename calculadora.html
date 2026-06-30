@@ -4,49 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>Calculadora · AmarangoElectro</title>
+<meta name="theme-color" content="#0B2D6B">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calculadora">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FC;--bor:#E8EBF4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
 body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden}
-
-/* HEADER */
 .header{background:linear-gradient(135deg,var(--az),#1a3a8a);padding:16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--nar)}
 .header-info h1{color:#fff;font-size:1rem;font-weight:900}
 .header-info p{color:rgba(255,255,255,.55);font-size:.65rem;margin-top:2px}
 .header-badge{background:rgba(255,122,0,.2);border:1px solid var(--nar);border-radius:20px;padding:3px 10px;font-size:.58rem;font-weight:800;color:var(--nar);white-space:nowrap}
-
-/* TABS */
 .tabs{display:flex;background:var(--wh);border-bottom:2px solid var(--bor);overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;padding:11px 8px;font-size:.68rem;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center;transition:all .2s;min-width:80px}
 .tab.on{color:var(--az);border-bottom-color:var(--nar);font-weight:800}
-
-/* CONTENIDO */
 .tab-content{display:none;padding:16px;animation:fadeUp .25s ease}
 .tab-content.on{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* INPUT PRECIO */
 .precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:16px;padding:16px;margin-bottom:16px}
 .precio-label{color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .precio-input-row{display:flex;align-items:center;gap:8px}
 .precio-sign{color:var(--nar);font-size:1.8rem;font-weight:900}
 .precio-input{background:transparent;border:none;outline:none;color:#fff;font-size:1.8rem;font-weight:900;font-family:inherit;width:100%;letter-spacing:-1px}
 .precio-input::placeholder{color:rgba(255,255,255,.25)}
-.precio-input::-webkit-outer-spin-button,
-.precio-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.precio-input::-webkit-outer-spin-button,.precio-input::-webkit-inner-spin-button{-webkit-appearance:none}
 .calc-btn{background:var(--nar);border:none;border-radius:12px;padding:12px 20px;color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
 .calc-btn:active{opacity:.85;transform:scale(.97)}
 .clear-btn{background:rgba(255,255,255,.1);border:none;border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.7);font-weight:700;font-size:.75rem;cursor:pointer;font-family:inherit;margin-top:8px;width:100%}
-
-/* RESULTADO PRECIO CONTADO */
+.pegar-area{width:100%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:12px;padding:12px;color:#fff;font-size:.9rem;font-family:inherit;outline:none;resize:vertical;min-height:90px;line-height:1.4}
+.pegar-area::placeholder{color:rgba(255,255,255,.4)}
 .result-contado{background:#CCFBF1;border-radius:14px;border:2px solid #14B8A6;padding:14px;margin-bottom:12px;text-align:center}
 .result-label{font-size:.6rem;font-weight:700;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
 .result-precio{font-size:2.2rem;font-weight:900;color:var(--az);letter-spacing:-1px}
 .result-sub{font-size:.65rem;color:var(--sub);margin-top:4px}
-
-/* CUOTAS */
 .cuotas-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
 .cuota-card{border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:none}
 .cuota-card.c2{background:#FEF9C3;border-left:4px solid #EAB308}
@@ -63,9 +60,6 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .cuota-info .cuota-n{font-size:.85rem;font-weight:800;color:var(--az)}
 .cuota-info .cuota-desc{font-size:.62rem;color:var(--sub);margin-top:2px}
 .cuota-val{font-size:1.1rem;font-weight:900;color:var(--az)}
-.cuota-total{font-size:.62rem;color:var(--sub);text-align:right;margin-top:2px}
-
-/* COMISIONES */
 .comision-card{background:var(--wh);border-radius:12px;border:1px solid var(--bor);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .com-info .com-n{font-size:.82rem;font-weight:700;color:var(--az)}
 .com-info .com-desc{font-size:.62rem;color:var(--sub);margin-top:2px}
@@ -75,8 +69,6 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .pago-card{background:var(--wh);border-radius:12px;border:2px solid var(--bor);padding:14px;margin-bottom:8px}
 .pago-num{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--az);color:#fff;font-size:.72rem;font-weight:800;flex-shrink:0}
 .excepcion-badge{background:#FEF3C7;border:1px solid #F59E0B;border-radius:10px;padding:8px 10px;font-size:.62rem;color:#92400E;font-weight:600;margin-top:8px;text-align:center}
-
-/* PLAN CONFIG ROW */
 .plan-config-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bor)}
 .plan-config-row:last-child{border:none}
 .plan-config-toggle{width:38px;height:22px;border-radius:11px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
@@ -88,8 +80,6 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .plan-config-label{flex:1;font-size:.78rem;font-weight:700;color:var(--az)}
 .plan-config-input{width:56px;border:1.5px solid var(--bor);border-radius:8px;padding:5px 6px;font-size:.75rem;font-weight:800;text-align:center;outline:none;font-family:inherit;color:var(--az)}
 .plan-config-input:focus{border-color:var(--nar)}
-
-/* INVERSION */
 .inv-card{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:14px;padding:14px;margin-bottom:10px}
 .inv-title{color:rgba(255,255,255,.6);font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
 .inv-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1)}
@@ -97,30 +87,21 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .inv-label{color:rgba(255,255,255,.75);font-size:.75rem;font-weight:600}
 .inv-val{color:var(--nar);font-size:.95rem;font-weight:900}
 .inv-val.white{color:#fff}
-
-/* PRECIO AL CONTADO CALC */
-.contado-ranges{display:flex;flex-direction:column;gap:8px}
-.range-card{background:var(--wh);border-radius:12px;padding:12px 14px;border:1px solid var(--bor)}
-.range-title{font-size:.6rem;font-weight:700;color:var(--sub);letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
-.range-row{display:flex;justify-content:space-between;align-items:center}
-.range-costo{font-size:.85rem;font-weight:800;color:var(--az)}
-.range-precio{font-size:.85rem;font-weight:900;color:var(--nar)}
-
-/* EMPTY STATE */
 .empty-state{text-align:center;padding:32px 20px;color:var(--sub);font-size:.8rem}
 .empty-icon{font-size:2.5rem;margin-bottom:10px}
-
-/* SHARE BTN */
 .share-row{display:flex;gap:8px;margin-top:4px}
 .share-btn{flex:1;background:var(--bg);border:2px solid var(--bor);border-radius:10px;padding:10px;font-size:.72rem;font-weight:700;color:var(--az);cursor:pointer;font-family:inherit;text-align:center;transition:all .15s}
 .share-btn:active{background:var(--az);color:#fff;border-color:var(--az)}
 .share-btn.wa{border-color:#25D366;color:#25D366}
 .share-btn.wa:active{background:#25D366;color:#fff}
-
+.msg-lindo{background:var(--wh);border:2px solid var(--bor);border-radius:14px;padding:16px;margin-bottom:10px;white-space:pre-wrap;font-size:.85rem;line-height:1.7;color:var(--txt);word-break:break-word}
 .footer{text-align:center;padding:16px;font-size:.6rem;color:var(--sub)}
 .footer span{color:var(--nar);font-weight:700}
-
-/* LOGIN MODAL */
+.install-banner{background:linear-gradient(135deg,var(--nar),#ff9a3c);margin:12px 16px 0;border-radius:12px;padding:12px 14px;display:none;align-items:center;gap:10px}
+.install-banner.show{display:flex}
+.install-banner .ib-txt{flex:1;color:#fff;font-size:.72rem;font-weight:700}
+.install-banner button{background:#fff;color:var(--nar);border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit}
+.install-banner .ib-close{background:transparent;color:#fff;font-size:1rem;padding:0 4px}
 .login-overlay{position:fixed;inset:0;background:rgba(11,45,107,.92);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
 .login-box{background:var(--wh);border-radius:22px;padding:28px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center}
 .lock-icon{font-size:2.5rem;margin-bottom:10px}
@@ -134,13 +115,10 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .login-box .err-msg.show{display:block}
 .login-box button{width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit}
 .login-box button:active{opacity:.85}
-.tab-lock{position:relative}
-.tab-lock::after{content:"🔒";font-size:.6rem;margin-left:3px}
 </style>
 </head>
 <body>
 
-<!-- LOGIN ADMIN -->
 <div class="login-overlay" id="login-overlay" style="display:none">
   <div class="login-box">
     <div class="lock-icon">🔐</div>
@@ -154,30 +132,101 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 </div>
 
 <div class="header">
-  <svg width="44" height="44" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M20 64 Q30 57 40 57 Q50 57 60 64 L60 78 Q40 82 20 78Z" fill="#0B2D6B"/><polygon points="40,59 44.5,66 35.5,66" fill="#FF7A00" opacity=".95"/><rect x="35.5" y="53.5" width="9" height="4.5" rx="2.2" fill="#FDBF8A"/><ellipse cx="40" cy="37" rx="17.5" ry="18.5" fill="#FDBF8A"/><ellipse cx="40" cy="23" rx="17.5" ry="9.5" fill="#2C1204"/><ellipse cx="23.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="56.5" cy="33" rx="5.5" ry="13" fill="#2C1204"/><ellipse cx="32.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="47.5" cy="36.5" rx="4.2" ry="4.8" fill="#fff"/><ellipse cx="33" cy="37" rx="2.5" ry="3" fill="#1a0800"/><ellipse cx="48" cy="37" rx="2.5" ry="3" fill="#1a0800"/><path d="M33 47 Q40 53.5 47 47" stroke="#C0704A" stroke-width="1.9" fill="none" stroke-linecap="round"/><path d="M34 48 Q40 54.5 46 48 L46 49.5 Q40 56 34 49.5Z" fill="#fff"/><ellipse cx="26.5" cy="44.5" rx="4.5" ry="2.4" fill="#FF9999" opacity=".32"/><ellipse cx="53.5" cy="44.5" rx="4.5" ry="2.4" fill="#FF9999" opacity=".32"/></svg>
-  <div class="header-info">
-    <h1>Mi Calculadora</h1>
-    <p>AmarangoElectro · Panel Admin</p>
+  <div class="header-info" style="flex:1">
+    <h1>🐝 AmarangoElectro</h1>
+    <p>Tu equipo de electro y celulares</p>
   </div>
-  <div class="header-badge">ADMIN</div>
+  <div class="header-badge">🧮 Calculadora</div>
+</div>
+
+<div class="install-banner" id="install-banner">
+  <span style="font-size:1.4rem">📲</span>
+  <div class="ib-txt">Instalá la app en tu celular para abrirla más rápido</div>
+  <button onclick="instalarApp()">Instalar</button>
+  <button class="ib-close" onclick="cerrarBannerInstall()">✕</button>
 </div>
 
 <div class="tabs">
-  <div class="tab" id="tab-btn-contado" onclick="showTab('contado')">💰 Contado 🔒</div>
-  <div class="tab on" onclick="showTab('cuotas')">📅 Cuotas</div>
-  <div class="tab" id="tab-btn-comisiones" onclick="showTab('comisiones')">🤝 Comisiones 🔒</div>
-  <div class="tab" id="tab-btn-inversion" onclick="showTab('inversion')">📊 Inversión 🔒</div>
+  <div class="tab on" id="tab-btn-pegar" onclick="showTab('pegar')">📋 Pegar precio</div>
+  <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')">📱 Celulares</div>
+  <div class="tab" onclick="showTab('cuotas')">📅 Cuotas</div>
+  <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Administradores</div>
 </div>
 
-<!-- TAB: PRECIO AL CONTADO -->
+<!-- Sub-pestañas de Administradores (aparecen al entrar al cajón) -->
+<div id="admin-subtabs" style="display:none;background:#fff;border-bottom:1px solid var(--bor);padding:8px 12px;gap:6px;flex-wrap:wrap">
+  <button class="metodo-btn on" id="sub-contado" onclick="showAdminSub('contado')" style="color:var(--az);border-color:var(--bor)">💰 Contado</button>
+  <button class="metodo-btn" id="sub-comisiones" onclick="showAdminSub('comisiones')" style="color:var(--az);border-color:var(--bor)">🤝 Comisiones</button>
+  <button class="metodo-btn" id="sub-inversion" onclick="showAdminSub('inversion')" style="color:var(--az);border-color:var(--bor)">📊 Inversión</button>
+  <button class="metodo-btn" id="sub-placas" onclick="showAdminSub('placas')" style="color:var(--az);border-color:var(--bor)">🎨 Placas</button>
+</div>
+
+<div class="tab-content on" id="tab-pegar">
+  <div class="precio-input-wrap">
+    <div class="precio-label">📋 Pegá el mensaje con el precio</div>
+    <textarea class="pegar-area" id="inp-pegar" placeholder="Pegá acá el mensaje de WhatsApp con el producto y su precio de venta..." oninput="calcPegar()"></textarea>
+    <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">✏️ Detecto el precio solo y te armo las cuotas + un texto listo para responder 🐝</div>
+    <button class="clear-btn" onclick="clearPegar()">Limpiar</button>
+  </div>
+  <div id="res-pegar" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p>Pegá el mensaje con el precio de venta y te armo todo</p>
+  </div>
+</div>
+
+<!-- TAB: CELULARES (público elige, admin sube) -->
+<div class="tab-content" id="tab-celulares">
+  <!-- Cajón para subir lista (solo admin) -->
+  <div id="celu-admin-box" style="margin-bottom:14px;display:none">
+    <div class="precio-input-wrap">
+      <div class="precio-label">🔒 Subir lista de celulares (admin)</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button class="metodo-btn on" id="celu-modo-pesos" onclick="setCeluModo('pesos')">💰 Precio en PESOS</button>
+        <button class="metodo-btn" id="celu-modo-usd" onclick="setCeluModo('usd')">💵 Precio en USD</button>
+      </div>
+      <div id="celu-cotiz-box" style="display:none;margin-bottom:10px">
+        <div style="color:rgba(255,255,255,.6);font-size:.62rem;font-weight:700;margin-bottom:4px">💵 Valor del dólar (editable)</div>
+        <input type="number" id="celu-cotiz" placeholder="Ej: 1520" value="1500" style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 10px;color:#fff;font-size:.95rem;font-weight:800;outline:none">
+      </div>
+      <textarea class="pegar-area" id="inp-celulista" placeholder="Pegá un celular por línea con su precio. Ej:&#10;Samsung A06 $167.000&#10;Moto G15 $235.500"></textarea>
+      <div id="celu-admin-hint" style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">📋 Un celu por línea, con su precio de venta en pesos. Los repetidos se actualizan, los nuevos se agregan.</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="calc-btn" onclick="toggleBorrarBox()" style="flex:1;background:rgba(255,255,255,.15);color:#fff">🗑️ Borrar</button>
+        <button class="calc-btn" onclick="guardarListaCelus()" style="flex:2">📲 Subir celulares</button>
+      </div>
+      <!-- Caja de borrado con botones (sin prompt, anda en el cel) -->
+      <div id="borrar-box" style="display:none;margin-top:12px;background:rgba(255,255,255,.08);border-radius:10px;padding:12px">
+        <div style="color:#fff;font-size:.68rem;font-weight:800;margin-bottom:8px">¿Qué querés borrar?</div>
+        <div id="borrar-botones" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Botón admin para mostrar el cajón de subir -->
+  <button id="celu-admin-toggle" class="share-btn" style="margin-bottom:14px;width:100%" onclick="toggleCeluAdmin()">🔒 Soy admin: subir/editar lista</button>
+  <!-- Buscador -->
+  <input type="text" id="celu-buscar" placeholder="🔍 Buscar marca o modelo..." oninput="renderListaCelus()" style="width:100%;border:1.5px solid var(--bor);border-radius:10px;padding:11px 14px;font-size:.85rem;font-family:inherit;outline:none;margin-bottom:10px;color:var(--txt)">
+  <!-- Filtro de marca (lo que ve el público) -->
+  <div id="celu-filtro-marca" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px"></div>
+  <!-- Filtro de gama (lo que ve el público) -->
+  <div id="celu-filtro-gama" style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px"></div>
+  <!-- Lista de celulares por gama (lo que ve el público) -->
+  <div id="celu-lista"></div>
+  <!-- Resultado al elegir un celu -->
+  <div id="res-celu"></div>
+</div>
+
 <div class="tab-content" id="tab-contado">
   <div class="precio-input-wrap">
-    <div class="precio-label">Precio de costo ($ARS) — editá acá</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="metodo-btn on" id="contado-modo-costo" onclick="setContadoModo('costo')">💰 Pongo el COSTO</button>
+      <button class="metodo-btn" id="contado-modo-venta" onclick="setContadoModo('venta')">🏷️ Pongo la VENTA</button>
+    </div>
+    <div class="precio-label" id="contado-label">Precio de costo ($ARS) — editá acá</div>
     <div class="precio-input-row">
       <span class="precio-sign">$</span>
       <input type="number" class="precio-input" id="inp-contado" placeholder="Ej: 150000" oninput="calcContado()">
     </div>
-    <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">✏️ Ingresá el costo → calculamos precio de venta + cuotas automáticamente</div>
+    <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px" id="contado-hint">✏️ Ingresá el costo → calculamos precio de venta + cuotas automáticamente</div>
     <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
       <span style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700">Margen %:</span>
       <input type="number" id="margen-contado" placeholder="auto" style="width:64px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 8px;color:#fff;font-size:.78rem;font-weight:800;text-align:center;outline:none" oninput="calcContado()">
@@ -186,8 +235,6 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <button class="calc-btn" id="off-btn-contado" onclick="toggleOff('contado')" style="width:100%;margin-top:10px;background:rgba(255,255,255,.15);color:#fff">🏷️ Aplicar 10% Off</button>
     <button class="clear-btn" onclick="clearTab('contado')">Limpiar</button>
   </div>
-
-  <!-- CONFIGURADOR DE PLANES DE CUOTAS -->
   <div style="background:var(--wh);border-radius:14px;border:1px solid var(--bor);padding:14px;margin-bottom:16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <div style="font-size:.7rem;font-weight:800;color:var(--az);letter-spacing:.5px">⚙️ CONFIGURAR PLANES DE CUOTAS</div>
@@ -204,8 +251,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   </div>
 </div>
 
-<!-- TAB: CUOTAS -->
-<div class="tab-content on" id="tab-cuotas">
+<div class="tab-content" id="tab-cuotas">
   <div class="precio-input-wrap">
     <div class="precio-label">Precio de venta ($ARS) — editá acá</div>
     <div class="precio-input-row">
@@ -221,7 +267,6 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   </div>
 </div>
 
-<!-- TAB: COMISIONES (Revendedores) -->
 <div class="tab-content" id="tab-comisiones">
   <div class="precio-input-wrap">
     <div class="precio-label">Precio de venta al contado ($ARS)</div>
@@ -256,7 +301,6 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   </div>
 </div>
 
-<!-- TAB: INVERSIÓN -->
 <div class="tab-content" id="tab-inversion">
   <div class="precio-input-wrap">
     <div class="precio-label">Precio de costo ($ARS) — editá acá</div>
@@ -265,25 +309,22 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       <input type="number" class="precio-input" id="inp-inversion" placeholder="Ej: 150000" oninput="calcInversion()">
     </div>
     <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">✏️ Ingresá el costo en $ARS para ver el análisis de inversión</div>
-
     <div style="margin-top:12px">
       <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;margin-bottom:6px">Plan elegido por el cliente</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="plan-inv-list"></div>
     </div>
-
     <div style="margin-top:12px">
       <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;margin-bottom:6px">Costo de envío ($ARS)</div>
       <input type="number" id="inp-envio" placeholder="0" oninput="calcInversion()" style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 10px;color:#fff;font-size:.85rem;font-weight:700;outline:none">
     </div>
-
     <div style="margin-top:12px">
-      <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;margin-bottom:6px">Cantidad de inversionistas</div>
-      <div style="display:flex;gap:6px">
-        <button class="metodo-btn on" id="inv-1" onclick="setInversionistas(1)">1 inversionista</button>
-        <button class="metodo-btn" id="inv-2" onclick="setInversionistas(2)">2 inversionistas</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700">Inversionistas (nombre y %)</div>
+        <button onclick="agregarInversor()" style="background:var(--nar);border:none;border-radius:8px;padding:5px 12px;color:#fff;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit">➕ Agregar</button>
       </div>
+      <div id="inversores-list"></div>
+      <div id="inversores-suma" style="color:rgba(255,255,255,.5);font-size:.62rem;margin-top:4px"></div>
     </div>
-
     <button class="clear-btn" onclick="clearTab('inversion')">Limpiar</button>
   </div>
   <div id="res-inversion" class="empty-state">
@@ -292,60 +333,119 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   </div>
 </div>
 
+<!-- TAB: PLACAS (admin) - pegado inteligente igual que el CRM -->
+<div class="tab-content" id="tab-placas">
+  <div class="precio-input-wrap">
+    <div class="precio-label">🎨 Pegá el texto del producto</div>
+    <textarea class="pegar-area" id="inp-placa" placeholder="Pegá el texto completo del producto (con sus características). El precio tiene que tener $ adelante o atrás (ej: $250.000 o 250.000$)." oninput="calcPlaca()"></textarea>
+    <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">✨ Elegí si ese precio es costo, venta o dólar, y armo todo 🐝</div>
+
+    <div style="margin-top:12px">
+      <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;margin-bottom:6px">Ese precio que pegaste, ¿qué es?</div>
+      <div style="display:flex;gap:6px">
+        <button class="metodo-btn on" id="placa-tipo-costo" onclick="setPlacaTipo('costo')">💰 Costo</button>
+        <button class="metodo-btn" id="placa-tipo-venta" onclick="setPlacaTipo('venta')">🏷️ Venta</button>
+        <button class="metodo-btn" id="placa-tipo-dolar" onclick="setPlacaTipo('dolar')">💵 Dólar</button>
+      </div>
+    </div>
+
+    <div id="placa-cotiz-box" style="display:none;margin-top:12px">
+      <div style="color:rgba(255,255,255,.6);font-size:.62rem;font-weight:700;margin-bottom:4px">💵 Valor del dólar</div>
+      <input type="number" id="placa-cotiz" placeholder="Ej: 1520" value="1500" oninput="calcPlaca()" style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;font-weight:800;outline:none">
+    </div>
+
+    <div style="margin-top:12px">
+      <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;margin-bottom:6px">¿Qué cuotas mostrar?</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="placa-cuotas-list"></div>
+    </div>
+
+    <button class="clear-btn" onclick="clearPlaca()">Vaciar</button>
+  </div>
+  <div id="res-placa" class="empty-state">
+    <div class="empty-icon">🎨</div>
+    <p>Pegá el texto del producto con el precio marcado con $</p>
+  </div>
+</div>
+
 <div class="footer">Calculadora exclusiva · <span>AmarangoElectro</span></div>
 
 <script>
 var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
-var fmtU=function(n){return"U$"+n.toLocaleString("es-AR");};
-
+// ═══ ORDEN FIJO Y PERMANENTE DE LAS CUOTAS (2 → 4 → 6 → resto creciente) ═══
+// Este orden NO depende de los datos, del JSON, ni del navegador. Es fijo por código.
+var ORDEN_CUOTAS=[2,3,4,5,6,7,8,9,10,11,12];
+// Devuelve los números de cuota ACTIVOS, siempre en orden creciente fijo
+function cuotasActivasOrdenadas(){
+  return ORDEN_CUOTAS.filter(function(n){return planesConfig[n] && planesConfig[n].activo;});
+}
+// ═══ FUNCIÓN CENTRAL: arma el mensaje de WhatsApp con el formato único de toda la app ═══
+// nombre: texto del producto (puede tener variante). precio: contado. cuotasLines: array "💳 N cuotas fijas de $X"
+function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
+  var titulo=(nombre||'PRODUCTO').toUpperCase();
+  var extra=lineaExtra?("\n"+lineaExtra):"";
+  var msg="*"+titulo+"*"+extra+"\n\n"+cuotasLines.join("\n")+"\n\n➡️ Contado: "+fmt(precio)+"\n@AmarangoElectro 🐝";
+  return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
+}
+// Arma las líneas de cuotas según los planes activos, SIEMPRE en orden fijo 2→4→6
+function armarCuotasLines(precio){
+  var lines=[];
+  cuotasActivasOrdenadas().forEach(function(n){
+    var totalPlan=calcularTotalPlan(precio,n);
+    var valorCuota=Math.round(totalPlan/n/500)*500;
+    lines.push("💳💵 "+n+" cuotas fijas de "+fmt(valorCuota));
+  });
+  return lines;
+}
 var TC=1500;
-
-function getPrecioContado(usd){
-  var costo=usd*TC;
-  var rec;
-  if(costo<=50000)rec=0.80;
-  else if(costo<=100000)rec=0.60;
-  else if(costo<=250000)rec=0.50;
-  else if(costo<=350000)rec=0.40;
-  else rec=0.30;
-  return Math.round(costo*(1+rec)/500)*500;
-}
-
-function getPorcentaje(usd){
-  var costo=usd*TC;
-  if(costo<=50000)return 80;
-  else if(costo<=100000)return 60;
-  else if(costo<=250000)return 50;
-  else if(costo<=350000)return 40;
-  else return 30;
-}
-
 var ADMIN_PASS="Amara4";
 var adminUnlocked=false;
 var pendingTab=null;
 
 function showTab(t){
-  var adminTabs=["contado","comisiones","inversion"];
-  if(adminTabs.indexOf(t)>=0 && !adminUnlocked){
-    pendingTab=t;
-    document.getElementById("admin-pass").value="";
-    document.getElementById("pass-err").classList.remove("show");
-    document.getElementById("admin-pass").classList.remove("error");
-    document.getElementById("login-overlay").style.display="flex";
-    setTimeout(function(){document.getElementById("admin-pass").focus();},200);
+  // El cajón "admin" pide clave una vez y muestra sub-pestañas
+  if(t==='admin'){
+    if(!adminUnlocked){
+      pendingTab='admin';
+      document.getElementById("admin-pass").value="";
+      document.getElementById("pass-err").classList.remove("show");
+      document.getElementById("admin-pass").classList.remove("error");
+      document.getElementById("login-overlay").style.display="flex";
+      setTimeout(function(){document.getElementById("admin-pass").focus();},200);
+      return;
+    }
+    // mostrar sub-pestañas y abrir Contado por defecto
+    document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
+    document.getElementById("tab-btn-admin").classList.add("on");
+    document.getElementById("admin-subtabs").style.display="flex";
+    showAdminSub('contado');
     return;
   }
+  // pestañas normales: ocultar sub-pestañas de admin
+  document.getElementById("admin-subtabs").style.display="none";
   document.querySelectorAll(".tab-content").forEach(function(el){el.classList.remove("on");});
   document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
   document.getElementById("tab-"+t).classList.add("on");
   var btn=document.getElementById("tab-btn-"+t);
   if(btn)btn.classList.add("on");
   else{
-    // cuotas tab
-    document.querySelectorAll(".tab")[1].classList.add("on");
+    document.querySelectorAll(".tab").forEach(function(el){
+      if(el.getAttribute("onclick")&&el.getAttribute("onclick").indexOf("'"+t+"'")>=0)el.classList.add("on");
+    });
   }
-  if(t==='comisiones')renderMetodosPago();
-  if(t==='inversion')renderPlanesInversion();
+  if(t==='celulares')renderListaCelus();
+}
+
+// Sub-pestañas dentro del cajón Administradores
+function showAdminSub(s){
+  document.querySelectorAll(".tab-content").forEach(function(el){el.classList.remove("on");});
+  document.getElementById("tab-"+s).classList.add("on");
+  ['contado','comisiones','inversion','placas'].forEach(function(k){
+    var b=document.getElementById('sub-'+k);
+    if(b){ b.classList.toggle('on',k===s); b.style.background=(k===s)?'var(--nar)':'rgba(255,255,255,.1)'; b.style.color=(k===s)?'#fff':'var(--az)'; }
+  });
+  if(s==='comisiones')renderMetodosPago();
+  if(s==='inversion'){renderPlanesInversion();renderInversores();}
+  if(s==='placas')renderPlacaCuotas();
 }
 
 function checkAdminPass(){
@@ -353,25 +453,23 @@ function checkAdminPass(){
   if(p===ADMIN_PASS){
     adminUnlocked=true;
     document.getElementById("login-overlay").style.display="none";
-    if(pendingTab){showTab(pendingTab);pendingTab=null;}
+    if(pendingTab==='__celuadmin__'){pendingTab=null;toggleCeluAdmin();}
+    else if(pendingTab){showTab(pendingTab);pendingTab=null;}
   } else {
     document.getElementById("pass-err").classList.add("show");
     document.getElementById("admin-pass").classList.add("error");
     document.getElementById("admin-pass").value="";
-    setTimeout(function(){
-      document.getElementById("admin-pass").classList.remove("error");
-    },400);
+    setTimeout(function(){document.getElementById("admin-pass").classList.remove("error");},400);
   }
 }
 
 function cancelAdminLogin(){
   document.getElementById("login-overlay").style.display="none";
   pendingTab=null;
-  // Volver a cuotas
   document.querySelectorAll(".tab-content").forEach(function(el){el.classList.remove("on");});
   document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
-  document.getElementById("tab-cuotas").classList.add("on");
-  document.querySelectorAll(".tab")[1].classList.add("on");
+  document.getElementById("tab-pegar").classList.add("on");
+  document.getElementById("tab-btn-pegar").classList.add("on");
 }
 
 function clearTab(t){
@@ -381,16 +479,11 @@ function clearTab(t){
     offState.contado=false;
     var b=document.getElementById('off-btn-contado');if(b){b.style.background='rgba(255,255,255,.15)';b.innerHTML='🏷️ Aplicar 10% Off';}
   }
-  if(t==='comisiones'){
-    metodoPago='contado';
-    renderMetodosPago();
-  }
+  if(t==='comisiones'){metodoPago='contado';renderMetodosPago();}
   if(t==='inversion'){
     var e=document.getElementById('inp-envio');if(e)e.value='';
-    planInversion='contado';
-    cantInversionistas=1;
-    renderPlanesInversion();
-    [1,2].forEach(function(k){var bi=document.getElementById('inv-'+k);if(bi)bi.classList.toggle('on',k===1);});
+    planInversion='contado';renderPlanesInversion();
+    inversores=[{nombre:'Inversor 1',pct:100}];renderInversores();
   }
   var labels={contado:'💰 Ingresá el precio de costo en $ARS para ver el precio de venta y las cuotas',cuotas:'📅 Ingresá el precio de venta para ver los planes de cuotas',comisiones:'🤝 Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor',inversion:'📊 Ingresá el precio de costo en $ARS para ver el análisis de inversión'};
   var icons={contado:'💰',cuotas:'📅',comisiones:'🤝',inversion:'📊'};
@@ -399,7 +492,6 @@ function clearTab(t){
 }
 
 var offState={contado:false,cuotas:false};
-
 function toggleOff(tab){
   offState[tab]=!offState[tab];
   var btn=document.getElementById('off-btn-'+tab);
@@ -409,43 +501,21 @@ function toggleOff(tab){
   if(tab==='cuotas')calcCuotas();
 }
 
-// ═══ CONFIGURACIÓN DE PLANES DE CUOTAS (2 a 12) ═══
-var planesDefault={
-  2:{activo:true,pct:15},
-  3:{activo:false,pct:20},
-  4:{activo:true,pct:35},
-  5:{activo:false,pct:15},
-  6:{activo:true,pct:15},
-  7:{activo:false,pct:10},
-  8:{activo:false,pct:10},
-  9:{activo:false,pct:10},
-  10:{activo:false,pct:10},
-  11:{activo:false,pct:10},
-  12:{activo:false,pct:10}
-};
+var planesDefault={2:{activo:true,pct:15},3:{activo:false,pct:20},4:{activo:true,pct:35},5:{activo:false,pct:15},6:{activo:true,pct:15},7:{activo:false,pct:10},8:{activo:false,pct:10},9:{activo:false,pct:10},10:{activo:false,pct:10},11:{activo:false,pct:10},12:{activo:false,pct:10}};
 
 function cargarPlanesGuardados(){
   try{
     var guardado=localStorage.getItem('amarango_planesConfig');
     if(guardado){
       var parsed=JSON.parse(guardado);
-      // Merge con default para asegurar que existan todas las claves 2-12
       var merged=JSON.parse(JSON.stringify(planesDefault));
-      for(var k in parsed){
-        if(merged[k])merged[k]=parsed[k];
-      }
+      for(var k in parsed){if(merged[k])merged[k]=parsed[k];}
       return merged;
     }
   }catch(e){}
   return JSON.parse(JSON.stringify(planesDefault));
 }
-
-function guardarPlanesConfig(){
-  try{
-    localStorage.setItem('amarango_planesConfig',JSON.stringify(planesConfig));
-  }catch(e){}
-}
-
+function guardarPlanesConfig(){try{localStorage.setItem('amarango_planesConfig',JSON.stringify(planesConfig));}catch(e){}}
 var planesConfig=cargarPlanesGuardados();
 var planesConfigAbierto=false;
 
@@ -455,371 +525,1078 @@ function togglePlanesConfig(){
   document.getElementById('planes-toggle-btn').textContent=planesConfigAbierto?'Ocultar':'Ver/Editar';
   if(planesConfigAbierto)renderPlanesConfig();
 }
-
 function renderPlanesConfig(){
-  var el=document.getElementById('planes-config-list');
-  var html='';
+  var el=document.getElementById('planes-config-list');var html='';
   for(var n=2;n<=12;n++){
     var p=planesConfig[n];
-    html+='<div class="plan-config-row">';
-    html+='<button class="plan-config-toggle '+(p.activo?'on':'off')+'" onclick="togglePlanActivo('+n+')"></button>';
-    html+='<div class="plan-config-label">'+n+' cuotas</div>';
-    html+='<input type="number" class="plan-config-input" value="'+p.pct+'" onchange="cambiarPctPlan('+n+',this.value)"> %';
-    html+='</div>';
+    html+='<div class="plan-config-row"><button class="plan-config-toggle '+(p.activo?'on':'off')+'" onclick="togglePlanActivo('+n+')"></button><div class="plan-config-label">'+n+' cuotas</div><input type="number" class="plan-config-input" value="'+p.pct+'" onchange="cambiarPctPlan('+n+',this.value)"> %</div>';
   }
   el.innerHTML=html;
 }
-
-// Refresca todas las pestañas que dependen de los planes activos,
-// para que SIEMPRE estén sincronizadas con Contado al instante
 function refrescarPlanesEnTodaLaApp(){
-  guardarPlanesConfig();
-  calcContado();
-  // Si Cuotas tiene un valor cargado, recalcular
-  var inpCuotas=document.getElementById('inp-cuotas');
-  if(inpCuotas && inpCuotas.value)calcCuotas();
-  // Si Comisiones está visible, refrescar botones de método de pago
-  var metPagoList=document.getElementById('met-pago-list');
-  if(metPagoList){renderMetodosPago();calcComisiones();}
-  // Si Inversión está visible, refrescar botones de plan
-  var planInvList=document.getElementById('plan-inv-list');
-  if(planInvList){renderPlanesInversion();calcInversion();}
+  guardarPlanesConfig();calcContado();
+  var inpCuotas=document.getElementById('inp-cuotas');if(inpCuotas && inpCuotas.value)calcCuotas();
+  var inpPegar=document.getElementById('inp-pegar');if(inpPegar && inpPegar.value)calcPegar();
+  var metPagoList=document.getElementById('met-pago-list');if(metPagoList){renderMetodosPago();calcComisiones();}
+  var planInvList=document.getElementById('plan-inv-list');if(planInvList){renderPlanesInversion();calcInversion();}
 }
-
-function togglePlanActivo(n){
-  planesConfig[n].activo=!planesConfig[n].activo;
-  renderPlanesConfig();
-  refrescarPlanesEnTodaLaApp();
-}
-
-function cambiarPctPlan(n,val){
-  planesConfig[n].pct=parseFloat(val)||0;
-  refrescarPlanesEnTodaLaApp();
-}
-
-// Calcula el total de un plan de N cuotas, en cascada desde el precio de venta,
-// usando los % configurados de los planes activos en orden hasta N.
-// Ej: si pide 6, aplica el % de 2 sobre precio, luego % de 4 sobre ese total, luego % de 6 sobre ese total
-// (solo cuenta los planes que están activos en la secuencia 2..N)
+function togglePlanActivo(n){planesConfig[n].activo=!planesConfig[n].activo;renderPlanesConfig();refrescarPlanesEnTodaLaApp();}
+function cambiarPctPlan(n,val){planesConfig[n].pct=parseFloat(val)||0;refrescarPlanesEnTodaLaApp();}
 function calcularTotalPlan(precioVenta,n){
   var ordenes=[];
-  for(var i=2;i<=n;i++){
-    if(planesConfig[i] && planesConfig[i].activo){ordenes.push(i);}
-  }
-  // Si el plan N no está en la lista de activos pero querés calcularlo igual (preview),
-  // lo agregamos al final si no está
+  for(var i=2;i<=n;i++){if(planesConfig[i] && planesConfig[i].activo){ordenes.push(i);}}
   if(ordenes.indexOf(n)===-1)ordenes.push(n);
   var total=precioVenta;
-  ordenes.forEach(function(num){
-    total=total*(1+planesConfig[num].pct/100);
-  });
+  ordenes.forEach(function(num){total=total*(1+planesConfig[num].pct/100);});
   return total;
 }
 
-function calcContado(){
-  var costo=parseFloat(document.getElementById('inp-contado').value)||0;
-  if(!costo){
-    document.getElementById('res-contado').innerHTML='<div class="empty-icon">💰</div><p>Ingresá el precio de costo en $ARS para ver el precio de venta y las cuotas</p>';
-    document.getElementById('res-contado').className='empty-state';
+function detectarPrecioTexto(txt){
+  if(!txt)return 0;
+  // IMPORTANTE: en WhatsApp ~texto~ queda tachado = precio VIEJO. Lo borramos antes de buscar.
+  // Soporta ~$500.000~ y *~$500.000~* y ~*$500.000*~
+  txt=txt.replace(/\*?~[^~]*~\*?/g,' ');
+  var precios=[];var m;
+  // 0) 💲[monto] — el emoji peso también marca precio (de venta)
+  var re0=/💲\s*\$?\s*([\d][\d.,]*)/g;
+  while((m=re0.exec(txt))!==null){
+    var v0=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));
+    if(!isNaN(v0) && v0>=1000)precios.push(v0);
+  }
+  // 1) $[monto] o [monto]$ (con o sin asteriscos alrededor)
+  var re=/\*?\s*\$\s*([\d][\d.,]*)\s*\*?/g;
+  while((m=re.exec(txt))!==null){
+    var v=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));
+    if(!isNaN(v) && v>=1000)precios.push(v);
+  }
+  var re1b=/([\d][\d.,]*)\s*\$/g;
+  while((m=re1b.exec(txt))!==null){
+    var vb=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));
+    if(!isNaN(vb) && vb>=1000)precios.push(vb);
+  }
+  // 2) *[monto]* (entre asteriscos, sin $) — formato de WhatsApp negrita
+  var re2=/\*\s*([\d][\d.]{3,})\s*\*/g;
+  while((m=re2.exec(txt))!==null){
+    var v2=parseFloat(m[1].replace(/\./g,''));
+    if(!isNaN(v2) && v2>=1000)precios.push(v2);
+  }
+  if(precios.length)return Math.max.apply(null,precios);
+  // 3) número grande suelto (último recurso)
+  var re3=/([\d][\d.]{4,})/g;
+  while((m=re3.exec(txt))!==null){
+    var v3=parseFloat(m[1].replace(/\./g,''));
+    if(!isNaN(v3) && v3>=10000)precios.push(v3);
+  }
+  return precios.length?Math.max.apply(null,precios):0;
+}
+function nombreProductoTexto(txt){
+  if(!txt)return '';
+  var lineas=txt.split('\n');
+  for(var i=0;i<lineas.length;i++){
+    var l=limpiarNombreProd(lineas[i]);
+    if(l && /[a-zA-Z]{3,}/.test(l) && l.length>=3)return l.substring(0,60);
+  }
+  return '';
+}
+// Limpia una línea para dejar solo el nombre: saca precios, símbolos *_~ y emojis de adorno
+function limpiarNombreProd(l){
+  if(!l)return '';
+  return l
+    .replace(/\*?~[^~]*~\*?/g,' ')        // tachados
+    .replace(/💲\s*\$?\s*[\d][\d.,]*/g,'') // 💲precio
+    .replace(/\$\s*[\d][\d.,]*/g,'')       // $precio
+    .replace(/[\d][\d.,]*\s*\$/g,'')       // precio$
+    .replace(/[*_~`]/g,'')                  // símbolos de formato WhatsApp
+    .replace(/[\u2190-\u21FF\u2300-\u27BF\u2B00-\u2BFF\uFE0F\u200D]/g,'') // flechas y símbolos
+    .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g,'') // emojis (pares surrogate)
+    .replace(/\s{2,}/g,' ')
+    .trim();
+}
+// Detecta si hay un precio marcado con 💲 (emoji peso) = COSTO. Devuelve {valor, esCosto}
+function detectarPrecioConTipo(txt){
+  if(!txt)return {valor:0,esCosto:false};
+  var limpio=txt.replace(/\*?~[^~]*~\*?/g,' ');
+  var mCosto=limpio.match(/💲\s*\$?\s*([\d][\d.,]*)/);
+  if(mCosto){
+    var vc=parseFloat(mCosto[1].replace(/\./g,'').replace(/,/g,'.'));
+    if(!isNaN(vc) && vc>=1000)return {valor:vc,esCosto:true};
+  }
+  return {valor:detectarPrecioTexto(txt),esCosto:false};
+}
+function armarBloquePegar(texto, indice, tituloGeneral){
+  var precio=detectarPrecioTexto(texto);
+  if(!precio)return null;
+  // el nombre sale de la línea que tiene el precio (ej: "Twin"). Si no hay, usa el título general.
+  var nombre='';
+  var lineas=texto.split('\n');
+  for(var li=lineas.length-1;li>=0;li--){
+    if(detectarPrecioTexto(lineas[li])){
+      var n=limpiarNombreProd(lineas[li]);
+      if(n && /[a-zA-Z]{2,}/.test(n))nombre=n;
+      break;
+    }
+  }
+  if(!nombre)nombre=nombreProductoTexto(texto);
+  if(!nombre && tituloGeneral)nombre=tituloGeneral;
+  // si hay título general Y el nombre es corto (ej "Twin"), combinar: "Título - Twin"
+  if(tituloGeneral && nombre && nombre.toLowerCase()!==tituloGeneral.toLowerCase() && nombre.length<25){
+    nombre=tituloGeneral+' '+nombre;
+  }
+  nombre=(nombre||'').substring(0,60);
+  var html='<div style="background:#fff;border:2px solid var(--bor);border-radius:14px;padding:14px;margin-bottom:14px">';
+  html+='<div class="result-contado" style="margin-bottom:10px"><div class="result-label">'+(indice?('Producto '+indice+' · '):'')+'Precio de venta</div><div class="result-precio">'+fmt(precio)+'</div>'+(nombre?'<div class="result-sub">📱 '+nombre+'</div>':'')+'</div>';
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">📅 Planes de cuotas</div>';
+  html+='<div class="cuotas-grid">';
+  var waLines=[];var hayPlanes=false;
+  cuotasActivasOrdenadas().forEach(function(n2){
+    hayPlanes=true;
+    var totalPlan=calcularTotalPlan(precio,n2);
+    var valorCuota=Math.round(totalPlan/n2/500)*500;
+    html+='<div class="cuota-card c'+n2+'"><div class="cuota-info"><div class="cuota-n">'+n2+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
+    waLines.push("💳💵 "+n2+" cuotas fijas de "+fmt(valorCuota));
+  });
+  html+='</div>';
+  if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes activados.</div>';
+  var msgLindo=armarMensajeAmarango(nombre||'Producto', precio, waLines);
+  html+='<div class="msg-lindo" style="margin-top:10px">'+msgLindo.replace(/\*/g,'').replace(/_/g,'')+'</div>';
+  html+='<div class="share-row"><button class="share-btn wa" onclick="abrirWAPegar('+(indice||0)+')">💬 Enviar por WhatsApp</button><button class="share-btn" onclick="copiarMsgPegarIdx('+(indice||0)+')">📋 Copiar</button></div>';
+  html+='</div>';
+  return {html:html, msg:msgLindo};
+}
+// Separa el texto en productos: cada vez que una línea tiene precio, ahí cierra un producto
+function separarProductosPegar(txt){
+  var lineas=txt.split('\n');
+  var productos=[];
+  var actual=[];
+  function lineaTienePrecio(l){
+    var limpio=l.replace(/\*?~[^~]*~\*?/g,' '); // sacar tachados
+    if(/💲\s*\$?\s*[\d][\d.,]*/.test(limpio))return true;
+    if(/\$\s*[\d][\d.,]*/.test(limpio))return true;
+    if(/[\d][\d.,]*\s*\$/.test(limpio))return true;
+    // número "pelado" grande (ej: 248.700 o 248700) en una línea corta = precio
+    var soloNum=limpio.replace(/[^\d.,]/g,'').replace(/[.,]/g,'');
+    if(soloNum.length>=5 && parseInt(soloNum)>=10000){
+      // que la línea sea mayormente el número (no un texto largo con un número adentro)
+      var textoSinNum=limpio.replace(/[\d.,$💲\s]/g,'');
+      if(textoSinNum.length<=12)return true;
+    }
+    return false;
+  }
+  lineas.forEach(function(l){
+    actual.push(l);
+    if(lineaTienePrecio(l)){
+      // cierra el producto actual
+      var bloque=actual.join('\n').trim();
+      if(bloque)productos.push(bloque);
+      actual=[];
+    }
+  });
+  // si quedó texto sin precio al final, lo agregamos al último producto (suele ser cierre/firma)
+  if(actual.join('').trim() && productos.length){
+    productos[productos.length-1]+='\n'+actual.join('\n').trim();
+  } else if(actual.join('').trim()){
+    productos.push(actual.join('\n').trim());
+  }
+  return productos;
+}
+function calcPegar(){
+  var txt=document.getElementById('inp-pegar').value||'';
+  var res=document.getElementById('res-pegar');
+  if(!txt.trim()){res.innerHTML='<div class="empty-icon">📋</div><p>Pegá el mensaje con el precio de venta y te armo todo</p>';res.className='empty-state';return;}
+  // separar productos: cada precio nuevo arranca otro producto
+  var bloques=separarProductosPegar(txt);
+  // detectar título general: primera línea con letras que NO tenga precio (ej: "Acolchado New Look Palette")
+  var tituloGeneral='';
+  var lineasTxt=txt.split('\n');
+  for(var ti=0;ti<lineasTxt.length;ti++){
+    if(!detectarPrecioTexto(lineasTxt[ti])){
+      var posibleTitulo=limpiarNombreProd(lineasTxt[ti]);
+      if(posibleTitulo && /[a-zA-Z]{3,}/.test(posibleTitulo) && posibleTitulo.length>=4 && !/variedad|colores|consulta|stock|env[ií]o|garant[ií]a/i.test(posibleTitulo)){
+        tituloGeneral=posibleTitulo;break;
+      }
+    } else break; // si la primera línea ya tiene precio, no hay título general
+  }
+  window._pegarMsgs={};
+  var html='';
+  var encontrados=0;
+  var idx=1;
+  var totalConPrecio=bloques.filter(function(b){return detectarPrecioTexto(b);}).length;
+  bloques.forEach(function(bloque){
+    // solo paso el título general si hay varios productos (variantes del mismo)
+    var r=armarBloquePegar(bloque, totalConPrecio>1?idx:0, totalConPrecio>1?tituloGeneral:'');
+    if(r){
+      window._pegarMsgs[totalConPrecio>1?idx:0]=r.msg;
+      if(idx===1)window._lastPegarMsg=r.msg;
+      html+=r.html;
+      idx++;encontrados++;
+    }
+  });
+  if(!encontrados){res.innerHTML='<div class="empty-icon">🤔</div><p>No encontré precios. Fijate que cada producto tenga su monto (ej: $250.000 o 250.000)</p>';res.className='empty-state';return;}
+  if(encontrados>1){
+    html='<div style="font-size:.7rem;font-weight:800;color:var(--az);margin-bottom:10px">📦 '+encontrados+' productos detectados</div>'+html;
+  }
+  res.innerHTML=html;res.className='tab-results';
+}
+function abrirWAPegar(idx){
+  var msg=(window._pegarMsgs&&window._pegarMsgs[idx])||window._lastPegarMsg||'';
+  try{window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
+  catch(e){try{window.open('https://wa.me/?text='+encodeURIComponent(limpiarTexto(msg)),'_blank');}catch(e2){alert('No se pudo abrir WhatsApp, probá Copiar');}}
+}
+function copiarMsgPegarIdx(idx){
+  var msg=(window._pegarMsgs&&window._pegarMsgs[idx])||window._lastPegarMsg||'';
+  if(msg){try{navigator.clipboard.writeText(msg);alert('✅ Copiado, ya lo podés pegar en WhatsApp');}catch(e){alert('No se pudo copiar');}}
+}
+function copiarMsgPegar(){copiarMsgPegarIdx(0);}
+function clearPegar(){
+  document.getElementById('inp-pegar').value='';
+  var res=document.getElementById('res-pegar');
+  res.innerHTML='<div class="empty-icon">📋</div><p>Pegá el mensaje con el precio de venta y te armo todo</p>';
+  res.className='empty-state';
+}
+
+// ═══ CELULARES: admin sube lista, público elige ═══
+function gamaPesos(precio){
+  if(precio<=350000)return {nivel:'eco',emoji:'🟢',txt:'Económicos'};
+  if(precio<=800000)return {nivel:'media',emoji:'🔵',txt:'Gama media'};
+  if(precio<=1300000)return {nivel:'premium',emoji:'🟠',txt:'Gama media premium'};
+  return {nivel:'alta',emoji:'🔴',txt:'Gama alta'};
+}
+function cargarListaCelus(){
+  try{var g=localStorage.getItem('amarango_celulares');if(g)return JSON.parse(g);}catch(e){}
+  return [];
+}
+function parsearCeluLinea(linea, esUSD){
+  // ignorar precios tachados de WhatsApp (~...~) = precios viejos
+  linea=linea.replace(/\*?~[^~]*~\*?/g,' ').replace(/\s{2,}/g,' ').trim();
+  var precio=0;
+  // detectar precio con usd/u$s pegado (ej: 110usd, 450 u$s)
+  var mu=linea.match(/(?:usd|u\$s|us\$|d[oó]lares?)\s*\$?\s*([\d][\d.,]*)/i)||linea.match(/([\d][\d.,]*)\s*(?:usd|u\$s|us\$|d[oó]lares?)/i);
+  if(mu)precio=parseFloat(mu[1].replace(/\./g,'').replace(/,/g,'.'));
+  if(!precio){
+    var m=linea.match(/💲\s*\$?\s*([\d][\d.,]*)/)||linea.match(/\$\s*([\d][\d.,]*)/)||linea.match(/([\d][\d.,]*)\s*\$/);
+    if(m)precio=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));
+  }
+  if(!precio){
+    // sin símbolo: tomar el número MÁS GRANDE de la línea (el precio, no la memoria 128/256)
+    var nums=linea.match(/[\d][\d.]*/g)||[];
+    var candidatos=[];
+    nums.forEach(function(s){
+      var val=parseFloat(s.replace(/\./g,''));
+      if(!isNaN(val))candidatos.push(val);
+    });
+    if(candidatos.length)precio=Math.max.apply(null,candidatos);
+  }
+  // mínimo: en USD aceptamos desde 20, en pesos desde 1000
+  var minimo=esUSD?20:1000;
+  if(!precio||precio<minimo)return null;
+  // extraer colores entre paréntesis (ej: "(blue-lavander-black)") antes de armar el nombre
+  var colores=[];
+  var mc=linea.match(/\(([^)]*)\)/);
+  if(mc){
+    var dentro=mc[1];
+    // separar por guion, coma o barra
+    dentro.split(/[-,\/]/).forEach(function(col){
+      var c=col.trim();
+      if(c && /[a-zA-Záéíóúñ]{2,}/.test(c))colores.push(c);
+    });
+  }
+  var nombre=linea
+    .replace(/\([^)]*\)/g,'') // sacar el paréntesis de colores
+    .replace(/(?:usd|u\$s|us\$|d[oó]lares?)\s*\$?\s*[\d][\d.,]*/i,'').replace(/[\d][\d.,]*\s*(?:usd|u\$s|us\$|d[oó]lares?)/i,'').replace(/\$\s*[\d][\d.,]*/,'').replace(/[\d][\d.,]*\s*\$/,'').replace(/[*_•▪️📱🍎]/g,'').replace(/[-–—]\s*$/,'').replace(/\s{2,}/g,' ').trim();
+  // limpiar caracteres rotos: emojis mal formados, surrogates sueltos y el carácter de reemplazo �
+  nombre=limpiarTexto(nombre);
+  if(!nombre||nombre.length<2)return null;
+  return {nombre:nombre.substring(0,60),precio:precio,colores:colores};
+}
+// Mapea un color (texto) a su emoji de bolita
+function emojiColor(c){
+  var n=(c||'').toLowerCase().trim();
+  var mapa={
+    'blue':'🔵','azul':'🔵','celeste':'🔵',
+    'black':'⚫','negro':'⚫','negra':'⚫',
+    'white':'⚪','blanco':'⚪','blanca':'⚪',
+    'red':'🔴','rojo':'🔴','roja':'🔴',
+    'green':'🟢','verde':'🟢','sage':'🟢','mint':'🟢',
+    'yellow':'🟡','amarillo':'🟡','gold':'🟡','dorado':'🟡',
+    'orange':'🟠','naranja':'🟠',
+    'purple':'🟣','violet':'🟣','violeta':'🟣','lavander':'🟣','lavender':'🟣','lavanda':'🟣','lila':'🟣',
+    'pink':'🩷','rosa':'🩷','rose':'🩷',
+    'gray':'⚫','grey':'⚫','gris':'⚫','graphite':'⚫','grafito':'⚫',
+    'silver':'⚪','plata':'⚪','plateado':'⚪',
+    'brown':'🟤','marron':'🟤','marrón':'🟤',
+    'titanium':'⚪','titanio':'⚪'
+  };
+  return mapa[n]||'🔘';
+}
+// Capitaliza la primera letra
+function capit(s){return s?s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';}
+// Arma la línea de colores: "Blue 🔵 · Lavander 🟣 · Black ⚫"
+function lineaColores(colores){
+  if(!colores||!colores.length)return '';
+  return colores.map(function(c){return capit(c)+' '+emojiColor(c);}).join(' · ');
+}
+// Quita caracteres que rompen encodeURIComponent (surrogates sueltos) y el �
+function limpiarTexto(s){
+  if(!s)return '';
+  // sacar el carácter de reemplazo y surrogates sin pareja
+  s=s.replace(/\uFFFD/g,'');
+  s=s.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,''); // alto surrogate sin bajo
+  s=s.replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1'); // bajo surrogate sin alto
+  // colapsar espacios/tabs repetidos PERO sin tocar los saltos de línea (\n)
+  s=s.replace(/[ \t]{2,}/g,' ');
+  return s.trim();
+}
+// Detecta incoherencias de memoria: mismo modelo donde MÁS GB sale ≤ que MENOS GB.
+// No cambia nada, solo devuelve los avisos para que el admin revise.
+function chequearCoherenciaMemoria(celus){
+  var avisos=[];
+  // extraer memoria (en GB) y nombre base de cada celu
+  function memGB(nombre){
+    var m=nombre.match(/(\d+)\s*(tb|gb)/i);
+    if(!m)return null;
+    var n=parseInt(m[1]);
+    if(/tb/i.test(m[2]))n=n*1024; // 1TB = 1024GB
+    return n;
+  }
+  function baseModelo(nombre){
+    // sacar la memoria y normalizar para agrupar por modelo
+    return nombre.toLowerCase().replace(/\d+\s*(tb|gb)/ig,'').replace(/\d+\s*\/\s*\d+/g,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+  }
+  // agrupar por modelo base
+  var grupos={};
+  celus.forEach(function(c){
+    var mem=memGB(c.nombre);
+    if(mem===null)return;
+    var base=baseModelo(c.nombre);
+    if(!grupos[base])grupos[base]=[];
+    grupos[base].push({nombre:c.nombre,precio:c.precio,mem:mem});
+  });
+  // en cada grupo, ver si más memoria = precio menor o igual
+  for(var base in grupos){
+    var arr=grupos[base];
+    if(arr.length<2)continue;
+    arr.sort(function(a,b){return a.mem-b.mem;}); // de menor a mayor memoria
+    for(var i=1;i<arr.length;i++){
+      if(arr[i].precio<=arr[i-1].precio){
+        avisos.push(arr[i].nombre+' ('+fmt(arr[i].precio)+') sale igual o menos que '+arr[i-1].nombre+' ('+fmt(arr[i-1].precio)+'), teniendo más memoria');
+      }
+    }
+  }
+  return avisos;
+}
+// Markup AmarangoElectro: costo → precio de venta (igual que el CRM)
+function markupVentaCRM(costo){
+  var m;
+  if(costo<=50000)m=1.80;
+  else if(costo<=100000)m=1.60;
+  else if(costo<=250000)m=1.50;
+  else if(costo<=350000)m=1.40;
+  else m=1.30;
+  return Math.round(costo*m/500)*500;
+}
+var celuModo='pesos'; // 'pesos' o 'usd'
+function setCeluModo(m){
+  celuModo=m;
+  document.getElementById('celu-modo-pesos').classList.toggle('on',m==='pesos');
+  document.getElementById('celu-modo-usd').classList.toggle('on',m==='usd');
+  document.getElementById('celu-modo-pesos').style.background=(m==='pesos')?'var(--nar)':'rgba(255,255,255,.1)';
+  document.getElementById('celu-modo-pesos').style.color=(m==='pesos')?'#fff':'rgba(255,255,255,.7)';
+  document.getElementById('celu-modo-usd').style.background=(m==='usd')?'var(--nar)':'rgba(255,255,255,.1)';
+  document.getElementById('celu-modo-usd').style.color=(m==='usd')?'#fff':'rgba(255,255,255,.7)';
+  document.getElementById('celu-cotiz-box').style.display=(m==='usd')?'block':'none';
+  document.getElementById('celu-admin-hint').textContent=(m==='usd')
+    ? '💵 Un celu por línea con su precio en USD. Lo paso a costo (USD × dólar) y le aplico el markup para sacar el precio de venta.'
+    : '📋 Un celu por línea, con su precio de venta en pesos. La lista nueva reemplaza la anterior.';
+}
+// clave para comparar nombres: minúsculas, sin espacios de más
+function claveNombre(n){return (n||'').toLowerCase().replace(/\s+/g,' ').trim();}
+// Caja de borrado con botones (no usa prompt, que falla en algunos celulares)
+var borrarBoxAbierto=false;
+function toggleBorrarBox(){
+  borrarBoxAbierto=!borrarBoxAbierto;
+  var box=document.getElementById('borrar-box');
+  box.style.display=borrarBoxAbierto?'block':'none';
+  if(borrarBoxAbierto)renderBotonesBorrar();
+}
+function renderBotonesBorrar(){
+  var cont=document.getElementById('borrar-botones');
+  var celus=cargarListaCelus();
+  if(!celus.length){
+    cont.innerHTML='<div style="color:rgba(255,255,255,.6);font-size:.7rem">No hay lista cargada para borrar.</div>';
     return;
   }
-  // Determinar porcentaje por rango de costo (o el editado manualmente)
-  var pctAuto;
-  if(costo<=50000)pctAuto=80;
-  else if(costo<=100000)pctAuto=60;
-  else if(costo<=250000)pctAuto=50;
-  else if(costo<=350000)pctAuto=40;
-  else pctAuto=30;
+  var marcas=[];
+  celus.forEach(function(c){var m=marcaDe(c.nombre);if(marcas.indexOf(m)<0)marcas.push(m);});
+  var html='';
+  // botón borrar todo
+  html+='<button onclick="borrarTodoCelus()" style="background:#EF4444;color:#fff;border:none;border-radius:8px;padding:10px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit">🗑️ Borrar TODA la lista ('+celus.length+')</button>';
+  // botón por cada marca
+  marcas.forEach(function(m){
+    var cant=celus.filter(function(c){return marcaDe(c.nombre)===m;}).length;
+    html+='<button onclick="borrarMarcaCelus(\''+m+'\')" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:9px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit">Borrar '+m.charAt(0).toUpperCase()+m.slice(1)+' ('+cant+')</button>';
+  });
+  cont.innerHTML=html;
+}
+function borrarTodoCelus(){
+  if(!confirm('¿Seguro que querés borrar TODA la lista de celulares? Esto no se puede deshacer.'))return;
+  try{localStorage.removeItem('amarango_celulares');}catch(e){}
+  var inp=document.getElementById('inp-celulista');if(inp)inp.value='';
+  alert('🗑️ Lista borrada por completo.');
+  borrarBoxAbierto=false;document.getElementById('borrar-box').style.display='none';
+  renderListaCelus();
+}
+function borrarMarcaCelus(marca){
+  var celus=cargarListaCelus();
+  var quedan=celus.filter(function(c){return marcaDe(c.nombre)!==marca;});
+  var borrados=celus.length-quedan.length;
+  if(!confirm('¿Borrar los '+borrados+' celulares de '+marca.toUpperCase()+'?'))return;
+  try{localStorage.setItem('amarango_celulares',JSON.stringify(quedan));}catch(e){}
+  alert('🗑️ Borrados '+borrados+' de '+marca.toUpperCase()+'. Quedan '+quedan.length+'.');
+  renderBotonesBorrar();
+  renderListaCelus();
+}
+// Detecta la marca del nombre (para ordenar por marca en el orden que se pega)
+function marcaDe(nombre){
+  var n=(nombre||'').toLowerCase();
+  var marcas=['samsung','motorola','moto','xiaomi','redmi','poco','apple','iphone','nokia','tcl','realme','honor','huawei','zte','alcatel','lg','oppo','vivo','infinix'];
+  for(var i=0;i<marcas.length;i++){if(n.indexOf(marcas[i])>=0){
+    // unificar moto→motorola, redmi/poco→xiaomi, iphone→apple
+    if(marcas[i]==='moto')return 'motorola';
+    if(marcas[i]==='redmi'||marcas[i]==='poco')return 'xiaomi';
+    if(marcas[i]==='iphone')return 'apple';
+    return marcas[i];
+  }}
+  return 'otras';
+}
+// Ordena la lista por marca respetando el orden de aparición de cada marca
+function ordenarPorMarca(lista){
+  var ordenMarcas=[];
+  lista.forEach(function(c){var m=marcaDe(c.nombre);if(ordenMarcas.indexOf(m)<0)ordenMarcas.push(m);});
+  var resultado=[];
+  ordenMarcas.forEach(function(m){
+    lista.forEach(function(c){if(marcaDe(c.nombre)===m)resultado.push(c);});
+  });
+  return resultado;
+}
+function guardarListaCelus(){
+  var txt=document.getElementById('inp-celulista').value||'';
+  var lineas=txt.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  var esUSD=(celuModo==='usd');
+  var cotiz=parseFloat(document.getElementById('celu-cotiz').value)||0;
+  if(esUSD && !cotiz){alert('Poné el valor del dólar para convertir los precios USD.');return;}
+  var nuevos=[];
+  lineas.forEach(function(l){
+    var c=parsearCeluLinea(l, esUSD);
+    if(!c)return;
+    if(esUSD){var costo=c.precio*cotiz;c.precio=markupVentaCRM(costo);}
+    nuevos.push(c);
+  });
+  if(!nuevos.length){alert('No detecté celulares con precio. Fijate que cada línea tenga el nombre y el precio.');return;}
 
-  var pctInput=document.getElementById('margen-contado').value;
-  var pct=(pctInput!==''&&pctInput!==null)?parseFloat(pctInput):pctAuto;
-  var esManual=(pctInput!==''&&pctInput!==null);
-
-  var precio=Math.round(costo*(1+pct/100)/500)*500;
-
-  // Aplicar 10% off si está activado
-  if(offState.contado){
-    precio=Math.round(precio*0.90/500)*500;
+  var anteriores=cargarListaCelus();
+  if(!anteriores.length){
+    finalizarGuardado(ordenarPorMarca(nuevos),esUSD,'Lista guardada por primera vez.');
+    return;
   }
 
-  var html='';
+  var clavesNuevos={};
+  nuevos.forEach(function(c){clavesNuevos[claveNombre(c.nombre)]=true;});
+  var clavesAnteriores={};
+  anteriores.forEach(function(c){clavesAnteriores[claveNombre(c.nombre)]=true;});
+  var actualizados=0, agregados=0;
+  nuevos.forEach(function(c){
+    if(clavesAnteriores[claveNombre(c.nombre)])actualizados++;else agregados++;
+  });
+  var colgados=anteriores.filter(function(c){return !clavesNuevos[claveNombre(c.nombre)];});
 
-  // Precio de venta
+  // arma la lista final. modoColgados: 'borrar' | 'sinstock' | 'dejar'
+  function construirFinal(modoColgados){
+    var mapa={};
+    // anteriores primero (para conservar orden), salvo que se borren los colgados
+    anteriores.forEach(function(c){
+      var k=claveNombre(c.nombre);
+      var esColgado=!clavesNuevos[k];
+      if(esColgado){
+        if(modoColgados==='borrar')return; // no lo incluyo
+        var copia=JSON.parse(JSON.stringify(c));
+        if(modoColgados==='sinstock')copia.sinStock=true;
+        mapa[k]=copia;
+      } else {
+        mapa[k]=c; // se va a pisar abajo con el nuevo precio
+      }
+    });
+    // los nuevos pisan/agregan (y les saco el sinStock si lo tenían)
+    nuevos.forEach(function(c){var cc=JSON.parse(JSON.stringify(c));cc.sinStock=false;mapa[claveNombre(c.nombre)]=cc;});
+    return ordenarPorMarca(Object.keys(mapa).map(function(k){return mapa[k];}));
+  }
+
+  if(colgados.length){
+    var listaColgados=colgados.map(function(c){return '• '+c.nombre+' ('+fmt(c.precio)+')';}).join('\n');
+    // dos confirm en cadena (prompt falla en algunos celulares)
+    var dejarEnLista=confirm('Detecté '+colgados.length+' celular(es) que estaban antes pero NO están en la lista nueva:\n\n'+listaColgados+'\n\n¿Los DEJO en la lista?\n\n• Aceptar = los dejo\n• Cancelar = elijo si los borro o los marco sin stock');
+    var modo;
+    if(dejarEnLista){
+      modo='dejar';
+    } else {
+      var marcarSinStock=confirm('¿Los marco como "SIN STOCK"?\n\n• Aceptar = quedan en la lista con cartel SIN STOCK\n• Cancelar = los borro definitivamente');
+      modo=marcarSinStock?'sinstock':'borrar';
+    }
+    var finalLista=construirFinal(modo);
+    var etiqueta={borrar:colgados.length+' borrados',sinstock:colgados.length+' marcados sin stock',dejar:colgados.length+' conservados'}[modo];
+    finalizarGuardado(finalLista,esUSD,'✅ '+actualizados+' actualizados · '+agregados+' nuevos · '+etiqueta);
+  } else {
+    var finalLista2=construirFinal('dejar');
+    finalizarGuardado(finalLista2,esUSD,'✅ '+actualizados+' actualizados · '+agregados+' nuevos');
+  }
+}
+function finalizarGuardado(lista,esUSD,resumen){
+  try{localStorage.setItem('amarango_celulares',JSON.stringify(lista));}catch(e){}
+  var avisos=chequearCoherenciaMemoria(lista);
+  var msg=resumen+'\n\nTotal en lista: '+lista.length+' celulares.';
+  if(avisos.length){
+    msg+='\n\n⚠️ OJO, revisá estos precios (un modelo con más memoria sale igual o menos que el de menos memoria):\n\n• '+avisos.join('\n• ');
+  }
+  alert(msg);
+  document.getElementById('inp-celulista').value='';
+  toggleCeluAdmin();
+  renderListaCelus();
+}
+var celuAdminAbierto=false;
+function toggleCeluAdmin(){
+  // si está cerrado y el admin no está desbloqueado, pedir contraseña
+  if(!celuAdminAbierto && !adminUnlocked){
+    pendingTab='__celuadmin__';
+    document.getElementById("admin-pass").value="";
+    document.getElementById("pass-err").classList.remove("show");
+    document.getElementById("admin-pass").classList.remove("error");
+    document.getElementById("login-overlay").style.display="flex";
+    setTimeout(function(){document.getElementById("admin-pass").focus();},200);
+    return;
+  }
+  celuAdminAbierto=!celuAdminAbierto;
+  document.getElementById('celu-admin-box').style.display=celuAdminAbierto?'block':'none';
+  if(celuAdminAbierto){
+    var celus=cargarListaCelus();
+    if(celus.length){
+      document.getElementById('inp-celulista').value=celus.map(function(c){
+        var col=(c.colores&&c.colores.length)?(' ('+c.colores.join('-')+')'):'';
+        return c.nombre+col+' $'+c.precio.toLocaleString('es-AR');
+      }).join('\n');
+    }
+  }
+}
+var filtroGama='todas';
+var filtroMarca='todas';
+function setFiltroGama(g){filtroGama=g;renderListaCelus();}
+function setFiltroMarca(m){filtroMarca=m;renderListaCelus();}
+function renderListaCelus(){
+  var cont=document.getElementById('celu-lista');
+  if(!cont)return;
+  var celus=cargarListaCelus();
+  // botones de filtro de MARCA
+  var marcaEl=document.getElementById('celu-filtro-marca');
+  if(marcaEl){
+    if(!celus.length){marcaEl.innerHTML='';}
+    else{
+      var marcasPresentes=[];
+      celus.forEach(function(c){var m=marcaDe(c.nombre);if(marcasPresentes.indexOf(m)<0)marcasPresentes.push(m);});
+      var btnsMarca='<button onclick="setFiltroMarca(\'todas\')" style="border:none;border-radius:16px;padding:6px 12px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;'+(filtroMarca==='todas'?'background:#FF7A00;color:#fff':'background:#fff;color:#FF7A00;border:1.5px solid #FFE0C2')+'">Todas las marcas</button>';
+      marcasPresentes.forEach(function(m){
+        var on=(filtroMarca===m);
+        btnsMarca+='<button onclick="setFiltroMarca(\''+m+'\')" style="border:none;border-radius:16px;padding:6px 12px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;'+(on?'background:#FF7A00;color:#fff':'background:#fff;color:#FF7A00;border:1.5px solid #FFE0C2')+'">'+m.charAt(0).toUpperCase()+m.slice(1)+'</button>';
+      });
+      marcaEl.innerHTML=btnsMarca;
+    }
+  }
+  // botones de filtro de gama
+  var filtroEl=document.getElementById('celu-filtro-gama');
+  if(filtroEl){
+    if(!celus.length){filtroEl.innerHTML='';}
+    else{
+      var botones=[
+        {k:'todas',t:'Todas'},
+        {k:'eco',t:'🟢 Económicos'},
+        {k:'media',t:'🔵 Media'},
+        {k:'premium',t:'🟠 Premium'},
+        {k:'alta',t:'🔴 Alta'}
+      ];
+      filtroEl.innerHTML=botones.map(function(b){
+        var on=(filtroGama===b.k);
+        return '<button onclick="setFiltroGama(\''+b.k+'\')" style="border:none;border-radius:16px;padding:7px 12px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit;'+(on?'background:#0B2D6B;color:#fff':'background:#fff;color:#0B2D6B;border:1.5px solid #E8EBF4')+'">'+b.t+'</button>';
+      }).join('');
+    }
+  }
+  if(!celus.length){
+    cont.innerHTML='<div class="empty-state"><div class="empty-icon">📱</div><p>Todavía no hay celulares cargados. Si sos admin, tocá el botón de arriba para subir la lista.</p></div>';
+    return;
+  }
+  // texto del buscador
+  var busca=(document.getElementById('celu-buscar')?document.getElementById('celu-buscar').value:'').toLowerCase().trim();
+  var gamas=[
+    {nivel:'eco',emoji:'🟢',txt:'Económicos'},
+    {nivel:'media',emoji:'🔵',txt:'Gama media'},
+    {nivel:'premium',emoji:'🟠',txt:'Gama media premium'},
+    {nivel:'alta',emoji:'🔴',txt:'Gama alta'}
+  ];
+  var html='';
+  var celusConIdx=celus.map(function(c,i){return {c:c,idx:i};});
+  var hayAlgo=false;
+  gamas.forEach(function(g){
+    if(filtroGama!=='todas' && filtroGama!==g.nivel)return; // filtro gama
+    var dela=celusConIdx.filter(function(o){
+      if(gamaPesos(o.c.precio).nivel!==g.nivel)return false;
+      if(filtroMarca!=='todas' && marcaDe(o.c.nombre)!==filtroMarca)return false; // filtro marca
+      if(busca && o.c.nombre.toLowerCase().indexOf(busca)<0)return false; // buscador
+      return true;
+    }).sort(function(a,b){return a.c.precio-b.c.precio;}); // menor a mayor
+    if(!dela.length)return;
+    hayAlgo=true;
+    html+='<div style="font-size:.74rem;font-weight:900;color:#0B2D6B;margin:16px 0 8px;letter-spacing:.5px">'+g.emoji+' '+g.txt.toUpperCase()+' ('+dela.length+')</div>';
+    dela.forEach(function(o){
+      var c=o.c, idx=o.idx;
+      var sinStock=!!c.sinStock;
+      var clickAttr=sinStock?'':' onclick="elegirCelu('+idx+')"';
+      var cursor=sinStock?'default':'cursor:pointer';
+      var opacidad=sinStock?'opacity:.55;':'';
+      html+='<div'+clickAttr+' style="'+cursor+';'+opacidad+'background:#fff;border-radius:12px;border-left:5px solid #0B2D6B;border-right:5px solid #FF7A00;box-shadow:0 1px 4px rgba(11,45,107,.08);padding:13px 14px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center">';
+      var badgeSinStock=sinStock?' <span style="background:#EF4444;color:#fff;font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:8px;vertical-align:middle">SIN STOCK</span>':'';
+      html+='<div style="flex:1"><div style="font-size:.88rem;font-weight:800;color:#0B2D6B">'+c.nombre+badgeSinStock+'</div>'+((c.colores&&c.colores.length)?'<div style="font-size:.68rem;color:#6B7280;font-weight:600;margin-top:3px">'+lineaColores(c.colores)+'</div>':'')+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:8px"><div style="font-size:1.05rem;font-weight:900;color:#0B2D6B">'+fmt(c.precio)+'</div>'+(sinStock?'':'<span style="font-size:1.1rem;color:#FF7A00" id="flecha-'+idx+'">›</span>')+'</div>';
+      html+='</div>';
+      if(!sinStock)html+='<div id="celu-res-'+idx+'" style="display:none"></div>';
+    });
+  });
+  if(!hayAlgo)html='<div class="empty-state"><div class="empty-icon">🔍</div><p>No se encontraron celulares con ese filtro o búsqueda.</p></div>';
+  cont.innerHTML=html;
+}
+function elegirCelu(idx){
+  var box=document.getElementById('celu-res-'+idx);
+  var flecha=document.getElementById('flecha-'+idx);
+  if(!box)return;
+  // si ya está abierto, cerrarlo (toggle)
+  if(box.style.display==='block'){
+    box.style.display='none'; box.innerHTML='';
+    if(flecha)flecha.textContent='›';
+    return;
+  }
+  // cerrar cualquier otro abierto
+  document.querySelectorAll('[id^="celu-res-"]').forEach(function(el){el.style.display='none';el.innerHTML='';});
+  document.querySelectorAll('[id^="flecha-"]').forEach(function(el){el.textContent='›';});
+  var celus=cargarListaCelus();
+  var c=celus[idx];
+  if(!c)return;
+  var precio=c.precio;
+  var html='<div style="background:#f7faff;border:2px solid var(--bor);border-radius:14px;padding:12px;margin:6px 0 12px">';
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">📅 Cuotas de '+c.nombre+'</div>';
+  if(c.colores&&c.colores.length)html+='<div style="font-size:.72rem;color:#0B2D6B;font-weight:700;margin-bottom:8px">🎨 '+lineaColores(c.colores)+'</div>';
+  html+='<div class="cuotas-grid">';
+  var waLines=[];
+  cuotasActivasOrdenadas().forEach(function(n){
+    var totalPlan=calcularTotalPlan(precio,n);
+    var valorCuota=Math.round(totalPlan/n/500)*500;
+    html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
+    waLines.push("💳💵 "+n+" cuotas fijas de "+fmt(valorCuota));
+  });
+  html+='</div>';
+  var lineaColorMsg=(c.colores&&c.colores.length)?("🎨 Colores: "+lineaColores(c.colores)):"";
+  var msgLindo=armarMensajeAmarango(c.nombre, precio, waLines, lineaColorMsg);
+  html+='<div class="msg-lindo" style="margin-bottom:8px">'+msgLindo.replace(/\*/g,'').replace(/_/g,'')+'</div>';
+  html+='<div class="share-row"><button class="share-btn wa" onclick="abrirWA('+idx+')">💬 Enviar por WhatsApp</button><button class="share-btn" onclick="copiarTextoCelu('+idx+')">📋 Copiar</button></div>';
+  html+='<button class="share-btn" style="width:100%;margin-top:8px" onclick="elegirCelu('+idx+')">✕ Cerrar</button>';
+  html+='</div>';
+  box.innerHTML=html;
+  box.style.display='block';
+  if(flecha)flecha.textContent='⌄';
+  window['_celuMsg_'+idx]=msgLindo;
+}
+function copiarTextoCelu(idx){
+  var msg=window['_celuMsg_'+idx];
+  if(msg){
+    try{navigator.clipboard.writeText(msg);alert('✅ Copiado, ya lo podés pegar en WhatsApp');}
+    catch(e){alert('No se pudo copiar');}
+  }
+}
+// Abre WhatsApp de forma segura (sin que rompan caracteres raros)
+function abrirWA(idx){
+  var msg=window['_celuMsg_'+idx]||'';
+  try{
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  }catch(e){
+    // si algún carácter rompe, limpiar y reintentar
+    try{ window.open('https://wa.me/?text='+encodeURIComponent(limpiarTexto(msg)),'_blank'); }
+    catch(e2){ alert('No se pudo abrir WhatsApp, probá con el botón Copiar'); }
+  }
+}
+
+// ═══ PLACAS (admin): pegado inteligente igual que el CRM ═══
+var placaTipo='costo'; // 'costo' | 'venta' | 'dolar'
+var placaCuotas={2:true,3:false,4:true,6:true,12:false};
+function setPlacaTipo(t){
+  placaTipo=t;
+  ['costo','venta','dolar'].forEach(function(k){
+    var b=document.getElementById('placa-tipo-'+k);
+    if(b){ b.classList.toggle('on',k===t); b.style.background=(k===t)?'var(--nar)':'rgba(255,255,255,.1)'; b.style.color=(k===t)?'#fff':'rgba(255,255,255,.7)'; }
+  });
+  document.getElementById('placa-cotiz-box').style.display=(t==='dolar')?'block':'none';
+  calcPlaca();
+}
+function renderPlacaCuotas(){
+  var el=document.getElementById('placa-cuotas-list');
+  if(!el)return;
+  var opciones=[2,3,4,6,12];
+  var html='';
+  opciones.forEach(function(n){
+    var on=placaCuotas[n];
+    html+='<button class="metodo-btn'+(on?' on':'')+'" onclick="togglePlacaCuota('+n+')" style="'+(on?'':'color:var(--az)')+'">'+(on?'✅':'⬜')+' '+n+'C</button>';
+  });
+  el.innerHTML=html;
+}
+function togglePlacaCuota(n){
+  placaCuotas[n]=!placaCuotas[n];
+  renderPlacaCuotas();
+  calcPlaca();
+}
+function calcPlaca(){
+  var txt=document.getElementById('inp-placa').value||'';
+  var res=document.getElementById('res-placa');
+  if(!txt.trim()){
+    res.innerHTML='<div class="empty-icon">🎨</div><p>Pegá el texto del producto con el precio marcado con $</p>';
+    res.className='empty-state';return;
+  }
+  var precioDetectado=detectarPrecioTexto(txt);
+  if(!precioDetectado){
+    res.innerHTML='<div class="empty-icon">🤔</div><p>No encontré un precio. Fijate que tenga el monto con $ (ej: $250.000)</p>';
+    res.className='empty-state';return;
+  }
+  // según el tipo, calcular costo y venta
+  var costo, precio;
+  if(placaTipo==='venta'){
+    precio=Math.round(precioDetectado/500)*500;
+    // costo hacia atrás según rango
+    var rangos=[[50000,80],[100000,60],[250000,50],[350000,40],[Infinity,30]];
+    costo=0;
+    for(var r=0;r<rangos.length;r++){
+      var pp=rangos[r][1];var cEst=precio/(1+pp/100);
+      if(cEst<=rangos[r][0]){costo=Math.round(cEst);break;}
+    }
+    if(!costo)costo=Math.round(precio/1.30);
+  } else if(placaTipo==='dolar'){
+    var cotiz=parseFloat(document.getElementById('placa-cotiz').value)||0;
+    costo=precioDetectado*cotiz;
+    precio=markupVentaCRM(costo);
+  } else { // costo
+    costo=precioDetectado;
+    precio=markupVentaCRM(costo);
+  }
+  var ganancia=precio-costo;
+  // nombre del producto (primera línea con letras)
+  var nombre=nombreProductoTexto(txt);
+
+  var html='';
+  // bloque costo/venta/ganancia (admin)
   html+='<div class="result-contado" style="border:2px solid var(--nar)">';
-  html+='<div class="result-label" style="color:var(--nar)">📥 COSTO · RECARGO '+pct+'%'+(esManual?' (manual)':' (sugerido)')+'</div>';
-  html+='<div style="font-size:.9rem;color:var(--sub);font-weight:700;margin-bottom:4px">'+fmt(costo)+' + '+pct+'% = </div>';
-  html+='<div class="result-label" style="color:var(--az);margin-top:6px">💰 PRECIO DE VENTA AL CONTADO'+(offState.contado?' (con 10% Off)':'')+'</div>';
+  html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
+  html+='<div style="font-size:1.2rem;color:var(--az);font-weight:900;margin-bottom:6px">'+fmt(costo)+'</div>';
+  html+='<div class="result-label" style="color:var(--az)">💰 PRECIO DE VENTA</div>';
   html+='<div class="result-precio">'+fmt(precio)+'</div>';
+  html+='<div class="result-sub">📈 Ganancia: '+fmt(ganancia)+'</div></div>';
+
+  // cuotas tildadas
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">📅 Cuotas</div>';
+  html+='<div class="cuotas-grid">';
+  var waLines=[];
+  ORDEN_CUOTAS.concat([12]).filter(function(v,i,a){return a.indexOf(v)===i;}).forEach(function(n){
+    if(!placaCuotas[n])return;
+    // usar el % del plan si está configurado, si no cascada estándar
+    var totalPlan;
+    if(planesConfig[n]){
+      totalPlan=calcularTotalPlan(precio,n);
+    } else {
+      totalPlan=precio*1.15;
+    }
+    var valorCuota=Math.round(totalPlan/n/500)*500;
+    var clase=(n<=12)?'c'+n:'c12';
+    html+='<div class="cuota-card '+clase+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
+    waLines.push("💳💵 "+n+" cuotas fijas de "+fmt(valorCuota));
+  });
   html+='</div>';
 
-  // Cuotas - solo planes activos
+  // mensaje para WhatsApp
+  var msgLindo=armarMensajeAmarango(nombre||'Producto', precio, waLines);
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px">💬 Mensaje listo para mandar</div>';
+  html+='<div class="msg-lindo">'+msgLindo.replace(/\*/g,'').replace(/_/g,'')+'</div>';
+  window._lastPlacaMsg=msgLindo;
+  html+='<div class="share-row"><button class="share-btn wa" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msgLindo)+'\',\'_blank\')">💬 Enviar por WhatsApp</button><button class="share-btn" onclick="copiarPlacaMsg()">📋 Copiar</button></div>';
+  res.innerHTML=html;res.className='tab-results';
+}
+function copiarPlacaMsg(){
+  if(window._lastPlacaMsg){
+    try{navigator.clipboard.writeText(window._lastPlacaMsg);alert('✅ Copiado, ya lo podés pegar en WhatsApp');}
+    catch(e){alert('No se pudo copiar');}
+  }
+}
+function clearPlaca(){
+  document.getElementById('inp-placa').value='';
+  var res=document.getElementById('res-placa');
+  res.innerHTML='<div class="empty-icon">🎨</div><p>Pegá el texto del producto con el precio marcado con $</p>';
+  res.className='empty-state';
+}
+
+var contadoModo='costo'; // 'costo' o 'venta'
+function setContadoModo(m){
+  contadoModo=m;
+  document.getElementById('contado-modo-costo').classList.toggle('on',m==='costo');
+  document.getElementById('contado-modo-venta').classList.toggle('on',m==='venta');
+  document.getElementById('contado-modo-costo').style.background=(m==='costo')?'var(--nar)':'rgba(255,255,255,.1)';
+  document.getElementById('contado-modo-costo').style.color=(m==='costo')?'#fff':'rgba(255,255,255,.7)';
+  document.getElementById('contado-modo-venta').style.background=(m==='venta')?'var(--nar)':'rgba(255,255,255,.1)';
+  document.getElementById('contado-modo-venta').style.color=(m==='venta')?'#fff':'rgba(255,255,255,.7)';
+  document.getElementById('contado-label').textContent=(m==='costo')?'Precio de costo ($ARS) — editá acá':'Precio de venta ($ARS) — editá acá';
+  document.getElementById('contado-hint').textContent=(m==='costo')?'✏️ Ingresá el costo → te doy el precio de venta + cuotas':'✏️ Ingresá la venta → te digo el costo y armo las cuotas';
+  calcContado();
+}
+function calcContado(){
+  var valor=parseFloat(document.getElementById('inp-contado').value)||0;
+  if(!valor){document.getElementById('res-contado').innerHTML='<div class="empty-icon">💰</div><p>Ingresá el precio para ver el resultado y las cuotas</p>';document.getElementById('res-contado').className='empty-state';return;}
+  var costo, precio, pct, esManual;
+  var pctInput=document.getElementById('margen-contado').value;
+  esManual=(pctInput!==''&&pctInput!==null);
+
+  if(contadoModo==='venta'){
+    // me dan la VENTA → calculo el costo hacia atrás
+    precio=Math.round(valor/500)*500;
+    if(esManual){
+      pct=parseFloat(pctInput);
+      costo=Math.round(precio/(1+pct/100));
+    } else {
+      // estimar el rango por el precio de venta para sacar el % sugerido
+      // pruebo cada rango de costo hasta encontrar el coherente
+      var rangos=[[50000,80],[100000,60],[250000,50],[350000,40],[Infinity,30]];
+      costo=0;pct=30;
+      for(var r=0;r<rangos.length;r++){
+        var pp=rangos[r][1];
+        var cEst=precio/(1+pp/100);
+        var topeCosto=rangos[r][0];
+        if(cEst<=topeCosto){ costo=Math.round(cEst); pct=pp; break; }
+      }
+      if(!costo){ costo=Math.round(precio/1.30); pct=30; }
+    }
+  } else {
+    // me dan el COSTO → calculo la venta
+    costo=valor;
+    var pctAuto;
+    if(costo<=50000)pctAuto=80;else if(costo<=100000)pctAuto=60;else if(costo<=250000)pctAuto=50;else if(costo<=350000)pctAuto=40;else pctAuto=30;
+    pct=esManual?parseFloat(pctInput):pctAuto;
+    precio=Math.round(costo*(1+pct/100)/500)*500;
+    if(offState.contado)precio=Math.round(precio*0.90/500)*500;
+  }
+  var html='';
+  html+='<div class="result-contado" style="border:2px solid var(--nar)">';
+  html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
+  html+='<div style="font-size:1.3rem;color:var(--az);font-weight:900;margin-bottom:8px">'+fmt(costo)+'</div>';
+  html+='<div class="result-label" style="color:var(--az)">💰 PRECIO DE VENTA · margen '+pct+'%'+(esManual?' (manual)':' (sugerido)')+(offState.contado?' · 10% Off':'')+'</div>';
+  html+='<div class="result-precio">'+fmt(precio)+'</div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">📅 Planes de financiamiento</div>';
   html+='<div class="cuotas-grid">';
   var hayPlanes=false;
   for(var n=2;n<=12;n++){
     if(planesConfig[n].activo){
-      hayPlanes=true;
-      var totalPlan=calcularTotalPlan(precio,n);
-      var valorCuota=Math.round(totalPlan/n/500)*500;
+      hayPlanes=true;var totalPlan=calcularTotalPlan(precio,n);var valorCuota=Math.round(totalPlan/n/500)*500;
       html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
     }
   }
-  if(!hayPlanes){
-    html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Tocá "Ver/Editar" arriba para activar alguno.</div>';
-  }
+  if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Tocá "Ver/Editar" arriba para activar alguno.</div>';
   html+='</div>';
   html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600">⭐ El cliente retira pagando solo la 1ra cuota ese mismo día</div>';
-
-  // Compartir WA - usa los planes activos dinámicamente
-  var waLines=[];
-  for(var n2=2;n2<=12;n2++){
-    if(planesConfig[n2].activo){
-      var totalP=calcularTotalPlan(precio,n2);
-      var valorC=Math.round(totalP/n2/500)*500;
-      waLines.push("❇️"+n2+" cuotas de "+fmt(valorC));
-    }
-  }
-  window._lastWAMsg="*Precio de venta: "+fmt(precio)+"*\n\n"+waLines.join("\n")+"\n\n📣Retiras pagando la 1ra cuota!";
+  window._lastWAMsg=armarMensajeAmarango('Producto', precio, armarCuotasLines(precio));
   html+='<div class="share-row"><button class="share-btn wa" onclick="compartirWA()">💬 Compartir por WhatsApp</button></div>';
-
-  var el=document.getElementById('res-contado');
-  el.innerHTML=html;el.className='tab-results';
+  var el=document.getElementById('res-contado');el.innerHTML=html;el.className='tab-results';
 }
 
 function calcCuotas(){
   var precio=parseFloat(document.getElementById('inp-cuotas').value)||0;
   if(!precio){document.getElementById('res-cuotas').innerHTML='<div class="empty-icon">📅</div><p>Ingresá el precio de venta para ver los planes de cuotas</p>';document.getElementById('res-cuotas').className='empty-state';return;}
-
   var html='<div class="result-contado"><div class="result-label">Precio de venta</div><div class="result-precio">'+fmt(precio)+'</div></div>';
-  html+='<div class="cuotas-grid">';
-  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Planes de financiamiento</div>';
-
-  var waLines=[];
+  html+='<div class="cuotas-grid"><div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Planes de financiamiento</div>';
   var hayPlanes=false;
   for(var n=2;n<=12;n++){
     if(planesConfig[n].activo){
-      hayPlanes=true;
-      var totalPlan=calcularTotalPlan(precio,n);
-      var valorCuota=Math.round(totalPlan/n/500)*500;
+      hayPlanes=true;var totalPlan=calcularTotalPlan(precio,n);var valorCuota=Math.round(totalPlan/n/500)*500;
       html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-      waLines.push("❇️"+n+" cuotas de "+fmt(valorCuota));
     }
   }
-  if(!hayPlanes){
-    html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Activalos desde la pestaña Contado (admin).</div>';
-  }
+  if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Activalos desde la pestaña Contado (admin).</div>';
   html+='</div>';
   html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600">⭐ El cliente retira pagando solo la 1ra cuota ese mismo día</div>';
-  // Botón compartir WA - solo planes activos
-  var msg="*Precio de venta: "+fmt(precio)+"*\n\n"+waLines.join("\n")+"\n\n📣Retiras pagando la 1ra cuota!";
+  var msg=armarMensajeAmarango('Producto', precio, armarCuotasLines(precio));
   html+='<div class="share-row"><button class="share-btn wa" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\')">💬 Compartir por WhatsApp</button></div>';
-  var el=document.getElementById('res-cuotas');
-  el.innerHTML=html;el.className='tab-results';
+  var el=document.getElementById('res-cuotas');el.innerHTML=html;el.className='tab-results';
 }
 
 var metodoPago='contado';
-
-function setMetodoPago(m){
-  metodoPago=m;
-  ['contado','2','4','6'].forEach(function(k){
-    document.getElementById('met-'+k).classList.toggle('on',k===m);
-  });
-  calcComisiones();
-}
-
 function renderMetodosPago(){
-  var el=document.getElementById('met-pago-list');
-  if(!el)return;
+  var el=document.getElementById('met-pago-list');if(!el)return;
   var html='<button class="metodo-btn'+(metodoPago==='contado'?' on':'')+'" id="met-contado" onclick="setMetodoPago(\'contado\')">Contado</button>';
   for(var n=2;n<=12;n++){
-    if(planesConfig[n].activo){
-      html+='<button class="metodo-btn'+(metodoPago===String(n)?' on':'')+'" id="met-'+n+'" onclick="setMetodoPago(\''+n+'\')">'+n+' cuotas</button>';
-    }
+    if(planesConfig[n].activo)html+='<button class="metodo-btn'+(metodoPago===String(n)?' on':'')+'" id="met-'+n+'" onclick="setMetodoPago(\''+n+'\')">'+n+' cuotas</button>';
   }
   el.innerHTML=html;
 }
-
-function setMetodoPago(m){
-  metodoPago=m;
-  renderMetodosPago();
-  calcComisiones();
-}
-
+function setMetodoPago(m){metodoPago=m;renderMetodosPago();calcComisiones();}
 function calcComisiones(){
   var precio=parseFloat(document.getElementById('inp-comisiones').value)||0;
-  if(!precio){
-    document.getElementById('res-comisiones').innerHTML='<div class="empty-icon">🤝</div><p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor</p>';
-    document.getElementById('res-comisiones').className='empty-state';
-    return;
-  }
-
+  if(!precio){document.getElementById('res-comisiones').innerHTML='<div class="empty-icon">🤝</div><p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor</p>';document.getElementById('res-comisiones').className='empty-state';return;}
   var pctComContado=parseFloat(document.getElementById('pct-com-contado').value)||10;
   var pctComCuotas=parseFloat(document.getElementById('pct-com-cuotas').value)||15;
   var limiteExcepcion=parseFloat(document.getElementById('limite-excepcion').value)||10000;
-
-  // 1. Determinar % de comisión sobre el precio de venta CONTADO
-  var pctComision = (metodoPago==='contado') ? pctComContado : pctComCuotas;
-  var comisionTotal = Math.round(precio*pctComision/100/500)*500;
-
-  // 2. Determinar en cuántas partes se paga la comisión al revendedor
-  var partesPago;
-  var motivoPartes;
-  if(metodoPago==='contado'){
-    partesPago=1;
-    motivoPartes='Venta al contado → 1 solo pago';
-  } else if(metodoPago==='2'){
-    partesPago=2;
-    motivoPartes='Cliente pagó en 2 cuotas → comisión en 2 partes';
-  } else {
-    partesPago=3;
-    motivoPartes='Cliente pagó en '+metodoPago+' cuotas → comisión en 3 partes';
-  }
-
-  // 3. Excepción: si la comisión es chica (<= límite editable), máximo 2 partes
+  var pctComision=(metodoPago==='contado')?pctComContado:pctComCuotas;
+  var comisionTotal=Math.round(precio*pctComision/100/500)*500;
+  var partesPago,motivoPartes;
+  if(metodoPago==='contado'){partesPago=1;motivoPartes='Venta al contado → 1 solo pago';}
+  else if(metodoPago==='2'){partesPago=2;motivoPartes='Cliente pagó en 2 cuotas → comisión en 2 partes';}
+  else{partesPago=3;motivoPartes='Cliente pagó en '+metodoPago+' cuotas → comisión en 3 partes';}
   var excepcionAplicada=false;
-  if(comisionTotal<=limiteExcepcion && partesPago>2){
-    partesPago=2;
-    excepcionAplicada=true;
-  }
-
+  if(comisionTotal<=limiteExcepcion && partesPago>2){partesPago=2;excepcionAplicada=true;}
   var montoPorPago=Math.round(comisionTotal/partesPago/500)*500;
-
   var html='';
   html+='<div class="result-contado"><div class="result-label">Precio de venta al contado</div><div class="result-precio">'+fmt(precio)+'</div></div>';
-
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🤝 Comisión del revendedor</div>';
-
-  html+='<div class="comision-card" style="border-left:4px solid var(--gr)">';
-  html+='<div class="com-info"><div class="com-n">Comisión total ('+pctComision+'%)</div><div class="com-desc">'+(metodoPago==='contado'?'Venta al contado':'Venta financiada en cuotas')+'</div></div>';
-  html+='<div class="com-val">'+fmt(comisionTotal)+'</div>';
-  html+='</div>';
-
+  html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">Comisión total ('+pctComision+'%)</div><div class="com-desc">'+(metodoPago==='contado'?'Venta al contado':'Venta financiada en cuotas')+'</div></div><div class="com-val">'+fmt(comisionTotal)+'</div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:14px">💵 Distribución del pago</div>';
-
   for(var i=1;i<=partesPago;i++){
-    html+='<div class="pago-card" style="display:flex;align-items:center;gap:12px">';
-    html+='<div class="pago-num">'+i+'</div>';
-    html+='<div style="flex:1"><div style="font-size:.78rem;font-weight:700;color:var(--az)">Pago '+i+' de '+partesPago+'</div></div>';
-    html+='<div style="font-size:1rem;font-weight:900;color:var(--gr)">'+fmt(montoPorPago)+'</div>';
-    html+='</div>';
+    html+='<div class="pago-card" style="display:flex;align-items:center;gap:12px"><div class="pago-num">'+i+'</div><div style="flex:1"><div style="font-size:.78rem;font-weight:700;color:var(--az)">Pago '+i+' de '+partesPago+'</div></div><div style="font-size:1rem;font-weight:900;color:var(--gr)">'+fmt(montoPorPago)+'</div></div>';
   }
-
   html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600;margin-top:8px">ℹ️ '+motivoPartes+'</div>';
-
-  if(excepcionAplicada){
-    html+='<div class="excepcion-badge">⚠️ Excepción aplicada: comisión ≤ '+fmt(limiteExcepcion)+' → se liquida en máximo 2 pagos para evitar cobros insignificantes</div>';
-  }
-
-  var el=document.getElementById('res-comisiones');
-  el.innerHTML=html;el.className='tab-results';
+  if(excepcionAplicada)html+='<div class="excepcion-badge">⚠️ Excepción aplicada: comisión ≤ '+fmt(limiteExcepcion)+' → se liquida en máximo 2 pagos para evitar cobros insignificantes</div>';
+  var el=document.getElementById('res-comisiones');el.innerHTML=html;el.className='tab-results';
 }
 
 var planInversion='contado';
-var cantInversionistas=1;
-
 function renderPlanesInversion(){
-  var el=document.getElementById('plan-inv-list');
-  if(!el)return;
+  var el=document.getElementById('plan-inv-list');if(!el)return;
   var html='<button class="metodo-btn'+(planInversion==='contado'?' on':'')+'" id="plan-contado" onclick="setPlanInversion(\'contado\')">Contado</button>';
   for(var n=2;n<=12;n++){
-    if(planesConfig[n].activo){
-      html+='<button class="metodo-btn'+(planInversion===String(n)?' on':'')+'" id="plan-'+n+'" onclick="setPlanInversion(\''+n+'\')">'+n+' cuotas</button>';
-    }
+    if(planesConfig[n].activo)html+='<button class="metodo-btn'+(planInversion===String(n)?' on':'')+'" id="plan-'+n+'" onclick="setPlanInversion(\''+n+'\')">'+n+' cuotas</button>';
   }
   el.innerHTML=html;
 }
-
-function setPlanInversion(p){
-  planInversion=p;
-  renderPlanesInversion();
-  calcInversion();
-}
-
-function setInversionistas(n){
-  cantInversionistas=n;
-  [1,2].forEach(function(k){
-    document.getElementById('inv-'+k).classList.toggle('on',k===n);
+function setPlanInversion(p){planInversion=p;renderPlanesInversion();calcInversion();}
+var inversores=[{nombre:'Inversor 1',pct:100}];
+function renderInversores(){
+  var cont=document.getElementById('inversores-list');
+  if(!cont)return;
+  var html='';
+  inversores.forEach(function(inv,i){
+    html+='<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">';
+    html+='<input type="text" value="'+(inv.nombre||'').replace(/"/g,'&quot;')+'" oninput="setInvNombre('+i+',this.value)" placeholder="Nombre" style="flex:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 8px;color:#fff;font-size:.78rem;font-family:inherit;outline:none">';
+    html+='<input type="number" value="'+inv.pct+'" oninput="setInvPct('+i+',this.value)" placeholder="%" style="width:60px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 8px;color:#fff;font-size:.78rem;font-weight:800;text-align:center;font-family:inherit;outline:none">';
+    html+='<span style="color:rgba(255,255,255,.6);font-size:.8rem">%</span>';
+    if(inversores.length>1)html+='<span onclick="quitarInversor('+i+')" style="cursor:pointer;color:#fff;font-size:1rem;padding:0 4px">🗑️</span>';
+    html+='</div>';
   });
-  calcInversion();
+  cont.innerHTML=html;
+  // suma de %
+  var suma=inversores.reduce(function(a,b){return a+(parseFloat(b.pct)||0);},0);
+  var sumaEl=document.getElementById('inversores-suma');
+  if(sumaEl){
+    sumaEl.textContent='Suma: '+suma+'%'+(suma!==100?' ⚠️ (debería dar 100%)':' ✅');
+    sumaEl.style.color=(suma!==100)?'#FFD27A':'rgba(255,255,255,.5)';
+  }
 }
+function agregarInversor(){
+  inversores.push({nombre:'Inversor '+(inversores.length+1),pct:0});
+  renderInversores();calcInversion();
+}
+function quitarInversor(i){
+  inversores.splice(i,1);
+  if(!inversores.length)inversores=[{nombre:'Inversor 1',pct:100}];
+  renderInversores();calcInversion();
+}
+function setInvNombre(i,v){if(inversores[i])inversores[i].nombre=v;calcInversion();}
+function setInvPct(i,v){if(inversores[i])inversores[i].pct=parseFloat(v)||0;renderInversores();calcInversion();}
 
 function calcInversion(){
   var costo=parseFloat(document.getElementById('inp-inversion').value)||0;
   if(!costo){document.getElementById('res-inversion').innerHTML='<div class="empty-icon">📊</div><p>Ingresá el precio de costo en $ARS para ver el análisis de inversión</p>';document.getElementById('res-inversion').className='empty-state';return;}
   var pctAuto;
-  if(costo<=50000)pctAuto=80;
-  else if(costo<=100000)pctAuto=60;
-  else if(costo<=250000)pctAuto=50;
-  else if(costo<=350000)pctAuto=40;
-  else pctAuto=30;
+  if(costo<=50000)pctAuto=80;else if(costo<=100000)pctAuto=60;else if(costo<=250000)pctAuto=50;else if(costo<=350000)pctAuto=40;else pctAuto=30;
   var pctInput=document.getElementById('margen-contado')?document.getElementById('margen-contado').value:'';
   var pct=(pctInput!==''&&pctInput!==null)?parseFloat(pctInput):pctAuto;
   var precio=Math.round(costo*(1+pct/100)/500)*500;
-
-  // Cuota inicial y TOTAL del plan elegido por el cliente, usando planesConfig
-  var cuotaInicial=0;
-  var totalPlan=0;
-  var planLabel='';
-  if(planInversion==='contado'){
-    cuotaInicial=precio;totalPlan=precio;planLabel='Pago al contado';
-  } else {
-    var n=parseInt(planInversion);
-    totalPlan=calcularTotalPlan(precio,n);
-    cuotaInicial=Math.round(totalPlan/n/500)*500;
-    planLabel='1ra cuota de '+n+' · Total del plan: '+fmt(totalPlan);
-  }
-
-  // Ganancia = total del plan elegido - costo
-  var ganancia=totalPlan - costo;
-
+  var cuotaInicial=0,totalPlan=0,planLabel='';
+  if(planInversion==='contado'){cuotaInicial=precio;totalPlan=precio;planLabel='Pago al contado';}
+  else{var n=parseInt(planInversion);totalPlan=calcularTotalPlan(precio,n);cuotaInicial=Math.round(totalPlan/n/500)*500;planLabel='1ra cuota de '+n+' · Total del plan: '+fmt(totalPlan);}
+  var ganancia=totalPlan-costo;
   var envio=parseFloat(document.getElementById('inp-envio').value)||0;
-
-  // Fórmula: Inversión = Precio de costo - Cuota inicial + Costo de envío
-  var inversionTotal=costo - cuotaInicial + envio;
-
-  // División entre inversionistas
-  var gananciaPorInversionista=ganancia/cantInversionistas;
-  var inversionPorInversionista=inversionTotal/cantInversionistas;
-
+  // ===== FÓRMULA EXACTA DEL CRM =====
+  // comisión del revendedor: 10% contado / 15% en cuotas, del precio de venta
+  var esCuotas=(planInversion!=='contado');
+  var comisionTotal=Math.round(precio*(esCuotas?0.15:0.10)/500)*500;
+  // primera parte de la comisión (igual que el CRM)
+  var nCuotas=esCuotas?parseInt(planInversion):1;
+  var partesComision;
+  if(!esCuotas)partesComision=1;
+  else if(nCuotas===2)partesComision=2;
+  else{ partesComision=3; if(Math.round(comisionTotal/3)<10000)partesComision=2; }
+  var primeraParteComision=Math.round(comisionTotal/partesComision/500)*500;
+  // CAPITAL = costo + 1ra parte comisión + envío − 1ra cuota del cliente
+  var inversionTotal=costo + primeraParteComision + envio - cuotaInicial;
+  if(inversionTotal<0)inversionTotal=0;
   var html='';
-  html+='<div class="inv-card">';
-  html+='<div class="inv-title">Análisis de inversión</div>';
+  html+='<div class="inv-card"><div class="inv-title">Análisis de inversión</div>';
   html+='<div class="inv-row"><span class="inv-label">Precio de costo</span><span class="inv-val white">'+fmt(costo)+'</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Recargo aplicado</span><span class="inv-val white">'+pct+'%</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Precio de venta (contado)</span><span class="inv-val">'+fmt(precio)+'</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Total cobrado ('+(planInversion==='contado'?'contado':planInversion+' cuotas')+')</span><span class="inv-val">'+fmt(totalPlan)+'</span></div>';
-  html+='<div class="inv-row"><span class="inv-label">Ganancia neta del plan</span><span class="inv-val">'+fmt(ganancia)+'</span></div>';
-  html+='</div>';
-
-  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💰 Cálculo de inversión real</div>';
+  html+='<div class="inv-row"><span class="inv-label">Comisión revendedor ('+(esCuotas?'15':'10')+'%)</span><span class="inv-val white">'+fmt(comisionTotal)+'</span></div>';
+  html+='<div class="inv-row"><span class="inv-label">Ganancia neta del plan</span><span class="inv-val">'+fmt(ganancia)+'</span></div></div>';
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💰 Cálculo de inversión real (fórmula AmarangoElectro)</div>';
   html+='<div class="comision-card"><div class="com-info"><div class="com-n">Precio de costo</div></div><div class="com-val" style="color:var(--az)">'+fmt(costo)+'</div></div>';
-  html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">- Cuota inicial cobrada</div><div class="com-desc">'+planLabel+'</div></div><div class="com-val">-'+fmt(cuotaInicial)+'</div></div>';
+  html+='<div class="comision-card" style="border-left:4px solid var(--nar)"><div class="com-info"><div class="com-n">+ 1ra parte de comisión</div><div class="com-desc">'+partesComision+' parte(s) · esta es la 1ra</div></div><div class="com-val" style="color:var(--nar)">+'+fmt(primeraParteComision)+'</div></div>';
   html+='<div class="comision-card" style="border-left:4px solid var(--red)"><div class="com-info"><div class="com-n">+ Costo de envío</div></div><div class="com-val" style="color:var(--red)">+'+fmt(envio)+'</div></div>';
-
-  html+='<div class="inv-card" style="margin-top:10px">';
-  html+='<div class="inv-title">💸 Capital a invertir</div>';
-  html+='<div class="inv-row" style="border:none;padding:4px 0"><span class="inv-label" style="font-size:.95rem;font-weight:800">Total a invertir</span><span class="inv-val" style="font-size:1.3rem">'+fmt(inversionTotal)+'</span></div>';
-  html+='</div>';
-
-  if(cantInversionistas>1){
-    html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">👥 Dividido entre '+cantInversionistas+' inversionistas (mitades iguales)</div>';
-    html+='<div class="comision-card" style="border-left:4px solid var(--az)"><div class="com-info"><div class="com-n">Inversión por persona</div><div class="com-desc">Capital a aportar c/u</div></div><div class="com-val" style="color:var(--az)">'+fmt(inversionPorInversionista)+'</div></div>';
-    html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">Ganancia por persona</div><div class="com-desc">Reparto de ganancia neta</div></div><div class="com-val">'+fmt(gananciaPorInversionista)+'</div></div>';
-  } else {
-    html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">👤 1 inversionista</div>';
-    html+='<div class="comision-card" style="border-left:4px solid var(--az)"><div class="com-info"><div class="com-n">Capital a invertir</div></div><div class="com-val" style="color:var(--az)">'+fmt(inversionTotal)+'</div></div>';
-    html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">Ganancia total</div></div><div class="com-val">'+fmt(ganancia)+'</div></div>';
-  }
-
-  html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600;margin-top:4px">💡 Ganancia calculada sobre el total del plan elegido por el cliente, menos el costo del producto</div>';
-  var el=document.getElementById('res-inversion');
-  el.innerHTML=html;el.className='tab-results';
+  html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">- 1ra cuota cobrada al cliente</div><div class="com-desc">'+planLabel+'</div></div><div class="com-val">-'+fmt(cuotaInicial)+'</div></div>';
+  html+='<div class="inv-card" style="margin-top:10px"><div class="inv-title">💸 Capital a invertir</div><div class="inv-row" style="border:none;padding:4px 0"><span class="inv-label" style="font-size:.95rem;font-weight:800">Total a invertir</span><span class="inv-val" style="font-size:1.3rem">'+fmt(inversionTotal)+'</span></div></div>';
+  // Reparto por inversor según % manual
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">👥 Reparto por inversionista</div>';
+  var waReparto=[];
+  inversores.forEach(function(inv){
+    var p=parseFloat(inv.pct)||0;
+    var puso=Math.round(inversionTotal*p/100);
+    var gana=Math.round(ganancia*p/100);
+    html+='<div class="comision-card" style="border-left:4px solid var(--az)"><div class="com-info"><div class="com-n">'+(inv.nombre||'Inversor')+' ('+p+'%)</div><div class="com-desc">Puso '+fmt(puso)+' · Gana '+fmt(gana)+'</div></div><div class="com-val">'+fmt(puso+gana)+'</div></div>';
+    waReparto.push("👤 "+(inv.nombre||'Inversor')+" ("+p+"%)\n   Puso: "+fmt(puso)+"\n   Gana: "+fmt(gana)+"\n   Recibe: "+fmt(puso+gana));
+  });
+  html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600;margin:4px 0 10px">💡 "Recibe" = lo que puso + su ganancia</div>';
+  // mensaje WhatsApp del reparto
+  var msgInv="📊 *REPARTO INVERSIÓN*\n\n💰 Costo: "+fmt(costo)+"\n💵 Venta: "+fmt(precio)+"\n📈 Ganancia: "+fmt(ganancia)+"\n💸 Capital a invertir: "+fmt(inversionTotal)+"\n\n"+waReparto.join("\n\n");
+  window._lastInvMsg=msgInv;
+  html+='<div class="share-row"><button class="share-btn wa" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msgInv)+'\',\'_blank\')">💬 Enviar reparto por WhatsApp</button></div>';
+  var el=document.getElementById('res-inversion');el.innerHTML=html;el.className='tab-results';
 }
 
-function compartirWA(){
-  if(window._lastWAMsg){
-    window.open("https://wa.me/?text="+encodeURIComponent(window._lastWAMsg),"_blank");
+function compartirWA(){if(window._lastWAMsg)window.open("https://wa.me/?text="+encodeURIComponent(window._lastWAMsg),"_blank");}
+
+var deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();deferredPrompt=e;
+  if(!localStorage.getItem('amarango_install_cerrado'))document.getElementById('install-banner').classList.add('show');
+});
+function instalarApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById('install-banner').classList.remove('show');});
+  }else{
+    alert('Para instalar: tocá el menú de tu navegador (⋮) y elegí "Agregar a pantalla de inicio" o "Instalar app" 📲');
   }
+}
+function cerrarBannerInstall(){
+  document.getElementById('install-banner').classList.remove('show');
+  try{localStorage.setItem('amarango_install_cerrado','1');}catch(e){}
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
 }
 </script>
 </body>
