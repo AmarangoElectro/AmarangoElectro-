@@ -1263,6 +1263,7 @@ function togglePlacaCuota(n){
 }
 // Detecta un precio marcado como DÓLAR: usd, u$s, u$d, USD, *usd*, adelante o atrás del número,
 // pegado o con espacio. Ej: "150usd", "usd 150", "u$s150", "*USD 150*", "150 U$S"
+// IMPORTANTE: el dólar es de 1 a 4 cifras (1 a 9999). Un número más grande es precio en pesos.
 function detectarUSD(txt){
   if(!txt)return 0;
   var t=txt.replace(/\*?~[^~]*~\*?/g,' '); // sacar tachados
@@ -1270,10 +1271,10 @@ function detectarUSD(txt){
   var candidatos=[];var m;
   // número seguido de marca usd (ej: 150usd, 150 u$s)
   var reNumUSD=/([\d][\d.,]*)\s*(?:u\$s|u\$d|usd|u\$|dolares?|dólares?)/gi;
-  while((m=reNumUSD.exec(t))!==null){var v=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));if(!isNaN(v)&&v>=10)candidatos.push(v);}
+  while((m=reNumUSD.exec(t))!==null){var v=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));if(!isNaN(v)&&v>=1&&v<=9999)candidatos.push(v);}
   // marca usd seguida de número (ej: usd 150, u$s150)
   var reUSDNum=/(?:u\$s|u\$d|usd|u\$|dolares?|dólares?)\s*\$?\s*([\d][\d.,]*)/gi;
-  while((m=reUSDNum.exec(t))!==null){var v2=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));if(!isNaN(v2)&&v2>=10)candidatos.push(v2);}
+  while((m=reUSDNum.exec(t))!==null){var v2=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));if(!isNaN(v2)&&v2>=1&&v2<=9999)candidatos.push(v2);}
   if(candidatos.length)return Math.max.apply(null,candidatos);
   return 0;
 }
@@ -1284,12 +1285,20 @@ function calcPlaca(){
     res.innerHTML='<div class="empty-icon">🎨</div><p>Pegá el texto del producto con el precio marcado con $</p>';
     res.className='empty-state';return;
   }
-  // primero: ¿hay un precio marcado como dólar (usd, u$s, etc.)?
+  // primero: ¿hay un precio marcado como dólar (usd, u$s, etc.)? — detección automática (1-4 cifras)
   var precioUSD=detectarUSD(txt);
   var esDolarAuto=(precioUSD>0);
-  var precioDetectado=esDolarAuto?precioUSD:detectarPrecioTexto(txt);
+  // en modo dólar manual, tomo el número tal cual (aunque no tenga "usd")
+  var precioManualDolar=(placaTipo==='dolar' && !esDolarAuto)?detectarPrecioTexto(txt):0;
+  var precioDetectado=esDolarAuto?precioUSD:(placaTipo==='dolar'?precioManualDolar:detectarPrecioTexto(txt));
   if(!precioDetectado){
     res.innerHTML='<div class="empty-icon">🤔</div><p>No encontré un precio. Fijate que tenga el monto con $ (ej: $250.000) o en dólar (ej: 150usd)</p>';
+    res.className='empty-state';return;
+  }
+  // PROTECCIÓN: si estoy en modo dólar (o detecté usd) pero el número es de 5+ cifras (≥10.000),
+  // seguramente es un error de tipeo (un precio en pesos). Aviso en vez de dar un disparate.
+  if((esDolarAuto || placaTipo==='dolar') && precioDetectado>=10000){
+    res.innerHTML='<div class="empty-icon">🤔</div><p style="color:#EF4444;font-weight:700">Ojo: "'+precioDetectado.toLocaleString('es-AR')+'" parece un precio en PESOS, no en dólares.</p><p style="font-size:.75rem;margin-top:6px">El dólar suele ser de 1 a 4 cifras (ej: 150, 370, 1200). Si querés un precio en pesos, tocá 💰 Costo o 🏷️ Venta.</p>';
     res.className='empty-state';return;
   }
   // según el tipo, calcular costo y venta
@@ -1297,7 +1306,7 @@ function calcPlaca(){
   if(esDolarAuto || placaTipo==='dolar'){
     // USD = costo en dólares → paso a pesos con la cotización → markup nuestro = venta
     var cotiz=parseFloat(document.getElementById('placa-cotiz').value)||0;
-    if(!cotiz){res.innerHTML='<div class="empty-icon">💵</div><p>Detecté un precio en dólares. Poné el valor del dólar (modo 💵 Dólar) para convertir.</p>';res.className='empty-state';return;}
+    if(!cotiz){res.innerHTML='<div class="empty-icon">💵</div><p>Poné el valor del dólar para convertir.</p>';res.className='empty-state';return;}
     costo=Math.round(precioDetectado*cotiz);
     precio=markupVentaCRM(costo);
     usoDolar=true;
