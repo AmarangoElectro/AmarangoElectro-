@@ -217,13 +217,18 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 
 <div class="tab-content" id="tab-contado">
   <div class="precio-input-wrap">
-    <div style="display:flex;gap:6px;margin-bottom:10px">
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
       <button class="metodo-btn on" id="contado-modo-costo" onclick="setContadoModo('costo')">💰 Pongo el COSTO</button>
       <button class="metodo-btn" id="contado-modo-venta" onclick="setContadoModo('venta')">🏷️ Pongo la VENTA</button>
+      <button class="metodo-btn" id="contado-modo-usd" onclick="setContadoModo('usd')">💵 Pongo el USD</button>
+    </div>
+    <div id="contado-cotiz-box" style="display:none;margin-bottom:10px">
+      <div style="color:rgba(255,255,255,.6);font-size:.62rem;font-weight:700;margin-bottom:4px">💵 Valor del dólar</div>
+      <input type="number" id="contado-cotiz" placeholder="Ej: 1520" value="1500" oninput="calcContado()" style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 10px;color:#fff;font-size:.9rem;font-weight:800;outline:none">
     </div>
     <div class="precio-label" id="contado-label">Precio de costo ($ARS) — editá acá</div>
     <div class="precio-input-row">
-      <span class="precio-sign">$</span>
+      <span class="precio-sign" id="contado-sign">$</span>
       <input type="number" class="precio-input" id="inp-contado" placeholder="Ej: 150000" oninput="calcContado()">
     </div>
     <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px" id="contado-hint">✏️ Ingresá el costo → calculamos precio de venta + cuotas automáticamente</div>
@@ -1256,6 +1261,22 @@ function togglePlacaCuota(n){
   renderPlacaCuotas();
   calcPlaca();
 }
+// Detecta un precio marcado como DÓLAR: usd, u$s, u$d, USD, *usd*, adelante o atrás del número,
+// pegado o con espacio. Ej: "150usd", "usd 150", "u$s150", "*USD 150*", "150 U$S"
+function detectarUSD(txt){
+  if(!txt)return 0;
+  var t=txt.replace(/\*?~[^~]*~\*?/g,' '); // sacar tachados
+  t=t.replace(/[*_]/g,' '); // sacar formato whatsapp
+  var candidatos=[];var m;
+  // número seguido de marca usd (ej: 150usd, 150 u$s)
+  var reNumUSD=/([\d][\d.,]*)\s*(?:u\$s|u\$d|usd|u\$|dolares?|dólares?)/gi;
+  while((m=reNumUSD.exec(t))!==null){var v=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));if(!isNaN(v)&&v>=10)candidatos.push(v);}
+  // marca usd seguida de número (ej: usd 150, u$s150)
+  var reUSDNum=/(?:u\$s|u\$d|usd|u\$|dolares?|dólares?)\s*\$?\s*([\d][\d.,]*)/gi;
+  while((m=reUSDNum.exec(t))!==null){var v2=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));if(!isNaN(v2)&&v2>=10)candidatos.push(v2);}
+  if(candidatos.length)return Math.max.apply(null,candidatos);
+  return 0;
+}
 function calcPlaca(){
   var txt=document.getElementById('inp-placa').value||'';
   var res=document.getElementById('res-placa');
@@ -1263,14 +1284,24 @@ function calcPlaca(){
     res.innerHTML='<div class="empty-icon">🎨</div><p>Pegá el texto del producto con el precio marcado con $</p>';
     res.className='empty-state';return;
   }
-  var precioDetectado=detectarPrecioTexto(txt);
+  // primero: ¿hay un precio marcado como dólar (usd, u$s, etc.)?
+  var precioUSD=detectarUSD(txt);
+  var esDolarAuto=(precioUSD>0);
+  var precioDetectado=esDolarAuto?precioUSD:detectarPrecioTexto(txt);
   if(!precioDetectado){
-    res.innerHTML='<div class="empty-icon">🤔</div><p>No encontré un precio. Fijate que tenga el monto con $ (ej: $250.000)</p>';
+    res.innerHTML='<div class="empty-icon">🤔</div><p>No encontré un precio. Fijate que tenga el monto con $ (ej: $250.000) o en dólar (ej: 150usd)</p>';
     res.className='empty-state';return;
   }
   // según el tipo, calcular costo y venta
-  var costo, precio;
-  if(placaTipo==='venta'){
+  var costo, precio, usoDolar=false;
+  if(esDolarAuto || placaTipo==='dolar'){
+    // USD = costo en dólares → paso a pesos con la cotización → markup nuestro = venta
+    var cotiz=parseFloat(document.getElementById('placa-cotiz').value)||0;
+    if(!cotiz){res.innerHTML='<div class="empty-icon">💵</div><p>Detecté un precio en dólares. Poné el valor del dólar (modo 💵 Dólar) para convertir.</p>';res.className='empty-state';return;}
+    costo=Math.round(precioDetectado*cotiz);
+    precio=markupVentaCRM(costo);
+    usoDolar=true;
+  } else if(placaTipo==='venta'){
     precio=Math.round(precioDetectado/500)*500;
     // costo hacia atrás según rango
     var rangos=[[50000,80],[100000,60],[250000,50],[350000,40],[Infinity,30]];
@@ -1280,10 +1311,6 @@ function calcPlaca(){
       if(cEst<=rangos[r][0]){costo=Math.round(cEst);break;}
     }
     if(!costo)costo=Math.round(precio/1.30);
-  } else if(placaTipo==='dolar'){
-    var cotiz=parseFloat(document.getElementById('placa-cotiz').value)||0;
-    costo=precioDetectado*cotiz;
-    precio=markupVentaCRM(costo);
   } else { // costo
     costo=precioDetectado;
     precio=markupVentaCRM(costo);
@@ -1295,8 +1322,15 @@ function calcPlaca(){
   var html='';
   // bloque costo/venta/ganancia (admin)
   html+='<div class="result-contado" style="border:2px solid var(--nar)">';
-  html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
-  html+='<div style="font-size:1.2rem;color:var(--az);font-weight:900;margin-bottom:6px">'+fmt(costo)+'</div>';
+  if(usoDolar){
+    html+='<div class="result-label" style="color:var(--nar)">💵 COSTO EN USD</div>';
+    html+='<div style="font-size:1.05rem;color:var(--az);font-weight:900">U$'+precioDetectado.toLocaleString('es-AR')+'</div>';
+    html+='<div class="result-label" style="color:var(--nar);margin-top:6px">📥 COSTO EN PESOS</div>';
+    html+='<div style="font-size:1.2rem;color:var(--az);font-weight:900;margin-bottom:6px">'+fmt(costo)+'</div>';
+  } else {
+    html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
+    html+='<div style="font-size:1.2rem;color:var(--az);font-weight:900;margin-bottom:6px">'+fmt(costo)+'</div>';
+  }
   html+='<div class="result-label" style="color:var(--az)">💰 PRECIO DE VENTA</div>';
   html+='<div class="result-precio">'+fmt(precio)+'</div>';
   html+='<div class="result-sub">📈 Ganancia: '+fmt(ganancia)+'</div></div>';
@@ -1342,17 +1376,27 @@ function clearPlaca(){
   res.className='empty-state';
 }
 
-var contadoModo='costo'; // 'costo' o 'venta'
+var contadoModo='costo'; // 'costo' | 'venta' | 'usd'
 function setContadoModo(m){
   contadoModo=m;
-  document.getElementById('contado-modo-costo').classList.toggle('on',m==='costo');
-  document.getElementById('contado-modo-venta').classList.toggle('on',m==='venta');
-  document.getElementById('contado-modo-costo').style.background=(m==='costo')?'var(--nar)':'rgba(255,255,255,.1)';
-  document.getElementById('contado-modo-costo').style.color=(m==='costo')?'#fff':'rgba(255,255,255,.7)';
-  document.getElementById('contado-modo-venta').style.background=(m==='venta')?'var(--nar)':'rgba(255,255,255,.1)';
-  document.getElementById('contado-modo-venta').style.color=(m==='venta')?'#fff':'rgba(255,255,255,.7)';
-  document.getElementById('contado-label').textContent=(m==='costo')?'Precio de costo ($ARS) — editá acá':'Precio de venta ($ARS) — editá acá';
-  document.getElementById('contado-hint').textContent=(m==='costo')?'✏️ Ingresá el costo → te doy el precio de venta + cuotas':'✏️ Ingresá la venta → te digo el costo y armo las cuotas';
+  ['costo','venta','usd'].forEach(function(k){
+    var b=document.getElementById('contado-modo-'+k);
+    if(b){ b.classList.toggle('on',k===m); b.style.background=(k===m)?'var(--nar)':'rgba(255,255,255,.1)'; b.style.color=(k===m)?'#fff':'rgba(255,255,255,.7)'; }
+  });
+  // mostrar campo de cotización solo en modo USD
+  document.getElementById('contado-cotiz-box').style.display=(m==='usd')?'block':'none';
+  // signo $ o U$
+  document.getElementById('contado-sign').textContent=(m==='usd')?'U$':'$';
+  // label y hint según modo
+  var labels={costo:'Precio de costo ($ARS) — editá acá',venta:'Precio de venta ($ARS) — editá acá',usd:'Costo en dólares (USD) — editá acá'};
+  var hints={
+    costo:'✏️ Ingresá el costo → te doy el precio de venta + cuotas',
+    venta:'✏️ Ingresá la venta → te digo el costo y armo las cuotas',
+    usd:'✏️ Ingresá el costo en USD → lo paso a pesos y te doy la venta + cuotas'
+  };
+  document.getElementById('contado-label').textContent=labels[m];
+  document.getElementById('contado-hint').textContent=hints[m];
+  document.getElementById('inp-contado').placeholder=(m==='usd')?'Ej: 110':'Ej: 150000';
   calcContado();
 }
 function calcContado(){
@@ -1381,6 +1425,16 @@ function calcContado(){
       }
       if(!costo){ costo=Math.round(precio/1.30); pct=30; }
     }
+  } else if(contadoModo==='usd'){
+    // me dan el COSTO EN USD → paso a pesos con la cotización → markup = venta
+    var cotiz=parseFloat(document.getElementById('contado-cotiz').value)||0;
+    if(!cotiz){document.getElementById('res-contado').innerHTML='<div class="empty-icon">💵</div><p>Poné el valor del dólar para convertir</p>';document.getElementById('res-contado').className='empty-state';return;}
+    costo=Math.round(valor*cotiz);
+    var pctAutoU;
+    if(costo<=50000)pctAutoU=80;else if(costo<=100000)pctAutoU=60;else if(costo<=250000)pctAutoU=50;else if(costo<=350000)pctAutoU=40;else pctAutoU=30;
+    pct=esManual?parseFloat(pctInput):pctAutoU;
+    precio=Math.round(costo*(1+pct/100)/500)*500;
+    if(offState.contado)precio=Math.round(precio*0.90/500)*500;
   } else {
     // me dan el COSTO → calculo la venta
     costo=valor;
@@ -1392,19 +1446,24 @@ function calcContado(){
   }
   var html='';
   html+='<div class="result-contado" style="border:2px solid var(--nar)">';
-  html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
-  html+='<div style="font-size:1.3rem;color:var(--az);font-weight:900;margin-bottom:8px">'+fmt(costo)+'</div>';
+  if(contadoModo==='usd'){
+    html+='<div class="result-label" style="color:var(--nar)">💵 COSTO EN USD</div>';
+    html+='<div style="font-size:1.1rem;color:var(--az);font-weight:900">U$'+valor.toLocaleString('es-AR')+'</div>';
+    html+='<div class="result-label" style="color:var(--nar);margin-top:6px">📥 COSTO EN PESOS</div>';
+    html+='<div style="font-size:1.2rem;color:var(--az);font-weight:900;margin-bottom:8px">'+fmt(costo)+'</div>';
+  } else {
+    html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
+    html+='<div style="font-size:1.3rem;color:var(--az);font-weight:900;margin-bottom:8px">'+fmt(costo)+'</div>';
+  }
   html+='<div class="result-label" style="color:var(--az)">💰 PRECIO DE VENTA · margen '+pct+'%'+(esManual?' (manual)':' (sugerido)')+(offState.contado?' · 10% Off':'')+'</div>';
   html+='<div class="result-precio">'+fmt(precio)+'</div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">📅 Planes de financiamiento</div>';
   html+='<div class="cuotas-grid">';
   var hayPlanes=false;
-  for(var n=2;n<=12;n++){
-    if(planesConfig[n].activo){
-      hayPlanes=true;var totalPlan=calcularTotalPlan(precio,n);var valorCuota=Math.round(totalPlan/n/500)*500;
-      html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-    }
-  }
+  cuotasActivasOrdenadas().forEach(function(n){
+    hayPlanes=true;var totalPlan=calcularTotalPlan(precio,n);var valorCuota=Math.round(totalPlan/n/500)*500;
+    html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
+  });
   if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Tocá "Ver/Editar" arriba para activar alguno.</div>';
   html+='</div>';
   html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600">⭐ El cliente retira pagando solo la 1ra cuota ese mismo día</div>';
