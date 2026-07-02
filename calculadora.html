@@ -150,6 +150,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   <div class="tab on" id="tab-btn-pegar" onclick="showTab('pegar')">📋 Pegar precio</div>
   <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')">📱 Celulares</div>
   <div class="tab" onclick="showTab('cuotas')">📅 Cuotas</div>
+  <div class="tab" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
   <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Administradores</div>
 </div>
 
@@ -372,6 +373,77 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   </div>
 </div>
 
+<!-- ============ PESTAÑA: TIENDA REVENDEDORES (Etapa 1) ============ -->
+<div class="tab-content" id="tab-tienda">
+
+  <!-- Pantalla PIN -->
+  <div id="tienda-pin" style="text-align:center;padding:30px 16px;">
+    <div style="font-size:2.4rem;">🛒</div>
+    <h2 style="font-size:1.1rem;font-weight:900;color:var(--az);margin:6px 0;">Tienda Revendedores</h2>
+    <p style="font-size:.75rem;color:var(--sub);margin-bottom:16px;">Ingresá el PIN para ver el catálogo</p>
+    <input type="password" id="tienda-pin-inp" placeholder="PIN" inputmode="numeric"
+      style="width:160px;text-align:center;font-size:1.3rem;letter-spacing:6px;padding:12px;border:2px solid var(--bor);border-radius:12px;"
+      onkeydown="if(event.key==='Enter')tiendaCheckPin()">
+    <div id="tienda-pin-err" style="color:var(--red);font-size:.75rem;font-weight:700;margin-top:8px;display:none;">PIN incorrecto</div>
+    <div><button class="calc-btn" style="margin-top:14px;" onclick="tiendaCheckPin()">Entrar →</button></div>
+  </div>
+
+  <!-- Contenido de la tienda (oculto hasta poner PIN) -->
+  <div id="tienda-cont" style="display:none;">
+
+    <!-- Buscador -->
+    <div style="position:sticky;top:0;background:var(--bg);padding-bottom:8px;z-index:5;">
+      <input id="tienda-buscar" placeholder="🔍 Buscar: Samsung, heladera, TV, cocina..."
+        oninput="tiendaRender()"
+        style="width:100%;padding:12px 14px;border:2px solid var(--bor);border-radius:12px;font-size:.9rem;font-family:inherit;">
+      <div id="tienda-chips" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none;"></div>
+    </div>
+
+    <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
+      📦 Todavía no hay productos cargados.<br>Un administrador puede cargarlos desde el botón de abajo.
+    </div>
+
+    <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
+
+    <!-- Botón admin: cargar catálogo -->
+    <button class="calc-btn" style="width:100%;margin-top:18px;background:var(--az);"
+      onclick="tiendaAbrirCarga()">⚙️ Cargar / actualizar catálogo (admin)</button>
+  </div>
+</div>
+
+<!-- Modal: cargar catálogo por pegado -->
+<div id="modal-carga" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;padding:20px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:20px auto;">
+    <h3 style="color:var(--az);font-weight:900;font-size:1rem;margin-bottom:4px;">⚙️ Cargar catálogo</h3>
+    <p style="font-size:.72rem;color:var(--sub);margin-bottom:12px;">
+      Pegá una línea por producto. Formato: <b>Nombre | Costo</b><br>
+      La app aplica sola tu fórmula de precio de venta.
+    </p>
+    <div style="background:#f0f4ff;border-radius:8px;padding:8px 10px;font-size:.68rem;color:var(--az);margin-bottom:10px;font-family:monospace;">
+      Heladera No Frost 300L | 310000<br>
+      Cocina Calabria 4h | 228400<br>
+      Yogurtera Delhi | 45000
+    </div>
+    <textarea id="carga-texto" rows="8" placeholder="Pegá acá tus productos..."
+      style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;font-family:monospace;font-size:.8rem;"></textarea>
+    <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--sub);margin:8px 0;">
+      <input type="checkbox" id="carga-usd"> Los costos están en USD (los paso a pesos con el dólar)
+    </label>
+    <input id="carga-dolar" placeholder="Cotización dólar (si es USD)" inputmode="numeric"
+      style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
+    <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--sub);margin-bottom:12px;">
+      <input type="checkbox" id="carga-reemplazar"> Reemplazar todo el catálogo (si no, agrega)
+    </label>
+    <button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaProcesarCarga()">✅ Cargar productos</button>
+    <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="document.getElementById('modal-carga').style.display='none'">Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal: calcular cuotas de un producto -->
+<div id="modal-cuotas" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;padding:20px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:30px auto;" id="modal-cuotas-body"></div>
+</div>
+
 <div class="footer">Calculadora exclusiva · <span>AmarangoElectro</span></div>
 
 <script>
@@ -554,6 +626,165 @@ function calcularTotalPlan(precioVenta,n){
   var total=precioVenta;
   ordenes.forEach(function(num){total=total*(1+planesConfig[num].pct/100);});
   return total;
+}
+
+/* =========================================================
+   TIENDA REVENDEDORES — Etapa 1 (catálogo local + buscador + cuotas)
+   ========================================================= */
+var TIENDA_PIN='1234';           // PIN genérico (después sumamos por revendedor)
+var tiendaProductos=[];          // catálogo en memoria
+var tiendaCategoriaActiva='';    // filtro de chip activo
+
+function tiendaCheckPin(){
+  var v=(document.getElementById('tienda-pin-inp').value||'').trim();
+  if(v===TIENDA_PIN){
+    document.getElementById('tienda-pin').style.display='none';
+    document.getElementById('tienda-cont').style.display='block';
+    tiendaCargarLocal();
+    tiendaRender();
+  }else{
+    document.getElementById('tienda-pin-err').style.display='block';
+  }
+}
+
+function tiendaCargarLocal(){
+  try{ tiendaProductos=JSON.parse(localStorage.getItem('ae_tienda_catalogo')||'[]'); }
+  catch(e){ tiendaProductos=[]; }
+}
+function tiendaGuardarLocal(){
+  try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+}
+
+// detecta una categoría simple por palabras clave del nombre
+function tiendaCategoria(nombre){
+  var n=(nombre||'').toLowerCase();
+  if(/samsung|motorola|xiaomi|iphone|celular|smartphone/.test(n))return '📱 Celulares';
+  if(/heladera|freezer|frio/.test(n))return '❄️ Heladeras';
+  if(/cocina|anafe|horno|microonda/.test(n))return '🍳 Cocina';
+  if(/tv|televis|smart tv|tcl|led/.test(n))return '📺 TV';
+  if(/ventilador|turbo|aire|calefact|estufa|caloventor/.test(n))return '🌀 Climatización';
+  if(/lavarrop|secarrop|lavavaj/.test(n))return '🧺 Lavado';
+  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich/.test(n))return '☕ Electro hogar';
+  return '📦 Otros';
+}
+
+function tiendaRender(){
+  var cont=document.getElementById('tienda-grid');
+  var vacia=document.getElementById('tienda-vacia');
+  if(!tiendaProductos.length){ vacia.style.display='block'; cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML=''; return; }
+  vacia.style.display='none';
+
+  // chips de categorías
+  var cats={};
+  tiendaProductos.forEach(function(p){ var c=tiendaCategoria(p.nombre); cats[c]=(cats[c]||0)+1; });
+  var chipsHtml='<div onclick="tiendaFiltrarCat(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(tiendaCategoriaActiva===''?'var(--nar);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
+  Object.keys(cats).forEach(function(c){
+    var on=tiendaCategoriaActiva===c;
+    chipsHtml+='<div onclick="tiendaFiltrarCat(\''+c+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(on?'var(--nar);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+c+'</div>';
+  });
+  document.getElementById('tienda-chips').innerHTML=chipsHtml;
+
+  // filtrar por búsqueda + categoría
+  var q=(document.getElementById('tienda-buscar').value||'').toLowerCase().trim();
+  var lista=tiendaProductos.filter(function(p){
+    var okCat=!tiendaCategoriaActiva || tiendaCategoria(p.nombre)===tiendaCategoriaActiva;
+    var okBusq=!q || (p.nombre||'').toLowerCase().indexOf(q)>=0;
+    return okCat && okBusq;
+  });
+
+  if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados para "'+q+'"</div>'; return; }
+
+  cont.innerHTML=lista.map(function(p){
+    return '<div style="background:var(--wh);border:1px solid var(--bor);border-radius:14px;padding:12px;display:flex;flex-direction:column;">'
+      +'<div style="font-size:1.8rem;text-align:center;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>'
+      +'<div style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;">'+p.nombre+'</div>'
+      +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:8px;">'+fmt(p.venta)+'</div>'
+      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);" onclick="tiendaVerCuotas('+p.id+')">📅 Ver cuotas</button>'
+      +'</div>';
+  }).join('');
+}
+
+function tiendaFiltrarCat(c){ tiendaCategoriaActiva=(tiendaCategoriaActiva===c?'':c); tiendaRender(); }
+
+function tiendaVerCuotas(id){
+  var p=tiendaProductos.find(function(x){return x.id===id;});
+  if(!p)return;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">'+p.nombre+'</h3>'
+    +'<div style="font-size:1.3rem;font-weight:900;color:var(--nar);margin:4px 0 12px;">Contado: '+fmt(p.venta)+'</div>'
+    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Planes de cuotas</div>';
+  for(var n=2;n<=12;n++){
+    if(planesConfig[n] && planesConfig[n].activo){
+      var total=calcularTotalPlan(p.venta,n);
+      var valorCuota=Math.round(total/n/500)*500;
+      html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bor);">'
+        +'<span style="font-weight:700;color:var(--az);">'+n+' cuotas</span>'
+        +'<span style="font-weight:900;color:var(--nar);">'+n+' x '+fmt(valorCuota)+'</span></div>';
+    }
+  }
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+// ---- carga de catálogo por pegado ----
+function tiendaAbrirCarga(){
+  document.getElementById('modal-carga').style.display='block';
+  var chk=document.getElementById('carga-usd');
+  chk.onchange=function(){ document.getElementById('carga-dolar').style.display=chk.checked?'block':'none'; };
+}
+
+function tiendaProcesarCarga(){
+ try{
+  var texto=document.getElementById('carga-texto').value||'';
+  if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
+  var esUSD=document.getElementById('carga-usd').checked;
+  var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
+  var reemplazar=document.getElementById('carga-reemplazar').checked;
+
+  if(esUSD && dolar<=0){ alert('Pusiste que los costos son en USD. Cargá la cotización del dólar.'); return; }
+
+  var lineas=texto.split(/\r?\n/);
+  var nuevos=[];
+  var maxId=tiendaProductos.reduce(function(a,p){return Math.max(a,p.id||0);},0);
+  var descartadas=0;
+
+  lineas.forEach(function(l){
+    l=(l||'').trim(); if(!l)return;
+    // aceptar varios separadores: | , barra rara, ; , tab, o "  " (2+ espacios)
+    var partes=l.split(/\s*[|¦;\t]\s*|\s{2,}/);
+    // si no encontró separador, intentar separar por el ÚLTIMO número de la línea
+    if(partes.length<2){
+      var mm=l.match(/^(.*?)[\s\-:]+\$?([\d\.]{4,})\s*$/);
+      if(mm){ partes=[mm[1], mm[2]]; }
+    }
+    if(partes.length<2){ descartadas++; return; }
+    var nombre=(partes[0]||'').trim();
+    var costoRaw=(partes[1]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
+    var costo=parseFloat(costoRaw);
+    if(isNaN(costo)||costo<=0||!nombre){ descartadas++; return; }
+    if(esUSD)costo=costo*dolar;
+    var venta=markupVentaCRM(costo);
+    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta });
+  });
+
+  if(!nuevos.length){
+    alert('⚠️ No pude leer ningún producto.\n\nRevisá que cada línea sea así:\nNombre del producto | 310000\n\n(nombre, una barra |, y el costo)');
+    return;
+  }
+
+  if(reemplazar) tiendaProductos=nuevos;
+  else tiendaProductos=tiendaProductos.concat(nuevos);
+
+  tiendaGuardarLocal();
+  document.getElementById('modal-carga').style.display='none';
+  document.getElementById('carga-texto').value='';
+  tiendaRender();
+  var msg='✅ Se cargaron '+nuevos.length+' productos.\nTotal en la tienda: '+tiendaProductos.length;
+  if(descartadas>0)msg+='\n\n('+descartadas+' líneas no se entendieron y se saltearon)';
+  alert(msg);
+ }catch(err){
+  alert('❌ Error al cargar: '+(err.message||err)+'\n\nMandale esta captura a Claude.');
+ }
 }
 
 function detectarPrecioTexto(txt){
