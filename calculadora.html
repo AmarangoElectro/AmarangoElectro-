@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>Calculadora · AmarangoElectro</title>
+<title>Tienda AmarangoElectro 🐝🛒</title>
 <meta name="theme-color" content="#0B2D6B">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
@@ -17,10 +17,15 @@
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FC;--bor:#E8EBF4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
 body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden}
-.header{background:linear-gradient(135deg,var(--az),#1a3a8a);padding:16px;display:flex;align-items:center;gap:12px;border-bottom:3px solid var(--nar)}
-.header-info h1{color:#fff;font-size:1rem;font-weight:900}
-.header-info p{color:rgba(255,255,255,.55);font-size:.65rem;margin-top:2px}
-.header-badge{background:rgba(255,122,0,.2);border:1px solid var(--nar);border-radius:20px;padding:3px 10px;font-size:.58rem;font-weight:800;color:var(--nar);white-space:nowrap}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-40%;left:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(120,170,255,.35),transparent 70%);transform:rotate(20deg);pointer-events:none}
+.header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
+.header-logo{width:66px;height:66px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.15);position:relative;z-index:1}
+.header-info{text-align:center;position:relative;z-index:1}
+.header-info h1{color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:.3px;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.header-info h1 span{color:var(--nar)}
+.header-info p{color:rgba(255,255,255,.7);font-size:.66rem;margin-top:2px}
+.header-badge{background:rgba(255,122,0,.25);border:1px solid var(--nar);border-radius:20px;padding:4px 14px;font-size:.62rem;font-weight:800;color:#ffb968;white-space:nowrap;position:relative;z-index:1;margin-top:2px}
 .tabs{display:flex;background:var(--wh);border-bottom:2px solid var(--bor);overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;padding:11px 8px;font-size:.68rem;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center;transition:all .2s;min-width:80px}
@@ -133,11 +138,12 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 </div>
 
 <div class="header">
-  <div class="header-info" style="flex:1">
-    <h1>🐝 AmarangoElectro</h1>
+  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="this.style.display='none'">
+  <div class="header-info">
+    <h1><span>A</span>MARANGO<span>E</span>LECTRO 🐝</h1>
     <p>Tu equipo de electro y celulares</p>
   </div>
-  <div class="header-badge">🧮 Calculadora</div>
+  <div class="header-badge">🛒 Tienda</div>
 </div>
 
 <div class="install-banner" id="install-banner">
@@ -460,7 +466,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:30px auto;" id="modal-cuotas-body"></div>
 </div>
 
-<div class="footer">Calculadora exclusiva · <span>AmarangoElectro</span></div>
+<div class="footer">Tienda AmarangoElectro 🐝 · <span>Equipo AmarangoElectro</span></div>
 
 <script>
 var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
@@ -754,7 +760,19 @@ function tiendaInit(){
   tiendaCargarLocal();     // primero lo local (instantáneo)
   tiendaAplicarModo();
   tiendaRender();
-  tiendaBajarNube();       // después baja lo último de la nube
+  tiendaBajarNube();       // baja el catálogo de la nube
+  tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+}
+// baja los celulares de la nube y refresca la tienda (para que se vean specs/precios nuevos)
+function tiendaBajarCelusNube(){
+  if(!NUBE_OK || !sbCalc)return;
+  sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()
+    .then(function(r){
+      if(r && r.data && r.data.datos){
+        try{ localStorage.setItem('amarango_celulares', JSON.stringify(r.data.datos)); }catch(e){}
+        tiendaRender();
+      }
+    }).catch(function(){});
 }
 
 // Baja el catálogo desde la nube y refresca
@@ -847,7 +865,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:true, foto:c.foto||'' };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:true, foto:c.foto||'', caracteristicas:c.caracteristicas||'' };
   }
   return null;
 }
@@ -872,7 +890,8 @@ function tiendaRender(){
       categoria: '📱 Celulares',
       colores: c.colores||[],
       visible: true,
-      foto: c.foto||''
+      foto: c.foto||'',
+      caracteristicas: c.caracteristicas||''
     });
   });
 
