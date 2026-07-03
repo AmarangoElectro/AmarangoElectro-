@@ -480,9 +480,23 @@ var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
 var SB_URL="https://zctaukyrhsmpjkcddcqq.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
 var sbCalc=null, NUBE_OK=false;
-try{
-  if(window.supabase && SB_URL && SB_KEY){ sbCalc=window.supabase.createClient(SB_URL, SB_KEY); NUBE_OK=true; }
-}catch(e){ NUBE_OK=false; }
+// Conecta a Supabase. Si la librería (del CDN) todavía no cargó, reintenta.
+function conectarNube(intentos){
+  intentos = intentos||0;
+  try{
+    if(window.supabase && SB_URL && SB_KEY){
+      sbCalc=window.supabase.createClient(SB_URL, SB_KEY);
+      NUBE_OK=true;
+      // ya conectados: bajar datos frescos de la nube y refrescar la tienda
+      try{ tiendaBajarNube(); tiendaBajarCelusNube(); }catch(e){}
+      return;
+    }
+  }catch(e){ NUBE_OK=false; }
+  // todavía no cargó la librería: reintentar hasta ~5 segundos
+  if(intentos<25){ setTimeout(function(){ conectarNube(intentos+1); }, 200); }
+}
+// arrancar la conexión cuando el resto del script ya está definido
+setTimeout(function(){ conectarNube(); }, 50);
 
 // ═══ ORDEN FIJO Y PERMANENTE DE LAS CUOTAS (2 → 4 → 6 → resto creciente) ═══
 // Este orden NO depende de los datos, del JSON, ni del navegador. Es fijo por código.
@@ -831,8 +845,12 @@ function tiendaInit(){
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
 }
 // baja los celulares de la nube y refresca la tienda (para que se vean specs/precios nuevos)
-function tiendaBajarCelusNube(){
-  if(!NUBE_OK || !sbCalc)return;
+function tiendaBajarCelusNube(intentos){
+  intentos=intentos||0;
+  if(!NUBE_OK || !sbCalc){
+    if(intentos<25){ setTimeout(function(){ tiendaBajarCelusNube(intentos+1); }, 200); }
+    return;
+  }
   sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()
     .then(function(r){
       if(r && r.data && r.data.datos){
@@ -843,8 +861,13 @@ function tiendaBajarCelusNube(){
 }
 
 // Baja el catálogo desde la nube y refresca
-function tiendaBajarNube(){
-  if(!NUBE_OK||!sbCalc)return;
+function tiendaBajarNube(intentos){
+  intentos=intentos||0;
+  if(!NUBE_OK||!sbCalc){
+    // la nube todavía no conectó: reintentar
+    if(intentos<25){ setTimeout(function(){ tiendaBajarNube(intentos+1); }, 200); }
+    return;
+  }
   sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
     .then(function(r){
       if(r && r.data && r.data.datos){
