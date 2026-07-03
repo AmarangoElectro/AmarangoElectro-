@@ -424,12 +424,13 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:20px auto;">
     <h3 style="color:var(--az);font-weight:900;font-size:1rem;margin-bottom:4px;">⚙️ Cargar catálogo</h3>
     <p style="font-size:.72rem;color:var(--sub);margin-bottom:12px;">
-      Pegá una línea por producto. Formato: <b>Nombre | Costo</b><br>
-      La app aplica sola tu fórmula de precio de venta.
+      Una línea por producto. Dos formas:<br>
+      • <b>Nombre | Costo</b> → calculo la venta con tu fórmula<br>
+      • <b>Nombre | Costo | Venta</b> → uso TU precio de venta tal cual
     </p>
     <div style="background:#f0f4ff;border-radius:8px;padding:8px 10px;font-size:.68rem;color:var(--az);margin-bottom:10px;font-family:monospace;">
       Heladera No Frost 300L | 310000<br>
-      Cocina Calabria 4h | 228400<br>
+      Batidora Yelmo | 180000 | 320000<br>
       Yogurtera Delhi | 45000
     </div>
     <textarea id="carga-texto" rows="8" placeholder="Pegá acá tus productos..."
@@ -841,12 +842,34 @@ function tiendaQuitarFoto(id){
 function tiendaEditarPrecio(id){
   var p=tiendaProductos.find(function(x){return x.id===id;});
   if(!p)return;
-  var nuevo=prompt('Precio de venta de:\n'+p.nombre+'\n\nActual: '+fmt(p.venta)+'\n\nEscribí el nuevo precio (solo números):', p.venta);
-  if(nuevo===null)return;
-  var val=parseFloat((nuevo+'').replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.'));
-  if(isNaN(val)||val<=0){ alert('Precio inválido.'); return; }
-  p.venta=Math.round(val);
-  tiendaGuardarLocal(); tiendaRender();
+  window._tiendaEditId=id;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">✏️ Editar precios</h3>'
+    +'<div style="font-size:.82rem;font-weight:700;color:var(--az);margin:4px 0 12px;">'+p.nombre+'</div>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">COSTO ($)</div>'
+    +'<input id="edit-costo" inputmode="numeric" value="'+(p.costo||'')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:6px;">'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--az);border:2px solid var(--bor);font-size:.75rem;padding:8px;margin-bottom:12px;" onclick="tiendaRecalcVenta()">🔄 Calcular venta desde el costo</button>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">PRECIO DE VENTA ($)</div>'
+    +'<input id="edit-venta" inputmode="numeric" value="'+(p.venta||'')+'" style="width:100%;padding:11px;border:2px solid var(--nar);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:800;color:var(--nar);margin-bottom:14px;">'
+    +'<button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaGuardarPrecios()">✅ Guardar</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+function _num(id){ return parseFloat((document.getElementById(id).value||'').replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.'))||0; }
+function tiendaRecalcVenta(){
+  var costo=_num('edit-costo');
+  if(costo<=0){ alert('Poné primero el costo.'); return; }
+  document.getElementById('edit-venta').value=markupVentaCRM(costo);
+}
+function tiendaGuardarPrecios(){
+  var p=tiendaProductos.find(function(x){return x.id===window._tiendaEditId;});
+  if(!p)return;
+  var costo=_num('edit-costo'), venta=_num('edit-venta');
+  if(venta<=0){ alert('El precio de venta no puede quedar vacío.'); return; }
+  p.costo=Math.round(costo); p.venta=Math.round(venta);
+  tiendaGuardarLocal();
+  document.getElementById('modal-cuotas').style.display='none';
+  tiendaRender();
 }
 
 // QUITAR producto (solo admin)
@@ -1041,7 +1064,15 @@ function tiendaProcesarCarga(){
     var costo=parseFloat(costoRaw);
     if(isNaN(costo)||costo<=0||!nombre){ descartadas++; return; }
     if(esUSD)costo=costo*dolar;
-    var venta=markupVentaCRM(costo);
+    // ¿trae precio de venta propio (tercer número)? entonces lo respetamos
+    var venta;
+    if(partes.length>=3 && (partes[2]||'').trim()){
+      var ventaRaw=(partes[2]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
+      var ventaNum=parseFloat(ventaRaw);
+      venta = (!isNaN(ventaNum)&&ventaNum>0) ? Math.round(ventaNum) : markupVentaCRM(costo);
+    }else{
+      venta = markupVentaCRM(costo);   // sin tercer número → fórmula
+    }
     nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta });
   });
 
