@@ -1,36 +1,11 @@
-// Service Worker - Calculadora AmarangoElectro
-var CACHE='amarango-calc-v1';
-var ARCHIVOS=['./calculadora.html','./manifest.json','./icon.png','./icon-192.png'];
-
-self.addEventListener('install', function(e){
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE).then(function(cache){
-      return cache.addAll(ARCHIVOS).catch(function(){});
-    })
-  );
-});
-
+// sw.js - Service Worker LIMPIO (no cachea nada)
+// El anterior guardaba versiones viejas y no dejaba ver los cambios.
+self.addEventListener('install', function(e){ self.skipWaiting(); });
 self.addEventListener('activate', function(e){
   e.waitUntil(
-    caches.keys().then(function(claves){
-      return Promise.all(claves.map(function(k){
-        if(k!==CACHE)return caches.delete(k);
-      }));
-    })
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', function(e){
-  e.respondWith(
-    caches.match(e.request).then(function(resp){
-      return resp || fetch(e.request).then(function(r){
-        return caches.open(CACHE).then(function(cache){
-          try{ cache.put(e.request, r.clone()); }catch(err){}
-          return r;
-        });
-      }).catch(function(){ return resp; });
-    })
+    caches.keys().then(function(keys){
+      return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+    }).then(function(){ return self.clients.claim(); })
   );
 });
+// NO intercepta fetch: siempre va directo a la red (nunca sirve copias viejas)
