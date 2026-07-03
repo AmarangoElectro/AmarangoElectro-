@@ -760,9 +760,9 @@ function tiendaRender(){
     }
 
     card+=(p.foto
-      ? '<div style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;"></div>'
-      : '<div style="font-size:1.8rem;text-align:center;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>')
-      +'<div style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;">'+p.nombre+'</div>'
+      ? '<div onclick="tiendaVerDetalle('+p.id+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
+      : '<div onclick="tiendaVerDetalle('+p.id+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>')
+      +'<div onclick="tiendaVerDetalle('+p.id+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:4px;">'+fmt(p.venta)+'</div>'
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+p.id+')">📅 Ver cuotas</button>';
 
@@ -949,6 +949,38 @@ function tiendaVender(){
   var url='https://wa.me/?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
   document.getElementById('modal-cuotas').style.display='none';
+}
+
+// VER DETALLE: foto grande (con toda la info del flyer) + precio + cuotas + acciones
+function tiendaVerDetalle(id){
+  var p=tiendaProductos.find(function(x){return x.id===id;});
+  if(!p)return;
+  window._tiendaPedirId=id;
+  var html='';
+  if(p.foto){
+    html+='<img src="'+p.foto+'" style="width:100%;border-radius:12px;margin-bottom:10px;display:block;">';
+  }else{
+    html+='<div style="font-size:3rem;text-align:center;margin-bottom:8px;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>';
+  }
+  html+='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+p.nombre+'</h3>'
+    +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:4px 0 10px;">Contado: '+fmt(p.venta)+'</div>';
+  // cuotas
+  html+='<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px;">Planes de cuotas</div>';
+  for(var n=2;n<=12;n++){
+    if(planesConfig[n] && planesConfig[n].activo){
+      var vc=Math.round(calcularTotalPlan(p.venta,n)/n/1000)*1000;
+      html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bor);">'
+        +'<span style="font-weight:700;color:var(--az);">'+n+' cuotas</span>'
+        +'<span style="font-weight:900;color:var(--nar);">'+n+' x '+fmt(vc)+'</span></div>';
+    }
+  }
+  // acciones
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+p.id+')">📲 Pedir / Consultar</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
 }
 
 function tiendaVerCuotas(id){
