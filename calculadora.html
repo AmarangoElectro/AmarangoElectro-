@@ -116,6 +116,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .login-box button{width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit}
 .login-box button:active{opacity:.85}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -457,6 +458,15 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 
 <script>
 var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
+
+/* ===== CONEXIÓN A LA NUBE (Supabase) — misma cuenta del CRM ===== */
+var SB_URL="https://zctaukyrhsmpjkcddcqq.supabase.co";
+var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
+var sbCalc=null, NUBE_OK=false;
+try{
+  if(window.supabase && SB_URL && SB_KEY){ sbCalc=window.supabase.createClient(SB_URL, SB_KEY); NUBE_OK=true; }
+}catch(e){ NUBE_OK=false; }
+
 // ═══ ORDEN FIJO Y PERMANENTE DE LAS CUOTAS (2 → 4 → 6 → resto creciente) ═══
 // Este orden NO depende de los datos, del JSON, ni del navegador. Es fijo por código.
 var ORDEN_CUOTAS=[2,3,4,5,6,7,8,9,10,11,12];
@@ -518,7 +528,7 @@ function showTab(t){
       if(el.getAttribute("onclick")&&el.getAttribute("onclick").indexOf("'"+t+"'")>=0)el.classList.add("on");
     });
   }
-  if(t==='celulares')renderListaCelus();
+  if(t==='celulares'){renderListaCelus();bajarCelusNube();}
   if(t==='tienda')tiendaInit();
 }
 
@@ -655,9 +665,25 @@ var tiendaMarcadosSet={};        // productos marcados para tanda
 
 // La tienda arranca en modo PÚBLICO (sin clave). El admin entra con clave.
 function tiendaInit(){
-  tiendaCargarLocal();
+  tiendaCargarLocal();     // primero lo local (instantáneo)
   tiendaAplicarModo();
   tiendaRender();
+  tiendaBajarNube();       // después baja lo último de la nube
+}
+
+// Baja el catálogo desde la nube y refresca
+function tiendaBajarNube(){
+  if(!NUBE_OK||!sbCalc)return;
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+    .then(function(r){
+      if(r && r.data && r.data.datos){
+        tiendaProductos = r.data.datos;
+        tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
+        try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+        tiendaRender();
+      }
+    })
+    .catch(function(){});
 }
 
 function tiendaLoginAdmin(){
@@ -704,6 +730,10 @@ function tiendaCargarLocal(){
 }
 function tiendaGuardarLocal(){
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+  // subir a la nube (para que lo vean todos)
+  if(NUBE_OK && sbCalc){
+    sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+  }
 }
 
 // detecta una categoría simple por palabras clave del nombre
@@ -1310,6 +1340,22 @@ function cargarListaCelus(){
   try{var g=localStorage.getItem('amarango_celulares');if(g)return JSON.parse(g);}catch(e){}
   return [];
 }
+// sube la lista de celulares a la nube
+function subirCelusNube(lista){
+  if(!NUBE_OK || !sbCalc)return;
+  sbCalc.from('celulares_lista').upsert({ id:'lista', datos:lista, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+}
+// baja la lista de celulares de la nube y refresca la vista
+function bajarCelusNube(){
+  if(!NUBE_OK || !sbCalc)return;
+  sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()
+    .then(function(r){
+      if(r && r.data && r.data.datos){
+        try{ localStorage.setItem('amarango_celulares', JSON.stringify(r.data.datos)); }catch(e){}
+        if(typeof renderListaCelus==='function')renderListaCelus();
+      }
+    }).catch(function(){});
+}
 function parsearCeluLinea(linea, esUSD){
   // ignorar precios tachados de WhatsApp (~...~) = precios viejos
   linea=linea.replace(/\*?~[^~]*~\*?/g,' ').replace(/\s{2,}/g,' ').trim();
@@ -1496,6 +1542,7 @@ function borrarMarcaCelus(marca){
   var borrados=celus.length-quedan.length;
   if(!confirm('¿Borrar los '+borrados+' celulares de '+marca.toUpperCase()+'?'))return;
   try{localStorage.setItem('amarango_celulares',JSON.stringify(quedan));}catch(e){}
+  subirCelusNube(quedan);
   alert('🗑️ Borrados '+borrados+' de '+marca.toUpperCase()+'. Quedan '+quedan.length+'.');
   renderBotonesBorrar();
   renderListaCelus();
@@ -1596,6 +1643,7 @@ function guardarListaCelus(){
 }
 function finalizarGuardado(lista,esUSD,resumen){
   try{localStorage.setItem('amarango_celulares',JSON.stringify(lista));}catch(e){}
+  subirCelusNube(lista);
   var avisos=chequearCoherenciaMemoria(lista);
   var msg=resumen+'\n\nTotal en lista: '+lista.length+' celulares.';
   if(avisos.length){
