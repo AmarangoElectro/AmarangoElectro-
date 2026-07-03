@@ -421,6 +421,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaAbrirCarga()">⚙️ Cargar / actualizar catálogo</button>
     <button id="tienda-btn-celus" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="showTab('celulares')">📱 Cargar / actualizar celulares</button>
+    <button id="tienda-btn-carac" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
+      onclick="tiendaAbrirCarac()">📋 Cargar características de celulares (masivo)</button>
   </div>
 </div>
 
@@ -679,6 +681,71 @@ function marcaCelu(nombre){
 }
 function tiendaFiltrarMarca(mk){ tiendaMarcaActiva=(tiendaMarcaActiva===mk?'':mk); tiendaRender(); }
 
+// ===== Carga masiva de características de celulares =====
+function tiendaAbrirCarac(){
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📋 Cargar características</h3>'
+    +'<p style="font-size:.72rem;color:var(--sub);margin:6px 0 10px;">Pegá el archivo completo de características. La app empareja cada celular por su nombre y le asigna sus specs automáticamente.</p>'
+    +'<textarea id="carac-texto" rows="9" placeholder="Pegá acá TODO el texto de características..." style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;font-family:monospace;font-size:.72rem;box-sizing:border-box;"></textarea>'
+    +'<button class="calc-btn" style="width:100%;margin-top:10px;background:var(--gr);" onclick="tiendaProcesarCarac()">✅ Emparejar y guardar</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+// normaliza para emparejar: minúsculas, sin acentos, sin cosas como "4g/5g"
+function _normNom(s){
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\bmotorola\b/g,'moto')
+    .replace(/\b4g\b|\b5g\b|\/|\(|\)/g,' ')
+    .replace(/[^a-z0-9 ]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function tiendaProcesarCarac(){
+  var texto=document.getElementById('carac-texto').value||'';
+  if(!texto.trim()){ alert('Pegá el texto de características.'); return; }
+  // separar en bloques por "---" o por doble salto antes de un nombre con "Memorias:"
+  var bloques=texto.split(/\n-{2,}\n/);
+  var specs=[]; // {nombre, texto}
+  bloques.forEach(function(b){
+    b=b.trim();
+    if(!b || b.indexOf('===')===0)return;
+    // quitar encabezados de sección tipo "=== SAMSUNG ==="
+    b=b.replace(/^===.*===\s*/,'').trim();
+    var lineas=b.split('\n');
+    var nombre=(lineas[0]||'').trim();
+    if(!nombre)return;
+    specs.push({ nombre:nombre, norm:_normNom(nombre), texto:b });
+  });
+  if(!specs.length){ alert('No pude leer bloques de características. Fijate que estén separados por "---".'); return; }
+
+  var celus=cargarListaCelus();
+  if(!celus.length){ alert('Primero cargá la lista de celulares (precios). Después las características.'); return; }
+
+  var emparejados=0, sinMatch=[];
+  celus.forEach(function(c){
+    var nc=_normNom(c.nombre);
+    // buscar el spec cuyo nombre esté contenido o contenga al del celu
+    var match=null, mejor=0;
+    specs.forEach(function(s){
+      // puntaje simple: cuántas palabras del spec están en el nombre del celu
+      var palabras=s.norm.split(' ').filter(function(w){return w.length>1;});
+      var hits=0;
+      palabras.forEach(function(w){ if(nc.indexOf(w)>=0)hits++; });
+      var score=hits/Math.max(1,palabras.length);
+      if(score>mejor && score>=0.6){ mejor=score; match=s; }
+    });
+    if(match){ c.caracteristicas=match.texto; emparejados++; }
+    else sinMatch.push(c.nombre);
+  });
+
+  try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); subirCelusNube(celus); }catch(e){}
+  document.getElementById('modal-cuotas').style.display='none';
+  tiendaRender();
+  var msg='✅ '+emparejados+' celulares con características asignadas.';
+  if(sinMatch.length){ msg+='\n\n'+sinMatch.length+' sin emparejar (podés cargarles las specs a mano con 🖍️ Editar):\n• '+sinMatch.slice(0,15).join('\n• ')+(sinMatch.length>15?'\n...':''); }
+  alert(msg);
+}
+
 var tiendaEsAdmin=false;         // modo admin activo o no
 var tiendaMarcadosSet={};        // productos marcados para tanda
 
@@ -739,6 +806,7 @@ function tiendaAplicarModo(){
   document.getElementById('tienda-tanda-bar').style.display = tiendaEsAdmin?'flex':'none';
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
+  var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
   document.getElementById('tienda-btn-admin').style.display = tiendaEsAdmin?'none':'inline-block';
 }
 
@@ -871,12 +939,12 @@ function tiendaRender(){
       +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:4px;">'+fmt(p.venta)+'</div>'
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
 
-    if(tiendaEsAdmin && !p.esCelu){
-      // botones de admin (solo productos propios)
+    if(tiendaEsAdmin){
+      // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:6px;">'
-        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Precio</button>'
+        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
-        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️ Quitar</button>'
+        +(p.esCelu?'':'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
       +'</div>';
     }else{
       // botón público: pedir por WhatsApp
@@ -917,7 +985,19 @@ function tiendaProcesarFoto(e){
       canvas.width=w; canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
       var comprimida=canvas.toDataURL('image/jpeg', 0.7);
-      var p=tiendaProductos.find(function(x){return x.id==window._tiendaFotoId;});
+      var fid=window._tiendaFotoId;
+      if((''+fid).indexOf('celu_')===0){
+        // foto de un celular
+        var i=parseInt((''+fid).replace('celu_',''),10);
+        var celus=cargarListaCelus();
+        if(celus[i]){
+          celus[i].foto=comprimida;
+          try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); subirCelusNube(celus); tiendaRender(); }
+          catch(err){ alert('⚠️ Almacenamiento lleno. Probá con menos fotos.'); celus[i].foto=''; }
+        }
+        return;
+      }
+      var p=tiendaProductos.find(function(x){return x.id==fid;});
       if(p){
         p.foto=comprimida;
         try{
@@ -933,30 +1013,45 @@ function tiendaProcesarFoto(e){
   };
   reader.readAsDataURL(file);
 }
-// quitar la foto de un producto
+// quitar la foto de un producto o celular
 function tiendaQuitarFoto(id){
+  if(!confirm('¿Quitar la foto?'))return;
+  if((''+id).indexOf('celu_')===0){
+    var i=parseInt((''+id).replace('celu_',''),10);
+    var celus=cargarListaCelus();
+    if(celus[i]){ celus[i].foto=''; try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); subirCelusNube(celus); }catch(e){} }
+    tiendaRender(); return;
+  }
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p||!p.foto)return;
-  if(!confirm('¿Quitar la foto de este producto?'))return;
   p.foto=''; tiendaGuardarLocal(); tiendaRender();
 }
 
-// EDITAR precio (solo admin)
+// EDITAR completo (solo admin): nombre, costo↔venta, categoría, características
 function tiendaEditarPrecio(id){
-  var p=tiendaProductos.find(function(x){return x.id==id;});
+  var p=buscarProd(id);
   if(!p)return;
   window._tiendaEditId=id;
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">✏️ Editar precios</h3>'
-    +'<div style="font-size:.82rem;font-weight:700;color:var(--az);margin:4px 0 12px;">'+p.nombre+'</div>'
+  window._tiendaEditEsCelu=!!p.esCelu;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🖍️ Editar producto</h3>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin:10px 0 4px;">NOMBRE</div>'
+    +'<input id="edit-nombre" value="'+(p.nombre||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:12px;">'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">COSTO ($)</div>'
-    +'<input id="edit-costo" inputmode="numeric" value="'+(p.costo||'')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:6px;">'
-    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--az);border:2px solid var(--bor);font-size:.75rem;padding:8px;margin-bottom:12px;" onclick="tiendaRecalcVenta()">🔄 Calcular venta desde el costo</button>'
-    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">PRECIO DE VENTA ($)</div>'
-    +'<input id="edit-venta" inputmode="numeric" value="'+(p.venta||'')+'" style="width:100%;padding:11px;border:2px solid var(--nar);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:800;color:var(--nar);margin-bottom:14px;">'
+    +'<div style="display:flex;gap:6px;margin-bottom:6px;">'
+      +'<input id="edit-costo" inputmode="numeric" value="'+(p.costo||'')+'" style="flex:1;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;">'
+      +'<button class="calc-btn" style="background:var(--az);font-size:.7rem;padding:8px 10px;white-space:nowrap;" onclick="tiendaRecalcVenta()">Costo→Venta</button>'
+    +'</div>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;margin-top:8px;">PRECIO DE VENTA ($)</div>'
+    +'<div style="display:flex;gap:6px;margin-bottom:12px;">'
+      +'<input id="edit-venta" inputmode="numeric" value="'+(p.venta||'')+'" style="flex:1;padding:11px;border:2px solid var(--nar);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:800;color:var(--nar);">'
+      +'<button class="calc-btn" style="background:var(--bg);color:var(--az);border:2px solid var(--bor);font-size:.7rem;padding:8px 10px;white-space:nowrap;" onclick="tiendaRecalcCosto()">Venta→Costo</button>'
+    +'</div>'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">CATEGORÍA</div>'
-    +'<select id="edit-cat" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:14px;">'
+    +'<select id="edit-cat" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     + TIENDA_CATEGORIAS.map(function(c){ return '<option value="'+c+'"'+(catProd(p)===c?' selected':'')+'>'+c+'</option>'; }).join('')
     +'</select>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">CARACTERÍSTICAS (pegá acá)</div>'
+    +'<textarea id="edit-carac" rows="6" placeholder="Pegá las características del producto..." style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-size:.82rem;margin-bottom:14px;">'+(p.caracteristicas||'').replace(/</g,'&lt;')+'</textarea>'
     +'<button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaGuardarPrecios()">✅ Guardar</button>'
     +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
@@ -968,14 +1063,47 @@ function tiendaRecalcVenta(){
   if(costo<=0){ alert('Poné primero el costo.'); return; }
   document.getElementById('edit-venta').value=markupVentaCRM(costo);
 }
+// Venta→Costo: estima el costo que, con tu fórmula, daría ese precio de venta
+function tiendaRecalcCosto(){
+  var venta=_num('edit-venta');
+  if(venta<=0){ alert('Poné primero el precio de venta.'); return; }
+  // probamos costos hasta que markupVentaCRM(costo) se acerque a la venta
+  var mejor=0, mejorDif=Infinity;
+  for(var c=1000; c<=venta; c+=500){
+    var v=markupVentaCRM(c);
+    var dif=Math.abs(v-venta);
+    if(dif<mejorDif){ mejorDif=dif; mejor=c; }
+    if(v>venta)break;
+  }
+  document.getElementById('edit-costo').value=mejor;
+}
 function tiendaGuardarPrecios(){
-  var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
-  if(!p)return;
-  var costo=_num('edit-costo'), venta=_num('edit-venta');
+  var venta=_num('edit-venta'), costo=_num('edit-costo');
   if(venta<=0){ alert('El precio de venta no puede quedar vacío.'); return; }
-  p.costo=Math.round(costo); p.venta=Math.round(venta);
-  var catSel=document.getElementById('edit-cat'); if(catSel)p.categoria=catSel.value;
-  tiendaGuardarLocal();
+  var nombre=(document.getElementById('edit-nombre').value||'').trim();
+  var cat=document.getElementById('edit-cat').value;
+  var carac=(document.getElementById('edit-carac').value||'').trim();
+
+  if(window._tiendaEditEsCelu){
+    // editar un celular: se guarda en la lista de celulares
+    var i=parseInt((''+window._tiendaEditId).replace('celu_',''),10);
+    var celus=cargarListaCelus();
+    if(celus[i]){
+      if(nombre)celus[i].nombre=nombre;
+      celus[i].precio=Math.round(venta);
+      celus[i].caracteristicas=carac;
+      try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
+      subirCelusNube(celus);
+    }
+  }else{
+    var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
+    if(p){
+      if(nombre)p.nombre=nombre;
+      p.costo=Math.round(costo); p.venta=Math.round(venta);
+      p.categoria=cat; p.caracteristicas=carac;
+      tiendaGuardarLocal();
+    }
+  }
   document.getElementById('modal-cuotas').style.display='none';
   tiendaRender();
 }
@@ -1095,6 +1223,10 @@ function tiendaVerDetalle(id){
   }
   html+='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+p.nombre+'</h3>'
     +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:4px 0 10px;">Contado: '+fmt(p.venta)+'</div>';
+  // características (si tiene)
+  if(p.caracteristicas){
+    html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.8rem;color:var(--az);white-space:pre-line;line-height:1.5;">'+p.caracteristicas.replace(/</g,'&lt;')+'</div>';
+  }
   // cuotas
   html+='<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px;">Planes de cuotas</div>';
   for(var n=2;n<=12;n++){
@@ -1105,10 +1237,15 @@ function tiendaVerDetalle(id){
         +'<span style="font-weight:900;color:var(--nar);">'+n+' x '+fmt(vc)+'</span></div>';
     }
   }
+  var pid="'"+p.id+"'";
   // acciones
-  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+p.id+')">📲 Pedir / Consultar</button>'
-    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>'
-    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 Pedir / Consultar</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+  // en modo admin: botón editar dentro del detalle
+  if(tiendaEsAdmin){
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
+  }
+  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
