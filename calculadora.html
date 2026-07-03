@@ -704,9 +704,37 @@ function tiendaRender(){
       +'<div style="font-size:1.8rem;text-align:center;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>'
       +'<div style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;">'+p.nombre+'</div>'
       +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:8px;">'+fmt(p.venta)+'</div>'
-      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);" onclick="tiendaVerCuotas('+p.id+')">📅 Ver cuotas</button>'
+      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+p.id+')">📅 Ver cuotas</button>'
+      +'<div style="display:flex;gap:6px;">'
+        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+p.id+')">✏️ Precio</button>'
+        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+p.id+')">🗑️ Quitar</button>'
+      +'</div>'
       +'</div>';
   }).join('');
+}
+
+// EDITAR precio de venta (solo admin, ya entró con clave)
+function tiendaEditarPrecio(id){
+  var p=tiendaProductos.find(function(x){return x.id===id;});
+  if(!p)return;
+  var actual=p.venta;
+  var nuevo=prompt('Precio de venta de:\n'+p.nombre+'\n\nActual: '+fmt(actual)+'\n\nEscribí el nuevo precio (solo números):', actual);
+  if(nuevo===null)return; // canceló
+  var val=parseFloat((nuevo+'').replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.'));
+  if(isNaN(val)||val<=0){ alert('Precio inválido.'); return; }
+  p.venta=Math.round(val);
+  tiendaGuardarLocal();
+  tiendaRender();
+}
+
+// QUITAR producto (solo admin)
+function tiendaEliminar(id){
+  var p=tiendaProductos.find(function(x){return x.id===id;});
+  if(!p)return;
+  if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)))return;
+  tiendaProductos=tiendaProductos.filter(function(x){return x.id!==id;});
+  tiendaGuardarLocal();
+  tiendaRender();
 }
 
 function tiendaFiltrarCat(c){ tiendaCategoriaActiva=(tiendaCategoriaActiva===c?'':c); tiendaRender(); }
