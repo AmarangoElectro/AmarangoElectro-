@@ -376,20 +376,22 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 <!-- ============ PESTAÑA: TIENDA REVENDEDORES (Etapa 1) ============ -->
 <div class="tab-content" id="tab-tienda">
 
-  <!-- Pantalla PIN -->
-  <div id="tienda-pin" style="text-align:center;padding:30px 16px;">
-    <div style="font-size:2.4rem;">🛒</div>
-    <h2 style="font-size:1.1rem;font-weight:900;color:var(--az);margin:6px 0;">Tienda Revendedores</h2>
-    <p style="font-size:.75rem;color:var(--sub);margin-bottom:16px;">Ingresá la clave para ver el catálogo</p>
-    <input type="password" id="tienda-pin-inp" placeholder="Clave"
-      style="width:180px;text-align:center;font-size:1.1rem;letter-spacing:3px;padding:12px;border:2px solid var(--bor);border-radius:12px;"
-      onkeydown="if(event.key==='Enter')tiendaCheckPin()">
-    <div id="tienda-pin-err" style="color:var(--red);font-size:.75rem;font-weight:700;margin-top:8px;display:none;">PIN incorrecto</div>
-    <div><button class="calc-btn" style="margin-top:14px;" onclick="tiendaCheckPin()">Entrar →</button></div>
-  </div>
+  <!-- La tienda entra directo en modo público. El admin entra con clave desde el botón. -->
 
-  <!-- Contenido de la tienda (oculto hasta poner PIN) -->
-  <div id="tienda-cont" style="display:none;">
+  <!-- Contenido de la tienda -->
+  <div id="tienda-cont">
+
+    <!-- Barra superior: título + botón admin -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:.95rem;font-weight:900;color:var(--az);">🛒 Tienda AmarangoElectro</div>
+      <button id="tienda-btn-admin" style="font-size:.68rem;padding:6px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaLoginAdmin()">🔒 Admin</button>
+    </div>
+
+    <!-- Banner modo admin (oculto por defecto) -->
+    <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
+      👑 Modo administrador — ves todos los productos y podés elegir cuáles mostrar.
+      <span onclick="tiendaSalirAdmin()" style="color:var(--red);cursor:pointer;text-decoration:underline;margin-left:6px;">Salir</span>
+    </div>
 
     <!-- Buscador -->
     <div style="position:sticky;top:0;background:var(--bg);padding-bottom:8px;z-index:5;">
@@ -399,15 +401,21 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       <div id="tienda-chips" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none;"></div>
     </div>
 
+    <!-- Barra de acciones en tanda (solo admin) -->
+    <div id="tienda-tanda-bar" style="display:none;gap:6px;margin:8px 0;flex-wrap:wrap;">
+      <button style="flex:1;min-width:120px;font-size:.7rem;padding:8px;background:var(--gr);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaMarcados('mostrar')">👁️ Mostrar marcados</button>
+      <button style="flex:1;min-width:120px;font-size:.7rem;padding:8px;background:var(--sub);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaMarcados('ocultar')">🙈 Ocultar marcados</button>
+    </div>
+
     <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
-      📦 Todavía no hay productos cargados.<br>Un administrador puede cargarlos desde el botón de abajo.
+      📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
     </div>
 
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
 
-    <!-- Botón admin: cargar catálogo -->
-    <button class="calc-btn" style="width:100%;margin-top:18px;background:var(--az);"
-      onclick="tiendaAbrirCarga()">⚙️ Cargar / actualizar catálogo (admin)</button>
+    <!-- Botón admin: cargar catálogo (solo visible en modo admin) -->
+    <button id="tienda-btn-cargar" class="calc-btn" style="display:none;width:100%;margin-top:18px;background:var(--az);"
+      onclick="tiendaAbrirCarga()">⚙️ Cargar / actualizar catálogo</button>
   </div>
 </div>
 
@@ -510,6 +518,7 @@ function showTab(t){
     });
   }
   if(t==='celulares')renderListaCelus();
+  if(t==='tienda')tiendaInit();
 }
 
 // Sub-pestañas dentro del cajón Administradores
@@ -640,21 +649,57 @@ var TIENDA_PIN='Amara4';         // PIN de acceso a la tienda
 var tiendaProductos=[];          // catálogo en memoria
 var tiendaCategoriaActiva='';    // filtro de chip activo
 
-function tiendaCheckPin(){
-  var v=(document.getElementById('tienda-pin-inp').value||'').trim();
+var tiendaEsAdmin=false;         // modo admin activo o no
+var tiendaMarcadosSet={};        // productos marcados para tanda
+
+// La tienda arranca en modo PÚBLICO (sin clave). El admin entra con clave.
+function tiendaInit(){
+  tiendaCargarLocal();
+  tiendaAplicarModo();
+  tiendaRender();
+}
+
+function tiendaLoginAdmin(){
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;text-align:center;">🔒 Modo administrador</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);text-align:center;margin:6px 0 14px;">Ingresá la clave</p>'
+    +'<input type="password" id="tienda-admin-inp" placeholder="Clave" '
+    +'style="width:100%;text-align:center;font-size:1.1rem;letter-spacing:3px;padding:12px;border:2px solid var(--bor);border-radius:12px;box-sizing:border-box;" '
+    +'onkeydown="if(event.key===\'Enter\')tiendaConfirmarAdmin()">'
+    +'<div id="tienda-admin-err" style="color:var(--red);font-size:.75rem;font-weight:700;text-align:center;margin-top:8px;display:none;">Clave incorrecta</div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--az);" onclick="tiendaConfirmarAdmin()">Entrar →</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  setTimeout(function(){ var i=document.getElementById('tienda-admin-inp'); if(i)i.focus(); },100);
+}
+function tiendaConfirmarAdmin(){
+  var v=(document.getElementById('tienda-admin-inp').value||'').trim();
   if(v===TIENDA_PIN){
-    document.getElementById('tienda-pin').style.display='none';
-    document.getElementById('tienda-cont').style.display='block';
-    tiendaCargarLocal();
+    tiendaEsAdmin=true;
+    document.getElementById('modal-cuotas').style.display='none';
+    tiendaAplicarModo();
     tiendaRender();
   }else{
-    document.getElementById('tienda-pin-err').style.display='block';
+    document.getElementById('tienda-admin-err').style.display='block';
   }
+}
+function tiendaSalirAdmin(){
+  tiendaEsAdmin=false; tiendaMarcadosSet={};
+  tiendaAplicarModo();
+  tiendaRender();
+}
+function tiendaAplicarModo(){
+  document.getElementById('tienda-admin-banner').style.display = tiendaEsAdmin?'block':'none';
+  document.getElementById('tienda-tanda-bar').style.display = tiendaEsAdmin?'flex':'none';
+  document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
+  document.getElementById('tienda-btn-admin').style.display = tiendaEsAdmin?'none':'inline-block';
 }
 
 function tiendaCargarLocal(){
   try{ tiendaProductos=JSON.parse(localStorage.getItem('ae_tienda_catalogo')||'[]'); }
   catch(e){ tiendaProductos=[]; }
+  // compatibilidad: productos viejos sin campo "visible" se consideran visibles
+  tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
 }
 function tiendaGuardarLocal(){
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
@@ -676,12 +721,16 @@ function tiendaCategoria(nombre){
 function tiendaRender(){
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
-  if(!tiendaProductos.length){ vacia.style.display='block'; cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML=''; return; }
+
+  // en modo público solo se ven los visibles; en admin se ven todos
+  var universo=tiendaEsAdmin ? tiendaProductos : tiendaProductos.filter(function(p){return p.visible;});
+
+  if(!universo.length){ vacia.style.display='block'; cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML=''; return; }
   vacia.style.display='none';
 
   // chips de categorías
   var cats={};
-  tiendaProductos.forEach(function(p){ var c=tiendaCategoria(p.nombre); cats[c]=(cats[c]||0)+1; });
+  universo.forEach(function(p){ var c=tiendaCategoria(p.nombre); cats[c]=(cats[c]||0)+1; });
   var chipsHtml='<div onclick="tiendaFiltrarCat(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(tiendaCategoriaActiva===''?'var(--nar);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
   Object.keys(cats).forEach(function(c){
     var on=tiendaCategoriaActiva===c;
@@ -691,7 +740,7 @@ function tiendaRender(){
 
   // filtrar por búsqueda + categoría
   var q=(document.getElementById('tienda-buscar').value||'').toLowerCase().trim();
-  var lista=tiendaProductos.filter(function(p){
+  var lista=universo.filter(function(p){
     var okCat=!tiendaCategoriaActiva || tiendaCategoria(p.nombre)===tiendaCategoriaActiva;
     var okBusq=!q || (p.nombre||'').toLowerCase().indexOf(q)>=0;
     return okCat && okBusq;
@@ -700,31 +749,104 @@ function tiendaRender(){
   if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados para "'+q+'"</div>'; return; }
 
   cont.innerHTML=lista.map(function(p){
-    return '<div style="background:var(--wh);border:1px solid var(--bor);border-radius:14px;padding:12px;display:flex;flex-direction:column;">'
-      +'<div style="font-size:1.8rem;text-align:center;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>'
+    var card='<div style="background:var(--wh);border:1px solid var(--bor);border-radius:14px;padding:12px;display:flex;flex-direction:column;'+(tiendaEsAdmin&&!p.visible?'opacity:.55;':'')+'">';
+
+    // en modo admin: checkbox para tanda + etiqueta de estado
+    if(tiendaEsAdmin){
+      var checked=tiendaMarcadosSet[p.id]?'checked':'';
+      card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-bottom:4px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
+        +'<input type="checkbox" '+checked+' onchange="tiendaToggleMarcado('+p.id+')"> '
+        +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
+    }
+
+    card+=(p.foto
+      ? '<div style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;"></div>'
+      : '<div style="font-size:1.8rem;text-align:center;">'+tiendaCategoria(p.nombre).split(' ')[0]+'</div>')
       +'<div style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;">'+p.nombre+'</div>'
-      +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:8px;">'+fmt(p.venta)+'</div>'
-      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+p.id+')">📅 Ver cuotas</button>'
-      +'<div style="display:flex;gap:6px;">'
+      +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:4px;">'+fmt(p.venta)+'</div>'
+      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+p.id+')">📅 Ver cuotas</button>';
+
+    if(tiendaEsAdmin){
+      // botones de admin
+      card+='<div style="display:flex;gap:6px;">'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+p.id+')">✏️ Precio</button>'
+        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+p.id+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+p.id+')">🗑️ Quitar</button>'
-      +'</div>'
       +'</div>';
+    }else{
+      // texto público: consultar stock
+      // botón público: pedir por WhatsApp
+      card+='<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+p.id+')">📲 Pedir / Consultar</button>'
+        +'<div style="font-size:.6rem;color:var(--sub);text-align:center;">Consultá stock con un administrador</div>';
+    }
+    card+='</div>';
+    return card;
   }).join('');
 }
 
-// EDITAR precio de venta (solo admin, ya entró con clave)
+// PONER foto desde la galería del celu (se comprime para no llenar el almacenamiento)
+function tiendaEditarFoto(id){
+  window._tiendaFotoId=id;
+  var inp=document.getElementById('tienda-foto-input');
+  if(!inp){
+    inp=document.createElement('input');
+    inp.type='file'; inp.accept='image/*'; inp.id='tienda-foto-input';
+    inp.style.display='none';
+    inp.onchange=tiendaProcesarFoto;
+    document.body.appendChild(inp);
+  }
+  inp.value='';
+  inp.click();
+}
+function tiendaProcesarFoto(e){
+  var file=e.target.files && e.target.files[0];
+  if(!file){ return; }
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      // achicar a máx 500px de ancho y comprimir a JPG (queda liviano)
+      var maxW=500;
+      var escala=Math.min(1, maxW/img.width);
+      var w=Math.round(img.width*escala), h=Math.round(img.height*escala);
+      var canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      var comprimida=canvas.toDataURL('image/jpeg', 0.7);
+      var p=tiendaProductos.find(function(x){return x.id===window._tiendaFotoId;});
+      if(p){
+        p.foto=comprimida;
+        try{
+          tiendaGuardarLocal();
+          tiendaRender();
+        }catch(err){
+          alert('⚠️ El almacenamiento del celu está lleno. Probá con menos fotos, o esperá a que conectemos la nube (fotos ilimitadas).');
+          p.foto='';
+        }
+      }
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+// quitar la foto de un producto
+function tiendaQuitarFoto(id){
+  var p=tiendaProductos.find(function(x){return x.id===id;});
+  if(!p||!p.foto)return;
+  if(!confirm('¿Quitar la foto de este producto?'))return;
+  p.foto=''; tiendaGuardarLocal(); tiendaRender();
+}
+
+// EDITAR precio (solo admin)
 function tiendaEditarPrecio(id){
   var p=tiendaProductos.find(function(x){return x.id===id;});
   if(!p)return;
-  var actual=p.venta;
-  var nuevo=prompt('Precio de venta de:\n'+p.nombre+'\n\nActual: '+fmt(actual)+'\n\nEscribí el nuevo precio (solo números):', actual);
-  if(nuevo===null)return; // canceló
+  var nuevo=prompt('Precio de venta de:\n'+p.nombre+'\n\nActual: '+fmt(p.venta)+'\n\nEscribí el nuevo precio (solo números):', p.venta);
+  if(nuevo===null)return;
   var val=parseFloat((nuevo+'').replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.'));
   if(isNaN(val)||val<=0){ alert('Precio inválido.'); return; }
   p.venta=Math.round(val);
-  tiendaGuardarLocal();
-  tiendaRender();
+  tiendaGuardarLocal(); tiendaRender();
 }
 
 // QUITAR producto (solo admin)
@@ -733,16 +855,107 @@ function tiendaEliminar(id){
   if(!p)return;
   if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)))return;
   tiendaProductos=tiendaProductos.filter(function(x){return x.id!==id;});
-  tiendaGuardarLocal();
-  tiendaRender();
+  delete tiendaMarcadosSet[id];
+  tiendaGuardarLocal(); tiendaRender();
+}
+
+// marcar/desmarcar producto para acciones en tanda
+function tiendaToggleMarcado(id){
+  if(tiendaMarcadosSet[id]) delete tiendaMarcadosSet[id];
+  else tiendaMarcadosSet[id]=true;
+}
+
+// mostrar u ocultar todos los marcados de una
+function tiendaMarcados(accion){
+  var ids=Object.keys(tiendaMarcadosSet);
+  if(!ids.length){ alert('Primero marcá los productos (tocá la casilla arriba de cada uno).'); return; }
+  var vis=(accion==='mostrar');
+  var cont=0;
+  tiendaProductos.forEach(function(p){
+    if(tiendaMarcadosSet[p.id]){ p.visible=vis; cont++; }
+  });
+  tiendaMarcadosSet={};
+  tiendaGuardarLocal(); tiendaRender();
+  alert('✅ '+cont+' producto(s) '+(vis?'ahora VISIBLES':'ahora OCULTOS')+' para los revendedores.');
 }
 
 function tiendaFiltrarCat(c){ tiendaCategoriaActiva=(tiendaCategoriaActiva===c?'':c); tiendaRender(); }
 
+// Vendedores para el pedido por WhatsApp
+var TIENDA_VENDEDORES=[
+  {nombre:'Maximiliano', tel:'5491168610532'},
+  {nombre:'Angela',      tel:'5491168746034'},
+  {nombre:'Selene',      tel:'5491162107212'}
+];
+
+// Abre un selector de vendedor y arma el mensaje de WhatsApp con el producto
+function tiendaPedirWA(id){
+  var p=tiendaProductos.find(function(x){return x.id===id;});
+  if(!p)return;
+  window._tiendaPedirId=id;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 Pedir producto</h3>'
+    +'<div style="font-size:.85rem;font-weight:700;color:var(--az);margin:6px 0 2px;">'+p.nombre+'</div>'
+    +'<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:12px;">'+fmt(p.venta)+'</div>'
+    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">¿A quién le consultás?</div>';
+  TIENDA_VENDEDORES.forEach(function(v){
+    html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="tiendaEnviarWA(\''+v.tel+'\',\''+v.nombre+'\')">💬 '+v.nombre+'</button>';
+  });
+  // 4ª opción: consultar disponibilidad al grupo/contacto que elija el revendedor
+  html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="tiendaEnviarConsulta()">👥 Chicos!! ¿Está disponible?</button>';
+  // Botón VENDER: manda al cliente el mensaje lindo estilo AmarangoElectro
+  html+='<button class="calc-btn" style="width:100%;background:var(--nar);margin-bottom:8px;font-size:1rem;" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+function tiendaEnviarWA(tel, nombreVend){
+  var p=tiendaProductos.find(function(x){return x.id===window._tiendaPedirId;});
+  if(!p)return;
+  var msg='Hola '+nombreVend+'! Me interesa este producto de AmarangoElectro 🐝\n\n'
+    +'📦 '+p.nombre+'\n'
+    +'💵 Contado: '+fmt(p.venta)+'\n';
+  // agregar planes de cuotas activos
+  var planes=[];
+  for(var n=2;n<=12;n++){
+    if(planesConfig[n] && planesConfig[n].activo){
+      var vc=Math.round(calcularTotalPlan(p.venta,n)/n/1000)*1000;
+      planes.push(n+' cuotas de '+fmt(vc));
+    }
+  }
+  if(planes.length)msg+='📅 En cuotas: '+planes.join(' · ')+'\n';
+  msg+='\n¿Está disponible? ¿Me pasás más info?';
+  var url='https://wa.me/'+tel+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
+}
+
+// "Chicos!!" — abre WhatsApp SIN número fijo, el revendedor elige el contacto/grupo
+function tiendaEnviarConsulta(){
+  var p=tiendaProductos.find(function(x){return x.id===window._tiendaPedirId;});
+  if(!p)return;
+  var msg='Chicos!! 🐝 ¿Está disponible este producto?\n\n📦 '+p.nombre+'\n💵 '+fmt(p.venta);
+  var url='https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
+}
+
+// VENDER — arma el mensaje lindo estilo "pegar precio" y lo manda al cliente (contacto que elija)
+function tiendaVender(){
+  var p=tiendaProductos.find(function(x){return x.id===window._tiendaPedirId;});
+  if(!p)return;
+  var cuotasLines=armarCuotasLines(p.venta);
+  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  var url='https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
+}
+
 function tiendaVerCuotas(id){
   var p=tiendaProductos.find(function(x){return x.id===id;});
   if(!p)return;
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">'+p.nombre+'</h3>'
+  var html=(p.foto?'<div style="width:100%;height:160px;border-radius:12px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:10px;"></div>':'')
+    +'<h3 style="color:var(--az);font-weight:900;font-size:1rem;">'+p.nombre+'</h3>'
     +'<div style="font-size:1.3rem;font-weight:900;color:var(--nar);margin:4px 0 12px;">Contado: '+fmt(p.venta)+'</div>'
     +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Planes de cuotas</div>';
   for(var n=2;n<=12;n++){
