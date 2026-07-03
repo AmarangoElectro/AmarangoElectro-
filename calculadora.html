@@ -380,9 +380,9 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   <div id="tienda-pin" style="text-align:center;padding:30px 16px;">
     <div style="font-size:2.4rem;">🛒</div>
     <h2 style="font-size:1.1rem;font-weight:900;color:var(--az);margin:6px 0;">Tienda Revendedores</h2>
-    <p style="font-size:.75rem;color:var(--sub);margin-bottom:16px;">Ingresá el PIN para ver el catálogo</p>
-    <input type="password" id="tienda-pin-inp" placeholder="PIN" inputmode="numeric"
-      style="width:160px;text-align:center;font-size:1.3rem;letter-spacing:6px;padding:12px;border:2px solid var(--bor);border-radius:12px;"
+    <p style="font-size:.75rem;color:var(--sub);margin-bottom:16px;">Ingresá la clave para ver el catálogo</p>
+    <input type="password" id="tienda-pin-inp" placeholder="Clave"
+      style="width:180px;text-align:center;font-size:1.1rem;letter-spacing:3px;padding:12px;border:2px solid var(--bor);border-radius:12px;"
       onkeydown="if(event.key==='Enter')tiendaCheckPin()">
     <div id="tienda-pin-err" style="color:var(--red);font-size:.75rem;font-weight:700;margin-top:8px;display:none;">PIN incorrecto</div>
     <div><button class="calc-btn" style="margin-top:14px;" onclick="tiendaCheckPin()">Entrar →</button></div>
@@ -631,7 +631,7 @@ function calcularTotalPlan(precioVenta,n){
 /* =========================================================
    TIENDA REVENDEDORES — Etapa 1 (catálogo local + buscador + cuotas)
    ========================================================= */
-var TIENDA_PIN='1234';           // PIN genérico (después sumamos por revendedor)
+var TIENDA_PIN='Amara4';         // PIN de acceso a la tienda
 var tiendaProductos=[];          // catálogo en memoria
 var tiendaCategoriaActiva='';    // filtro de chip activo
 
