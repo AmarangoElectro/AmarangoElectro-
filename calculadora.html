@@ -138,7 +138,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 </div>
 
 <div class="header">
-  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="this.style.display='none'">
+  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
   <div class="header-info">
     <h1><span>A</span>MARANGO<span>E</span>LECTRO 🐝</h1>
     <p>Tu equipo de electro y celulares</p>
@@ -154,11 +154,12 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 </div>
 
 <div class="tabs">
-  <div class="tab on" id="tab-btn-pegar" onclick="showTab('pegar')">📋 Pegar precio</div>
+  <div class="tab on" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
+  <div class="tab" id="tab-btn-pegar" onclick="showTab('pegar')" style="display:none;">📋 Pegar precio</div>
   <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')" style="display:none;">📱 Celulares</div>
-  <div class="tab" onclick="showTab('cuotas')">📅 Cuotas</div>
-  <div class="tab" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
-  <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Administradores</div>
+  <div class="tab" id="tab-btn-cuotas" onclick="showTab('cuotas')" style="display:none;">📅 Cuotas</div>
+  <div class="tab" id="tab-btn-revend" onclick="accesoRevendedores()">👥 Revendedores</div>
+  <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Admin</div>
 </div>
 
 <!-- Sub-pestañas de Administradores (aparecen al entrar al cajón) -->
@@ -169,7 +170,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   <button class="metodo-btn" id="sub-placas" onclick="showAdminSub('placas')" style="color:var(--az);border-color:var(--bor)">🎨 Placas</button>
 </div>
 
-<div class="tab-content on" id="tab-pegar">
+<div class="tab-content" id="tab-pegar">
   <div class="precio-input-wrap">
     <div class="precio-label">📋 Pegá el mensaje con el precio</div>
     <textarea class="pegar-area" id="inp-pegar" placeholder="Pegá acá el mensaje de WhatsApp con el producto y su precio de venta..." oninput="calcPegar()"></textarea>
@@ -382,7 +383,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 </div>
 
 <!-- ============ PESTAÑA: TIENDA REVENDEDORES (Etapa 1) ============ -->
-<div class="tab-content" id="tab-tienda">
+<div class="tab-content on" id="tab-tienda">
 
   <!-- La tienda entra directo en modo público. El admin entra con clave desde el botón. -->
 
@@ -509,7 +510,65 @@ var ADMIN_PASS="Amara4";
 var adminUnlocked=false;
 var pendingTab=null;
 
+var REV_PASS='Moro6';       // clave de revendedores para las herramientas de cálculo
+var revUnlocked=false;      // ¿ya ingresó la clave de revendedor?
+
+// Acceso "Revendedores": pide Moro6 y abre las herramientas de precios
+function accesoRevendedores(){
+  if(revUnlocked){ mostrarPestanasRev(); showTab('pegar'); return; }
+  pedirClaveRevendedor('pegar');
+}
+// muestra las pestañas de cálculo para revendedores
+function mostrarPestanasRev(){
+  document.getElementById('tab-btn-pegar').style.display='';
+  document.getElementById('tab-btn-cuotas').style.display='';
+}
+// muestra TODO (para admin): pestañas de cálculo + celulares
+function mostrarPestanasAdmin(){
+  mostrarPestanasRev();
+}
+function pedirClaveRevendedor(destino){
+  window._revDestino=destino;
+  var ov=document.getElementById('rev-overlay');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='rev-overlay';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(2,12,46,.92);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;';
+    ov.innerHTML='<div style="background:#fff;border-radius:18px;padding:24px;max-width:340px;width:100%;text-align:center;">'
+      +'<div style="font-size:2rem;">🐝</div>'
+      +'<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;margin:6px 0;">Acceso revendedores</h3>'
+      +'<p style="font-size:.75rem;color:var(--sub);margin-bottom:14px;">Ingresá la clave para usar las herramientas de precios</p>'
+      +'<input type="password" id="rev-pass" placeholder="Clave" style="width:100%;text-align:center;font-size:1.1rem;letter-spacing:3px;padding:12px;border:2px solid var(--bor);border-radius:12px;box-sizing:border-box;" onkeydown="if(event.key===\'Enter\')validarRevendedor()">'
+      +'<div id="rev-err" style="color:var(--red);font-size:.75rem;font-weight:700;margin-top:8px;display:none;">Clave incorrecta</div>'
+      +'<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--az);" onclick="validarRevendedor()">Entrar →</button>'
+      +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarRevOverlay()">Cancelar</button>'
+      +'</div>';
+    document.body.appendChild(ov);
+  }
+  document.getElementById('rev-pass').value='';
+  document.getElementById('rev-err').style.display='none';
+  ov.style.display='flex';
+  setTimeout(function(){ var i=document.getElementById('rev-pass'); if(i)i.focus(); },150);
+}
+function validarRevendedor(){
+  var v=(document.getElementById('rev-pass').value||'').trim();
+  if(v===REV_PASS){
+    revUnlocked=true;
+    mostrarPestanasRev();
+    cerrarRevOverlay();
+    showTab(window._revDestino||'pegar');
+  }else{
+    document.getElementById('rev-err').style.display='block';
+  }
+}
+function cerrarRevOverlay(){ var ov=document.getElementById('rev-overlay'); if(ov)ov.style.display='none'; }
+
 function showTab(t){
+  // Pestañas de cálculo (Pegar precio, Cuotas) protegidas con clave de revendedor
+  if((t==='pegar' || t==='cuotas') && !revUnlocked){
+    pedirClaveRevendedor(t);
+    return;
+  }
   // El cajón "admin" pide clave una vez y muestra sub-pestañas
   if(t==='admin'){
     if(!adminUnlocked){
@@ -561,9 +620,13 @@ function checkAdminPass(){
   var p=document.getElementById("admin-pass").value;
   if(p===ADMIN_PASS){
     adminUnlocked=true;
+    revUnlocked=true;          // admin también puede usar herramientas de revendedor
+    tiendaEsAdmin=true;        // admin también edita la tienda (sin pedir clave de nuevo)
+    mostrarPestanasAdmin();    // mostrar pestañas de cálculo
     document.getElementById("login-overlay").style.display="none";
     if(pendingTab==='__celuadmin__'){pendingTab=null;toggleCeluAdmin();}
-    else if(pendingTab){showTab(pendingTab);pendingTab=null;}
+    else if(pendingTab && pendingTab!=='admin'){showTab(pendingTab);pendingTab=null;}
+    else {showTab('admin');pendingTab=null;}
   } else {
     document.getElementById("pass-err").classList.add("show");
     document.getElementById("admin-pass").classList.add("error");
@@ -791,6 +854,13 @@ function tiendaBajarNube(){
 }
 
 function tiendaLoginAdmin(){
+  // si ya se desbloqueó admin (Amara4), entrar directo sin pedir clave de nuevo
+  if(adminUnlocked){
+    tiendaEsAdmin=true;
+    tiendaAplicarModo();
+    tiendaRender();
+    return;
+  }
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;text-align:center;">🔒 Modo administrador</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);text-align:center;margin:6px 0 14px;">Ingresá la clave</p>'
     +'<input type="password" id="tienda-admin-inp" placeholder="Clave" '
@@ -807,6 +877,8 @@ function tiendaConfirmarAdmin(){
   var v=(document.getElementById('tienda-admin-inp').value||'').trim();
   if(v===TIENDA_PIN){
     tiendaEsAdmin=true;
+    adminUnlocked=true;   // clave correcta = acceso admin total
+    revUnlocked=true;
     document.getElementById('modal-cuotas').style.display='none';
     tiendaAplicarModo();
     tiendaRender();
@@ -2499,6 +2571,9 @@ function cerrarBannerInstall(){
     }
   }catch(e){}
 })();
+
+// La tienda es la pestaña de inicio (pública): inicializarla al cargar
+try{ tiendaInit(); }catch(e){}
 </script>
 </body>
 </html>
