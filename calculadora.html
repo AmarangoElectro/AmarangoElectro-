@@ -1135,41 +1135,57 @@ function tiendaProcesarFoto(e){
   reader.onload=function(ev){
     var img=new Image();
     img.onload=function(){
-      // achicar a máx 500px de ancho y comprimir a JPG (queda liviano)
-      var maxW=320;
+      var maxW=600;
       var escala=Math.min(1, maxW/img.width);
       var w=Math.round(img.width*escala), h=Math.round(img.height*escala);
       var canvas=document.createElement('canvas');
       canvas.width=w; canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      var comprimida=canvas.toDataURL('image/jpeg', 0.7);
-      var fid=window._tiendaFotoId;
-      if((''+fid).indexOf('celu_')===0){
-        // foto de un celular
-        var i=parseInt((''+fid).replace('celu_',''),10);
-        var celus=cargarListaCelus();
-        if(celus[i]){
-          celus[i].foto=comprimida;
-          try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); subirCelusNube(celus); tiendaRender(); }
-          catch(err){ alert('⚠️ Almacenamiento lleno. Probá con menos fotos.'); celus[i].foto=''; }
-        }
-        return;
-      }
-      var p=tiendaProductos.find(function(x){return x.id==fid;});
-      if(p){
-        p.foto=comprimida;
-        try{
-          tiendaGuardarLocal();
-          tiendaRender();
-        }catch(err){
-          alert('⚠️ El almacenamiento del celu está lleno. Probá con menos fotos, o esperá a que conectemos la nube (fotos ilimitadas).');
-          p.foto='';
-        }
-      }
+      // convertir a dataURL y de ahí a blob (más confiable en Android que toBlob directo)
+      var dataUrl=canvas.toDataURL('image/jpeg', 0.8);
+      var blob=dataURLaBlob(dataUrl);
+      if(!blob || blob.size<100){ alert('⚠️ La foto quedó vacía al procesar. Probá con otra imagen.'); return; }
+      subirFotoStorage(blob, window._tiendaFotoId);
     };
+    img.onerror=function(){ alert('⚠️ No pude leer esa imagen. Probá con otra.'); };
     img.src=ev.target.result;
   };
   reader.readAsDataURL(file);
+}
+// convierte un dataURL en Blob de forma segura
+function dataURLaBlob(dataUrl){
+  try{
+    var partes=dataUrl.split(',');
+    var mime=(partes[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+    var bin=atob(partes[1]);
+    var n=bin.length;
+    var u8=new Uint8Array(n);
+    while(n--){ u8[n]=bin.charCodeAt(n); }
+    return new Blob([u8], {type:mime});
+  }catch(e){ return null; }
+}
+
+// Sube la foto al Storage de Supabase y guarda el LINK en el producto/celular
+function subirFotoStorage(blob, fid){
+  if(!NUBE_OK || !sbCalc){ alert('Sin conexión a la nube. Esperá unos segundos e intentá de nuevo.'); return; }
+  var nombreArch = 'foto_'+fid+'_'+Date.now()+'.jpg';
+  sbCalc.storage.from('tienda-fotos').upload(nombreArch, blob, { contentType:'image/jpeg', upsert:true, cacheControl:'3600' })
+    .then(function(res){
+      if(res.error){ alert('⚠️ Error al subir la foto:\n'+res.error.message); return; }
+      var pub = sbCalc.storage.from('tienda-fotos').getPublicUrl(nombreArch);
+      var url = pub.data.publicUrl;
+      if((''+fid).indexOf('celu_')===0){
+        var i=parseInt((''+fid).replace('celu_',''),10);
+        var celus=cargarListaCelus();
+        if(celus[i]){ celus[i].foto=url; try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){} subirCelusNube(celus); }
+      }else{
+        var p=tiendaProductos.find(function(x){return x.id==fid;});
+        if(p){ p.foto=url; tiendaGuardarLocal(); }
+      }
+      tiendaRender();
+      alert('✅ Foto subida a la nube. Ahora la ven todos.');
+    })
+    .catch(function(e){ alert('⚠️ Excepción al subir foto: '+(e.message||e)); });
 }
 // quitar la foto de un producto o celular
 function tiendaQuitarFoto(id){
