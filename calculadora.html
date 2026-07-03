@@ -430,6 +430,10 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="showTab('celulares')">📱 Cargar / actualizar celulares</button>
     <button id="tienda-btn-carac" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaAbrirCarac()">📋 Cargar características de celulares (masivo)</button>
+    <button id="tienda-btn-subir" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
+      onclick="tiendaForzarSubir()">☁️ Subir todo a la nube (para que otros vean)</button>
+    <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
+      onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
   </div>
 </div>
 
@@ -853,6 +857,44 @@ function tiendaBajarNube(){
     .catch(function(){});
 }
 
+// DIAGNÓSTICO: revisa qué hay en la nube y fuerza subir/bajar
+function tiendaDiagNube(){
+  var r='CLOUD: '+(NUBE_OK?'SÍ':'NO')+'\nCliente sb: '+(sbCalc?'SÍ':'NO')+'\n';
+  r+='Productos en TU celu: '+tiendaProductos.length+'\n';
+  r+='Celulares en TU celu: '+cargarListaCelus().length+'\n\n';
+  if(!NUBE_OK||!sbCalc){ alert('❌ Sin conexión a la nube.\n\n'+r); return; }
+  r+='Consultando la nube...\n';
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+    .then(function(res){
+      if(res.error){ alert('⚠️ ERROR al leer la nube:\n\n'+res.error.message+'\n\n'+r); return; }
+      var enNube = (res.data && res.data.datos) ? res.data.datos.length : 0;
+      r+='Productos en la NUBE: '+enNube+'\n';
+      r+='Celulares en la NUBE: (ver abajo)\n\n';
+      if(enNube===0 && tiendaProductos.length>0){
+        r+='➡️ La nube está VACÍA pero vos tenés productos.\nHay que subirlos: tocá "Subir todo a la nube".';
+      }else if(enNube>0){
+        r+='✅ La nube TIENE productos. Si otros no los ven, es caché en el celu de ellos.';
+      }
+      alert('🔍 DIAGNÓSTICO NUBE:\n\n'+r);
+    })
+    .catch(function(e){ alert('⚠️ Excepción: '+(e.message||e)+'\n\n'+r); });
+}
+
+// Fuerza subir TODO (productos + celulares) a la nube
+function tiendaForzarSubir(){
+  if(!NUBE_OK||!sbCalc){ alert('Sin conexión a la nube.'); return; }
+  var celus=cargarListaCelus();
+  Promise.all([
+    sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).select(),
+    sbCalc.from('celulares_lista').upsert({ id:'lista', datos:celus, actualizado:new Date().toISOString() }).select()
+  ]).then(function(res){
+    var e1=res[0].error, e2=res[1].error;
+    if(e1||e2){ alert('⚠️ Error al subir:\n'+((e1&&e1.message)||'')+'\n'+((e2&&e2.message)||'')); return; }
+    var okP=res[0].data&&res[0].data.length, okC=res[1].data&&res[1].data.length;
+    alert('✅ Subido a la nube:\n\nProductos: '+(okP?'OK':'falló')+'\nCelulares: '+(okC?'OK':'falló')+'\n\nAhora los demás tienen que borrar caché y van a verlos.');
+  }).catch(function(e){ alert('⚠️ Excepción al subir: '+(e.message||e)); });
+}
+
 function tiendaLoginAdmin(){
   // si ya se desbloqueó admin (Amara4), entrar directo sin pedir clave de nuevo
   if(adminUnlocked){
@@ -897,6 +939,8 @@ function tiendaAplicarModo(){
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
+  var btnSubir=document.getElementById('tienda-btn-subir'); if(btnSubir)btnSubir.style.display = tiendaEsAdmin?'block':'none';
+  var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
   document.getElementById('tienda-btn-admin').style.display = tiendaEsAdmin?'none':'inline-block';
 }
 
