@@ -22,8 +22,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
 .header-logo{width:66px;height:66px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.15);position:relative;z-index:1}
 .header-info{text-align:center;position:relative;z-index:1}
-.header-info h1{color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:.3px;text-shadow:0 2px 8px rgba(0,0,0,.4)}
-.header-info h1 span{color:var(--nar)}
+.header-info h1{color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:.3px;text-shadow:0 0 1px var(--nar),0 0 2px rgba(255,122,0,.55),0 2px 8px rgba(0,0,0,.4)}
+.header-info h1 .pwr{display:inline-block;font-weight:900;transform:translateY(1px)}
 .header-info p{color:rgba(255,255,255,.7);font-size:.66rem;margin-top:2px}
 .header-badge{background:rgba(255,122,0,.25);border:1px solid var(--nar);border-radius:20px;padding:4px 14px;font-size:.62rem;font-weight:800;color:#ffb968;white-space:nowrap;position:relative;z-index:1;margin-top:2px}
 .tabs{display:flex;background:var(--wh);border-bottom:2px solid var(--bor);overflow-x:auto;scrollbar-width:none}
@@ -140,7 +140,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 <div class="header">
   <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
   <div class="header-info">
-    <h1><span>A</span>MARANGO<span>E</span>LECTRO 🐝</h1>
+    <h1>AmarangoElectr<span class="pwr">⏻</span> 🐝</h1>
     <p>La energía que mueve tu hogar</p>
   </div>
   <div class="header-badge">🛒 Tienda</div>
