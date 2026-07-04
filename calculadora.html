@@ -405,6 +405,13 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       <span onclick="cerrarSesion()" style="color:var(--red);cursor:pointer;text-decoration:underline;margin-left:10px;">🚪 Cerrar sesión</span>
     </div>
 
+    <!-- Banner "cómo comprar" para clientes -->
+    <div onclick="tiendaComoComprar()" style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;border-radius:12px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.2);">
+      <span style="font-size:1.4rem;">💡</span>
+      <div style="flex:1;font-size:.78rem;font-weight:700;line-height:1.25;">¿No sabés cómo comprar?<br><span style="font-weight:500;opacity:.85;font-size:.72rem;">Tocá acá y te explicamos, es muy fácil 👇</span></div>
+      <span style="font-size:1.1rem;">→</span>
+    </div>
+
     <!-- Buscador -->
     <div style="position:sticky;top:0;background:var(--bg);padding-bottom:8px;z-index:5;">
       <input id="tienda-buscar" placeholder="🔍 Buscar: Samsung, heladera, TV, cocina..."
@@ -1139,8 +1146,8 @@ function tiendaRender(){
       +'</div>';
     }else{
       // botón público: pedir por WhatsApp
-      card+='<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 Pedir / Consultar</button>'
-        +'<div style="font-size:.6rem;color:var(--sub);text-align:center;">Consultá stock con un administrador</div>';
+      card+='<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+((revUnlocked||adminUnlocked)?'Pedir / Consultar':'Consultar')+'</button>'
+        +'<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
     }
     card+='</div>';
     return card;
@@ -1359,20 +1366,72 @@ function tiendaPedirWA(id){
   var p=buscarProd(id);
   if(!p)return;
   window._tiendaPedirId=id;
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 Pedir producto</h3>'
+  var esVendedor = revUnlocked || adminUnlocked; // vendedores/admin desbloqueados
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 '+(esVendedor?'Pedir producto':'Consultá este producto')+'</h3>'
     +'<div style="font-size:.85rem;font-weight:700;color:var(--az);margin:6px 0 2px;">'+p.nombre+'</div>'
     +'<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:12px;">'+fmt(p.venta)+'</div>'
-    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">¿A quién le consultás?</div>';
+    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">'+(esVendedor?'¿A quién le consultás?':'Consultá con nosotros')+'</div>';
+  // Consultar a los administradores/encargada (visible para TODOS)
   TIENDA_VENDEDORES.forEach(function(v){
     html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="tiendaEnviarWA(\''+v.tel+'\',\''+v.nombre+'\')">💬 '+v.nombre+'</button>';
   });
-  // 4ª opción: consultar disponibilidad al grupo/contacto que elija el revendedor
-  html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="tiendaEnviarConsulta()">👥 Chicos!! ¿Está disponible?</button>';
-  // Botón VENDER: manda al cliente el mensaje lindo estilo AmarangoElectro
-  html+='<button class="calc-btn" style="width:100%;background:var(--nar);margin-bottom:8px;font-size:1rem;" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+
+  if(esVendedor){
+    // opciones SOLO para vendedores/admin
+    html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="tiendaEnviarConsulta()">👥 Chicos!! ¿Está disponible?</button>';
+    html+='<button class="calc-btn" style="width:100%;background:var(--nar);margin-bottom:8px;font-size:1rem;" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+  }else{
+    // opción SOLO para clientes: consultar con su vendedor (elige contacto)
+    html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="tiendaConsultarVendedor()">🤝 Consultá con tu vendedor</button>';
+  }
   html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
+}
+
+// Instrucciones simples para el cliente
+function tiendaComoComprar(){
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.1rem;text-align:center;">💡 ¿Cómo comprar?</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);text-align:center;margin:4px 0 16px;">Es muy fácil, en 3 pasos 🐝</p>'
+    +'<div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div style="font-size:.82rem;color:var(--az);"><b>Elegí tu producto</b><br><span style="color:var(--sub);">Mirá el catálogo, tocá un producto para ver la foto, el precio y las cuotas.</span></div></div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div style="font-size:.82rem;color:var(--az);"><b>Consultá</b><br><span style="color:var(--sub);">Tocá <b>📲 Consultá este producto</b> y escribinos por WhatsApp. Si ya tenés un vendedor, elegí <b>🤝 Consultá con tu vendedor</b>.</span></div></div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:16px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div style="font-size:.82rem;color:var(--az);"><b>Coordinamos y listo</b><br><span style="color:var(--sub);">Te confirmamos stock, la primera cuota y la entrega. ¡Así de simple! 🎉</span></div></div>'
+    +'<div style="background:var(--bg);border-radius:10px;padding:10px 12px;font-size:.75rem;color:var(--az);text-align:center;margin-bottom:14px;">💬 <b>¿Dudas?</b> Escribinos y te asesoramos sin compromiso.</div>'
+    +'<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="tiendaAsesoramiento()">💬 Quiero que me asesoren</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+// Asesoramiento: selector de a quién escribir
+function tiendaAsesoramiento(){
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">💬 Asesoramiento</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí con quién querés hablar:</p>';
+  TIENDA_VENDEDORES.forEach(function(v){
+    var msg='Hola '+v.nombre+'! 🐝 Quiero que me asesoren para comprar en AmarangoElectro.';
+    html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="window.open(\'https://wa.me/'+v.tel+'?text='+encodeURIComponent(msg)+'\',\'_blank\')">💬 '+v.nombre+'</button>';
+  });
+  html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent('Hola! 🐝 Soy cliente de AmarangoElectro y quiero que me asesoren.')+'\',\'_blank\')">🤝 Consultá con tu vendedor</button>';
+  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="tiendaComoComprar()">← Volver</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+}
+
+  var p=buscarProd(window._tiendaPedirId);
+  if(!p)return;
+  var msg='Hola! 🐝 Soy cliente de AmarangoElectro. Me interesa este producto:\n\n'
+    +'📦 '+p.nombre+'\n💵 Contado: '+fmt(p.venta)+'\n';
+  var planes=[];
+  for(var n=2;n<=12;n++){
+    if(planesConfig[n] && planesConfig[n].activo){
+      var vc=Math.round(calcularTotalPlan(p.venta,n)/n/1000)*1000;
+      planes.push(n+' cuotas de '+fmt(vc));
+    }
+  }
+  if(planes.length)msg+='📅 En cuotas: '+planes.join(' · ')+'\n';
+  msg+='\n¿Me pasás info?';
+  var url='https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
 }
 
 function tiendaEnviarWA(tel, nombreVend){
@@ -1445,9 +1504,12 @@ function tiendaVerDetalle(id){
     }
   }
   var pid="'"+p.id+"'";
+  var esVend = revUnlocked || adminUnlocked;
   // acciones
-  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 Pedir / Consultar</button>'
-    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
+  if(esVend){
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+  }
   // en modo admin: botón editar dentro del detalle
   if(tiendaEsAdmin){
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
