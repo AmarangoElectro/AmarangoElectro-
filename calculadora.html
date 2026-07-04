@@ -1884,6 +1884,52 @@ function bajarCelusNube(){
       }
     }).catch(function(){});
 }
+// Pre-procesa la lista: une líneas partidas (nombre en una, precio en la otra)
+// y descarta encabezados. Detecta precio como $número o -$número.
+function preprocesarLineasCelus(txt){
+  var crudas=txt.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  function tienePrecio(l){ return /\$\s*\d|[-–]\s*\$?\s*\d|\d{3,}/.test(l); }
+  // una línea es "solo precio/color" si arranca con -, $ o ( (continuación de la de arriba)
+  function esContinuacion(l){
+    if(/^[-–$(]/.test(l) || /^\d/.test(l))return true;
+    // línea de solo colores (ej: "silver-blue-orange", "orange") sin números
+    if(!/\d/.test(l) && /^[a-zA-Záéíóú][a-zA-Záéíóú \-\/,]*$/.test(l) && l.length<40){
+      // ¿son palabras de color conocidas?
+      var pal=l.toLowerCase().split(/[-\/,\s]+/);
+      var coloresConocidos=['silver','blue','orange','black','white','yellow','green','red','purple','lavander','lavender','gold','gray','grey','pink','desert','natural','titanium','graphite','sage','mint','celeste','negro','blanco','azul','rojo','verde','dorado','plata','gris','rosa','violeta','lila','naranja'];
+      var todosColor=pal.every(function(p){return !p||coloresConocidos.indexOf(p)>=0;});
+      if(todosColor)return true;
+    }
+    return false;
+  }
+  function tieneNombre(l){
+    if(esContinuacion(l))return false;
+    var limpio=l.replace(/\([^)]*\)/g,'').replace(/\$?\s*\d[\d.,]*/g,'').replace(/[^a-zA-Z0-9 ]/g,'').trim();
+    return limpio.length>=3;
+  }
+  function esEncabezado(l){
+    return !tienePrecio(l) && /(sellado|gtia|garant|oficial|meses|^lista|precios|hay stock|consult)/i.test(l);
+  }
+  var out=[];
+  for(var i=0;i<crudas.length;i++){
+    var l=crudas[i];
+    if(esEncabezado(l))continue;
+    var hayNom=tieneNombre(l), hayPre=tienePrecio(l);
+    if(hayNom){
+      // es un nombre. Absorbo líneas de continuación (precio/color) que le siguen
+      var j=i+1;
+      while(j<crudas.length && esContinuacion(crudas[j]) && !tieneNombre(crudas[j])){
+        l=l+' '+crudas[j]; j++;
+        if(tienePrecio(crudas[j-1]) && /\)/.test(crudas[j-1]))break; // ya tiene precio y color, corto
+      }
+      i=j-1;
+      out.push(l);
+    }
+    // líneas de continuación sueltas sin nombre previo → se ignoran
+  }
+  return out;
+}
+
 function parsearCeluLinea(linea, esUSD){
   // ignorar precios tachados de WhatsApp (~...~) = precios viejos
   linea=linea.replace(/\*?~[^~]*~\*?/g,' ').replace(/\s{2,}/g,' ').trim();
@@ -2100,7 +2146,7 @@ function ordenarPorMarca(lista){
 }
 function guardarListaCelus(){
   var txt=document.getElementById('inp-celulista').value||'';
-  var lineas=txt.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  var lineas=preprocesarLineasCelus(txt);
   var esUSD=(celuModo==='usd');
   var cotiz=parseFloat(document.getElementById('celu-cotiz').value)||0;
   if(esUSD && !cotiz){alert('Poné el valor del dólar para convertir los precios USD.');return;}
