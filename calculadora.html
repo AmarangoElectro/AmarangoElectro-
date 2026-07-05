@@ -405,6 +405,9 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       <span onclick="cerrarSesion()" style="color:var(--red);cursor:pointer;text-decoration:underline;margin-left:10px;">🚪 Cerrar sesión</span>
     </div>
 
+    <!-- Banner rotativo de mensajes -->
+    <div id="tienda-banner-rot" style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:.82rem;font-weight:800;text-align:center;box-shadow:0 2px 8px rgba(255,122,0,.25);transition:opacity .4s;min-height:20px;"></div>
+
     <!-- Banner "cómo comprar" para clientes -->
     <div onclick="tiendaComoComprar()" style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;border-radius:12px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.2);">
       <span style="font-size:1.4rem;">💡</span>
@@ -869,6 +872,32 @@ function tiendaInit(){
   tiendaRender();
   tiendaBajarNube();       // baja el catálogo de la nube
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+  iniciarBannerRotativo();
+}
+// Banner rotativo: mensajes que van cambiando
+var BANNER_MENSAJES=[
+  '🐝 ¡Bienvenido a AmarangoElectro!',
+  '💳 Todo en cuotas fijas, sin sorpresas',
+  '📦 Consultá stock por WhatsApp',
+  '⭐ Mirá nuestros productos destacados',
+  '🛒 Armá tu pedido y coordinamos la entrega',
+  '📱 Celulares y electro para tu hogar'
+];
+var _bannerIdx=0, _bannerTimer=null;
+function iniciarBannerRotativo(){
+  var el=document.getElementById('tienda-banner-rot');
+  if(!el)return;
+  if(_bannerTimer)clearInterval(_bannerTimer);
+  el.textContent=BANNER_MENSAJES[0];
+  _bannerIdx=0;
+  _bannerTimer=setInterval(function(){
+    el.style.opacity='0';
+    setTimeout(function(){
+      _bannerIdx=(_bannerIdx+1)%BANNER_MENSAJES.length;
+      el.textContent=BANNER_MENSAJES[_bannerIdx];
+      el.style.opacity='1';
+    },400);
+  },3500);
 }
 // baja los celulares de la nube y refresca la tienda (para que se vean specs/precios nuevos)
 function tiendaBajarCelusNube(intentos){
