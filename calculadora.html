@@ -122,10 +122,25 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 .login-box .err-msg.show{display:block}
 .login-box button{width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit}
 .login-box button:active{opacity:.85}
+@keyframes splashPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+@keyframes splashDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-5px);}}
+#splash-screen.oculto{opacity:0;pointer-events:none;transition:opacity .5s;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+<div id="splash-screen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 55%,#1e5bc8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <img src="icon.png" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}" style="width:120px;height:120px;border-radius:50%;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:splashPulse 1.4s ease-in-out infinite;">
+  <div style="color:#fff;font-size:1.4rem;font-weight:900;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.4);">AmarangoElectr<span style="display:inline-block;position:relative;width:.55em;height:.55em;vertical-align:baseline;"><span style="position:absolute;inset:0;border:2.5px solid #fff;border-radius:50%;border-top-color:transparent;"></span><span style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:45%;background:#fff;border-radius:2px;"></span></span> 🐝</div>
+  <div style="color:#ffb968;font-size:.85rem;font-style:italic;font-weight:600;">Equipá tu casa, fácil y en cuotas</div>
+  <div style="margin-top:10px;display:flex;gap:6px;">
+    <span style="width:10px;height:10px;border-radius:50%;background:var(--nar);animation:splashDot 1s infinite;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;background:var(--nar);animation:splashDot 1s infinite .2s;"></span>
+    <span style="width:10px;height:10px;border-radius:50%;background:var(--nar);animation:splashDot 1s infinite .4s;"></span>
+  </div>
+  <div style="color:rgba(255,255,255,.6);font-size:.72rem;margin-top:4px;">Cargando tu tienda...</div>
+</div>
 
 <div class="login-overlay" id="login-overlay" style="display:none">
   <div class="login-box">
@@ -460,6 +475,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaForzarSubir()">☁️ Subir todo a la nube (para que otros vean)</button>
     <button id="tienda-btn-banner" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--nar);"
       onclick="editarBanner()">📢 Editar mensajes del banner</button>
+    <button id="tienda-btn-cupones" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--nar);"
+      onclick="editarCupones()">🎟️ Cupones de descuento</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
   </div>
@@ -874,6 +891,28 @@ function tiendaProcesarCarac(){
 var tiendaEsAdmin=false;         // modo admin activo o no
 var tiendaMarcadosSet={};        // productos marcados para tanda
 var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
+var cuponAplicado=null;          // cupón activo en el carrito
+// Cupones de ejemplo por defecto. tipo: 'pct' (%) o 'monto' ($)
+var CUPONES_DEFAULT=[
+  {codigo:'BIENVENIDO10', tipo:'pct', valor:10},
+  {codigo:'AMARANGO5', tipo:'pct', valor:5}
+];
+function cargarCupones(){
+  try{ var g=localStorage.getItem('ae_cupones'); if(g){var a=JSON.parse(g); if(a)return a;} }catch(e){}
+  return CUPONES_DEFAULT.slice();
+}
+function guardarCupones(lista){
+  try{ localStorage.setItem('ae_cupones', JSON.stringify(lista)); }catch(e){}
+  if(NUBE_OK && sbCalc){
+    sbCalc.from('tienda_catalogo').upsert({ id:'cupones', datos:lista, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+  }
+}
+function bajarCuponesNube(){
+  if(!NUBE_OK||!sbCalc)return;
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','cupones').maybeSingle()
+    .then(function(r){ if(r&&r.data&&r.data.datos){ try{localStorage.setItem('ae_cupones',JSON.stringify(r.data.datos));}catch(e){} } })
+    .catch(function(){});
+}
 
 // La tienda arranca en modo PÚBLICO (sin clave). El admin entra con clave.
 function tiendaInit(){
@@ -886,6 +925,7 @@ function tiendaInit(){
   tiendaBajarNube();       // baja el catálogo de la nube
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
   bajarBannerNube();       // baja los mensajes del banner de la nube
+  bajarCuponesNube();      // baja los cupones de la nube
   iniciarBannerRotativo();
 }
 // Banner rotativo: mensajes que van cambiando
@@ -954,6 +994,48 @@ function bajarBannerNube(){
         BANNER_MENSAJES=r.data.datos;
       }
     }).catch(function(){});
+}
+// ===== Gestor de CUPONES (admin) =====
+function editarCupones(){
+  var cups=cargarCupones();
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🎟️ Cupones de descuento</h3>'
+    +'<div id="cupones-lista" style="margin:10px 0;">';
+  if(!cups.length)html+='<p style="font-size:.75rem;color:var(--sub);">No hay cupones todavía.</p>';
+  cups.forEach(function(c,idx){
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--bor);border-radius:10px;margin-bottom:6px;">'
+      +'<div style="flex:1;"><div style="font-weight:800;color:var(--az);font-size:.82rem;">'+c.codigo+'</div>'
+      +'<div style="font-size:.7rem;color:#0a8a3f;font-weight:700;">'+(c.tipo==='pct'?c.valor+'% off':fmt(c.valor)+' off')+'</div></div>'
+      +'<button onclick="borrarCupon('+idx+')" style="width:30px;height:30px;border-radius:8px;border:1.5px solid #ffd5d5;background:#fff0f0;color:var(--red);cursor:pointer;">🗑️</button></div>';
+  });
+  html+='</div>'
+    +'<div style="border-top:1px solid var(--bor);padding-top:12px;margin-top:8px;">'
+    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);margin-bottom:6px;">NUEVO CUPÓN</div>'
+    +'<input id="cup-cod" placeholder="Código (ej: VERANO20)" style="width:100%;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.8rem;text-transform:uppercase;margin-bottom:6px;box-sizing:border-box;">'
+    +'<div style="display:flex;gap:6px;margin-bottom:8px;">'
+      +'<select id="cup-tipo" style="flex:1;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.8rem;"><option value="pct">Porcentaje %</option><option value="monto">Monto $</option></select>'
+      +'<input id="cup-val" type="number" inputmode="numeric" placeholder="Valor" style="flex:1;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.8rem;box-sizing:border-box;"></div>'
+    +'<button class="calc-btn" style="width:100%;background:var(--gr);" onclick="agregarCupon()">➕ Agregar cupón</button></div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+function agregarCupon(){
+  var cod=(document.getElementById('cup-cod').value||'').trim().toUpperCase();
+  var tipo=document.getElementById('cup-tipo').value;
+  var val=parseFloat(document.getElementById('cup-val').value)||0;
+  if(!cod||val<=0){ alert('Poné código y valor.'); return; }
+  var cups=cargarCupones();
+  if(cups.find(function(c){return c.codigo.toUpperCase()===cod;})){ alert('Ya existe un cupón con ese código.'); return; }
+  cups.push({codigo:cod, tipo:tipo, valor:val});
+  guardarCupones(cups);
+  editarCupones();
+}
+function borrarCupon(idx){
+  var cups=cargarCupones();
+  cups.splice(idx,1);
+  guardarCupones(cups);
+  editarCupones();
 }
 // baja los celulares de la nube y refresca la tienda (para que se vean specs/precios nuevos)
 function tiendaBajarCelusNube(intentos){
@@ -1117,6 +1199,7 @@ function tiendaAplicarModo(){
   var btnSubir=document.getElementById('tienda-btn-subir'); if(btnSubir)btnSubir.style.display = tiendaEsAdmin?'block':'none';
   var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
+  var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
     bAdmin.style.display='none';
@@ -1827,8 +1910,25 @@ function abrirCarrito(){
       +'<button onclick="cambiarCant('+idx+',0)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #ffd5d5;background:#fff0f0;color:var(--red);cursor:pointer;margin-left:2px;">🗑️</button>'
       +'</div>';
   });
-  html+='</div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--az);margin-bottom:14px;"><span style="font-weight:800;color:var(--az);">TOTAL contado:</span><span style="font-size:1.3rem;font-weight:900;color:var(--nar);">'+fmt(total)+'</span></div>'
+  html+='</div>';
+  // === CUPÓN ===
+  var desc=0;
+  if(cuponAplicado){
+    desc = cuponAplicado.tipo==='pct' ? Math.round(total*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,total);
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#e7f9ee;border-radius:10px;padding:8px 12px;margin-bottom:8px;">'
+      +'<span style="font-size:.75rem;font-weight:800;color:#0a8a3f;">🎟️ '+cuponAplicado.codigo+' ('+(cuponAplicado.tipo==='pct'?cuponAplicado.valor+'%':fmt(cuponAplicado.valor))+' off)</span>'
+      +'<span onclick="quitarCupon()" style="color:var(--red);font-size:.7rem;font-weight:700;cursor:pointer;text-decoration:underline;">Quitar</span></div>';
+  }else{
+    html+='<div style="display:flex;gap:6px;margin-bottom:8px;">'
+      +'<input id="cupon-inp" placeholder="🎟️ Código de cupón" style="flex:1;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.8rem;text-transform:uppercase;">'
+      +'<button class="calc-btn" style="background:var(--az);font-size:.75rem;padding:8px 14px;white-space:nowrap;" onclick="aplicarCupon()">Aplicar</button></div>';
+  }
+  var totalFinal=total-desc;
+  if(desc>0){
+    html+='<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--sub);padding:2px 0;"><span>Subtotal:</span><span>'+fmt(total)+'</span></div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:.78rem;color:#0a8a3f;font-weight:700;padding:2px 0;"><span>Descuento:</span><span>− '+fmt(desc)+'</span></div>';
+  }
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--az);margin-bottom:14px;"><span style="font-weight:800;color:var(--az);">TOTAL contado:</span><span style="font-size:1.3rem;font-weight:900;color:var(--nar);">'+fmt(totalFinal)+'</span></div>'
     +'<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="finalizarPedido()">✅ Hacer el pedido</button>'
     +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--red);border:2px solid #ffd5d5;margin-bottom:8px;" onclick="vaciarCarrito()">Vaciar carrito</button>'
     +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Seguir mirando</button>';
@@ -1836,6 +1936,15 @@ function abrirCarrito(){
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
 }
+function aplicarCupon(){
+  var cod=(document.getElementById('cupon-inp').value||'').trim().toUpperCase();
+  if(!cod)return;
+  var cup=cargarCupones().find(function(c){return c.codigo.toUpperCase()===cod;});
+  if(!cup){ alert('❌ Cupón no válido.'); return; }
+  cuponAplicado=cup;
+  abrirCarrito();
+}
+function quitarCupon(){ cuponAplicado=null; abrirCarrito(); }
 function cambiarCant(idx, delta){
   if(delta===0){ carrito.splice(idx,1); }
   else{
@@ -1848,7 +1957,7 @@ function cambiarCant(idx, delta){
 }
 function vaciarCarrito(){
   if(!confirm('¿Vaciar el carrito?'))return;
-  carrito=[]; actualizarCarritoUI();
+  carrito=[]; cuponAplicado=null; actualizarCarritoUI();
   document.getElementById('modal-cuotas').style.display='none';
 }
 // Finalizar: arma el mensaje del pedido y elige destinatario
@@ -1871,7 +1980,13 @@ function enviarPedido(tel, nombre){
     var sub=x.venta*x.cantidad; total+=sub;
     msg+='• '+x.cantidad+'x '+x.nombre+' — '+fmt(sub)+'\n';
   });
-  msg+='\n💰 *TOTAL contado: '+fmt(total)+'*\n\n';
+  var desc=0;
+  if(cuponAplicado){
+    desc = cuponAplicado.tipo==='pct' ? Math.round(total*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,total);
+    msg+='\nSubtotal: '+fmt(total)+'\n';
+    msg+='🎟️ Cupón '+cuponAplicado.codigo+': − '+fmt(desc)+'\n';
+  }
+  msg+='\n💰 *TOTAL contado: '+fmt(total-desc)+'*\n\n';
   msg+=(nombre?'Hola '+nombre+'! ':'')+'Quiero hacer este pedido. ¿Coordinamos? 🙌';
   var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
@@ -3190,6 +3305,12 @@ function cerrarBannerInstall(){
 
 // La tienda es la pestaña de inicio (pública): inicializarla al cargar
 try{ tiendaInit(); }catch(e){}
+
+// Ocultar la pantalla de bienvenida a los ~1.8 segundos
+setTimeout(function(){
+  var sp=document.getElementById('splash-screen');
+  if(sp){ sp.classList.add('oculto'); setTimeout(function(){ sp.style.display='none'; },500); }
+}, 1800);
 </script>
 </body>
 </html>
