@@ -128,6 +128,11 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 @keyframes splashPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 @keyframes splashDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-5px);}}
 #splash-screen.oculto{opacity:0;pointer-events:none;transition:opacity .5s;}
+/* Fade-in de las tarjetas al cargar */
+@keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.card-fade{animation:cardFade .35s ease both;}
+/* Vista LISTA: una columna, tarjeta horizontal */
+#tienda-grid.vista-lista{grid-template-columns:1fr !important;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -461,6 +466,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
         </select>
         <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
         <button id="btn-ver-favs" onclick="toggleVerFavoritos()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Ver mis favoritos">❤️</button>
+        <button id="btn-vista" onclick="tiendaToggleVista()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Cambiar vista">☰</button>
         <button id="btn-modo-selec" onclick="tiendaToggleModoSelec()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Compartir varios productos">📤</button>
       </div>
     </div>
@@ -967,6 +973,7 @@ var tiendaEsAdmin=false;         // modo admin activo o no
 var tiendaMarcadosSet={};        // productos marcados para tanda
 var tiendaModoSelec=false;       // modo "compartir varios" activo
 var tiendaSelecSet={};           // productos seleccionados para compartir
+var tiendaVistaLista=false;      // false = grilla 2 columnas, true = lista 1 columna
 var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
 var cuponAplicado=null;          // cupón activo en el carrito
 // Cupones de ejemplo por defecto. tipo: 'pct' (%) o 'monto' ($)
@@ -1006,6 +1013,9 @@ function tiendaInit(){
   bajarHistorialNube();    // baja el historial de pedidos de la nube
   iniciarBannerRotativo();
   mostrarSaludoHora();     // saludo según la hora del día
+  // recuperar preferencia de vista (lista/grilla)
+  try{ if(localStorage.getItem('ae_vista_lista')==='1'){ tiendaVistaLista=true;
+    var bv=document.getElementById('btn-vista'); if(bv){ bv.textContent='▦'; bv.title='Ver en grilla'; bv.style.background='var(--az)'; bv.style.color='#fff'; } } }catch(e){}
   // reflejar el estado del modo oscuro en el botón
   var bmo=document.getElementById('btn-modo-oscuro');
   if(bmo)bmo.textContent=document.body.classList.contains('oscuro')?'☀️':'🌙';
@@ -1670,10 +1680,11 @@ function tiendaRender(){
   var cntEl=document.getElementById('tienda-contador');
   if(cntEl)cntEl.textContent='Mostrando '+lista.length+' producto'+(lista.length===1?'':'s');
 
-  cont.innerHTML=lista.map(function(p){
+  cont.innerHTML=lista.map(function(p, _idx){
     var pid="'"+p.id+"'"; // id entre comillas (sirve para número y para celu_N)
     var selMarcado=tiendaSelecSet[p.id];
-    var card='<div style="background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+    var delay=Math.min(_idx*40, 400); // fade escalonado (tope 0.4s)
+    var card='<div class="prod-card card-fade" style="animation-delay:'+delay+'ms;background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
     // modo compartir varios: casilla de selección (para todos)
     if(tiendaModoSelec){
@@ -1753,6 +1764,9 @@ function tiendaRender(){
     card+='</div>';
     return card;
   }).join('');
+  // aplicar vista lista/grilla
+  if(tiendaVistaLista) cont.classList.add('vista-lista');
+  else cont.classList.remove('vista-lista');
   actualizarCarritoUI();
 }
 
@@ -2335,6 +2349,20 @@ function compartirProducto(id){
 function compartirSoloTexto(msg){
   var url='https://wa.me/?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
+}
+
+// ═══ VISTA LISTA / GRILLA ═══
+function tiendaToggleVista(){
+  tiendaVistaLista=!tiendaVistaLista;
+  var btn=document.getElementById('btn-vista');
+  if(btn){
+    btn.textContent=tiendaVistaLista?'▦':'☰';
+    btn.title=tiendaVistaLista?'Ver en grilla':'Ver en lista';
+    btn.style.background=tiendaVistaLista?'var(--az)':'var(--wh)';
+    btn.style.color=tiendaVistaLista?'#fff':'';
+  }
+  try{ localStorage.setItem('ae_vista_lista', tiendaVistaLista?'1':'0'); }catch(e){}
+  tiendaRender();
 }
 
 // ═══ COMPARTIR VARIOS PRODUCTOS CON FOTO ═══
