@@ -428,6 +428,9 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       <span onclick="cerrarSesion()" style="color:var(--red);cursor:pointer;text-decoration:underline;margin-left:10px;">🚪 Cerrar sesión</span>
     </div>
 
+    <!-- Saludo según la hora -->
+    <div id="tienda-saludo-hora" style="text-align:center;font-size:.95rem;font-weight:800;color:var(--txt);margin-bottom:8px;letter-spacing:.2px;"></div>
+
     <!-- Banner rotativo de mensajes -->
     <div id="tienda-banner-rot" style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:.82rem;font-weight:800;text-align:center;box-shadow:0 2px 8px rgba(255,122,0,.25);transition:opacity .4s;min-height:20px;"></div>
 
@@ -451,10 +454,19 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
           <option value="menor">💰 Precio: menor a mayor</option>
           <option value="mayor">💰 Precio: mayor a menor</option>
           <option value="az">🔤 Nombre A-Z</option>
+          <option value="nuevos">✨ Novedades primero</option>
         </select>
         <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
         <button id="btn-ver-favs" onclick="toggleVerFavoritos()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Ver mis favoritos">❤️</button>
+        <button id="btn-modo-selec" onclick="tiendaToggleModoSelec()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Compartir varios productos">📤</button>
       </div>
+    </div>
+
+    <!-- Barra flotante de compartir varios -->
+    <div id="tienda-selec-bar" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:1450;background:var(--wh);border-top:2px solid var(--nar);box-shadow:0 -4px 16px rgba(0,0,0,.18);padding:10px 14px;gap:8px;align-items:center;">
+      <div style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);"><span id="selec-count">0</span> seleccionado(s)</div>
+      <button onclick="tiendaCancelarSelec()" style="font-size:.72rem;padding:9px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit;">Cancelar</button>
+      <button onclick="tiendaCompartirVarios()" style="font-size:.75rem;padding:9px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">📤 Compartir</button>
     </div>
 
     <!-- Barra de acciones en tanda (solo admin) -->
@@ -491,6 +503,10 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
     <button id="tienda-btn-hist" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaHistorial()">📋 Historial de pedidos</button>
+    <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
+      onclick="tiendaBackup()">💾 Descargar backup (respaldo)</button>
+    <button id="tienda-btn-restore" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--az);border:2px solid var(--az);"
+      onclick="tiendaRestaurarAbrir()">📂 Restaurar backup</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
   </div>
@@ -912,6 +928,8 @@ function tiendaProcesarCarac(){
 
 var tiendaEsAdmin=false;         // modo admin activo o no
 var tiendaMarcadosSet={};        // productos marcados para tanda
+var tiendaModoSelec=false;       // modo "compartir varios" activo
+var tiendaSelecSet={};           // productos seleccionados para compartir
 var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
 var cuponAplicado=null;          // cupón activo en el carrito
 // Cupones de ejemplo por defecto. tipo: 'pct' (%) o 'monto' ($)
@@ -950,9 +968,20 @@ function tiendaInit(){
   bajarCuponesNube();      // baja los cupones de la nube
   bajarHistorialNube();    // baja el historial de pedidos de la nube
   iniciarBannerRotativo();
+  mostrarSaludoHora();     // saludo según la hora del día
   // reflejar el estado del modo oscuro en el botón
   var bmo=document.getElementById('btn-modo-oscuro');
   if(bmo)bmo.textContent=document.body.classList.contains('oscuro')?'☀️':'🌙';
+}
+// Saludo según la hora del día (mañana / tarde / noche)
+function mostrarSaludoHora(){
+  var el=document.getElementById('tienda-saludo-hora');
+  if(!el)return;
+  var h=new Date().getHours(), txt;
+  if(h>=6 && h<13)      txt='Buenos días 🌅';
+  else if(h>=13 && h<20)txt='Buenas tardes ☀️';
+  else                  txt='Buenas noches 🌙';
+  el.textContent=txt;
 }
 // Banner rotativo: mensajes que van cambiando
 var BANNER_DEFAULT=[
@@ -1312,6 +1341,8 @@ function tiendaAplicarModo(){
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
   var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
+  var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
+  var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
     bAdmin.style.display='none';
@@ -1500,6 +1531,7 @@ function tiendaRender(){
   if(orden==='menor')      lista.sort(function(a,b){return a.venta-b.venta;});
   else if(orden==='mayor') lista.sort(function(a,b){return b.venta-a.venta;});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
+  else if(orden==='nuevos')lista.sort(function(a,b){return (b.creado||0)-(a.creado||0);});
 
   if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados'+(maxPrecio?' hasta '+fmt(maxPrecio):'')+(q?' para "'+q+'"':'')+'</div>'; return; }
 
@@ -1509,7 +1541,15 @@ function tiendaRender(){
 
   cont.innerHTML=lista.map(function(p){
     var pid="'"+p.id+"'"; // id entre comillas (sirve para número y para celu_N)
-    var card='<div style="background:var(--wh);border:1px solid var(--bor);border-radius:14px;padding:12px;display:flex;flex-direction:column;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+    var selMarcado=tiendaSelecSet[p.id];
+    var card='<div style="background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+
+    // modo compartir varios: casilla de selección (para todos)
+    if(tiendaModoSelec){
+      card+='<label onclick="event.stopPropagation();tiendaToggleSelec('+pid+');" style="display:flex;align-items:center;gap:6px;font-size:.68rem;font-weight:800;margin-bottom:6px;cursor:pointer;color:'+(selMarcado?'var(--nar)':'var(--sub)')+';">'
+        +'<input type="checkbox" '+(selMarcado?'checked':'')+' onclick="event.stopPropagation();tiendaToggleSelec('+pid+');" style="width:18px;height:18px;accent-color:var(--nar);"> '
+        +(selMarcado?'✅ Seleccionado':'Seleccionar')+'</label>';
+    }
 
     // en modo admin: checkbox para tanda (solo productos propios, no celulares)
     if(tiendaEsAdmin && !p.esCelu){
@@ -1525,6 +1565,10 @@ function tiendaRender(){
     // etiqueta "últimas unidades" (visible para todos)
     if(p.pocoStock){
       card+='<div style="display:inline-block;background:var(--red);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">🔥 ¡Últimas unidades!</div>';
+    }
+    // etiqueta "nuevo" (visible para todos)
+    if(esNuevo(p)){
+      card+='<div style="display:inline-block;background:var(--gr);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">✨ NUEVO</div>';
     }
 
     card+='<div style="position:relative;">'
@@ -2073,6 +2117,82 @@ function compartirSoloTexto(msg){
   window.open(url,'_blank');
 }
 
+// ═══ COMPARTIR VARIOS PRODUCTOS CON FOTO ═══
+function tiendaToggleModoSelec(){
+  tiendaModoSelec=!tiendaModoSelec;
+  if(!tiendaModoSelec)tiendaSelecSet={};
+  var bar=document.getElementById('tienda-selec-bar');
+  if(bar)bar.style.display=tiendaModoSelec?'flex':'none';
+  var btn=document.getElementById('btn-modo-selec');
+  if(btn)btn.style.background=tiendaModoSelec?'var(--nar)':'var(--wh)';
+  tiendaActualizarSelecCount();
+  tiendaRender();
+}
+function tiendaCancelarSelec(){
+  tiendaModoSelec=false; tiendaSelecSet={};
+  var bar=document.getElementById('tienda-selec-bar'); if(bar)bar.style.display='none';
+  var btn=document.getElementById('btn-modo-selec'); if(btn)btn.style.background='var(--wh)';
+  tiendaRender();
+}
+function tiendaToggleSelec(id){
+  if(tiendaSelecSet[id]) delete tiendaSelecSet[id];
+  else tiendaSelecSet[id]=true;
+  tiendaActualizarSelecCount();
+  tiendaRender();
+}
+function tiendaActualizarSelecCount(){
+  var n=Object.keys(tiendaSelecSet).length;
+  var el=document.getElementById('selec-count'); if(el)el.textContent=n;
+}
+// arma el texto combinado de todos los productos elegidos
+function tiendaTextoVarios(prods){
+  var partes=prods.map(function(p){
+    var cuotasLines=armarCuotasLines(p.venta);
+    return armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  });
+  return partes.join('\n\n━━━━━━━━━━━━━\n\n');
+}
+// junta las fotos (las que tengan) y comparte todo de una
+function tiendaCompartirVarios(){
+  var ids=Object.keys(tiendaSelecSet);
+  if(!ids.length){ alert('Tocá "Seleccionar" en los productos que querés compartir.'); return; }
+  var prods=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});
+  if(!prods.length){ alert('No se encontraron los productos seleccionados.'); return; }
+
+  var msg=tiendaTextoVarios(prods);
+  var conFoto=prods.filter(function(p){return !!p.foto;});
+
+  // sin compartir nativo o sin fotos: mandamos el texto de todos por WhatsApp
+  if(!navigator.share || !conFoto.length){ compartirSoloTexto(msg); return; }
+
+  // bajamos todas las fotos y armamos los archivos
+  mostrarToast('📤 Preparando '+conFoto.length+' foto(s)…');
+  Promise.all(conFoto.map(function(p,idx){
+    return fetch(p.foto)
+      .then(function(r){return r.blob();})
+      .then(function(blob){ return new File([blob], 'producto'+(idx+1)+'.jpg', {type:blob.type||'image/jpeg'}); })
+      .catch(function(){return null;});
+  })).then(function(files){
+    files=files.filter(function(f){return !!f;});
+    // ¿el celu puede compartir varios archivos?
+    if(files.length && navigator.canShare && navigator.canShare({files:files})){
+      return navigator.share({ files:files, text:msg });
+    }
+    // fallback: una sola foto (la primera) + texto de todos
+    if(files.length && navigator.canShare && navigator.canShare({files:[files[0]]})){
+      return navigator.share({ files:[files[0]], text:msg });
+    }
+    // último recurso: solo texto
+    return navigator.share({ text:msg });
+  }).then(function(){
+    // compartido ok: salimos del modo selección
+    tiendaCancelarSelec();
+  }).catch(function(){
+    // si el usuario cancela o falla, ofrecemos el texto por WA
+    compartirSoloTexto(msg);
+  });
+}
+
 // Botón "volver arriba"
 function volverArriba(){
   var tab=document.getElementById('tab-tienda');
@@ -2149,6 +2269,67 @@ function toggleModoOscuro(){
 (function(){
   try{ if(localStorage.getItem('ae_modo_oscuro')==='1'){ document.body.classList.add('oscuro'); } }catch(e){}
 })();
+
+// ===== BACKUP / RESTAURAR =====
+function tiendaBackup(){
+  var datos={
+    version:1,
+    fecha:new Date().toISOString(),
+    productos: tiendaProductos,
+    celulares: cargarListaCelus(),
+    cupones: cargarCupones(),
+    banner: cargarBannerMensajes(),
+    historial: cargarHistorial()
+  };
+  var blob=new Blob([JSON.stringify(datos,null,2)], {type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var f=new Date();
+  var nombre='backup-amarango-'+f.getFullYear()+('0'+(f.getMonth()+1)).slice(-2)+('0'+f.getDate()).slice(-2)+'.json';
+  var a=document.createElement('a');
+  a.href=url; a.download=nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  mostrarToast('💾 Backup descargado');
+}
+function tiendaRestaurarAbrir(){
+  var inp=document.getElementById('restore-input');
+  if(!inp){
+    inp=document.createElement('input');
+    inp.type='file'; inp.accept='.json,application/json'; inp.id='restore-input';
+    inp.style.display='none';
+    inp.onchange=tiendaRestaurar;
+    document.body.appendChild(inp);
+  }
+  inp.value='';
+  inp.click();
+}
+function tiendaRestaurar(e){
+  var file=e.target.files && e.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(!d.productos && !d.celulares){ alert('El archivo no parece un backup válido.'); return; }
+      if(!confirm('¿Restaurar este backup?\n\nFecha: '+(d.fecha?new Date(d.fecha).toLocaleString():'?')+'\nProductos: '+(d.productos?d.productos.length:0)+'\nCelulares: '+(d.celulares?d.celulares.length:0)+'\n\nEsto REEMPLAZA lo que tenés ahora.'))return;
+      if(d.productos){ tiendaProductos=d.productos; tiendaGuardarLocal(); }
+      if(d.celulares){ try{localStorage.setItem('amarango_celulares',JSON.stringify(d.celulares));}catch(er){} subirCelusNube(d.celulares); }
+      if(d.cupones){ try{localStorage.setItem('ae_cupones',JSON.stringify(d.cupones));}catch(er){} guardarCupones(d.cupones); }
+      if(d.banner){ try{localStorage.setItem('ae_banner_msgs',JSON.stringify(d.banner));}catch(er){} }
+      if(d.historial){ try{localStorage.setItem('ae_historial',JSON.stringify(d.historial));}catch(er){} }
+      tiendaRender();
+      alert('✅ Backup restaurado con éxito.');
+    }catch(err){ alert('⚠️ No pude leer el archivo: '+(err.message||err)); }
+  };
+  reader.readAsText(file);
+}
+
+// ¿el producto es "nuevo"? (cargado en los últimos 7 días)
+function esNuevo(p){
+  if(!p||!p.creado)return false;
+  var dias=(Date.now()-p.creado)/(1000*60*60*24);
+  return dias<=7;
+}
 
 // ===== FAVORITOS =====
 function cargarFavoritos(){
@@ -2402,7 +2583,7 @@ function tiendaProcesarCarga(){
     }else{
       venta = markupVentaCRM(costo);   // sin tercer número → fórmula
     }
-    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta });
+    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now() });
   });
 
   if(!nuevos.length){
