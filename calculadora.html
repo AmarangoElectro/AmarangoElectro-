@@ -432,6 +432,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     </div>
 
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
+    <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
 
     <!-- Botón admin: cargar catálogo (solo visible en modo admin) -->
@@ -856,6 +857,7 @@ function tiendaProcesarCarac(){
 
 var tiendaEsAdmin=false;         // modo admin activo o no
 var tiendaMarcadosSet={};        // productos marcados para tanda
+var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
 
 // La tienda arranca en modo PÚBLICO (sin clave). El admin entra con clave.
 function tiendaInit(){
@@ -1217,6 +1219,7 @@ function tiendaRender(){
     card+='</div>';
     return card;
   }).join('');
+  actualizarCarritoUI();
 }
 
 // PONER foto desde la galería del celu (se comprime para no llenar el almacenamiento)
@@ -1592,9 +1595,10 @@ function tiendaVerDetalle(id){
   var pid="'"+p.id+"'";
   var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
   // acciones
-  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);" onclick="agregarAlCarrito('+pid+')">🛒 Agregar al carrito</button>';
+  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
   if(esVend){
-    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);color:#fff;border:2px solid var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
   }
   // en modo admin: botón editar dentro del detalle
   if(tiendaEsAdmin){
@@ -1604,6 +1608,93 @@ function tiendaVerDetalle(id){
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
+}
+
+// ===== CARRITO =====
+function agregarAlCarrito(id){
+  var p=buscarProd(id);
+  if(!p)return;
+  var item=carrito.find(function(x){return x.id==id;});
+  if(item){ item.cantidad++; }
+  else{ carrito.push({id:p.id, nombre:p.nombre, venta:p.venta, cantidad:1}); }
+  actualizarCarritoUI();
+  // feedback visual
+  var b=document.getElementById('carrito-flotante');
+  if(b){ b.style.transform='scale(1.2)'; setTimeout(function(){b.style.transform='scale(1)';},180); }
+  document.getElementById('modal-cuotas').style.display='none';
+}
+function actualizarCarritoUI(){
+  var total=carrito.reduce(function(s,x){return s+x.cantidad;},0);
+  var b=document.getElementById('carrito-flotante');
+  var c=document.getElementById('carrito-count');
+  if(c)c.textContent=total;
+  if(b)b.style.display=total>0?'flex':'none';
+}
+function abrirCarrito(){
+  if(!carrito.length){ alert('Tu carrito está vacío.'); return; }
+  var total=0;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.1rem;">🛒 Tu pedido</h3>'
+    +'<div style="margin:12px 0;">';
+  carrito.forEach(function(x,idx){
+    var sub=x.venta*x.cantidad; total+=sub;
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bor);">'
+      +'<div style="flex:1;"><div style="font-size:.8rem;font-weight:700;color:var(--az);line-height:1.2;">'+x.nombre+'</div>'
+      +'<div style="font-size:.72rem;color:var(--nar);font-weight:800;">'+fmt(x.venta)+' c/u</div></div>'
+      +'<button onclick="cambiarCant('+idx+',-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--bor);background:var(--bg);font-weight:900;color:var(--az);cursor:pointer;">−</button>'
+      +'<span style="min-width:22px;text-align:center;font-weight:800;">'+x.cantidad+'</span>'
+      +'<button onclick="cambiarCant('+idx+',1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--bor);background:var(--bg);font-weight:900;color:var(--az);cursor:pointer;">+</button>'
+      +'<button onclick="cambiarCant('+idx+',0)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid #ffd5d5;background:#fff0f0;color:var(--red);cursor:pointer;margin-left:2px;">🗑️</button>'
+      +'</div>';
+  });
+  html+='</div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--az);margin-bottom:14px;"><span style="font-weight:800;color:var(--az);">TOTAL contado:</span><span style="font-size:1.3rem;font-weight:900;color:var(--nar);">'+fmt(total)+'</span></div>'
+    +'<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="finalizarPedido()">✅ Hacer el pedido</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--red);border:2px solid #ffd5d5;margin-bottom:8px;" onclick="vaciarCarrito()">Vaciar carrito</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Seguir mirando</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+function cambiarCant(idx, delta){
+  if(delta===0){ carrito.splice(idx,1); }
+  else{
+    carrito[idx].cantidad+=delta;
+    if(carrito[idx].cantidad<=0)carrito.splice(idx,1);
+  }
+  actualizarCarritoUI();
+  if(carrito.length)abrirCarrito();
+  else document.getElementById('modal-cuotas').style.display='none';
+}
+function vaciarCarrito(){
+  if(!confirm('¿Vaciar el carrito?'))return;
+  carrito=[]; actualizarCarritoUI();
+  document.getElementById('modal-cuotas').style.display='none';
+}
+// Finalizar: arma el mensaje del pedido y elige destinatario
+function finalizarPedido(){
+  var esVend=(revUnlocked||adminUnlocked)&&!vistaPreviaCliente;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 ¿A quién le mandás el pedido?</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí el contacto:</p>';
+  TIENDA_VENDEDORES.forEach(function(v){
+    html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="enviarPedido(\''+v.tel+'\',\''+v.nombre+'\')">💬 '+v.nombre+'</button>';
+  });
+  // cliente: consultar con su vendedor (sin número). Vendedor: a su cliente (sin número)
+  html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="enviarPedido(\'\',\'\')">'+(esVend?'🛍️ Enviar a un cliente':'🤝 Enviá a tu vendedor')+'</button>';
+  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="abrirCarrito()">← Volver al carrito</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+}
+function enviarPedido(tel, nombre){
+  var total=0;
+  var msg='🛒 *PEDIDO - AmarangoElectro* 🐝\n\n';
+  carrito.forEach(function(x){
+    var sub=x.venta*x.cantidad; total+=sub;
+    msg+='• '+x.cantidad+'x '+x.nombre+' — '+fmt(sub)+'\n';
+  });
+  msg+='\n💰 *TOTAL contado: '+fmt(total)+'*\n\n';
+  msg+=(nombre?'Hola '+nombre+'! ':'')+'Quiero hacer este pedido. ¿Coordinamos? 🙌';
+  var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
 }
 
 function tiendaVerCuotas(id){
