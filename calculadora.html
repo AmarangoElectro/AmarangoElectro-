@@ -565,6 +565,14 @@ function mejorCuotaTexto(precio){
   var vc=Math.round(calcularTotalPlan(precio,n)/n/1000)*1000;
   return n+' cuotas de '+fmt(vc);
 }
+// Devuelve {n: cantidad de cuotas, valor: valor de cada cuota} de la mejor cuota
+function mejorCuotaDatos(precio){
+  var activos=cuotasActivasOrdenadas();
+  if(!activos.length)return null;
+  var n=activos[activos.length-1];
+  var vc=Math.round(calcularTotalPlan(precio,n)/n/1000)*1000;
+  return { n:n, valor:vc };
+}
 // ═══ FUNCIÓN CENTRAL: arma el mensaje de WhatsApp con el formato único de toda la app ═══
 // nombre: texto del producto (puede tener variante). precio: contado. cuotasLines: array "💳 N cuotas fijas de $X"
 function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
@@ -1380,8 +1388,11 @@ function tiendaRender(){
         +'<div style="position:absolute;top:-1px;left:-1px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px 0 12px 0;">⭐ DESTACADO</div>'
         +(p.foto?'<div style="width:100%;height:90px;border-radius:8px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin:14px 0 6px;"></div>':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
         +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
-        +'<div style="font-size:.95rem;font-weight:900;color:var(--nar);margin-top:2px;">'+fmt(p.venta)+'</div>'
-        +(cuota?'<div style="font-size:.6rem;font-weight:800;color:#0a8a3f;">💳 '+cuota+'</div>':'')
+        +(function(){
+          var cd=mejorCuotaDatos(p.venta);
+          if(cd)return '<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div><div style="font-size:.56rem;font-weight:700;color:#0a8a3f;">en '+cd.n+' cuotas</div><div style="font-size:.58rem;color:var(--sub);">Contado: '+fmt(p.venta)+'</div>';
+          return '<div style="font-size:.95rem;font-weight:900;color:var(--nar);margin-top:2px;">'+fmt(p.venta)+'</div>';
+        })()
         +'</div>';
     });
     dh+='</div>';
@@ -1450,8 +1461,16 @@ function tiendaRender(){
       ? '<div onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
       : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
       +'<div onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
-      +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
-      +(mejorCuotaTexto(p.venta)?'<div style="display:inline-block;background:#e7f9ee;color:#0a8a3f;font-size:.66rem;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:6px;">💳 '+mejorCuotaTexto(p.venta)+'</div>':'')
+      +(function(){
+        var cd=mejorCuotaDatos(p.venta);
+        if(cd){
+          return '<div style="font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
+            +'<div style="font-size:.62rem;font-weight:700;color:#0a8a3f;margin-bottom:1px;">en '+cd.n+' cuotas fijas</div>'
+            +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: '+fmt(p.venta)+'</div>';
+        }else{
+          return '<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:6px;">'+fmt(p.venta)+'</div>';
+        }
+      })()
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
 
     if(tiendaEsAdmin){
@@ -1844,6 +1863,16 @@ function tiendaVender(){
 
 // VER DETALLE: foto grande (con toda la info del flyer) + precio + cuotas + acciones
 // Devuelve productos de la misma categoría (para "también te puede interesar")
+// Número de "visitas" simulado, consistente por producto y que crece de a poco con los días
+function visitasProducto(id){
+  // base fija según el id (entre 12 y 88)
+  var s=(''+id).split('').reduce(function(a,c){return a+c.charCodeAt(0);},0);
+  var base=12+(s%77);
+  // pequeño empuje según el día del mes (para que se sienta vivo)
+  var dia=new Date().getDate();
+  return base+(dia%15);
+}
+
 function tiendaRelacionados(p){
   if(!p)return [];
   var cat=catProd(p);
@@ -1869,7 +1898,8 @@ function tiendaVerDetalle(id){
     html+='<div style="font-size:3rem;text-align:center;margin-bottom:8px;">'+catProd(p).split(' ')[0]+'</div>';
   }
   html+='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+p.nombre+'</h3>'
-    +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:4px 0 10px;">Contado: '+fmt(p.venta)+'</div>';
+    +'<div style="display:flex;align-items:center;gap:5px;margin:4px 0 2px;font-size:.68rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>'
+    +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:2px 0 10px;">Contado: '+fmt(p.venta)+'</div>';
   // características (si tiene)
   if(p.caracteristicas){
     html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.8rem;color:var(--az);white-space:pre-line;line-height:1.5;">'+p.caracteristicas.replace(/</g,'&lt;')+'</div>';
