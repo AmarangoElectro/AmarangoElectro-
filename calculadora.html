@@ -504,6 +504,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
     <button id="tienda-btn-hist" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaHistorial()">📋 Historial de pedidos</button>
+    <button id="tienda-btn-papelera" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
+      onclick="tiendaPapeleraAbrir()">🗑️ Papelera (recuperar borrados)</button>
     <button id="tienda-btn-pdf" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#c0392b;"
       onclick="tiendaCatalogoPDF()">📄 Descargar catálogo PDF</button>
     <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
@@ -1104,9 +1106,14 @@ function agregarCupon(){
 }
 function borrarCupon(idx){
   var cups=cargarCupones();
+  var c=cups[idx];
+  if(!c)return;
+  if(!confirm('¿Borrar el cupón "'+(c.codigo||c.nombre||'?')+'"?\n\n(Va a la 🗑️ Papelera)'))return;
+  papeleraAgregar('cupon', c);
   cups.splice(idx,1);
   guardarCupones(cups);
   editarCupones();
+  mostrarToast('🗑️ Cupón a la papelera');
 }
 // baja los celulares de la nube y refresca la tienda (para que se vean specs/precios nuevos)
 function tiendaBajarCelusNube(intentos){
@@ -1183,7 +1190,8 @@ function tiendaHistorial(){
   document.getElementById('modal-cuotas').scrollTop=0;
 }
 function borrarHistorial(){
-  if(!confirm('¿Borrar todo el historial de pedidos? No se puede deshacer.'))return;
+  if(!confirm('⚠️ DATOS DELICADOS\n\n¿Borrar TODO el historial de pedidos?'))return;
+  if(!confirm('Última confirmación:\n\nEsto NO se puede deshacer y no va a la papelera.\n\n¿Seguro que querés borrar el historial?'))return;
   try{ localStorage.removeItem('ae_historial'); }catch(e){}
   if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({id:'historial',datos:[],actualizado:new Date().toISOString()}).then(function(){}).catch(function(){}); }
   document.getElementById('modal-cuotas').style.display='none';
@@ -1359,6 +1367,7 @@ function tiendaAplicarModo(){
   var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
   var btnPdf=document.getElementById('tienda-btn-pdf'); if(btnPdf)btnPdf.style.display = tiendaEsAdmin?'block':'none';
+  var btnPap=document.getElementById('tienda-btn-papelera'); if(btnPap)btnPap.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
@@ -1387,6 +1396,81 @@ function tiendaGuardarLocal(){
   if(NUBE_OK && sbCalc){
     sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
   }
+}
+
+// ═══ PAPELERA (guarda lo que se borra por si te arrepentís) ═══
+// helper: abre el modal genérico con contenido y un botón de cerrar
+function tiendaModalAbrir(contenidoHtml){
+  var body=document.getElementById('modal-cuotas-body');
+  if(!body)return;
+  body.innerHTML=contenidoHtml
+    +'<button class="calc-btn" style="width:100%;margin-top:12px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas').style.display='block';
+}
+function cargarPapelera(){
+  try{ return JSON.parse(localStorage.getItem('ae_papelera')||'[]'); }catch(e){ return []; }
+}
+function guardarPapelera(pap){
+  try{ localStorage.setItem('ae_papelera', JSON.stringify(pap)); }catch(e){}
+}
+// mete un elemento a la papelera. tipo: 'producto' | 'celular' | 'cupon'
+function papeleraAgregar(tipo, dato, extra){
+  var pap=cargarPapelera();
+  pap.unshift({ tipo:tipo, dato:dato, extra:extra||null, fecha:Date.now() });
+  if(pap.length>100)pap=pap.slice(0,100); // tope: últimos 100 borrados
+  guardarPapelera(pap);
+}
+// abre el modal de la papelera
+function tiendaPapeleraAbrir(){
+  var pap=cargarPapelera();
+  var html='<div style="font-size:1rem;font-weight:900;color:var(--az);margin-bottom:4px;">🗑️ Papelera</div>'
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:12px;">Últimos elementos borrados. Podés restaurarlos o vaciar todo.</div>';
+  if(!pap.length){
+    html+='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:24px 0;">La papelera está vacía 🌱</div>';
+  }else{
+    pap.forEach(function(it,idx){
+      var nom=(it.dato&&it.dato.nombre)?it.dato.nombre:'(sin nombre)';
+      var precio=(it.dato&&(it.dato.venta||it.dato.precio))?fmt(it.dato.venta||it.dato.precio):'';
+      var tipoTxt=it.tipo==='celular'?'📱 Celular':(it.tipo==='cupon'?'🎟️ Cupón':'📦 Producto');
+      var cuando=new Date(it.fecha).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--bor);border-radius:10px;margin-bottom:8px;background:var(--bg);">'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:.8rem;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escapeHtml(nom)+'</div>'
+        +'<div style="font-size:.66rem;color:var(--sub);">'+tipoTxt+(precio?' · '+precio:'')+' · '+cuando+'</div></div>'
+        +'<button onclick="tiendaPapeleraRestaurar('+idx+')" style="font-size:.72rem;padding:7px 12px;background:var(--gr);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">♻️ Restaurar</button>'
+        +'</div>';
+    });
+    html+='<button onclick="tiendaPapeleraVaciar()" style="width:100%;margin-top:8px;font-size:.75rem;padding:10px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;">🗑️ Vaciar papelera (definitivo)</button>';
+  }
+  tiendaModalAbrir(html);
+}
+// restaura un elemento de la papelera a su lugar
+function tiendaPapeleraRestaurar(idx){
+  var pap=cargarPapelera();
+  var it=pap[idx];
+  if(!it)return;
+  if(it.tipo==='producto'){
+    tiendaProductos.push(it.dato);
+    tiendaGuardarLocal();
+  }else if(it.tipo==='celular'){
+    var celus=cargarListaCelus();
+    celus.push(it.dato);
+    try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){}
+    subirCelusNube(celus);
+  }else if(it.tipo==='cupon'){
+    var cups=cargarCupones(); cups.push(it.dato); guardarCupones(cups);
+  }
+  pap.splice(idx,1); guardarPapelera(pap);
+  mostrarToast('♻️ Restaurado');
+  tiendaPapeleraAbrir(); tiendaRender();
+}
+// vacía la papelera para siempre
+function tiendaPapeleraVaciar(){
+  var pap=cargarPapelera();
+  if(!pap.length)return;
+  if(!confirm('¿Vaciar la papelera definitivamente?\n\nSon '+pap.length+' elemento(s) y NO se van a poder recuperar.'))return;
+  guardarPapelera([]);
+  mostrarToast('🗑️ Papelera vaciada');
+  tiendaPapeleraAbrir();
 }
 
 // detecta una categoría simple por palabras clave del nombre
@@ -1810,10 +1894,12 @@ function tiendaGuardarPrecios(){
 function tiendaEliminar(id){
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p)return;
-  if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)))return;
+  if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)+'\n\n(Va a la 🗑️ Papelera por si te arrepentís)'))return;
+  papeleraAgregar('producto', p);
   tiendaProductos=tiendaProductos.filter(function(x){return x.id!=id;});
   delete tiendaMarcadosSet[id];
   tiendaGuardarLocal(); tiendaRender();
+  mostrarToast('🗑️ Movido a la papelera');
 }
 
 // marcar/desmarcar producto para acciones en tanda
@@ -3295,21 +3381,28 @@ function renderBotonesBorrar(){
   cont.innerHTML=html;
 }
 function borrarTodoCelus(){
-  if(!confirm('¿Seguro que querés borrar TODA la lista de celulares? Esto no se puede deshacer.'))return;
+  var celus=cargarListaCelus();
+  if(!celus.length){ alert('No hay celulares para borrar.'); return; }
+  if(!confirm('⚠️ DATOS DELICADOS\n\nVas a borrar TODA la lista de celulares ('+celus.length+' equipos).\n\n¿Seguro?'))return;
+  if(!confirm('Última confirmación:\n\n¿Borrar los '+celus.length+' celulares?\n\n(Van a la 🗑️ Papelera por si te arrepentís)'))return;
+  celus.forEach(function(c){ papeleraAgregar('celular', c); });
   try{localStorage.removeItem('amarango_celulares');}catch(e){}
+  subirCelusNube([]);
   var inp=document.getElementById('inp-celulista');if(inp)inp.value='';
-  alert('🗑️ Lista borrada por completo.');
+  alert('🗑️ Lista movida a la papelera ('+celus.length+' equipos).');
   borrarBoxAbierto=false;document.getElementById('borrar-box').style.display='none';
   renderListaCelus();
 }
 function borrarMarcaCelus(marca){
   var celus=cargarListaCelus();
   var quedan=celus.filter(function(c){return marcaDe(c.nombre)!==marca;});
-  var borrados=celus.length-quedan.length;
-  if(!confirm('¿Borrar los '+borrados+' celulares de '+marca.toUpperCase()+'?'))return;
+  var borrar=celus.filter(function(c){return marcaDe(c.nombre)===marca;});
+  var borrados=borrar.length;
+  if(!confirm('¿Borrar los '+borrados+' celulares de '+marca.toUpperCase()+'?\n\n(Van a la 🗑️ Papelera)'))return;
+  borrar.forEach(function(c){ papeleraAgregar('celular', c); });
   try{localStorage.setItem('amarango_celulares',JSON.stringify(quedan));}catch(e){}
   subirCelusNube(quedan);
-  alert('🗑️ Borrados '+borrados+' de '+marca.toUpperCase()+'. Quedan '+quedan.length+'.');
+  alert('🗑️ '+borrados+' de '+marca.toUpperCase()+' a la papelera. Quedan '+quedan.length+'.');
   renderBotonesBorrar();
   renderListaCelus();
 }
