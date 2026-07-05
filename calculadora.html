@@ -443,6 +443,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
     </div>
 
+    <div id="tienda-productodia" style="display:none;margin-top:12px;"></div>
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
@@ -1148,7 +1149,9 @@ function tiendaRender(){
       colores: c.colores||[],
       visible: true,
       foto: c.foto||'',
-      caracteristicas: c.caracteristicas||''
+      caracteristicas: c.caracteristicas||'',
+      destacado: c.destacado||false,
+      delDia: c.delDia||false
     });
   });
 
@@ -1164,6 +1167,26 @@ function tiendaRender(){
     chipsHtml+='<div onclick="tiendaFiltrarCat(\''+c+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(on?'var(--nar);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+c+'</div>';
   });
   document.getElementById('tienda-chips').innerHTML=chipsHtml;
+
+  // PRODUCTO DEL DÍA (solo en vista principal sin filtros)
+  var diaDiv=document.getElementById('tienda-productodia');
+  var qDia=(document.getElementById('tienda-buscar').value||'').trim();
+  var pDia=universo.find(function(p){return p.delDia;});
+  if(pDia && !tiendaCategoriaActiva && !qDia){
+    var pidDia="'"+pDia.id+"'";
+    var cuotaDia=mejorCuotaTexto(pDia.venta);
+    diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);border:2px solid #f0c040;position:relative;overflow:hidden;">'
+      +'<div style="position:absolute;top:0;right:0;background:#f0c040;color:#1a1a2e;font-size:.6rem;font-weight:900;padding:3px 12px;border-radius:0 14px 0 12px;">🌟 PRODUCTO DEL DÍA</div>'
+      +(pDia.foto?'<div style="width:90px;height:90px;border-radius:12px;background:#fff url(\''+pDia.foto+'\') center/cover no-repeat;flex-shrink:0;"></div>':'<div style="font-size:3rem;flex-shrink:0;">'+catProd(pDia).split(' ')[0]+'</div>')
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="color:#fff;font-size:.85rem;font-weight:800;line-height:1.2;margin-top:8px;">'+pDia.nombre+'</div>'
+        +'<div style="color:#f0c040;font-size:1.3rem;font-weight:900;margin-top:2px;">'+fmt(pDia.venta)+'</div>'
+        +(cuotaDia?'<div style="color:#7fe8a0;font-size:.68rem;font-weight:800;">💳 '+cuotaDia+'</div>':'')
+      +'</div></div>';
+    diaDiv.style.display='block';
+  }else{
+    diaDiv.style.display='none';
+  }
 
   // CARRUSEL DE DESTACADOS (solo en la vista principal, sin filtros)
   var destDiv=document.getElementById('tienda-destacados');
@@ -1256,6 +1279,7 @@ function tiendaRender(){
     if(tiendaEsAdmin){
       // botón destacar (estrella) arriba de los otros
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
+      card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:6px;">'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
@@ -1468,6 +1492,30 @@ function tiendaToggleDestacado(id){
     var p=tiendaProductos.find(function(x){return x.id==id;});
     if(p){ p.destacado=!p.destacado; tiendaGuardarLocal(); }
   }
+  tiendaRender();
+}
+
+// Producto del día: solo UNO a la vez. Al marcar uno, se desmarcan los demás.
+function tiendaSetProductoDia(id){
+  var yaEra=false;
+  // desmarcar todos los productos
+  tiendaProductos.forEach(function(p){ if(p.delDia && p.id==id)yaEra=true; p.delDia=false; });
+  // desmarcar todos los celulares
+  var celus=cargarListaCelus();
+  celus.forEach(function(c,idx){ if(c.delDia && ('celu_'+idx)==id)yaEra=true; c.delDia=false; });
+  // marcar el elegido (si no era ya el del día)
+  if(!yaEra){
+    if((''+id).indexOf('celu_')===0){
+      var i=parseInt((''+id).replace('celu_',''),10);
+      if(celus[i])celus[i].delDia=true;
+    }else{
+      var p=tiendaProductos.find(function(x){return x.id==id;});
+      if(p)p.delDia=true;
+    }
+  }
+  try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){}
+  subirCelusNube(celus);
+  tiendaGuardarLocal();
   tiendaRender();
 }
 
