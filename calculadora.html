@@ -132,7 +132,14 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
 /* Vista LISTA: una columna, tarjeta horizontal */
+/* Vistas de tarjetas: chica (3 col), normal (2 col), grande (1 col) */
+#tienda-grid.vista-chica{grid-template-columns:1fr 1fr 1fr !important;gap:7px !important;}
+#tienda-grid.vista-chica .prod-card{padding:7px !important;}
+#tienda-grid.vista-chica .prod-foto{height:78px !important;}
+#tienda-grid.vista-chica .prod-nombre{font-size:.64rem !important;min-height:auto !important;}
+#tienda-grid.vista-chica .calc-btn{font-size:.58rem !important;padding:6px 2px !important;}
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
+#tienda-grid.vista-lista .prod-foto{height:200px !important;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -973,7 +980,7 @@ var tiendaEsAdmin=false;         // modo admin activo o no
 var tiendaMarcadosSet={};        // productos marcados para tanda
 var tiendaModoSelec=false;       // modo "compartir varios" activo
 var tiendaSelecSet={};           // productos seleccionados para compartir
-var tiendaVistaLista=false;      // false = grilla 2 columnas, true = lista 1 columna
+var tiendaVista=0;               // 0 = normal (2 col), 1 = grande (1 col), 2 = chica (3 col)
 var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
 var cuponAplicado=null;          // cupón activo en el carrito
 // Cupones de ejemplo por defecto. tipo: 'pct' (%) o 'monto' ($)
@@ -1013,9 +1020,8 @@ function tiendaInit(){
   bajarHistorialNube();    // baja el historial de pedidos de la nube
   iniciarBannerRotativo();
   mostrarSaludoHora();     // saludo según la hora del día
-  // recuperar preferencia de vista (lista/grilla)
-  try{ if(localStorage.getItem('ae_vista_lista')==='1'){ tiendaVistaLista=true;
-    var bv=document.getElementById('btn-vista'); if(bv){ bv.textContent='▦'; bv.title='Ver en grilla'; bv.style.background='var(--az)'; bv.style.color='#fff'; } } }catch(e){}
+  // recuperar preferencia de vista (0 normal, 1 grande, 2 chica)
+  try{ var vg=localStorage.getItem('ae_vista'); if(vg!==null){ tiendaVista=parseInt(vg,10)||0; tiendaAplicarBtnVista(); } }catch(e){}
   // reflejar el estado del modo oscuro en el botón
   var bmo=document.getElementById('btn-modo-oscuro');
   if(bmo)bmo.textContent=document.body.classList.contains('oscuro')?'☀️':'🌙';
@@ -1725,11 +1731,11 @@ function tiendaRender(){
 
     card+='<div style="position:relative;">'
       +(p.foto
-        ? '<div onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
+        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
       +'<button onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\')" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:.95rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);line-height:1;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>'
-      +'<div onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
+      +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
@@ -1765,8 +1771,10 @@ function tiendaRender(){
     return card;
   }).join('');
   // aplicar vista lista/grilla
-  if(tiendaVistaLista) cont.classList.add('vista-lista');
-  else cont.classList.remove('vista-lista');
+  // aplicar vista (0 normal, 1 grande, 2 chica)
+  cont.classList.remove('vista-lista','vista-chica');
+  if(tiendaVista===1) cont.classList.add('vista-lista');
+  else if(tiendaVista===2) cont.classList.add('vista-chica');
   actualizarCarritoUI();
 }
 
@@ -1983,29 +1991,47 @@ function tiendaSetSinInteres(id){
 function tiendaSetOferta(id){
   var p=buscarProd(id);
   if(!p)return;
-  var actual=p.precioAntes?p.precioAntes:'';
-  var r=prompt('💰 PONER EN OFERTA\n\nEscribí el precio ANTERIOR (el más alto, que va a aparecer tachado).\n\nEl precio actual del producto ('+fmt(p.venta)+') queda como precio de oferta.\n\nDejá VACÍO y aceptá para quitar la oferta.', actual);
-  if(r===null)return; // canceló
-  var limpio=(''+r).replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'').trim();
-  var antes=parseFloat(limpio);
-  var valor=(isNaN(antes)||antes<=0)?null:Math.round(antes);
 
-  if(valor && valor<=p.venta){
-    alert('⚠️ El precio anterior ('+fmt(valor)+') tiene que ser MAYOR al precio actual ('+fmt(p.venta)+').\n\nSi el producto bajó de precio, primero actualizá su precio y después poné el anterior más alto.');
+  // Paso 1: precio AHORA (el de oferta). Por defecto el actual.
+  var rAhora=prompt('🏷️ OFERTA — Paso 1 de 2\n\nPrecio AHORA (el de oferta, el que paga el cliente):', p.venta);
+  if(rAhora===null)return; // canceló
+  var ahora=parseFloat((''+rAhora).replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'').trim());
+  if(isNaN(ahora)||ahora<=0){ alert('⚠️ El precio AHORA no es válido.'); return; }
+  ahora=Math.round(ahora);
+
+  // Paso 2: precio ANTES (el tachado, más alto). Por defecto el que ya tenía o vacío.
+  var rAntes=prompt('🏷️ OFERTA — Paso 2 de 2\n\nPrecio ANTES (el más alto, va tachado):\n\n(Dejá VACÍO y aceptá para QUITAR la oferta)', (p.precioAntes||''));
+  if(rAntes===null)return; // canceló
+  var limpioAntes=(''+rAntes).replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'').trim();
+  var antes=parseFloat(limpioAntes);
+  var quitarOferta=(limpioAntes===''||isNaN(antes)||antes<=0);
+
+  if(!quitarOferta && antes<=ahora){
+    alert('⚠️ El precio ANTES ('+fmt(Math.round(antes))+') tiene que ser MAYOR al precio AHORA ('+fmt(ahora)+').');
     return;
   }
+  antes=Math.round(antes);
 
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var celus=cargarListaCelus();
-    if(celus[i]){ if(valor)celus[i].precioAntes=valor; else delete celus[i].precioAntes;
-      try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
+    if(celus[i]){
+      celus[i].precio=ahora;                              // actualiza precio real
+      if(quitarOferta) delete celus[i].precioAntes;
+      else celus[i].precioAntes=antes;
+      try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus);
+    }
   }else{
     var pr=tiendaProductos.find(function(x){return x.id==id;});
-    if(pr){ if(valor)pr.precioAntes=valor; else delete pr.precioAntes; tiendaGuardarLocal(); }
+    if(pr){
+      pr.venta=ahora;                                     // actualiza precio real
+      if(quitarOferta) delete pr.precioAntes;
+      else pr.precioAntes=antes;
+      tiendaGuardarLocal();
+    }
   }
-  if(valor){ var off=Math.round((1-p.venta/valor)*100); mostrarToast('🔥 Oferta -'+off+'%'); }
-  else mostrarToast('Oferta quitada');
+  if(quitarOferta) mostrarToast('Oferta quitada');
+  else { var off=Math.round((1-ahora/antes)*100); mostrarToast('🔥 Oferta -'+off+'% ('+fmt(antes)+' → '+fmt(ahora)+')'); }
   tiendaRender();
 }
 
@@ -2351,17 +2377,25 @@ function compartirSoloTexto(msg){
   window.open(url,'_blank');
 }
 
-// ═══ VISTA LISTA / GRILLA ═══
-function tiendaToggleVista(){
-  tiendaVistaLista=!tiendaVistaLista;
+// ═══ VISTA: chica / normal / grande ═══
+// Aplica el ícono y el estado del botón según tiendaVista
+function tiendaAplicarBtnVista(){
   var btn=document.getElementById('btn-vista');
-  if(btn){
-    btn.textContent=tiendaVistaLista?'▦':'☰';
-    btn.title=tiendaVistaLista?'Ver en grilla':'Ver en lista';
-    btn.style.background=tiendaVistaLista?'var(--az)':'var(--wh)';
-    btn.style.color=tiendaVistaLista?'#fff':'';
-  }
-  try{ localStorage.setItem('ae_vista_lista', tiendaVistaLista?'1':'0'); }catch(e){}
+  if(!btn)return;
+  // 0 normal, 1 grande, 2 chica
+  var iconos=['▦','▬','⋮⋮⋮'];      // normal, grande, chica
+  var titulos=['Vista normal','Vista grande','Vista chica'];
+  btn.textContent=iconos[tiendaVista];
+  btn.title=titulos[tiendaVista]+' (tocá para cambiar)';
+  btn.style.background=tiendaVista===0?'var(--wh)':'var(--az)';
+  btn.style.color=tiendaVista===0?'':'#fff';
+}
+function tiendaToggleVista(){
+  tiendaVista=(tiendaVista+1)%3;   // rota 0→1→2→0
+  tiendaAplicarBtnVista();
+  try{ localStorage.setItem('ae_vista', ''+tiendaVista); }catch(e){}
+  var nombres=['Normal (2 columnas)','Grande (1 columna)','Chica (3 columnas)'];
+  mostrarToast('📐 '+nombres[tiendaVista]);
   tiendaRender();
 }
 
