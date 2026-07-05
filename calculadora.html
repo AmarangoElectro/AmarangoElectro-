@@ -458,6 +458,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaAbrirCarac()">📋 Cargar características de celulares (masivo)</button>
     <button id="tienda-btn-subir" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
       onclick="tiendaForzarSubir()">☁️ Subir todo a la nube (para que otros vean)</button>
+    <button id="tienda-btn-banner" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--nar);"
+      onclick="editarBanner()">📢 Editar mensajes del banner</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
   </div>
@@ -883,10 +885,11 @@ function tiendaInit(){
   tiendaRender();
   tiendaBajarNube();       // baja el catálogo de la nube
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+  bajarBannerNube();       // baja los mensajes del banner de la nube
   iniciarBannerRotativo();
 }
 // Banner rotativo: mensajes que van cambiando
-var BANNER_MENSAJES=[
+var BANNER_DEFAULT=[
   '🐝 ¡Bienvenido a AmarangoElectro!',
   '💳 Todo en cuotas fijas, sin sorpresas',
   '📦 Consultá stock por WhatsApp',
@@ -894,8 +897,14 @@ var BANNER_MENSAJES=[
   '🛒 Armá tu pedido y coordinamos la entrega',
   '📱 Celulares y electro para tu hogar'
 ];
+function cargarBannerMensajes(){
+  try{ var g=localStorage.getItem('ae_banner_msgs'); if(g){var a=JSON.parse(g); if(a&&a.length)return a;} }catch(e){}
+  return BANNER_DEFAULT.slice();
+}
+var BANNER_MENSAJES=cargarBannerMensajes();
 var _bannerIdx=0, _bannerTimer=null;
 function iniciarBannerRotativo(){
+  BANNER_MENSAJES=cargarBannerMensajes();
   var el=document.getElementById('tienda-banner-rot');
   if(!el)return;
   if(_bannerTimer)clearInterval(_bannerTimer);
@@ -909,6 +918,42 @@ function iniciarBannerRotativo(){
       el.style.opacity='1';
     },400);
   },3500);
+}
+// Editar los mensajes del banner (admin)
+function editarBanner(){
+  var actual=cargarBannerMensajes().join('\n');
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📢 Mensajes del banner</h3>'
+    +'<p style="font-size:.72rem;color:var(--sub);margin:6px 0 10px;">Un mensaje por línea. Podés poner emojis. Rotan solos arriba de la tienda.</p>'
+    +'<textarea id="banner-txt" rows="8" style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.82rem;box-sizing:border-box;">'+actual.replace(/</g,'&lt;')+'</textarea>'
+    +'<button class="calc-btn" style="width:100%;margin-top:10px;background:var(--gr);" onclick="guardarBanner()">✅ Guardar mensajes</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+function guardarBanner(){
+  var txt=document.getElementById('banner-txt').value||'';
+  var msgs=txt.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  if(!msgs.length){ alert('Poné al menos un mensaje.'); return; }
+  try{ localStorage.setItem('ae_banner_msgs', JSON.stringify(msgs)); }catch(e){}
+  // subir a la nube para que todos vean las promos
+  if(NUBE_OK && sbCalc){
+    sbCalc.from('tienda_catalogo').upsert({ id:'banner', datos:msgs, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+  }
+  BANNER_MENSAJES=msgs;
+  document.getElementById('modal-cuotas').style.display='none';
+  iniciarBannerRotativo();
+  alert('✅ Mensajes actualizados.');
+}
+// bajar mensajes del banner de la nube
+function bajarBannerNube(){
+  if(!NUBE_OK||!sbCalc)return;
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','banner').maybeSingle()
+    .then(function(r){
+      if(r&&r.data&&r.data.datos&&r.data.datos.length){
+        try{ localStorage.setItem('ae_banner_msgs', JSON.stringify(r.data.datos)); }catch(e){}
+        BANNER_MENSAJES=r.data.datos;
+      }
+    }).catch(function(){});
 }
 // baja los celulares de la nube y refresca la tienda (para que se vean specs/precios nuevos)
 function tiendaBajarCelusNube(intentos){
@@ -1071,6 +1116,7 @@ function tiendaAplicarModo(){
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
   var btnSubir=document.getElementById('tienda-btn-subir'); if(btnSubir)btnSubir.style.display = tiendaEsAdmin?'block':'none';
   var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
+  var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
     bAdmin.style.display='none';
