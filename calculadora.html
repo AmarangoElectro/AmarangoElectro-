@@ -455,6 +455,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
           <option value="mayor">💰 Precio: mayor a menor</option>
           <option value="az">🔤 Nombre A-Z</option>
           <option value="nuevos">✨ Novedades primero</option>
+          <option value="sininteres">✨ Sin interés primero</option>
         </select>
         <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
         <button id="btn-ver-favs" onclick="toggleVerFavoritos()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Ver mis favoritos">❤️</button>
@@ -589,7 +590,12 @@ function mejorCuotaTexto(precio){
   return n+' cuotas de '+fmt(vc);
 }
 // Devuelve {n: cantidad de cuotas, valor: valor de cada cuota} de la mejor cuota
-function mejorCuotaDatos(precio){
+// Si el producto tiene sinInteres (número de cuotas), calcula SIN recargo: contado ÷ N
+function mejorCuotaDatos(precio, prod){
+  if(prod && prod.sinInteres){
+    var ns=parseInt(prod.sinInteres,10);
+    if(ns>0){ var vcs=Math.round(precio/ns/1000)*1000; return { n:ns, valor:vcs, sinInteres:true }; }
+  }
   var activos=cuotasActivasOrdenadas();
   if(!activos.length)return null;
   var n=activos[activos.length-1];
@@ -605,7 +611,15 @@ function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
 // Arma las líneas de cuotas según los planes activos, SIEMPRE en orden fijo 2→4→6
-function armarCuotasLines(precio){
+// Si el producto tiene sinInteres, muestra esa cuota especial sin recargo
+function armarCuotasLines(precio, prod){
+  if(prod && prod.sinInteres){
+    var ns=parseInt(prod.sinInteres,10);
+    if(ns>0){
+      var vcs=Math.round(precio/ns/1000)*1000;
+      return ["✨💳 "+ns+" cuotas SIN INTERÉS de "+fmt(vcs)];
+    }
+  }
   var lines=[];
   cuotasActivasOrdenadas().forEach(function(n){
     var totalPlan=calcularTotalPlan(precio,n);
@@ -1395,7 +1409,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:true, foto:c.foto||'', caracteristicas:c.caracteristicas||'' };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:true, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0 };
   }
   return null;
 }
@@ -1424,7 +1438,8 @@ function tiendaRender(){
       caracteristicas: c.caracteristicas||'',
       destacado: c.destacado||false,
       delDia: c.delDia||false,
-      pocoStock: c.pocoStock||false
+      pocoStock: c.pocoStock||false,
+      sinInteres: c.sinInteres||0
     });
   });
 
@@ -1447,7 +1462,7 @@ function tiendaRender(){
   var pDia=universo.find(function(p){return p.delDia;});
   if(pDia && !tiendaCategoriaActiva && !qDia){
     var pidDia="'"+pDia.id+"'";
-    var cdDia=mejorCuotaDatos(pDia.venta);
+    var cdDia=mejorCuotaDatos(pDia.venta, pDia);
     diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);border:2px solid #f0c040;position:relative;overflow:hidden;">'
       +'<div style="position:absolute;top:0;right:0;background:#f0c040;color:#1a1a2e;font-size:.6rem;font-weight:900;padding:3px 12px;border-radius:0 14px 0 12px;">🌟 PRODUCTO DEL DÍA</div>'
       +(pDia.foto?'<div style="width:90px;height:90px;border-radius:12px;background:#fff url(\''+pDia.foto+'\') center/cover no-repeat;flex-shrink:0;"></div>':'<div style="font-size:3rem;flex-shrink:0;">'+catProd(pDia).split(' ')[0]+'</div>')
@@ -1455,7 +1470,7 @@ function tiendaRender(){
         +'<div style="color:#fff;font-size:.85rem;font-weight:800;line-height:1.2;margin-top:8px;">'+pDia.nombre+'</div>'
         +(cdDia
           ? '<div style="color:#f0c040;font-size:1.5rem;font-weight:900;line-height:1.05;margin-top:2px;">'+fmt(cdDia.valor)+'</div>'
-            +'<div style="color:#7fe8a0;font-size:.66rem;font-weight:800;">en '+cdDia.n+' cuotas fijas</div>'
+            +'<div style="color:#7fe8a0;font-size:.66rem;font-weight:800;">en '+cdDia.n+(cdDia.sinInteres?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
             +'<div style="color:rgba(255,255,255,.6);font-size:.66rem;">Contado: '+fmt(pDia.venta)+'</div>'
           : '<div style="color:#f0c040;font-size:1.3rem;font-weight:900;margin-top:2px;">'+fmt(pDia.venta)+'</div>')
       +'</div></div>';
@@ -1479,8 +1494,8 @@ function tiendaRender(){
         +(p.foto?'<div style="width:100%;height:90px;border-radius:8px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin:14px 0 6px;"></div>':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
         +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
         +(function(){
-          var cd=mejorCuotaDatos(p.venta);
-          if(cd)return '<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div><div style="font-size:.56rem;font-weight:700;color:#0a8a3f;">en '+cd.n+' cuotas</div><div style="font-size:.58rem;color:var(--sub);">Contado: '+fmt(p.venta)+'</div>';
+          var cd=mejorCuotaDatos(p.venta, p);
+          if(cd)return '<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div><div style="font-size:.56rem;font-weight:700;color:'+(cd.sinInteres?'var(--nar)':'#0a8a3f')+';">en '+cd.n+(cd.sinInteres?' ✨ s/interés':' cuotas')+'</div><div style="font-size:.58rem;color:var(--sub);">Contado: '+fmt(p.venta)+'</div>';
           return '<div style="font-size:.95rem;font-weight:900;color:var(--nar);margin-top:2px;">'+fmt(p.venta)+'</div>';
         })()
         +'</div>';
@@ -1532,6 +1547,7 @@ function tiendaRender(){
   else if(orden==='mayor') lista.sort(function(a,b){return b.venta-a.venta;});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
   else if(orden==='nuevos')lista.sort(function(a,b){return (b.creado||0)-(a.creado||0);});
+  else if(orden==='sininteres')lista.sort(function(a,b){return (b.sinInteres?1:0)-(a.sinInteres?1:0);});
 
   if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados'+(maxPrecio?' hasta '+fmt(maxPrecio):'')+(q?' para "'+q+'"':'')+'</div>'; return; }
 
@@ -1570,6 +1586,10 @@ function tiendaRender(){
     if(esNuevo(p)){
       card+='<div style="display:inline-block;background:var(--gr);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">✨ NUEVO</div>';
     }
+    // etiqueta "SIN INTERÉS" (visible para todos)
+    if(p.sinInteres){
+      card+='<div style="display:inline-block;background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;box-shadow:0 1px 4px rgba(255,122,0,.4);">✨ '+parseInt(p.sinInteres,10)+' CUOTAS SIN INTERÉS</div>';
+    }
 
     card+='<div style="position:relative;">'
       +(p.foto
@@ -1579,10 +1599,10 @@ function tiendaRender(){
       +'</div>'
       +'<div onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +(function(){
-        var cd=mejorCuotaDatos(p.venta);
+        var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
           return '<div style="font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
-            +'<div style="font-size:.62rem;font-weight:700;color:#0a8a3f;margin-bottom:1px;">en '+cd.n+' cuotas fijas</div>'
+            +'<div style="font-size:.62rem;font-weight:700;color:'+(cd.sinInteres?'var(--nar)':'#0a8a3f')+';margin-bottom:1px;">en '+cd.n+(cd.sinInteres?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
             +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: '+fmt(p.venta)+'</div>';
         }else{
           return '<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:6px;">'+fmt(p.venta)+'</div>';
@@ -1595,6 +1615,7 @@ function tiendaRender(){
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
+      card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.sinInteres?'#fff4e6':'var(--bg)')+';color:'+(p.sinInteres?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.sinInteres?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetSinInteres('+pid+')">'+(p.sinInteres?'✨ '+parseInt(p.sinInteres,10)+' cuotas s/interés':'☆ Cuotas sin interés')+'</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:6px;">'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
@@ -1796,6 +1817,29 @@ function tiendaToggleMarcado(id){
   else tiendaMarcadosSet[id]=true;
 }
 
+// Marcar/desmarcar "cuotas sin interés": pide en cuántas cuotas va sin recargo
+function tiendaSetSinInteres(id){
+  var p=buscarProd(id);
+  if(!p)return;
+  var actual=p.sinInteres?parseInt(p.sinInteres,10):'';
+  var r=prompt('¿En cuántas cuotas SIN INTERÉS va este producto?\n\n(Ej: 3 = contado ÷ 3, sin recargo)\n\nDejá VACÍO y aceptá para quitar el sin interés.', actual);
+  if(r===null)return; // canceló
+  var n=parseInt((''+r).trim(),10);
+  var valor=(isNaN(n)||n<1)?null:n;   // null = quitar
+
+  if((''+id).indexOf('celu_')===0){
+    var i=parseInt((''+id).replace('celu_',''),10);
+    var celus=cargarListaCelus();
+    if(celus[i]){ if(valor)celus[i].sinInteres=valor; else delete celus[i].sinInteres;
+      try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
+  }else{
+    var pr=tiendaProductos.find(function(x){return x.id==id;});
+    if(pr){ if(valor)pr.sinInteres=valor; else delete pr.sinInteres; tiendaGuardarLocal(); }
+  }
+  mostrarToast(valor?('✨ '+valor+' cuotas sin interés'):'Sin interés quitado');
+  tiendaRender();
+}
+
 // Marcar/desmarcar "últimas unidades"
 function tiendaTogglePocoStock(id){
   if((''+id).indexOf('celu_')===0){
@@ -1985,7 +2029,7 @@ function tiendaEnviarConsulta(){
 function tiendaVender(){
   var p=buscarProd(window._tiendaPedirId);
   if(!p)return;
-  var cuotasLines=armarCuotasLines(p.venta);
+  var cuotasLines=armarCuotasLines(p.venta, p);
   var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
   var url='https://wa.me/?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
@@ -2037,6 +2081,16 @@ function tiendaVerDetalle(id){
   }
   // cuotas
   html+='<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px;">Planes de cuotas</div>';
+  // plan SIN INTERÉS destacado (si el producto lo tiene)
+  if(p.sinInteres){
+    var nsiD=parseInt(p.sinInteres,10);
+    var vsiD=Math.round(p.venta/nsiD/1000)*1000;
+    html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 2px 8px rgba(255,122,0,.3);">'
+      +'<div style="font-size:.7rem;font-weight:800;opacity:.9;">✨ OFERTA ESPECIAL</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">'
+      +'<span style="font-weight:800;">'+nsiD+' cuotas SIN INTERÉS</span>'
+      +'<span style="font-weight:900;font-size:1.15rem;">'+nsiD+' x '+fmt(vsiD)+'</span></div></div>';
+  }
   for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
       var vc=Math.round(calcularTotalPlan(p.venta,n)/n/1000)*1000;
@@ -2086,7 +2140,7 @@ function tiendaVerDetalle(id){
 function compartirProducto(id){
   var p=buscarProd(id);
   if(!p)return;
-  var cuotasLines=armarCuotasLines(p.venta);
+  var cuotasLines=armarCuotasLines(p.venta, p);
   var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
 
   // Si tiene foto, intentar compartir la imagen + texto
@@ -2147,7 +2201,7 @@ function tiendaActualizarSelecCount(){
 // arma el texto combinado de todos los productos elegidos
 function tiendaTextoVarios(prods){
   var partes=prods.map(function(p){
-    var cuotasLines=armarCuotasLines(p.venta);
+    var cuotasLines=armarCuotasLines(p.venta, p);
     return armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
   });
   return partes.join('\n\n━━━━━━━━━━━━━\n\n');
@@ -2159,39 +2213,63 @@ function tiendaCompartirVarios(){
   var prods=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});
   if(!prods.length){ alert('No se encontraron los productos seleccionados.'); return; }
 
-  var msg=tiendaTextoVarios(prods);
-  var conFoto=prods.filter(function(p){return !!p.foto;});
+  // Si es uno solo: comparte directo (foto + su precio)
+  if(prods.length===1){ tiendaCancelarSelec(); compartirProducto(prods[0].id); return; }
 
-  // sin compartir nativo o sin fotos: mandamos el texto de todos por WhatsApp
-  if(!navigator.share || !conFoto.length){ compartirSoloTexto(msg); return; }
+  // Sin compartir nativo: cae al texto combinado por WhatsApp
+  if(!navigator.share){ compartirSoloTexto(tiendaTextoVarios(prods)); tiendaCancelarSelec(); return; }
 
-  // bajamos todas las fotos y armamos los archivos
-  mostrarToast('📤 Preparando '+conFoto.length+' foto(s)…');
-  Promise.all(conFoto.map(function(p,idx){
-    return fetch(p.foto)
-      .then(function(r){return r.blob();})
-      .then(function(blob){ return new File([blob], 'producto'+(idx+1)+'.jpg', {type:blob.type||'image/jpeg'}); })
-      .catch(function(){return null;});
-  })).then(function(files){
-    files=files.filter(function(f){return !!f;});
-    // ¿el celu puede compartir varios archivos?
-    if(files.length && navigator.canShare && navigator.canShare({files:files})){
-      return navigator.share({ files:files, text:msg });
-    }
-    // fallback: una sola foto (la primera) + texto de todos
-    if(files.length && navigator.canShare && navigator.canShare({files:[files[0]]})){
-      return navigator.share({ files:[files[0]], text:msg });
-    }
-    // último recurso: solo texto
-    return navigator.share({ text:msg });
-  }).then(function(){
-    // compartido ok: salimos del modo selección
-    tiendaCancelarSelec();
-  }).catch(function(){
-    // si el usuario cancela o falla, ofrecemos el texto por WA
-    compartirSoloTexto(msg);
-  });
+  // VARIOS: se envían de a UNO, cada foto con SU nombre y SU precio.
+  // Android no deja poner un texto distinto por cada imagen en un solo envío,
+  // así que los mandamos en secuencia (compartís uno, volvés, sale el siguiente).
+  if(!confirm('Vas a compartir '+prods.length+' productos.\n\nComo cada foto lleva SU propio precio, se envían de a uno: compartís el primero, volvés a la app y aparece el siguiente.\n\n¿Empezamos?')){ return; }
+  tiendaModoSelec=false;
+  var bar=document.getElementById('tienda-selec-bar'); if(bar)bar.style.display='none';
+  var btn=document.getElementById('btn-modo-selec'); if(btn)btn.style.background='var(--wh)';
+  tiendaCompartirEnCadena(prods, 0);
 }
+
+// comparte un producto de la lista y, al volver, ofrece el siguiente
+function tiendaCompartirEnCadena(prods, i){
+  if(i>=prods.length){
+    tiendaSelecSet={}; tiendaRender();
+    mostrarToast('✅ Listo, compartiste los '+prods.length+' productos');
+    return;
+  }
+  var p=prods[i];
+  var cuotasLines=armarCuotasLines(p.venta, p);
+  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  var restantes=prods.length-i-1;
+
+  function siguiente(){
+    if(restantes>0){
+      mostrarToast('👉 Falta'+(restantes>1?'n':'')+' '+restantes+' — tocá para el siguiente');
+      // pequeño respiro y seguimos con el próximo
+      setTimeout(function(){ tiendaCompartirEnCadena(prods, i+1); }, 400);
+    }else{
+      tiendaCompartirEnCadena(prods, i+1);
+    }
+  }
+
+  if(p.foto){
+    fetch(p.foto)
+      .then(function(r){return r.blob();})
+      .then(function(blob){
+        var file=new File([blob], 'producto.jpg', {type:blob.type||'image/jpeg'});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          return navigator.share({ files:[file], text:msg });
+        }
+        return navigator.share({ text:msg });
+      })
+      .then(siguiente)
+      .catch(function(){ siguiente(); }); // si cancela una, seguimos con la que viene
+  }else{
+    navigator.share({ text:msg }).then(siguiente).catch(function(){ siguiente(); });
+  }
+}
+
+// junta el texto de todos (para el fallback sin compartir nativo)
+function tiendaTextoVariosViejo(prods){ return tiendaTextoVarios(prods); }
 
 // Botón "volver arriba"
 function volverArriba(){
@@ -2523,6 +2601,16 @@ function tiendaVerCuotas(id){
     +'<h3 style="color:var(--az);font-weight:900;font-size:1rem;">'+p.nombre+'</h3>'
     +'<div style="font-size:1.3rem;font-weight:900;color:var(--nar);margin:4px 0 12px;">Contado: '+fmt(p.venta)+'</div>'
     +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Planes de cuotas</div>';
+  // plan SIN INTERÉS destacado (si el producto lo tiene)
+  if(p.sinInteres){
+    var nsi=parseInt(p.sinInteres,10);
+    var vsi=Math.round(p.venta/nsi/1000)*1000;
+    html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(255,122,0,.3);">'
+      +'<div style="font-size:.7rem;font-weight:800;opacity:.9;">✨ OFERTA ESPECIAL</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">'
+      +'<span style="font-weight:800;">'+nsi+' cuotas SIN INTERÉS</span>'
+      +'<span style="font-weight:900;font-size:1.1rem;">'+nsi+' x '+fmt(vsi)+'</span></div></div>';
+  }
   for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
       var total=calcularTotalPlan(p.venta,n);
