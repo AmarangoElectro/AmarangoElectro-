@@ -447,6 +447,12 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <!-- Banner rotativo de mensajes -->
     <div id="tienda-banner-rot" style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:.82rem;font-weight:800;text-align:center;box-shadow:0 2px 8px rgba(255,122,0,.25);transition:opacity .4s;min-height:20px;"></div>
 
+    <!-- Barra de redes: Instagram + Canal de WhatsApp -->
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <a href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border-radius:11px;padding:11px;font-size:.78rem;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.15);">📷 Instagram</a>
+      <a href="https://whatsapp.com/channel/0029Vb21w9lKQuJM9CWY1347" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;background:#25D366;color:#fff;border-radius:11px;padding:11px;font-size:.78rem;font-weight:800;box-shadow:0 2px 6px rgba(37,211,102,.3);">📢 Canal WhatsApp</a>
+    </div>
+
     <!-- Banner "cómo comprar" para clientes -->
     <div onclick="tiendaComoComprar()" style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;border-radius:12px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.2);">
       <span style="font-size:1.4rem;">💡</span>
@@ -572,7 +578,13 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
   <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:30px auto;" id="modal-cuotas-body"></div>
 </div>
 
-<div class="footer">Tienda AmarangoElectro 🐝 · <span>Equipo AmarangoElectro</span></div>
+<div class="footer">
+  Tienda AmarangoElectro 🐝 · <span>Equipo AmarangoElectro</span>
+  <div style="margin-top:8px;display:flex;gap:14px;justify-content:center;">
+    <a href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener" style="color:var(--nar);text-decoration:none;font-weight:700;font-size:.8rem;">📷 @amarangoelectro</a>
+    <a href="https://whatsapp.com/channel/0029Vb21w9lKQuJM9CWY1347" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-weight:700;font-size:.8rem;">📢 Canal WhatsApp</a>
+  </div>
+</div>
 
 <script>
 var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
