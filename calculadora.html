@@ -422,6 +422,15 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
         style="width:100%;padding:12px 14px;border:2px solid var(--bor);border-radius:12px;font-size:.9rem;font-family:inherit;">
       <div id="tienda-chips" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none;"></div>
       <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;">
+        <select id="tienda-orden" onchange="tiendaRender()" style="flex:1;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;color:var(--az);font-weight:700;background:var(--wh);">
+          <option value="">Ordenar por…</option>
+          <option value="menor">💰 Precio: menor a mayor</option>
+          <option value="mayor">💰 Precio: mayor a menor</option>
+          <option value="az">🔤 Nombre A-Z</option>
+        </select>
+        <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
+      </div>
     </div>
 
     <!-- Barra de acciones en tanda (solo admin) -->
@@ -435,6 +444,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     </div>
 
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
+    <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
 
@@ -1196,16 +1206,28 @@ function tiendaRender(){
     tiendaMarcaActiva='';
   }
 
-  // filtrar por búsqueda + categoría + marca
+  // filtrar por búsqueda + categoría + marca + precio máximo
   var q=(document.getElementById('tienda-buscar').value||'').toLowerCase().trim();
+  var maxPrecio=parseFloat(document.getElementById('tienda-maxprecio').value)||0;
   var lista=universo.filter(function(p){
     var okCat=!tiendaCategoriaActiva || catProd(p)===tiendaCategoriaActiva;
     var okBusq=!q || (p.nombre||'').toLowerCase().indexOf(q)>=0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
-    return okCat && okBusq && okMarca;
+    var okPrecio=!maxPrecio || p.venta<=maxPrecio;
+    return okCat && okBusq && okMarca && okPrecio;
   });
 
-  if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados para "'+q+'"</div>'; return; }
+  // ordenar
+  var orden=document.getElementById('tienda-orden').value;
+  if(orden==='menor')      lista.sort(function(a,b){return a.venta-b.venta;});
+  else if(orden==='mayor') lista.sort(function(a,b){return b.venta-a.venta;});
+  else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
+
+  if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados'+(maxPrecio?' hasta '+fmt(maxPrecio):'')+(q?' para "'+q+'"':'')+'</div>'; return; }
+
+  // contador de resultados
+  var cntEl=document.getElementById('tienda-contador');
+  if(cntEl)cntEl.textContent='Mostrando '+lista.length+' producto'+(lista.length===1?'':'s');
 
   cont.innerHTML=lista.map(function(p){
     var pid="'"+p.id+"'"; // id entre comillas (sirve para número y para celu_N)
