@@ -1633,10 +1633,26 @@ function tiendaVerDetalle(id){
   if(tiendaEsAdmin){
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
   }
+  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
   html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
+}
+
+// Compartir un producto: arma el mensaje lindo AmarangoElectro y comparte (con foto si se puede)
+function compartirProducto(id){
+  var p=buscarProd(id);
+  if(!p)return;
+  var cuotasLines=armarCuotasLines(p.venta);
+  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  // Intento compartir nativo (permite mandar por cualquier app + foto)
+  if(navigator.share){
+    navigator.share({ title:p.nombre, text:msg }).catch(function(){});
+  }else{
+    var url='https://wa.me/?text='+encodeURIComponent(msg);
+    window.open(url,'_blank');
+  }
 }
 
 // ===== CARRITO =====
