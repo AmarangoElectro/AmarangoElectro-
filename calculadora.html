@@ -1827,12 +1827,12 @@ function tiendaVerDetalle(id){
   html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
   if(esVend){
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);color:#fff;border:2px solid var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
   }
   // en modo admin: botón editar dentro del detalle
   if(tiendaEsAdmin){
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
   }
-  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
   html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
