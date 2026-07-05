@@ -129,6 +129,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 #splash-screen.oculto{opacity:0;pointer-events:none;transition:opacity .5s;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -413,6 +414,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="font-size:.95rem;font-weight:900;color:var(--az);">🛒 Tienda AmarangoElectro</div>
       <div style="display:flex;gap:6px;align-items:center;">
+        <button id="btn-qr-tienda" onclick="mostrarQR()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Código QR">📱</button>
+        <button id="btn-compartir-tienda" onclick="compartirTienda()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Compartir tienda">📤</button>
         <button id="btn-modo-oscuro" onclick="toggleModoOscuro()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Modo oscuro">🌙</button>
         <button id="tienda-btn-admin" style="font-size:.68rem;padding:6px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaLoginAdmin()">🔒 Admin</button>
       </div>
@@ -450,6 +453,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
           <option value="az">🔤 Nombre A-Z</option>
         </select>
         <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
+        <button id="btn-ver-favs" onclick="toggleVerFavoritos()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Ver mis favoritos">❤️</button>
       </div>
     </div>
 
@@ -466,6 +470,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <div id="tienda-productodia" style="display:none;margin-top:12px;"></div>
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
+    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:80px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
 
@@ -484,6 +489,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="editarCupones()">🎟️ Cupones de descuento</button>
     <button id="tienda-btn-stats" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
+    <button id="tienda-btn-hist" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
+      onclick="tiendaHistorial()">📋 Historial de pedidos</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
   </div>
@@ -941,6 +948,7 @@ function tiendaInit(){
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
   bajarBannerNube();       // baja los mensajes del banner de la nube
   bajarCuponesNube();      // baja los cupones de la nube
+  bajarHistorialNube();    // baja el historial de pedidos de la nube
   iniciarBannerRotativo();
   // reflejar el estado del modo oscuro en el botón
   var bmo=document.getElementById('btn-modo-oscuro');
@@ -1089,6 +1097,52 @@ function tiendaBajarNube(intentos){
       }
     })
     .catch(function(){});
+}
+
+// HISTORIAL DE PEDIDOS + ranking (solo admin)
+function tiendaHistorial(){
+  var hist=cargarHistorial();
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">📋 Historial de pedidos</h3>';
+  if(!hist.length){
+    html+='<p style="font-size:.78rem;color:var(--sub);margin:12px 0;">Todavía no hay pedidos registrados. Cuando alguien haga un pedido desde el carrito, aparece acá.</p>';
+  }else{
+    // ranking de lo más pedido
+    var ranking={};
+    hist.forEach(function(p){ (p.items||[]).forEach(function(it){ ranking[it.nombre]=(ranking[it.nombre]||0)+it.cantidad; }); });
+    var top=Object.keys(ranking).map(function(k){return {nombre:k,cant:ranking[k]};}).sort(function(a,b){return b.cant-a.cant;}).slice(0,5);
+    var totalVendido=hist.reduce(function(s,p){return s+(p.total||0);},0);
+
+    html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin:12px 0;">'
+      +'<div style="font-size:.8rem;font-weight:900;color:var(--az);margin-bottom:8px;">🏆 Lo más pedido</div>';
+    top.forEach(function(t,i){
+      var medalla=['🥇','🥈','🥉','4.','5.'][i];
+      html+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--az);">'+medalla+' '+t.nombre+'</span><span style="font-weight:800;color:var(--nar);">'+t.cant+'</span></div>';
+    });
+    html+='</div>';
+    html+='<div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--bor);border-bottom:1px solid var(--bor);margin-bottom:10px;"><span style="font-size:.8rem;color:var(--sub);">📦 Pedidos totales</span><span style="font-weight:800;color:var(--az);">'+hist.length+'</span></div>';
+
+    html+='<div style="font-size:.8rem;font-weight:900;color:var(--az);margin-bottom:6px;">Últimos pedidos</div>';
+    hist.slice(0,20).forEach(function(p){
+      var f=new Date(p.fecha);
+      var fstr=f.getDate()+'/'+(f.getMonth()+1)+' '+('0'+f.getHours()).slice(-2)+':'+('0'+f.getMinutes()).slice(-2);
+      var items=(p.items||[]).map(function(it){return it.cantidad+'x '+it.nombre;}).join(', ');
+      html+='<div style="border:1px solid var(--bor);border-radius:10px;padding:8px 10px;margin-bottom:6px;">'
+        +'<div style="display:flex;justify-content:space-between;"><span style="font-size:.68rem;color:var(--sub);">🕐 '+fstr+(p.destinatario?' · '+p.destinatario:'')+'</span><span style="font-weight:800;color:var(--nar);font-size:.8rem;">'+fmt(p.total)+'</span></div>'
+        +'<div style="font-size:.72rem;color:var(--az);margin-top:3px;">'+items+'</div></div>';
+    });
+  }
+  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--red);border:2px solid #ffd5d5;" onclick="borrarHistorial()">🗑️ Borrar historial</button>';
+  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+function borrarHistorial(){
+  if(!confirm('¿Borrar todo el historial de pedidos? No se puede deshacer.'))return;
+  try{ localStorage.removeItem('ae_historial'); }catch(e){}
+  if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({id:'historial',datos:[],actualizado:new Date().toISOString()}).then(function(){}).catch(function(){}); }
+  document.getElementById('modal-cuotas').style.display='none';
+  alert('✅ Historial borrado.');
 }
 
 // ESTADÍSTICAS del negocio (solo admin)
@@ -1257,6 +1311,7 @@ function tiendaAplicarModo(){
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
+  var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
     bAdmin.style.display='none';
@@ -1337,7 +1392,8 @@ function tiendaRender(){
       foto: c.foto||'',
       caracteristicas: c.caracteristicas||'',
       destacado: c.destacado||false,
-      delDia: c.delDia||false
+      delDia: c.delDia||false,
+      pocoStock: c.pocoStock||false
     });
   });
 
@@ -1423,14 +1479,21 @@ function tiendaRender(){
 
   // filtrar por búsqueda + categoría + marca + precio máximo
   var q=(document.getElementById('tienda-buscar').value||'').toLowerCase().trim();
+  var palabras=q.split(/\s+/).filter(function(w){return w;});
   var maxPrecio=parseFloat(document.getElementById('tienda-maxprecio').value)||0;
   var lista=universo.filter(function(p){
     var okCat=!tiendaCategoriaActiva || catProd(p)===tiendaCategoriaActiva;
-    var okBusq=!q || (p.nombre||'').toLowerCase().indexOf(q)>=0;
+    // búsqueda: texto combinado (nombre + categoría + marca + características)
+    var texto=((p.nombre||'')+' '+catProd(p)+' '+(p.esCelu?marcaCelu(p.nombre):'')+' '+(p.caracteristicas||'')).toLowerCase();
+    var okBusq=!palabras.length || palabras.every(function(w){return texto.indexOf(w)>=0;});
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
     var okPrecio=!maxPrecio || p.venta<=maxPrecio;
-    return okCat && okBusq && okMarca && okPrecio;
+    var okFav=!verSoloFavoritos || esFavorito(p.id);
+    return okCat && okBusq && okMarca && okPrecio && okFav;
   });
+  // resaltar botón favoritos si está activo
+  var bfav=document.getElementById('btn-ver-favs');
+  if(bfav){ bfav.style.background=verSoloFavoritos?'var(--red)':'var(--wh)'; bfav.style.color=verSoloFavoritos?'#fff':'inherit'; }
 
   // ordenar
   var orden=document.getElementById('tienda-orden').value;
@@ -1459,10 +1522,17 @@ function tiendaRender(){
     if(tiendaEsAdmin && p.esCelu){
       card+='<div style="font-size:.6rem;font-weight:700;margin-bottom:4px;color:var(--az);">📱 Desde "Celulares"</div>';
     }
+    // etiqueta "últimas unidades" (visible para todos)
+    if(p.pocoStock){
+      card+='<div style="display:inline-block;background:var(--red);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">🔥 ¡Últimas unidades!</div>';
+    }
 
-    card+=(p.foto
-      ? '<div onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
-      : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
+    card+='<div style="position:relative;">'
+      +(p.foto
+        ? '<div onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
+        : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
+      +'<button onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\')" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:.95rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);line-height:1;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
+      +'</div>'
       +'<div onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +(function(){
         var cd=mejorCuotaDatos(p.venta);
@@ -1480,6 +1550,7 @@ function tiendaRender(){
       // botón destacar (estrella) arriba de los otros
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
+      card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:6px;">'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
@@ -1679,6 +1750,19 @@ function tiendaEliminar(id){
 function tiendaToggleMarcado(id){
   if(tiendaMarcadosSet[id]) delete tiendaMarcadosSet[id];
   else tiendaMarcadosSet[id]=true;
+}
+
+// Marcar/desmarcar "últimas unidades"
+function tiendaTogglePocoStock(id){
+  if((''+id).indexOf('celu_')===0){
+    var i=parseInt((''+id).replace('celu_',''),10);
+    var celus=cargarListaCelus();
+    if(celus[i]){ celus[i].pocoStock=!celus[i].pocoStock; try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
+  }else{
+    var p=tiendaProductos.find(function(x){return x.id==id;});
+    if(p){ p.pocoStock=!p.pocoStock; tiendaGuardarLocal(); }
+  }
+  tiendaRender();
 }
 
 // Marcar/desmarcar un producto como destacado (aparece en el carrusel de arriba)
@@ -1989,6 +2073,71 @@ function compartirSoloTexto(msg){
   window.open(url,'_blank');
 }
 
+// Botón "volver arriba"
+function volverArriba(){
+  var tab=document.getElementById('tab-tienda');
+  if(tab)tab.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+// mostrar/ocultar el botón según el scroll
+(function(){
+  function chequear(){
+    var b=document.getElementById('btn-arriba');
+    if(!b)return;
+    var tab=document.getElementById('tab-tienda');
+    var sc=(tab&&tab.scrollTop)||window.scrollY||document.documentElement.scrollTop||0;
+    b.style.display = (sc>300 && tab && tab.classList.contains('on'))?'block':'none';
+  }
+  window.addEventListener('scroll', chequear, true);
+})();
+
+// Genera el código QR de la tienda
+function mostrarQR(){
+  var link=window.location.href.split('#')[0];
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;text-align:center;">📱 Código QR de tu tienda</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);text-align:center;margin:6px 0 14px;">Imprimilo y pegalo en tu local, flyers o donde quieras. La gente lo escanea y entra a tu tienda.</p>'
+    +'<div id="qr-box" style="display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px;margin-bottom:14px;"></div>'
+    +'<div style="font-size:.66rem;color:var(--sub);text-align:center;word-break:break-all;margin-bottom:14px;">'+link+'</div>'
+    +'<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="descargarQR()">📥 Descargar QR</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+  // generar el QR
+  setTimeout(function(){
+    var box=document.getElementById('qr-box');
+    if(box && window.QRCode){
+      box.innerHTML='';
+      new QRCode(box, { text:link, width:220, height:220, colorDark:'#0B2D6B', colorLight:'#ffffff' });
+    }else if(box){
+      box.innerHTML='<div style="color:var(--sub);font-size:.75rem;">No se pudo generar el QR. Revisá tu conexión.</div>';
+    }
+  },100);
+}
+function descargarQR(){
+  var img=document.querySelector('#qr-box img') || document.querySelector('#qr-box canvas');
+  if(!img){ alert('Esperá que se genere el QR.'); return; }
+  var url = img.tagName==='IMG' ? img.src : img.toDataURL('image/png');
+  var a=document.createElement('a');
+  a.href=url; a.download='QR-AmarangoElectro.png';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// Compartir la tienda entera con un mensaje de presentación
+function compartirTienda(){
+  var link=window.location.href.split('#')[0];
+  var msg='🐝 *AmarangoElectro* — Tu tienda de electro y celulares\n\n'
+    +'✨ Equipá tu casa, fácil y en cuotas fijas\n'
+    +'📱 Celulares · ❄️ Heladeras · 📺 TV · 🍳 Cocina y más\n\n'
+    +'Mirá todo nuestro catálogo con precios y cuotas acá 👇\n'
+    +link;
+  if(navigator.share){
+    navigator.share({ title:'AmarangoElectro', text:msg, url:link }).catch(function(){ compartirSoloTexto(msg); });
+  }else{
+    compartirSoloTexto(msg);
+  }
+}
+
 // Modo oscuro: activa/desactiva y recuerda la preferencia
 function toggleModoOscuro(){
   var on=document.body.classList.toggle('oscuro');
@@ -2000,6 +2149,23 @@ function toggleModoOscuro(){
 (function(){
   try{ if(localStorage.getItem('ae_modo_oscuro')==='1'){ document.body.classList.add('oscuro'); } }catch(e){}
 })();
+
+// ===== FAVORITOS =====
+function cargarFavoritos(){
+  try{ var g=localStorage.getItem('ae_favoritos'); if(g)return JSON.parse(g); }catch(e){}
+  return [];
+}
+function esFavorito(id){ return cargarFavoritos().indexOf(''+id)>=0; }
+function toggleFavorito(id){
+  var favs=cargarFavoritos();
+  var i=favs.indexOf(''+id);
+  if(i>=0){ favs.splice(i,1); mostrarToast('🤍 Quitado de favoritos'); }
+  else{ favs.push(''+id); mostrarToast('❤️ Agregado a favoritos'); }
+  try{ localStorage.setItem('ae_favoritos', JSON.stringify(favs)); }catch(e){}
+  tiendaRender();
+}
+var verSoloFavoritos=false;
+function toggleVerFavoritos(){ verSoloFavoritos=!verSoloFavoritos; tiendaRender(); }
 
 // ===== CARRITO =====
 function agregarAlCarrito(id){
@@ -2137,9 +2303,36 @@ function enviarPedido(tel, nombre){
   }
   msg+='\n💰 *TOTAL contado: '+fmt(total-desc)+'*\n\n';
   msg+=(nombre?'Hola '+nombre+'! ':'')+'Quiero hacer este pedido. ¿Coordinamos? 🙌';
+  // guardar en el historial de pedidos
+  guardarPedidoHistorial(total-desc, nombre);
   var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
   document.getElementById('modal-cuotas').style.display='none';
+}
+// Guarda el pedido en el historial (local + nube)
+function guardarPedidoHistorial(total, destinatario){
+  var hist=cargarHistorial();
+  hist.unshift({
+    fecha: new Date().toISOString(),
+    total: total,
+    destinatario: destinatario||'',
+    items: carrito.map(function(x){return {nombre:x.nombre, cantidad:x.cantidad, venta:x.venta};})
+  });
+  if(hist.length>200)hist=hist.slice(0,200); // guardar últimos 200
+  try{ localStorage.setItem('ae_historial', JSON.stringify(hist)); }catch(e){}
+  if(NUBE_OK && sbCalc){
+    sbCalc.from('tienda_catalogo').upsert({ id:'historial', datos:hist, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+  }
+}
+function cargarHistorial(){
+  try{ var g=localStorage.getItem('ae_historial'); if(g)return JSON.parse(g); }catch(e){}
+  return [];
+}
+function bajarHistorialNube(){
+  if(!NUBE_OK||!sbCalc)return;
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','historial').maybeSingle()
+    .then(function(r){ if(r&&r.data&&r.data.datos){ try{localStorage.setItem('ae_historial',JSON.stringify(r.data.datos));}catch(e){} } })
+    .catch(function(){});
 }
 
 function tiendaVerCuotas(id){
