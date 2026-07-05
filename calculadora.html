@@ -2780,7 +2780,7 @@ function tiendaProcesarCarga(){
     }else{
       venta = markupVentaCRM(costo);   // sin tercer número → fórmula
     }
-    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now() });
+    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), visible:false });
   });
 
   if(!nuevos.length){
@@ -2820,6 +2820,7 @@ function tiendaProcesarCarga(){
   if(window._cargaResumen){
     var r=window._cargaResumen;
     msg='✅ Listo:\n\n• '+r.actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+r.agregados+' producto(s) nuevo(s)';
+    if(r.agregados>0)msg+='\n\n🙈 Los nuevos quedaron OCULTOS. Cuando quieras publicarlos, tocá "👁️ Oculto" en cada uno (o usá "Mostrar marcados").';
     window._cargaResumen=null;
   }else{
     msg='✅ Se cargaron '+nuevos.length+' productos (reemplazó todo el catálogo).';
