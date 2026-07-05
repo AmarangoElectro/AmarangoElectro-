@@ -431,6 +431,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
     </div>
 
+    <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
 
     <!-- Botón admin: cargar catálogo (solo visible en modo admin) -->
@@ -1123,6 +1124,31 @@ function tiendaRender(){
   });
   document.getElementById('tienda-chips').innerHTML=chipsHtml;
 
+  // CARRUSEL DE DESTACADOS (solo en la vista principal, sin filtros)
+  var destDiv=document.getElementById('tienda-destacados');
+  var q0=(document.getElementById('tienda-buscar').value||'').trim();
+  var destacados=universo.filter(function(p){return p.destacado;});
+  if(destacados.length && !tiendaCategoriaActiva && !q0){
+    var dh='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:1rem;">⭐</span><span style="font-size:.85rem;font-weight:900;color:var(--az);">Destacados de la semana</span></div>';
+    dh+='<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;">';
+    destacados.forEach(function(p){
+      var pid="'"+p.id+"'";
+      var cuota=mejorCuotaTexto(p.venta);
+      dh+='<div onclick="tiendaVerDetalle('+pid+')" style="flex:0 0 auto;width:150px;background:var(--wh);border:2px solid var(--nar);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 2px 8px rgba(255,122,0,.15);position:relative;">'
+        +'<div style="position:absolute;top:-1px;left:-1px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px 0 12px 0;">⭐ DESTACADO</div>'
+        +(p.foto?'<div style="width:100%;height:90px;border-radius:8px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin:14px 0 6px;"></div>':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
+        +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
+        +'<div style="font-size:.95rem;font-weight:900;color:var(--nar);margin-top:2px;">'+fmt(p.venta)+'</div>'
+        +(cuota?'<div style="font-size:.6rem;font-weight:800;color:#0a8a3f;">💳 '+cuota+'</div>':'')
+        +'</div>';
+    });
+    dh+='</div>';
+    destDiv.innerHTML=dh;
+    destDiv.style.display='block';
+  }else{
+    destDiv.style.display='none';
+  }
+
   // sub-chips de MARCA cuando estás en la categoría Celulares
   if(tiendaCategoriaActiva==='📱 Celulares'){
     var marcas={};
@@ -1175,6 +1201,8 @@ function tiendaRender(){
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
 
     if(tiendaEsAdmin){
+      // botón destacar (estrella) arriba de los otros
+      card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:6px;">'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
@@ -1373,6 +1401,20 @@ function tiendaEliminar(id){
 function tiendaToggleMarcado(id){
   if(tiendaMarcadosSet[id]) delete tiendaMarcadosSet[id];
   else tiendaMarcadosSet[id]=true;
+}
+
+// Marcar/desmarcar un producto como destacado (aparece en el carrusel de arriba)
+function tiendaToggleDestacado(id){
+  if((''+id).indexOf('celu_')===0){
+    // celular: guardar en su lista
+    var i=parseInt((''+id).replace('celu_',''),10);
+    var celus=cargarListaCelus();
+    if(celus[i]){ celus[i].destacado=!celus[i].destacado; try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
+  }else{
+    var p=tiendaProductos.find(function(x){return x.id==id;});
+    if(p){ p.destacado=!p.destacado; tiendaGuardarLocal(); }
+  }
+  tiendaRender();
 }
 
 // mostrar u ocultar todos los marcados de una
