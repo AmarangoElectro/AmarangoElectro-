@@ -1646,13 +1646,33 @@ function compartirProducto(id){
   if(!p)return;
   var cuotasLines=armarCuotasLines(p.venta);
   var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
-  // Intento compartir nativo (permite mandar por cualquier app + foto)
-  if(navigator.share){
-    navigator.share({ title:p.nombre, text:msg }).catch(function(){});
-  }else{
-    var url='https://wa.me/?text='+encodeURIComponent(msg);
-    window.open(url,'_blank');
+
+  // Si tiene foto, intentar compartir la imagen + texto
+  if(p.foto && navigator.share){
+    fetch(p.foto)
+      .then(function(r){ return r.blob(); })
+      .then(function(blob){
+        var file=new File([blob], 'producto.jpg', {type:blob.type||'image/jpeg'});
+        // ¿el celu puede compartir archivos?
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          return navigator.share({ files:[file], text:msg });
+        }else{
+          return navigator.share({ text:msg }); // sin foto
+        }
+      })
+      .catch(function(){
+        // si algo falla, compartir solo texto por WhatsApp
+        compartirSoloTexto(msg);
+      });
+    return;
   }
+  // sin foto o sin compartir nativo: texto
+  if(navigator.share){ navigator.share({title:p.nombre, text:msg}).catch(function(){compartirSoloTexto(msg);}); }
+  else compartirSoloTexto(msg);
+}
+function compartirSoloTexto(msg){
+  var url='https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
 }
 
 // ===== CARRITO =====
