@@ -504,6 +504,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
     <button id="tienda-btn-hist" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaHistorial()">📋 Historial de pedidos</button>
+    <button id="tienda-btn-pdf" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#c0392b;"
+      onclick="tiendaCatalogoPDF()">📄 Descargar catálogo PDF</button>
     <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
       onclick="tiendaBackup()">💾 Descargar backup (respaldo)</button>
     <button id="tienda-btn-restore" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--az);border:2px solid var(--az);"
@@ -1356,6 +1358,7 @@ function tiendaAplicarModo(){
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
   var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
+  var btnPdf=document.getElementById('tienda-btn-pdf'); if(btnPdf)btnPdf.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
@@ -2349,6 +2352,112 @@ function toggleModoOscuro(){
 })();
 
 // ===== BACKUP / RESTAURAR =====
+// Devuelve TODOS los productos (propios + celulares) como universo unificado
+function tiendaTodosLosProductos(soloVisibles){
+  var universo = soloVisibles
+    ? tiendaProductos.filter(function(p){return p.visible;})
+    : tiendaProductos.slice();
+  var celus=cargarListaCelus();
+  celus.forEach(function(c,i){
+    if(!c||!c.precio)return;
+    universo.push({
+      id:'celu_'+i, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0,
+      categoria:'📱 Celulares', colores:c.colores||[], visible:true,
+      foto:c.foto||'', caracteristicas:c.caracteristicas||'',
+      destacado:c.destacado||false, delDia:c.delDia||false,
+      pocoStock:c.pocoStock||false, sinInteres:c.sinInteres||0
+    });
+  });
+  return universo;
+}
+
+// Genera el catálogo completo en PDF (vía impresión → guardar como PDF)
+function tiendaCatalogoPDF(){
+  var prods=tiendaTodosLosProductos(true); // solo visibles para el cliente
+  if(!prods.length){ alert('No hay productos para el catálogo.'); return; }
+
+  // agrupar por categoría
+  var cats={};
+  prods.forEach(function(p){
+    var c=p.categoria||'Otros';
+    (cats[c]=cats[c]||[]).push(p);
+  });
+
+  var hoy=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var css='<style>'
+    +'*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif;}'
+    +'body{color:#1a1a1a;padding:0;}'
+    +'.pdf-header{background:linear-gradient(135deg,#0B2D6B,#1a4a9e);color:#fff;padding:24px 28px;text-align:center;}'
+    +'.pdf-header h1{font-size:26px;font-weight:900;letter-spacing:1px;}'
+    +'.pdf-header .sub{font-size:12px;opacity:.85;margin-top:4px;letter-spacing:2px;}'
+    +'.pdf-header .ig{font-size:12px;margin-top:8px;color:#FF7A00;font-weight:700;}'
+    +'.pdf-fecha{text-align:center;font-size:11px;color:#666;padding:8px;background:#f5f5f5;}'
+    +'.cat-titulo{background:#FF7A00;color:#fff;font-size:15px;font-weight:800;padding:8px 16px;margin:0;page-break-after:avoid;}'
+    +'.prod{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #eee;page-break-inside:avoid;align-items:center;}'
+    +'.prod img{width:70px;height:70px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#f0f0f0;}'
+    +'.prod .noimg{width:70px;height:70px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}'
+    +'.prod .info{flex:1;}'
+    +'.prod .nom{font-size:14px;font-weight:800;color:#0B2D6B;}'
+    +'.prod .carac{font-size:10px;color:#888;margin-top:1px;}'
+    +'.prod .precio{text-align:right;flex-shrink:0;}'
+    +'.prod .contado{font-size:15px;font-weight:900;color:#FF7A00;}'
+    +'.prod .cuota{font-size:10px;color:#0a8a3f;font-weight:700;}'
+    +'.prod .sininteres{font-size:9px;color:#fff;background:#FF7A00;padding:1px 6px;border-radius:8px;font-weight:800;display:inline-block;margin-top:2px;}'
+    +'.pdf-foot{text-align:center;font-size:10px;color:#999;padding:16px;border-top:2px solid #FF7A00;margin-top:8px;}'
+    +'@media print{.cat-titulo{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.pdf-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.prod .sininteres{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}'
+    +'</style>';
+
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Catálogo AmarangoElectro</title>'+css+'</head><body>';
+  html+='<div class="pdf-header"><h1>AMARANGO ELECTRO</h1><div class="sub">EQUIPO AMARANGOELECTRO</div><div class="ig">📷 @amarangoelectro</div></div>';
+  html+='<div class="pdf-fecha">Catálogo actualizado al '+hoy+' — Precios en pesos, sujetos a cambios</div>';
+
+  // categorías ordenadas (celulares primero si existe)
+  var nombresCats=Object.keys(cats).sort(function(a,b){
+    if(a.indexOf('Celulares')>=0)return -1;
+    if(b.indexOf('Celulares')>=0)return 1;
+    return a.localeCompare(b);
+  });
+
+  nombresCats.forEach(function(cat){
+    html+='<div class="cat-titulo">'+cat+'</div>';
+    cats[cat].forEach(function(p){
+      var cd=mejorCuotaDatos(p.venta,p);
+      var fotoHtml=p.foto
+        ? '<img src="'+p.foto+'" alt="">'
+        : '<div class="noimg">📦</div>';
+      var carac=p.caracteristicas?'<div class="carac">'+escapeHtml(p.caracteristicas).slice(0,80)+'</div>':'';
+      var cuotaHtml='';
+      if(cd){
+        cuotaHtml='<div class="cuota">'+cd.n+' x '+fmt(cd.valor)+'</div>';
+        if(cd.sinInteres)cuotaHtml+='<div class="sininteres">✨ SIN INTERÉS</div>';
+      }
+      html+='<div class="prod">'+fotoHtml
+        +'<div class="info"><div class="nom">'+escapeHtml(p.nombre||'')+'</div>'+carac+'</div>'
+        +'<div class="precio"><div class="contado">'+fmt(p.venta)+'</div>'+cuotaHtml+'</div></div>';
+    });
+  });
+
+  html+='<div class="pdf-foot">AmarangoElectro — Financiación en cuotas fijas · Consultá por WhatsApp<br>Generado el '+hoy+'</div>';
+  html+='</body></html>';
+
+  // abrir en ventana nueva y disparar impresión (guardar como PDF)
+  var w=window.open('','_blank');
+  if(!w){ alert('Permití las ventanas emergentes para generar el PDF.'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  // esperar a que carguen las imágenes antes de imprimir
+  mostrarToast('📄 Preparando catálogo…');
+  setTimeout(function(){
+    try{ w.focus(); w.print(); }catch(e){}
+  }, 900);
+}
+
+// escape básico para el HTML del PDF
+function escapeHtml(s){
+  return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function tiendaBackup(){
   var datos={
     version:1,
