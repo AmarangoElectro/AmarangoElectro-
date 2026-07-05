@@ -2151,12 +2151,17 @@ function guardarListaCelus(){
   var cotiz=parseFloat(document.getElementById('celu-cotiz').value)||0;
   if(esUSD && !cotiz){alert('Poné el valor del dólar para convertir los precios USD.');return;}
   var nuevos=[];
+  var descartadas=[];
   lineas.forEach(function(l){
     var c=parsearCeluLinea(l, esUSD);
-    if(!c)return;
+    if(!c){ descartadas.push(l); return; }
     if(esUSD){var costo=c.precio*cotiz;c.precio=markupVentaCRM(costo);}
     nuevos.push(c);
   });
+  // aviso de diagnóstico si se descartaron líneas
+  if(descartadas.length){
+    alert('📊 Detecté '+nuevos.length+' celulares.\n\n⚠️ '+descartadas.length+' línea(s) NO se entendieron:\n\n'+descartadas.slice(0,12).join('\n')+(descartadas.length>12?'\n...':'')+'\n\n(Copiá esto y pasáselo a Claude para ajustar el formato)');
+  }
   if(!nuevos.length){alert('No detecté celulares con precio. Fijate que cada línea tenga el nombre y el precio.');return;}
 
   var anteriores=cargarListaCelus();
