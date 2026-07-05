@@ -457,6 +457,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
           <option value="az">🔤 Nombre A-Z</option>
           <option value="nuevos">✨ Novedades primero</option>
           <option value="sininteres">✨ Sin interés primero</option>
+          <option value="ofertas">🔥 Ofertas primero</option>
         </select>
         <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
         <button id="btn-ver-favs" onclick="toggleVerFavoritos()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Ver mis favoritos">❤️</button>
@@ -600,6 +601,17 @@ function mejorCuotaTexto(precio){
   var vc=Math.round(calcularTotalPlan(precio,n)/n/1000)*1000;
   return n+' cuotas de '+fmt(vc);
 }
+// Devuelve el HTML del precio tachado + % OFF si el producto está en oferta
+function bloquePrecioAntes(p, tam){
+  if(!p || !p.precioAntes) return '';
+  var antes=parseFloat(p.precioAntes);
+  if(isNaN(antes) || antes<=p.venta) return '';
+  var off=Math.round((1-p.venta/antes)*100);
+  var fs=tam||'.66rem';
+  return '<span style="font-size:'+fs+';color:var(--sub);text-decoration:line-through;margin-right:5px;">'+fmt(antes)+'</span>'
+    +'<span style="font-size:'+fs+';background:#e11d48;color:#fff;font-weight:800;padding:1px 6px;border-radius:8px;">-'+off+'%</span>';
+}
+
 // Devuelve {n: cantidad de cuotas, valor: valor de cada cuota} de la mejor cuota
 // Si el producto tiene sinInteres (número de cuotas), calcula SIN recargo: contado ÷ N
 function mejorCuotaDatos(precio, prod){
@@ -1504,7 +1516,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0 };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
   }
   return null;
 }
@@ -1536,7 +1548,8 @@ function tiendaRender(){
       destacado: c.destacado||false,
       delDia: c.delDia||false,
       pocoStock: c.pocoStock||false,
-      sinInteres: c.sinInteres||0
+      sinInteres: c.sinInteres||0,
+      precioAntes: c.precioAntes||0
     });
   });
 
@@ -1645,6 +1658,11 @@ function tiendaRender(){
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
   else if(orden==='nuevos')lista.sort(function(a,b){return (b.creado||0)-(a.creado||0);});
   else if(orden==='sininteres')lista.sort(function(a,b){return (b.sinInteres?1:0)-(a.sinInteres?1:0);});
+  else if(orden==='ofertas')lista.sort(function(a,b){
+    var oa=(a.precioAntes&&parseFloat(a.precioAntes)>a.venta)?(1-a.venta/parseFloat(a.precioAntes)):0;
+    var ob=(b.precioAntes&&parseFloat(b.precioAntes)>b.venta)?(1-b.venta/parseFloat(b.precioAntes)):0;
+    return ob-oa;
+  });
 
   if(!lista.length){ cont.innerHTML='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.8rem;padding:20px;">Sin resultados'+(maxPrecio?' hasta '+fmt(maxPrecio):'')+(q?' para "'+q+'"':'')+'</div>'; return; }
 
@@ -1683,6 +1701,12 @@ function tiendaRender(){
     if(esNuevo(p)){
       card+='<div style="display:inline-block;background:var(--gr);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">✨ NUEVO</div>';
     }
+    // etiqueta "OFERTA" (si tiene precio anterior mayor)
+    if(p.precioAntes && parseFloat(p.precioAntes)>p.venta){
+      var offEt=Math.round((1-p.venta/parseFloat(p.precioAntes))*100);
+      card+='<div style="display:inline-block;background:#e11d48;color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;box-shadow:0 1px 4px rgba(225,29,72,.4);">🔥 OFERTA -'+offEt+'%</div>';
+    }
+
     // etiqueta "SIN INTERÉS" (visible para todos)
     if(p.sinInteres){
       card+='<div style="display:inline-block;background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;box-shadow:0 1px 4px rgba(255,122,0,.4);">✨ '+parseInt(p.sinInteres,10)+' CUOTAS SIN INTERÉS</div>';
@@ -1700,9 +1724,10 @@ function tiendaRender(){
         if(cd){
           return '<div style="font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
             +'<div style="font-size:.62rem;font-weight:700;color:'+(cd.sinInteres?'var(--nar)':'#0a8a3f')+';margin-bottom:1px;">en '+cd.n+(cd.sinInteres?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
-            +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: '+fmt(p.venta)+'</div>';
+            +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
         }else{
-          return '<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:6px;">'+fmt(p.venta)+'</div>';
+          return '<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
+            +'<div style="margin-bottom:6px;">'+bloquePrecioAntes(p)+'</div>';
         }
       })()
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
@@ -1713,6 +1738,7 @@ function tiendaRender(){
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.sinInteres?'#fff4e6':'var(--bg)')+';color:'+(p.sinInteres?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.sinInteres?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetSinInteres('+pid+')">'+(p.sinInteres?'✨ '+parseInt(p.sinInteres,10)+' cuotas s/interés':'☆ Cuotas sin interés')+'</button>';
+      card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.precioAntes?'#ffe4e9':'var(--bg)')+';color:'+(p.precioAntes?'#e11d48':'var(--sub)')+';border:1.5px solid '+(p.precioAntes?'#e11d48':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetOferta('+pid+')">'+(p.precioAntes?'🔥 Oferta ('+fmt(p.precioAntes)+' antes)':'☆ Poner en oferta')+'</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:6px;">'
         +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
@@ -1936,6 +1962,36 @@ function tiendaSetSinInteres(id){
     if(pr){ if(valor)pr.sinInteres=valor; else delete pr.sinInteres; tiendaGuardarLocal(); }
   }
   mostrarToast(valor?('✨ '+valor+' cuotas sin interés'):'Sin interés quitado');
+  tiendaRender();
+}
+
+// Poner/quitar oferta: guarda el precio ANTERIOR (el actual es el de oferta)
+function tiendaSetOferta(id){
+  var p=buscarProd(id);
+  if(!p)return;
+  var actual=p.precioAntes?p.precioAntes:'';
+  var r=prompt('💰 PONER EN OFERTA\n\nEscribí el precio ANTERIOR (el más alto, que va a aparecer tachado).\n\nEl precio actual del producto ('+fmt(p.venta)+') queda como precio de oferta.\n\nDejá VACÍO y aceptá para quitar la oferta.', actual);
+  if(r===null)return; // canceló
+  var limpio=(''+r).replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'').trim();
+  var antes=parseFloat(limpio);
+  var valor=(isNaN(antes)||antes<=0)?null:Math.round(antes);
+
+  if(valor && valor<=p.venta){
+    alert('⚠️ El precio anterior ('+fmt(valor)+') tiene que ser MAYOR al precio actual ('+fmt(p.venta)+').\n\nSi el producto bajó de precio, primero actualizá su precio y después poné el anterior más alto.');
+    return;
+  }
+
+  if((''+id).indexOf('celu_')===0){
+    var i=parseInt((''+id).replace('celu_',''),10);
+    var celus=cargarListaCelus();
+    if(celus[i]){ if(valor)celus[i].precioAntes=valor; else delete celus[i].precioAntes;
+      try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
+  }else{
+    var pr=tiendaProductos.find(function(x){return x.id==id;});
+    if(pr){ if(valor)pr.precioAntes=valor; else delete pr.precioAntes; tiendaGuardarLocal(); }
+  }
+  if(valor){ var off=Math.round((1-p.venta/valor)*100); mostrarToast('🔥 Oferta -'+off+'%'); }
+  else mostrarToast('Oferta quitada');
   tiendaRender();
 }
 
@@ -2183,7 +2239,8 @@ function tiendaVerDetalle(id){
   }
   html+='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+p.nombre+'</h3>'
     +'<div style="display:flex;align-items:center;gap:5px;margin:4px 0 2px;font-size:.68rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>'
-    +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:2px 0 10px;">Contado: '+fmt(p.venta)+'</div>';
+    +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:2px 0 4px;">Contado: '+fmt(p.venta)+'</div>'
+    +(bloquePrecioAntes(p,'.8rem')?'<div style="margin:0 0 10px;">'+bloquePrecioAntes(p,'.8rem')+'</div>':'<div style="margin-bottom:6px;"></div>');
   // características (si tiene)
   if(p.caracteristicas){
     html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.8rem;color:var(--az);white-space:pre-line;line-height:1.5;">'+p.caracteristicas.replace(/</g,'&lt;')+'</div>';
@@ -2472,7 +2529,7 @@ function tiendaTodosLosProductos(soloVisibles){
       categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda,
       foto:c.foto||'', caracteristicas:c.caracteristicas||'',
       destacado:c.destacado||false, delDia:c.delDia||false,
-      pocoStock:c.pocoStock||false, sinInteres:c.sinInteres||0
+      pocoStock:c.pocoStock||false, sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0
     });
   });
   return universo;
@@ -2540,7 +2597,7 @@ function tiendaCatalogoPDF(){
       }
       html+='<div class="prod">'+fotoHtml
         +'<div class="info"><div class="nom">'+escapeHtml(p.nombre||'')+'</div>'+carac+'</div>'
-        +'<div class="precio"><div class="contado">'+fmt(p.venta)+'</div>'+cuotaHtml+'</div></div>';
+        +'<div class="precio">'+(p.precioAntes&&parseFloat(p.precioAntes)>p.venta?'<div style="font-size:10px;color:#999;text-decoration:line-through;">'+fmt(parseFloat(p.precioAntes))+' <span style="color:#e11d48;font-weight:800;">-'+Math.round((1-p.venta/parseFloat(p.precioAntes))*100)+'%</span></div>':'')+'<div class="contado">'+fmt(p.venta)+'</div>'+cuotaHtml+'</div></div>';
     });
   });
 
