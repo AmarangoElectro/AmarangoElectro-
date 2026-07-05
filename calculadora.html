@@ -515,6 +515,14 @@ var ORDEN_CUOTAS=[2,3,4,5,6,7,8,9,10,11,12];
 function cuotasActivasOrdenadas(){
   return ORDEN_CUOTAS.filter(function(n){return planesConfig[n] && planesConfig[n].activo;});
 }
+// Devuelve la cuota más vendedora (la de más cuotas activa) como texto corto para la tarjeta
+function mejorCuotaTexto(precio){
+  var activos=cuotasActivasOrdenadas();
+  if(!activos.length)return '';
+  var n=activos[activos.length-1]; // la de más cuotas (ej: 6)
+  var vc=Math.round(calcularTotalPlan(precio,n)/n/1000)*1000;
+  return n+' cuotas de '+fmt(vc);
+}
 // ═══ FUNCIÓN CENTRAL: arma el mensaje de WhatsApp con el formato único de toda la app ═══
 // nombre: texto del producto (puede tener variante). precio: contado. cuotasLines: array "💳 N cuotas fijas de $X"
 function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
@@ -1142,7 +1150,8 @@ function tiendaRender(){
       ? '<div onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
       : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
       +'<div onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
-      +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:4px;">'+fmt(p.venta)+'</div>'
+      +'<div style="font-size:1rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
+      +(mejorCuotaTexto(p.venta)?'<div style="display:inline-block;background:#e7f9ee;color:#0a8a3f;font-size:.66rem;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:6px;">💳 '+mejorCuotaTexto(p.venta)+'</div>':'')
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
 
     if(tiendaEsAdmin){
