@@ -15,6 +15,8 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FC;--bor:#E8EBF4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
+body.oscuro{--az:#c9a98a;--nar:#FF9838;--bg:#3a3632;--bor:#524d47;--txt:#ece7e1;--sub:#b3aaa0;--wh:#48423c;--gr:#7fb069;--red:#e07a5f}
+body.oscuro{background:#3a3632;color:#ece7e1;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
 body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden}
 .header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:relative;overflow:hidden}
@@ -410,7 +412,10 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <!-- Barra superior: título + botón admin -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <div style="font-size:.95rem;font-weight:900;color:var(--az);">🛒 Tienda AmarangoElectro</div>
-      <button id="tienda-btn-admin" style="font-size:.68rem;padding:6px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaLoginAdmin()">🔒 Admin</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="btn-modo-oscuro" onclick="toggleModoOscuro()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Modo oscuro">🌙</button>
+        <button id="tienda-btn-admin" style="font-size:.68rem;padding:6px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaLoginAdmin()">🔒 Admin</button>
+      </div>
     </div>
 
     <!-- Banner modo admin (oculto por defecto) -->
@@ -477,6 +482,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="editarBanner()">📢 Editar mensajes del banner</button>
     <button id="tienda-btn-cupones" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--nar);"
       onclick="editarCupones()">🎟️ Cupones de descuento</button>
+    <button id="tienda-btn-stats" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
+      onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
   </div>
@@ -927,6 +934,9 @@ function tiendaInit(){
   bajarBannerNube();       // baja los mensajes del banner de la nube
   bajarCuponesNube();      // baja los cupones de la nube
   iniciarBannerRotativo();
+  // reflejar el estado del modo oscuro en el botón
+  var bmo=document.getElementById('btn-modo-oscuro');
+  if(bmo)bmo.textContent=document.body.classList.contains('oscuro')?'☀️':'🌙';
 }
 // Banner rotativo: mensajes que van cambiando
 var BANNER_DEFAULT=[
@@ -1073,6 +1083,44 @@ function tiendaBajarNube(intentos){
     .catch(function(){});
 }
 
+// ESTADÍSTICAS del negocio (solo admin)
+function tiendaEstadisticas(){
+  var prods=tiendaProductos.slice();
+  var celus=cargarListaCelus();
+  var totalProds=prods.length;
+  var totalCelus=celus.length;
+  var visibles=prods.filter(function(p){return p.visible;}).length;
+  var destacados=prods.filter(function(p){return p.destacado;}).length + celus.filter(function(c){return c.destacado;}).length;
+  var conFoto=prods.filter(function(p){return p.foto;}).length + celus.filter(function(c){return c.foto;}).length;
+  // juntar precios de todo
+  var todos=prods.map(function(p){return {nombre:p.nombre,v:p.venta};})
+    .concat(celus.map(function(c){return {nombre:c.nombre,v:c.precio};}))
+    .filter(function(x){return x.v>0;});
+  var valorTotal=todos.reduce(function(s,x){return s+x.v;},0);
+  var masCaro=todos.length?todos.reduce(function(a,b){return b.v>a.v?b:a;}):null;
+  var masBarato=todos.length?todos.reduce(function(a,b){return b.v<a.v?b:a;}):null;
+  var promedio=todos.length?Math.round(valorTotal/todos.length):0;
+
+  function fila(label,val){ return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bor);"><span style="color:var(--sub);font-size:.8rem;">'+label+'</span><span style="font-weight:800;color:var(--az);font-size:.85rem;">'+val+'</span></div>'; }
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">📊 Estadísticas de tu tienda</h3>'
+    +'<div style="margin:12px 0;">'
+    +fila('🛍️ Productos (electro)', totalProds)
+    +fila('📱 Celulares', totalCelus)
+    +fila('👁️ Visibles al cliente', visibles+' / '+totalProds)
+    +fila('⭐ Destacados', destacados)
+    +fila('📷 Con foto', conFoto+' / '+(totalProds+totalCelus))
+    +fila('💰 Valor total del catálogo', fmt(valorTotal))
+    +fila('📈 Precio promedio', fmt(promedio))
+    +(masCaro?fila('🔺 Más caro', fmt(masCaro.v)):'')
+    +(masBarato?fila('🔻 Más barato', fmt(masBarato.v)):'')
+    +'</div>';
+  if(masCaro)html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;font-size:.72rem;color:var(--sub);margin-bottom:14px;">🔺 <b>'+masCaro.nombre+'</b> es el más caro · 🔻 <b>'+masBarato.nombre+'</b> el más accesible</div>';
+  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+
 // DIAGNÓSTICO: revisa qué hay en la nube y fuerza subir/bajar
 function tiendaDiagNube(){
   var r='CLOUD: '+(NUBE_OK?'SÍ':'NO')+'\nCliente sb: '+(sbCalc?'SÍ':'NO')+'\n';
@@ -1200,6 +1248,7 @@ function tiendaAplicarModo(){
   var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
+  var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
     bAdmin.style.display='none';
@@ -1907,6 +1956,18 @@ function compartirSoloTexto(msg){
   window.open(url,'_blank');
 }
 
+// Modo oscuro: activa/desactiva y recuerda la preferencia
+function toggleModoOscuro(){
+  var on=document.body.classList.toggle('oscuro');
+  try{ localStorage.setItem('ae_modo_oscuro', on?'1':'0'); }catch(e){}
+  var b=document.getElementById('btn-modo-oscuro');
+  if(b)b.textContent=on?'☀️':'🌙';
+}
+// aplicar la preferencia guardada al cargar
+(function(){
+  try{ if(localStorage.getItem('ae_modo_oscuro')==='1'){ document.body.classList.add('oscuro'); } }catch(e){}
+})();
+
 // ===== CARRITO =====
 function agregarAlCarrito(id){
   var p=buscarProd(id);
@@ -1915,10 +1976,32 @@ function agregarAlCarrito(id){
   if(item){ item.cantidad++; }
   else{ carrito.push({id:p.id, nombre:p.nombre, venta:p.venta, cantidad:1}); }
   actualizarCarritoUI();
-  // feedback visual
+  // feedback visual: rebote del carrito
   var b=document.getElementById('carrito-flotante');
-  if(b){ b.style.transform='scale(1.2)'; setTimeout(function(){b.style.transform='scale(1)';},180); }
+  if(b){ b.style.transition='transform .18s'; b.style.transform='scale(1.25)'; setTimeout(function(){b.style.transform='scale(1)';},180); }
   document.getElementById('modal-cuotas').style.display='none';
+  mostrarToast('✅ Agregado al carrito');
+}
+// Cartelito emergente (toast) que aparece abajo y se va solo
+function mostrarToast(texto){
+  var t=document.getElementById('ae-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='ae-toast';
+    t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gr);color:#fff;padding:12px 22px;border-radius:24px;font-size:.85rem;font-weight:800;z-index:2000;box-shadow:0 4px 16px rgba(0,0,0,.3);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;font-family:inherit;';
+    document.body.appendChild(t);
+  }
+  t.textContent=texto;
+  // mostrar
+  requestAnimationFrame(function(){
+    t.style.opacity='1';
+    t.style.transform='translateX(-50%) translateY(0)';
+  });
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(function(){
+    t.style.opacity='0';
+    t.style.transform='translateX(-50%) translateY(20px)';
+  },1600);
 }
 function actualizarCarritoUI(){
   var total=carrito.reduce(function(s,x){return s+x.cantidad;},0);
