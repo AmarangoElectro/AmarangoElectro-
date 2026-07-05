@@ -401,7 +401,7 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
       👑 Modo administrador — ves todos los productos y podés elegir cuáles mostrar.
-      <span onclick="tiendaSalirAdmin()" style="color:var(--sub);cursor:pointer;text-decoration:underline;margin-left:6px;">Ver como cliente</span>
+      <span onclick="toggleVistaCliente()" style="color:var(--sub);cursor:pointer;text-decoration:underline;margin-left:6px;">👁️ Ver como cliente</span>
       <span onclick="cerrarSesion()" style="color:var(--red);cursor:pointer;text-decoration:underline;margin-left:10px;">🚪 Cerrar sesión</span>
     </div>
 
@@ -547,6 +547,7 @@ var adminUnlocked=(function(){try{return localStorage.getItem('ae_sesion_admin')
 var pendingTab=null;
 
 var REV_PASS='Moro6';       // clave de revendedores para las herramientas de cálculo
+var vistaPreviaCliente=false; // cuando true, se previsualiza como lo ve un cliente
 var revUnlocked=(function(){try{return localStorage.getItem('ae_sesion_rev')==='1'||localStorage.getItem('ae_sesion_admin')==='1';}catch(e){return false;}})();
 
 // Acceso "Revendedores": pide Moro6 y abre las herramientas de precios
@@ -978,6 +979,25 @@ function tiendaSalirAdmin(){
   tiendaAplicarModo();
   tiendaRender();
 }
+// Previsualizar como cliente (sin cerrar sesión): oculta botones de vendedor
+function toggleVistaCliente(){
+  vistaPreviaCliente=!vistaPreviaCliente;
+  tiendaEsAdmin = adminUnlocked && !vistaPreviaCliente; // en vista cliente, no mostrar herramientas admin
+  tiendaAplicarModo();
+  tiendaRender();
+  var b=document.getElementById('tienda-vistaprev-banner');
+  if(vistaPreviaCliente){
+    if(!b){
+      b=document.createElement('div');
+      b.id='tienda-vistaprev-banner';
+      b.style.cssText='position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--az);color:#fff;padding:10px 18px;border-radius:24px;font-size:.78rem;font-weight:700;z-index:1500;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;';
+      b.onclick=toggleVistaCliente;
+      document.body.appendChild(b);
+    }
+    b.textContent='👁️ Estás viendo como CLIENTE — tocá para volver a admin';
+    b.style.display='block';
+  }else if(b){ b.style.display='none'; }
+}
 // CERRAR SESIÓN: borra el acceso admin y revendedor. Al volver, pide clave de nuevo.
 function cerrarSesion(){
   if(!confirm('¿Cerrar sesión?\n\nLa próxima vez que entres te va a pedir la clave de nuevo.'))return;
@@ -1163,7 +1183,7 @@ function tiendaRender(){
       +'</div>';
     }else{
       // botón público: pedir por WhatsApp
-      card+='<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+((revUnlocked||adminUnlocked)?'Pedir / Consultar':'Consultar')+'</button>'
+      card+='<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>'
         +'<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
     }
     card+='</div>';
@@ -1383,7 +1403,7 @@ function tiendaPedirWA(id){
   var p=buscarProd(id);
   if(!p)return;
   window._tiendaPedirId=id;
-  var esVendedor = revUnlocked || adminUnlocked; // vendedores/admin desbloqueados
+  var esVendedor = (revUnlocked || adminUnlocked) && !vistaPreviaCliente; // vendedores/admin desbloqueados
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 '+(esVendedor?'Pedir producto':'Consultá este producto')+'</h3>'
     +'<div style="font-size:.85rem;font-weight:700;color:var(--az);margin:6px 0 2px;">'+p.nombre+'</div>'
     +'<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:12px;">'+fmt(p.venta)+'</div>'
@@ -1528,7 +1548,7 @@ function tiendaVerDetalle(id){
     }
   }
   var pid="'"+p.id+"'";
-  var esVend = revUnlocked || adminUnlocked;
+  var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
   // acciones
   html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
   if(esVend){
