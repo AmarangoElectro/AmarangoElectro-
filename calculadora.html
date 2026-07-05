@@ -11,7 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Calculadora">
+<meta name="apple-mobile-web-app-title" content="Tienda AmarangoElectro">
+<meta name="application-name" content="Tienda AmarangoElectro">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FC;--bor:#E8EBF4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
@@ -474,6 +475,12 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <div id="tienda-tanda-bar" style="display:none;gap:6px;margin:8px 0;flex-wrap:wrap;">
       <button style="flex:1;min-width:120px;font-size:.7rem;padding:8px;background:var(--gr);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaMarcados('mostrar')">👁️ Mostrar marcados</button>
       <button style="flex:1;min-width:120px;font-size:.7rem;padding:8px;background:var(--sub);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaMarcados('ocultar')">🙈 Ocultar marcados</button>
+    </div>
+
+    <!-- Botones directos arriba (solo admin): agregar productos / celulares -->
+    <div id="tienda-admin-top" style="display:none;gap:8px;margin:8px 0;">
+      <button style="flex:1;font-size:.82rem;padding:12px;background:var(--gr);color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(45,164,78,.3);" onclick="tiendaAbrirCarga()">➕ Agregar productos</button>
+      <button style="flex:1;font-size:.82rem;padding:12px;background:var(--az);color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(11,45,107,.3);" onclick="showTab('celulares')">📱 Cargar celulares</button>
     </div>
 
     <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
@@ -1356,6 +1363,7 @@ function tiendaAplicarModo(){
   }
   document.getElementById('tienda-admin-banner').style.display = tiendaEsAdmin?'block':'none';
   document.getElementById('tienda-tanda-bar').style.display = tiendaEsAdmin?'flex':'none';
+  var adminTop=document.getElementById('tienda-admin-top'); if(adminTop)adminTop.style.display = tiendaEsAdmin?'flex':'none';
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
