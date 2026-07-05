@@ -140,6 +140,17 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
 #tienda-grid.vista-chica .calc-btn{font-size:.58rem !important;padding:6px 2px !important;}
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
 #tienda-grid.vista-lista .prod-foto{height:200px !important;}
+/* 🎰 Ruleta de descuentos */
+#ruleta-fab{position:fixed;bottom:150px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
+@keyframes ruletaPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+#ruleta-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
+#ruleta-modal{background:var(--wh);border-radius:20px;padding:24px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.4);}
+.ruleta-wrap{position:relative;width:240px;height:240px;margin:16px auto;}
+.ruleta-disco{width:240px;height:240px;border-radius:50%;border:6px solid var(--az);transition:transform 4.5s cubic-bezier(.17,.67,.2,1);box-shadow:0 4px 16px rgba(0,0,0,.25);}
+.ruleta-flecha{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:2rem;z-index:5;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4));}
+.ruleta-centro{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:var(--wh);border:4px solid var(--az);display:flex;align-items:center;justify-content:center;font-size:1.2rem;z-index:4;}
+@keyframes confetiCae{to{transform:translateY(105vh) rotate(720deg);opacity:0;}}
+.confeti-pza{position:fixed;top:-20px;width:10px;height:14px;z-index:2100;animation:confetiCae linear forwards;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -512,6 +523,14 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
     <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:80px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
+
+    <!-- 🎰 Ruleta de descuentos -->
+    <button id="ruleta-fab" onclick="ruletaAbrir()" title="¡Girá y ganá un descuento!">🎰</button>
+    <div id="ruleta-overlay">
+      <div id="ruleta-modal">
+        <div id="ruleta-contenido"></div>
+      </div>
+    </div>
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;"></div>
 
     <!-- Botón admin: cargar catálogo (solo visible en modo admin) -->
@@ -533,6 +552,8 @@ body{background:var(--bg);color:var(--txt);min-height:100vh;max-width:480px;marg
       onclick="tiendaHistorial()">📋 Historial de pedidos</button>
     <button id="tienda-btn-papelera" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaPapeleraAbrir()">🗑️ Papelera (recuperar borrados)</button>
+    <button id="tienda-btn-ruleta" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#e11d48,#ff7a00);"
+      onclick="ruletaEditarAbrir()">🎰 Editar premios de la ruleta</button>
     <button id="tienda-btn-pdf" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#c0392b;"
       onclick="tiendaCatalogoPDF()">📄 Descargar catálogo PDF</button>
     <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
@@ -1016,6 +1037,13 @@ function bajarCuponesNube(){
     .then(function(r){ if(r&&r.data&&r.data.datos){ try{localStorage.setItem('ae_cupones',JSON.stringify(r.data.datos));}catch(e){} } })
     .catch(function(){});
 }
+// baja los premios de la ruleta que editó el admin (para que todos vean lo mismo)
+function bajarPremiosRuletaNube(){
+  if(!NUBE_OK||!sbCalc)return;
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','ruleta').maybeSingle()
+    .then(function(r){ if(r&&r.data&&r.data.datos&&r.data.datos.length){ try{localStorage.setItem('ae_ruleta_premios',JSON.stringify(r.data.datos));}catch(e){} RULETA_PREMIOS=r.data.datos; } })
+    .catch(function(){});
+}
 
 // La tienda arranca en modo PÚBLICO (sin clave). El admin entra con clave.
 function tiendaInit(){
@@ -1027,6 +1055,7 @@ function tiendaInit(){
   tiendaRender();
   tiendaBajarNube();       // baja el catálogo de la nube
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+  bajarPremiosRuletaNube(); // baja los premios de la ruleta editados por el admin
   bajarBannerNube();       // baja los mensajes del banner de la nube
   bajarCuponesNube();      // baja los cupones de la nube
   bajarHistorialNube();    // baja el historial de pedidos de la nube
@@ -1416,6 +1445,7 @@ function tiendaAplicarModo(){
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
   var btnPdf=document.getElementById('tienda-btn-pdf'); if(btnPdf)btnPdf.style.display = tiendaEsAdmin?'block':'none';
   var btnPap=document.getElementById('tienda-btn-papelera'); if(btnPap)btnPap.style.display = tiendaEsAdmin?'block':'none';
+  var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
   var bAdmin=document.getElementById('tienda-btn-admin');
   if(tiendaEsAdmin){
@@ -2866,6 +2896,254 @@ function aplicarCupon(){
   abrirCarrito();
 }
 function quitarCupon(){ cuponAplicado=null; abrirCarrito(); }
+
+// ═══════════ 🎰 RULETA DE DESCUENTOS ═══════════
+// Premios por defecto (si el admin no editó nada)
+var RULETA_DEFAULT=[
+  {label:'5% OFF',  tipo:'pct', valor:5,  color:'#3b82f6', peso:30},
+  {label:'Sin premio', tipo:'nada', valor:0, color:'#94a3b8', peso:22},
+  {label:'10% OFF', tipo:'pct', valor:10, color:'#22c55e', peso:20},
+  {label:'Envío gratis', tipo:'envio', valor:0, color:'#f59e0b', peso:12},
+  {label:'15% OFF', tipo:'pct', valor:15, color:'#e11d48', peso:10},
+  {label:'¡Girá otra vez!', tipo:'otra', valor:0, color:'#8b5cf6', peso:4},
+  {label:'20% OFF', tipo:'pct', valor:20, color:'#ff7a00', peso:2}
+];
+// carga los premios editados por el admin, o los default
+function cargarPremiosRuleta(){
+  try{ var g=JSON.parse(localStorage.getItem('ae_ruleta_premios')||'null'); if(g&&g.length)return g; }catch(e){}
+  return RULETA_DEFAULT.slice();
+}
+function guardarPremiosRuleta(lista){
+  try{ localStorage.setItem('ae_ruleta_premios', JSON.stringify(lista)); }catch(e){}
+  if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({id:'ruleta',datos:lista,actualizado:new Date().toISOString()}).then(function(){}).catch(function(){}); }
+  RULETA_PREMIOS=lista;
+}
+var RULETA_PREMIOS=cargarPremiosRuleta();
+function ruletaHoyKey(){ var d=new Date(); return 'ae_ruleta_'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function ruletaYaGiroHoy(){ try{ return localStorage.getItem(ruletaHoyKey())==='1'; }catch(e){ return false; } }
+function ruletaMarcarGiro(){ try{ localStorage.setItem(ruletaHoyKey(),'1'); }catch(e){} }
+
+// dibuja el disco de la ruleta en SVG (partes iguales, colores por premio)
+function ruletaDiscoSVG(){
+  var n=RULETA_PREMIOS.length, ang=360/n, r=120, cx=120, cy=120;
+  var svg='<svg class="ruleta-disco" id="ruleta-disco" viewBox="0 0 240 240">';
+  RULETA_PREMIOS.forEach(function(pr,i){
+    var a0=(i*ang-90)*Math.PI/180, a1=((i+1)*ang-90)*Math.PI/180;
+    var x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0);
+    var x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    svg+='<path d="M'+cx+','+cy+' L'+x0.toFixed(1)+','+y0.toFixed(1)+' A'+r+','+r+' 0 0,1 '+x1.toFixed(1)+','+y1.toFixed(1)+' Z" fill="'+pr.color+'"/>';
+    // texto del premio
+    var am=(i*ang+ang/2-90)*Math.PI/180, tr=r*0.62;
+    var tx=cx+tr*Math.cos(am), ty=cy+tr*Math.sin(am);
+    var rot=i*ang+ang/2;
+    svg+='<text x="'+tx.toFixed(1)+'" y="'+ty.toFixed(1)+'" fill="#fff" font-size="10" font-weight="800" text-anchor="middle" dominant-baseline="middle" transform="rotate('+rot.toFixed(1)+' '+tx.toFixed(1)+' '+ty.toFixed(1)+')">'+pr.label+'</text>';
+  });
+  svg+='</svg>';
+  return svg;
+}
+function ruletaAbrir(){
+  var cont=document.getElementById('ruleta-contenido');
+  var ov=document.getElementById('ruleta-overlay');
+  if(ruletaYaGiroHoy()){
+    cont.innerHTML='<div style="font-size:2.5rem;">🎁</div>'
+      +'<h3 style="color:var(--az);font-weight:900;margin:8px 0;">Ya giraste hoy</h3>'
+      +'<p style="color:var(--sub);font-size:.85rem;margin-bottom:16px;">Volvé mañana para otra oportunidad de ganar un descuento. 🐝</p>'
+      +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="ruletaCerrar()">Cerrar</button>';
+    ov.style.display='flex';
+    return;
+  }
+  cont.innerHTML='<h3 style="color:var(--az);font-weight:900;font-size:1.15rem;">🎰 Ruleta de la suerte</h3>'
+    +'<p style="color:var(--sub);font-size:.8rem;margin:4px 0 0;">¡Girá y ganá un descuento! Una vez por día.</p>'
+    +'<div class="ruleta-wrap"><div class="ruleta-flecha">🔻</div>'+ruletaDiscoSVG()+'<div class="ruleta-centro">🐝</div></div>'
+    +'<button id="ruleta-btn-girar" class="calc-btn" style="width:100%;background:linear-gradient(135deg,#e11d48,#ff7a00);" onclick="ruletaGirar()">🎡 ¡GIRAR!</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="ruletaCerrar()">Ahora no</button>';
+  ov.style.display='flex';
+}
+function ruletaCerrar(){ document.getElementById('ruleta-overlay').style.display='none'; }
+
+var _ruletaGirando=false;
+function ruletaGirar(){
+  if(_ruletaGirando)return;
+  _ruletaGirando=true;
+  var btn=document.getElementById('ruleta-btn-girar');
+  if(btn){ btn.disabled=true; btn.style.opacity=.6; btn.textContent='Girando…'; }
+
+  // elegir premio por peso
+  var total=RULETA_PREMIOS.reduce(function(s,p){return s+p.peso;},0);
+  var rnd=Math.random()*total, idx=0, acc=0;
+  for(var i=0;i<RULETA_PREMIOS.length;i++){ acc+=RULETA_PREMIOS[i].peso; if(rnd<=acc){ idx=i; break; } }
+
+  // calcular ángulo para que la flecha (arriba) caiga en ese sector
+  var n=RULETA_PREMIOS.length, ang=360/n;
+  var centroSector=idx*ang+ang/2;
+  var vueltas=5;
+  var destino=vueltas*360 + (360 - centroSector); // la flecha está arriba (0°)
+  var disco=document.getElementById('ruleta-disco');
+  if(disco){ disco.style.transform='rotate('+destino+'deg)'; }
+
+  setTimeout(function(){
+    _ruletaGirando=false;
+    ruletaResultado(RULETA_PREMIOS[idx]);
+  }, 4700);
+}
+
+// genera un código de cupón único para el premio
+function ruletaCodigoCupon(pct){
+  var n=Math.floor(Math.random()*9000)+1000;
+  return 'RULETA'+pct+'-'+n;
+}
+function ruletaResultado(premio){
+  ruletaMarcarGiro();
+  var cont=document.getElementById('ruleta-contenido');
+
+  // "girá otra vez": no consume el día
+  if(premio.tipo==='otra'){
+    try{ localStorage.removeItem(ruletaHoyKey()); }catch(e){}
+    cont.innerHTML='<div style="font-size:3rem;">🎡</div>'
+      +'<h3 style="color:#8b5cf6;font-weight:900;margin:8px 0;">¡Girá otra vez!</h3>'
+      +'<p style="color:var(--sub);font-size:.85rem;margin-bottom:16px;">Tenés un giro extra de regalo. 🍀</p>'
+      +'<button class="calc-btn" style="width:100%;background:linear-gradient(135deg,#e11d48,#ff7a00);" onclick="ruletaAbrir()">🎡 Girar de nuevo</button>';
+    return;
+  }
+  if(premio.tipo==='nada'){
+    cont.innerHTML='<div style="font-size:3rem;">🫤</div>'
+      +'<h3 style="color:var(--sub);font-weight:900;margin:8px 0;">¡Casi!</h3>'
+      +'<p style="color:var(--sub);font-size:.85rem;margin-bottom:16px;">Esta vez no salió premio. Probá mañana de nuevo. 🐝</p>'
+      +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="ruletaCerrar()">Cerrar</button>';
+    return;
+  }
+
+  lanzarConfeti();
+
+  if(premio.tipo==='envio'){
+    cont.innerHTML='<div style="font-size:3rem;">🚚</div>'
+      +'<h3 style="color:#f59e0b;font-weight:900;margin:8px 0;">¡Ganaste ENVÍO GRATIS!</h3>'
+      +'<p style="color:var(--sub);font-size:.85rem;margin-bottom:14px;">Mostrale esta pantalla al vendedor al hacer tu compra. 🐝</p>'
+      +'<button class="calc-btn" style="width:100%;background:#25D366;" onclick="ruletaAvisarWhatsApp(\'Envío gratis\')">📲 Reclamar por WhatsApp</button>'
+      +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="ruletaCerrar()">Cerrar</button>';
+    return;
+  }
+
+  // premio de % → genera cupón real y lo guarda
+  var codigo=ruletaCodigoCupon(premio.valor);
+  var cups=cargarCupones();
+  cups.push({codigo:codigo, tipo:'pct', valor:premio.valor, deRuleta:true});
+  guardarCupones(cups);
+
+  cont.innerHTML='<div style="font-size:3rem;">🎉</div>'
+    +'<h3 style="color:var(--gr);font-weight:900;margin:8px 0;font-size:1.3rem;">¡Ganaste '+premio.valor+'% OFF!</h3>'
+    +'<p style="color:var(--sub);font-size:.82rem;margin-bottom:8px;">Tu cupón para usar en el carrito:</p>'
+    +'<div style="background:var(--bg);border:2px dashed var(--nar);border-radius:12px;padding:12px;margin-bottom:12px;">'
+    +'<div style="font-size:1.15rem;font-weight:900;color:var(--nar);letter-spacing:1px;">'+codigo+'</div></div>'
+    +'<button class="calc-btn" style="width:100%;background:var(--gr);" onclick="ruletaCopiar(\''+codigo+'\')">📋 Copiar cupón</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="ruletaCerrar()">Listo</button>'
+    +'<p style="color:var(--sub);font-size:.68rem;margin-top:10px;">💡 Aplicalo en el carrito antes de finalizar tu compra.</p>';
+}
+function ruletaCopiar(codigo){
+  try{ navigator.clipboard.writeText(codigo); mostrarToast('📋 Cupón copiado: '+codigo); }
+  catch(e){ mostrarToast('Cupón: '+codigo); }
+}
+function ruletaAvisarWhatsApp(premio){
+  var msg='¡Hola! 🎰 Gané "'+premio+'" en la ruleta de la Tienda AmarangoElectro 🐝. Quiero usarlo en mi compra.';
+  window.open('https://wa.me/5491168610532?text='+encodeURIComponent(msg),'_blank');
+}
+// lluvia de confeti
+function lanzarConfeti(){
+  var colores=['#e11d48','#ff7a00','#22c55e','#3b82f6','#f59e0b','#8b5cf6'];
+  for(var i=0;i<60;i++){
+    var c=document.createElement('div');
+    c.className='confeti-pza';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colores[Math.floor(Math.random()*colores.length)];
+    c.style.animationDuration=(2+Math.random()*2)+'s';
+    c.style.animationDelay=(Math.random()*0.5)+'s';
+    document.body.appendChild(c);
+    (function(el){ setTimeout(function(){ el.remove(); }, 4500); })(c);
+  }
+}
+
+// ═══ EDITOR DE PREMIOS (admin) ═══
+var COLORES_RULETA=['#3b82f6','#22c55e','#e11d48','#ff7a00','#f59e0b','#8b5cf6','#14b8a6','#94a3b8'];
+function ruletaEditarAbrir(){
+  var pr=cargarPremiosRuleta();
+  var totalPeso=pr.reduce(function(s,p){return s+(parseInt(p.peso,10)||0);},0)||1;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">🎰 Premios de la ruleta</h3>'
+    +'<p style="color:var(--sub);font-size:.72rem;margin:4px 0 12px;">Editá qué premios salen y la probabilidad de cada uno. La "chance" se calcula sola según el peso.</p>';
+  pr.forEach(function(p,i){
+    var chance=Math.round((parseInt(p.peso,10)||0)/totalPeso*100);
+    html+='<div style="border:1px solid var(--bor);border-radius:10px;padding:10px;margin-bottom:8px;background:var(--bg);">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">'
+      +'<span style="width:16px;height:16px;border-radius:4px;background:'+p.color+';flex-shrink:0;"></span>'
+      +'<input value="'+escapeHtml(p.label)+'" onchange="ruletaEdit('+i+',\'label\',this.value)" placeholder="Nombre del premio" style="flex:1;padding:7px;border:1.5px solid var(--bor);border-radius:7px;font-family:inherit;font-size:.8rem;font-weight:700;">'
+      +'<button onclick="ruletaEditBorrar('+i+')" style="background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:7px;padding:7px 9px;font-weight:800;cursor:pointer;font-family:inherit;">✕</button></div>'
+      +'<div style="display:flex;gap:6px;align-items:center;">'
+      +'<select onchange="ruletaEdit('+i+',\'tipo\',this.value)" style="flex:1;padding:6px;border:1.5px solid var(--bor);border-radius:7px;font-family:inherit;font-size:.72rem;">'
+      +'<option value="pct"'+(p.tipo==='pct'?' selected':'')+'>% descuento</option>'
+      +'<option value="envio"'+(p.tipo==='envio'?' selected':'')+'>Envío gratis</option>'
+      +'<option value="otra"'+(p.tipo==='otra'?' selected':'')+'>Girá otra vez</option>'
+      +'<option value="nada"'+(p.tipo==='nada'?' selected':'')+'>Sin premio</option></select>'
+      +(p.tipo==='pct'?'<input type="number" value="'+p.valor+'" onchange="ruletaEdit('+i+',\'valor\',this.value)" placeholder="%" style="width:60px;padding:6px;border:1.5px solid var(--bor);border-radius:7px;font-family:inherit;font-size:.72rem;" title="% de descuento">':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px;align-items:center;margin-top:6px;">'
+      +'<span style="font-size:.68rem;color:var(--sub);font-weight:700;">Chance:</span>'
+      +'<input type="range" min="1" max="50" value="'+(p.peso||1)+'" oninput="ruletaEdit('+i+',\'peso\',this.value);document.getElementById(\'rch'+i+'\').textContent=Math.round(this.value/'+totalPeso+'*100)+\'%\'" style="flex:1;accent-color:var(--nar);">'
+      +'<span id="rch'+i+'" style="font-size:.72rem;font-weight:800;color:var(--nar);min-width:34px;text-align:right;">'+chance+'%</span></div>'
+      +'</div>';
+  });
+  html+='<button class="calc-btn" style="width:100%;margin-top:4px;background:var(--gr);" onclick="ruletaEditAgregar()">➕ Agregar premio</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="ruletaEditGuardar()">✅ Guardar premios</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="ruletaEditRestaurar()">↺ Volver a los premios de fábrica</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+var _ruletaEdit=null;
+function ruletaEditEstado(){ if(!_ruletaEdit)_ruletaEdit=cargarPremiosRuleta(); return _ruletaEdit; }
+function ruletaEdit(i,campo,val){
+  var pr=ruletaEditEstado();
+  if(!pr[i])return;
+  if(campo==='valor'||campo==='peso')val=parseInt(val,10)||0;
+  pr[i][campo]=val;
+}
+function ruletaEditBorrar(i){
+  var pr=ruletaEditEstado();
+  if(pr.length<=2){ alert('Tienen que quedar al menos 2 premios.'); return; }
+  pr.splice(i,1);
+  _guardarYRefrescarEditor();
+}
+function ruletaEditAgregar(){
+  var pr=ruletaEditEstado();
+  if(pr.length>=8){ alert('Máximo 8 premios (para que la ruleta se vea bien).'); return; }
+  var color=COLORES_RULETA[pr.length%COLORES_RULETA.length];
+  pr.push({label:'Nuevo premio', tipo:'pct', valor:10, color:color, peso:10});
+  _guardarYRefrescarEditor();
+}
+function _guardarYRefrescarEditor(){
+  // reasignar colores para que no se repitan feo
+  _ruletaEdit.forEach(function(p,idx){ p.color=COLORES_RULETA[idx%COLORES_RULETA.length]; });
+  var tmp=_ruletaEdit; guardarPremiosRuleta(tmp); _ruletaEdit=tmp.slice();
+  ruletaEditAbrir();
+}
+function ruletaEditGuardar(){
+  var pr=ruletaEditEstado();
+  // validar
+  for(var i=0;i<pr.length;i++){
+    if(!pr[i].label||!(''+pr[i].label).trim()){ alert('El premio #'+(i+1)+' no tiene nombre.'); return; }
+    if(pr[i].tipo==='pct'&&(!pr[i].valor||pr[i].valor<=0)){ alert('El premio "'+pr[i].label+'" es % descuento pero no tiene un valor válido.'); return; }
+  }
+  pr.forEach(function(p,idx){ p.color=COLORES_RULETA[idx%COLORES_RULETA.length]; });
+  guardarPremiosRuleta(pr);
+  _ruletaEdit=null;
+  mostrarToast('✅ Premios guardados');
+  document.getElementById('modal-cuotas').style.display='none';
+}
+function ruletaEditRestaurar(){
+  if(!confirm('¿Volver a los premios de fábrica? Se pierden tus cambios.'))return;
+  _ruletaEdit=RULETA_DEFAULT.slice();
+  guardarPremiosRuleta(_ruletaEdit);
+  ruletaEditAbrir();
+}
 function cambiarCant(idx, delta){
   if(delta===0){ carrito.splice(idx,1); }
   else{
