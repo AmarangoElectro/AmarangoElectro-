@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>Tienda AmarangoElectro 🐝🛒</title>
 <meta name="theme-color" content="#0B2D6B">
-<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -597,6 +596,8 @@ body.oscuro{background:linear-gradient(180deg,#0a1830,#0d1f3d);background-attach
       onclick="editarBanner()">📢 Editar mensajes del banner</button>
     <button id="tienda-btn-cupones" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--nar);"
       onclick="editarCupones()">🎟️ Cupones de descuento</button>
+    <button id="tienda-btn-wsplink" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#25D366;color:#fff;"
+      onclick="generarLinkWsp()">🔗 Generar link de WhatsApp</button>
     <button id="tienda-btn-stats" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
     <button id="tienda-btn-hist" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
@@ -1208,6 +1209,44 @@ function bajarBannerNube(){
     }).catch(function(){});
 }
 // ===== Gestor de CUPONES (admin) =====
+// ===== Generador de link de WhatsApp con mensaje pre-cargado =====
+var WSP_VENDEDORES = {
+  'Maximiliano':'5491168610532',
+  'Selene':'5491162107212',
+  'Angela':'5491168746034'
+};
+function generarLinkWsp(){
+  var producto = prompt('🔗 Generar link de WhatsApp\n\nEscribí el nombre del producto:', '');
+  if(producto===null) return;              // canceló
+  producto = producto.trim();
+  if(!producto){ alert('Escribí el nombre del producto 🐝'); return; }
+
+  var nombres = Object.keys(WSP_VENDEDORES);
+  var opciones = nombres.map(function(n,i){ return (i+1)+') '+n; }).join('\n');
+  var elec = prompt('¿A qué número llegan las consultas?\n\n'+opciones+'\n\nEscribí el número (1, 2 o 3):', '1');
+  if(elec===null) return;
+  var idx = parseInt(elec,10)-1;
+  if(isNaN(idx) || idx<0 || idx>=nombres.length){ alert('Opción inválida. Poné 1, 2 o 3.'); return; }
+  var numero = WSP_VENDEDORES[nombres[idx]];
+
+  var mensaje = '¡Hola! Vi el '+producto+' en sus estados, quiero consultar precio y cuotas 🙂';
+  var link = 'https://wa.me/'+numero+'?text='+encodeURIComponent(mensaje);
+
+  // Copiar al portapapeles
+  function copiado(){ alert('✅ ¡Link copiado!\n\nPegalo en tu bio de Instagram o en una difusión.\n\n'+link); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(copiado).catch(function(){
+      var t=document.createElement('textarea'); t.value=link; document.body.appendChild(t); t.select();
+      try{ document.execCommand('copy'); copiado(); }catch(e){ alert('Copialo manualmente:\n\n'+link); }
+      document.body.removeChild(t);
+    });
+  } else {
+    var t=document.createElement('textarea'); t.value=link; document.body.appendChild(t); t.select();
+    try{ document.execCommand('copy'); copiado(); }catch(e){ alert('Copialo manualmente:\n\n'+link); }
+    document.body.removeChild(t);
+  }
+}
+
 function editarCupones(){
   var cups=cargarCupones();
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🎟️ Cupones de descuento</h3>'
@@ -1503,6 +1542,7 @@ function tiendaAplicarModo(){
   var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
+  var btnWspLink=document.getElementById('tienda-btn-wsplink'); if(btnWspLink)btnWspLink.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
   var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
@@ -4759,18 +4799,13 @@ function cerrarBannerInstall(){
   document.getElementById('install-banner').classList.remove('show');
   try{localStorage.setItem('amarango_install_cerrado','1');}catch(e){}
 }
-// LIMPIEZA de caché: el service worker viejo servía versiones viejas de la calculadora
-// (por eso no aparecían los cambios). Lo desregistramos y borramos todo lo cacheado.
+// Service Worker desactivado: no usamos modo sin conexión.
+// Limpieza silenciosa por si algún cliente quedó con un SW viejo de pruebas.
 (function limpiarSW(){
   try{
     if('serviceWorker' in navigator){
       navigator.serviceWorker.getRegistrations().then(function(regs){
         regs.forEach(function(r){ r.unregister(); });
-      }).catch(function(){});
-    }
-    if(window.caches && caches.keys){
-      caches.keys().then(function(keys){
-        keys.forEach(function(k){ caches.delete(k); });
       }).catch(function(){});
     }
   }catch(e){}
