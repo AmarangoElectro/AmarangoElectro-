@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Tienda AmarangoElectro 🐝🛒</title>
 <meta name="theme-color" content="#0B2D6B">
 <link rel="manifest" href="manifest.json">
@@ -19,7 +19,10 @@
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
-body{color:var(--txt);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden}
+html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
+body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;}
+/* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
+img,video,canvas,svg,iframe{max-width:100%;}
 .header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:relative;overflow:hidden}
 .header::before{content:'';position:absolute;top:-40%;left:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(120,170,255,.35),transparent 70%);transform:rotate(20deg);pointer-events:none}
 .header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
@@ -35,7 +38,7 @@ body{color:var(--txt);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;padding:11px 8px;font-size:.68rem;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center;transition:all .2s;min-width:80px}
 .tab.on{color:var(--az);border-bottom-color:var(--nar);font-weight:800}
-.tab-content{display:none;padding:16px;animation:fadeUp .25s ease}
+.tab-content{display:none;padding:16px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
 .tab-content.on{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:16px;padding:16px;margin-bottom:16px}
@@ -2043,9 +2046,8 @@ function tiendaRender(){
         +(p.esCelu?'':'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
       +'</div>';
     }else{
-      // botón público: COMPRAR (deja la venta casi hecha) + consultar
-      card+='<button class="calc-btn" style="font-size:.78rem;padding:10px;background:var(--nar);margin-bottom:6px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar</button>'
-        +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>'
+      // botón público: pedir por WhatsApp
+      card+='<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>'
         +'<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
     }
     card+='</div>';
@@ -3429,15 +3431,14 @@ function ayudaAbrir(){
       {ic:'📤',t:'Compartir',d:'Cada producto tiene "Compartir" con foto y precio, listo para mandar por WhatsApp.'}
     ];
   } else {
-    icono='🐝'; titulo='¿Cómo comprar?'; subtitulo='Es muy fácil, mirá:';
+    icono='🐝'; titulo='¿Cómo usar la tienda?'; subtitulo='Es muy fácil, mirá:';
     pasos=[
-      {ic:'🔍',t:'1. Buscá lo que querés',d:'Usá el buscador o los filtros de categoría para encontrar tu producto.'},
-      {ic:'💳',t:'2. Mirá precio y cuotas',d:'Cada producto muestra el precio de contado y en cuotas fijas.'},
-      {ic:'🛒',t:'3. Tocá "Comprar"',d:'La primera vez te pedimos tus datos una sola vez (nombre, DNI, teléfono, domicilio y ocupación). Después la tienda te reconoce y comprás en segundos.'},
-      {ic:'📆',t:'4. Elegí tu plan',d:'Elegís en cuántas cuotas pagar. Te mostramos el valor de la 1ª cuota que abonás para reservar tu producto.'},
-      {ic:'✅',t:'5. Coordinamos',d:'Tu compra le llega lista a tu vendedor. Coordinás el pago de la 1ª cuota y, dentro de las 48 hs de abonarla, te entregamos el producto. 📦'},
-      {ic:'🎟️',t:'¿Cupón o beneficio?',d:'Si tenés un cupón o un beneficio, avisanos al coordinar y lo aplicamos.'},
-      {ic:'❤️',t:'Guardá favoritos',d:'Tocá el corazón para guardar los productos que te gustan.'}
+      {ic:'🔍',t:'Buscá lo que querés',d:'Escribí en el buscador de arriba lo que andás buscando.'},
+      {ic:'🏷️',t:'Filtrá por categoría',d:'Tocá los botones de categoría para ver por tipo de producto.'},
+      {ic:'💳',t:'Mirá precio y cuotas',d:'Cada producto muestra el precio de contado y en cuotas fijas.'},
+      {ic:'❤️',t:'Guardá favoritos',d:'Tocá el corazón para guardar los que te gustan.'},
+      {ic:'🛒',t:'Armá tu pedido',d:'Agregá al carrito y mandanos el pedido por WhatsApp.'},
+      {ic:'🎰',t:'Girá la ruleta',d:'Una vez por día podés girar la ruleta y ganar un descuento.'}
     ];
   }
 
@@ -3684,46 +3685,22 @@ function vaciarCarrito(){
   document.getElementById('modal-cuotas').style.display='none';
 }
 // datos del pedido en curso (se van llenando en los pasos)
-// ═══════════════════════════════════════════════════════════════
-//   🛒 FLUJO DE COMPRA PROFESIONAL (estilo tienda con cuotas)
-//   Pasos: 1) reconocer/registrar cliente  2) elegir plan
-//          3) resumen con 1ª cuota y condiciones  4) enviar cocinado
-// ═══════════════════════════════════════════════════════════════
+var pedidoActual={ esNuevo:null, nombre:'', dni:'', domicilio:'', ingresos:'', plan:1 };
 
-// Estado del pedido en curso. prodId = producto directo (botón Comprar);
-// si es null, se usa el carrito.
-var pedidoActual={ nombre:'', dni:'', domicilio:'', ingresos:'', telefono:'', plan:1, prodId:null };
-
-// total del carrito con cupón aplicado
-function totalCarrito(){
-  var total=0;
-  carrito.forEach(function(x){ total+=x.venta*x.cantidad; });
-  if(cuponAplicado){
-    var desc = cuponAplicado.tipo==='pct' ? Math.round(total*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,total);
-    total-=desc;
-  }
-  return total;
-}
-// total del pedido (producto directo o carrito)
-function totalPedido(){
-  if(pedidoActual.prodId!=null){
-    var p=buscarProd(pedidoActual.prodId);
-    return p?p.venta:0;
-  }
-  return totalCarrito();
-}
-// devuelve los items del pedido (para el mensaje)
-function itemsPedido(){
-  if(pedidoActual.prodId!=null){
-    var p=buscarProd(pedidoActual.prodId);
-    return p?[{nombre:p.nombre, cantidad:1, venta:p.venta}]:[];
-  }
-  return carrito.map(function(x){return {nombre:x.nombre, cantidad:x.cantidad, venta:x.venta};});
+// ── PASO 1: ¿es cliente nuevo o ya cliente? ──
+function finalizarPedido(){
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;text-align:center;">🐝 ¡Casi listo!</h3>'
+    +'<p style="font-size:.8rem;color:var(--sub);text-align:center;margin:8px 0 16px;">Contanos si ya comprás con nosotros para agilizar tu pedido 🙌</p>'
+    +'<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:10px;padding:14px;" onclick="pasoDatosCliente(true)">🆕 Es mi primera compra</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--gr);margin-bottom:14px;padding:14px;" onclick="pasoDatosCliente(false)">🤝 Ya soy cliente</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="abrirCarrito()">← Volver al carrito</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').scrollTop=0;
 }
 
-// arma los <option> de planes de cuotas activos (con el valor de cuota)
+// arma los <option> de planes de cuotas activos para el <select>
 function opcionesPlanesHTML(){
-  var total=totalPedido();
+  var total=totalCarrito();
   var op='<option value="1">💵 Contado — '+fmt(total)+'</option>';
   for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
@@ -3734,292 +3711,173 @@ function opcionesPlanesHTML(){
   }
   return op;
 }
-
-// ── ENTRADA: botón "🛒 Comprar" de un producto ──
-function tiendaComprar(id){
-  pedidoActual.prodId=id;
-  iniciarCompra();
-}
-// ── ENTRADA: botón "Hacer el pedido" del carrito ──
-function finalizarPedido(){
-  if(!carrito.length){ alert('Tu carrito está vacío.'); return; }
-  pedidoActual.prodId=null;
-  iniciarCompra();
-}
-
-// PASO 0: decide si el cliente ya está registrado en este celu
-function iniciarCompra(){
-  var mi=cargarMiCuenta();
-  if(mi && mi.nombre){
-    // ya registrado → lo saludamos y va directo a elegir plan
-    pedidoActual.nombre=mi.nombre; pedidoActual.dni=mi.dni||'';
-    pedidoActual.domicilio=mi.domicilio||''; pedidoActual.ingresos=mi.ingresos||'';
-    pedidoActual.telefono=mi.telefono||'';
-    pasoElegirPlan();
-  }else{
-    // primera vez en este dispositivo
-    pasoBienvenida();
+// total del carrito con cupón aplicado
+function totalCarrito(){
+  var total=0;
+  carrito.forEach(function(x){ total+=x.venta*x.cantidad; });
+  if(cuponAplicado){
+    var desc = cuponAplicado.tipo==='pct' ? Math.round(total*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,total);
+    total-=desc;
   }
+  return total;
 }
 
-// PASO 1a: bienvenida (solo si NO está registrado en el celu)
-function pasoBienvenida(){
-  var html='<div style="text-align:center;">'
-    +'<div style="font-size:2.4rem;margin-bottom:6px;">🐝</div>'
-    +'<h3 style="color:var(--az);font-weight:900;font-size:1.1rem;">¡Bienvenido a AmarangoElectro!</h3>'
-    +'<p style="font-size:.8rem;color:var(--sub);margin:8px 0 18px;">Para comprar en cuotas necesitamos registrarte una sola vez. Después te reconocemos y comprás en segundos 🙌</p></div>'
-    +'<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:10px;padding:14px;" onclick="pasoFormulario()">📝 Registrarme (1 minuto)</button>'
-    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--az);border:2px solid var(--bor);margin-bottom:8px;" onclick="pasoFormulario(true)">🤝 Ya soy cliente, cargar mis datos</button>'
-    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarModalCompra()">← Cancelar</button>';
-  mostrarPasoCompra(html);
-}
+// ── PASO 2: datos del cliente ──
+function pasoDatosCliente(esNuevo){
+  pedidoActual.esNuevo=esNuevo;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+(esNuevo?'🆕 Tus datos':'🤝 Bienvenido de nuevo')+'</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 14px;">'+(esNuevo?'Con estos datos preparamos tu plan. Es rápido 👇':'Poné tu nombre y elegí tu plan 👇')+'</p>';
 
-// PASO 1b: la planilla profesional de datos
-function pasoFormulario(yaCliente){
-  var mi=cargarMiCuenta()||{};
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">📝 Tus datos</h3>'
-    +'<p style="font-size:.72rem;color:var(--sub);margin:6px 0 14px;">Los usamos para preparar tu plan de cuotas. Quedan guardados en tu teléfono, no los volvés a cargar. 🔒</p>';
+  // Nombre (siempre)
+  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Nombre y apellido</label>'
+    +'<input id="cli-nombre" placeholder="Ej: Juan Pérez" oninput="cliAutocompletar()" value="'+(pedidoActual.nombre||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:4px;">'
+    +'<div id="cli-sugerencia" style="font-size:.68rem;color:var(--gr);font-weight:700;margin-bottom:10px;min-height:14px;"></div>';
 
-  html+=campoForm('Nombre y apellido','cli-nombre','Ej: Juan Pérez',pedidoActual.nombre||mi.nombre||'','text',true)
-    +campoForm('DNI','cli-dni','Ej: 40123456',pedidoActual.dni||mi.dni||'','numeric',true)
-    +campoForm('Teléfono (WhatsApp)','cli-telefono','Ej: 11 2345 6789',pedidoActual.telefono||mi.telefono||'','tel',true)
-    +campoForm('Domicilio','cli-domicilio','Calle, número, localidad',pedidoActual.domicilio||mi.domicilio||'','text',true);
+  if(esNuevo){
+    html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">DNI</label>'
+      +'<input id="cli-dni" inputmode="numeric" placeholder="Ej: 40123456" value="'+(pedidoActual.dni||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:10px;">'
+      +'<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Domicilio</label>'
+      +'<input id="cli-domicilio" placeholder="Calle, número, barrio/localidad" value="'+(pedidoActual.domicilio||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:10px;">'
+      +'<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Tipo de ingresos</label>'
+      +'<select id="cli-ingresos" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:14px;background:var(--wh);color:var(--txt);">'
+        +'<option value="">Elegí una opción...</option>'
+        +'<option'+(pedidoActual.ingresos==='Relación de dependencia'?' selected':'')+'>Relación de dependencia</option>'
+        +'<option'+(pedidoActual.ingresos==='Monotributista / autónomo'?' selected':'')+'>Monotributista / autónomo</option>'
+        +'<option'+(pedidoActual.ingresos==='Jubilado / pensionado'?' selected':'')+'>Jubilado / pensionado</option>'
+        +'<option'+(pedidoActual.ingresos==='Plan social / AUH'?' selected':'')+'>Plan social / AUH</option>'
+        +'<option'+(pedidoActual.ingresos==='Changas / informal'?' selected':'')+'>Changas / informal</option>'
+        +'<option'+(pedidoActual.ingresos==='Otro'?' selected':'')+'>Otro</option>'
+      +'</select>';
+  }
 
-  var ingActual=pedidoActual.ingresos||mi.ingresos||'';
-  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Ocupación / Ingresos <span style="color:var(--red);">*</span></label>'
-    +'<select id="cli-ingresos" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:16px;background:var(--wh);color:var(--txt);">'
-      +'<option value="">Elegí una opción...</option>'
-      +optIng('Relación de dependencia',ingActual)
-      +optIng('Monotributista / autónomo',ingActual)
-      +optIng('Comerciante',ingActual)
-      +optIng('Jubilado / pensionado',ingActual)
-      +optIng('Plan social / AUH',ingActual)
-      +optIng('Changas / trabajo informal',ingActual)
-      +optIng('Otro',ingActual)
-    +'</select>';
-
-  html+='<button class="calc-btn" style="width:100%;background:var(--gr);margin-bottom:8px;padding:14px;" onclick="guardarFormulario()">✅ Guardar y continuar</button>'
-    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="pasoBienvenida()">← Atrás</button>';
-  mostrarPasoCompra(html);
-}
-// helper: campo de texto del formulario
-function campoForm(label,id,ph,val,modo,oblig){
-  var inputmode = modo==='numeric'?' inputmode="numeric"' : (modo==='tel'?' inputmode="tel"':'');
-  return '<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">'+label+(oblig?' <span style="color:var(--red);">*</span>':'')+'</label>'
-    +'<input id="'+id+'"'+inputmode+' placeholder="'+ph+'" value="'+(val||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:12px;">';
-}
-function optIng(txt,sel){ return '<option'+(sel===txt?' selected':'')+'>'+txt+'</option>'; }
-
-// guarda la planilla (valida obligatorios) y registra al cliente en el celu
-function guardarFormulario(){
-  var nombre=(val('cli-nombre')||'').trim();
-  var dni=(val('cli-dni')||'').trim();
-  var tel=(val('cli-telefono')||'').trim();
-  var dom=(val('cli-domicilio')||'').trim();
-  var ing=(val('cli-ingresos')||'').trim();
-  // validación
-  var faltan=[];
-  if(!nombre)faltan.push('Nombre');
-  if(!dni)faltan.push('DNI');
-  if(!tel)faltan.push('Teléfono');
-  if(!dom)faltan.push('Domicilio');
-  if(!ing)faltan.push('Ocupación / Ingresos');
-  if(faltan.length){ alert('Faltan completar:\n\n• '+faltan.join('\n• ')); return; }
-
-  pedidoActual.nombre=nombre; pedidoActual.dni=dni; pedidoActual.telefono=tel;
-  pedidoActual.domicilio=dom; pedidoActual.ingresos=ing;
-
-  // guardar en el celu del cliente (para reconocerlo la próxima)
-  guardarMiCuenta({nombre:nombre,dni:dni,telefono:tel,domicilio:dom,ingresos:ing,creado:new Date().toISOString()});
-  // registrar también en la base de la tienda (para que lo vea el admin)
-  registrarClienteTienda({nombre:nombre,dni:dni,telefono:tel,domicilio:dom,ingresos:ing});
-
-  pasoElegirPlan();
-}
-function val(id){ var e=document.getElementById(id); return e?e.value:''; }
-
-// PASO 2: elegir el plan de cuotas
-function pasoElegirPlan(){
-  var total=totalPedido();
-  var nombre=(pedidoActual.nombre||'').split(' ')[0];
-  var items=itemsPedido();
-  var listaItems=items.map(function(x){return '• '+(x.cantidad>1?x.cantidad+'x ':'')+x.nombre;}).join('<br>');
-
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">👋 ¡Hola'+(nombre?' '+nombre:'')+'!</h3>'
-    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí en cuántas cuotas querés pagar 👇</p>'
-    +'<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.75rem;color:var(--az);">'+listaItems+'<div style="border-top:1px solid var(--bor);margin-top:8px;padding-top:8px;font-weight:900;">Total contado: '+fmt(total)+'</div></div>';
-
-  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Plan de pago</label>'
-    +'<select id="cli-plan" onchange="actualizarPreviewCuota()" style="width:100%;padding:12px;border:2px solid var(--nar);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:800;margin-bottom:12px;background:var(--wh);color:var(--txt);">'
+  // Plan de cuotas (siempre)
+  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">¿Cómo querés pagarlo?</label>'
+    +'<select id="cli-plan" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:16px;background:var(--wh);color:var(--txt);">'
       +opcionesPlanesHTML()
     +'</select>';
 
-  // preview de la primera cuota (se actualiza al cambiar el plan)
-  html+='<div id="preview-cuota" style="margin-bottom:14px;"></div>';
+  html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;padding:14px;" onclick="pasoElegirVendedor()">📲 Continuar</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="finalizarPedido()">← Atrás</button>';
 
-  html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;padding:14px;" onclick="pasoResumen()">Continuar →</button>'
-    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarModalCompra()">← Cancelar</button>';
-  mostrarPasoCompra(html);
-  var sel=document.getElementById('cli-plan');
-  if(sel && pedidoActual.plan)sel.value=pedidoActual.plan;
-  actualizarPreviewCuota();
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').scrollTop=0;
+  // preseleccionar plan guardado
+  var selPlan=document.getElementById('cli-plan');
+  if(selPlan && pedidoActual.plan)selPlan.value=pedidoActual.plan;
+  // si es cliente conocido y ya escribió, autocompletar
+  cliAutocompletar();
 }
-// muestra el detalle de la 1ª cuota debajo del selector
-function actualizarPreviewCuota(){
-  var sel=document.getElementById('cli-plan');
-  var prev=document.getElementById('preview-cuota');
-  if(!sel||!prev)return;
-  var n=parseInt(sel.value,10)||1;
-  pedidoActual.plan=n;
-  var total=totalPedido();
-  if(n>1){
-    var t=calcularTotalPlan(total,n);
-    var vc=Math.round(t/n/1000)*1000;
-    prev.innerHTML='<div style="background:linear-gradient(135deg,#e7f9ee,#d3f5e1);border:1.5px solid #9fe3ba;border-radius:12px;padding:12px 14px;">'
-      +'<div style="font-size:.7rem;font-weight:800;color:#0a8a3f;text-transform:uppercase;letter-spacing:.4px;">Para reservar tu producto</div>'
-      +'<div style="font-size:1.05rem;font-weight:900;color:var(--az);margin:4px 0;">Abonás la 1ª cuota: '+fmt(vc)+'</div>'
-      +'<div style="font-size:.68rem;color:var(--sub);line-height:1.5;">Quedan '+(n-1)+' cuota'+(n-1===1?'':'s')+' de '+fmt(vc)+'.<br>📦 Te lo entregamos dentro de las 48 hs de abonada la 1ª cuota.</div>'
-      +'</div>';
+
+// autocompleta si el nombre coincide con un cliente registrado
+function cliAutocompletar(){
+  var inp=document.getElementById('cli-nombre');
+  var sug=document.getElementById('cli-sugerencia');
+  if(!inp||!sug)return;
+  var c=buscarClienteTienda(inp.value);
+  if(c && normNombreCli(inp.value).length>=3){
+    sug.innerHTML='✅ Te reconocimos, '+c.nombre.split(' ')[0]+'. ¡Bienvenido de nuevo!';
+    // si estamos en modo "ya cliente", cargar sus datos en pedidoActual (para el mensaje)
+    pedidoActual.dni=c.dni||''; pedidoActual.domicilio=c.domicilio||''; pedidoActual.ingresos=c.ingresos||'';
+    // si por casualidad marcó "primera compra" pero ya existe, autocompletar campos visibles
+    var dd=document.getElementById('cli-dni'); if(dd&&!dd.value&&c.dni)dd.value=c.dni;
+    var dom=document.getElementById('cli-domicilio'); if(dom&&!dom.value&&c.domicilio)dom.value=c.domicilio;
   }else{
-    prev.innerHTML='<div style="background:linear-gradient(135deg,#fff4e8,#ffe9d3);border:1.5px solid #ffcfa0;border-radius:12px;padding:12px 14px;">'
-      +'<div style="font-size:.7rem;font-weight:800;color:#c96a00;text-transform:uppercase;letter-spacing:.4px;">Pago contado</div>'
-      +'<div style="font-size:1.05rem;font-weight:900;color:var(--az);margin:4px 0;">Total: '+fmt(total)+'</div>'
-      +'<div style="font-size:.68rem;color:var(--sub);line-height:1.5;">📦 Coordinamos la entrega al abonar.</div>'
-      +'</div>';
+    sug.innerHTML='';
   }
 }
 
-// PASO 3: resumen final antes de enviar
-function pasoResumen(){
-  var sel=document.getElementById('cli-plan');
-  if(sel)pedidoActual.plan=parseInt(sel.value,10)||1;
-  var total=totalPedido();
-  var n=pedidoActual.plan;
-  var primeraCuota, textoPlan;
-  if(n>1){
-    var t=calcularTotalPlan(total,n);
-    var vc=Math.round(t/n/1000)*1000;
-    primeraCuota=vc;
-    textoPlan=n+' cuotas de '+fmt(vc);
-  }else{
-    primeraCuota=total;
-    textoPlan='Contado '+fmt(total);
+// ── PASO 3: elegir a quién enviar (vendedor) ──
+function pasoElegirVendedor(){
+  var nombre=(document.getElementById('cli-nombre').value||'').trim();
+  if(!nombre){ alert('Poné tu nombre para que te podamos atender 🙌'); return; }
+  pedidoActual.nombre=nombre;
+  var planSel=document.getElementById('cli-plan');
+  pedidoActual.plan=planSel?parseInt(planSel.value,10)||1:1;
+
+  if(pedidoActual.esNuevo){
+    var dni=document.getElementById('cli-dni'); pedidoActual.dni=dni?(dni.value||'').trim():'';
+    var dom=document.getElementById('cli-domicilio'); pedidoActual.domicilio=dom?(dom.value||'').trim():'';
+    var ing=document.getElementById('cli-ingresos'); pedidoActual.ingresos=ing?(ing.value||'').trim():'';
+    if(!pedidoActual.dni || !pedidoActual.domicilio || !pedidoActual.ingresos){
+      if(!confirm('Te faltan algunos datos (DNI, domicilio o ingresos).\n\n¿Seguir igual? El vendedor te los va a pedir después.'))return;
+    }
   }
-  pedidoActual._primeraCuota=primeraCuota;
-  pedidoActual._textoPlan=textoPlan;
+  // registrar/actualizar el cliente en la base
+  registrarClienteTienda({
+    nombre:pedidoActual.nombre, dni:pedidoActual.dni,
+    domicilio:pedidoActual.domicilio, ingresos:pedidoActual.ingresos
+  });
 
-  var items=itemsPedido();
-  var listaItems=items.map(function(x){return '• '+(x.cantidad>1?x.cantidad+'x ':'')+x.nombre+' — '+fmt(x.venta*(x.cantidad||1));}).join('<br>');
-
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">🧾 Confirmá tu compra</h3>';
-
-  html+='<div style="border:1.5px solid var(--bor);border-radius:12px;padding:12px 14px;margin:12px 0;">'
-    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px;">Producto</div>'
-    +'<div style="font-size:.8rem;color:var(--az);font-weight:700;line-height:1.5;">'+listaItems+'</div></div>';
-
-  html+='<div style="border:1.5px solid var(--nar);border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#fffaf4;">'
-    +'<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:.75rem;color:var(--sub);font-weight:700;">Plan elegido:</span><span style="font-size:.8rem;color:var(--az);font-weight:900;">'+textoPlan+'</span></div>'
-    +(n>1?'<div style="display:flex;justify-content:space-between;"><span style="font-size:.75rem;color:var(--sub);font-weight:700;">1ª cuota a abonar:</span><span style="font-size:.95rem;color:var(--gr);font-weight:900;">'+fmt(primeraCuota)+'</span></div>':'')
-    +'</div>';
-
-  html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.68rem;color:var(--sub);line-height:1.6;">'
-    +'ℹ️ <b>Cómo sigue:</b><br>'
-    +'1️⃣ Coordinás con nosotros el pago de la 1ª cuota.<br>'
-    +'2️⃣ Dentro de las 48 hs de abonarla, coordinamos la entrega del producto.<br>'
-    +'🎟️ Si tenés un cupón o beneficio, avisanos al coordinar y lo aplicamos.'
-    +'</div>';
-
-  html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;padding:14px;" onclick="pasoEnviar()">📲 Enviar mi compra</button>'
-    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="pasoElegirPlan()">← Cambiar plan</button>';
-  mostrarPasoCompra(html);
-}
-
-// PASO 4: elegir a quién enviar (vendedor) y disparar el WhatsApp cocinado
-function pasoEnviar(){
   var esVend=(revUnlocked||adminUnlocked)&&!vistaPreviaCliente;
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 ¿A quién le enviás la compra?</h3>'
-    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Le llega todo listo para coordinar 👇</p>';
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 ¿A quién le mandás el pedido?</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Le llega tu pedido listo para coordinar 👇</p>';
   TIENDA_VENDEDORES.forEach(function(v){
     html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="enviarPedido(\''+v.tel+'\',\''+v.nombre+'\')">💬 '+v.nombre+'</button>';
   });
   html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="enviarPedido(\'\',\'\')">'+(esVend?'🛍️ Enviar a un cliente':'🤝 Enviá a tu vendedor')+'</button>';
-  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="pasoResumen()">← Atrás</button>';
-  mostrarPasoCompra(html);
+  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="pasoDatosCliente('+(pedidoActual.esNuevo?'true':'false')+')">← Atrás</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').scrollTop=0;
 }
 
 // arma el mensaje "cocinado" y lo manda al vendedor
 function enviarPedido(tel, nombreVendedor){
-  var items=itemsPedido();
   var total=0;
-  var msg='🛒 *NUEVA COMPRA - AmarangoElectro* 🐝\n\n';
-  msg+='📦 *PRODUCTO:*\n';
-  items.forEach(function(x){
-    var sub=x.venta*(x.cantidad||1); total+=sub;
-    msg+='• '+(x.cantidad>1?x.cantidad+'x ':'')+x.nombre+' — '+fmt(sub)+'\n';
+  var msg='🛒 *PEDIDO - AmarangoElectro* 🐝\n\n';
+  // productos
+  carrito.forEach(function(x){
+    var sub=x.venta*x.cantidad; total+=sub;
+    msg+='• '+x.cantidad+'x '+x.nombre+' — '+fmt(sub)+'\n';
   });
+  var desc=0;
+  if(cuponAplicado){
+    desc = cuponAplicado.tipo==='pct' ? Math.round(total*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,total);
+    msg+='\nSubtotal: '+fmt(total)+'\n';
+    msg+='🎟️ Cupón '+cuponAplicado.codigo+': − '+fmt(desc)+'\n';
+  }
+  var totalFinal=total-desc;
 
-  var n=pedidoActual.plan||1;
-  var primeraCuota=pedidoActual._primeraCuota||total;
-  msg+='\n💳 *PLAN ELEGIDO:*\n';
-  if(n>1){
-    var t=calcularTotalPlan(total,n);
-    var vc=Math.round(t/n/1000)*1000;
-    msg+='📆 '+n+' cuotas de '+fmt(vc)+'\n';
-    msg+='✅ 1ª cuota a abonar: *'+fmt(vc)+'*\n';
-    msg+='   (quedan '+(n-1)+' cuota'+(n-1===1?'':'s')+' de '+fmt(vc)+')\n';
+  // plan elegido
+  msg+='\n💳 *FORMA DE PAGO ELEGIDA:*\n';
+  if(pedidoActual.plan && pedidoActual.plan>1){
+    var t=calcularTotalPlan(totalFinal,pedidoActual.plan);
+    var vc=Math.round(t/pedidoActual.plan/1000)*1000;
+    msg+='📆 '+pedidoActual.plan+' cuotas de '+fmt(vc)+' (total '+fmt(Math.round(t))+')\n';
   }else{
-    msg+='💵 Contado: '+fmt(total)+'\n';
+    msg+='💵 Contado: '+fmt(totalFinal)+'\n';
   }
 
+  // datos del cliente
   msg+='\n👤 *DATOS DEL CLIENTE:*\n';
   msg+='• Nombre: '+(pedidoActual.nombre||'—')+'\n';
-  if(pedidoActual.dni)msg+='• DNI: '+pedidoActual.dni+'\n';
-  if(pedidoActual.telefono)msg+='• Tel: '+pedidoActual.telefono+'\n';
-  if(pedidoActual.domicilio)msg+='• Domicilio: '+pedidoActual.domicilio+'\n';
-  if(pedidoActual.ingresos)msg+='• Ocupación/Ingresos: '+pedidoActual.ingresos+'\n';
+  if(pedidoActual.esNuevo){
+    msg+='• Cliente: 🆕 NUEVO\n';
+    msg+='• DNI: '+(pedidoActual.dni||'(a completar)')+'\n';
+    msg+='• Domicilio: '+(pedidoActual.domicilio||'(a completar)')+'\n';
+    msg+='• Ingresos: '+(pedidoActual.ingresos||'(a completar)')+'\n';
+  }else{
+    msg+='• Cliente: 🤝 YA ES CLIENTE\n';
+    if(pedidoActual.dni)msg+='• DNI (registrado): '+pedidoActual.dni+'\n';
+  }
 
-  msg+='\n📦 Entrega dentro de 48 hs de abonada la 1ª cuota.\n\n';
-  msg+=(nombreVendedor?'Hola '+nombreVendedor+'! ':'')+'Ya completé todo, quiero avanzar con esta compra 🙌';
+  msg+='\n💰 *TOTAL contado de referencia: '+fmt(totalFinal)+'*\n\n';
+  msg+=(nombreVendedor?'Hola '+nombreVendedor+'! ':'')+'Ya elegí todo, quiero avanzar con esta compra 🙌';
 
-  guardarPedidoHistorial(total, pedidoActual.nombre, itemsPedido());
-  abrirWhatsAppMsgTel(tel, msg);
-  cerrarModalCompra();
-  // limpiar solo lo del pedido (los datos del cliente quedan guardados en su celu)
-  if(pedidoActual.prodId==null){ carrito=[]; cuponAplicado=null; actualizarCarritoUI(); }
-  pedidoActual={ nombre:pedidoActual.nombre, dni:pedidoActual.dni, domicilio:pedidoActual.domicilio, ingresos:pedidoActual.ingresos, telefono:pedidoActual.telefono, plan:1, prodId:null };
-}
-
-// abre WhatsApp con destinatario opcional (usa el método robusto)
-function abrirWhatsAppMsgTel(tel, msg){
-  var limpio=(msg||'').replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,'').replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1');
-  var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(limpio);
-  try{
-    var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener';
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ try{document.body.removeChild(a);}catch(e){} },300);
-    return;
-  }catch(e){}
-  try{ window.location.href=url; return; }catch(e){}
-  try{ window.open(url,'_blank'); }catch(e){ alert('No se pudo abrir WhatsApp.'); }
-}
-
-// helpers de UI del modal de compra
-function mostrarPasoCompra(html){
-  document.getElementById('modal-cuotas-body').innerHTML=html;
-  document.getElementById('modal-cuotas').style.display='block';
-  document.getElementById('modal-cuotas').scrollTop=0;
-}
-function cerrarModalCompra(){
+  guardarPedidoHistorial(totalFinal, pedidoActual.nombre);
+  var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
   document.getElementById('modal-cuotas').style.display='none';
+  // reset para el próximo pedido
+  pedidoActual={ esNuevo:null, nombre:'', dni:'', domicilio:'', ingresos:'', plan:1 };
 }
 // Guarda el pedido en el historial (local + nube)
-function guardarPedidoHistorial(total, destinatario, items){
+function guardarPedidoHistorial(total, destinatario){
   var hist=cargarHistorial();
   hist.unshift({
     fecha: new Date().toISOString(),
     total: total,
     destinatario: destinatario||'',
-    items: items || carrito.map(function(x){return {nombre:x.nombre, cantidad:x.cantidad, venta:x.venta};})
+    items: carrito.map(function(x){return {nombre:x.nombre, cantidad:x.cantidad, venta:x.venta};})
   });
   if(hist.length>200)hist=hist.slice(0,200); // guardar últimos 200
   try{ localStorage.setItem('ae_historial', JSON.stringify(hist)); }catch(e){}
@@ -4072,7 +3930,6 @@ function registrarClienteTienda(datos){
     dni:(datos.dni||'').trim(),
     domicilio:(datos.domicilio||'').trim(),
     ingresos:(datos.ingresos||'').trim(),
-    telefono:(datos.telefono||'').trim(),
     actualizado:new Date().toISOString()
   };
   if(i>=0){
@@ -4080,7 +3937,6 @@ function registrarClienteTienda(datos){
     reg.dni=reg.dni||lista[i].dni||'';
     reg.domicilio=reg.domicilio||lista[i].domicilio||'';
     reg.ingresos=reg.ingresos||lista[i].ingresos||'';
-    reg.telefono=reg.telefono||lista[i].telefono||'';
     reg.creado=lista[i].creado||reg.actualizado;
     lista[i]=reg;
   }else{
@@ -4091,22 +3947,6 @@ function registrarClienteTienda(datos){
   guardarClientesTienda(lista);
   return reg;
 }
-
-// ═══════════ 👤 MI CUENTA (registro en el celu del cliente) ═══════════
-// Guarda los datos del cliente en SU teléfono, para reconocerlo automáticamente
-// cada vez que vuelve a entrar, sin volver a pedirle nada.
-function cargarMiCuenta(){
-  try{ var g=localStorage.getItem('ae_mi_cuenta'); if(g)return JSON.parse(g); }catch(e){}
-  return null;
-}
-function guardarMiCuenta(datos){
-  try{ localStorage.setItem('ae_mi_cuenta', JSON.stringify(datos)); }catch(e){}
-}
-function borrarMiCuenta(){
-  try{ localStorage.removeItem('ae_mi_cuenta'); }catch(e){}
-}
-// ¿este dispositivo ya tiene un cliente registrado?
-function tengoCuenta(){ var c=cargarMiCuenta(); return !!(c && c.nombre); }
 
 // Panel admin: lista de clientes registrados desde la tienda
 function tiendaClientesAbrir(){
@@ -4172,11 +4012,7 @@ function tiendaVerCuotas(id){
         +'<span style="font-weight:900;color:var(--nar);">'+n+' x '+fmt(valorCuota)+'</span></div>';
     }
   }
-  // botón COMPRAR (solo cliente; el admin/vendedor usa sus propias herramientas)
-  if(!((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)){
-    html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);font-weight:900;padding:13px;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar(\''+id+'\')">🛒 Comprar este producto</button>';
-  }
-  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
 }
