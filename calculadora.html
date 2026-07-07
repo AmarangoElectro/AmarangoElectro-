@@ -555,6 +555,13 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:80px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
 
+    <!-- 💬 WhatsApp flotante (siempre visible - lo que más vende) -->
+    <a id="wsp-flotante" href="https://wa.me/5491168610532?text=%C2%A1Hola%20AmarangoElectro!%20%F0%9F%90%9D%20Quiero%20hacer%20una%20consulta" target="_blank" rel="noopener"
+      title="Escribinos por WhatsApp"
+      style="position:fixed;bottom:18px;left:18px;z-index:1400;width:58px;height:58px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3);text-decoration:none;">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.2-.4.1-.2 0-.4 0-.5s-.6-1.5-.9-2c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2z"/></svg>
+    </a>
+
     <!-- 🎰 Ruleta de descuentos -->
     <button id="ruleta-fab" onclick="ruletaAbrir()" title="¡Girá y ganá un descuento!">🎰</button>
 
@@ -564,6 +571,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- Botón Ayuda fijo esquina superior izquierda -->
     <button id="ayuda-btn" onclick="ayudaAbrir()">❓ Ayuda</button>
+    <button id="ofertas-btn" onclick="ofertasGlobitoAbrir()" title="Enterate de las ofertas"
+      style="position:fixed;top:12px;right:12px;z-index:1380;background:rgba(255,122,0,.95);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(0,0,0,.25);">✉️ Ofertas</button>
 
     <!-- Cajón lateral de Ayuda -->
     <div id="ayuda-overlay" onclick="ayudaCerrar()"></div>
@@ -1900,6 +1909,40 @@ function tiendaRender(){
               +'<div style="font-size:.62rem;font-weight:700;color:'+(esSI?'var(--nar)':'#0a8a3f')+';margin-bottom:1px;">en '+cd.n+(esSI?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
               +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
           }
+          if(tiendaFormatoCuota==='destacado'){
+            return '<div style="background:linear-gradient(135deg,#FF7A00,#ff9a3d);border-radius:10px;padding:9px;margin-bottom:5px;text-align:center;color:#fff;">'
+              +'<div style="font-size:.62rem;font-weight:800;opacity:.95;letter-spacing:.5px;">'+cd.n+' CUOTAS DE</div>'
+              +'<div style="font-size:1.7rem;font-weight:900;line-height:1;">'+fmt(cd.valor)+'</div>'
+              +'<div style="font-size:.62rem;font-weight:800;margin-top:2px;background:rgba(255,255,255,.25);border-radius:20px;padding:1px 8px;display:inline-block;">'+(esSI?'\u2728 SIN INTER\u00c9S':'CUOTAS FIJAS')+'</div>'
+              +'</div>'
+              +'<div style="font-size:.62rem;color:var(--sub);margin-bottom:6px;text-align:center;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
+          }
+          if(tiendaFormatoCuota==='comparativo'){
+            return '<div style="display:flex;gap:6px;margin-bottom:5px;">'
+              +'<div style="flex:1;background:#f0f4ff;border-radius:9px;padding:6px;text-align:center;">'
+                +'<div style="font-size:.55rem;color:var(--sub);font-weight:700;">CONTADO</div>'
+                +'<div style="font-size:1rem;font-weight:900;color:var(--az);line-height:1.1;">'+fmt(p.venta)+'</div>'
+              +'</div>'
+              +'<div style="flex:1;background:'+(esSI?'#e6f8ee':'#fff4e8')+';border-radius:9px;padding:6px;text-align:center;">'
+                +'<div style="font-size:.55rem;color:var(--sub);font-weight:700;">'+cd.n+' CUOTAS</div>'
+                +'<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
+              +'</div>'
+              +'</div>'
+              +'<div style="font-size:.6rem;text-align:center;color:'+(esSI?'#0a8a3f':'var(--sub)')+';font-weight:700;margin-bottom:6px;">'+(esSI?'\u2728 Sin inter\u00e9s':'Cuotas fijas')+' '+bloquePrecioAntes(p)+'</div>';
+          }
+          if(tiendaFormatoCuota==='ahorro'){
+            var tieneOferta=p.precioAntes&&parseFloat(p.precioAntes)>p.venta;
+            var pctOff=tieneOferta?Math.round((1-p.venta/parseFloat(p.precioAntes))*100):0;
+            var cab=tieneOferta
+              ? '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">'
+                  +'<span style="font-size:.72rem;color:#999;text-decoration:line-through;">'+fmt(parseFloat(p.precioAntes))+'</span>'
+                  +'<span style="background:#dc2626;color:#fff;font-size:.6rem;font-weight:900;padding:1px 7px;border-radius:20px;">-'+pctOff+'%</span>'
+                +'</div>'
+              : '';
+            return cab
+              +'<div style="font-size:1.35rem;font-weight:900;color:var(--nar);line-height:1;">'+fmt(p.venta)+'</div>'
+              +'<div style="font-size:.66rem;font-weight:800;color:'+(esSI?'#0a8a3f':'var(--az)')+';margin-bottom:5px;">\u00f3 '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' SIN INTER\u00c9S':'')+'</div>';
+          }
           // formato CAJA (Frávega): verde = sin interés, azul = cuotas fijas
           var bgCaja=esSI?'linear-gradient(135deg,#16a34a,#22c55e)':'linear-gradient(135deg,#0B2D6B,#1a4a9e)';
           return '<div style="background:'+bgCaja+';color:#fff;border-radius:9px;padding:7px 9px;margin-bottom:4px;">'
@@ -2641,14 +2684,16 @@ function tiendaToggleLujo(){
   tiendaRender();
 }
 
-// alterna el formato de las cuotas en las tarjetas (cajita ↔ simple)
+// alterna el formato de las cuotas en las tarjetas (rota entre 5 formatos)
+var FORMATOS_CUOTA=['caja','simple','destacado','comparativo','ahorro'];
+var FORMATOS_NOMBRE={caja:'Cajita (Frávega)',simple:'Simple',destacado:'💥 Destacado grande',comparativo:'⚡ Comparativo',ahorro:'🔥 Ahorro visible'};
 function tiendaToggleFormatoCuota(){
-  tiendaFormatoCuota=(tiendaFormatoCuota==='caja')?'simple':'caja';
+  var idx=FORMATOS_CUOTA.indexOf(tiendaFormatoCuota);
+  tiendaFormatoCuota=FORMATOS_CUOTA[(idx+1)%FORMATOS_CUOTA.length];
   try{ localStorage.setItem('ae_formato_cuota', tiendaFormatoCuota); }catch(e){}
-  // guardar en la nube para que todos vean el mismo formato
   if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({id:'formatocuota',datos:tiendaFormatoCuota,actualizado:new Date().toISOString()}).then(function(){}).catch(function(){}); }
-  var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC)btnFC.textContent='💳 Formato de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple');
-  mostrarToast('💳 Formato: '+(tiendaFormatoCuota==='caja'?'Cajita (Frávega)':'Simple'));
+  var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC)btnFC.textContent='💳 Formato de cuotas: '+(FORMATOS_NOMBRE[tiendaFormatoCuota]||tiendaFormatoCuota);
+  mostrarToast('💳 Formato: '+(FORMATOS_NOMBRE[tiendaFormatoCuota]||tiendaFormatoCuota));
   tiendaRender();
 }
 
@@ -3167,6 +3212,16 @@ function mailSuscribirMostrar(){
   // no mostrar si ya se sumó o ya lo cerró antes
   try{ if(localStorage.getItem('ae_mail_estado'))return; }catch(e){}
   var el=document.getElementById('mail-suscribir'); if(el)el.style.display='block';
+}
+// Al tocar el globito "✉️ Ofertas": muestra el cartelito y lleva el foco ahí
+function ofertasGlobitoAbrir(){
+  var el=document.getElementById('mail-suscribir');
+  if(el){
+    el.style.display='block';
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    var inp=document.getElementById('mail-suscribir-input');
+    if(inp) setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 400);
+  }
 }
 function mailSuscribirCerrar(){
   try{ localStorage.setItem('ae_mail_estado','cerrado'); }catch(e){}
