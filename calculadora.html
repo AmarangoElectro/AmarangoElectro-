@@ -547,6 +547,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <button style="flex:1;font-size:.82rem;padding:12px;background:var(--az);color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(11,45,107,.3);" onclick="showTab('celulares')">📱 Cargar celulares</button>
     </div>
 
+    <!-- Aviso de precios viejos (solo admin) -->
+    <div id="tienda-aviso-precios" style="display:none;margin:8px 0;"></div>
+
     <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
       📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
     </div>
@@ -611,6 +614,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaEstadisticas()">📊 Estadísticas de la tienda</button>
     <button id="tienda-btn-hist" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaHistorial()">📋 Historial de pedidos</button>
+    <button id="tienda-btn-clientes" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
+      onclick="tiendaClientesAbrir()">👥 Clientes registrados</button>
     <button id="tienda-btn-papelera" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaPapeleraAbrir()">🗑️ Papelera (recuperar borrados)</button>
     <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#16a34a;color:#fff;"
@@ -1141,6 +1146,7 @@ function tiendaInit(){
   bajarBannerNube();       // baja los mensajes del banner de la nube
   bajarCuponesNube();      // baja los cupones de la nube
   bajarHistorialNube();    // baja el historial de pedidos de la nube
+  bajarClientesNube();     // baja la lista de clientes de la tienda de la nube
   iniciarBannerRotativo();
   mostrarSaludoHora();     // saludo según la hora del día
   mailSuscribirMostrar();  // cartelito suave de suscripción por mail (opcional)
@@ -1533,6 +1539,7 @@ function tiendaAplicarModo(){
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
   var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
+  var btnCli=document.getElementById('tienda-btn-clientes'); if(btnCli)btnCli.style.display = tiendaEsAdmin?'block':'none';
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
   var btnPdf=document.getElementById('tienda-btn-pdf'); if(btnPdf)btnPdf.style.display = tiendaEsAdmin?'block':'none';
   var btnPap=document.getElementById('tienda-btn-papelera'); if(btnPap)btnPap.style.display = tiendaEsAdmin?'block':'none';
@@ -1866,7 +1873,9 @@ function tiendaRender(){
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
     var okPrecio=!maxPrecio || p.venta<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
-    return okCat && okBusq && okMarca && okPrecio && okFav;
+    // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
+    var okViejo=!verSoloPreciosViejos || (!p.esCelu && (diasPrecio(p)||0)>=30);
+    return okCat && okBusq && okMarca && okPrecio && okFav && okViejo;
   });
   // resaltar botón favoritos si está activo
   var bfav=document.getElementById('btn-ver-favs');
@@ -2008,6 +2017,10 @@ function tiendaRender(){
       +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
 
     if(tiendaEsAdmin){
+      // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
+      if(!p.esCelu){
+        card+=etiquetaFechaPrecio(p);
+      }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
       card+='<details style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;">⚙️ Opciones del producto ▾</summary><div style="padding-top:6px;">';
@@ -2042,7 +2055,32 @@ function tiendaRender(){
   cont.classList.remove('vista-lista','vista-chica');
   if(tiendaVista===1) cont.classList.add('vista-lista');
   else if(tiendaVista===2) cont.classList.add('vista-chica');
+  renderAvisoPreciosViejos();
   actualizarCarritoUI();
+}
+
+// Aviso arriba (solo admin): cuántos productos propios tienen precio de 1 mes o más
+function renderAvisoPreciosViejos(){
+  var box=document.getElementById('tienda-aviso-precios');
+  if(!box)return;
+  if(!tiendaEsAdmin){ box.style.display='none'; box.innerHTML=''; return; }
+  var viejos=tiendaProductos.filter(function(p){ return !p.esCelu && (diasPrecio(p)||0)>=30; });
+  box.style.display='block';
+  if(!viejos.length && !verSoloPreciosViejos){
+    box.innerHTML='<div style="background:#eefaf2;border:1px solid #b8e6c8;border-radius:10px;padding:9px 12px;font-size:.7rem;font-weight:800;color:var(--gr);text-align:center;">✅ Todos los precios están actualizados (menos de 1 mes)</div>';
+    return;
+  }
+  if(verSoloPreciosViejos){
+    box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff7e6;border:1px solid #f0c040;border-radius:10px;padding:9px 12px;">'
+      +'<span style="font-size:.7rem;font-weight:800;color:#b45309;">⚠️ Viendo solo precios de 1 mes o más ('+viejos.length+')</span>'
+      +'<button onclick="toggleVerPreciosViejos()" style="font-size:.65rem;padding:6px 12px;background:var(--az);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">Ver todos</button>'
+      +'</div>';
+    return;
+  }
+  box.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff7e6;border:1px solid #f0c040;border-radius:10px;padding:9px 12px;">'
+    +'<span style="font-size:.7rem;font-weight:800;color:#b45309;">⚠️ '+viejos.length+' producto'+(viejos.length===1?'':'s')+' con precio de 1 mes o más</span>'
+    +'<button onclick="toggleVerPreciosViejos()" style="font-size:.65rem;padding:6px 12px;background:var(--nar);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">Revisar</button>'
+    +'</div>';
 }
 
 // PONER foto desde la galería del celu (se comprime para no llenar el almacenamiento)
@@ -2204,6 +2242,10 @@ function tiendaGuardarPrecios(){
     var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
     if(p){
       if(nombre)p.nombre=nombre;
+      // sellar fecha SOLO si cambió el precio de venta o el costo
+      if(Math.round(p.venta)!==Math.round(venta) || Math.round(p.costo||0)!==Math.round(costo)){
+        p.precioActualizado=Date.now();
+      }
       p.costo=Math.round(costo); p.venta=Math.round(venta);
       p.categoria=cat; p.caracteristicas=carac;
       tiendaGuardarLocal();
@@ -3102,6 +3144,41 @@ function esNuevo(p){
   return dias<=7;
 }
 
+// ===== ANTIGÜEDAD DEL PRECIO (solo admin) =====
+// Devuelve los días desde que se selló el precio por última vez.
+// Usa precioActualizado; si no existe (productos viejos), cae a creado.
+function diasPrecio(p){
+  if(!p)return null;
+  var t=p.precioActualizado||p.creado;
+  if(!t)return null;
+  return Math.floor((Date.now()-t)/(1000*60*60*24));
+}
+// Etiqueta HTML con la fecha/antigüedad del precio para la vista admin.
+function etiquetaFechaPrecio(p){
+  var d=diasPrecio(p);
+  if(d===null){
+    return '<div style="font-size:.58rem;font-weight:700;color:var(--sub);margin-bottom:4px;">🕒 Precio sin fecha registrada</div>';
+  }
+  var t=p.precioActualizado||p.creado;
+  var f=new Date(t);
+  var fechaTxt=('0'+f.getDate()).slice(-2)+'/'+('0'+(f.getMonth()+1)).slice(-2)+'/'+f.getFullYear();
+  var txt, color, bg, bor, ico;
+  if(d>=30){
+    // 1 mes o más → hay que revisar/actualizar
+    var meses=Math.floor(d/30);
+    var tiempo = meses>=1 ? (meses===1?'hace 1 mes':'hace '+meses+' meses') : 'hace '+d+' días';
+    txt='⚠️ Precio de '+tiempo+' — revisar'; color='#b45309'; bg='#fff7e6'; bor='#f0c040'; ico='';
+  }else if(d>=20){
+    txt='🕒 Precio hace '+d+' días'; color='#92702a'; bg='#fffdf5'; bor='#eadfae'; ico='';
+  }else{
+    txt='✅ Precio reciente ('+d+'d)'; color='var(--gr)'; bg='#eefaf2'; bor='#b8e6c8'; ico='';
+  }
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:'+bg+';border:1px solid '+bor+';border-radius:7px;padding:4px 8px;margin-bottom:5px;">'
+    +'<span style="font-size:.6rem;font-weight:800;color:'+color+';line-height:1.15;">'+txt+'</span>'
+    +'<span style="font-size:.55rem;font-weight:700;color:var(--sub);white-space:nowrap;">'+fechaTxt+'</span>'
+    +'</div>';
+}
+
 // ===== FAVORITOS =====
 function cargarFavoritos(){
   try{ var g=localStorage.getItem('ae_favoritos'); if(g)return JSON.parse(g); }catch(e){}
@@ -3118,6 +3195,8 @@ function toggleFavorito(id){
 }
 var verSoloFavoritos=false;
 function toggleVerFavoritos(){ verSoloFavoritos=!verSoloFavoritos; tiendaRender(); }
+var verSoloPreciosViejos=false;
+function toggleVerPreciosViejos(){ verSoloPreciosViejos=!verSoloPreciosViejos; tiendaRender(); }
 
 // ===== CARRITO =====
 function agregarAlCarrito(id){
@@ -3602,22 +3681,147 @@ function vaciarCarrito(){
   carrito=[]; cuponAplicado=null; actualizarCarritoUI();
   document.getElementById('modal-cuotas').style.display='none';
 }
-// Finalizar: arma el mensaje del pedido y elige destinatario
+// datos del pedido en curso (se van llenando en los pasos)
+var pedidoActual={ esNuevo:null, nombre:'', dni:'', domicilio:'', ingresos:'', plan:1 };
+
+// ── PASO 1: ¿es cliente nuevo o ya cliente? ──
 function finalizarPedido(){
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;text-align:center;">🐝 ¡Casi listo!</h3>'
+    +'<p style="font-size:.8rem;color:var(--sub);text-align:center;margin:8px 0 16px;">Contanos si ya comprás con nosotros para agilizar tu pedido 🙌</p>'
+    +'<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:10px;padding:14px;" onclick="pasoDatosCliente(true)">🆕 Es mi primera compra</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--gr);margin-bottom:14px;padding:14px;" onclick="pasoDatosCliente(false)">🤝 Ya soy cliente</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="abrirCarrito()">← Volver al carrito</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+
+// arma los <option> de planes de cuotas activos para el <select>
+function opcionesPlanesHTML(){
+  var total=totalCarrito();
+  var op='<option value="1">💵 Contado — '+fmt(total)+'</option>';
+  for(var n=2;n<=12;n++){
+    if(planesConfig[n] && planesConfig[n].activo){
+      var t=calcularTotalPlan(total,n);
+      var vc=Math.round(t/n/1000)*1000;
+      op+='<option value="'+n+'">'+n+' cuotas de '+fmt(vc)+'</option>';
+    }
+  }
+  return op;
+}
+// total del carrito con cupón aplicado
+function totalCarrito(){
+  var total=0;
+  carrito.forEach(function(x){ total+=x.venta*x.cantidad; });
+  if(cuponAplicado){
+    var desc = cuponAplicado.tipo==='pct' ? Math.round(total*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,total);
+    total-=desc;
+  }
+  return total;
+}
+
+// ── PASO 2: datos del cliente ──
+function pasoDatosCliente(esNuevo){
+  pedidoActual.esNuevo=esNuevo;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+(esNuevo?'🆕 Tus datos':'🤝 Bienvenido de nuevo')+'</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 14px;">'+(esNuevo?'Con estos datos preparamos tu plan. Es rápido 👇':'Poné tu nombre y elegí tu plan 👇')+'</p>';
+
+  // Nombre (siempre)
+  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Nombre y apellido</label>'
+    +'<input id="cli-nombre" placeholder="Ej: Juan Pérez" oninput="cliAutocompletar()" value="'+(pedidoActual.nombre||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:4px;">'
+    +'<div id="cli-sugerencia" style="font-size:.68rem;color:var(--gr);font-weight:700;margin-bottom:10px;min-height:14px;"></div>';
+
+  if(esNuevo){
+    html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">DNI</label>'
+      +'<input id="cli-dni" inputmode="numeric" placeholder="Ej: 40123456" value="'+(pedidoActual.dni||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:10px;">'
+      +'<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Domicilio</label>'
+      +'<input id="cli-domicilio" placeholder="Calle, número, barrio/localidad" value="'+(pedidoActual.domicilio||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:10px;">'
+      +'<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Tipo de ingresos</label>'
+      +'<select id="cli-ingresos" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:14px;background:var(--wh);color:var(--txt);">'
+        +'<option value="">Elegí una opción...</option>'
+        +'<option'+(pedidoActual.ingresos==='Relación de dependencia'?' selected':'')+'>Relación de dependencia</option>'
+        +'<option'+(pedidoActual.ingresos==='Monotributista / autónomo'?' selected':'')+'>Monotributista / autónomo</option>'
+        +'<option'+(pedidoActual.ingresos==='Jubilado / pensionado'?' selected':'')+'>Jubilado / pensionado</option>'
+        +'<option'+(pedidoActual.ingresos==='Plan social / AUH'?' selected':'')+'>Plan social / AUH</option>'
+        +'<option'+(pedidoActual.ingresos==='Changas / informal'?' selected':'')+'>Changas / informal</option>'
+        +'<option'+(pedidoActual.ingresos==='Otro'?' selected':'')+'>Otro</option>'
+      +'</select>';
+  }
+
+  // Plan de cuotas (siempre)
+  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">¿Cómo querés pagarlo?</label>'
+    +'<select id="cli-plan" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:16px;background:var(--wh);color:var(--txt);">'
+      +opcionesPlanesHTML()
+    +'</select>';
+
+  html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;padding:14px;" onclick="pasoElegirVendedor()">📲 Continuar</button>'
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="finalizarPedido()">← Atrás</button>';
+
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').scrollTop=0;
+  // preseleccionar plan guardado
+  var selPlan=document.getElementById('cli-plan');
+  if(selPlan && pedidoActual.plan)selPlan.value=pedidoActual.plan;
+  // si es cliente conocido y ya escribió, autocompletar
+  cliAutocompletar();
+}
+
+// autocompleta si el nombre coincide con un cliente registrado
+function cliAutocompletar(){
+  var inp=document.getElementById('cli-nombre');
+  var sug=document.getElementById('cli-sugerencia');
+  if(!inp||!sug)return;
+  var c=buscarClienteTienda(inp.value);
+  if(c && normNombreCli(inp.value).length>=3){
+    sug.innerHTML='✅ Te reconocimos, '+c.nombre.split(' ')[0]+'. ¡Bienvenido de nuevo!';
+    // si estamos en modo "ya cliente", cargar sus datos en pedidoActual (para el mensaje)
+    pedidoActual.dni=c.dni||''; pedidoActual.domicilio=c.domicilio||''; pedidoActual.ingresos=c.ingresos||'';
+    // si por casualidad marcó "primera compra" pero ya existe, autocompletar campos visibles
+    var dd=document.getElementById('cli-dni'); if(dd&&!dd.value&&c.dni)dd.value=c.dni;
+    var dom=document.getElementById('cli-domicilio'); if(dom&&!dom.value&&c.domicilio)dom.value=c.domicilio;
+  }else{
+    sug.innerHTML='';
+  }
+}
+
+// ── PASO 3: elegir a quién enviar (vendedor) ──
+function pasoElegirVendedor(){
+  var nombre=(document.getElementById('cli-nombre').value||'').trim();
+  if(!nombre){ alert('Poné tu nombre para que te podamos atender 🙌'); return; }
+  pedidoActual.nombre=nombre;
+  var planSel=document.getElementById('cli-plan');
+  pedidoActual.plan=planSel?parseInt(planSel.value,10)||1:1;
+
+  if(pedidoActual.esNuevo){
+    var dni=document.getElementById('cli-dni'); pedidoActual.dni=dni?(dni.value||'').trim():'';
+    var dom=document.getElementById('cli-domicilio'); pedidoActual.domicilio=dom?(dom.value||'').trim():'';
+    var ing=document.getElementById('cli-ingresos'); pedidoActual.ingresos=ing?(ing.value||'').trim():'';
+    if(!pedidoActual.dni || !pedidoActual.domicilio || !pedidoActual.ingresos){
+      if(!confirm('Te faltan algunos datos (DNI, domicilio o ingresos).\n\n¿Seguir igual? El vendedor te los va a pedir después.'))return;
+    }
+  }
+  // registrar/actualizar el cliente en la base
+  registrarClienteTienda({
+    nombre:pedidoActual.nombre, dni:pedidoActual.dni,
+    domicilio:pedidoActual.domicilio, ingresos:pedidoActual.ingresos
+  });
+
   var esVend=(revUnlocked||adminUnlocked)&&!vistaPreviaCliente;
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 ¿A quién le mandás el pedido?</h3>'
-    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí el contacto:</p>';
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Le llega tu pedido listo para coordinar 👇</p>';
   TIENDA_VENDEDORES.forEach(function(v){
     html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="enviarPedido(\''+v.tel+'\',\''+v.nombre+'\')">💬 '+v.nombre+'</button>';
   });
-  // cliente: consultar con su vendedor (sin número). Vendedor: a su cliente (sin número)
   html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="enviarPedido(\'\',\'\')">'+(esVend?'🛍️ Enviar a un cliente':'🤝 Enviá a tu vendedor')+'</button>';
-  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="abrirCarrito()">← Volver al carrito</button>';
+  html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="pasoDatosCliente('+(pedidoActual.esNuevo?'true':'false')+')">← Atrás</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').scrollTop=0;
 }
-function enviarPedido(tel, nombre){
+
+// arma el mensaje "cocinado" y lo manda al vendedor
+function enviarPedido(tel, nombreVendedor){
   var total=0;
   var msg='🛒 *PEDIDO - AmarangoElectro* 🐝\n\n';
+  // productos
   carrito.forEach(function(x){
     var sub=x.venta*x.cantidad; total+=sub;
     msg+='• '+x.cantidad+'x '+x.nombre+' — '+fmt(sub)+'\n';
@@ -3628,13 +3832,40 @@ function enviarPedido(tel, nombre){
     msg+='\nSubtotal: '+fmt(total)+'\n';
     msg+='🎟️ Cupón '+cuponAplicado.codigo+': − '+fmt(desc)+'\n';
   }
-  msg+='\n💰 *TOTAL contado: '+fmt(total-desc)+'*\n\n';
-  msg+=(nombre?'Hola '+nombre+'! ':'')+'Quiero hacer este pedido. ¿Coordinamos? 🙌';
-  // guardar en el historial de pedidos
-  guardarPedidoHistorial(total-desc, nombre);
+  var totalFinal=total-desc;
+
+  // plan elegido
+  msg+='\n💳 *FORMA DE PAGO ELEGIDA:*\n';
+  if(pedidoActual.plan && pedidoActual.plan>1){
+    var t=calcularTotalPlan(totalFinal,pedidoActual.plan);
+    var vc=Math.round(t/pedidoActual.plan/1000)*1000;
+    msg+='📆 '+pedidoActual.plan+' cuotas de '+fmt(vc)+' (total '+fmt(Math.round(t))+')\n';
+  }else{
+    msg+='💵 Contado: '+fmt(totalFinal)+'\n';
+  }
+
+  // datos del cliente
+  msg+='\n👤 *DATOS DEL CLIENTE:*\n';
+  msg+='• Nombre: '+(pedidoActual.nombre||'—')+'\n';
+  if(pedidoActual.esNuevo){
+    msg+='• Cliente: 🆕 NUEVO\n';
+    msg+='• DNI: '+(pedidoActual.dni||'(a completar)')+'\n';
+    msg+='• Domicilio: '+(pedidoActual.domicilio||'(a completar)')+'\n';
+    msg+='• Ingresos: '+(pedidoActual.ingresos||'(a completar)')+'\n';
+  }else{
+    msg+='• Cliente: 🤝 YA ES CLIENTE\n';
+    if(pedidoActual.dni)msg+='• DNI (registrado): '+pedidoActual.dni+'\n';
+  }
+
+  msg+='\n💰 *TOTAL contado de referencia: '+fmt(totalFinal)+'*\n\n';
+  msg+=(nombreVendedor?'Hola '+nombreVendedor+'! ':'')+'Ya elegí todo, quiero avanzar con esta compra 🙌';
+
+  guardarPedidoHistorial(totalFinal, pedidoActual.nombre);
   var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
   document.getElementById('modal-cuotas').style.display='none';
+  // reset para el próximo pedido
+  pedidoActual={ esNuevo:null, nombre:'', dni:'', domicilio:'', ingresos:'', plan:1 };
 }
 // Guarda el pedido en el historial (local + nube)
 function guardarPedidoHistorial(total, destinatario){
@@ -3654,6 +3885,96 @@ function guardarPedidoHistorial(total, destinatario){
 function cargarHistorial(){
   try{ var g=localStorage.getItem('ae_historial'); if(g)return JSON.parse(g); }catch(e){}
   return [];
+}
+
+// ═══════════ 👥 CLIENTES DE LA TIENDA ═══════════
+// Se guardan localmente y se sincronizan con la nube (id 'clientes_tienda').
+function cargarClientesTienda(){
+  try{ var g=localStorage.getItem('ae_clientes_tienda'); if(g)return JSON.parse(g); }catch(e){}
+  return [];
+}
+function guardarClientesTienda(lista){
+  try{ localStorage.setItem('ae_clientes_tienda', JSON.stringify(lista)); }catch(e){}
+  if(NUBE_OK && sbCalc){
+    sbCalc.from('tienda_catalogo').upsert({ id:'clientes_tienda', datos:lista, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+  }
+}
+function bajarClientesNube(){
+  if(!NUBE_OK||!sbCalc)return;
+  sbCalc.from('tienda_catalogo').select('datos').eq('id','clientes_tienda').maybeSingle()
+    .then(function(r){ if(r&&r.data&&r.data.datos){ try{localStorage.setItem('ae_clientes_tienda',JSON.stringify(r.data.datos));}catch(e){} } })
+    .catch(function(){});
+}
+// normaliza un nombre para comparar (minúsculas, sin dobles espacios ni tildes)
+function normNombreCli(s){
+  return (s||'').toLowerCase().trim().replace(/\s+/g,' ')
+    .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+    .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/ñ/g,'n');
+}
+// busca un cliente por nombre (match flexible)
+function buscarClienteTienda(nombre){
+  var n=normNombreCli(nombre);
+  if(!n)return null;
+  return cargarClientesTienda().find(function(c){ return normNombreCli(c.nombre)===n; })||null;
+}
+// guarda/actualiza un cliente (upsert por nombre)
+function registrarClienteTienda(datos){
+  var lista=cargarClientesTienda();
+  var n=normNombreCli(datos.nombre);
+  var i=lista.findIndex(function(c){ return normNombreCli(c.nombre)===n; });
+  var reg={
+    nombre:(datos.nombre||'').trim(),
+    dni:(datos.dni||'').trim(),
+    domicilio:(datos.domicilio||'').trim(),
+    ingresos:(datos.ingresos||'').trim(),
+    actualizado:new Date().toISOString()
+  };
+  if(i>=0){
+    // no pisar datos viejos con vacíos
+    reg.dni=reg.dni||lista[i].dni||'';
+    reg.domicilio=reg.domicilio||lista[i].domicilio||'';
+    reg.ingresos=reg.ingresos||lista[i].ingresos||'';
+    reg.creado=lista[i].creado||reg.actualizado;
+    lista[i]=reg;
+  }else{
+    reg.creado=reg.actualizado;
+    lista.unshift(reg);
+  }
+  if(lista.length>500)lista=lista.slice(0,500);
+  guardarClientesTienda(lista);
+  return reg;
+}
+
+// Panel admin: lista de clientes registrados desde la tienda
+function tiendaClientesAbrir(){
+  window._cliFiltro='';
+  tiendaClientesRender();
+  document.getElementById('modal-cuotas').style.display='block';
+  document.getElementById('modal-cuotas').scrollTop=0;
+}
+function tiendaClientesFiltrar(v){ window._cliFiltro=(v||'').toLowerCase().trim(); tiendaClientesRender(); }
+function tiendaClientesRender(){
+  var lista=cargarClientesTienda();
+  var q=window._cliFiltro||'';
+  if(q){ lista=lista.filter(function(c){ return ((c.nombre||'')+' '+(c.dni||'')+' '+(c.domicilio||'')).toLowerCase().indexOf(q)>=0; }); }
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">👥 Clientes registrados</h3>'
+    +'<input placeholder="🔎 Buscar por nombre, DNI o domicilio" oninput="tiendaClientesFiltrar(this.value)" value="'+(q||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:600;margin:10px 0 12px;">';
+  if(!lista.length){
+    html+='<p style="font-size:.78rem;color:var(--sub);margin:12px 0;">'+(q?'No hay clientes que coincidan con la búsqueda.':'Todavía no hay clientes registrados. Cuando alguien haga un pedido y cargue sus datos, aparece acá.')+'</p>';
+  }else{
+    html+='<div style="font-size:.7rem;color:var(--sub);margin-bottom:8px;">Total: '+lista.length+' cliente'+(lista.length===1?'':'s')+'</div>';
+    lista.forEach(function(c){
+      var wa=(c.dni||c.domicilio)?'':'';
+      html+='<div style="border:1px solid var(--bor);border-radius:11px;padding:10px 12px;margin-bottom:8px;background:var(--wh);">'
+        +'<div style="font-size:.85rem;font-weight:900;color:var(--az);">'+(c.nombre||'—')+'</div>'
+        +(c.dni?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">🪪 DNI: '+c.dni+'</div>':'')
+        +(c.domicilio?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">📍 '+c.domicilio+'</div>':'')
+        +(c.ingresos?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">💼 '+c.ingresos+'</div>':'')
+        +'</div>';
+    });
+  }
+  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
 }
 function bajarHistorialNube(){
   if(!NUBE_OK||!sbCalc)return;
@@ -3779,7 +4100,7 @@ function tiendaProcesarCarga(){
       costo = num;                // costo directo
       venta = markupVentaCRM(costo); // fórmula Amarango
     }
-    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), visible:false });
+    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), precioActualizado:Date.now(), visible:false });
   });
 
   if(!nuevos.length){
@@ -3799,6 +4120,10 @@ function tiendaProcesarCarga(){
         return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===norm;
       });
       if(existe){
+        // sellar fecha solo si el precio realmente cambió
+        if(Math.round(existe.venta)!==Math.round(n.venta) || Math.round(existe.costo||0)!==Math.round(n.costo||0)){
+          existe.precioActualizado=Date.now();
+        }
         existe.costo=n.costo; existe.venta=n.venta;  // solo precio/costo
         actualizados++;
         // foto, caracteristicas, categoria, visible → NO se tocan
