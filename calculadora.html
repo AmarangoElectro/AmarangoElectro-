@@ -132,8 +132,9 @@ body{color:var(--txt);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
 /* Efecto vidrio: las tarjetas dejan ver el fondo de colmena suavemente */
-.prod-card{background:rgba(255,255,255,.82) !important;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-shadow:0 2px 10px rgba(11,45,107,.08);}
-body.oscuro .prod-card{background:rgba(18,36,66,.80) !important;}
+.prod-card{background:#ffffff !important;border:1px solid var(--bor);border-top:3px solid var(--az);border-radius:14px;box-shadow:0 3px 14px rgba(11,45,107,.10);transition:box-shadow .2s,transform .2s;}
+.prod-card:active{box-shadow:0 5px 20px rgba(11,45,107,.16);}
+body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border-top:3px solid var(--nar);}
 /* Cajón lateral de Ayuda (drawer) */
 #ayuda-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2050;opacity:0;pointer-events:none;transition:opacity .3s;}
 #ayuda-overlay.abierto{opacity:1;pointer-events:auto;}
@@ -555,24 +556,15 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:80px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
 
-    <!-- 💬 WhatsApp flotante (siempre visible - lo que más vende) -->
-    <a id="wsp-flotante" href="https://wa.me/5491168610532?text=%C2%A1Hola%20AmarangoElectro!%20%F0%9F%90%9D%20Quiero%20hacer%20una%20consulta" target="_blank" rel="noopener"
-      title="Escribinos por WhatsApp"
-      style="position:fixed;bottom:18px;left:18px;z-index:1400;width:58px;height:58px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.3);text-decoration:none;">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.2-.4.1-.2 0-.4 0-.5s-.6-1.5-.9-2c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.3.3-1 .9-1 2.3s1 2.7 1.2 2.9c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2z"/></svg>
-    </a>
-
     <!-- 🎰 Ruleta de descuentos -->
     <button id="ruleta-fab" onclick="ruletaAbrir()" title="¡Girá y ganá un descuento!">🎰</button>
 
     <!-- Botón flotante CARGAR PRODUCTO (solo admin) -->
     <button id="cargar-fab" onclick="tiendaAbrirCarga()" title="Cargar producto"
-      style="display:none;position:fixed;bottom:150px;right:18px;z-index:1396;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0B2D6B,#1a4a9f);color:#fff;border:3px solid #FF7A00;box-shadow:0 5px 16px rgba(0,0,0,.35);font-size:26px;cursor:pointer;display:none;align-items:center;justify-content:center;">➕</button>
+      style="display:none;position:fixed;bottom:150px;right:18px;z-index:1396;width:60px;height:60px;border-radius:50%;background:#ffffff;border:3px solid #0B2D6B;box-shadow:0 0 0 3px #FF7A00, 0 5px 16px rgba(0,0,0,.35);font-size:30px;cursor:pointer;align-items:center;justify-content:center;line-height:1;">🐝</button>
 
     <!-- Botón Ayuda fijo esquina superior izquierda -->
     <button id="ayuda-btn" onclick="ayudaAbrir()">❓ Ayuda</button>
-    <button id="ofertas-btn" onclick="ofertasGlobitoAbrir()" title="Enterate de las ofertas"
-      style="position:fixed;top:12px;right:12px;z-index:1380;background:rgba(255,122,0,.95);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(0,0,0,.25);">✉️ Ofertas</button>
 
     <!-- Cajón lateral de Ayuda -->
     <div id="ayuda-overlay" onclick="ayudaCerrar()"></div>
@@ -621,6 +613,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaHistorial()">📋 Historial de pedidos</button>
     <button id="tienda-btn-papelera" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaPapeleraAbrir()">🗑️ Papelera (recuperar borrados)</button>
+    <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#16a34a;color:#fff;"
+      onclick="tiendaBackupAbrir()">🛟 Copias de seguridad del catálogo</button>
     <button id="tienda-btn-ruleta" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#e11d48,#ff7a00);"
       onclick="ruletaEditarAbrir()">🎰 Editar premios de la ruleta</button>
     <button id="tienda-btn-fmtcuota" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
@@ -689,6 +683,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <a href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener" style="color:var(--nar);text-decoration:none;font-weight:700;font-size:.8rem;">📷 @amarangoelectro</a>
     <a href="https://whatsapp.com/channel/0029Vb21w9lKQuJM9CWY1347" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-weight:700;font-size:.8rem;">📢 Canal WhatsApp</a>
   </div>
+  <div style="margin-top:14px;font-size:.62rem;color:rgba(107,114,128,.75);letter-spacing:.2px;">Creado por Maximiliano Exequiel Cardozo</div>
 </div>
 
 <script>
@@ -1541,6 +1536,7 @@ function tiendaAplicarModo(){
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
   var btnPdf=document.getElementById('tienda-btn-pdf'); if(btnPdf)btnPdf.style.display = tiendaEsAdmin?'block':'none';
   var btnPap=document.getElementById('tienda-btn-papelera'); if(btnPap)btnPap.style.display = tiendaEsAdmin?'block':'none';
+  var btnBkp=document.getElementById('tienda-btn-backup'); if(btnBkp)btnBkp.style.display = tiendaEsAdmin?'block':'none';
   var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
   var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Formato de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
@@ -1569,10 +1565,64 @@ function tiendaCargarLocal(){
 }
 function tiendaGuardarLocal(){
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+  tiendaBackupAuto();  // copia de seguridad automática del catálogo
   // subir a la nube (para que lo vean todos)
   if(NUBE_OK && sbCalc){
     sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
   }
+}
+
+// ═══ BACKUP AUTOMÁTICO DEL CATÁLOGO ═══
+// Guarda copias de seguridad fechadas del catálogo (las últimas 5) dentro del celu.
+// Si algo se borra o corrompe, se recupera desde acá. Red de seguridad.
+var TIENDA_BACKUP_KEY='ae_tienda_backups';
+var TIENDA_BACKUP_MAX=5;
+function tiendaBackupAuto(){
+  try{
+    if(!tiendaProductos || tiendaProductos.length===0) return; // no pisar con vacío
+    var copias=[];
+    try{ copias=JSON.parse(localStorage.getItem(TIENDA_BACKUP_KEY)||'[]'); }catch(e){ copias=[]; }
+    var hoy=new Date().toISOString().slice(0,10);
+    // si ya hay copia de hoy con misma cantidad, no duplicar
+    var yaHoy=copias.find(function(c){ return c.fecha && c.fecha.slice(0,10)===hoy && (c.productos||[]).length===tiendaProductos.length; });
+    if(yaHoy) return;
+    copias.unshift({ fecha:new Date().toISOString(), productos:JSON.parse(JSON.stringify(tiendaProductos)) });
+    if(copias.length>TIENDA_BACKUP_MAX) copias=copias.slice(0,TIENDA_BACKUP_MAX);
+    localStorage.setItem(TIENDA_BACKUP_KEY, JSON.stringify(copias));
+  }catch(e){}
+}
+function tiendaBackupLista(){
+  try{ return JSON.parse(localStorage.getItem(TIENDA_BACKUP_KEY)||'[]'); }catch(e){ return []; }
+}
+function tiendaBackupRestaurar(idx){
+  var copias=tiendaBackupLista();
+  var c=copias[idx];
+  if(!c || !c.productos){ mostrarToast('No se encontró esa copia'); return; }
+  if(!confirm('¿Restaurar la copia del '+new Date(c.fecha).toLocaleString()+'?\n\n'+c.productos.length+' productos.\n\nSe reemplaza el catálogo actual por esta copia.')) return;
+  tiendaBackupAuto(); // guardar el estado actual antes de pisar, por las dudas
+  tiendaProductos=JSON.parse(JSON.stringify(c.productos));
+  tiendaGuardarLocal();
+  tiendaRender();
+  mostrarToast('✅ Catálogo restaurado ('+c.productos.length+' productos)');
+}
+function tiendaBackupAbrir(){
+  var copias=tiendaBackupLista();
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'
+    +'<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🛟 Copias del catálogo</h3></div>'
+    +'<p style="font-size:.72rem;color:var(--sub);margin-bottom:12px;">Se guardan solas cada vez que cambiás el catálogo. Si algo se borra, restaurá desde acá.</p>';
+  if(!copias.length){
+    html+='<div style="text-align:center;padding:20px;color:var(--sub);font-size:.8rem;">Todavía no hay copias. Se crean solas al cargar o editar productos.</div>';
+  } else {
+    copias.forEach(function(c,i){
+      var f=new Date(c.fecha);
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid var(--bor);border-radius:10px;margin-bottom:8px;">'
+        +'<div><div style="font-weight:700;color:var(--txt);font-size:.8rem;">🕐 '+f.toLocaleDateString()+' '+f.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</div>'
+        +'<div style="color:var(--sub);font-size:.72rem;">'+(c.productos||[]).length+' productos</div></div>'
+        +'<button class="calc-btn" style="width:auto;padding:6px 14px;font-size:.72rem;margin:0;background:var(--az);" onclick="tiendaBackupRestaurar('+i+')">Restaurar</button>'
+      +'</div>';
+    });
+  }
+  tiendaModalAbrir(html);
 }
 
 // ═══ PAPELERA (guarda lo que se borra por si te arrepentís) ═══
@@ -1913,7 +1963,7 @@ function tiendaRender(){
             return '<div style="background:linear-gradient(135deg,#FF7A00,#ff9a3d);border-radius:10px;padding:9px;margin-bottom:5px;text-align:center;color:#fff;">'
               +'<div style="font-size:.62rem;font-weight:800;opacity:.95;letter-spacing:.5px;">'+cd.n+' CUOTAS DE</div>'
               +'<div style="font-size:1.7rem;font-weight:900;line-height:1;">'+fmt(cd.valor)+'</div>'
-              +'<div style="font-size:.62rem;font-weight:800;margin-top:2px;background:rgba(255,255,255,.25);border-radius:20px;padding:1px 8px;display:inline-block;">'+(esSI?'\u2728 SIN INTER\u00c9S':'CUOTAS FIJAS')+'</div>'
+              +'<div style="font-size:.62rem;font-weight:800;margin-top:2px;background:rgba(255,255,255,.25);border-radius:20px;padding:1px 8px;display:inline-block;">'+(esSI?'\u2728 SIN INTERÉS':'CUOTAS FIJAS')+'</div>'
               +'</div>'
               +'<div style="font-size:.62rem;color:var(--sub);margin-bottom:6px;text-align:center;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
           }
@@ -1928,7 +1978,7 @@ function tiendaRender(){
                 +'<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
               +'</div>'
               +'</div>'
-              +'<div style="font-size:.6rem;text-align:center;color:'+(esSI?'#0a8a3f':'var(--sub)')+';font-weight:700;margin-bottom:6px;">'+(esSI?'\u2728 Sin inter\u00e9s':'Cuotas fijas')+' '+bloquePrecioAntes(p)+'</div>';
+              +'<div style="font-size:.6rem;text-align:center;color:'+(esSI?'#0a8a3f':'var(--sub)')+';font-weight:700;margin-bottom:6px;">'+(esSI?'\u2728 Sin interés':'Cuotas fijas')+' '+bloquePrecioAntes(p)+'</div>';
           }
           if(tiendaFormatoCuota==='ahorro'){
             var tieneOferta=p.precioAntes&&parseFloat(p.precioAntes)>p.venta;
@@ -1941,7 +1991,7 @@ function tiendaRender(){
               : '';
             return cab
               +'<div style="font-size:1.35rem;font-weight:900;color:var(--nar);line-height:1;">'+fmt(p.venta)+'</div>'
-              +'<div style="font-size:.66rem;font-weight:800;color:'+(esSI?'#0a8a3f':'var(--az)')+';margin-bottom:5px;">\u00f3 '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' SIN INTER\u00c9S':'')+'</div>';
+              +'<div style="font-size:.66rem;font-weight:800;color:'+(esSI?'#0a8a3f':'var(--az)')+';margin-bottom:5px;">ó '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' SIN INTERÉS':'')+'</div>';
           }
           // formato CAJA (Frávega): verde = sin interés, azul = cuotas fijas
           var bgCaja=esSI?'linear-gradient(135deg,#16a34a,#22c55e)':'linear-gradient(135deg,#0B2D6B,#1a4a9e)';
@@ -3272,28 +3322,57 @@ function copiarSuscriptores(json){
 
 // ═══ ❓ AYUDA / INSTRUCCIONES (cajón lateral) ═══
 function ayudaAbrir(){
-  var pasos=[
-    {ic:'🔍',t:'Buscá lo que querés',d:'Escribí en el buscador de arriba (ej: "Samsung", "heladera", "iPhone") y aparecen los productos al instante.'},
-    {ic:'🏷️',t:'Filtrá por categoría',d:'Tocá los botones de categoría (Celulares, Electro, etc.) para ver solo lo que te interesa.'},
-    {ic:'💳',t:'Mirá precio y cuotas',d:'Cada producto muestra el precio de contado y en cuántas cuotas podés pagarlo. Tocá "Ver cuotas" para el detalle.'},
-    {ic:'❤️',t:'Guardá favoritos',d:'Tocá el corazón para guardar los que te gustan y verlos después con el botón ❤️.'},
-    {ic:'🛒',t:'Armá tu pedido',d:'Agregá productos al carrito y mandanos el pedido por WhatsApp con un toque.'},
-    {ic:'🎰',t:'Girá la ruleta',d:'Una vez por día podés girar la ruleta y ganar descuentos. ¡Probá suerte!'},
-    {ic:'📐',t:'Cambiá la vista',d:'Con el botón de vista elegís ver los productos en 1, 2 o 3 columnas, como más te guste.'}
-  ];
-  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
+  // Detectar rol para mostrar la ayuda correcta
+  var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
+  var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
+
+  var pasos, titulo, subtitulo, icono;
+
+  if(esAdmin){
+    icono='👑'; titulo='Instrucciones para Administradores'; subtitulo='Todo lo que podés hacer como admin:';
+    pasos=[
+      {ic:'⚙️',t:'Cargar productos',d:'Usá el botón flotante ➕ o "Cargar catálogo". Elegí si el precio es Costo, Venta o USD.'},
+      {ic:'📱',t:'Cargar celulares',d:'En "Cargar celulares" pegá la lista completa. En USD, poné la cotización del dólar primero.'},
+      {ic:'🖼️',t:'Fotos',d:'Cada producto tiene el botón "Foto". Al actualizar precios de celus, las fotos NO se borran.'},
+      {ic:'⚙️',t:'Opciones por producto',d:'Abrí el cajón "Opciones" para destacar, poner del día, marcar SIN STOCK, o mostrar/ocultar de la tienda.'},
+      {ic:'💳',t:'Formato de cuotas',d:'Con "Formato de cuotas" elegís entre 5 estilos. Se aplica para todos los clientes.'},
+      {ic:'📄',t:'Catálogo PDF',d:'Descargá el catálogo en PDF con fotos, 3 por fila, para compartir.'},
+      {ic:'☁️',t:'Todo se guarda solo',d:'Los cambios se sincronizan en la nube. Angela y los demás ven lo mismo que vos.'}
+    ];
+  } else if(esRev){
+    icono='🤝'; titulo='Instrucciones para Revendedores'; subtitulo='Cómo trabajar con la tienda:';
+    pasos=[
+      {ic:'📋',t:'Pegar precio',d:'En la pestaña "Pegar precio", pegá el mensaje con el precio y te arma las cuotas y un texto listo para responder.'},
+      {ic:'💳',t:'Ver cuotas',d:'En "Cuotas" calculás rápido cuánto sale cualquier producto en cuotas para pasarle al cliente.'},
+      {ic:'🔍',t:'Buscar productos',d:'Buscá en el catálogo lo que el cliente necesita y compartí con el botón "Compartir".'},
+      {ic:'💰',t:'Tu ganancia',d:'Vos vendés al precio de la tienda. Consultá con el admin tu comisión por cada venta.'},
+      {ic:'📤',t:'Compartir',d:'Cada producto tiene "Compartir" con foto y precio, listo para mandar por WhatsApp.'}
+    ];
+  } else {
+    icono='🐝'; titulo='¿Cómo usar la tienda?'; subtitulo='Es muy fácil, mirá:';
+    pasos=[
+      {ic:'🔍',t:'Buscá lo que querés',d:'Escribí en el buscador de arriba lo que andás buscando.'},
+      {ic:'🏷️',t:'Filtrá por categoría',d:'Tocá los botones de categoría para ver por tipo de producto.'},
+      {ic:'💳',t:'Mirá precio y cuotas',d:'Cada producto muestra el precio de contado y en cuotas fijas.'},
+      {ic:'❤️',t:'Guardá favoritos',d:'Tocá el corazón para guardar los que te gustan.'},
+      {ic:'🛒',t:'Armá tu pedido',d:'Agregá al carrito y mandanos el pedido por WhatsApp.'},
+      {ic:'🎰',t:'Girá la ruleta',d:'Una vez por día podés girar la ruleta y ganar un descuento.'}
+    ];
+  }
+
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'
     +'<h3 style="color:var(--az);font-weight:900;font-size:1.15rem;">❓ Ayuda</h3>'
-    +'<button onclick="ayudaCerrar()" style="background:var(--bg);border:1.5px solid var(--bor);color:var(--sub);border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;font-family:inherit;line-height:1;padding:0;">✕</button></div>'
-    +'<div style="text-align:center;margin-bottom:14px;"><div style="font-size:2.2rem;">🐝</div>'
-    +'<div style="font-weight:800;color:var(--az);font-size:.95rem;">¿Cómo usar la tienda?</div>'
-    +'<p style="color:var(--sub);font-size:.76rem;margin-top:2px;">Es muy fácil, mirá:</p></div>';
+    +'<button onclick="ayudaCerrar()" style="background:var(--bg);border:1.5px solid var(--bor);color:var(--sub);border-radius:50%;width:30px;height:30px;font-size:1rem;cursor:pointer;">✕</button></div>'
+    +'<div style="text-align:center;margin-bottom:14px;"><div style="font-size:2.2rem;">'+icono+'</div>'
+    +'<div style="font-weight:800;color:var(--az);font-size:.95rem;">'+titulo+'</div>'
+    +'<p style="color:var(--sub);font-size:.76rem;margin-top:2px;">'+subtitulo+'</p></div>';
   pasos.forEach(function(p){
-    html+='<div style="display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--bor);border-radius:12px;margin-bottom:8px;background:var(--bg);">'
+    html+='<div style="display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--bor);border-radius:10px;margin-bottom:8px;background:var(--bg);">'
       +'<div style="font-size:1.5rem;flex-shrink:0;">'+p.ic+'</div>'
       +'<div><div style="font-weight:800;color:var(--az);font-size:.85rem;">'+p.t+'</div>'
       +'<div style="color:var(--sub);font-size:.76rem;line-height:1.4;margin-top:1px;">'+p.d+'</div></div></div>';
   });
-  html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px;text-align:center;margin-top:10px;">'
+  html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px;margin-top:6px;text-align:center;">'
     +'<div style="font-weight:800;font-size:.85rem;margin-bottom:2px;">¿Dudas? Escribinos 🐝</div>'
     +'<div style="font-size:.74rem;opacity:.95;">Estamos para ayudarte por WhatsApp, Instagram o nuestro canal.</div></div>';
   html+='<button class="calc-btn" style="width:100%;margin-top:12px;background:var(--az);" onclick="ayudaCerrar()">Entendido 👍</button>';
