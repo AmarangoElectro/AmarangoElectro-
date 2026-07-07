@@ -777,7 +777,7 @@ function armarCuotasLines(precio, prod){
   cuotasActivasOrdenadas().forEach(function(n){
     var totalPlan=calcularTotalPlan(precio,n);
     var valorCuota=Math.round(totalPlan/n/1000)*1000;
-    lines.push("💳💵 "+n+" cuotas fijas de "+fmt(valorCuota));
+    lines.push("💳 "+n+" cuotas fijas de "+fmt(valorCuota));
   });
   return lines;
 }
@@ -4291,7 +4291,7 @@ function armarBloquePegar(texto, indice, tituloGeneral){
     var totalPlan=calcularTotalPlan(precio,n2);
     var valorCuota=Math.round(totalPlan/n2/1000)*1000;
     html+='<div class="cuota-card c'+n2+'"><div class="cuota-info"><div class="cuota-n">'+n2+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-    waLines.push("💳💵 "+n2+" cuotas fijas de "+fmt(valorCuota));
+    waLines.push("💳 "+n2+" cuotas fijas de "+fmt(valorCuota));
   });
   html+='</div>';
   if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes activados.</div>';
@@ -4375,10 +4375,33 @@ function calcPegar(){
   }
   res.innerHTML=html;res.className='tab-results';
 }
+// Abre WhatsApp de forma confiable en Android (window.open suele quedar bloqueado).
+// Limpia surrogates rotos, crea un enlace real y lo dispara con un click sintético.
+function abrirWhatsAppMsg(msg){
+  msg=(msg||'').toString();
+  if(!msg){ alert('No hay mensaje para enviar. Primero pegá un producto.'); return; }
+  // limpiar posibles emojis mal formados (surrogates sueltos) que rompen encodeURIComponent
+  var limpio=msg.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,'').replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1');
+  var url='https://wa.me/?text='+encodeURIComponent(limpio);
+  // método 1: crear un <a> real y clickearlo (el más confiable en móvil)
+  try{
+    var a=document.createElement('a');
+    a.href=url; a.target='_blank'; a.rel='noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ try{document.body.removeChild(a);}catch(e){} },300);
+    return;
+  }catch(e){}
+  // método 2: navegación directa (si el <a> falló)
+  try{ window.location.href=url; return; }catch(e){}
+  // método 3: window.open como último recurso
+  try{ window.open(url,'_blank'); }
+  catch(e){ alert('No se pudo abrir WhatsApp. Usá el botón Copiar y pegalo a mano.'); }
+}
+
 function abrirWAPegar(idx){
   var msg=(window._pegarMsgs&&window._pegarMsgs[idx])||window._lastPegarMsg||'';
-  try{window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');}
-  catch(e){try{window.open('https://wa.me/?text='+encodeURIComponent(limpiarTexto(msg)),'_blank');}catch(e2){alert('No se pudo abrir WhatsApp, probá Copiar');}}
+  abrirWhatsAppMsg(msg);
 }
 function copiarMsgPegarIdx(idx){
   var msg=(window._pegarMsgs&&window._pegarMsgs[idx])||window._lastPegarMsg||'';
@@ -4542,10 +4565,13 @@ function limpiarTexto(s){
   s=s.replace(/\uFFFD/g,'');
   s=s.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,''); // alto surrogate sin bajo
   s=s.replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1'); // bajo surrogate sin alto
-  // sacar símbolos de lista al inicio (〽️ 🔱 📱 🍎 ✳️ etc.) y asteriscos
-  s=s.replace(/^[\s*〽🔱📱🍎✳️▪️◾•\-–—>»·\uFE0F]+/,'');
-  // sacar banderitas y emojis sueltos que quedan pegados
-  s=s.replace(/[🇦🇷🇺🇸✅✨🔥⭐️❗❕]/g,'');
+  // sacar símbolos de lista al inicio (〽️ 🔱 📱 🍎 ✳️ etc.) y asteriscos.
+  // Se hace en dos pasos seguros: primero los emojis multi-byte por alternativas,
+  // luego los símbolos simples con una clase (sin surrogates).
+  s=s.replace(/^(?:\s|\*|〽️|〽|🔱|📱|🍎|✳️|✳|▪️|▪|◾|•|[-–—>»·\uFE0F])+/,'');
+  // sacar banderitas y emojis sueltos que quedan pegados (usando alternativas seguras,
+  // NO una clase [] con surrogates, que puede romper emojis vecinos como 🐝 o 💳)
+  s=s.replace(/🇦🇷|🇺🇸|✅|✨|🔥|⭐️|⭐|❗|❕/g,'');
   // sacar coletillas comerciales típicas al final (oferta, nacional, ram, promo, etc.)
   s=s.replace(/\s*[!¡]{1,}\s*$/,''); // signos de exclamación finales
   s=s.replace(/\s+(oferta|promo|nacional|liquidaci[oó]n|[uú]ltim[ao]s?|hay stock|sim f[ií]sica|\d+\s*ram)\b[^]*$/i,'');
@@ -4930,7 +4956,7 @@ function elegirCelu(idx){
     var totalPlan=calcularTotalPlan(precio,n);
     var valorCuota=Math.round(totalPlan/n/1000)*1000;
     html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-    waLines.push("💳💵 "+n+" cuotas fijas de "+fmt(valorCuota));
+    waLines.push("💳 "+n+" cuotas fijas de "+fmt(valorCuota));
   });
   html+='</div>';
   var lineaColorMsg=(c.colores&&c.colores.length)?("🎨 Colores: "+lineaColores(c.colores)):"";
@@ -4954,13 +4980,7 @@ function copiarTextoCelu(idx){
 // Abre WhatsApp de forma segura (sin que rompan caracteres raros)
 function abrirWA(idx){
   var msg=window['_celuMsg_'+idx]||'';
-  try{
-    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
-  }catch(e){
-    // si algún carácter rompe, limpiar y reintentar
-    try{ window.open('https://wa.me/?text='+encodeURIComponent(limpiarTexto(msg)),'_blank'); }
-    catch(e2){ alert('No se pudo abrir WhatsApp, probá con el botón Copiar'); }
-  }
+  abrirWhatsAppMsg(msg);
 }
 
 // ═══ PLACAS (admin): pegado inteligente igual que el CRM ═══
@@ -5093,7 +5113,7 @@ function calcPlaca(){
     var valorCuota=Math.round(totalPlan/n/1000)*1000;
     var clase=(n<=12)?'c'+n:'c12';
     html+='<div class="cuota-card '+clase+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-    waLines.push("💳💵 "+n+" cuotas fijas de "+fmt(valorCuota));
+    waLines.push("💳 "+n+" cuotas fijas de "+fmt(valorCuota));
   });
   html+='</div>';
 
@@ -5115,16 +5135,7 @@ function copiarPlacaMsg(){
 function enviarPlacaWhatsApp(){
   var msg=window._lastPlacaMsg||'';
   if(!msg){ alert('Primero pegá un producto y armá la placa'); return; }
-  var url;
-  try{
-    url='https://wa.me/?text='+encodeURIComponent(msg);
-  }catch(e){
-    // si algún emoji está mal formado, limpiar surrogates sueltos y reintentar
-    var limpio=msg.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,'').replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1');
-    try{ url='https://wa.me/?text='+encodeURIComponent(limpio); }
-    catch(e2){ alert('No se pudo abrir WhatsApp. Usá el botón Copiar y pegalo a mano.'); return; }
-  }
-  window.open(url,'_blank');
+  abrirWhatsAppMsg(msg);
 }
 function clearPlaca(){
   document.getElementById('inp-placa').value='';
