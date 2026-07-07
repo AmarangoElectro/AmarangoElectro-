@@ -3842,6 +3842,28 @@ function tiendaProcesarCarga(){
  }
 }
 
+// Detección de precio ROBUSTA (igual que el CRM). Detecta $ adelante/atrás y USD en varios formatos.
+function detectarPrecioPlacaTienda(txt){
+  if(!txt) return {valor:0, esDolar:false};
+  // sacar tachados (~precio viejo~) y formato whatsapp
+  txt=txt.replace(/\*?~[^~]*~\*?/g,' ');
+  var esDolar=/usd|u\$s|us\$|d[oó]lar/i.test(txt);
+  var m;
+  // $ adelante: $2.000 ó $ 2000
+  m=txt.match(/\$\s*([\d][\d.,]*)/);
+  if(m) return {valor:parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.')), esDolar:esDolar};
+  // $ atrás: 2.000$
+  m=txt.match(/([\d][\d.,]*)\s*\$/);
+  if(m) return {valor:parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.')), esDolar:esDolar};
+  // USD adelante: usd620, usd 620, u$s620
+  m=txt.match(/(?:usd|u\$s|us\$|d[oó]lares?)\s*([\d][\d.,]*)/i);
+  if(m) return {valor:parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.')), esDolar:true};
+  // número antes de usd: 620usd, 620 usd
+  m=txt.match(/([\d][\d.,]*)\s*(?:usd|u\$s|us\$|d[oó]lares?)/i);
+  if(m) return {valor:parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.')), esDolar:true};
+  return {valor:0, esDolar:false};
+}
+
 function detectarPrecioTexto(txt){
   if(!txt)return 0;
   // IMPORTANTE: en WhatsApp ~texto~ queda tachado = precio VIEJO. Lo borramos antes de buscar.
@@ -4669,11 +4691,14 @@ function calcPlaca(){
     res.className='empty-state';return;
   }
   // primero: ¿hay un precio marcado como dólar (usd, u$s, etc.)? — detección automática (1-4 cifras)
-  var precioUSD=detectarUSD(txt);
-  var esDolarAuto=(precioUSD>0);
+  // Detección robusta (igual que el CRM): $ adelante/atrás y USD en varios formatos
+  var det=detectarPrecioPlacaTienda(txt);
+  var precioUSD=(det.esDolar)?det.valor:detectarUSD(txt);
+  var esDolarAuto=(det.esDolar || precioUSD>0);
+  if(esDolarAuto && !precioUSD) precioUSD=det.valor;
   // en modo dólar manual, tomo el número tal cual (aunque no tenga "usd")
-  var precioManualDolar=(placaTipo==='dolar' && !esDolarAuto)?detectarPrecioTexto(txt):0;
-  var precioDetectado=esDolarAuto?precioUSD:(placaTipo==='dolar'?precioManualDolar:detectarPrecioTexto(txt));
+  var precioManualDolar=(placaTipo==='dolar' && !esDolarAuto)?(det.valor||detectarPrecioTexto(txt)):0;
+  var precioDetectado=esDolarAuto?precioUSD:(placaTipo==='dolar'?precioManualDolar:(det.valor||detectarPrecioTexto(txt)));
   if(!precioDetectado){
     res.innerHTML='<div class="empty-icon">🤔</div><p>No encontré un precio. Fijate que tenga el monto con $ (ej: $250.000) o en dólar (ej: 150usd)</p>';
     res.className='empty-state';return;
@@ -4751,8 +4776,8 @@ function calcPlaca(){
   var msgLindo=armarMensajeAmarango(nombre||'Producto', precio, waLines);
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px">💬 Mensaje listo para mandar</div>';
   html+='<div class="msg-lindo">'+msgLindo.replace(/\*/g,'').replace(/_/g,'')+'</div>';
-  window._lastPlacaMsg=msgLindo;
-  html+='<div class="share-row"><button class="share-btn wa" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msgLindo)+'\',\'_blank\')">💬 Enviar por WhatsApp</button><button class="share-btn" onclick="copiarPlacaMsg()">📋 Copiar</button></div>';
+  window._lastPlacaMsg=(msgLindo||'').replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,'').replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1');
+  html+='<div class="share-row"><button class="share-btn wa" onclick="enviarPlacaWhatsApp()">💬 Enviar por WhatsApp</button><button class="share-btn" onclick="copiarPlacaMsg()">📋 Copiar</button></div>';
   res.innerHTML=html;res.className='tab-results';
 }
 function copiarPlacaMsg(){
@@ -4760,6 +4785,21 @@ function copiarPlacaMsg(){
     try{navigator.clipboard.writeText(window._lastPlacaMsg);alert('✅ Copiado, ya lo podés pegar en WhatsApp');}
     catch(e){alert('No se pudo copiar');}
   }
+}
+// Envía la placa por WhatsApp de forma segura (no se rompe con emojis/banderitas)
+function enviarPlacaWhatsApp(){
+  var msg=window._lastPlacaMsg||'';
+  if(!msg){ alert('Primero pegá un producto y armá la placa'); return; }
+  var url;
+  try{
+    url='https://wa.me/?text='+encodeURIComponent(msg);
+  }catch(e){
+    // si algún emoji está mal formado, limpiar surrogates sueltos y reintentar
+    var limpio=msg.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,'').replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1');
+    try{ url='https://wa.me/?text='+encodeURIComponent(limpio); }
+    catch(e2){ alert('No se pudo abrir WhatsApp. Usá el botón Copiar y pegalo a mano.'); return; }
+  }
+  window.open(url,'_blank');
 }
 function clearPlaca(){
   document.getElementById('inp-placa').value='';
