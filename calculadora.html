@@ -630,9 +630,8 @@ body.oscuro{background-image:linear-gradient(rgba(10,24,48,.90),rgba(10,24,48,.9
   <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:20px auto;">
     <h3 style="color:var(--az);font-weight:900;font-size:1rem;margin-bottom:4px;">⚙️ Cargar catálogo</h3>
     <p style="font-size:.72rem;color:var(--sub);margin-bottom:12px;">
-      Una línea por producto. Dos formas:<br>
-      • <b>Nombre | Costo</b> → calculo la venta con tu fórmula<br>
-      • <b>Nombre | Costo | Venta</b> → uso TU precio de venta tal cual
+      Una línea por producto: <b>Nombre | Precio</b><br>
+      Elegí abajo si el precio es Costo, Venta o USD.
     </p>
     <div style="background:#f0f4ff;border-radius:8px;padding:8px 10px;font-size:.68rem;color:var(--az);margin-bottom:10px;font-family:monospace;">
       Heladera No Frost 300L | 310000<br>
@@ -641,9 +640,14 @@ body.oscuro{background-image:linear-gradient(rgba(10,24,48,.90),rgba(10,24,48,.9
     </div>
     <textarea id="carga-texto" rows="8" placeholder="Pegá acá tus productos..."
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;font-family:monospace;font-size:.8rem;"></textarea>
-    <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--sub);margin:8px 0;">
-      <input type="checkbox" id="carga-usd"> Los costos están en USD (los paso a pesos con el dólar)
-    </label>
+    <div style="margin:10px 0;">
+      <div style="font-size:.72rem;color:var(--az);font-weight:800;margin-bottom:6px;">¿Qué precio estás pegando?</div>
+      <div style="display:flex;gap:5px;">
+        <button type="button" id="modo-costo" class="carga-modo-btn on" onclick="setCargaModo('costo')" style="flex:1;padding:9px 4px;font-size:.68rem;font-weight:800;border-radius:8px;border:2px solid var(--az);background:var(--az);color:#fff;cursor:pointer;">💰 Costo<br><span style="font-size:.56rem;font-weight:600;opacity:.9;">(aplico fórmula)</span></button>
+        <button type="button" id="modo-venta" class="carga-modo-btn" onclick="setCargaModo('venta')" style="flex:1;padding:9px 4px;font-size:.68rem;font-weight:800;border-radius:8px;border:2px solid var(--az);background:#fff;color:var(--az);cursor:pointer;">🏷️ Venta<br><span style="font-size:.56rem;font-weight:600;opacity:.8;">(precio final)</span></button>
+        <button type="button" id="modo-usd" class="carga-modo-btn" onclick="setCargaModo('usd')" style="flex:1;padding:9px 4px;font-size:.68rem;font-weight:800;border-radius:8px;border:2px solid var(--az);background:#fff;color:var(--az);cursor:pointer;">💵 USD<br><span style="font-size:.56rem;font-weight:600;opacity:.8;">(paso a pesos)</span></button>
+      </div>
+    </div>
     <div style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
       <div style="font-size:.7rem;color:var(--az);font-weight:800;margin-bottom:6px;">📷 Foto (opcional)</div>
       <div style="font-size:.64rem;color:var(--sub);margin-bottom:8px;">Se le pone al primer producto de la lista. A los demás les ponés la foto después con el botón "Foto" de cada uno.</div>
@@ -3550,8 +3554,7 @@ function tiendaVerCuotas(id){
 // ---- carga de catálogo por pegado ----
 function tiendaAbrirCarga(){
   document.getElementById('modal-carga').style.display='block';
-  var chk=document.getElementById('carga-usd');
-  chk.onchange=function(){ document.getElementById('carga-dolar').style.display=chk.checked?'block':'none'; };
+  setCargaModo('costo');  // arranca en modo Costo por defecto
 }
 
 // Guarda la foto elegida en la carga (comprimida) para asignarla al primer producto
@@ -3578,15 +3581,32 @@ function cargaFotoElegida(e){
   reader.readAsDataURL(file);
 }
 
+// Modo de carga de precio: 'costo' (aplica fórmula), 'venta' (precio tal cual), 'usd' (convierte y aplica fórmula)
+var cargaModo='costo';
+function setCargaModo(m){
+  cargaModo=m;
+  ['costo','venta','usd'].forEach(function(x){
+    var b=document.getElementById('modo-'+x);
+    if(!b)return;
+    var on=(x===m);
+    b.style.background=on?'var(--az)':'#fff';
+    b.style.color=on?'#fff':'var(--az)';
+    b.classList.toggle('on',on);
+  });
+  // el casillero del dólar solo aparece en modo USD
+  var dol=document.getElementById('carga-dolar');
+  if(dol) dol.style.display=(m==='usd')?'block':'none';
+}
+
 function tiendaProcesarCarga(){
  try{
   var texto=document.getElementById('carga-texto').value||'';
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
-  var esUSD=document.getElementById('carga-usd').checked;
+  var esUSD=(cargaModo==='usd');
   var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
   var reemplazar=document.getElementById('carga-reemplazar').checked;
 
-  if(esUSD && dolar<=0){ alert('Pusiste que los costos son en USD. Cargá la cotización del dólar.'); return; }
+  if(esUSD && dolar<=0){ alert('Elegiste USD. Cargá la cotización del dólar para convertir los precios.'); return; }
 
   var lineas=texto.split(/\r?\n/);
   var nuevos=[];
@@ -3595,27 +3615,27 @@ function tiendaProcesarCarga(){
 
   lineas.forEach(function(l){
     l=(l||'').trim(); if(!l)return;
-    // aceptar varios separadores: | , barra rara, ; , tab, o "  " (2+ espacios)
     var partes=l.split(/\s*[|¦;\t]\s*|\s{2,}/);
-    // si no encontró separador, intentar separar por el ÚLTIMO número de la línea
     if(partes.length<2){
       var mm=l.match(/^(.*?)[\s\-:]+\$?([\d\.]{4,})\s*$/);
       if(mm){ partes=[mm[1], mm[2]]; }
     }
     if(partes.length<2){ descartadas++; return; }
     var nombre=(partes[0]||'').trim();
-    var costoRaw=(partes[1]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
-    var costo=parseFloat(costoRaw);
-    if(isNaN(costo)||costo<=0||!nombre){ descartadas++; return; }
-    if(esUSD)costo=costo*dolar;
-    // ¿trae precio de venta propio (tercer número)? entonces lo respetamos
-    var venta;
-    if(partes.length>=3 && (partes[2]||'').trim()){
-      var ventaRaw=(partes[2]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
-      var ventaNum=parseFloat(ventaRaw);
-      venta = (!isNaN(ventaNum)&&ventaNum>0) ? Math.round(ventaNum) : markupVentaCRM(costo);
-    }else{
-      venta = markupVentaCRM(costo);   // sin tercer número → fórmula
+    var numRaw=(partes[1]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
+    var num=parseFloat(numRaw);
+    if(isNaN(num)||num<=0||!nombre){ descartadas++; return; }
+
+    var costo, venta;
+    if(cargaModo==='venta'){
+      venta = Math.round(num);   // precio final tal cual
+      costo = 0;
+    } else if(cargaModo==='usd'){
+      costo = num*dolar;          // USD -> pesos
+      venta = markupVentaCRM(costo); // fórmula Amarango
+    } else {
+      costo = num;                // costo directo
+      venta = markupVentaCRM(costo); // fórmula Amarango
     }
     nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), visible:false });
   });
@@ -4033,8 +4053,17 @@ function limpiarTexto(s){
   s=s.replace(/\uFFFD/g,'');
   s=s.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,''); // alto surrogate sin bajo
   s=s.replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1'); // bajo surrogate sin alto
+  // sacar símbolos de lista al inicio (〽️ 🔱 📱 🍎 ✳️ etc.) y asteriscos
+  s=s.replace(/^[\s*〽🔱📱🍎✳️▪️◾•\-–—>»·\uFE0F]+/,'');
+  // sacar banderitas y emojis sueltos que quedan pegados
+  s=s.replace(/[🇦🇷🇺🇸✅✨🔥⭐️❗❕]/g,'');
+  // sacar coletillas comerciales típicas al final (oferta, nacional, ram, promo, etc.)
+  s=s.replace(/\s*[!¡]{1,}\s*$/,''); // signos de exclamación finales
+  s=s.replace(/\s+(oferta|promo|nacional|liquidaci[oó]n|[uú]ltim[ao]s?|hay stock|sim f[ií]sica|\d+\s*ram)\b[^]*$/i,'');
   // colapsar espacios/tabs repetidos PERO sin tocar los saltos de línea (\n)
   s=s.replace(/[ \t]{2,}/g,' ');
+  // limpiar guiones o signos sueltos al final
+  s=s.replace(/[\s\-–—,]+$/,'');
   return s.trim();
 }
 // Detecta incoherencias de memoria: mismo modelo donde MÁS GB sale ≤ que MENOS GB.
