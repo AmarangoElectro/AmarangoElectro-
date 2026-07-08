@@ -2055,8 +2055,12 @@ function tiendaRender(){
     }else{
       // botones públicos: COMPRAR (deja la venta casi hecha) + Consultar
       card+='<button class="calc-btn" style="font-size:.78rem;padding:10px;background:var(--nar);margin-bottom:6px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar</button>'
-        +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>'
-        +'<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
+        +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>';
+      // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
+      if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
+        card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')">📤 Compartir</button>';
+      }
+      card+='<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
     }
     card+='</div>';
     return card;
@@ -3727,8 +3731,18 @@ function totalCarrito(){
   return total;
 }
 // total del pedido (producto directo o carrito)
+// El descuento (cupón) se aplica SIEMPRE sobre el precio base, y todas las cuotas
+// se calculan sobre ese precio ya rebajado (igual que el CRM y toda la tienda).
 function totalPedido(){
-  if(pedidoActual.prodId!=null){ var p=buscarProd(pedidoActual.prodId); return p?p.venta:0; }
+  if(pedidoActual.prodId!=null){
+    var p=buscarProd(pedidoActual.prodId);
+    var base=p?p.venta:0;
+    if(cuponAplicado){
+      var desc = cuponAplicado.tipo==='pct' ? Math.round(base*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,base);
+      base-=desc;
+    }
+    return base;
+  }
   return totalCarrito();
 }
 // items del pedido
