@@ -354,11 +354,11 @@
   .chat-close{font-size:22px;cursor:pointer;background:none;border:none;color:#fff;}
   .chat-pins{background:#fff8f0;border-bottom:1px solid var(--border);padding:8px 14px;max-height:120px;overflow-y:auto;}
   .chat-pin{display:flex;gap:8px;align-items:flex-start;font-size:12px;padding:4px 0;color:#7a4a00;}
-  .chat-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;}
-  .msg{max-width:100%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.35;position:relative;word-wrap:break-word;white-space:pre-wrap;cursor:pointer;}
+  .chat-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:6px;}
+  .msg{width:fit-content;max-width:100%;flex-shrink:0;padding:8px 12px;border-radius:14px;font-size:14px;line-height:1.35;position:relative;word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap;cursor:pointer;}
   .msg-mine{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px;}
   .msg-other{align-self:flex-start;background:#fff;color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
-  .msg-autor{font-size:11px;font-weight:800;margin-bottom:2px;opacity:.85;}
+  .msg-autor{font-size:11px;font-weight:800;margin-bottom:2px;}
   .msg-time{font-size:10px;opacity:.6;margin-top:3px;text-align:right;}
   .chat-input-bar{display:flex;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid var(--border);align-items:center;}
   .chat-input-bar input{flex:1;border:1px solid var(--border);border-radius:20px;padding:10px 14px;font-size:15px;outline:none;}
@@ -373,7 +373,7 @@
   .msg-aviso.verde{background:#f0fbf4;border-color:var(--green);color:#0a7c3a;}
   .msg-aviso.naranja{background:#fff7ec;border-color:var(--orange);color:#b35c00;}
   /* ===== MENSAJERÍA ESTILO WHATSAPP ===== */
-  .msg-row{display:flex;flex-direction:column;max-width:78%;}
+  .msg-row{display:flex;flex-direction:column;max-width:82%;flex-shrink:0;}
   .msg-row.mine{align-self:flex-end;align-items:flex-end;}
   .msg-row.other{align-self:flex-start;align-items:flex-start;}
   .msg.grouped{margin-top:-6px;border-top-right-radius:14px;border-top-left-radius:14px;}
@@ -872,6 +872,18 @@
 </div>
 <div class="msg-menu-bg" id="msgMenuBg" onclick="if(event.target===this)cerrarMsgMenu()">
   <div class="msg-menu" id="msgMenu"></div>
+</div>
+<div id="planillaAnchoBg" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:500;flex-direction:column;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--blue);color:#fff;flex-shrink:0;">
+    <div id="planillaAnchoTit" style="font-weight:900;font-size:14px;">📋 Planilla</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button onclick="planillaAnchoNav(-1)" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:15px;font-weight:800;cursor:pointer;">◀</button>
+      <button onclick="planillaAnchoNav(1)" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:15px;font-weight:800;cursor:pointer;">▶</button>
+      <button onclick="cerrarPlanillaAncho()" style="background:var(--orange);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:800;cursor:pointer;">✕ Salir</button>
+    </div>
+  </div>
+  <div id="planillaAnchoAviso" style="display:none;text-align:center;padding:6px;background:#fff7ec;color:#b35c00;font-size:12px;font-weight:700;flex-shrink:0;">🔄 Girá el celu de costado para ver todo el tablero</div>
+  <div id="planillaAnchoContent" style="flex:1;overflow:auto;padding:10px;-webkit-overflow-scrolling:touch;"></div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -4198,6 +4210,7 @@ function renderPlanillaMes(){
     '<div style="flex:1;text-align:center;font-size:15px;font-weight:900;color:var(--blue);">'+nombreMes+'</div>'+
     '<button onclick="planillaMesNav(1)" style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:16px;font-weight:800;cursor:pointer;">▶</button>'+
   '</div>';
+  html+='<div style="text-align:center;margin-bottom:8px;"><button onclick="abrirPlanillaAncho()" style="background:var(--orange);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 6px rgba(255,122,0,.3);">🔄 Ver a lo ancho (pantalla completa)</button></div>';
   html+='<div class="planilla-hint">👉 Deslizá al costado para cambiar de mes</div>';
   // Leyenda de colores (guía de estados)
   html+='<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px;font-size:9px;">'
@@ -4288,7 +4301,66 @@ function planillaMesNav(dir){
   if(ni<0 || ni>=lista.length) return; // no hay más meses
   planillaMesSel=lista[ni];
   renderPlanillaMes();
+  // si está abierta la vista a lo ancho, refrescarla también
+  if(document.getElementById('planillaAnchoBg') && document.getElementById('planillaAnchoBg').style.display==='flex') pintarPlanillaAncho();
 }
+// ===== PLANILLA A LO ANCHO (pantalla completa) =====
+async function abrirPlanillaAncho(){
+  const bg=document.getElementById('planillaAnchoBg');
+  bg.style.display='flex';
+  pintarPlanillaAncho();
+  // 1) intentar pantalla completa
+  try{
+    const el=document.documentElement;
+    if(el.requestFullscreen) await el.requestFullscreen();
+    else if(el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+  }catch(e){}
+  // 2) intentar girar a horizontal (solo funciona en fullscreen y en algunos celus)
+  let giroOk=false;
+  try{
+    if(screen.orientation && screen.orientation.lock){
+      await screen.orientation.lock('landscape');
+      giroOk=true;
+    }
+  }catch(e){ giroOk=false; }
+  // 3) si no se pudo girar solo, mostrar el cartelito
+  document.getElementById('planillaAnchoAviso').style.display = giroOk ? 'none' : 'block';
+}
+function cerrarPlanillaAncho(){
+  document.getElementById('planillaAnchoBg').style.display='none';
+  try{ if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); }catch(e){}
+  try{
+    if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    else if(document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }catch(e){}
+}
+function planillaAnchoNav(dir){ planillaMesNav(dir); }
+// arma la tabla grande usando el mismo HTML de la planilla normal, pero a ancho completo
+function pintarPlanillaAncho(){
+  const cont=document.getElementById('planillaAnchoContent'); if(!cont) return;
+  const src=document.getElementById('planillaContent');
+  // clonar la tabla ya renderizada
+  const wrap=src.querySelector('.planilla-wrap');
+  const tit=document.getElementById('planillaAnchoTit');
+  const partes=(planillaMesSel||'').split('-');
+  if(partes.length===2) tit.textContent='📋 Planilla · '+MESES_NOM[parseInt(partes[1])-1]+' '+partes[0];
+  if(!wrap){ cont.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;">Sin datos este mes.</div>'; return; }
+  // copiar la tabla y agrandar fuente para aprovechar el ancho
+  cont.innerHTML='<div style="min-width:100%;">'+wrap.innerHTML+'</div>';
+  const tabla=cont.querySelector('table.planilla');
+  if(tabla){ tabla.style.fontSize='13px'; tabla.style.tableLayout='auto'; tabla.style.minWidth='900px'; }
+  // los th/td en modo ancho: sin recorte, se ve todo
+  cont.querySelectorAll('table.planilla td, table.planilla th').forEach(function(c){
+    c.style.whiteSpace='nowrap'; c.style.maxWidth='none'; c.style.overflow='visible'; c.style.textOverflow='clip'; c.style.padding='8px 10px';
+  });
+}
+// si el usuario sale del fullscreen con el botón atrás del celu, cerrar la vista
+document.addEventListener('fullscreenchange', function(){
+  if(!document.fullscreenElement){
+    const bg=document.getElementById('planillaAnchoBg');
+    if(bg && bg.style.display==='flex'){ /* dejar la vista abierta pero sin fullscreen, con el aviso */ }
+  }
+});
 // Swipe horizontal en la planilla: izquierda = mes siguiente, derecha = mes anterior
 var _plSwipeX=0, _plSwipeY=0;
 function planillaTouchStart(e){ var t=e.touches[0]; _plSwipeX=t.clientX; _plSwipeY=t.clientY; }
@@ -4314,6 +4386,7 @@ async function marcarCuotaPlanilla(ventaId){
   try{ if(typeof AUDIT!=='undefined') AUDIT.registrar('cobró','venta','cuota '+v.pagadas+' de '+tot+' — '+(v.producto||'')); }catch(e){}
   toast('Pago registrado ✅');
   renderPlanillaMes();
+  if(document.getElementById('planillaAnchoBg') && document.getElementById('planillaAnchoBg').style.display==='flex') pintarPlanillaAncho();
 }
 
 
@@ -8202,10 +8275,13 @@ function pintarChat(){
     const reacts=agruparReacciones(m.reacciones);
     const reactsHtml = reacts.length ? `<div class="msg-reacts">${reacts.map(r=>`<span class="msg-react" onclick="reaccionar('${m.id}','${r.emoji}')" title="${escHtml(r.quienes.join(', '))}">${r.emoji}${r.cnt>1?`<span class="cnt">${r.cnt}</span>`:''}</span>`).join('')}</div>` : '';
     const editTag = m.editado ? `<span class="msg-edit-tag">editado</span>` : '';
+    const col = nombreColor(m.autor);
+    // burbuja de otros: barra de color a la izquierda + nombre en color (fácil de distinguir a simple vista)
+    const estiloOtro = !mine ? `border-left:4px solid ${col};` : '';
     html+=`<div class="msg-row ${mine?'mine':'other'}">
-      <div class="msg ${mine?'msg-mine':'msg-other'} ${grouped?'grouped':''}" id="msg_${m.id}" onclick="abrirMsgMenu(event,'${m.id}')">
+      <div class="msg ${mine?'msg-mine':'msg-other'} ${grouped?'grouped':''}" id="msg_${m.id}" style="${estiloOtro}" onclick="abrirMsgMenu(event,'${m.id}')">
         ${quoteHtml}
-        ${(!mine&&!grouped)?`<div class="msg-autor" style="color:${nombreColor(m.autor)};">${escHtml(m.autor)}</div>`:''}
+        ${!mine?`<div class="msg-autor" style="color:${col};">${escHtml(m.autor)}</div>`:''}
         ${m.img?`<img src="${m.img}" onclick="event.stopPropagation();verFotoChat('${m.id}')" style="max-width:200px;max-height:240px;border-radius:10px;cursor:pointer;display:block;margin-bottom:${m.texto?'4px':'0'};">`:''}
         ${m.texto?`<div>${escHtml(m.texto)}</div>`:''}
         <div class="msg-time">${m.fijado?'📌 ':''}${editTag}${horaMsg(m.ts)}${tick}</div>
