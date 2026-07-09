@@ -566,21 +566,18 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- ===== BARRA DE NAVEGACIÓN INFERIOR (estilo Mercado Libre) ===== -->
     <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
-      <button class="nav-item" onclick="navTienda('inicio')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--az);">
-        <span style="font-size:20px;line-height:1;">🏠</span><span style="font-size:.6rem;font-weight:700;">Inicio</span>
-      </button>
-      <button class="nav-item" onclick="navTienda('categorias')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
-        <span style="font-size:20px;line-height:1;">📂</span><span style="font-size:.6rem;font-weight:700;">Categorías</span>
+      <button class="nav-item" onclick="navTienda('categorias')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--az);">
+        <span style="font-size:22px;line-height:1;">📂</span><span style="font-size:.62rem;font-weight:700;">Categorías</span>
       </button>
       <button class="nav-item" onclick="navTienda('carrito')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);position:relative;">
-        <span style="font-size:20px;line-height:1;">🛒</span><span style="font-size:.6rem;font-weight:700;">Carrito</span>
-        <span id="nav-carrito-badge" style="display:none;position:absolute;top:0;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:.55rem;font-weight:800;min-width:15px;height:15px;line-height:15px;border-radius:8px;text-align:center;padding:0 3px;">0</span>
+        <span style="font-size:22px;line-height:1;">🛒</span><span style="font-size:.62rem;font-weight:700;">Carrito</span>
+        <span id="nav-carrito-badge" style="display:none;position:absolute;top:0;right:calc(50% - 22px);background:var(--red);color:#fff;font-size:.55rem;font-weight:800;min-width:15px;height:15px;line-height:15px;border-radius:8px;text-align:center;padding:0 3px;">0</span>
       </button>
       <button class="nav-item" onclick="navTienda('favoritos')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
-        <span style="font-size:20px;line-height:1;">❤️</span><span style="font-size:.6rem;font-weight:700;">Favoritos</span>
+        <span style="font-size:22px;line-height:1;">❤️</span><span style="font-size:.62rem;font-weight:700;">Favoritos</span>
       </button>
-      <button class="nav-item" onclick="navTienda('consultar')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
-        <span style="font-size:20px;line-height:1;">📲</span><span style="font-size:.6rem;font-weight:700;">Consultar</span>
+      <button class="nav-item" onclick="navTienda('ofertas')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:22px;line-height:1;">🔥</span><span style="font-size:.62rem;font-weight:700;">Ofertas</span>
       </button>
     </div>
 
@@ -1774,6 +1771,8 @@ function tiendaToggleLimpiar(){
 function tiendaLimpiarBusqueda(){
   var inp=document.getElementById('tienda-buscar');
   if(inp){ inp.value=''; inp.focus(); }
+  if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
+  if(typeof marcarNavActiva==='function') marcarNavActiva('');
   tiendaToggleLimpiar();
   tiendaRender();
 }
@@ -1904,7 +1903,9 @@ function tiendaRender(){
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
     var okViejo=!verSoloPreciosViejos || (!p.esCelu && (diasPrecio(p)||0)>=30);
-    return okCat && okBusq && okMarca && okPrecio && okFav && okViejo;
+    // filtro "solo ofertas": producto con precio tachado o cuotas sin interés
+    var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
+    return okCat && okBusq && okMarca && okPrecio && okFav && okViejo && okOferta;
   });
   // resaltar botón favoritos si está activo
   var bfav=document.getElementById('btn-ver-favs');
@@ -2493,31 +2494,34 @@ function tiendaMarcados(accion){
 
 function tiendaFiltrarCat(c){ tiendaCategoriaActiva=(tiendaCategoriaActiva===c?'':c); tiendaRender(); }
 // ===== BARRA DE NAVEGACIÓN INFERIOR =====
+var verSoloOfertas=false;
 function navTienda(accion){
-  if(accion==='inicio'){
-    tiendaCategoriaActiva=''; verSoloFavoritos=false;
-    var inp=document.getElementById('tienda-buscar'); if(inp){ inp.value=''; tiendaLimpiarBusqueda&&tiendaLimpiarBusqueda(); }
-    tiendaRender();
-    window.scrollTo({top:0,behavior:'smooth'});
-  } else if(accion==='categorias'){
-    // ir arriba donde están los chips de categoría
+  if(accion==='categorias'){
+    verSoloOfertas=false;
     window.scrollTo({top:0,behavior:'smooth'});
     var chips=document.getElementById('tienda-buscar-wrap');
     if(chips){ chips.style.transition='box-shadow .3s'; chips.style.boxShadow='0 0 0 3px var(--nar)'; setTimeout(function(){ chips.style.boxShadow=''; },1200); }
+    tiendaRender();
   } else if(accion==='carrito'){
     abrirCarrito();
   } else if(accion==='favoritos'){
+    verSoloOfertas=false;
     if(typeof toggleVerFavoritos==='function') toggleVerFavoritos();
     window.scrollTo({top:0,behavior:'smooth'});
-  } else if(accion==='consultar'){
-    if(typeof tiendaConsultarVendedor==='function') tiendaConsultarVendedor();
+  } else if(accion==='ofertas'){
+    // mostrar solo productos en oferta o sin interés
+    verSoloOfertas=!verSoloOfertas;
+    if(verSoloOfertas){ verSoloFavoritos=false; tiendaCategoriaActiva=''; }
+    tiendaRender();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(verSoloOfertas){ toast&&toast('🔥 Mostrando solo ofertas'); }
   }
   marcarNavActiva(accion);
 }
 function marcarNavActiva(accion){
   var nav=document.getElementById('nav-inferior'); if(!nav) return;
   var botones=nav.querySelectorAll('.nav-item');
-  var orden=['inicio','categorias','carrito','favoritos','consultar'];
+  var orden=['categorias','carrito','favoritos','ofertas'];
   botones.forEach(function(b,i){ b.style.color = (orden[i]===accion) ? 'var(--az)' : 'var(--sub)'; });
 }
 // muestra la barra inferior y actualiza el contador del carrito
