@@ -5489,7 +5489,6 @@ function calcContado(){
     if(costo<=50000)pctAutoU=80;else if(costo<=100000)pctAutoU=60;else if(costo<=250000)pctAutoU=50;else if(costo<=350000)pctAutoU=40;else pctAutoU=30;
     pct=esManual?parseFloat(pctInput):pctAutoU;
     precio=Math.round(costo*(1+pct/100)/500)*500;
-    if(offState.contado)precio=Math.round(precio*0.90/500)*500;
   } else {
     // me dan el COSTO → calculo la venta
     costo=valor;
@@ -5497,8 +5496,10 @@ function calcContado(){
     if(costo<=50000)pctAuto=80;else if(costo<=100000)pctAuto=60;else if(costo<=250000)pctAuto=50;else if(costo<=350000)pctAuto=40;else pctAuto=30;
     pct=esManual?parseFloat(pctInput):pctAuto;
     precio=Math.round(costo*(1+pct/100)/500)*500;
-    if(offState.contado)precio=Math.round(precio*0.90/500)*500;
   }
+  // DESCUENTO 10% (si está activado): se aplica SIEMPRE, en cualquier modo (costo, usd o venta directa).
+  // Como el precio ya rebajado es el que alimenta las cuotas más abajo, el 10% queda parejo en contado y cuotas.
+  if(offState.contado){ precio=Math.round(precio*0.90/500)*500; }
   var html='';
   html+='<div class="result-contado" style="border:2px solid var(--nar)">';
   if(contadoModo==='usd'){
