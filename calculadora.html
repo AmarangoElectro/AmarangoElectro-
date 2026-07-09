@@ -168,7 +168,7 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
 #tienda-grid.vista-lista .prod-foto{height:200px !important;}
 /* 🎰 Ruleta de descuentos */
-#ruleta-fab{position:fixed;bottom:150px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
+#ruleta-fab{position:fixed;bottom:145px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
 @keyframes ruletaPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
 #ruleta-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
 #ruleta-modal{background:var(--wh);border-radius:20px;padding:24px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.4);}
@@ -558,7 +558,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
-    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:140px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
+    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:215px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none !important;position:fixed;bottom:78px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
 
     <!-- 🎰 Ruleta de descuentos -->
@@ -583,7 +583,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- Botón flotante CARGAR PRODUCTO (solo admin) -->
     <button id="cargar-fab" onclick="tiendaAbrirCarga()" title="Cargar producto"
-      style="display:none;position:fixed;bottom:150px;right:18px;z-index:1396;width:60px;height:60px;border-radius:50%;background:#ffffff;border:3px solid #0B2D6B;box-shadow:0 0 0 3px #FF7A00, 0 5px 16px rgba(0,0,0,.35);font-size:30px;cursor:pointer;align-items:center;justify-content:center;line-height:1;">🐝</button>
+      style="display:none;position:fixed;bottom:75px;right:18px;z-index:1396;width:60px;height:60px;border-radius:50%;background:#ffffff;border:3px solid #0B2D6B;box-shadow:0 0 0 3px #FF7A00, 0 5px 16px rgba(0,0,0,.35);font-size:30px;cursor:pointer;align-items:center;justify-content:center;line-height:1;">🐝</button>
 
     <!-- Botón Ayuda fijo esquina superior izquierda -->
     <button id="ayuda-btn" onclick="ayudaAbrir()">❓ Ayuda</button>
