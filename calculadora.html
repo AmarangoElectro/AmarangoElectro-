@@ -15,7 +15,7 @@
 <meta name="application-name" content="Tienda Amarango">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&display=swap');
-:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FC;--bor:#E8EBF4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
@@ -135,7 +135,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
 /* Efecto vidrio: las tarjetas dejan ver el fondo de colmena suavemente */
-.prod-card{background:#ffffff !important;border:1px solid var(--bor);border-top:3px solid var(--az);border-radius:14px;box-shadow:0 3px 14px rgba(11,45,107,.10);transition:box-shadow .2s,transform .2s;}
+.prod-card{background:#ffffff !important;border:1px solid var(--bor);border-top:3px solid var(--nar);border-bottom:3px solid var(--az);border-radius:14px;box-shadow:0 3px 14px rgba(11,45,107,.10);transition:box-shadow .2s,transform .2s;}
 .prod-card:active{box-shadow:0 5px 20px rgba(11,45,107,.16);}
 body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border-top:3px solid var(--nar);}
 /* Cajón lateral de Ayuda (drawer) */
