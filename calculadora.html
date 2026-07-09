@@ -4535,8 +4535,25 @@ function guardarFotoBanco(nombre, foto){
 }
 function reasignarFotosDesdeBanco(lista){
   var banco=cargarBancoFotos();
+  var claves=Object.keys(banco);
   (lista||[]).forEach(function(c){
-    if(c && !c.foto){ var f=banco[claveModelo(c.nombre)]; if(f)c.foto=f; }
+    if(!c || c.foto) return;
+    var k=claveModelo(c.nombre);
+    // 1) coincidencia exacta
+    if(banco[k]){ c.foto=banco[k]; return; }
+    // 2) coincidencia parcial: el modelo guardado está contenido en el nuevo, o al revés.
+    //    Así "iphone13128gb" matchea con "iphone13128gbnegro" (le agregaste el color).
+    //    Elegimos la coincidencia más larga (la más específica) para no confundir modelos.
+    var mejor='', mejorLen=0;
+    for(var i=0;i<claves.length;i++){
+      var kb=claves[i];
+      if(!kb || kb.length<5) continue; // ignorar claves muy cortas que darían falsos positivos
+      if(k.indexOf(kb)!==-1 || kb.indexOf(k)!==-1){
+        var largo=Math.min(k.length, kb.length);
+        if(largo>mejorLen){ mejorLen=largo; mejor=kb; }
+      }
+    }
+    if(mejor && banco[mejor]){ c.foto=banco[mejor]; }
   });
   return lista;
 }
@@ -4891,6 +4908,21 @@ function guardarListaCelus(){
       var cc=JSON.parse(JSON.stringify(c));
       cc.sinStock=false;
       var prev=mapa[k];  // el anterior (si existía) con su foto
+      // si no hubo match exacto, buscar un anterior parecido (nombre cambió un poco: espacio, color, memoria)
+      if(!prev || !prev.foto){
+        var kc=claveModelo(c.nombre);
+        var mejor=null, mejorLen=0;
+        anteriores.forEach(function(a){
+          if(!a || !a.foto) return;
+          var ka=claveModelo(a.nombre);
+          if(!ka || ka.length<5) return;
+          if(kc.indexOf(ka)!==-1 || ka.indexOf(kc)!==-1){
+            var largo=Math.min(kc.length, ka.length);
+            if(largo>mejorLen){ mejorLen=largo; mejor=a; }
+          }
+        });
+        if(mejor){ prev = prev || {}; if(!prev.foto) prev.foto=mejor.foto; if(typeof prev.visible==='undefined') prev.visible=mejor.visible; if(!prev.caracteristicas) prev.caracteristicas=mejor.caracteristicas; }
+      }
       if(prev){
         if(prev.foto) cc.foto=prev.foto;                 // conservar la foto
         if(typeof prev.visible!=='undefined') cc.visible=prev.visible;
