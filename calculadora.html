@@ -558,11 +558,31 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
-    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:80px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
-    <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none;position:fixed;bottom:18px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);display:flex;align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
+    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:140px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
+    <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none !important;position:fixed;bottom:78px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
 
     <!-- 🎰 Ruleta de descuentos -->
     <button id="ruleta-fab" onclick="ruletaAbrir()" title="¡Girá y ganá un descuento!">🎰</button>
+
+    <!-- ===== BARRA DE NAVEGACIÓN INFERIOR (estilo Mercado Libre) ===== -->
+    <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
+      <button class="nav-item" onclick="navTienda('inicio')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--az);">
+        <span style="font-size:20px;line-height:1;">🏠</span><span style="font-size:.6rem;font-weight:700;">Inicio</span>
+      </button>
+      <button class="nav-item" onclick="navTienda('categorias')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:20px;line-height:1;">📂</span><span style="font-size:.6rem;font-weight:700;">Categorías</span>
+      </button>
+      <button class="nav-item" onclick="navTienda('carrito')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);position:relative;">
+        <span style="font-size:20px;line-height:1;">🛒</span><span style="font-size:.6rem;font-weight:700;">Carrito</span>
+        <span id="nav-carrito-badge" style="display:none;position:absolute;top:0;right:calc(50% - 20px);background:var(--red);color:#fff;font-size:.55rem;font-weight:800;min-width:15px;height:15px;line-height:15px;border-radius:8px;text-align:center;padding:0 3px;">0</span>
+      </button>
+      <button class="nav-item" onclick="navTienda('favoritos')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:20px;line-height:1;">❤️</span><span style="font-size:.6rem;font-weight:700;">Favoritos</span>
+      </button>
+      <button class="nav-item" onclick="navTienda('consultar')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:20px;line-height:1;">📲</span><span style="font-size:.6rem;font-weight:700;">Consultar</span>
+      </button>
+    </div>
 
     <!-- Botón flotante CARGAR PRODUCTO (solo admin) -->
     <button id="cargar-fab" onclick="tiendaAbrirCarga()" title="Cargar producto"
@@ -579,7 +599,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
         <div id="ruleta-contenido"></div>
       </div>
     </div>
-    <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;align-items:start;justify-items:stretch;width:100%;"></div>
+    <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;align-items:start;justify-items:stretch;width:100%;padding-bottom:70px;"></div>
 
     <!-- Cartelito suave: dejá tu mail (opcional) -->
     <div id="mail-suscribir" style="display:none;background:var(--wh);border:1.5px dashed var(--nar);border-radius:12px;padding:10px 12px;margin:16px 0 10px;">
@@ -1889,6 +1909,7 @@ function tiendaRender(){
   // resaltar botón favoritos si está activo
   var bfav=document.getElementById('btn-ver-favs');
   if(bfav){ bfav.style.background=verSoloFavoritos?'var(--red)':'var(--wh)'; bfav.style.color=verSoloFavoritos?'#fff':'inherit'; }
+  if(typeof mostrarNavInferior==='function') mostrarNavInferior();
 
   // ordenar
   var orden=document.getElementById('tienda-orden').value;
@@ -2471,6 +2492,44 @@ function tiendaMarcados(accion){
 }
 
 function tiendaFiltrarCat(c){ tiendaCategoriaActiva=(tiendaCategoriaActiva===c?'':c); tiendaRender(); }
+// ===== BARRA DE NAVEGACIÓN INFERIOR =====
+function navTienda(accion){
+  if(accion==='inicio'){
+    tiendaCategoriaActiva=''; verSoloFavoritos=false;
+    var inp=document.getElementById('tienda-buscar'); if(inp){ inp.value=''; tiendaLimpiarBusqueda&&tiendaLimpiarBusqueda(); }
+    tiendaRender();
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else if(accion==='categorias'){
+    // ir arriba donde están los chips de categoría
+    window.scrollTo({top:0,behavior:'smooth'});
+    var chips=document.getElementById('tienda-buscar-wrap');
+    if(chips){ chips.style.transition='box-shadow .3s'; chips.style.boxShadow='0 0 0 3px var(--nar)'; setTimeout(function(){ chips.style.boxShadow=''; },1200); }
+  } else if(accion==='carrito'){
+    abrirCarrito();
+  } else if(accion==='favoritos'){
+    if(typeof toggleVerFavoritos==='function') toggleVerFavoritos();
+    window.scrollTo({top:0,behavior:'smooth'});
+  } else if(accion==='consultar'){
+    if(typeof tiendaConsultarVendedor==='function') tiendaConsultarVendedor();
+  }
+  marcarNavActiva(accion);
+}
+function marcarNavActiva(accion){
+  var nav=document.getElementById('nav-inferior'); if(!nav) return;
+  var botones=nav.querySelectorAll('.nav-item');
+  var orden=['inicio','categorias','carrito','favoritos','consultar'];
+  botones.forEach(function(b,i){ b.style.color = (orden[i]===accion) ? 'var(--az)' : 'var(--sub)'; });
+}
+// muestra la barra inferior y actualiza el contador del carrito
+function mostrarNavInferior(){
+  var nav=document.getElementById('nav-inferior'); if(!nav) return;
+  nav.style.display='flex';
+  var badge=document.getElementById('nav-carrito-badge');
+  if(badge){
+    var n=(typeof carrito!=='undefined' && carrito) ? carrito.reduce(function(s,x){return s+(x.cantidad||1);},0) : 0;
+    if(n>0){ badge.style.display='block'; badge.textContent=n>99?'99+':n; } else badge.style.display='none';
+  }
+}
 
 // Vendedores para el pedido por WhatsApp
 var TIENDA_VENDEDORES=[
@@ -3268,6 +3327,9 @@ function actualizarCarritoUI(){
   var c=document.getElementById('carrito-count');
   if(c)c.textContent=total;
   if(b)b.style.display=total>0?'flex':'none';
+  // badge de la barra inferior
+  var nb=document.getElementById('nav-carrito-badge');
+  if(nb){ if(total>0){ nb.style.display='block'; nb.textContent=total>99?'99+':total; } else nb.style.display='none'; }
 }
 function abrirCarrito(){
   if(!carrito.length){ alert('Tu carrito está vacío.'); return; }
@@ -3718,7 +3780,7 @@ function vaciarCarrito(){
 // ═══════════════════════════════════════════════════════════════
 
 // prodId = compra directa de un producto (botón Comprar). Si es null, usa el carrito.
-var pedidoActual={ nombre:'', dni:'', domicilio:'', ingresos:'', telefono:'', plan:1, prodId:null };
+var pedidoActual={ nombre:'', dni:'', domicilio:'', ingresos:'', telefono:'', mail:'', redTipo:'Instagram', redUser:'', plan:1, prodId:null };
 
 // total del carrito con cupón
 function totalCarrito(){
@@ -3812,7 +3874,19 @@ function pasoFormulario(){
   html+=campoForm('Nombre y apellido','cli-nombre','Ej: Juan Pérez',pedidoActual.nombre||mi.nombre||'','text',true)
     +campoForm('DNI','cli-dni','Ej: 40123456',pedidoActual.dni||mi.dni||'','numeric',true)
     +campoForm('Teléfono (WhatsApp)','cli-telefono','Ej: 11 2345 6789',pedidoActual.telefono||mi.telefono||'','tel',true)
+    +campoForm('Mail','cli-mail','Ej: juan@gmail.com',pedidoActual.mail||mi.mail||'','email',true)
     +campoForm('Domicilio','cli-domicilio','Calle, número, localidad',pedidoActual.domicilio||mi.domicilio||'','text',true);
+  // Red social
+  var redTipo=pedidoActual.redTipo||mi.redTipo||'Instagram';
+  var redUser=pedidoActual.redUser||mi.redUser||'';
+  html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Red social <span style="color:var(--red);">*</span></label>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px;">'
+      +'<select id="cli-redtipo" style="flex:0 0 42%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;background:var(--wh);color:var(--txt);">'
+        +'<option'+(redTipo==='Instagram'?' selected':'')+'>Instagram</option>'
+        +'<option'+(redTipo==='Facebook'?' selected':'')+'>Facebook</option>'
+      +'</select>'
+      +'<input id="cli-reduser" placeholder="@usuario o nombre" value="'+(redUser||'').replace(/"/g,'&quot;')+'" style="flex:1;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;">'
+    +'</div>';
   var ing=pedidoActual.ingresos||mi.ingresos||'';
   html+='<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">Ocupación / Ingresos <span style="color:var(--red);">*</span></label>'
     +'<select id="cli-ingresos" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:16px;background:var(--wh);color:var(--txt);">'
@@ -3826,7 +3900,7 @@ function pasoFormulario(){
   mostrarPasoCompra(html);
 }
 function campoForm(label,id,ph,val,modo,oblig){
-  var im = modo==='numeric'?' inputmode="numeric"' : (modo==='tel'?' inputmode="tel"':'');
+  var im = modo==='numeric'?' inputmode="numeric"' : (modo==='tel'?' inputmode="tel"' : (modo==='email'?' inputmode="email" type="email"':''));
   return '<label style="font-size:.72rem;font-weight:800;color:var(--az);display:block;margin-bottom:4px;">'+label+(oblig?' <span style="color:var(--red);">*</span>':'')+'</label>'
     +'<input id="'+id+'"'+im+' placeholder="'+ph+'" value="'+(val||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:12px;">';
 }
@@ -3836,14 +3910,21 @@ function guardarFormulario(){
   var nombre=(valEl('cli-nombre')||'').trim(), dni=(valEl('cli-dni')||'').trim();
   var tel=(valEl('cli-telefono')||'').trim(), dom=(valEl('cli-domicilio')||'').trim();
   var ing=(valEl('cli-ingresos')||'').trim();
+  var mail=(valEl('cli-mail')||'').trim();
+  var redTipo=(valEl('cli-redtipo')||'Instagram').trim(), redUser=(valEl('cli-reduser')||'').trim();
   var faltan=[];
   if(!nombre)faltan.push('Nombre'); if(!dni)faltan.push('DNI'); if(!tel)faltan.push('Teléfono');
-  if(!dom)faltan.push('Domicilio'); if(!ing)faltan.push('Ocupación / Ingresos');
+  if(!mail)faltan.push('Mail'); if(!dom)faltan.push('Domicilio');
+  if(!redUser)faltan.push('Red social'); if(!ing)faltan.push('Ocupación / Ingresos');
   if(faltan.length){ alert('Faltan completar:\n\n• '+faltan.join('\n• ')); return; }
+  // validación simple de mail
+  if(mail.indexOf('@')<1 || mail.indexOf('.')<0){ alert('Revisá el mail, parece incompleto.'); return; }
   pedidoActual.nombre=nombre; pedidoActual.dni=dni; pedidoActual.telefono=tel;
-  pedidoActual.domicilio=dom; pedidoActual.ingresos=ing;
-  guardarMiCuenta({nombre:nombre,dni:dni,telefono:tel,domicilio:dom,ingresos:ing,creado:new Date().toISOString()});
-  if(typeof registrarClienteTienda==='function'){ registrarClienteTienda({nombre:nombre,dni:dni,telefono:tel,domicilio:dom,ingresos:ing}); }
+  pedidoActual.domicilio=dom; pedidoActual.ingresos=ing; pedidoActual.mail=mail;
+  pedidoActual.redTipo=redTipo; pedidoActual.redUser=redUser;
+  var datos={nombre:nombre,dni:dni,telefono:tel,domicilio:dom,ingresos:ing,mail:mail,redTipo:redTipo,redUser:redUser};
+  guardarMiCuenta(Object.assign({}, datos, {creado:new Date().toISOString()}));
+  if(typeof registrarClienteTienda==='function'){ registrarClienteTienda(datos); }
   pasoElegirPlan();
 }
 function valEl(id){ var e=document.getElementById(id); return e?e.value:''; }
@@ -4026,15 +4107,23 @@ function registrarClienteTienda(datos){
   var reg={
     nombre:(datos.nombre||'').trim(),
     dni:(datos.dni||'').trim(),
+    telefono:(datos.telefono||'').trim(),
+    mail:(datos.mail||'').trim(),
     domicilio:(datos.domicilio||'').trim(),
     ingresos:(datos.ingresos||'').trim(),
+    redTipo:(datos.redTipo||'').trim(),
+    redUser:(datos.redUser||'').trim(),
     actualizado:new Date().toISOString()
   };
   if(i>=0){
     // no pisar datos viejos con vacíos
     reg.dni=reg.dni||lista[i].dni||'';
+    reg.telefono=reg.telefono||lista[i].telefono||'';
+    reg.mail=reg.mail||lista[i].mail||'';
     reg.domicilio=reg.domicilio||lista[i].domicilio||'';
     reg.ingresos=reg.ingresos||lista[i].ingresos||'';
+    reg.redTipo=reg.redTipo||lista[i].redTipo||'';
+    reg.redUser=reg.redUser||lista[i].redUser||'';
     reg.creado=lista[i].creado||reg.actualizado;
     lista[i]=reg;
   }else{
@@ -4057,18 +4146,21 @@ function tiendaClientesFiltrar(v){ window._cliFiltro=(v||'').toLowerCase().trim(
 function tiendaClientesRender(){
   var lista=cargarClientesTienda();
   var q=window._cliFiltro||'';
-  if(q){ lista=lista.filter(function(c){ return ((c.nombre||'')+' '+(c.dni||'')+' '+(c.domicilio||'')).toLowerCase().indexOf(q)>=0; }); }
+  if(q){ lista=lista.filter(function(c){ return ((c.nombre||'')+' '+(c.dni||'')+' '+(c.domicilio||'')+' '+(c.telefono||'')+' '+(c.mail||'')+' '+(c.redUser||'')).toLowerCase().indexOf(q)>=0; }); }
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">👥 Clientes registrados</h3>'
-    +'<input placeholder="🔎 Buscar por nombre, DNI o domicilio" oninput="tiendaClientesFiltrar(this.value)" value="'+(q||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:600;margin:10px 0 12px;">';
+    +'<input placeholder="🔎 Buscar por nombre, DNI, tel, mail..." oninput="tiendaClientesFiltrar(this.value)" value="'+(q||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:600;margin:10px 0 12px;">';
   if(!lista.length){
     html+='<p style="font-size:.78rem;color:var(--sub);margin:12px 0;">'+(q?'No hay clientes que coincidan con la búsqueda.':'Todavía no hay clientes registrados. Cuando alguien haga un pedido y cargue sus datos, aparece acá.')+'</p>';
   }else{
     html+='<div style="font-size:.7rem;color:var(--sub);margin-bottom:8px;">Total: '+lista.length+' cliente'+(lista.length===1?'':'s')+'</div>';
     lista.forEach(function(c){
-      var wa=(c.dni||c.domicilio)?'':'';
+      var telLimpio=(c.telefono||'').replace(/[^0-9]/g,'');
       html+='<div style="border:1px solid var(--bor);border-radius:11px;padding:10px 12px;margin-bottom:8px;background:var(--wh);">'
         +'<div style="font-size:.85rem;font-weight:900;color:var(--az);">'+(c.nombre||'—')+'</div>'
         +(c.dni?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">🪪 DNI: '+c.dni+'</div>':'')
+        +(c.telefono?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">📲 <a href="https://wa.me/54'+telLimpio+'" target="_blank" style="color:var(--gr);font-weight:700;text-decoration:none;">'+c.telefono+'</a></div>':'')
+        +(c.mail?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">✉️ '+c.mail+'</div>':'')
+        +(c.redUser?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">'+(c.redTipo==='Facebook'?'📘':'📷')+' '+(c.redTipo||'')+': '+c.redUser+'</div>':'')
         +(c.domicilio?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">📍 '+c.domicilio+'</div>':'')
         +(c.ingresos?'<div style="font-size:.72rem;color:var(--sub);margin-top:2px;">💼 '+c.ingresos+'</div>':'')
         +'</div>';
