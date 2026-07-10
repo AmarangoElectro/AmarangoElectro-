@@ -121,7 +121,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <div class="brand">
     <span class="bee">🐝</span>
     <h1>AmarangoElectro</h1>
-    <span class="tag">Equipá tu casa en cuotas</span>
+    <button id="favBtn" onclick="verFavoritos()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:20px;padding:6px 12px;color:#fff;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">❤️ <span id="favCount">0</span></button>
   </div>
   <div class="searchbar">
     <span>🔍</span>
@@ -238,6 +238,7 @@ function bajarCatalogo(){
       if(r && r.data && r.data.datos){
         PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
         try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(r.data.datos)); }catch(e){}
+        actualizarFavCount();
         render();
       } else if(!PRODUCTOS.length){
         mostrarError('La nube respondió pero no hay productos cargados todavía.');
@@ -269,7 +270,8 @@ function render(){
     var okQ=!q || normTxt(p.nombre).indexOf(q)>=0;
     var okOferta=!soloOfertas || enOferta(p);
     var okTope=!tope || cuotaRef(p)<=tope;
-    return okCat && okQ && okOferta && okTope;
+    var okFav=!viendoFavs || esFav(p);
+    return okCat && okQ && okOferta && okTope && okFav;
   });
 
   // ordenar
@@ -280,15 +282,19 @@ function render(){
   // mostrar barra de filtros una vez que hay productos
   document.getElementById('filtros').style.display = PRODUCTOS.length ? 'flex' : 'none';
 
-  // Producto del día + Destacados: solo en la portada (sin buscar, sin filtrar categoría, sin filtros activos)
-  var portada = !q && !catActiva && !soloOfertas && !tope && !orden;
+  // Producto del día + Destacados: solo en la portada (sin buscar, sin filtrar, sin favoritos)
+  var portada = !q && !catActiva && !soloOfertas && !tope && !orden && !viendoFavs;
   renderDestacados(portada);
 
-  document.getElementById('section-h').textContent = q ? 'Resultados' : (catActiva||'Catálogo completo')+' ('+lista.length+')';
+  document.getElementById('section-h').textContent = viendoFavs ? '❤️ Mis favoritos ('+lista.length+')' : (q ? 'Resultados' : (catActiva||'Catálogo completo')+' ('+lista.length+')');
 
   var wrap=document.getElementById('grid-wrap');
   if(!lista.length){
-    wrap.innerHTML='<div class="estado"><div class="e-i">🐝</div>'+(q?'No encontramos eso. Probá otra palabra.':'No hay productos en esta categoría.')+'</div>';
+    if(viendoFavs){
+      wrap.innerHTML='<div class="estado"><div class="e-i">❤️</div>Todavía no marcaste favoritos.<br>Tocá el corazón en los productos que te gusten y los guardás acá.</div>';
+    } else {
+      wrap.innerHTML='<div class="estado"><div class="e-i">🐝</div>'+(q?'No encontramos eso. Probá otra palabra.':'No hay productos en esta categoría.')+'</div>';
+    }
     return;
   }
   wrap.innerHTML='<div class="grid">'+lista.map(function(p){
@@ -302,6 +308,7 @@ function render(){
     return '<div class="card">'
       +'<div class="ph" '+phStyle+' onclick="verDetalle('+idx+')">'+phIco
         +(enOferta ? '<span class="badge">🔥 '+pctOff+'% OFF</span>' : '')
+        +'<button class="fav" onclick="toggleFav('+idx+',event)">'+(esFav(p)?'❤️':'🤍')+'</button>'
       +'</div>'
       +'<div class="body">'
         +(marca?'<div class="marca">'+marca+'</div>':'<div class="marca">&nbsp;</div>')
@@ -318,6 +325,31 @@ function toggleSoloOfertas(){
   window._soloOfertas = !window._soloOfertas;
   var b=document.getElementById('btnOfertas');
   if(b) b.classList.toggle('on', window._soloOfertas);
+  render();
+}
+
+/* ===== FAVORITOS (guardados en el teléfono del cliente) ===== */
+function idProd(p){ return p.id!=null ? String(p.id) : (p.nombre||''); }
+function cargarFavs(){ try{ return JSON.parse(localStorage.getItem('ae_favoritos')||'[]'); }catch(e){ return []; } }
+function guardarFavs(a){ try{ localStorage.setItem('ae_favoritos', JSON.stringify(a)); }catch(e){} }
+function esFav(p){ return cargarFavs().indexOf(idProd(p))>=0; }
+function toggleFav(idx, ev){
+  if(ev){ ev.stopPropagation(); }
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var favs=cargarFavs(); var id=idProd(p); var i=favs.indexOf(id);
+  if(i>=0) favs.splice(i,1); else favs.push(id);
+  guardarFavs(favs);
+  actualizarFavCount();
+  render();
+}
+function actualizarFavCount(){
+  var c=document.getElementById('favCount'); if(c) c.textContent=cargarFavs().length;
+}
+var viendoFavs=false;
+function verFavoritos(){
+  viendoFavs=!viendoFavs;
+  var b=document.getElementById('favBtn');
+  if(b) b.style.background = viendoFavs ? 'var(--nar)' : 'rgba(255,255,255,.15)';
   render();
 }
 
