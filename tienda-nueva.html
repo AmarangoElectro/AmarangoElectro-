@@ -41,6 +41,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .section-h{padding:4px 16px 10px;font-size:.72rem;font-weight:900;color:var(--az);letter-spacing:.5px;text-transform:uppercase}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px}
 
+/* PRODUCTO DEL DÍA — tarjeta grande destacada */
+.pdd{margin:6px 14px 4px;background:linear-gradient(160deg,#0a1a3a,var(--az));border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 4px 16px rgba(11,45,107,.22)}
+.pdd .tag{position:absolute;top:0;right:0;background:var(--nar);color:#fff;font-size:.56rem;font-weight:900;padding:5px 12px;border-radius:0 0 0 12px;letter-spacing:.5px}
+.pdd .foto{width:96px;height:96px;flex:0 0 auto;border-radius:12px;background:#fff center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:2.4rem}
+.pdd .info{flex:1;min-width:0}
+.pdd .info .n{color:#fff;font-size:.92rem;font-weight:800;line-height:1.2;margin-bottom:6px}
+.pdd .info .cv{color:#ffb968;font-size:1.5rem;font-weight:900;line-height:1}
+.pdd .info .cn{color:var(--gr);font-size:.66rem;font-weight:700;margin-top:1px}
+.pdd .info .ct{color:rgba(255,255,255,.55);font-size:.62rem;margin-top:3px}
+
+/* DESTACADOS — fila horizontal */
+.dest-row{display:flex;gap:11px;overflow-x:auto;padding:2px 14px 6px;scrollbar-width:none}
+.dest-row::-webkit-scrollbar{display:none}
+.dest-card{flex:0 0 auto;width:140px;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;cursor:pointer}
+.dest-card .dfoto{height:96px;background:#FAFBFC center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:2rem;border-bottom:1px solid var(--line);position:relative}
+.dest-card .dstar{position:absolute;top:5px;left:5px;background:var(--nar);color:#fff;font-size:.5rem;font-weight:900;padding:2px 6px;border-radius:5px}
+.dest-card .dbody{padding:8px 10px 10px}
+.dest-card .dn{font-size:.68rem;font-weight:700;color:var(--txt);line-height:1.25;height:34px;overflow:hidden;margin-bottom:4px}
+.dest-card .dcv{font-size:.9rem;font-weight:900;color:var(--nar)}
+.dest-card .dcn{font-size:.55rem;color:var(--gr);font-weight:700}
+
 /* TARJETA (sobria) */
 .card{background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .15s}
 .card:active{transform:scale(.985)}
@@ -100,6 +121,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 
 <div class="cats" id="cats"></div>
+<div id="destacados-wrap"></div>
 <div class="section-h" id="section-h">Cargando…</div>
 <div id="grid-wrap"></div>
 
@@ -222,6 +244,9 @@ function render(){
     return okCat && okQ;
   });
 
+  // Producto del día + Destacados: solo en la portada (sin buscar ni filtrar categoría)
+  renderDestacados(!q && !catActiva);
+
   document.getElementById('section-h').textContent = q ? 'Resultados' : (catActiva||'Catálogo completo')+' ('+lista.length+')';
 
   var wrap=document.getElementById('grid-wrap');
@@ -235,20 +260,63 @@ function render(){
     var marca=marcaDe(p.nombre);
     var phStyle = p.foto ? 'style="background-image:url(\''+p.foto+'\')"' : '';
     var phIco = p.foto ? '' : catProd(p).split(' ')[0];
+    var enOferta = p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta);
+    var pctOff = enOferta ? Math.round((1-p.venta/parseFloat(p.precioAntes))*100) : 0;
     return '<div class="card">'
       +'<div class="ph" '+phStyle+' onclick="verDetalle('+idx+')">'+phIco
-        +(p.precioAntes && p.precioAntes>p.venta ? '<span class="badge">OFERTA</span>' : '')
+        +(enOferta ? '<span class="badge">🔥 '+pctOff+'% OFF</span>' : '')
       +'</div>'
       +'<div class="body">'
         +(marca?'<div class="marca">'+marca+'</div>':'<div class="marca">&nbsp;</div>')
         +'<div class="nom" onclick="verDetalle('+idx+')">'+p.nombre+'</div>'
         +(mc?'<div class="cuota-v">'+fmt(mc.valor)+'</div><div class="cuota-n">en '+mc.n+' cuotas fijas</div>':'')
-        +'<div class="contado">Contado: '+fmt(p.venta)+'</div>'
+        +'<div class="contado">'+(enOferta?'<span style="text-decoration:line-through;color:#bbb">'+fmt(p.precioAntes)+'</span> ':'')+'Contado: '+fmt(p.venta)+'</div>'
         +'<button class="share" onclick="compartir('+idx+')">📤 Compartir</button>'
       +'</div></div>';
   }).join('')+'</div>';
 }
 function setCat(k){ catActiva=(catActiva===k?'':k); render(); }
+
+/* Producto del día (marcado con delDia) + Destacados (marcado con destacado) */
+function renderDestacados(mostrar){
+  var wrap=document.getElementById('destacados-wrap');
+  if(!mostrar){ wrap.innerHTML=''; return; }
+  var html='';
+
+  // Producto del día
+  var pdd=PRODUCTOS.find(function(p){ return p.delDia; });
+  if(pdd){
+    var idx=PRODUCTOS.indexOf(pdd);
+    var mc=mejorCuota(pdd.venta);
+    var foto = pdd.foto ? 'style="background-image:url(\''+pdd.foto+'\')"' : '';
+    var ico = pdd.foto ? '' : catProd(pdd).split(' ')[0];
+    html+='<div class="pdd" onclick="verDetalle('+idx+')">'
+      +'<span class="tag">🌟 PRODUCTO DEL DÍA</span>'
+      +'<div class="foto" '+foto+'>'+ico+'</div>'
+      +'<div class="info"><div class="n">'+pdd.nombre+'</div>'
+      +(mc?'<div class="cv">'+fmt(mc.valor)+'</div><div class="cn">en '+mc.n+' cuotas fijas</div>':'')
+      +'<div class="ct">Contado: '+fmt(pdd.venta)+'</div></div></div>';
+  }
+
+  // Destacados (excluyo el del día para no repetir)
+  var dest=PRODUCTOS.filter(function(p){ return p.destacado && !p.delDia; });
+  if(dest.length){
+    html+='<div class="section-h" style="padding-top:12px">⭐ Destacados de la semana</div>';
+    html+='<div class="dest-row">'+dest.map(function(p){
+      var idx=PRODUCTOS.indexOf(p);
+      var mc=mejorCuota(p.venta);
+      var foto = p.foto ? 'style="background-image:url(\''+p.foto+'\')"' : '';
+      var ico = p.foto ? '' : catProd(p).split(' ')[0];
+      return '<div class="dest-card" onclick="verDetalle('+idx+')">'
+        +'<div class="dfoto" '+foto+'><span class="dstar">⭐</span>'+ico+'</div>'
+        +'<div class="dbody"><div class="dn">'+p.nombre+'</div>'
+        +(mc?'<div class="dcv">'+fmt(mc.valor)+'</div><div class="dcn">'+mc.n+' cuotas fijas</div>':'')
+        +'</div></div>';
+    }).join('')+'</div>';
+  }
+
+  wrap.innerHTML=html;
+}
 
 /* ===== Detalle ===== */
 var actualIdx=null;
