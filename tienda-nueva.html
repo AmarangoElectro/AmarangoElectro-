@@ -255,8 +255,9 @@ function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
+  if(destino==='cargar'){ abrirCargar(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
-  var nombres={cargar:'➕ Cargar producto', crm:'📊 Clientes / CRM'};
+  var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
      '<div class="construccion" style="padding:50px 20px">'
     +'<div class="ci">🛠️</div>'
@@ -585,6 +586,115 @@ function armarPlaca(){
 function compartirPlaca(){
   if(navigator.share){ navigator.share({text:window._placaMsg}).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(window._placaMsg),'_blank'); }); }
   else window.open('https://wa.me/?text='+encodeURIComponent(window._placaMsg),'_blank');
+}
+
+/* ═══════ CARGAR PRODUCTO (sube a la misma tabla que lee la vidriera) ═══════ */
+var _cargaModo='venta', _cargaFoto='';
+function abrirCargar(){
+  _cargaFoto='';
+  var cats=['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:12px">➕ Cargar producto</div>'
+    // foto
+    +'<div style="text-align:center;margin-bottom:14px">'
+      +'<div id="cargaFotoPrev" style="width:120px;height:120px;margin:0 auto 8px;border-radius:14px;background:#F5F8FF;border:1.5px dashed var(--nar);display:flex;align-items:center;justify-content:center;font-size:2.5rem">📷</div>'
+      +'<button onclick="document.getElementById(\'cargaFile\').click()" style="background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">📷 Elegir foto</button>'
+      +'<input type="file" id="cargaFile" accept="image/*" style="display:none" onchange="subirFotoProd(event)">'
+    +'</div>'
+    +campoC('Nombre del producto','cg_nombre','Ej: Samsung Galaxy A06 128GB')
+    // precio con modo
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Precio</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:8px">'
+      +botonModoC('venta','🏷️ Venta directa')
+      +botonModoC('costo','💰 Costo (+ markup)')
+    +'</div>'
+    +'<input type="number" id="cg_precio" oninput="previewVentaCarga()" placeholder="Poné el precio" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.9rem;outline:none;margin-bottom:6px">'
+    +'<div id="cg_previewVenta" style="font-size:.72rem;color:var(--sub);margin-bottom:12px"></div>'
+    // categoría
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Categoría</div>'
+    +'<select id="cg_categoria" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none;margin-bottom:12px;background:#fff">'
+      +'<option value="">Automática (según el nombre)</option>'
+      +cats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')
+    +'</select>'
+    +campoC('Descripción (opcional)','cg_desc','Specs, detalles, lo que quieras')
+    // toggles
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:6px 0 8px">Mostrar como</div>'
+    +'<div id="cg_toggles" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">'
+      +toggleC('destacado','⭐ Destacado')
+      +toggleC('delDia','🌟 Producto del día')
+      +toggleC('oferta','🔥 Oferta')
+    +'</div>'
+    +'<div id="cg_ofertaBox" style="display:none;margin-bottom:12px">'
+      +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:5px">PRECIO ANTES (tachado)</div>'
+      +'<input type="number" id="cg_precioAntes" placeholder="Precio anterior más alto" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;outline:none">'
+    +'</div>'
+    +'<button onclick="guardarProducto()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit">💾 Guardar producto</button>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
+}
+function campoC(lbl,id,ph){ return '<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">'+lbl+'</div><input id="'+id+'" placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none;margin-bottom:12px">'; }
+function botonModoC(m,t){ var on=_cargaModo===m; return '<button onclick="setCargaModo(\''+m+'\')" style="flex:1;border:2px solid '+(on?'var(--az)':'var(--line)')+';background:'+(on?'#F5F8FF':'#fff')+';color:'+(on?'var(--az)':'var(--txt)')+';border-radius:11px;padding:11px;font-size:.76rem;font-weight:800;cursor:pointer;font-family:inherit">'+t+'</button>'; }
+function setCargaModo(m){ _cargaModo=m; abrirCargar(); }
+var _cgToggles={destacado:false,delDia:false,oferta:false};
+function toggleC(k,t){ var on=_cgToggles[k]; return '<button id="tgc_'+k+'" onclick="toggleCarga(\''+k+'\')" style="border:1.5px solid '+(on?'var(--nar)':'var(--line)')+';background:'+(on?'#FFF0E0':'#fff')+';color:'+(on?'var(--nar)':'var(--sub)')+';border-radius:20px;padding:8px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit">'+t+'</button>'; }
+function toggleCarga(k){
+  _cgToggles[k]=!_cgToggles[k];
+  var b=document.getElementById('tgc_'+k);
+  if(b){ var on=_cgToggles[k]; b.style.border='1.5px solid '+(on?'var(--nar)':'var(--line)'); b.style.background=on?'#FFF0E0':'#fff'; b.style.color=on?'var(--nar)':'var(--sub)'; }
+  if(k==='oferta'){ document.getElementById('cg_ofertaBox').style.display=_cgToggles.oferta?'block':'none'; }
+}
+function subirFotoProd(ev){
+  var file=ev.target.files&&ev.target.files[0]; if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var max=600,w=img.width,h=img.height;
+      if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>max){w=Math.round(w*max/h);h=max;}
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+      _cargaFoto=cv.toDataURL('image/jpeg',0.82);
+      var pv=document.getElementById('cargaFotoPrev'); if(pv){pv.style.background='url('+_cargaFoto+') center/cover';pv.textContent='';}
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function previewVentaCarga(){
+  var el=document.getElementById('cg_previewVenta'); if(!el)return;
+  var p=parseFloat(document.getElementById('cg_precio').value)||0;
+  if(!p){ el.textContent=''; return; }
+  if(_cargaModo==='costo'){ el.innerHTML='Se venderá a <b style="color:var(--az)">'+fmt(markupDeCosto(p))+'</b> (costo + tu markup)'; }
+  else { el.innerHTML='6 cuotas fijas de <b style="color:var(--nar)">'+fmt(valorCuota(p,6))+'</b>'; }
+}
+function guardarProducto(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+  var nombre=g('cg_nombre'); if(!nombre){ alert('Poné el nombre del producto.'); return; }
+  var precio=parseFloat(g('cg_precio'))||0; if(!precio){ alert('Poné el precio.'); return; }
+  var venta = _cargaModo==='costo' ? markupDeCosto(precio) : precio;
+  var prod={
+    id: 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    nombre: nombre,
+    venta: venta,
+    foto: _cargaFoto||'',
+    categoria: g('cg_categoria')||'',
+    desc: g('cg_desc')||'',
+    destacado: _cgToggles.destacado,
+    delDia: _cgToggles.delDia,
+    visible: true
+  };
+  if(_cgToggles.oferta){ var pa=parseFloat(g('cg_precioAntes'))||0; if(pa>venta) prod.precioAntes=pa; }
+  // si es producto del día, saco el flag de los otros
+  if(prod.delDia){ PRODUCTOS.forEach(function(p){ p.delDia=false; }); }
+  PRODUCTOS.push(prod);
+  guardarCatalogo();
+  _cgToggles={destacado:false,delDia:false,oferta:false};
+  alert('✅ Producto cargado. Ya aparece en tu tienda.');
+  render();
+  abrirPanelDueno();
+}
+/* guarda el catálogo completo en Supabase (misma tabla que lee la vidriera) */
+function guardarCatalogo(){
+  try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(PRODUCTOS)); }catch(e){}
+  if(sb){ sb.from('tienda_catalogo').upsert({id:'catalogo', datos:PRODUCTOS}).then(function(){}).catch(function(){}); }
 }
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
