@@ -39,6 +39,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .cat.on span{color:var(--az)}
 
 .section-h{padding:4px 16px 10px;font-size:.72rem;font-weight:900;color:var(--az);letter-spacing:.5px;text-transform:uppercase}
+
+/* BARRA DE FILTROS */
+.filtros{display:flex;gap:8px;padding:2px 14px 10px;align-items:center}
+.filtros select,.filtros input{border:1.5px solid var(--line);border-radius:10px;padding:10px 11px;font-family:inherit;font-size:.76rem;color:var(--txt);outline:none;background:#fff}
+.filtros select{flex:1.3;font-weight:600}
+.filtros input{flex:1;min-width:0}
+.filtros input:focus,.filtros select:focus{border-color:var(--nar)}
+.f-oferta{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:.74rem;font-weight:800;color:var(--sub);cursor:pointer;font-family:inherit;white-space:nowrap}
+.f-oferta.on{background:#FFF0E0;border-color:var(--nar);color:var(--nar)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px}
 
 /* PRODUCTO DEL DÍA — tarjeta grande destacada */
@@ -121,6 +130,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 
 <div class="cats" id="cats"></div>
+<div class="filtros" id="filtros" style="display:none">
+  <select id="orden" onchange="render()">
+    <option value="">Ordenar por…</option>
+    <option value="barato">💵 Cuota más baja primero</option>
+    <option value="caro">💰 Cuota más alta primero</option>
+    <option value="oferta">🔥 Ofertas primero</option>
+  </select>
+  <input id="tope" type="number" inputmode="numeric" placeholder="Cuota hasta $" oninput="render()">
+  <button id="btnOfertas" class="f-oferta" onclick="toggleSoloOfertas()">🔥 Ofertas</button>
+</div>
 <div id="destacados-wrap"></div>
 <div class="section-h" id="section-h">Cargando…</div>
 <div id="grid-wrap"></div>
@@ -238,14 +257,32 @@ function render(){
   }).join('');
 
   var q=normTxt(document.getElementById('buscador').value);
+  var soloOfertas = window._soloOfertas || false;
+  var tope = parseFloat(document.getElementById('tope') ? document.getElementById('tope').value : '') || 0;
+  var orden = document.getElementById('orden') ? document.getElementById('orden').value : '';
+
+  function enOferta(p){ return p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta); }
+  function cuotaRef(p){ var mc=mejorCuota(p.venta); return mc?mc.valor:p.venta; }
+
   var lista=PRODUCTOS.filter(function(p){
     var okCat=!catActiva || catProd(p)===catActiva;
     var okQ=!q || normTxt(p.nombre).indexOf(q)>=0;
-    return okCat && okQ;
+    var okOferta=!soloOfertas || enOferta(p);
+    var okTope=!tope || cuotaRef(p)<=tope;
+    return okCat && okQ && okOferta && okTope;
   });
 
-  // Producto del día + Destacados: solo en la portada (sin buscar ni filtrar categoría)
-  renderDestacados(!q && !catActiva);
+  // ordenar
+  if(orden==='barato') lista.sort(function(a,b){ return cuotaRef(a)-cuotaRef(b); });
+  else if(orden==='caro') lista.sort(function(a,b){ return cuotaRef(b)-cuotaRef(a); });
+  else if(orden==='oferta') lista.sort(function(a,b){ return (enOferta(b)?1:0)-(enOferta(a)?1:0); });
+
+  // mostrar barra de filtros una vez que hay productos
+  document.getElementById('filtros').style.display = PRODUCTOS.length ? 'flex' : 'none';
+
+  // Producto del día + Destacados: solo en la portada (sin buscar, sin filtrar categoría, sin filtros activos)
+  var portada = !q && !catActiva && !soloOfertas && !tope && !orden;
+  renderDestacados(portada);
 
   document.getElementById('section-h').textContent = q ? 'Resultados' : (catActiva||'Catálogo completo')+' ('+lista.length+')';
 
@@ -276,6 +313,13 @@ function render(){
   }).join('')+'</div>';
 }
 function setCat(k){ catActiva=(catActiva===k?'':k); render(); }
+
+function toggleSoloOfertas(){
+  window._soloOfertas = !window._soloOfertas;
+  var b=document.getElementById('btnOfertas');
+  if(b) b.classList.toggle('on', window._soloOfertas);
+  render();
+}
 
 /* Producto del día (marcado con delDia) + Destacados (marcado con destacado) */
 function renderDestacados(mostrar){
