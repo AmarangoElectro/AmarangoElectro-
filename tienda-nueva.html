@@ -17,7 +17,24 @@
   --bg:#F7F8FA; --wh:#fff; --txt:#141824; --sub:#7A8291; --line:#ECEEF2; --gr:#10B981;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:40px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:76px}
+
+/* SISTEMA DE VISTAS (una puerta a la vez) */
+.vista{display:none}
+.vista.on{display:block}
+
+/* BARRA INFERIOR — las puertas grandes tipo app */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:300;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 0 calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 14px rgba(0,0,0,.06)}
+.tabbar button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font-family:inherit;color:var(--sub);font-size:.62rem;font-weight:700;padding:4px 0}
+.tabbar button .i{font-size:1.35rem;line-height:1}
+.tabbar button.on{color:var(--nar)}
+.tabbar button.admin-tab{color:#c0c6d0}
+
+/* pantalla "en construcción" para las puertas que faltan */
+.construccion{text-align:center;padding:70px 24px;color:var(--sub)}
+.construccion .ci{font-size:3.2rem;margin-bottom:14px}
+.construccion .ct{font-size:1.05rem;font-weight:900;color:var(--az);margin-bottom:6px}
+.construccion .cs{font-size:.82rem;line-height:1.5}
 
 /* HEADER con degradé (identidad Amarango, se mantiene) */
 .top{position:sticky;top:0;z-index:100;background:linear-gradient(160deg,#020c2e 0%,var(--az) 55%,var(--az2) 100%);padding:13px 16px 15px;box-shadow:0 2px 12px rgba(11,45,107,.2)}
@@ -49,6 +66,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .f-oferta{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font-size:.74rem;font-weight:800;color:var(--sub);cursor:pointer;font-family:inherit;white-space:nowrap}
 .f-oferta.on{background:#FFF0E0;border-color:var(--nar);color:var(--nar)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px}
+
+/* SALUDO por hora */
+.saludo{margin:8px 14px 2px;display:flex;align-items:center;gap:10px}
+.saludo .emo{font-size:1.6rem}
+.saludo .txt .hola{font-size:1.02rem;font-weight:900;color:var(--az);line-height:1.1}
+.saludo .txt .sub{font-size:.68rem;color:var(--sub);font-weight:600;margin-top:1px}
 
 /* PRODUCTO DEL DÍA — tarjeta grande destacada */
 .pdd{margin:6px 14px 4px;background:linear-gradient(160deg,#0a1a3a,var(--az));border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center;position:relative;overflow:hidden;cursor:pointer;box-shadow:0 4px 16px rgba(11,45,107,.22)}
@@ -129,6 +152,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
+<div class="vista on" id="vista-tienda">
 <div class="cats" id="cats"></div>
 <div class="filtros" id="filtros" style="display:none">
   <select id="orden" onchange="render()">
@@ -140,9 +164,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <input id="tope" type="number" inputmode="numeric" placeholder="Cuota hasta $" oninput="render()">
   <button id="btnOfertas" class="f-oferta" onclick="toggleSoloOfertas()">🔥 Ofertas</button>
 </div>
+<div id="saludo-wrap"></div>
 <div id="destacados-wrap"></div>
 <div class="section-h" id="section-h">Cargando…</div>
 <div id="grid-wrap"></div>
+</div><!-- fin vista-tienda -->
+
+<!-- VISTA PLACAS (se llena en el próximo bloque) -->
+<div class="vista" id="vista-placas">
+  <div class="construccion">
+    <div class="ci">🎨</div>
+    <div class="ct">Armar placas</div>
+    <div class="cs">Acá vas a sacar precios y armar las placas<br>para compartir. Lo sumamos en el próximo paso.</div>
+  </div>
+</div>
+
+<!-- VISTA CARGAR (se llena después) -->
+<div class="vista" id="vista-cargar">
+  <div class="construccion">
+    <div class="ci">➕</div>
+    <div class="ct">Cargar producto</div>
+    <div class="cs">Acá vas a subir productos nuevos a tu tienda,<br>fácil y rápido. Lo sumamos en un paso más adelante.</div>
+  </div>
+</div>
+
+<!-- BARRA INFERIOR: las 3 puertas -->
+<div class="tabbar">
+  <button id="tab-tienda" class="on" onclick="irA('tienda')"><span class="i">🏪</span>Tienda</button>
+  <button id="tab-placas" onclick="irA('placas')"><span class="i">🎨</span>Placas</button>
+  <button id="tab-cargar" onclick="irA('cargar')"><span class="i">➕</span>Cargar</button>
+</div>
 
 <!-- DETALLE -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)cerrar()">
@@ -173,6 +224,20 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
+
+/* ===== Navegación entre puertas (tienda / placas / cargar) ===== */
+function irA(vista){
+  ['tienda','placas','cargar'].forEach(function(v){
+    var pane=document.getElementById('vista-'+v);
+    var tab=document.getElementById('tab-'+v);
+    if(pane) pane.classList.toggle('on', v===vista);
+    if(tab) tab.classList.toggle('on', v===vista);
+  });
+  // el header con buscador solo tiene sentido en la tienda
+  var top=document.querySelector('.top');
+  if(top) top.style.display = (vista==='tienda') ? 'block' : 'none';
+  window.scrollTo(0,0);
+}
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
 var PLANES = { 2:{on:true,pct:15}, 4:{on:true,pct:55}, 6:{on:true,pct:78} };
@@ -284,6 +349,7 @@ function render(){
 
   // Producto del día + Destacados: solo en la portada (sin buscar, sin filtrar, sin favoritos)
   var portada = !q && !catActiva && !soloOfertas && !tope && !orden && !viendoFavs;
+  renderSaludo(portada);
   renderDestacados(portada);
 
   document.getElementById('section-h').textContent = viendoFavs ? '❤️ Mis favoritos ('+lista.length+')' : (q ? 'Resultados' : (catActiva||'Catálogo completo')+' ('+lista.length+')');
@@ -351,6 +417,19 @@ function verFavoritos(){
   var b=document.getElementById('favBtn');
   if(b) b.style.background = viendoFavs ? 'var(--nar)' : 'rgba(255,255,255,.15)';
   render();
+}
+
+/* Saludo según la hora del día */
+function renderSaludo(mostrar){
+  var wrap=document.getElementById('saludo-wrap');
+  if(!mostrar){ wrap.innerHTML=''; return; }
+  var h=new Date().getHours();
+  var emo, hola, sub;
+  if(h>=6 && h<13){ emo='🌅'; hola='¡Buenos días!'; sub='Arrancá el día equipando tu casa en cuotas fijas'; }
+  else if(h>=13 && h<20){ emo='☀️'; hola='¡Buenas tardes!'; sub='Mirá lo nuevo y calculá tus cuotas al toque'; }
+  else { emo='🌙'; hola='¡Buenas noches!'; sub='Tranqui, elegí lo tuyo y te lo llevás en cuotas'; }
+  wrap.innerHTML='<div class="saludo"><span class="emo">'+emo+'</span>'
+    +'<div class="txt"><div class="hola">'+hola+'</div><div class="sub">'+sub+'</div></div></div>';
 }
 
 /* Producto del día (marcado con delDia) + Destacados (marcado con destacado) */
