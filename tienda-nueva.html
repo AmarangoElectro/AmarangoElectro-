@@ -254,8 +254,9 @@ function botonPanel(ico, titulo, sub, destino){
 function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
+  if(destino==='placas'){ abrirPlacas(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
-  var nombres={placas:'🎨 Armar placas', cargar:'➕ Cargar producto', crm:'📊 Clientes / CRM'};
+  var nombres={cargar:'➕ Cargar producto', crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
      '<div class="construccion" style="padding:50px 20px">'
     +'<div class="ci">🛠️</div>'
@@ -365,7 +366,10 @@ var CONFIG_DEFAULT = {
   negocio: "AmarangoElectro", eslogan: "Equipá tu casa en cuotas",
   instagram: "@amarangoelectro", whatsapp: "", logo: "",
   colorPrincipal: "#0B2D6B", colorAcento: "#FF7A00",
-  cuotas: { 2:15, 4:55, 6:78 }, pin: "2580"
+  cuotas: { 2:15, 4:55, 6:78 },
+  markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
+  dolar: 1500,
+  pin: "2580"
 };
 var CONFIG = null;
 function cargarConfig(cb){
@@ -478,6 +482,109 @@ function guardarConfigDesdeForm(){
   render();
   alert('✅ Guardado. Tu tienda se actualizó.');
   abrirPanelDueno();
+}
+
+/* ═══════ ARMAR PLACAS (herramienta de trabajo del dueño) ═══════
+   Usa las cuotas y el markup de la CONFIG. 3 modos: costo/venta/USD + descuento. */
+var _placaModo='costo', _placaDesc=0;
+function markupDeCosto(costo){
+  var mk=CONFIG.markup||CONFIG_DEFAULT.markup;
+  for(var i=0;i<mk.length;i++){ if(costo<=mk[i].hasta) return Math.round(costo*(1+mk[i].pct/100)/500)*500; }
+  return costo;
+}
+function abrirPlacas(){
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:10px">🎨 Armar placa</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px">'
+      +botonModo('costo','💰','Costo','en pesos')
+      +botonModo('venta','🏷️','Venta','directa')
+      +botonModo('usd','💵','USD','en dólares')
+    +'</div>'
+    +'<div id="placaDolarBox" style="display:'+(_placaModo==='usd'?'block':'none')+';margin-bottom:12px;background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:11px">'
+      +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:5px">💵 VALOR DEL DÓLAR (editable)</div>'
+      +'<input type="number" id="placaDolar" value="'+(CONFIG.dolar||1500)+'" oninput="armarPlaca()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:1rem;font-weight:800;color:var(--az);outline:none;text-align:center">'
+    +'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px" id="placaLbl">🎨 Pegá el producto (con el COSTO)</div>'
+    +'<textarea id="placaTxt" oninput="armarPlaca()" placeholder="Pegá el texto del producto con el precio marcado con $" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:.86rem;min-height:90px;outline:none;resize:vertical"></textarea>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">🏷️ Descuento</div>'
+    +'<div id="placaDescPick" style="display:flex;gap:7px;flex-wrap:wrap"></div>'
+    +'<div id="placaResultado" style="margin-top:14px"></div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver al panel</button>';
+  renderDescPickPlaca();
+  armarPlaca();
+}
+function botonModo(m,ico,t,s){
+  var on=_placaModo===m;
+  return '<button onclick="setPlacaModo(\''+m+'\')" style="flex:1;border:2px solid '+(on?'var(--az)':'var(--line)')+';background:'+(on?'#F5F8FF':'#fff')+';border-radius:14px;padding:12px 6px;cursor:pointer;font-family:inherit;text-align:center">'
+    +'<span style="font-size:1.4rem;display:block">'+ico+'</span>'
+    +'<span style="font-size:.8rem;font-weight:900;color:'+(on?'var(--az)':'var(--txt)')+';display:block">'+t+'</span>'
+    +'<span style="font-size:.58rem;color:var(--sub);display:block">'+s+'</span></button>';
+}
+function setPlacaModo(m){ _placaModo=m; abrirPlacas(); }
+function renderDescPickPlaca(){
+  var arr=[0,5,10,15,20];
+  document.getElementById('placaDescPick').innerHTML=arr.map(function(d){
+    var on=_placaDesc===d;
+    return '<button onclick="setPlacaDesc('+d+')" style="border:1.5px solid '+(on?'var(--az)':'var(--line)')+';background:'+(on?'var(--az)':'#fff')+';color:'+(on?'#fff':'var(--sub)')+';border-radius:20px;padding:8px 14px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit">'+(d===0?'Sin desc.':d+'% OFF')+'</button>';
+  }).join('');
+}
+function setPlacaDesc(d){ _placaDesc=d; renderDescPickPlaca(); armarPlaca(); }
+function detectarPrecioPlaca(txt){ var m=(txt||'').replace(/\./g,'').match(/\$?\s*(\d{3,})/); return m?parseInt(m[1],10):0; }
+function detectarNombrePlaca(txt){
+  var ls=(txt||'').split('\n').map(function(l){return l.replace(/[*_#🔥☕️💰💵🏷️]/g,'').trim();}).filter(Boolean);
+  for(var i=0;i<ls.length;i++){ var l=ls[i]; if(/[a-záéíóúñ]/i.test(l) && !/^\W*\$?\s*\d/.test(l) && l.length>3 && l.length<55) return l; }
+  return 'Producto';
+}
+function armarPlaca(){
+  var lbls={costo:'🎨 Pegá el producto (con el COSTO)', venta:'🎨 Pegá el producto (con la VENTA)', usd:'🎨 Pegá el producto (con el precio en USD)'};
+  var lblEl=document.getElementById('placaLbl'); if(lblEl) lblEl.textContent=lbls[_placaModo];
+  var txt=document.getElementById('placaTxt').value;
+  var precio=detectarPrecioPlaca(txt);
+  var cont=document.getElementById('placaResultado');
+  if(!precio){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:20px;font-size:.82rem">Pegá un producto con el precio (marcado con $) y armo la placa.</div>'; return; }
+
+  var costo=null, venta, usoDolar=false, usd=null, cot=null;
+  if(_placaModo==='costo'){ costo=precio; venta=markupDeCosto(costo); }
+  else if(_placaModo==='venta'){ venta=precio; }
+  else if(_placaModo==='usd'){
+    if(precio>=10000){ cont.innerHTML='<div style="text-align:center;color:#DC2626;padding:20px;font-size:.82rem;font-weight:700">"'+precio.toLocaleString('es-AR')+'" parece PESOS, no dólares. Usá 💰 o 🏷️.</div>'; return; }
+    cot=parseFloat(document.getElementById('placaDolar').value)||0;
+    if(!cot){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:20px">Poné el valor del dólar.</div>'; return; }
+    usd=precio; costo=Math.round(usd*cot); venta=markupDeCosto(costo); usoDolar=true;
+  }
+  var ventaFull=venta;
+  if(_placaDesc>0) venta=Math.round(venta*(1-_placaDesc/100)/500)*500;
+
+  var nombre=detectarNombrePlaca(txt);
+  var cuotasHtml='', waLines=[];
+  cuotasActivas().forEach(function(n){
+    var vc=valorCuota(venta,n);
+    cuotasHtml+='<div style="background:rgba(255,255,255,.09);border-left:3px solid var(--nar);border-radius:10px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:.8rem;font-weight:800;color:#fff">'+n+' cuotas fijas</span><span style="font-size:1.05rem;font-weight:900;color:#ffb968">'+fmt(vc)+'</span></div>';
+    waLines.push('💳 '+n+' cuotas fijas de '+fmt(vc));
+  });
+  var ventaHtml = _placaDesc>0
+    ? '<span style="text-decoration:line-through;color:rgba(255,255,255,.45);font-size:1.1rem">'+fmt(ventaFull)+'</span> '+fmt(venta)+'<div style="font-size:.62rem;color:#ffb968;font-weight:700;margin-top:2px">🏷️ '+_placaDesc+'% OFF · CONTADO</div>'
+    : fmt(venta)+'<div style="font-size:.62rem;color:rgba(255,255,255,.6);font-weight:700;margin-top:2px">PRECIO CONTADO</div>';
+
+  var costoBox='';
+  if(usoDolar){ costoBox='<div style="background:#FFF9F0;border:1px dashed var(--nar);border-radius:11px;padding:10px 13px;margin-top:10px;font-size:.72rem;color:var(--sub)"><div style="display:flex;justify-content:space-between"><span>💵 USD × $'+cot.toLocaleString('es-AR')+'</span><span style="font-weight:900;color:var(--az)">U$'+usd+'</span></div><div style="display:flex;justify-content:space-between"><span>📥 Costo</span><span style="font-weight:900;color:var(--az)">'+fmt(costo)+'</span></div><div style="text-align:center;font-size:.58rem;margin-top:3px">👁️ Solo vos · no va en la placa</div></div>'; }
+  else if(costo!==null){ costoBox='<div style="background:#FFF9F0;border:1px dashed var(--nar);border-radius:11px;padding:10px 13px;margin-top:10px;display:flex;justify-content:space-between;font-size:.72rem;color:var(--sub)"><span>👁️ Solo vos — costo</span><span style="font-weight:900;color:var(--az)">'+fmt(costo)+'</span></div>'; }
+
+  cont.innerHTML=
+     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff">'
+    +'<div style="text-align:center;font-size:.9rem;font-weight:900;margin-bottom:8px">'+nombre+'</div>'
+    +'<div style="text-align:center;font-size:1.7rem;font-weight:900;margin-bottom:14px">'+ventaHtml+'</div>'
+    +cuotasHtml
+    +'<div style="text-align:center;font-size:.66rem;color:rgba(255,255,255,.7);margin-top:10px">'+(CONFIG.instagram||'@amarangoelectro')+' 🐝</div>'
+    +'</div>'+costoBox
+    +'<button onclick="compartirPlaca()" style="width:100%;margin-top:12px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Compartir por WhatsApp</button>';
+
+  var lineaC = _placaDesc>0 ? '➡️ Contado: '+fmt(venta)+'  (🏷️ '+_placaDesc+'% OFF, antes '+fmt(ventaFull)+')' : '➡️ Contado: '+fmt(venta);
+  window._placaMsg='*'+nombre.toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n'+lineaC+'\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+}
+function compartirPlaca(){
+  if(navigator.share){ navigator.share({text:window._placaMsg}).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(window._placaMsg),'_blank'); }); }
+  else window.open('https://wa.me/?text='+encodeURIComponent(window._placaMsg),'_blank');
 }
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
