@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>Tienda AmarangoElectro 🐝</title>
+<meta name="theme-color" content="#0B2D6B">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ============================================================
+   TIENDA NUEVA — Bloque 1 (catálogo prolijo, diseño sobrio)
+   Header con degradé Amarango (como pidió Max).
+   Cuotas 15/55/78 · categorías reales · compartir con foto.
+   ============================================================ */
+:root{
+  --az:#0B2D6B; --az2:#1e5bc8; --nar:#FF7A00;
+  --bg:#F7F8FA; --wh:#fff; --txt:#141824; --sub:#7A8291; --line:#ECEEF2; --gr:#10B981;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:40px}
+
+/* HEADER con degradé (identidad Amarango, se mantiene) */
+.top{position:sticky;top:0;z-index:100;background:linear-gradient(160deg,#020c2e 0%,var(--az) 55%,var(--az2) 100%);padding:13px 16px 15px;box-shadow:0 2px 12px rgba(11,45,107,.2)}
+.brand{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.brand .bee{font-size:1.35rem}
+.brand h1{color:#fff;font-size:1.05rem;font-weight:900;letter-spacing:.2px}
+.brand .tag{color:#ffb968;font-size:.6rem;font-weight:600;margin-left:auto;font-style:italic}
+.searchbar{display:flex;align-items:center;gap:9px;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.searchbar span{font-size:1rem;opacity:.5}
+.searchbar input{flex:1;border:none;outline:none;font-size:.9rem;font-family:inherit;background:transparent;color:var(--txt)}
+
+/* CATEGORÍAS */
+.cats{display:flex;gap:10px;overflow-x:auto;padding:14px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-width:62px}
+.cat .ico{width:54px;height:54px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.55rem;border:1.5px solid var(--line);transition:all .18s}
+.cat.on .ico{border-color:var(--az);box-shadow:0 0 0 3px rgba(11,45,107,.08)}
+.cat span{font-size:.63rem;font-weight:700;color:var(--sub);text-align:center}
+.cat.on span{color:var(--az)}
+
+.section-h{padding:4px 16px 10px;font-size:.72rem;font-weight:900;color:var(--az);letter-spacing:.5px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 14px}
+
+/* TARJETA (sobria) */
+.card{background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .15s}
+.card:active{transform:scale(.985)}
+.card .ph{height:120px;background:#FAFBFC;display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;border-bottom:1px solid var(--line);cursor:pointer;background-size:cover;background-position:center}
+.card .fav{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:none;font-size:.9rem;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);line-height:1}
+.card .badge{position:absolute;top:6px;left:6px;background:var(--nar);color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:.2px}
+.card .body{padding:10px 12px 12px;display:flex;flex-direction:column;flex:1}
+.card .marca{font-size:.55rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
+.card .nom{font-size:.79rem;font-weight:700;color:var(--txt);line-height:1.3;margin:3px 0 7px;min-height:34px;cursor:pointer}
+.card .cuota-v{font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.05}
+.card .cuota-n{font-size:.6rem;font-weight:700;color:var(--gr);margin-bottom:2px}
+.card .contado{font-size:.64rem;color:var(--sub);margin-bottom:8px}
+.card .share{margin-top:auto;width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px}
+
+.estado{text-align:center;padding:44px 20px;color:var(--sub)}
+.estado .e-i{font-size:2.6rem;margin-bottom:10px}
+.setup{margin:14px;background:#FFF9F0;border:1.5px dashed var(--nar);border-radius:14px;padding:16px;font-size:.78rem;color:var(--az);line-height:1.55}
+.setup b{color:var(--nar)}
+.setup code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:.72rem}
+
+/* DETALLE */
+.overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(2,8,20,.55);backdrop-filter:blur(3px);align-items:flex-end;justify-content:center}
+.overlay.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:88vh;overflow-y:auto;animation:up .28s cubic-bezier(.2,.9,.3,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-head{background:linear-gradient(160deg,#020c2e,var(--az));padding:18px;position:sticky;top:0;z-index:2}
+.sheet-head .x{position:absolute;top:14px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.1rem;cursor:pointer}
+.sheet-head .ph-big{width:100%;height:180px;border-radius:14px;background:#0a1a3a center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:10px}
+.sheet-head .nom{color:#fff;font-size:1.15rem;font-weight:900;text-align:center}
+.sheet-body{padding:16px 16px 22px}
+.precio-box{background:#fff;border-radius:14px;padding:14px;text-align:center;border:1px solid var(--line);margin-bottom:8px}
+.precio-box .lbl{font-size:.62rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px}
+.precio-box .val{font-size:1.7rem;font-weight:900;color:var(--az);margin-top:2px}
+.cuota-title{font-size:.66rem;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin:14px 2px 8px}
+.cuota-card{border-radius:13px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cuota-card.c2{background:#FEF9C3;border-left:4px solid #EAB308}
+.cuota-card.c4{background:#FFF0E0;border-left:4px solid var(--nar)}
+.cuota-card.c6{background:#EDE9FE;border-left:4px solid #7C3AED}
+.cuota-card .c-n{font-size:.88rem;font-weight:900;color:var(--az)}
+.cuota-card .c-v{font-size:1.12rem;font-weight:900;color:var(--az)}
+.retira{background:#EEF2FF;border-radius:11px;padding:11px 13px;font-size:.68rem;color:var(--az);font-weight:700;margin-top:6px;display:flex;gap:7px;align-items:flex-start}
+.wa-btn{width:100%;margin-top:14px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="brand">
+    <span class="bee">🐝</span>
+    <h1>AmarangoElectro</h1>
+    <span class="tag">Equipá tu casa en cuotas</span>
+  </div>
+  <div class="searchbar">
+    <span>🔍</span>
+    <input id="buscador" placeholder="Buscar celular, TV, heladera..." oninput="render()">
+  </div>
+</div>
+
+<div class="cats" id="cats"></div>
+<div class="section-h" id="section-h">Cargando…</div>
+<div id="grid-wrap"></div>
+
+<!-- DETALLE -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)cerrar()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="x" onclick="cerrar()">✕</button>
+      <div class="ph-big" id="d-ph"></div>
+      <div class="nom" id="d-nom"></div>
+    </div>
+    <div class="sheet-body">
+      <div class="precio-box"><div class="lbl">💰 Precio contado</div><div class="val" id="d-precio"></div></div>
+      <div class="cuota-title">📅 Elegí en cuántas cuotas</div>
+      <div id="d-cuotas"></div>
+      <div class="retira"><span>⭐</span><span>Retirás pagando solo la 1ra cuota ese mismo día.</span></div>
+      <button class="wa-btn" onclick="compartirActual()">💬 Lo quiero · Pedir por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   👉 PEGÁ ACÁ TU CLAVE DE SUPABASE (la misma que ya está en tu
+   calculadora.html, en la línea que dice SB_KEY). Copiá y pegá
+   entre las comillas. Sin la key, la tienda no baja productos.
+   ═══════════════════════════════════════════════════════════ */
+var SB_URL = "https://zctaukyrhsmpjkcddcqq.supabase.co";
+var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del teléfono
+
+/* Si ya se pegó antes en este teléfono, la recuerda */
+try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
+
+/* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
+var PLANES = { 2:{on:true,pct:15}, 4:{on:true,pct:55}, 6:{on:true,pct:78} };
+function valorCuota(venta,n){ return Math.round(venta*(1+PLANES[n].pct/100)/n/1000)*1000; }
+function fmt(n){ return '$'+Math.round(n).toLocaleString('es-AR'); }
+function cuotasActivas(){ return [2,4,6].filter(function(n){return PLANES[n].on;}); }
+function mejorCuota(venta){ var a=cuotasActivas(); if(!a.length)return null; var n=a[a.length-1]; return {n:n, valor:valorCuota(venta,n)}; }
+
+/* ===== Categorías reales (mismas que tu tienda) ===== */
+var CATS = [
+  {k:'',              ico:'🔥', txt:'Todos'},
+  {k:'📱 Celulares',   ico:'📱', txt:'Celulares'},
+  {k:'📺 TV',          ico:'📺', txt:'TV'},
+  {k:'❄️ Heladeras',   ico:'❄️', txt:'Heladeras'},
+  {k:'🍳 Cocina',      ico:'🍳', txt:'Cocina'},
+  {k:'🌀 Climatización',ico:'🌀', txt:'Clima'},
+  {k:'🧺 Lavado',      ico:'🧺', txt:'Lavado'},
+  {k:'☕ Electro hogar',ico:'☕', txt:'Electro'},
+  {k:'📦 Otros',       ico:'📦', txt:'Otros'}
+];
+function categoriaDe(nombre){
+  var n=(nombre||'').toLowerCase();
+  if(/samsung|motorola|xiaomi|iphone|celular|smartphone/.test(n))return '📱 Celulares';
+  if(/heladera|freezer|frio/.test(n))return '❄️ Heladeras';
+  if(/cocina|anafe|horno|microonda/.test(n))return '🍳 Cocina';
+  if(/tv|televis|smart tv|tcl|led/.test(n))return '📺 TV';
+  if(/ventilador|turbo|aire|calefact|estufa|caloventor/.test(n))return '🌀 Climatización';
+  if(/lavarrop|secarrop|lavavaj/.test(n))return '🧺 Lavado';
+  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich/.test(n))return '☕ Electro hogar';
+  return '📦 Otros';
+}
+function catProd(p){ return p.categoria || categoriaDe(p.nombre); }
+function marcaDe(nombre){
+  var n=(nombre||'').toLowerCase();
+  if(/samsung|galaxy/.test(n))return 'Samsung';
+  if(/motorola|moto|edge/.test(n))return 'Motorola';
+  if(/xiaomi|redmi|poco/.test(n))return 'Xiaomi';
+  if(/iphone|apple/.test(n))return 'Apple';
+  return '';
+}
+/* búsqueda tolerante a acentos */
+function normTxt(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,''); }
+
+/* ===== Estado ===== */
+var PRODUCTOS = [];
+var catActiva = '';
+var sb = null;
+
+/* ===== Conexión Supabase ===== */
+function conectar(){
+  if(!SB_KEY){ mostrarSetup(); return; }
+  try{
+    sb = window.supabase.createClient(SB_URL, SB_KEY);
+    bajarCatalogo();
+  }catch(e){ mostrarError('No pude conectar. Revisá que la key esté bien pegada.'); }
+}
+function bajarCatalogo(){
+  // 1) intenta mostrar lo que haya en el teléfono al toque (rápido)
+  try{ var local=JSON.parse(localStorage.getItem('ae_tienda_catalogo')||'[]'); if(local.length){ PRODUCTOS=local; render(); } }catch(e){}
+  // 2) baja lo último de la nube
+  sb.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+    .then(function(r){
+      if(r && r.data && r.data.datos){
+        PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
+        try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(r.data.datos)); }catch(e){}
+        render();
+      } else if(!PRODUCTOS.length){
+        mostrarError('La nube respondió pero no hay productos cargados todavía.');
+      }
+    })
+    .catch(function(){ if(!PRODUCTOS.length) mostrarError('No pude bajar el catálogo. Revisá la key o tu conexión.'); });
+}
+
+/* ===== Render ===== */
+function render(){
+  // categorías (solo las que tienen productos, + Todos)
+  var catsConProd = {};
+  PRODUCTOS.forEach(function(p){ catsConProd[catProd(p)]=true; });
+  document.getElementById('cats').innerHTML = CATS.filter(function(c){ return c.k==='' || catsConProd[c.k]; }).map(function(c){
+    return '<div class="cat'+(catActiva===c.k?' on':'')+'" onclick="setCat(\''+c.k.replace(/'/g,"\\'")+'\')">'
+      +'<div class="ico">'+c.ico+'</div><span>'+c.txt+'</span></div>';
+  }).join('');
+
+  var q=normTxt(document.getElementById('buscador').value);
+  var lista=PRODUCTOS.filter(function(p){
+    var okCat=!catActiva || catProd(p)===catActiva;
+    var okQ=!q || normTxt(p.nombre).indexOf(q)>=0;
+    return okCat && okQ;
+  });
+
+  document.getElementById('section-h').textContent = q ? 'Resultados' : (catActiva||'Catálogo completo')+' ('+lista.length+')';
+
+  var wrap=document.getElementById('grid-wrap');
+  if(!lista.length){
+    wrap.innerHTML='<div class="estado"><div class="e-i">🐝</div>'+(q?'No encontramos eso. Probá otra palabra.':'No hay productos en esta categoría.')+'</div>';
+    return;
+  }
+  wrap.innerHTML='<div class="grid">'+lista.map(function(p){
+    var idx=PRODUCTOS.indexOf(p);
+    var mc=mejorCuota(p.venta);
+    var marca=marcaDe(p.nombre);
+    var phStyle = p.foto ? 'style="background-image:url(\''+p.foto+'\')"' : '';
+    var phIco = p.foto ? '' : catProd(p).split(' ')[0];
+    return '<div class="card">'
+      +'<div class="ph" '+phStyle+' onclick="verDetalle('+idx+')">'+phIco
+        +(p.precioAntes && p.precioAntes>p.venta ? '<span class="badge">OFERTA</span>' : '')
+      +'</div>'
+      +'<div class="body">'
+        +(marca?'<div class="marca">'+marca+'</div>':'<div class="marca">&nbsp;</div>')
+        +'<div class="nom" onclick="verDetalle('+idx+')">'+p.nombre+'</div>'
+        +(mc?'<div class="cuota-v">'+fmt(mc.valor)+'</div><div class="cuota-n">en '+mc.n+' cuotas fijas</div>':'')
+        +'<div class="contado">Contado: '+fmt(p.venta)+'</div>'
+        +'<button class="share" onclick="compartir('+idx+')">📤 Compartir</button>'
+      +'</div></div>';
+  }).join('')+'</div>';
+}
+function setCat(k){ catActiva=(catActiva===k?'':k); render(); }
+
+/* ===== Detalle ===== */
+var actualIdx=null;
+function verDetalle(idx){
+  var p=PRODUCTOS[idx]; if(!p)return; actualIdx=idx;
+  var ph=document.getElementById('d-ph');
+  if(p.foto){ ph.style.backgroundImage='url('+p.foto+')'; ph.textContent=''; }
+  else { ph.style.backgroundImage='none'; ph.textContent=catProd(p).split(' ')[0]; }
+  document.getElementById('d-nom').textContent=p.nombre;
+  document.getElementById('d-precio').textContent=fmt(p.venta);
+  document.getElementById('d-cuotas').innerHTML=cuotasActivas().map(function(n){
+    return '<div class="cuota-card c'+n+'"><span class="c-n">'+n+' cuotas fijas</span><span class="c-v">'+fmt(valorCuota(p.venta,n))+'</span></div>';
+  }).join('');
+  document.getElementById('overlay').classList.add('on');
+}
+function cerrar(){ document.getElementById('overlay').classList.remove('on'); }
+
+/* ===== Compartir con foto (misma lógica que tu tienda) ===== */
+function armarMensaje(p){
+  var lines=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(p.venta,n)); });
+  return '*'+(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'+lines.join('\n')+'\n\n➡️ Contado: '+fmt(p.venta)+'\n@AmarangoElectro 🐝';
+}
+function compartir(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var msg=armarMensaje(p);
+  if(p.foto && navigator.share){
+    fetch(p.foto).then(function(r){return r.blob();}).then(function(blob){
+      var file=new File([blob],'producto.jpg',{type:blob.type||'image/jpeg'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){ return navigator.share({files:[file], text:msg}); }
+      return navigator.share({text:msg});
+    }).catch(function(){ soloTexto(msg); });
+    return;
+  }
+  if(navigator.share){ navigator.share({title:p.nombre, text:msg}).catch(function(){soloTexto(msg);}); }
+  else soloTexto(msg);
+}
+function compartirActual(){ if(actualIdx!=null) compartir(actualIdx); }
+function soloTexto(msg){ window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); }
+
+/* ===== Estados vacíos ===== */
+function mostrarSetup(){
+  document.getElementById('cats').innerHTML='';
+  document.getElementById('section-h').textContent='';
+  document.getElementById('grid-wrap').innerHTML='<div class="setup">'
+    +'<div style="font-size:1rem;font-weight:900;margin-bottom:4px">🔑 Un solo paso para conectar tu tienda</div>'
+    +'<div style="margin:10px 0">Pegá acá abajo tu clave de Supabase (la copiás de tu <b>calculadora.html</b>, línea que dice <code>SB_KEY</code>). Queda guardada en este teléfono, no la tenés que poner nunca más.</div>'
+    +'<input id="keyInput" placeholder="Pegá tu key acá (empieza con eyJ...)" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:.82rem;outline:none;margin-bottom:10px">'
+    +'<button onclick="guardarKey()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:11px;padding:13px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">✅ Conectar tienda</button>'
+    +'<div style="font-size:.66rem;color:var(--sub);margin-top:10px;text-align:center">La key es la misma que ya usás en tu calculadora 🐝</div>'
+    +'</div>';
+}
+function guardarKey(){
+  var v=(document.getElementById('keyInput').value||'').trim();
+  if(!v){ alert('Pegá la key primero.'); return; }
+  if(v.indexOf('eyJ')!==0){ if(!confirm('Esa key no parece del formato habitual (suele empezar con "eyJ"). ¿La pego igual?')) return; }
+  try{ localStorage.setItem('ae_sb_key', v); }catch(e){}
+  SB_KEY=v;
+  document.getElementById('grid-wrap').innerHTML='<div class="estado"><div class="e-i">🐝</div>Conectando y bajando tus productos…</div>';
+  conectar();
+}
+function mostrarError(txt){
+  document.getElementById('grid-wrap').innerHTML='<div class="estado"><div class="e-i">😕</div>'+txt+'</div>';
+}
+
+/* arranque */
+conectar();
+</script>
+</body>
+</html>
