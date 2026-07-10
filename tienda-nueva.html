@@ -237,6 +237,7 @@ function abrirPanelDueno(){
      '<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('➕','Cargar producto','Subí productos nuevos a tu tienda','cargar')
+    +botonPanel('👥','Suscriptores','Controlá quién está al día con la membresía','subs')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
     +botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
     +'</div>'
@@ -251,7 +252,8 @@ function botonPanel(ico, titulo, sub, destino){
     +'<span style="color:var(--sub);font-size:1.1rem">›</span></button>';
 }
 function abrirModuloDueno(destino){
-  // por ahora en construcción — los llenamos de a uno en los próximos bloques
+  if(destino==='subs'){ abrirSuscriptores(); return; }
+  // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={placas:'🎨 Armar placas', cargar:'➕ Cargar producto', config:'⚙️ Configuración', crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
      '<div class="construccion" style="padding:50px 20px">'
@@ -262,6 +264,97 @@ function abrirModuloDueno(destino){
     +'</div>';
 }
 function cerrarAdmin(){ document.getElementById('adminOverlay').classList.remove('on'); }
+
+/* ═══════ SUSCRIPTORES (libreta de control de la membresía) ═══════
+   Se guarda en Supabase (tabla 'amarango_subs'). Si la tabla no existe
+   todavía, funciona igual en el teléfono (localStorage) y avisa. */
+var SUBS = [];
+function subsCargar(cb){
+  // primero lo del teléfono (rápido)
+  try{ SUBS = JSON.parse(localStorage.getItem('ae_subs')||'[]'); }catch(e){ SUBS=[]; }
+  if(cb) cb();
+  // después la nube (si conecta)
+  if(sb){
+    sb.from('amarango_subs').select('datos').eq('id','lista').maybeSingle()
+      .then(function(r){ if(r&&r.data&&r.data.datos){ SUBS=r.data.datos; try{localStorage.setItem('ae_subs',JSON.stringify(SUBS));}catch(e){} if(cb)cb(); } })
+      .catch(function(){});
+  }
+}
+function subsGuardar(){
+  try{ localStorage.setItem('ae_subs', JSON.stringify(SUBS)); }catch(e){}
+  if(sb){
+    sb.from('amarango_subs').upsert({id:'lista', datos:SUBS}).then(function(){}).catch(function(){});
+  }
+}
+function abrirSuscriptores(){ subsCargar(renderSubs); }
+
+function renderSubs(){
+  var alDia = SUBS.filter(function(s){return s.estado==='ok';}).length;
+  var venc = SUBS.filter(function(s){return s.estado!=='ok';}).length;
+  var html = '<div style="display:flex;gap:8px;margin-bottom:14px">'
+    +'<div style="flex:1;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:11px;text-align:center"><div style="font-size:1.4rem;font-weight:900;color:#059669">'+alDia+'</div><div style="font-size:.62rem;color:#059669;font-weight:700">AL DÍA ✅</div></div>'
+    +'<div style="flex:1;background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:11px;text-align:center"><div style="font-size:1.4rem;font-weight:900;color:#DC2626">'+venc+'</div><div style="font-size:.62rem;color:#DC2626;font-weight:700">VENCIDOS 🔴</div></div>'
+    +'</div>';
+
+  html += '<button onclick="editarSub(-1)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px">➕ Agregar suscriptor</button>';
+
+  if(!SUBS.length){
+    html += '<div style="text-align:center;color:var(--sub);padding:24px;font-size:.82rem">Todavía no cargaste suscriptores.<br>Tocá «Agregar» para empezar tu lista. 🐝</div>';
+  } else {
+    SUBS.forEach(function(s, i){
+      var ok = s.estado==='ok';
+      html += '<div style="background:#fff;border:1px solid var(--line);border-left:4px solid '+(ok?'#10B981':'#EF4444')+';border-radius:12px;padding:12px;margin-bottom:9px">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-weight:900;color:var(--az);flex:1">'+(s.nombre||'(sin nombre)')+'</span>'
+        +'<span style="font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:20px;background:'+(ok?'#ECFDF5':'#FEF2F2')+';color:'+(ok?'#059669':'#DC2626')+'">'+(ok?'AL DÍA':'VENCIDO')+'</span></div>'
+        +(s.negocio?'<div style="font-size:.72rem;color:var(--sub)">🏪 '+s.negocio+(s.vende?' · '+s.vende:'')+'</div>':'')
+        +(s.whatsapp?'<div style="font-size:.72rem;color:var(--sub)">📱 '+s.whatsapp+'</div>':'')
+        +(s.pagaHasta?'<div style="font-size:.72rem;color:var(--sub)">📅 Pagó hasta: '+s.pagaHasta+'</div>':'')
+        +(s.monto?'<div style="font-size:.72rem;color:var(--sub)">💵 $'+s.monto+'/mes</div>':'')
+        +'<div style="display:flex;gap:7px;margin-top:9px">'
+        +'<button onclick="toggleEstadoSub('+i+')" style="flex:1;background:'+(ok?'#FEF2F2':'#ECFDF5')+';color:'+(ok?'#DC2626':'#059669')+';border:none;border-radius:9px;padding:9px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit">'+(ok?'🔴 Marcar vencido':'✅ Marcar al día')+'</button>'
+        +'<button onclick="editarSub('+i+')" style="background:#F3F4F6;border:none;border-radius:9px;padding:9px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;color:var(--az)">✏️</button>'
+        +(s.whatsapp?'<button onclick="avisarSub('+i+')" style="background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit">💬</button>':'')
+        +'</div></div>';
+    });
+  }
+  html += '<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
+  document.getElementById('adminBody').innerHTML = html;
+}
+
+function editarSub(i){
+  var s = i>=0 ? SUBS[i] : {nombre:'',negocio:'',vende:'',whatsapp:'',pagaHasta:'',monto:'',nota:'',estado:'ok'};
+  function campo(lbl,id,val,ph){ return '<div style="margin-bottom:10px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" value="'+(val||'').replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'; }
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:14px">'+(i>=0?'✏️ Editar suscriptor':'➕ Nuevo suscriptor')+'</div>'
+    +campo('Nombre','sb_nombre',s.nombre,'Ej: Marcelo Gómez')
+    +campo('Negocio','sb_negocio',s.negocio,'Ej: Marcelo Hogar')
+    +campo('¿Qué vende?','sb_vende',s.vende,'Ej: Electro / Ropa / Comida')
+    +campo('WhatsApp','sb_whatsapp',s.whatsapp,'Ej: 5491122334455')
+    +campo('Pagó hasta','sb_pagaHasta',s.pagaHasta,'Ej: 31/08/2026')
+    +campo('Cuánto paga por mes','sb_monto',s.monto,'Ej: 20000')
+    +campo('Nota','sb_nota',s.nota,'Lo que quieras anotar')
+    +'<div style="display:flex;gap:8px;margin-top:6px">'
+    +'<button onclick="guardarSub('+i+')" style="flex:1;background:var(--nar);color:#fff;border:none;border-radius:11px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit">💾 Guardar</button>'
+    +(i>=0?'<button onclick="borrarSub('+i+')" style="background:#FEF2F2;color:#DC2626;border:none;border-radius:11px;padding:13px 16px;font-weight:800;cursor:pointer;font-family:inherit">🗑️</button>':'')
+    +'</div>'
+    +'<button onclick="renderSubs()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Cancelar</button>';
+}
+function guardarSub(i){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  var obj={ nombre:g('sb_nombre'), negocio:g('sb_negocio'), vende:g('sb_vende'), whatsapp:g('sb_whatsapp'), pagaHasta:g('sb_pagaHasta'), monto:g('sb_monto'), nota:g('sb_nota'), estado: i>=0?SUBS[i].estado:'ok' };
+  if(!obj.nombre){ alert('Poné al menos el nombre.'); return; }
+  if(i>=0) SUBS[i]=obj; else SUBS.push(obj);
+  subsGuardar(); renderSubs();
+}
+function toggleEstadoSub(i){ SUBS[i].estado = SUBS[i].estado==='ok'?'venc':'ok'; subsGuardar(); renderSubs(); }
+function borrarSub(i){ if(confirm('¿Borrar este suscriptor?')){ SUBS.splice(i,1); subsGuardar(); renderSubs(); } }
+function avisarSub(i){
+  var s=SUBS[i]; if(!s.whatsapp) return;
+  var msg = s.estado==='ok'
+    ? 'Hola '+s.nombre+'! Te recuerdo que tu Amarango está activa 🐝. ¡A vender!'
+    : 'Hola '+s.nombre+'! Tu suscripción a Amarango venció. Para reactivarla, pasá el pago y la habilito al toque 🐝';
+  window.open('https://wa.me/'+s.whatsapp.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+}
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
 var PLANES = { 2:{on:true,pct:15}, 4:{on:true,pct:55}, 6:{on:true,pct:78} };
