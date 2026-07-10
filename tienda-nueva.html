@@ -17,7 +17,7 @@
   --bg:#F7F8FA; --wh:#fff; --txt:#141824; --sub:#7A8291; --line:#ECEEF2; --gr:#10B981;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:76px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:40px}
 
 /* SISTEMA DE VISTAS (una puerta a la vez) */
 .vista{display:none}
@@ -142,7 +142,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <div class="top">
   <div class="brand">
-    <span class="bee">🐝</span>
+    <span class="bee" onclick="toqueAbeja()" style="cursor:pointer">🐝</span>
     <h1>AmarangoElectro</h1>
     <button id="favBtn" onclick="verFavoritos()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:20px;padding:6px 12px;color:#fff;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">❤️ <span id="favCount">0</span></button>
   </div>
@@ -170,29 +170,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <div id="grid-wrap"></div>
 </div><!-- fin vista-tienda -->
 
-<!-- VISTA PLACAS (se llena en el próximo bloque) -->
-<div class="vista" id="vista-placas">
-  <div class="construccion">
-    <div class="ci">🎨</div>
-    <div class="ct">Armar placas</div>
-    <div class="cs">Acá vas a sacar precios y armar las placas<br>para compartir. Lo sumamos en el próximo paso.</div>
+<!-- PANEL DEL DUEÑO (oculto — se entra tocando 5 veces la abeja + clave) -->
+<div class="overlay" id="adminOverlay" onclick="if(event.target===this)cerrarAdmin()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="x" onclick="cerrarAdmin()">✕</button>
+      <div class="nom">🔒 Panel del dueño</div>
+    </div>
+    <div class="sheet-body" id="adminBody"></div>
   </div>
-</div>
-
-<!-- VISTA CARGAR (se llena después) -->
-<div class="vista" id="vista-cargar">
-  <div class="construccion">
-    <div class="ci">➕</div>
-    <div class="ct">Cargar producto</div>
-    <div class="cs">Acá vas a subir productos nuevos a tu tienda,<br>fácil y rápido. Lo sumamos en un paso más adelante.</div>
-  </div>
-</div>
-
-<!-- BARRA INFERIOR: las 3 puertas -->
-<div class="tabbar">
-  <button id="tab-tienda" class="on" onclick="irA('tienda')"><span class="i">🏪</span>Tienda</button>
-  <button id="tab-placas" onclick="irA('placas')"><span class="i">🎨</span>Placas</button>
-  <button id="tab-cargar" onclick="irA('cargar')"><span class="i">➕</span>Cargar</button>
 </div>
 
 <!-- DETALLE -->
@@ -225,19 +211,57 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
 
-/* ===== Navegación entre puertas (tienda / placas / cargar) ===== */
-function irA(vista){
-  ['tienda','placas','cargar'].forEach(function(v){
-    var pane=document.getElementById('vista-'+v);
-    var tab=document.getElementById('tab-'+v);
-    if(pane) pane.classList.toggle('on', v===vista);
-    if(tab) tab.classList.toggle('on', v===vista);
-  });
-  // el header con buscador solo tiene sentido en la tienda
-  var top=document.querySelector('.top');
-  if(top) top.style.display = (vista==='tienda') ? 'block' : 'none';
-  window.scrollTo(0,0);
+/* ═══════ PUERTA OCULTA DEL DUEÑO ═══════
+   Se entra tocando 5 veces la abeja del header + clave (PIN).
+   El cliente nunca ve un botón de admin. */
+var PIN_DUENO = "2580";   // clave por defecto (editable después desde config)
+var _toquesAbeja = 0, _toqueTimer = null;
+
+function toqueAbeja(){
+  _toquesAbeja++;
+  clearTimeout(_toqueTimer);
+  _toqueTimer = setTimeout(function(){ _toquesAbeja = 0; }, 1500);
+  if(_toquesAbeja >= 5){
+    _toquesAbeja = 0;
+    pedirClaveAdmin();
+  }
 }
+function pedirClaveAdmin(){
+  var pin = prompt("🔒 Clave del dueño:");
+  if(pin === null) return;
+  if(pin === PIN_DUENO){ abrirPanelDueno(); }
+  else { alert("Clave incorrecta."); }
+}
+function abrirPanelDueno(){
+  document.getElementById('adminBody').innerHTML =
+     '<div style="display:grid;gap:10px">'
+    +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
+    +botonPanel('➕','Cargar producto','Subí productos nuevos a tu tienda','cargar')
+    +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
+    +botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
+    +'</div>'
+    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:16px">🐝 Panel privado · solo lo ve el dueño</div>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+function botonPanel(ico, titulo, sub, destino){
+  return '<button onclick="abrirModuloDueno(\''+destino+'\')" style="width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:13px">'
+    +'<span style="font-size:1.7rem">'+ico+'</span>'
+    +'<span style="flex:1"><span style="display:block;font-size:.92rem;font-weight:900;color:var(--az)">'+titulo+'</span>'
+    +'<span style="display:block;font-size:.7rem;color:var(--sub);margin-top:2px">'+sub+'</span></span>'
+    +'<span style="color:var(--sub);font-size:1.1rem">›</span></button>';
+}
+function abrirModuloDueno(destino){
+  // por ahora en construcción — los llenamos de a uno en los próximos bloques
+  var nombres={placas:'🎨 Armar placas', cargar:'➕ Cargar producto', config:'⚙️ Configuración', crm:'📊 Clientes / CRM'};
+  document.getElementById('adminBody').innerHTML=
+     '<div class="construccion" style="padding:50px 20px">'
+    +'<div class="ci">🛠️</div>'
+    +'<div class="ct">'+(nombres[destino]||destino)+'</div>'
+    +'<div class="cs">Esta parte la sumamos en el próximo paso,<br>de a poco y probando cada una. 🐝</div>'
+    +'<button onclick="abrirPanelDueno()" style="margin-top:18px;background:var(--az);color:#fff;border:none;border-radius:11px;padding:11px 20px;font-weight:800;cursor:pointer;font-family:inherit">‹ Volver al panel</button>'
+    +'</div>';
+}
+function cerrarAdmin(){ document.getElementById('adminOverlay').classList.remove('on'); }
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
 var PLANES = { 2:{on:true,pct:15}, 4:{on:true,pct:55}, 6:{on:true,pct:78} };
