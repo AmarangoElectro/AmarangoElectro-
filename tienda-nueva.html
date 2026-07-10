@@ -253,8 +253,9 @@ function botonPanel(ico, titulo, sub, destino){
 }
 function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
+  if(destino==='config'){ abrirConfig(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
-  var nombres={placas:'🎨 Armar placas', cargar:'➕ Cargar producto', config:'⚙️ Configuración', crm:'📊 Clientes / CRM'};
+  var nombres={placas:'🎨 Armar placas', cargar:'➕ Cargar producto', crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
      '<div class="construccion" style="padding:50px 20px">'
     +'<div class="ci">🛠️</div>'
@@ -356,6 +357,85 @@ function avisarSub(i){
   window.open('https://wa.me/'+s.whatsapp.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg),'_blank');
 }
 
+/* ═══════ CONFIGURACIÓN — EL MOTOR DE AMARANGO ═══════
+   Acá vive TODO lo que cambia entre una tienda y otra: marca, colores,
+   cuotas, clave. Cambiar esto = crear una tienda nueva.
+   AmarangoElectro es simplemente la primera config. */
+var CONFIG_DEFAULT = {
+  negocio: "AmarangoElectro", eslogan: "Equipá tu casa en cuotas",
+  instagram: "@amarangoelectro", whatsapp: "",
+  colorPrincipal: "#0B2D6B", colorAcento: "#FF7A00",
+  cuotas: { 2:15, 4:55, 6:78 }, pin: "2580"
+};
+var CONFIG = null;
+function cargarConfig(cb){
+  try{ var l=localStorage.getItem('ae_config'); if(l) CONFIG=JSON.parse(l); }catch(e){}
+  if(!CONFIG) CONFIG=JSON.parse(JSON.stringify(CONFIG_DEFAULT));
+  aplicarConfig();
+  if(cb) cb();
+  if(sb){
+    sb.from('amarango_config').select('datos').eq('id','config').maybeSingle()
+      .then(function(r){ if(r&&r.data&&r.data.datos){ CONFIG=Object.assign(JSON.parse(JSON.stringify(CONFIG_DEFAULT)), r.data.datos); try{localStorage.setItem('ae_config',JSON.stringify(CONFIG));}catch(e){} aplicarConfig(); render(); } })
+      .catch(function(){});
+  }
+}
+function guardarConfig(){
+  try{ localStorage.setItem('ae_config', JSON.stringify(CONFIG)); }catch(e){}
+  if(sb){ sb.from('amarango_config').upsert({id:'config', datos:CONFIG}).then(function(){}).catch(function(){}); }
+  aplicarConfig();
+}
+function aplicarConfig(){
+  if(!CONFIG) return;
+  PIN_DUENO = CONFIG.pin || "2580";
+  PLANES = { 2:{on:true,pct:CONFIG.cuotas[2]}, 4:{on:true,pct:CONFIG.cuotas[4]}, 6:{on:true,pct:CONFIG.cuotas[6]} };
+  var h=document.querySelector('.brand h1'); if(h) h.textContent=CONFIG.negocio;
+  document.documentElement.style.setProperty('--az', CONFIG.colorPrincipal);
+  document.documentElement.style.setProperty('--nar', CONFIG.colorAcento);
+}
+function abrirConfig(){
+  var c=CONFIG;
+  function campo(lbl,id,val,ph,tipo){ return '<div style="margin-bottom:11px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" '+(tipo?'type="'+tipo+'"':'')+' value="'+(val==null?'':String(val)).replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'; }
+  function sec(t){ return '<div style="font-size:.72rem;font-weight:900;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding-bottom:5px;border-bottom:1.5px solid var(--line)">'+t+'</div>'; }
+  var html = '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">⚙️ Configuración</div>'
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Esto define tu tienda. Cambialo y se aplica a todo. 🐝</div>'
+    +sec('🏪 Tu marca')
+    +campo('Nombre del negocio','cf_negocio',c.negocio,'Ej: Marcelo Hogar')
+    +campo('Eslogan','cf_eslogan',c.eslogan,'Ej: Equipá tu casa en cuotas')
+    +campo('Instagram','cf_instagram',c.instagram,'@tunegocio')
+    +campo('WhatsApp','cf_whatsapp',c.whatsapp,'5491122334455')
+    +sec('🎨 Colores')
+    +'<div style="display:flex;gap:10px;margin-bottom:11px">'
+      +'<div style="flex:1"><div style="font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:5px">PRINCIPAL</div><input id="cf_color1" type="color" value="'+c.colorPrincipal+'" style="width:100%;height:44px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer"></div>'
+      +'<div style="flex:1"><div style="font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:5px">ACENTO</div><input id="cf_color2" type="color" value="'+c.colorAcento+'" style="width:100%;height:44px;border:1.5px solid var(--line);border-radius:10px;cursor:pointer"></div>'
+    +'</div>'
+    +sec('📅 Cuotas (%)')
+    +'<div style="display:flex;gap:8px">'
+      +'<div style="flex:1">'+campo('2 cuotas','cf_c2',c.cuotas[2],'','number')+'</div>'
+      +'<div style="flex:1">'+campo('4 cuotas','cf_c4',c.cuotas[4],'','number')+'</div>'
+      +'<div style="flex:1">'+campo('6 cuotas','cf_c6',c.cuotas[6],'','number')+'</div>'
+    +'</div>'
+    +sec('🔒 Seguridad')
+    +campo('Clave del dueño (PIN)','cf_pin',c.pin,'','number')
+    +'<button onclick="guardarConfigDesdeForm()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px">💾 Guardar cambios</button>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
+  document.getElementById('adminBody').innerHTML=html;
+}
+function guardarConfigDesdeForm(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  CONFIG.negocio = g('cf_negocio')||'Mi Tienda';
+  CONFIG.eslogan = g('cf_eslogan');
+  CONFIG.instagram = g('cf_instagram');
+  CONFIG.whatsapp = g('cf_whatsapp');
+  CONFIG.colorPrincipal = g('cf_color1')||'#0B2D6B';
+  CONFIG.colorAcento = g('cf_color2')||'#FF7A00';
+  CONFIG.cuotas = { 2:parseFloat(g('cf_c2'))||15, 4:parseFloat(g('cf_c4'))||55, 6:parseFloat(g('cf_c6'))||78 };
+  CONFIG.pin = g('cf_pin')||'2580';
+  guardarConfig();
+  render();
+  alert('✅ Guardado. Tu tienda se actualizó.');
+  abrirPanelDueno();
+}
+
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
 var PLANES = { 2:{on:true,pct:15}, 4:{on:true,pct:55}, 6:{on:true,pct:78} };
 function valorCuota(venta,n){ return Math.round(venta*(1+PLANES[n].pct/100)/n/1000)*1000; }
@@ -405,9 +485,10 @@ var sb = null;
 
 /* ===== Conexión Supabase ===== */
 function conectar(){
-  if(!SB_KEY){ mostrarSetup(); return; }
+  if(!SB_KEY){ cargarConfig(); mostrarSetup(); return; }
   try{
     sb = window.supabase.createClient(SB_URL, SB_KEY);
+    cargarConfig();
     bajarCatalogo();
   }catch(e){ mostrarError('No pude conectar. Revisá que la key esté bien pegada.'); }
 }
