@@ -142,7 +142,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <div class="top">
   <div class="brand">
-    <span class="bee" onclick="toqueAbeja()" style="cursor:pointer">🐝</span>
+    <span class="bee" id="beeLogo" onclick="toqueAbeja()" style="cursor:pointer">🐝</span>
     <h1>AmarangoElectro</h1>
     <button id="favBtn" onclick="verFavoritos()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;border-radius:20px;padding:6px 12px;color:#fff;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px">❤️ <span id="favCount">0</span></button>
   </div>
@@ -363,7 +363,7 @@ function avisarSub(i){
    AmarangoElectro es simplemente la primera config. */
 var CONFIG_DEFAULT = {
   negocio: "AmarangoElectro", eslogan: "Equipá tu casa en cuotas",
-  instagram: "@amarangoelectro", whatsapp: "",
+  instagram: "@amarangoelectro", whatsapp: "", logo: "",
   colorPrincipal: "#0B2D6B", colorAcento: "#FF7A00",
   cuotas: { 2:15, 4:55, 6:78 }, pin: "2580"
 };
@@ -389,6 +389,12 @@ function aplicarConfig(){
   PIN_DUENO = CONFIG.pin || "2580";
   PLANES = { 2:{on:true,pct:CONFIG.cuotas[2]}, 4:{on:true,pct:CONFIG.cuotas[4]}, 6:{on:true,pct:CONFIG.cuotas[6]} };
   var h=document.querySelector('.brand h1'); if(h) h.textContent=CONFIG.negocio;
+  // logo: imagen si hay, abeja si no (el gesto secreto funciona igual)
+  var bee=document.getElementById('beeLogo');
+  if(bee){
+    if(CONFIG.logo){ bee.innerHTML=''; bee.style.cssText='cursor:pointer;width:34px;height:34px;border-radius:8px;background:url('+CONFIG.logo+') center/cover;display:inline-block;vertical-align:middle'; }
+    else { bee.textContent='🐝'; bee.style.cssText='cursor:pointer'; }
+  }
   document.documentElement.style.setProperty('--az', CONFIG.colorPrincipal);
   document.documentElement.style.setProperty('--nar', CONFIG.colorAcento);
 }
@@ -399,6 +405,16 @@ function abrirConfig(){
   var html = '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">⚙️ Configuración</div>'
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Esto define tu tienda. Cambialo y se aplica a todo. 🐝</div>'
     +sec('🏪 Tu marca')
+    +'<div style="margin-bottom:12px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Logo</div>'
+      +'<div style="display:flex;align-items:center;gap:12px">'
+        +'<div id="logoPreview" style="width:60px;height:60px;border-radius:14px;background:'+(c.logo?'url('+c.logo+') center/cover':'#F5F8FF')+';border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.8rem">'+(c.logo?'':'🐝')+'</div>'
+        +'<div style="flex:1">'
+          +'<button onclick="document.getElementById(\'logoFile\').click()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">📷 Elegir logo del teléfono</button>'
+          +(c.logo?'<button onclick="quitarLogo()" style="width:100%;background:none;border:none;color:#DC2626;font-size:.68rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:5px">Quitar logo (volver a la abeja)</button>':'')
+        +'</div>'
+      +'</div>'
+      +'<input type="file" id="logoFile" accept="image/*" style="display:none" onchange="subirLogo(event)">'
+    +'</div>'
     +campo('Nombre del negocio','cf_negocio',c.negocio,'Ej: Marcelo Hogar')
     +campo('Eslogan','cf_eslogan',c.eslogan,'Ej: Equipá tu casa en cuotas')
     +campo('Instagram','cf_instagram',c.instagram,'@tunegocio')
@@ -419,6 +435,34 @@ function abrirConfig(){
     +'<button onclick="guardarConfigDesdeForm()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px">💾 Guardar cambios</button>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
+}
+/* Sube el logo, lo achica automáticamente (máx 240px) y lo guarda */
+function subirLogo(ev){
+  var file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      var max=240, w=img.width, h=img.height;
+      if(w>h && w>max){ h=Math.round(h*max/w); w=max; }
+      else if(h>max){ w=Math.round(w*max/h); h=max; }
+      var canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      var data=canvas.toDataURL('image/png');
+      CONFIG.logo = data;
+      // preview al toque
+      var pv=document.getElementById('logoPreview');
+      if(pv){ pv.style.background='url('+data+') center/cover'; pv.textContent=''; }
+      alert('✅ Logo cargado. Tocá «Guardar cambios» para aplicarlo.');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function quitarLogo(){
+  CONFIG.logo = '';
+  abrirConfig();
 }
 function guardarConfigDesdeForm(){
   var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
