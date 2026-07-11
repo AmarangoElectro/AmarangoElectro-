@@ -17,7 +17,20 @@
   --bg:#F7F8FA; --wh:#fff; --txt:#141824; --sub:#7A8291; --line:#ECEEF2; --gr:#10B981;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:40px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--txt);padding-bottom:78px}
+
+/* BARRA INFERIOR fija (estilo Mercado Libre) */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:350;background:#fff;border-top:1px solid var(--line);display:flex;padding:6px 0 calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,.06)}
+.tabbar button{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;color:var(--sub);font-size:.6rem;font-weight:700;padding:4px 0}
+.tabbar button .i{font-size:1.3rem;line-height:1}
+.tabbar button.on{color:var(--nar)}
+
+/* filas del menú Más */
+.mas-row{display:flex;align-items:center;gap:12px;padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.mas-row span.ic{font-size:1.3rem;width:26px;text-align:center}
+.mas-row span.tx{flex:1;font-size:.88rem;font-weight:600;color:var(--txt)}
+.mas-row span.ar{color:var(--sub)}
+.mas-sec{font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px;margin:16px 0 4px}
 
 /* SISTEMA DE VISTAS (una puerta a la vez) */
 .vista{display:none}
@@ -140,9 +153,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 
-<!-- Botón AYUDA (flotante, discreto). Adentro va el acceso a Iniciar sesión. -->
-<button onclick="abrirAyuda()" style="position:fixed;top:12px;left:12px;z-index:400;background:rgba(11,45,107,.9);color:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.2)">❓ Ayuda</button>
-
 <!-- Panel de AYUDA -->
 <div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
   <div class="sheet">
@@ -208,9 +218,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <div class="cuota-title">📅 Elegí en cuántas cuotas</div>
       <div id="d-cuotas"></div>
       <div class="retira"><span>⭐</span><span>Retirás pagando solo la 1ra cuota ese mismo día.</span></div>
-      <button class="wa-btn" onclick="compartirActual()">💬 Lo quiero · Pedir por WhatsApp</button>
+      <div id="d-acciones" style="margin-top:14px"></div>
     </div>
   </div>
+</div>
+
+<!-- Panel MÁS (menú, estilo Mercado Libre) -->
+<div class="overlay" id="masOverlay" onclick="if(event.target===this)cerrarMas()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="x" onclick="cerrarMas()">✕</button>
+      <div class="nom">☰ Más</div>
+    </div>
+    <div class="sheet-body" id="masBody"></div>
+  </div>
+</div>
+
+<!-- BARRA INFERIOR fija (estilo Mercado Libre) -->
+<div class="tabbar">
+  <button id="tb-inicio" class="on" onclick="tabIr('inicio')"><span class="i">🏠</span>Inicio</button>
+  <button id="tb-cats" onclick="tabIr('cats')"><span class="i">🗂️</span>Categorías</button>
+  <button id="tb-favs" onclick="tabIr('favs')"><span class="i">❤️</span>Favoritos</button>
+  <button id="tb-ofertas" onclick="tabIr('ofertas')"><span class="i">🔥</span>Ofertas</button>
+  <button id="tb-mas" onclick="abrirMas()"><span class="i">☰</span>Más</button>
 </div>
 
 <script>
@@ -225,7 +255,53 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
 
-/* ═══════ AYUDA — instrucciones según quién sos + acceso discreto ═══════ */
+/* ═══════ BARRA INFERIOR + MENÚ "MÁS" (estilo Mercado Libre) ═══════ */
+function tabIr(t){
+  ['inicio','cats','favs','ofertas'].forEach(function(x){
+    var b=document.getElementById('tb-'+x); if(b) b.classList.toggle('on', x===t);
+  });
+  // limpio filtros y aplico el que corresponde
+  viendoFavs=false; window._soloOfertas=false; catActiva='';
+  var inp=document.getElementById('buscador'); if(inp) inp.value='';
+  var tope=document.getElementById('tope'); if(tope) tope.value='';
+  var ord=document.getElementById('orden'); if(ord) ord.value='';
+
+  if(t==='favs'){ viendoFavs=true; }
+  else if(t==='ofertas'){ window._soloOfertas=true; var bo=document.getElementById('btnOfertas'); if(bo) bo.classList.add('on'); }
+  else if(t==='cats'){ window.scrollTo(0, 0); }
+  render();
+  window.scrollTo(0,0);
+}
+function abrirMas(){
+  var rol=rolActual();
+  var html='';
+  function fila(ico,txt,fn){ return '<div class="mas-row" onclick="'+fn+'"><span class="ic">'+ico+'</span><span class="tx">'+txt+'</span><span class="ar">›</span></div>'; }
+
+  html+='<div class="mas-sec">Tu cuenta</div>';
+  html+=fila('❤️','Mis favoritos','cerrarMas();tabIr(\'favs\')');
+  html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
+
+  html+='<div class="mas-sec">Ayuda</div>';
+  html+=fila('❓','¿Cómo comprar?','cerrarMas();abrirAyuda()');
+  if(CONFIG && CONFIG.whatsapp) html+=fila('💬','Escribinos por WhatsApp','cerrarMas();window.open(\'https://wa.me/'+CONFIG.whatsapp.replace(/[^0-9]/g,'')+'\',\'_blank\')');
+  if(CONFIG && CONFIG.instagram) html+=fila('📷','Seguinos en Instagram','cerrarMas();window.open(\'https://instagram.com/'+CONFIG.instagram.replace('@','')+'\',\'_blank\')');
+
+  // acceso discreto, abajo de todo
+  html+='<div style="border-top:1px solid var(--line);margin-top:18px;padding-top:12px">';
+  if(rol){
+    html+='<div style="text-align:center;font-size:.72rem;color:var(--sub);margin-bottom:8px">Entraste como <b>'+(rol==='admin'?'👑 Administrador':'🤝 Revendedor')+'</b></div>'
+      +'<button onclick="cerrarMas();abrirPanelSegunRol();" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:7px">Ir a mi panel</button>'
+      +'<button onclick="cerrarMas();cerrarSesion();" style="width:100%;background:none;border:1.5px solid var(--line);color:#DC2626;border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit">🔒 Cerrar sesión</button>';
+  } else {
+    html+='<button onclick="loginDesdeAyuda()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.8rem">🔑 Iniciar sesión</button>';
+  }
+  html+='</div>';
+  document.getElementById('masBody').innerHTML=html;
+  document.getElementById('masOverlay').classList.add('on');
+}
+function cerrarMas(){ document.getElementById('masOverlay').classList.remove('on'); }
+
+/* ═══════ AYUDA — instrucciones según quién sos ═══════ */
 function abrirAyuda(){
   var rol=rolActual();
   var html='';
@@ -298,9 +374,20 @@ function cerrarSesion(){
 }
 
 function toqueAbeja(){
-  // el acceso ahora es por Ayuda → Iniciar sesión.
-  // Si YA tenés sesión, un toque en el logo te lleva a tu panel (atajo cómodo).
-  if(haySesion()){ abrirPanelSegunRol(); }
+  // si ya hay sesión → 1 toque y entrás a tu panel
+  if(haySesion()){ abrirPanelSegunRol(); return; }
+  // si no → 5 toques + clave (la puerta discreta de siempre)
+  _toquesAbeja++;
+  clearTimeout(_toqueTimer);
+  _toqueTimer = setTimeout(function(){ _toquesAbeja = 0; }, 1500);
+  if(_toquesAbeja >= 5){ _toquesAbeja = 0; pedirClaveAdmin(); }
+}
+function pedirClaveAdmin(){
+  var pin = prompt("🔒 Clave:");
+  if(pin === null) return;
+  if(pin === PIN_DUENO){ setRol('admin'); abrirPanelSegunRol(); render(); }
+  else if(pin === PIN_REVENDEDOR){ setRol('revendedor'); abrirPanelSegunRol(); render(); }
+  else { alert("Clave incorrecta."); }
 }
 function pedirClaveAdmin(){
   var pin = prompt("🔒 Clave:");
@@ -503,6 +590,7 @@ var CONFIG_DEFAULT = {
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
+  vendedores: [],          // [{nombre:'Maximiliano', wa:'5491162107212'}, ...]
   pin: "2580",
   pinRev: "1234"
 };
@@ -570,6 +658,9 @@ function abrirConfig(){
       +'<div style="flex:1">'+campo('4 cuotas','cf_c4',c.cuotas[4],'','number')+'</div>'
       +'<div style="flex:1">'+campo('6 cuotas','cf_c6',c.cuotas[6],'','number')+'</div>'
     +'</div>'
+    +sec('💬 Vendedores (para "Consultar")')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Uno por línea: <b>Nombre, WhatsApp</b><br>Ej: Maximiliano, 5491162107212</div>'
+    +'<textarea id="cf_vendedores" placeholder="Maximiliano, 5491162107212&#10;Ángela, 5491168610532" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:70px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
     +sec('🔒 Seguridad')
     +campo('Clave del dueño (PIN)','cf_pin',c.pin,'','number')
     +campo('Clave de revendedor','cf_pinRev',c.pinRev||'1234','','number')
@@ -617,6 +708,13 @@ function guardarConfigDesdeForm(){
   CONFIG.cuotas = { 2:parseFloat(g('cf_c2'))||15, 4:parseFloat(g('cf_c4'))||55, 6:parseFloat(g('cf_c6'))||78 };
   CONFIG.pin = g('cf_pin')||'2580';
   CONFIG.pinRev = g('cf_pinRev')||'1234';
+  // vendedores: una línea por vendedor "Nombre, WhatsApp"
+  var vtxt=g('cf_vendedores');
+  CONFIG.vendedores = vtxt ? vtxt.split('\n').map(function(l){
+    var partes=l.split(','); if(partes.length<2) return null;
+    var nom=partes[0].trim(); var wa=partes[1].replace(/[^0-9]/g,'');
+    return (nom && wa) ? {nombre:nom, wa:wa} : null;
+  }).filter(Boolean) : [];
   guardarConfig();
   render();
   alert('✅ Guardado. Tu tienda se actualizó.');
@@ -817,6 +915,7 @@ function guardarProducto(){
     foto: _cargaFoto||'',
     categoria: g('cg_categoria')||'',
     desc: g('cg_desc')||'',
+    fechaPrecio: Date.now(),
     destacado: _cgToggles.destacado,
     delDia: _cgToggles.delDia,
     visible: true
@@ -948,7 +1047,7 @@ function guardarMasivo(){
   if(!confirm(msg)) return;
   if(reemplazar) PRODUCTOS=[];
   _masivoParsed.forEach(function(p){
-    var prod={ id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), nombre:p.nombre, venta:p.venta, foto:'', categoria:'', visible:true };
+    var prod={ id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), nombre:p.nombre, venta:p.venta, foto:'', categoria:'', visible:true, fechaPrecio:Date.now() };
     if(p.oferta) prod.precioAntes=Math.round(p.venta*1.15/500)*500;
     PRODUCTOS.push(prod);
   });
@@ -1199,14 +1298,101 @@ var actualIdx=null;
 function verDetalle(idx){
   var p=PRODUCTOS[idx]; if(!p)return; actualIdx=idx;
   var ph=document.getElementById('d-ph');
-  if(p.foto){ ph.style.backgroundImage='url('+p.foto+')'; ph.textContent=''; }
-  else { ph.style.backgroundImage='none'; ph.textContent=catProd(p).split(' ')[0]; }
+  // FOTO ENTERA (contain) — no recorta el producto
+  if(p.foto){ ph.style.cssText='width:100%;height:230px;border-radius:14px;background:#fff url('+p.foto+') center/contain no-repeat;margin-bottom:10px;border:1px solid rgba(255,255,255,.15)'; ph.textContent=''; }
+  else { ph.style.cssText='width:100%;height:180px;border-radius:14px;background:#0a1a3a;display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:10px'; ph.textContent=catProd(p).split(' ')[0]; }
   document.getElementById('d-nom').textContent=p.nombre;
   document.getElementById('d-precio').textContent=fmt(p.venta);
   document.getElementById('d-cuotas').innerHTML=cuotasActivas().map(function(n){
     return '<div class="cuota-card c'+n+'"><span class="c-n">'+n+' cuotas fijas</span><span class="c-v">'+fmt(valorCuota(p.venta,n))+'</span></div>';
   }).join('');
+  renderBotonesDetalle(idx);
   document.getElementById('overlay').classList.add('on');
+}
+
+/* Los botones cambian según QUIÉN mira (admin / revendedor / cliente) */
+function renderBotonesDetalle(idx){
+  var cont=document.getElementById('d-acciones'); if(!cont) return;
+  var p=PRODUCTOS[idx];
+  var rol=rolActual();
+  var html='';
+
+  if(rol==='admin'){
+    // ADMIN: compartir con foto + editar + fecha del precio
+    html+='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📤 Compartir con foto</button>';
+    html+='<div style="display:flex;gap:8px">'
+      +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">✏️ Editar</button>'
+      +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🗑️</button>'
+      +'</div>';
+    // fecha del precio (para saber si hay que actualizar)
+    if(p.fechaPrecio){
+      var dias=Math.floor((Date.now()-p.fechaPrecio)/86400000);
+      var alerta = dias>15;
+      html+='<div style="margin-top:10px;background:'+(alerta?'#FEF2F2':'#F7F8FA')+';border:1px solid '+(alerta?'#FECACA':'var(--line)')+';border-radius:10px;padding:9px 12px;font-size:.72rem;color:'+(alerta?'#DC2626':'var(--sub)')+';text-align:center;font-weight:600">'
+        +(alerta?'⚠️ ':'🕐 ')+'Precio armado hace '+dias+' día'+(dias===1?'':'s')+(alerta?' — conviene actualizar':'')+'</div>';
+    } else {
+      html+='<div style="margin-top:10px;background:#F7F8FA;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.72rem;color:var(--sub);text-align:center">🕐 Precio sin fecha registrada</div>';
+    }
+  }
+  else if(rol==='revendedor'){
+    // REVENDEDOR: solo compartir (nunca ve costos ni edita)
+    html+='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">📤 Compartir con foto</button>';
+  }
+  else {
+    // CLIENTE: comprar / carrito / consultar (como los grandes)
+    html+='<button onclick="consultarProducto('+idx+')" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛒 Lo quiero · Consultar</button>';
+    html+='<button onclick="compartir('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--line);color:var(--az);border-radius:13px;padding:13px;font-size:.86rem;font-weight:800;cursor:pointer;font-family:inherit">📤 Compartir</button>';
+  }
+  cont.innerHTML=html;
+}
+
+/* CLIENTE: elegir con quién consultar (los vendedores salen de la config) */
+function consultarProducto(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var vends=(CONFIG.vendedores&&CONFIG.vendedores.length)?CONFIG.vendedores:[];
+  var msg='Hola! Me interesa el *'+p.nombre+'* ('+fmt(p.venta)+' contado). ¿Me pasás info de las cuotas? 🐝';
+  // si no hay vendedores cargados, usa el WhatsApp del negocio
+  if(!vends.length){
+    var wa=(CONFIG.whatsapp||'').replace(/[^0-9]/g,'');
+    if(wa) window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+    else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    return;
+  }
+  var html='<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">💬 Consultá este producto</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+p.nombre+' · '+fmt(p.venta)+'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Elegí con quién</div>';
+  vends.forEach(function(v){
+    html+='<button onclick="window.open(\'https://wa.me/'+String(v.wa).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
+  });
+  html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
+  document.getElementById('ayudaBody').innerHTML=html;
+  document.getElementById('ayudaOverlay').classList.add('on');
+}
+function cerrarConsulta(){ document.getElementById('ayudaOverlay').classList.remove('on'); }
+
+/* ADMIN: editar un producto ya cargado */
+function editarProducto(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var nuevoNombre=prompt('Nombre del producto:', p.nombre);
+  if(nuevoNombre===null) return;
+  var nuevoPrecio=prompt('Precio de venta:', p.venta);
+  if(nuevoPrecio===null) return;
+  var v=parseFloat(nuevoPrecio)||p.venta;
+  p.nombre=(nuevoNombre||'').trim()||p.nombre;
+  if(v!==p.venta){ p.venta=v; p.fechaPrecio=Date.now(); }  // si cambia el precio, actualiza la fecha
+  guardarCatalogo();
+  render();
+  verDetalle(idx);
+  alert('✅ Producto actualizado. Ya se ve en la tienda.');
+}
+function borrarProducto(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  if(!confirm('¿Borrar "'+p.nombre+'" de la tienda?')) return;
+  PRODUCTOS.splice(idx,1);
+  guardarCatalogo();
+  cerrar();
+  render();
+  alert('🗑️ Producto borrado de la tienda.');
 }
 function cerrar(){ document.getElementById('overlay').classList.remove('on'); }
 
