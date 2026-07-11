@@ -133,9 +133,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .sheet{background:var(--bg);width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:88vh;overflow-y:auto;animation:up .28s cubic-bezier(.2,.9,.3,1)}
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sheet-head{background:linear-gradient(160deg,#020c2e,var(--az));padding:18px;position:sticky;top:0;z-index:2}
-.sheet-head .x{position:absolute;top:14px;right:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.1rem;cursor:pointer}
+/* botón cerrar BIEN VISIBLE (antes nadie sabía dónde tocar) */
+.sheet-head .x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:#fff;border:none;color:var(--az);font-size:1.25rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.3);z-index:6;line-height:1;display:flex;align-items:center;justify-content:center}
 .sheet-head .ph-big{width:100%;height:180px;border-radius:14px;background:#0a1a3a center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:10px}
 .sheet-head .nom{color:#fff;font-size:1.15rem;font-weight:900;text-align:center}
+
+/* FOTO GRANDE del producto (estilo Mercado Libre) — entera, sin recortar, en alta */
+.foto-big{width:100%;height:290px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.foto-big img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.foto-big .sinfoto{font-size:4rem;opacity:.25}
+
+/* Productos sugeridos */
+.sug-row{display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}
+.sug-row::-webkit-scrollbar{display:none}
+.sug-card{flex:0 0 auto;width:132px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer}
+.sug-card .sf{height:92px;background:#FAFBFC;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);overflow:hidden}
+.sug-card .sf img{max-width:100%;max-height:100%;object-fit:contain}
+.sug-card .sb{padding:8px 9px 10px}
+.sug-card .sn{font-size:.66rem;font-weight:700;color:var(--txt);line-height:1.25;height:32px;overflow:hidden;margin-bottom:3px}
+.sug-card .sp{font-size:.82rem;font-weight:900;color:var(--nar)}
+.sug-card .sc{font-size:.56rem;color:var(--gr);font-weight:700}
 .sheet-body{padding:16px 16px 22px}
 .precio-box{background:#fff;border-radius:14px;padding:14px;text-align:center;border:1px solid var(--line);margin-bottom:8px}
 .precio-box .lbl{font-size:.62rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.6px}
@@ -208,17 +225,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <!-- DETALLE -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)cerrar()">
   <div class="sheet">
-    <div class="sheet-head">
-      <button class="x" onclick="cerrar()">✕</button>
-      <div class="ph-big" id="d-ph"></div>
-      <div class="nom" id="d-nom"></div>
+    <div style="position:sticky;top:0;z-index:3;background:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)">
+      <button onclick="cerrar()" style="width:38px;height:38px;border-radius:50%;background:#F0F2F5;border:none;color:var(--az);font-size:1.2rem;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center;flex:0 0 auto">←</button>
+      <span style="flex:1;font-size:.78rem;font-weight:700;color:var(--sub)">Volver a la tienda</span>
+      <button onclick="cerrar()" style="width:38px;height:38px;border-radius:50%;background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;font-size:1.05rem;cursor:pointer;font-weight:900;flex:0 0 auto">✕</button>
+    </div>
+    <div style="background:#fff;padding:0 0 6px">
+      <div id="d-ph"></div>
     </div>
     <div class="sheet-body">
+      <div id="d-nom" style="font-size:1.15rem;font-weight:900;color:var(--az);line-height:1.25;margin-bottom:8px"></div>
       <div class="precio-box"><div class="lbl">💰 Precio contado</div><div class="val" id="d-precio"></div></div>
-      <div class="cuota-title">📅 Elegí en cuántas cuotas</div>
+      <div class="cuota-title">📅 Planes de cuotas</div>
       <div id="d-cuotas"></div>
       <div class="retira"><span>⭐</span><span>Retirás pagando solo la 1ra cuota ese mismo día.</span></div>
       <div id="d-acciones" style="margin-top:14px"></div>
+      <div id="d-sugeridos" style="margin-top:20px"></div>
+      <div id="d-sugeridos" style="margin-top:22px"></div>
     </div>
   </div>
 </div>
@@ -1054,10 +1077,10 @@ function subirFotoCatalogo(ev){
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
-      var max=600,w=img.width,h=img.height;
+      var max=900,w=img.width,h=img.height;
       if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>max){w=Math.round(w*max/h);h=max;}
       var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
-      _catFoto=cv.toDataURL('image/jpeg',0.82);
+      _catFoto=cv.toDataURL("image/jpeg",0.88);
       var pv=document.getElementById('catFotoPrev');
       if(pv){ pv.style.cssText='width:80px;height:80px;margin:0 auto 8px;border-radius:10px;background:#fff url('+_catFoto+') center/contain no-repeat;border:1.5px solid var(--line)'; }
     };
@@ -1235,10 +1258,10 @@ function subirFotoProd(ev){
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
-      var max=600,w=img.width,h=img.height;
+      var max=900,w=img.width,h=img.height;
       if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>max){w=Math.round(w*max/h);h=max;}
       var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
-      _cargaFoto=cv.toDataURL('image/jpeg',0.82);
+      _cargaFoto=cv.toDataURL("image/jpeg",0.88);
       var pv=document.getElementById('cargaFotoPrev'); if(pv){pv.style.background='url('+_cargaFoto+') center/cover';pv.textContent='';}
     };
     img.src=e.target.result;
@@ -1648,16 +1671,56 @@ var actualIdx=null;
 function verDetalle(idx){
   var p=PRODUCTOS[idx]; if(!p)return; actualIdx=idx;
   var ph=document.getElementById('d-ph');
-  // FOTO ENTERA (contain) — no recorta el producto
-  if(p.foto){ ph.style.cssText='width:100%;height:230px;border-radius:14px;background:#fff url('+p.foto+') center/contain no-repeat;margin-bottom:10px;border:1px solid rgba(255,255,255,.15)'; ph.textContent=''; }
-  else { ph.style.cssText='width:100%;height:180px;border-radius:14px;background:#0a1a3a;display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:10px'; ph.textContent=catProd(p).split(' ')[0]; }
+  // FOTO GRANDE Y ENTERA (estilo Mercado Libre) — usa <img> real para máxima calidad
+  if(p.foto){
+    ph.innerHTML='<div class="foto-big"><img src="'+p.foto+'" alt="'+(p.nombre||'').replace(/"/g,'')+'"></div>';
+  } else {
+    ph.innerHTML='<div class="foto-big"><span class="sinfoto">'+catProd(p).split(' ')[0]+'</span></div>';
+  }
   document.getElementById('d-nom').textContent=p.nombre;
   document.getElementById('d-precio').textContent=fmt(p.venta);
   document.getElementById('d-cuotas').innerHTML=cuotasActivas().map(function(n){
-    return '<div class="cuota-card c'+n+'"><span class="c-n">'+n+' cuotas fijas</span><span class="c-v">'+fmt(valorCuota(p.venta,n))+'</span></div>';
+    return '<div class="cuota-card c'+n+'"><span class="c-n">'+n+' cuotas</span><span class="c-v">'+n+' x '+fmt(valorCuota(p.venta,n))+'</span></div>';
   }).join('');
   renderBotonesDetalle(idx);
+  renderSugeridos(idx);
   document.getElementById('overlay').classList.add('on');
+  // sube el scroll del panel al abrir
+  var sh=document.querySelector('#overlay .sheet'); if(sh) sh.scrollTop=0;
+}
+
+/* "También te puede interesar" — por ahora por categoría.
+   Más adelante: algoritmo con lo que se vende junto. */
+function renderSugeridos(idx){
+  var cont=document.getElementById('d-sugeridos'); if(!cont)return;
+  var p=PRODUCTOS[idx]; if(!p){ cont.innerHTML=''; return; }
+  var cat=catProd(p);
+  // 1) misma categoría · 2) si no alcanza, completa con destacados
+  var mismos=PRODUCTOS.filter(function(x,i){ return i!==idx && catProd(x)===cat; });
+  if(mismos.length<4){
+    var extra=PRODUCTOS.filter(function(x,i){ return i!==idx && catProd(x)!==cat && (x.destacado || x.precioAntes); });
+    mismos=mismos.concat(extra);
+  }
+  // ordena por cercanía de precio (lo que puede pagar el mismo cliente)
+  mismos.sort(function(a,b){ return Math.abs(a.venta-p.venta) - Math.abs(b.venta-p.venta); });
+  mismos=mismos.slice(0,8);
+  if(!mismos.length){ cont.innerHTML=''; return; }
+
+  var html='<div style="border-top:1px solid var(--line);padding-top:16px">'
+    +'<div style="font-weight:900;color:var(--az);font-size:.92rem;margin-bottom:10px">🛍️ También te puede interesar</div>'
+    +'<div class="sug-row">';
+  mismos.forEach(function(s){
+    var si=PRODUCTOS.indexOf(s);
+    var mc=mejorCuota(s.venta);
+    html+='<div class="sug-card" onclick="verDetalle('+si+')">'
+      +'<div class="sf">'+(s.foto?'<img src="'+s.foto+'">':'<span style="font-size:1.8rem;opacity:.3">'+catProd(s).split(' ')[0]+'</span>')+'</div>'
+      +'<div class="sb"><div class="sn">'+s.nombre+'</div>'
+      +'<div class="sp">'+fmt(s.venta)+'</div>'
+      +(mc?'<div class="sc">💳 '+mc.n+' cuotas de '+fmt(mc.valor)+'</div>':'')
+      +'</div></div>';
+  });
+  html+='</div></div>';
+  cont.innerHTML=html;
 }
 
 /* Los botones cambian según QUIÉN mira (admin / revendedor / cliente) */
@@ -1668,18 +1731,20 @@ function renderBotonesDetalle(idx){
   var html='';
 
   if(rol==='admin'){
-    // ADMIN: compartir con foto + editar + fecha del precio
+    // ADMIN: vender + compartir + editar
+    html+='<button onclick="venderProducto('+idx+')" style="width:100%;background:var(--az);color:#fff;border:2px solid var(--nar);border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛍️ VENDER (enviar al cliente)</button>';
     html+='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📤 Compartir con foto</button>';
     html+='<div style="display:flex;gap:8px">'
       +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">✏️ Editar</button>'
-      +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:11px;padding:12px 16px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🗑️</button>'
+      +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🖼️ Foto</button>'
+      +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🗑️</button>'
       +'</div>';
     // fecha del precio (para saber si hay que actualizar)
     if(p.fechaPrecio){
       var dias=Math.floor((Date.now()-p.fechaPrecio)/86400000);
       var alerta = dias>15;
-      html+='<div style="margin-top:10px;background:'+(alerta?'#FEF2F2':'#F7F8FA')+';border:1px solid '+(alerta?'#FECACA':'var(--line)')+';border-radius:10px;padding:9px 12px;font-size:.72rem;color:'+(alerta?'#DC2626':'var(--sub)')+';text-align:center;font-weight:600">'
-        +(alerta?'⚠️ ':'🕐 ')+'Precio armado hace '+dias+' día'+(dias===1?'':'s')+(alerta?' — conviene actualizar':'')+'</div>';
+      html+='<div style="margin-top:10px;background:'+(alerta?'#FEF2F2':'#F0FDF4')+';border:1px solid '+(alerta?'#FECACA':'#A7F3D0')+';border-radius:10px;padding:9px 12px;font-size:.72rem;color:'+(alerta?'#DC2626':'#059669')+';text-align:center;font-weight:700">'
+        +(alerta?'⚠️ Precio viejo ('+dias+'d) — conviene actualizar':'✅ Precio reciente ('+dias+'d)')+'</div>';
     } else {
       html+='<div style="margin-top:10px;background:#F7F8FA;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.72rem;color:var(--sub);text-align:center">🕐 Precio sin fecha registrada</div>';
     }
@@ -1720,6 +1785,55 @@ function consultarProducto(idx){
   document.getElementById('ayudaOverlay').classList.add('on');
 }
 function cerrarConsulta(){ document.getElementById('ayudaOverlay').classList.remove('on'); }
+
+/* ADMIN: VENDER — arma el mensaje completo y lo manda al cliente */
+function venderProducto(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var tel=prompt('📱 WhatsApp del cliente (sin +, ej: 5491122334455):');
+  if(tel===null) return;
+  tel=(tel||'').replace(/[^0-9]/g,'');
+  var lines=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(p.venta,n)); });
+  var msg='*'+p.nombre.toUpperCase()+'*\n\n'+lines.join('\n')+'\n\n➡️ Contado: '+fmt(p.venta)
+    +'\n\n⭐ Retirás pagando solo la 1ra cuota ese mismo día.\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+  // con foto si tiene y el celu lo permite
+  if(p.foto && navigator.share && !tel){
+    fetch(p.foto).then(function(r){return r.blob();}).then(function(b){
+      var f=new File([b],'producto.jpg',{type:b.type||'image/jpeg'});
+      if(navigator.canShare && navigator.canShare({files:[f]})) return navigator.share({files:[f],text:msg});
+      return navigator.share({text:msg});
+    }).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank'); });
+    return;
+  }
+  var url = tel ? 'https://wa.me/'+tel+'?text='+encodeURIComponent(msg) : 'https://wa.me/?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+}
+/* ADMIN: cambiar/poner la foto de un producto */
+function cambiarFotoProducto(idx){
+  var inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/*';
+  inp.onchange=function(ev){
+    var file=ev.target.files&&ev.target.files[0]; if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        // foto en buena calidad para que se vea grande y linda
+        var max=900,w=img.width,h=img.height;
+        if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>max){w=Math.round(w*max/h);h=max;}
+        var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        PRODUCTOS[idx].foto=cv.toDataURL('image/jpeg',0.88);
+        guardarCatalogo();
+        render();
+        verDetalle(idx);
+        alert('✅ Foto actualizada.');
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
 
 /* ADMIN: editar un producto ya cargado */
 function editarProducto(idx){
