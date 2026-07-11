@@ -552,36 +552,60 @@ function abrirPanelRevendedor(){
      '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px;margin-bottom:14px;text-align:center">'
     +'<div style="font-size:1.6rem">🤝</div>'
     +'<div style="font-weight:900;color:#059669;font-size:.95rem">Panel Revendedor</div>'
-    +'<div style="font-size:.7rem;color:var(--sub);margin-top:2px">Calculá cuotas y compartí productos</div>'
+    +'<div style="font-size:.7rem;color:var(--sub);margin-top:2px">Pegá el precio de venta y compartí</div>'
     +'</div>'
-    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🧮 Calculadora de cuotas</div>'
-    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Poné el precio de venta y te saco las cuotas.</div>'
-    +'<input type="number" id="revPrecio" oninput="calcRevendedor()" placeholder="Precio de venta (ej: 163500)" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px;font-family:inherit;font-size:1rem;font-weight:800;color:var(--az);outline:none;text-align:center">'
-    +'<input id="revNombre" oninput="calcRevendedor()" placeholder="Nombre del producto (opcional)" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px;font-family:inherit;font-size:.86rem;outline:none;margin-top:8px">'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.4;margin-bottom:9px">Pegá el producto con su <b style="color:var(--az)">precio de venta</b>. Te calculo las cuotas y lo dejo listo para mandar.</div>'
+    +'<div style="background:#F0F4FF;border-radius:10px;padding:10px 12px;margin-bottom:11px;font-family:monospace;font-size:.76rem;color:var(--az);line-height:1.6">'
+      +'Heladera No Frost 300L | 434000<br>Smart TV 43" | 395000'
+    +'</div>'
+    +'<textarea id="revTxt" oninput="calcRevendedor()" placeholder="Pegá acá el producto y su precio..." style="width:100%;border:1.5px solid #10B981;border-radius:13px;padding:13px;font-family:inherit;font-size:.88rem;min-height:100px;outline:none;resize:vertical"></textarea>'
     +'<div id="revResultado" style="margin-top:14px"></div>'
     +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px">🔒 Cerrar sesión</button>';
   calcRevendedor();
 }
+/* El revendedor SOLO trabaja con precio de VENTA. Nunca ve costos ni markup. */
 function calcRevendedor(){
   var cont=document.getElementById('revResultado'); if(!cont) return;
-  var venta=parseFloat(document.getElementById('revPrecio').value)||0;
-  var nombre=(document.getElementById('revNombre').value||'').trim();
-  if(!venta){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:18px;font-size:.82rem">Poné un precio de venta y te calculo las cuotas. 🐝</div>'; return; }
-  var cuotasHtml='', waLines=[];
-  cuotasActivas().forEach(function(n){
-    var vc=valorCuota(venta,n);
-    cuotasHtml+='<div style="background:rgba(255,255,255,.09);border-left:3px solid var(--nar);border-radius:10px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:.82rem;font-weight:800;color:#fff">'+n+' cuotas fijas</span><span style="font-size:1.05rem;font-weight:900;color:#ffb968">'+fmt(vc)+'</span></div>';
-    waLines.push('💳 '+n+' cuotas fijas de '+fmt(vc));
+  var txt=(document.getElementById('revTxt')||{}).value||'';
+  var lineas=txt.split('\n').filter(function(l){return l.trim();});
+  if(!lineas.length){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:18px;font-size:.82rem">Pegá un producto con su precio de venta. 🐝</div>'; return; }
+
+  var items=[];
+  lineas.forEach(function(raw){
+    var linea=raw.replace(/[*_#]/g,'').trim(); if(!linea) return;
+    var nombre='', venta=0;
+    if(linea.indexOf('|')>=0){
+      var partes=linea.split('|');
+      nombre=partes[0].trim();
+      var mp=(partes[1]||'').match(/(\d[\d\.]*)/);
+      if(mp) venta=parseInt(mp[1].replace(/\./g,''),10);
+    } else {
+      var md=linea.match(/\$\s*(\d[\d\.]{2,})/) || linea.match(/(\d[\d\.]{4,})/);
+      if(md){ venta=parseInt(md[1].replace(/\./g,''),10); nombre=limpiarNombre(linea.replace(md[0],'')); }
+    }
+    if(venta && nombre && nombre.length>2) items.push({nombre:nombre, venta:venta});
   });
-  cont.innerHTML=
-     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff">'
-    +(nombre?'<div style="text-align:center;font-size:.9rem;font-weight:900;margin-bottom:6px">'+nombre+'</div>':'')
-    +'<div style="text-align:center;font-size:1.7rem;font-weight:900;margin-bottom:14px">'+fmt(venta)+'<div style="font-size:.62rem;color:rgba(255,255,255,.6);font-weight:700;margin-top:2px">PRECIO CONTADO</div></div>'
-    +cuotasHtml
-    +'<div style="text-align:center;font-size:.66rem;color:rgba(255,255,255,.7);margin-top:10px">'+(CONFIG.instagram||'@amarangoelectro')+' 🐝</div>'
-    +'</div>'
-    +'<button onclick="compartirRevendedor()" style="width:100%;margin-top:12px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Compartir por WhatsApp</button>';
-  window._revMsg='*'+(nombre||'PRODUCTO').toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n➡️ Contado: '+fmt(venta)+'\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+  if(!items.length){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:18px;font-size:.82rem">No encontré el precio. Probá: <b>Nombre | Precio</b></div>'; return; }
+
+  var html='', msgs=[];
+  items.forEach(function(it){
+    var cuotasHtml='', waLines=[];
+    cuotasActivas().forEach(function(n){
+      var vc=valorCuota(it.venta,n);
+      cuotasHtml+='<div style="background:rgba(255,255,255,.09);border-left:3px solid var(--nar);border-radius:9px;padding:9px 12px;display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.78rem;font-weight:800;color:#fff">'+n+' cuotas fijas</span><span style="font-size:.95rem;font-weight:900;color:#ffb968">'+fmt(vc)+'</span></div>';
+      waLines.push('💳 '+n+' cuotas fijas de '+fmt(vc));
+    });
+    html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:15px;padding:16px;color:#fff;margin-bottom:10px">'
+      +'<div style="text-align:center;font-size:.88rem;font-weight:900;margin-bottom:5px">'+it.nombre+'</div>'
+      +'<div style="text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:12px">'+fmt(it.venta)+'<div style="font-size:.6rem;color:rgba(255,255,255,.6);font-weight:700">PRECIO CONTADO</div></div>'
+      +cuotasHtml
+      +'<div style="text-align:center;font-size:.64rem;color:rgba(255,255,255,.7);margin-top:8px">'+(CONFIG.instagram||'@amarangoelectro')+' 🐝</div>'
+      +'</div>';
+    msgs.push('*'+it.nombre.toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n➡️ Contado: '+fmt(it.venta));
+  });
+  html+='<button onclick="compartirRevendedor()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Compartir por WhatsApp</button>';
+  cont.innerHTML=html;
+  window._revMsg=msgs.join('\n\n———\n\n')+'\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
 }
 function compartirRevendedor(){
   if(navigator.share){ navigator.share({text:window._revMsg}).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(window._revMsg),'_blank'); }); }
@@ -594,7 +618,7 @@ function abrirPanelDueno(){
   document.getElementById('adminBody').innerHTML =
      '<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
-    +botonPanel('➕','Cargar producto','Subí productos nuevos a tu tienda','cargar')
+    +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
     +botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
     +'</div>'
@@ -970,17 +994,194 @@ function compartirPlaca(){
 
 /* ═══════ CARGAR PRODUCTO (sube a la misma tabla que lee la vidriera) ═══════ */
 var _cargaModo='venta', _cargaFoto='';
-function abrirCargar(){
-  // El pegado de lista es lo que MÁS se usa → va primero, directo.
-  abrirPegadoMasivo();
+/* ═══════ CARGAR CATÁLOGO — la pantalla que más usan los admin ═══════
+   Pegás "Nombre | Precio" (del canal de WhatsApp o del mayorista),
+   elegís si es Costo/Venta/USD, ponés la foto, y sube directo a la tienda. */
+var _catModo='costo', _catFoto='';
+function abrirCargar(){ abrirCargarCatalogo(); }
+
+function abrirCargarCatalogo(){
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">⚙️ Cargar catálogo</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.4;margin-bottom:10px">Una línea por producto: <b style="color:var(--az)">Nombre | Precio</b><br>Elegí abajo si el precio es Costo, Venta o USD.</div>'
+    // ejemplo (igual que en la vieja)
+    +'<div style="background:#F0F4FF;border-radius:10px;padding:11px 13px;margin-bottom:12px;font-family:monospace;font-size:.78rem;color:var(--az);line-height:1.7">'
+      +'Heladera No Frost 300L | 310000<br>Batidora Yelmo | 180000<br>Yogurtera Delhi | 45000'
+    +'</div>'
+    // el cuadro para pegar
+    +'<textarea id="catTxt" oninput="parsearCatalogo()" placeholder="Pegá acá tus productos..." style="width:100%;border:1.5px solid var(--nar);border-radius:14px;padding:14px;font-family:inherit;font-size:.88rem;min-height:130px;outline:none;resize:vertical"></textarea>'
+    // 3 botones: costo / venta / usd
+    +'<div style="font-weight:900;color:var(--az);font-size:.86rem;margin:14px 0 8px">¿Qué precio estás pegando?</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px">'
+      +botonCat('costo','💰','Costo','aplico fórmula')
+      +botonCat('venta','🏷️','Venta','precio final')
+      +botonCat('usd','💵','USD','paso a pesos')
+    +'</div>'
+    // cotización (solo si es USD)
+    +'<div id="catDolarBox" style="display:'+(_catModo==='usd'?'block':'none')+';background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:11px;padding:11px;margin-bottom:12px">'
+      +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:5px">💵 VALOR DEL DÓLAR</div>'
+      +'<input type="number" id="catDolar" value="'+(CONFIG.dolar||1500)+'" oninput="parsearCatalogo()" style="width:100%;border:1.5px solid var(--line);border-radius:9px;padding:10px;font-family:inherit;font-weight:800;color:var(--az);outline:none;text-align:center">'
+    +'</div>'
+    // foto opcional
+    +'<div style="background:#F5F8FF;border-radius:12px;padding:13px;margin-bottom:12px">'
+      +'<div style="font-weight:900;color:var(--az);font-size:.84rem;margin-bottom:4px">📷 Foto (opcional)</div>'
+      +'<div style="font-size:.72rem;color:var(--sub);line-height:1.4;margin-bottom:9px">Se le pone al primer producto de la lista. A los demás les ponés la foto después, editando cada uno.</div>'
+      +'<div id="catFotoPrev" style="'+(_catFoto?'width:80px;height:80px;margin:0 auto 8px;border-radius:10px;background:#fff url('+_catFoto+') center/contain no-repeat;border:1.5px solid var(--line)':'display:none')+'"></div>'
+      +'<button onclick="document.getElementById(\'catFile\').click()" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.84rem">🖼️ Elegir foto</button>'
+      +'<input type="file" id="catFile" accept="image/*" style="display:none" onchange="subirFotoCatalogo(event)">'
+    +'</div>'
+    // reemplazar (peligroso → con confirmación)
+    +'<label style="display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:.8rem;color:var(--txt);cursor:pointer"><input type="checkbox" id="catReemplazar" style="width:19px;height:19px"> Reemplazar todo el catálogo <span style="color:var(--sub);font-size:.74rem">(si no, agrega)</span></label>'
+    +'<div id="catPreview" style="margin-bottom:12px"></div>'
+    +'<button onclick="guardarCatalogoPegado()" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">✅ Cargar productos</button>'
+    +'<div style="display:flex;gap:8px;margin-top:10px">'
+      +'<button onclick="abrirPegadoMasivo()" style="flex:1;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.78rem">📋 Lista de celulares</button>'
+      +'<button onclick="abrirPapelera()" style="background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px 14px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.78rem">🗑️</button>'
+    +'</div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">Cancelar</button>';
+  parsearCatalogo();
 }
+function botonCat(m,ico,t,s){
+  var on=_catModo===m;
+  return '<button onclick="setCatModo(\''+m+'\')" style="flex:1;border:2px solid '+(on?'var(--az)':'var(--line)')+';background:'+(on?'var(--az)':'#fff')+';border-radius:12px;padding:11px 5px;cursor:pointer;font-family:inherit;text-align:center">'
+    +'<span style="font-size:.82rem;font-weight:900;color:'+(on?'#fff':'var(--txt)')+';display:block">'+ico+' '+t+'</span>'
+    +'<span style="font-size:.6rem;color:'+(on?'rgba(255,255,255,.7)':'var(--sub)')+';display:block;margin-top:1px">'+s+'</span></button>';
+}
+function setCatModo(m){ _catModo=m; abrirCargarCatalogo(); }
+function subirFotoCatalogo(ev){
+  var file=ev.target.files&&ev.target.files[0]; if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var max=600,w=img.width,h=img.height;
+      if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>max){w=Math.round(w*max/h);h=max;}
+      var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+      _catFoto=cv.toDataURL('image/jpeg',0.82);
+      var pv=document.getElementById('catFotoPrev');
+      if(pv){ pv.style.cssText='width:80px;height:80px;margin:0 auto 8px;border-radius:10px;background:#fff url('+_catFoto+') center/contain no-repeat;border:1.5px solid var(--line)'; }
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* Parser: Nombre | Precio  (lo que sigue a la barra es el precio, lo demás se descarta) */
+var _catParsed=[];
+function parsearCatalogo(){
+  var txt=document.getElementById('catTxt'); if(!txt)return;
+  var lineas=(txt.value||'').split('\n');
+  var cot=parseFloat((document.getElementById('catDolar')||{}).value)||CONFIG.dolar||1500;
+  _catParsed=[];
+  lineas.forEach(function(raw){
+    var linea=raw.replace(/[*_#]/g,'').trim();
+    if(!linea) return;
+    var nombre='', precio=0;
+    if(linea.indexOf('|')>=0){
+      var partes=linea.split('|');
+      nombre=partes[0].trim();
+      var ps=(partes[1]||'').trim();          // ← lo que sigue a la barra = precio
+      var mp=ps.match(/(\d[\d\.]*)/);
+      if(mp) precio=parseInt(mp[1].replace(/\./g,''),10);
+    } else {
+      // sin barra: busca un precio con $ o usd en la línea
+      var mu=linea.match(/(\d{2,4})\s*usd/i);
+      var md=linea.match(/\$\s*(\d[\d\.]{2,})/) || linea.match(/(\d[\d\.]{2,})\s*\$/);
+      if(mu){ precio=parseInt(mu[1],10); nombre=limpiarNombre(linea.replace(/\d{2,4}\s*usd/i,'')); }
+      else if(md){ precio=parseInt(md[1].replace(/\./g,''),10); nombre=limpiarNombre(linea.replace(md[0],'')); }
+    }
+    if(!precio || !nombre || nombre.length<3) return;
+    var costo, venta;
+    if(_catModo==='usd'){ costo=Math.round(precio*cot); venta=markupDeCosto(costo); }
+    else if(_catModo==='costo'){ costo=precio; venta=markupDeCosto(costo); }
+    else { costo=null; venta=precio; }
+    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(_catModo==='usd'?precio:null) });
+  });
+  renderCatPreview();
+}
+function renderCatPreview(){
+  var c=document.getElementById('catPreview'); if(!c)return;
+  if(!_catParsed.length){ c.innerHTML=''; return; }
+  var html='<div style="font-weight:900;color:var(--az);font-size:.86rem;margin-bottom:7px">✅ '+_catParsed.length+' producto'+(_catParsed.length===1?'':'s')+' detectado'+(_catParsed.length===1?'':'s')+'</div>';
+  _catParsed.slice(0,8).forEach(function(p){
+    html+='<div style="background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 11px;margin-bottom:5px">'
+      +'<div style="font-size:.76rem;font-weight:700;color:var(--txt)">'+p.nombre+'</div>'
+      +'<div style="font-size:.66rem;color:var(--sub)">'+(p.usd?'U$'+p.usd+' → ':'')+'Vende: <b style="color:var(--az)">'+fmt(p.venta)+'</b> · 6 cuotas '+fmt(valorCuota(p.venta,6))+'</div></div>';
+  });
+  if(_catParsed.length>8) html+='<div style="text-align:center;font-size:.72rem;color:var(--sub);padding:4px">…y '+(_catParsed.length-8)+' más</div>';
+  c.innerHTML=html;
+}
+
+function guardarCatalogoPegado(){
+  if(!_catParsed.length){ alert('Pegá al menos un producto.'); return; }
+  var reemplazar=document.getElementById('catReemplazar') && document.getElementById('catReemplazar').checked;
+  if(reemplazar){
+    // 🚨 confirmación doble — es peligroso
+    if(!confirm('⚠️ ATENCIÓN\n\nVas a BORRAR los '+PRODUCTOS.length+' productos que ya tenés y dejar solo estos '+_catParsed.length+'.\n\n¿Estás seguro?')) return;
+    if(!confirm('Última confirmación:\n\n¿Seguro que querés reemplazar TODO el catálogo?\n\n(Los productos viejos van a la papelera, se pueden recuperar)')) return;
+    guardarEnPapelera(PRODUCTOS);   // respaldo antes de borrar
+    PRODUCTOS=[];
+  }
+  _catParsed.forEach(function(p,i){
+    var prod={
+      id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+      nombre:p.nombre, venta:p.venta, foto:(i===0?_catFoto:''), categoria:'', visible:true, fechaPrecio:Date.now()
+    };
+    PRODUCTOS.push(prod);
+  });
+  guardarCatalogo();
+  var n=_catParsed.length;
+  _catParsed=[]; _catFoto='';
+  alert('✅ '+n+' producto'+(n===1?'':'s')+' '+(reemplazar?'cargado'+(n===1?'':'s')+' (catálogo reemplazado)':'agregado'+(n===1?'':'s'))+'. Ya está en tu tienda.');
+  render();
+  abrirPanelDueno();
+}
+
+/* ═══════ PAPELERA — respaldo por si borran todo sin querer ═══════ */
+function guardarEnPapelera(prods){
+  if(!prods || !prods.length) return;
+  try{
+    var pap={ fecha:Date.now(), productos:JSON.parse(JSON.stringify(prods)) };
+    localStorage.setItem('ae_papelera', JSON.stringify(pap));
+    if(sb) sb.from('tienda_catalogo').upsert({id:'papelera', datos:pap.productos}).then(function(){}).catch(function(){});
+  }catch(e){}
+}
+function abrirPapelera(){
+  var pap=null;
+  try{ pap=JSON.parse(localStorage.getItem('ae_papelera')||'null'); }catch(e){}
+  var html='<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:10px">🗑️ Papelera</div>';
+  if(!pap || !pap.productos || !pap.productos.length){
+    html+='<div style="text-align:center;color:var(--sub);padding:30px 20px;font-size:.85rem">La papelera está vacía.<br><span style="font-size:.75rem">Acá van los productos si reemplazás todo el catálogo, por si te arrepentís. 🐝</span></div>';
+  } else {
+    var f=new Date(pap.fecha);
+    html+='<div style="background:#FFF9F0;border:1.5px dashed var(--nar);border-radius:12px;padding:13px;margin-bottom:12px">'
+      +'<div style="font-weight:900;color:var(--az);font-size:.9rem">'+pap.productos.length+' productos guardados</div>'
+      +'<div style="font-size:.74rem;color:var(--sub);margin-top:2px">Borrados el '+f.toLocaleDateString('es-AR')+' a las '+f.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})+'</div></div>'
+      +'<button onclick="restaurarPapelera()" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit">♻️ Recuperar estos '+pap.productos.length+' productos</button>'
+      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;margin-top:8px">Se van a agregar a los que tenés ahora.</div>';
+  }
+  html+='<button onclick="abrirCargarCatalogo()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver</button>';
+  document.getElementById('adminBody').innerHTML=html;
+}
+function restaurarPapelera(){
+  var pap=null;
+  try{ pap=JSON.parse(localStorage.getItem('ae_papelera')||'null'); }catch(e){}
+  if(!pap || !pap.productos) return;
+  if(!confirm('¿Recuperar '+pap.productos.length+' productos de la papelera?')) return;
+  pap.productos.forEach(function(p){ PRODUCTOS.push(p); });
+  guardarCatalogo();
+  alert('♻️ '+pap.productos.length+' productos recuperados.');
+  render();
+  abrirPanelDueno();
+}
+
 /* El formulario de uno por uno queda como opción secundaria */
 function abrirCargarUno(){
   _cargaFoto='';
   var cats=['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
   document.getElementById('adminBody').innerHTML=
      '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:12px">➕ Cargar uno por uno</div>'
-    +'<button onclick="abrirPegadoMasivo()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:14px;font-size:.82rem">📋 Mejor pegar una lista completa</button>'
+    +'<button onclick="abrirCargarCatalogo()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:14px;font-size:.82rem">⚙️ Mejor usar Cargar catálogo</button>'
     // foto
     +'<div style="text-align:center;margin-bottom:14px">'
       +'<div id="cargaFotoPrev" style="width:120px;height:120px;margin:0 auto 8px;border-radius:14px;background:#F5F8FF;border:1.5px dashed var(--nar);display:flex;align-items:center;justify-content:center;font-size:2.5rem">📷</div>'
