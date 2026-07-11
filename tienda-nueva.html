@@ -930,11 +930,11 @@ function toggleCajonOpciones(){
   c.style.display = abierto ? 'none' : 'grid';
   if(f) f.textContent = abierto ? '▼' : '▲';
 }
-function opcProd(idx,k,txt,on,peligro){
+function opcProd(idx,k,ico,txt,on,peligro){
   var colOn = peligro ? '#DC2626' : 'var(--nar)';
   var bgOn  = peligro ? '#FEF2F2' : '#FFF0E0';
-  return '<button onclick="toggleOpcProd('+idx+',\''+k+'\')" style="width:100%;text-align:left;border:1.5px solid '+(on?colOn:'var(--line)')+';background:'+(on?bgOn:'#fff')+';color:'+(on?colOn:'var(--sub)')+';border-radius:11px;padding:12px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:inherit">'
-    +(on?'✅ ':'☆ ')+txt+'</button>';
+  return '<button onclick="toggleOpcProd('+idx+',\''+k+'\')" style="width:100%;text-align:left;border:1.5px solid '+(on?colOn:'var(--line)')+';background:'+(on?bgOn:'#fff')+';color:'+(on?colOn:'var(--sub)')+';border-radius:11px;padding:12px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:7px;display:flex;align-items:center;gap:9px">'
+    +'<span style="font-size:1rem">'+(on?'✅':ico)+'</span><span>'+txt+'</span></button>';
 }
 function toggleOpcProd(idx,k){
   var p=PRODUCTOS[idx]; if(!p)return;
@@ -1967,17 +1967,6 @@ function renderBotonesDetalle(idx){
       +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">✏️ Editar</button>'
       +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🖼️ Foto</button>'
       +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🗑️</button>'
-      +'</div>';
-    // ⚙️ CAJÓN de opciones del producto (se despliega)
-    html+='<button onclick="toggleCajonOpciones()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.84rem;margin-top:10px">⚙️ Opciones del producto <span id="cajonFlecha">▼</span></button>'
-      +'<div id="cajonOpciones" style="display:none;margin-top:8px;display:grid;gap:7px">'
-        +opcProd(idx,'destacado','⭐ Destacado', !!p.destacado)
-        +opcProd(idx,'delDia','🌟 Producto del día', !!p.delDia)
-        +opcProd(idx,'ultimas','📦 Últimas unidades', !!p.ultimas)
-        +opcProd(idx,'sinInteres','💳 Cuotas sin interés', !!p.sinInteres)
-        +opcProd(idx,'oferta','🔥 Poner en oferta', !!(p.precioAntes && p.precioAntes>p.venta))
-        +opcProd(idx,'oculto','🙈 Ocultar de la tienda', p.visible===false, true)
-        +opcProd(idx,'sinStock','⛔ Marcar SIN STOCK', !!p.sinStock, true)
       +'</div>';
   }
   else if(rol==='revendedor'){
