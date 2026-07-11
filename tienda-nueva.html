@@ -286,6 +286,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
    calculadora.html, en la línea que dice SB_KEY). Copiá y pegá
    entre las comillas. Sin la key, la tienda no baja productos.
    ═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   🏪 MULTI-TIENDA — el motor de Amarango
+   Cada tienda tiene su CÓDIGO, y sus datos se guardan separados.
+   Se elige con la dirección:  ...tienda-nueva.html?t=marcelo
+   Sin código = 'amarango' (la tienda de Max, por compatibilidad).
+   ═══════════════════════════════════════════════════════════ */
+function tiendaID(){
+  try{
+    var p=new URLSearchParams(window.location.search);
+    var t=(p.get('t')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'');
+    if(t) { try{ localStorage.setItem('ae_tienda_id', t); }catch(e){} return t; }
+    var guardada=localStorage.getItem('ae_tienda_id');
+    if(guardada) return guardada;
+  }catch(e){}
+  return 'amarango';   // la de Max por defecto
+}
+var TIENDA = tiendaID();
+/* claves de guardado, separadas por tienda */
+function keyConfig(){  return TIENDA==='amarango' ? 'config'   : 'config_'+TIENDA; }
+function keyCatalogo(){return TIENDA==='amarango' ? 'catalogo' : 'catalogo_'+TIENDA; }
+function keyClientes(){return TIENDA==='amarango' ? 'clientes' : 'clientes_'+TIENDA; }
+function keySubs(){    return 'lista'; }   // los suscriptores son SOLO de Max
+/* claves locales (en el teléfono), también separadas */
+function lsKey(base){ return TIENDA==='amarango' ? base : base+'_'+TIENDA; }
+
 var SB_URL = "https://zctaukyrhsmpjkcddcqq.supabase.co";
 var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del teléfono
 
@@ -622,13 +647,13 @@ function calcRevendedor(){
       +'<div style="text-align:center;font-size:.88rem;font-weight:900;margin-bottom:5px">'+it.nombre+'</div>'
       +'<div style="text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:12px">'+fmt(it.venta)+'<div style="font-size:.6rem;color:rgba(255,255,255,.6);font-weight:700">PRECIO CONTADO</div></div>'
       +cuotasHtml
-      +'<div style="text-align:center;font-size:.64rem;color:rgba(255,255,255,.7);margin-top:8px">'+(CONFIG.instagram||'@amarangoelectro')+' 🐝</div>'
+      +'<div style="text-align:center;font-size:.64rem;color:rgba(255,255,255,.7);margin-top:8px">'+firmaTienda()+' 🐝</div>'
       +'</div>';
     msgs.push('*'+it.nombre.toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n➡️ Contado: '+fmt(it.venta));
   });
   html+='<button onclick="compartirRevendedor()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Compartir por WhatsApp</button>';
   cont.innerHTML=html;
-  window._revMsg=msgs.join('\n\n———\n\n')+'\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+  window._revMsg=msgs.join('\n\n———\n\n')+'\n'+firmaTienda()+' 🐝';
 }
 function compartirRevendedor(){
   if(navigator.share){ navigator.share({text:window._revMsg}).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(window._revMsg),'_blank'); }); }
@@ -786,21 +811,42 @@ var CONFIG_DEFAULT = {
   pin: "2580",
   pinRev: "1234"
 };
+/* La firma que va al pie de cada mensaje. Sale de la CONFIG de cada tienda. */
+function firmaTienda(){
+  if(!CONFIG) return '';
+  if(CONFIG.instagram) return CONFIG.instagram;
+  if(CONFIG.negocio) return CONFIG.negocio;
+  return '';
+}
+
 var CONFIG = null;
 function cargarConfig(cb){
-  try{ var l=localStorage.getItem('ae_config'); if(l) CONFIG=JSON.parse(l); }catch(e){}
-  if(!CONFIG) CONFIG=JSON.parse(JSON.stringify(CONFIG_DEFAULT));
+  try{ var l=localStorage.getItem(lsKey('ae_config')); if(l) CONFIG=JSON.parse(l); }catch(e){}
+  if(!CONFIG){
+    CONFIG=JSON.parse(JSON.stringify(CONFIG_DEFAULT));
+    // Si NO es la tienda de Max → arranca VACÍA, sin marca ajena
+    if(TIENDA!=='amarango'){
+      CONFIG.negocio='Mi Tienda';
+      CONFIG.eslogan='';
+      CONFIG.instagram='';
+      CONFIG.whatsapp='';
+      CONFIG.logo='';
+      CONFIG.admins=[];
+      CONFIG.vendedores=[];
+      CONFIG.duenoPlataforma=false;   // no ve Suscripciones (eso es de Max)
+    }
+  }
   aplicarConfig();
   if(cb) cb();
   if(sb){
-    sb.from('amarango_config').select('datos').eq('id','config').maybeSingle()
-      .then(function(r){ if(r&&r.data&&r.data.datos){ CONFIG=Object.assign(JSON.parse(JSON.stringify(CONFIG_DEFAULT)), r.data.datos); try{localStorage.setItem('ae_config',JSON.stringify(CONFIG));}catch(e){} aplicarConfig(); render(); } })
+    sb.from('amarango_config').select('datos').eq('id',keyConfig()).maybeSingle()
+      .then(function(r){ if(r&&r.data&&r.data.datos){ CONFIG=Object.assign(JSON.parse(JSON.stringify(CONFIG_DEFAULT)), r.data.datos); try{localStorage.setItem(lsKey('ae_config'),JSON.stringify(CONFIG));}catch(e){} aplicarConfig(); render(); } })
       .catch(function(){});
   }
 }
 function guardarConfig(){
-  try{ localStorage.setItem('ae_config', JSON.stringify(CONFIG)); }catch(e){}
-  if(sb){ sb.from('amarango_config').upsert({id:'config', datos:CONFIG}).then(function(){}).catch(function(){}); }
+  try{ localStorage.setItem(lsKey('ae_config'), JSON.stringify(CONFIG)); }catch(e){}
+  if(sb){ sb.from('amarango_config').upsert({id:keyConfig(), datos:CONFIG}).then(function(){}).catch(function(){}); }
   aplicarConfig();
 }
 function aplicarConfig(){
@@ -818,12 +864,48 @@ function aplicarConfig(){
   document.documentElement.style.setProperty('--az', CONFIG.colorPrincipal);
   document.documentElement.style.setProperty('--nar', CONFIG.colorAcento);
 }
+/* El link único de esta tienda (para compartir con los clientes) */
+function linkTienda(){
+  var base=window.location.origin+window.location.pathname;
+  return TIENDA==='amarango' ? base : base+'?t='+TIENDA;
+}
+function copiarLink(){
+  var l=linkTienda();
+  if(navigator.clipboard){ navigator.clipboard.writeText(l).then(function(){ alert('✅ Link copiado. Ya lo podés compartir.'); }).catch(function(){ prompt('Copiá este link:', l); }); }
+  else prompt('Copiá este link:', l);
+}
+/* Checklist: le muestra al dueño qué le falta poner de SU marca */
+function checklistMarca(){
+  var c=CONFIG||{};
+  var faltan=[];
+  if(!c.negocio || c.negocio==='Mi Tienda' || (TIENDA!=='amarango' && /amarango/i.test(c.negocio))) faltan.push('El nombre de tu negocio');
+  if(!c.logo) faltan.push('Tu logo');
+  if(!c.instagram || (TIENDA!=='amarango' && /amarango/i.test(c.instagram))) faltan.push('Tu Instagram');
+  if(!c.whatsapp) faltan.push('Tu WhatsApp');
+  if(!c.admins || !c.admins.length) faltan.push('Quién cobra (administradores)');
+  if(!faltan.length){
+    return '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:11px;padding:11px;margin-bottom:14px;font-size:.78rem;color:#059669;font-weight:700;text-align:center">✅ Tu marca está completa</div>';
+  }
+  return '<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:12px;padding:12px;margin-bottom:14px">'
+    +'<div style="font-weight:900;color:var(--nar);font-size:.84rem;margin-bottom:6px">📝 Te falta poner tu marca</div>'
+    +'<div style="font-size:.74rem;color:var(--sub);line-height:1.6">'
+    +faltan.map(function(f){ return '• '+f; }).join('<br>')
+    +'</div></div>';
+}
+
 function abrirConfig(){
   var c=CONFIG;
   function campo(lbl,id,val,ph,tipo){ return '<div style="margin-bottom:11px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" '+(tipo?'type="'+tipo+'"':'')+' value="'+(val==null?'':String(val)).replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'; }
   function sec(t){ return '<div style="font-size:.72rem;font-weight:900;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding-bottom:5px;border-bottom:1.5px solid var(--line)">'+t+'</div>'; }
   var html = '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">⚙️ Configuración</div>'
-    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Esto define tu tienda. Cambialo y se aplica a todo. 🐝</div>'
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:10px">Esto define tu tienda. Cambialo y se aplica a todo. 🐝</div>'
+    // el link de ESTA tienda
+    +'<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px;margin-bottom:14px">'
+      +'<div style="font-size:.66rem;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🔗 El link de tu tienda</div>'
+      +'<div style="font-size:.74rem;color:var(--txt);word-break:break-all;font-family:monospace;background:#fff;border-radius:8px;padding:8px;margin-bottom:7px">'+linkTienda()+'</div>'
+      +'<button onclick="copiarLink()" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.78rem">📋 Copiar link para compartir</button>'
+    +'</div>'
+    +checklistMarca()
     +sec('🏪 Tu marca')
     +'<div style="margin-bottom:12px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Logo</div>'
       +'<div style="display:flex;align-items:center;gap:12px">'
@@ -1010,12 +1092,12 @@ function armarPlaca(){
     +'<div style="text-align:center;font-size:.9rem;font-weight:900;margin-bottom:8px">'+nombre+'</div>'
     +'<div style="text-align:center;font-size:1.7rem;font-weight:900;margin-bottom:14px">'+ventaHtml+'</div>'
     +cuotasHtml
-    +'<div style="text-align:center;font-size:.66rem;color:rgba(255,255,255,.7);margin-top:10px">'+(CONFIG.instagram||'@amarangoelectro')+' 🐝</div>'
+    +'<div style="text-align:center;font-size:.66rem;color:rgba(255,255,255,.7);margin-top:10px">'+firmaTienda()+' 🐝</div>'
     +'</div>'+costoBox
     +'<button onclick="compartirPlaca()" style="width:100%;margin-top:12px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Compartir por WhatsApp</button>';
 
   var lineaC = _placaDesc>0 ? '➡️ Contado: '+fmt(venta)+'  (🏷️ '+_placaDesc+'% OFF, antes '+fmt(ventaFull)+')' : '➡️ Contado: '+fmt(venta);
-  window._placaMsg='*'+nombre.toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n'+lineaC+'\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+  window._placaMsg='*'+nombre.toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n'+lineaC+'\n'+firmaTienda()+' 🐝';
 }
 function compartirPlaca(){
   if(navigator.share){ navigator.share({text:window._placaMsg}).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(window._placaMsg),'_blank'); }); }
@@ -1311,8 +1393,8 @@ function guardarProducto(){
 }
 /* guarda el catálogo completo en Supabase (misma tabla que lee la vidriera) */
 function guardarCatalogo(){
-  try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(PRODUCTOS)); }catch(e){}
-  if(sb){ sb.from('tienda_catalogo').upsert({id:'catalogo', datos:PRODUCTOS}).then(function(){}).catch(function(){}); }
+  try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(PRODUCTOS)); }catch(e){}
+  if(sb){ sb.from('tienda_catalogo').upsert({id:keyCatalogo(), datos:PRODUCTOS}).then(function(){}).catch(function(){}); }
 }
 
 /* ═══════ PEGADO MASIVO — cargar muchos productos de una lista ═══════ */
@@ -1496,13 +1578,13 @@ function conectar(){
 }
 function bajarCatalogo(){
   // 1) intenta mostrar lo que haya en el teléfono al toque (rápido)
-  try{ var local=JSON.parse(localStorage.getItem('ae_tienda_catalogo')||'[]'); if(local.length){ PRODUCTOS=local; render(); } }catch(e){}
+  try{ var local=JSON.parse(localStorage.getItem(lsKey('ae_tienda_catalogo'))||'[]'); if(local.length){ PRODUCTOS=local; render(); } }catch(e){}
   // 2) baja lo último de la nube
-  sb.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+  sb.from('tienda_catalogo').select('datos').eq('id',keyCatalogo()).maybeSingle()
     .then(function(r){
       if(r && r.data && r.data.datos){
         PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
-        try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(r.data.datos)); }catch(e){}
+        try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(r.data.datos)); }catch(e){}
         actualizarFavCount(); actualizarBadgeCarrito(); actualizarBeeFab();
         setTimeout(function(){ try{ mostrarBienvenida(); }catch(e){} }, 1200);
         render();
@@ -1815,11 +1897,11 @@ function guardarRegistro(){
   try{ localStorage.setItem('ae_cliente', JSON.stringify(cli)); }catch(e){}
   // lo guarda en la nube para que el dueño lo vea
   if(sb){
-    sb.from('tienda_catalogo').select('datos').eq('id','clientes').maybeSingle()
+    sb.from('tienda_catalogo').select('datos').eq('id',keyClientes()).maybeSingle()
       .then(function(r){
         var arr=(r&&r.data&&r.data.datos)?r.data.datos:[];
         arr.push(cli);
-        sb.from('tienda_catalogo').upsert({id:'clientes', datos:arr}).then(function(){}).catch(function(){});
+        sb.from('tienda_catalogo').upsert({id:keyClientes(), datos:arr}).then(function(){}).catch(function(){});
       }).catch(function(){});
   }
   cerrarConsulta();
@@ -1872,7 +1954,7 @@ function venderProducto(idx){
   tel=(tel||'').replace(/[^0-9]/g,'');
   var lines=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(p.venta,n)); });
   var msg='*'+p.nombre.toUpperCase()+'*\n\n'+lines.join('\n')+'\n\n➡️ Contado: '+fmt(p.venta)
-    +'\n\n⭐ Retirás pagando solo la 1ra cuota ese mismo día.\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+    +'\n\n⭐ Retirás pagando solo la 1ra cuota ese mismo día.\n'+firmaTienda()+' 🐝';
   // con foto si tiene y el celu lo permite
   if(p.foto && navigator.share && !tel){
     fetch(p.foto).then(function(r){return r.blob();}).then(function(b){
