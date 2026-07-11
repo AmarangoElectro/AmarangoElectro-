@@ -212,12 +212,24 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
 
 /* ═══════ PUERTA OCULTA DEL DUEÑO ═══════
-   Se entra tocando 5 veces la abeja del header + clave (PIN).
-   El cliente nunca ve un botón de admin. */
-var PIN_DUENO = "2580";   // clave por defecto (editable después desde config)
+   1ra vez: 5 toques en el logo + clave. Después queda la SESIÓN abierta:
+   con UN solo toque entrás. Se cierra con "Cerrar sesión". */
+var PIN_DUENO = "2580";
 var _toquesAbeja = 0, _toqueTimer = null;
 
+/* ¿Hay sesión abierta en este teléfono? */
+function haySesion(){ try{ return localStorage.getItem('ae_sesion')==='1'; }catch(e){ return false; } }
+function abrirSesion(){ try{ localStorage.setItem('ae_sesion','1'); }catch(e){} }
+function cerrarSesion(){
+  try{ localStorage.removeItem('ae_sesion'); }catch(e){}
+  cerrarAdmin();
+  alert('🔒 Sesión cerrada. Para volver a entrar: 5 toques en el logo + clave.');
+}
+
 function toqueAbeja(){
+  // si ya hay sesión abierta → entra directo con UN toque
+  if(haySesion()){ abrirPanelDueno(); document.getElementById('adminOverlay').classList.add('on'); return; }
+  // si no → hay que hacer los 5 toques + clave
   _toquesAbeja++;
   clearTimeout(_toqueTimer);
   _toqueTimer = setTimeout(function(){ _toquesAbeja = 0; }, 1500);
@@ -229,19 +241,26 @@ function toqueAbeja(){
 function pedirClaveAdmin(){
   var pin = prompt("🔒 Clave del dueño:");
   if(pin === null) return;
-  if(pin === PIN_DUENO){ abrirPanelDueno(); }
+  if(pin === PIN_DUENO){
+    abrirSesion();   // queda abierta, no pide más la clave
+    abrirPanelDueno();
+    document.getElementById('adminOverlay').classList.add('on');
+  }
   else { alert("Clave incorrecta."); }
 }
 function abrirPanelDueno(){
+  // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
+  var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
   document.getElementById('adminBody').innerHTML =
      '<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('➕','Cargar producto','Subí productos nuevos a tu tienda','cargar')
-    +botonPanel('👥','Suscriptores','Controlá quién está al día con la membresía','subs')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
+    +(esDuenoAmarango ? botonPanel('👥','Suscriptores','Controlá quién está al día con la membresía','subs') : '')
     +botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
     +'</div>'
-    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:16px">🐝 Panel privado · solo lo ve el dueño</div>';
+    +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px">🔒 Cerrar sesión</button>'
+    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado · solo lo ve el dueño</div>';
   document.getElementById('adminOverlay').classList.add('on');
 }
 function botonPanel(ico, titulo, sub, destino){
@@ -370,6 +389,7 @@ var CONFIG_DEFAULT = {
   cuotas: { 2:15, 4:55, 6:78 },
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
+  duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
   pin: "2580"
 };
 var CONFIG = null;
