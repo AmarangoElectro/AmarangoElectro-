@@ -971,12 +971,16 @@ function compartirPlaca(){
 /* ═══════ CARGAR PRODUCTO (sube a la misma tabla que lee la vidriera) ═══════ */
 var _cargaModo='venta', _cargaFoto='';
 function abrirCargar(){
+  // El pegado de lista es lo que MÁS se usa → va primero, directo.
+  abrirPegadoMasivo();
+}
+/* El formulario de uno por uno queda como opción secundaria */
+function abrirCargarUno(){
   _cargaFoto='';
   var cats=['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
   document.getElementById('adminBody').innerHTML=
-     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:12px">➕ Cargar producto</div>'
-    +'<button onclick="abrirPegadoMasivo()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px">📋 Pegar lista completa (muchos de una vez)</button>'
-    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-bottom:14px">— o cargá uno por uno acá abajo —</div>'
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:12px">➕ Cargar uno por uno</div>'
+    +'<button onclick="abrirPegadoMasivo()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:14px;font-size:.82rem">📋 Mejor pegar una lista completa</button>'
     // foto
     +'<div style="text-align:center;margin-bottom:14px">'
       +'<div id="cargaFotoPrev" style="width:120px;height:120px;margin:0 auto 8px;border-radius:14px;background:#F5F8FF;border:1.5px dashed var(--nar);display:flex;align-items:center;justify-content:center;font-size:2.5rem">📷</div>'
@@ -1093,7 +1097,8 @@ function abrirPegadoMasivo(){
     +'<textarea id="masivoTxt" oninput="parsearMasivo()" placeholder="Pegá acá la lista de productos..." style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:.82rem;min-height:120px;outline:none;resize:vertical"></textarea>'
     +'<label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;color:var(--txt);cursor:pointer"><input type="checkbox" id="masivoReemplazar" style="width:18px;height:18px"> Reemplazar todo el catálogo <span style="color:var(--sub)">(si no, agrega)</span></label>'
     +'<div id="masivoPreview" style="margin-top:12px"></div>'
-    +'<button onclick="abrirCargar()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+    +'<button onclick="abrirCargarUno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;font-size:.8rem">➕ O cargar uno solo, con foto</button>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
 }
 /* Parser: cada línea que tenga un precio es un producto */
 function parsearMasivo(){
@@ -1107,17 +1112,17 @@ function parsearMasivo(){
     var precio=0, esUsd=false, nombre='', dudoso=false;
 
     // ===== FORMATO BARRITA: Nombre | Precio =====
+    // REGLA DE MAX: lo que sigue a la PRIMERA barra es el precio.
+    // Todo lo que venga después del precio se descarta.
     if(linea.indexOf('|')>=0){
-      var partes=linea.split('|').map(function(x){return x.trim();});
-      nombre=partes[0];
-      var nums=partes.slice(1).filter(function(x){return /\d/.test(x);});
-      dudoso=nums.length>1;
-      var precioStr=nums.length?nums[nums.length-1]:'';
+      var partes=linea.split('|');
+      nombre=partes[0].trim();
+      var precioStr=(partes[1]||'').trim();   // ← el que sigue a la barra, siempre
       var mu=precioStr.match(/(\d[\d\.]*)\s*usd/i);
       if(mu){ precio=parseInt(mu[1].replace(/\./g,''),10); esUsd=true; }
       else { var mp=precioStr.match(/(\d[\d\.]*)/); if(mp){ precio=parseInt(mp[1].replace(/\./g,''),10); esUsd=/usd/i.test(precioStr); } }
-      if(!precio) return;
-      pushProd(nombre, precio, esUsd, /oferta/i.test(linea), dudoso, cot); return;
+      if(!precio || !nombre) return;
+      pushProd(nombre, precio, esUsd, /oferta/i.test(linea), false, cot); return;
     }
 
     // ===== USD explícito (celulares mayorista): "110usd" =====
