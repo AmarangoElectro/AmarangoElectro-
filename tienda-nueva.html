@@ -140,6 +140,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 
+<!-- Botón AYUDA (flotante, discreto). Adentro va el acceso a Iniciar sesión. -->
+<button onclick="abrirAyuda()" style="position:fixed;top:12px;left:12px;z-index:400;background:rgba(11,45,107,.9);color:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.2)">❓ Ayuda</button>
+
+<!-- Panel de AYUDA -->
+<div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="x" onclick="cerrarAyuda()">✕</button>
+      <div class="nom">❓ Ayuda</div>
+    </div>
+    <div class="sheet-body" id="ayudaBody"></div>
+  </div>
+</div>
+
 <div class="top">
   <div class="brand">
     <span class="bee" id="beeLogo" onclick="toqueAbeja()" style="cursor:pointer">🐝</span>
@@ -211,6 +225,55 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
 
+/* ═══════ AYUDA — instrucciones según quién sos + acceso discreto ═══════ */
+function abrirAyuda(){
+  var rol=rolActual();
+  var html='';
+  function tarjeta(ico,t,s){ return '<div style="background:#F7F8FA;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px;display:flex;gap:11px"><span style="font-size:1.4rem">'+ico+'</span><div><div style="font-weight:900;color:var(--az);font-size:.86rem">'+t+'</div><div style="font-size:.74rem;color:var(--sub);line-height:1.4;margin-top:2px">'+s+'</div></div></div>'; }
+
+  if(rol==='admin'){
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">👑</div><div style="font-weight:900;color:var(--az);font-size:1rem">Instrucciones para Administradores</div></div>'
+      +tarjeta('➕','Cargar productos','Entrá al panel → «Cargar producto». Podés cargar uno o pegar una lista completa de golpe.')
+      +tarjeta('📋','Pegar lista','Pegá la lista del mayorista tal cual te la mandan. Entiendo USD y pesos, y aplico tu markup solo.')
+      +tarjeta('🎨','Armar placas','Sacá precios y armá placas para compartir por WhatsApp, desde costo, venta o dólar.')
+      +tarjeta('⚙️','Configuración','Cambiá tu logo, nombre, colores, cuotas y las claves. Se aplica a toda la tienda.')
+      +tarjeta('☁️','Se guarda solo','Todo se sincroniza en la nube. Tu equipo ve lo mismo que vos.');
+  } else if(rol==='revendedor'){
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🤝</div><div style="font-weight:900;color:var(--az);font-size:1rem">Instrucciones para Revendedores</div></div>'
+      +tarjeta('🧮','Calculadora','Poné el precio de venta y te saco las cuotas al toque.')
+      +tarjeta('💬','Compartir','Con un botón mandás el producto y las cuotas por WhatsApp.')
+      +tarjeta('🏪','La tienda','Navegá el catálogo y compartí cualquier producto con tus clientes.');
+  } else {
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🛒</div><div style="font-weight:900;color:var(--az);font-size:1rem">¿Cómo comprar?</div></div>'
+      +tarjeta('🔍','Buscá lo tuyo','Usá el buscador o tocá una categoría para ver los productos.')
+      +tarjeta('💳','Mirá las cuotas','Tocá un producto y vas a ver el precio contado y todas las cuotas fijas.')
+      +tarjeta('❤️','Guardá favoritos','Tocá el corazón para guardar lo que te gusta y encontrarlo después.')
+      +tarjeta('💬','Consultanos','Tocá «Consultar» y hablás con nosotros directo por WhatsApp.')
+      +'<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);border-radius:12px;padding:14px;text-align:center;color:#fff;margin-top:6px"><div style="font-weight:900;font-size:.9rem">¿Dudas? Escribinos 🐝</div><div style="font-size:.74rem;margin-top:2px">Estamos para ayudarte</div></div>';
+  }
+
+  // ===== acceso discreto, abajo de todo =====
+  html+='<div style="border-top:1px solid var(--line);margin-top:18px;padding-top:12px">';
+  if(rol){
+    html+='<div style="text-align:center;font-size:.72rem;color:var(--sub);margin-bottom:8px">Entraste como <b>'+(rol==='admin'?'👑 Administrador':'🤝 Revendedor')+'</b></div>'
+      +'<button onclick="cerrarAyuda();abrirPanelSegunRol();" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:7px">Ir a mi panel</button>'
+      +'<button onclick="cerrarAyuda();cerrarSesion();" style="width:100%;background:none;border:1.5px solid var(--line);color:#DC2626;border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit">🔒 Cerrar sesión</button>';
+  } else {
+    html+='<button onclick="loginDesdeAyuda()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.8rem">🔑 Iniciar sesión</button>';
+  }
+  html+='</div>';
+  document.getElementById('ayudaBody').innerHTML=html;
+  document.getElementById('ayudaOverlay').classList.add('on');
+}
+function cerrarAyuda(){ document.getElementById('ayudaOverlay').classList.remove('on'); }
+function loginDesdeAyuda(){
+  var pin=prompt('🔑 Ingresá tu clave:');
+  if(pin===null) return;
+  if(pin===PIN_DUENO){ setRol('admin'); cerrarAyuda(); abrirPanelSegunRol(); render(); }
+  else if(pin===PIN_REVENDEDOR){ setRol('revendedor'); cerrarAyuda(); abrirPanelSegunRol(); render(); }
+  else alert('Clave incorrecta.');
+}
+
 /* ═══════ PUERTA OCULTA — DOS LLAVES, UN GESTO ═══════
    5 toques en el logo + clave. La CLAVE decide el rol:
    · clave admin → 👑 Admin (todo: costos, placas, cargar, config)
@@ -235,12 +298,9 @@ function cerrarSesion(){
 }
 
 function toqueAbeja(){
-  // si ya hay sesión → entra directo con UN toque, al panel que le toca
-  if(haySesion()){ abrirPanelSegunRol(); return; }
-  _toquesAbeja++;
-  clearTimeout(_toqueTimer);
-  _toqueTimer = setTimeout(function(){ _toquesAbeja = 0; }, 1500);
-  if(_toquesAbeja >= 5){ _toquesAbeja = 0; pedirClaveAdmin(); }
+  // el acceso ahora es por Ayuda → Iniciar sesión.
+  // Si YA tenés sesión, un toque en el logo te lleva a tu panel (atajo cómodo).
+  if(haySesion()){ abrirPanelSegunRol(); }
 }
 function pedirClaveAdmin(){
   var pin = prompt("🔒 Clave:");
@@ -305,11 +365,15 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('➕','Cargar producto','Subí productos nuevos a tu tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +(esDuenoAmarango ? botonPanel('👥','Suscriptores','Controlá quién está al día con la membresía','subs') : '')
     +botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
     +'</div>'
-    +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px">🔒 Cerrar sesión</button>'
-    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado · solo lo ve el dueño</div>';
+    // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
+    +(esDuenoAmarango
+      ? '<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">'
+        +'<button onclick="abrirModuloDueno(\'subs\')" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.78rem;display:flex;align-items:center;justify-content:center;gap:6px">👥 Suscripciones Amarango</button></div>'
+      : '')
+    +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">🔒 Cerrar sesión</button>'
+    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado</div>';
   document.getElementById('adminOverlay').classList.add('on');
 }
 function botonPanel(ico, titulo, sub, destino){
