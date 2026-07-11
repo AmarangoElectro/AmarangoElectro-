@@ -234,6 +234,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
+<!-- BOTÓN FLOTANTE 🐝 — atajo a cargar productos. SOLO lo ve el admin. -->
+<button id="beeFab" onclick="abrirCargarDirecto()" style="display:none;position:fixed;bottom:88px;right:16px;z-index:340;width:60px;height:60px;border-radius:50%;background:#fff;border:3px solid var(--nar);font-size:1.9rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);padding:0;line-height:1">🐝</button>
+
 <!-- Panel CARRITO -->
 <div class="overlay" id="carritoOverlay" onclick="if(event.target===this)cerrarCarrito()">
   <div class="sheet">
@@ -265,6 +268,25 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
+
+/* La abeja flotante SOLO la ve el admin. Atajo directo a cargar productos. */
+function actualizarBeeFab(){
+  var b=document.getElementById('beeFab'); if(!b)return;
+  b.style.display = (rolActual()==='admin') ? 'block' : 'none';
+  // si el usuario tiene logo propio, la abeja se reemplaza por su logo
+  if(CONFIG && CONFIG.logo && rolActual()==='admin'){
+    b.textContent='';
+    b.style.background='#fff url('+CONFIG.logo+') center/cover no-repeat';
+  } else {
+    b.textContent='🐝';
+    b.style.background='#fff';
+  }
+}
+/* Abre la carga de productos directo, sin pasar por el panel */
+function abrirCargarDirecto(){
+  abrirCargar();
+  document.getElementById('adminOverlay').classList.add('on');
+}
 
 /* ═══════ CARRITO — que el cliente arme una compra de varias cosas ═══════
    Se guarda en su teléfono. Al pedir, va TODO junto por WhatsApp con las
@@ -483,7 +505,7 @@ var _toquesAbeja = 0, _toqueTimer = null;
 
 /* ROL actual: null (cliente) | 'admin' | 'revendedor' */
 function rolActual(){ try{ return localStorage.getItem('ae_rol')||null; }catch(e){ return null; } }
-function setRol(r){ try{ if(r) localStorage.setItem('ae_rol',r); else localStorage.removeItem('ae_rol'); }catch(e){} }
+function setRol(r){ try{ if(r) localStorage.setItem('ae_rol',r); else localStorage.removeItem('ae_rol'); }catch(e){} try{ actualizarBeeFab(); }catch(e){} }
 function haySesion(){ return rolActual()!==null; }
 function esAdmin(){ return rolActual()==='admin'; }
 function esRevendedor(){ return rolActual()==='revendedor'; }
@@ -1245,7 +1267,7 @@ function bajarCatalogo(){
       if(r && r.data && r.data.datos){
         PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
         try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(r.data.datos)); }catch(e){}
-        actualizarFavCount(); actualizarBadgeCarrito();
+        actualizarFavCount(); actualizarBadgeCarrito(); actualizarBeeFab();
         render();
       } else if(!PRODUCTOS.length){
         mostrarError('La nube respondió pero no hay productos cargados todavía.');
@@ -1568,6 +1590,7 @@ function mostrarError(txt){
 
 /* arranque */
 conectar();
+try{ actualizarBeeFab(); }catch(e){}
 </script>
 </body>
 </html>
