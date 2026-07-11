@@ -805,6 +805,7 @@ var CONFIG_DEFAULT = {
   cuotas: { 2:15, 4:55, 6:78 },
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
+  formatoCuota: 'simple',  // 'simple' | 'caja' | 'destacado'
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
   admins: [],              // los que COBRAN (botón Comprar) — [{nombre,wa}]
   vendedores: [],          // los que ATIENDEN (botón Consultar) — [{nombre,wa}]
@@ -864,6 +865,33 @@ function aplicarConfig(){
   document.documentElement.style.setProperty('--az', CONFIG.colorPrincipal);
   document.documentElement.style.setProperty('--nar', CONFIG.colorAcento);
 }
+/* ═══════ FORMATOS DE CUOTA — cada tienda elige cómo mostrar el precio ═══════ */
+function precioTarjeta(p){
+  var mc=mejorCuota(p.venta);
+  var fmt_=(CONFIG&&CONFIG.formatoCuota)||'simple';
+  var enOferta = p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta);
+  var tachado = enOferta ? '<span style="text-decoration:line-through;color:#bbb;font-size:.7rem">'+fmt(p.precioAntes)+'</span> ' : '';
+
+  if(fmt_==='caja'){
+    // estilo Frávega: cajita naranja con la cuota bien grande
+    if(!mc) return '<div class="cuota-v">'+fmt(p.venta)+'</div>';
+    return '<div style="background:#FFF6EE;border:1px solid #FFE0C2;border-radius:9px;padding:8px 10px;margin-bottom:6px">'
+      +'<div style="font-size:.6rem;font-weight:800;color:var(--nar);text-transform:uppercase;letter-spacing:.3px">'+mc.n+' cuotas fijas de</div>'
+      +'<div style="font-size:1.15rem;font-weight:900;color:var(--az);line-height:1.1">'+fmt(mc.valor)+'</div>'
+      +'</div>'
+      +'<div class="contado">'+tachado+'Contado: '+fmt(p.venta)+'</div>';
+  }
+  if(fmt_==='destacado'){
+    // el CONTADO grande arriba, la cuota abajo chiquita
+    return '<div style="font-size:1.15rem;font-weight:900;color:var(--az);line-height:1.1">'+tachado+fmt(p.venta)+'</div>'
+      +(mc?'<div style="font-size:.68rem;color:var(--gr);font-weight:700;margin-top:2px">💳 '+mc.n+' cuotas de '+fmt(mc.valor)+'</div>':'')
+      +'<div style="height:6px"></div>';
+  }
+  // 'simple' (por defecto): la CUOTA grande en naranja, el contado abajo
+  return (mc?'<div class="cuota-v">'+fmt(mc.valor)+'</div><div class="cuota-n">en '+mc.n+' cuotas fijas</div>':'')
+    +'<div class="contado">'+tachado+'Contado: '+fmt(p.venta)+'</div>';
+}
+
 /* El link único de esta tienda (para compartir con los clientes) */
 function linkTienda(){
   var base=window.location.origin+window.location.pathname;
@@ -891,6 +919,67 @@ function checklistMarca(){
     +'<div style="font-size:.74rem;color:var(--sub);line-height:1.6">'
     +faltan.map(function(f){ return '• '+f; }).join('<br>')
     +'</div></div>';
+}
+
+/* Cajón de opciones del producto (admin) */
+function toggleCajonOpciones(){
+  var c=document.getElementById('cajonOpciones');
+  var f=document.getElementById('cajonFlecha');
+  if(!c)return;
+  var abierto = c.style.display!=='none';
+  c.style.display = abierto ? 'none' : 'grid';
+  if(f) f.textContent = abierto ? '▼' : '▲';
+}
+function opcProd(idx,k,txt,on,peligro){
+  var colOn = peligro ? '#DC2626' : 'var(--nar)';
+  var bgOn  = peligro ? '#FEF2F2' : '#FFF0E0';
+  return '<button onclick="toggleOpcProd('+idx+',\''+k+'\')" style="width:100%;text-align:left;border:1.5px solid '+(on?colOn:'var(--line)')+';background:'+(on?bgOn:'#fff')+';color:'+(on?colOn:'var(--sub)')+';border-radius:11px;padding:12px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:inherit">'
+    +(on?'✅ ':'☆ ')+txt+'</button>';
+}
+function toggleOpcProd(idx,k){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  if(k==='destacado'){ p.destacado=!p.destacado; }
+  else if(k==='delDia'){
+    var era=p.delDia;
+    PRODUCTOS.forEach(function(x){ x.delDia=false; });   // solo puede haber uno
+    p.delDia=!era;
+  }
+  else if(k==='ultimas'){ p.ultimas=!p.ultimas; }
+  else if(k==='sinInteres'){ p.sinInteres=!p.sinInteres; }
+  else if(k==='sinStock'){ p.sinStock=!p.sinStock; }
+  else if(k==='oculto'){
+    p.visible = (p.visible===false) ? true : false;
+  }
+  else if(k==='oferta'){
+    var enOferta = p.precioAntes && p.precioAntes>p.venta;
+    if(enOferta){ delete p.precioAntes; }
+    else {
+      var sug=Math.round(p.venta*1.25/500)*500;
+      var v=prompt('🔥 Precio ANTES (el que se muestra tachado):\n\nEl precio actual es '+fmt(p.venta)+'.\nPoné uno más alto para que se vea la rebaja.', sug);
+      if(v===null) return;
+      var pa=parseFloat(v)||0;
+      if(pa<=p.venta){ alert('El precio tachado tiene que ser MÁS ALTO que '+fmt(p.venta)+'.'); return; }
+      p.precioAntes=pa;
+    }
+  }
+  guardarCatalogo();
+  render();
+  verDetalle(idx);
+  setTimeout(toggleCajonOpciones, 50);   // deja el cajón abierto
+}
+
+function opcionFormato(k,titulo,sub){
+  var on=((CONFIG&&CONFIG.formatoCuota)||'simple')===k;
+  return '<button onclick="elegirFormato(\''+k+'\')" style="width:100%;text-align:left;background:'+(on?'#F5F8FF':'#fff')+';border:2px solid '+(on?'var(--az)':'var(--line)')+';border-radius:12px;padding:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px">'
+    +'<span style="font-size:1.1rem">'+(on?'✅':'⬜')+'</span>'
+    +'<span style="flex:1"><span style="display:block;font-size:.86rem;font-weight:900;color:'+(on?'var(--az)':'var(--txt)')+'">'+titulo+'</span>'
+    +'<span style="display:block;font-size:.7rem;color:var(--sub);margin-top:1px">'+sub+'</span></span></button>';
+}
+function elegirFormato(k){
+  CONFIG.formatoCuota=k;
+  guardarConfig();
+  render();
+  abrirConfig();   // refresca la config para que se vea el tilde
 }
 
 function abrirConfig(){
@@ -938,6 +1027,13 @@ function abrirConfig(){
     +sec('🤝 Vendedores (los que ATIENDEN)')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Al tocar <b>💬 Consultar</b>, el cliente elige entre estos. Responden dudas, no cobran.<br>Uno por línea: <b>Nombre, WhatsApp</b></div>'
     +'<textarea id="cf_vendedores" placeholder="Selene, 5491168746034" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:64px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
+    +sec('💳 Cómo se ve el precio')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Elegí cómo se muestran los precios en tu tienda.</div>'
+    +'<div id="cf_formatos" style="display:grid;gap:8px;margin-bottom:12px">'
+      +opcionFormato('simple','Cuota grande','La cuota en grande, el contado abajo')
+      +opcionFormato('caja','Cajita (estilo Frávega)','La cuota en una cajita naranja')
+      +opcionFormato('destacado','Contado grande','El precio total en grande, cuota abajo')
+    +'</div>'
     +sec('🔒 Seguridad')
     +campo('Clave del dueño (PIN)','cf_pin',c.pin,'','number')
     +campo('Clave de revendedor','cf_pinRev',c.pinRev||'1234','','number')
@@ -1619,7 +1715,9 @@ function render(){
     var okOferta=!soloOfertas || enOferta(p);
     var okTope=!tope || cuotaRef(p)<=tope;
     var okFav=!viendoFavs || esFav(p);
-    return okCat && okQ && okOferta && okTope && okFav;
+    // los OCULTOS: el admin los ve (en gris), el cliente NO
+    var okVisible = (rolActual()==='admin') ? true : (p.visible!==false);
+    return okCat && okQ && okOferta && okTope && okFav && okVisible;
   });
 
   // ordenar
@@ -1663,15 +1761,35 @@ function render(){
         +'<button onclick="comprarProducto('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Comprar</button>'
         +'<button onclick="consultarProducto('+idx+',event)" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Consultar</button>';
     }
-    return '<div class="card">'
+    var oculto = p.visible===false;
+    var esAdmin = rolT==='admin';
+    // fecha del precio con colores (solo la ve el admin)
+    var fechaHtml='';
+    if(esAdmin){
+      if(p.fechaPrecio){
+        var dias=Math.floor((Date.now()-p.fechaPrecio)/86400000);
+        var col, bg, ico;
+        if(dias>=30){ col='#DC2626'; bg='#FEF2F2'; ico='🔴'; }
+        else if(dias>=7){ col='#EA580C'; bg='#FFF7ED'; ico='🟠'; }
+        else { col='#059669'; bg='#F0FDF4'; ico='🟢'; }
+        fechaHtml='<div style="background:'+bg+';border-radius:6px;padding:4px 7px;font-size:.58rem;color:'+col+';font-weight:800;text-align:center;margin-bottom:5px">'+ico+' Precio de hace '+dias+'d</div>';
+      } else {
+        fechaHtml='<div style="background:#F7F8FA;border-radius:6px;padding:4px 7px;font-size:.58rem;color:var(--sub);text-align:center;margin-bottom:5px">🕐 Sin fecha</div>';
+      }
+    }
+    return '<div class="card" style="'+(oculto?'opacity:.45':'')+'">'
       +'<div class="ph" '+phStyle+' onclick="verDetalle('+idx+')">'+phIco
         +(enOferta ? '<span class="badge">🔥 '+pctOff+'% OFF</span>' : '')
+        +(p.sinStock ? '<span style="position:absolute;top:6px;left:6px;background:#DC2626;color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px">SIN STOCK</span>' : '')
+        +(oculto ? '<span style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.65);color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px">🙈 OCULTO</span>' : '')
         +'<button class="fav" onclick="toggleFav('+idx+',event)">'+(esFav(p)?'❤️':'🤍')+'</button>'
       +'</div>'
       +'<div class="body">'
+        +fechaHtml
         +'<div class="nom" onclick="verDetalle('+idx+')">'+p.nombre+'</div>'
-        +(mc?'<div class="cuota-v">'+fmt(mc.valor)+'</div><div class="cuota-n">en '+mc.n+' cuotas fijas</div>':'')
-        +'<div class="contado">'+(enOferta?'<span style="text-decoration:line-through;color:#bbb">'+fmt(p.precioAntes)+'</span> ':'')+'Contado: '+fmt(p.venta)+'</div>'
+        +(p.ultimas?'<div style="font-size:.6rem;color:#DC2626;font-weight:800;margin-bottom:3px">📦 ¡Últimas unidades!</div>':'')
+        +(p.sinInteres?'<div style="font-size:.6rem;color:var(--gr);font-weight:800;margin-bottom:3px">💳 Cuotas SIN INTERÉS</div>':'')
+        +precioTarjeta(p)
         +botones
       +'</div></div>';
   }).join('')+'</div>';
@@ -1832,20 +1950,35 @@ function renderBotonesDetalle(idx){
     // ADMIN: vender + compartir + editar
     html+='<button onclick="venderProducto('+idx+')" style="width:100%;background:var(--az);color:#fff;border:2px solid var(--nar);border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛍️ VENDER (enviar al cliente)</button>';
     html+='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📤 Compartir con foto</button>';
-    html+='<div style="display:flex;gap:8px">'
+    // ⚙️ CAJÓN de opciones del producto (se abre/cierra)
+    html+='<button onclick="toggleCajonOpciones()" id="cajonBtn" style="width:100%;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.84rem;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:6px">⚙️ Opciones del producto <span id="cajonFlecha">▾</span></button>';
+    html+='<div id="cajonOpciones" style="display:none;margin-top:8px">'
+      +opcProd(idx,'destacado','⭐','Destacado', !!p.destacado)
+      +opcProd(idx,'delDia','🌟','Producto del día', !!p.delDia)
+      +opcProd(idx,'ultimas','⏳','Últimas unidades', !!p.ultimas)
+      +opcProd(idx,'sinInteres','💳','Cuotas sin interés', !!p.sinInteres)
+      +opcProd(idx,'oferta','🔥','Poner en oferta', !!(p.precioAntes && p.precioAntes>p.venta))
+      +opcProd(idx,'oculto','🙈','Ocultar de la tienda', p.visible===false, true)
+      +opcProd(idx,'sinStock','⛔','Marcar SIN STOCK', !!p.sinStock, true)
+      +'</div>';
+    // 🕐 FECHA con semáforo: verde → naranja (1 sem) → rojo (1 mes)
+    html+=semaforoFecha(p);
+    html+='<div style="display:flex;gap:8px;margin-top:10px">'
       +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">✏️ Editar</button>'
       +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🖼️ Foto</button>'
       +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🗑️</button>'
       +'</div>';
-    // fecha del precio (para saber si hay que actualizar)
-    if(p.fechaPrecio){
-      var dias=Math.floor((Date.now()-p.fechaPrecio)/86400000);
-      var alerta = dias>15;
-      html+='<div style="margin-top:10px;background:'+(alerta?'#FEF2F2':'#F0FDF4')+';border:1px solid '+(alerta?'#FECACA':'#A7F3D0')+';border-radius:10px;padding:9px 12px;font-size:.72rem;color:'+(alerta?'#DC2626':'#059669')+';text-align:center;font-weight:700">'
-        +(alerta?'⚠️ Precio viejo ('+dias+'d) — conviene actualizar':'✅ Precio reciente ('+dias+'d)')+'</div>';
-    } else {
-      html+='<div style="margin-top:10px;background:#F7F8FA;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:.72rem;color:var(--sub);text-align:center">🕐 Precio sin fecha registrada</div>';
-    }
+    // ⚙️ CAJÓN de opciones del producto (se despliega)
+    html+='<button onclick="toggleCajonOpciones()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:12px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.84rem;margin-top:10px">⚙️ Opciones del producto <span id="cajonFlecha">▼</span></button>'
+      +'<div id="cajonOpciones" style="display:none;margin-top:8px;display:grid;gap:7px">'
+        +opcProd(idx,'destacado','⭐ Destacado', !!p.destacado)
+        +opcProd(idx,'delDia','🌟 Producto del día', !!p.delDia)
+        +opcProd(idx,'ultimas','📦 Últimas unidades', !!p.ultimas)
+        +opcProd(idx,'sinInteres','💳 Cuotas sin interés', !!p.sinInteres)
+        +opcProd(idx,'oferta','🔥 Poner en oferta', !!(p.precioAntes && p.precioAntes>p.venta))
+        +opcProd(idx,'oculto','🙈 Ocultar de la tienda', p.visible===false, true)
+        +opcProd(idx,'sinStock','⛔ Marcar SIN STOCK', !!p.sinStock, true)
+      +'</div>';
   }
   else if(rol==='revendedor'){
     // REVENDEDOR: solo compartir (nunca ve costos ni edita)
@@ -1995,20 +2128,73 @@ function cambiarFotoProducto(idx){
   inp.click();
 }
 
-/* ADMIN: editar un producto ya cargado */
+/* ADMIN: editar producto completo (nombre, costo↔venta, categoría, características) */
 function editarProducto(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
-  var nuevoNombre=prompt('Nombre del producto:', p.nombre);
-  if(nuevoNombre===null) return;
-  var nuevoPrecio=prompt('Precio de venta:', p.venta);
-  if(nuevoPrecio===null) return;
-  var v=parseFloat(nuevoPrecio)||p.venta;
-  p.nombre=(nuevoNombre||'').trim()||p.nombre;
-  if(v!==p.venta){ p.venta=v; p.fechaPrecio=Date.now(); }  // si cambia el precio, actualiza la fecha
+  var cats=['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
+  var catActual=p.categoria||catProd(p);
+  function campo(lbl,id,val,ph){ return '<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" value="'+String(val==null?'':val).replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;margin-bottom:12px">'; }
+
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:14px">✏️ Editar producto</div>'
+    +campo('Nombre','ed_nombre',p.nombre,'Nombre del producto')
+    // costo ↔ venta con conversión
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Costo ($)</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px">'
+      +'<input type="number" id="ed_costo" value="'+(p.costo||'')+'" placeholder="Costo" style="flex:1;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none">'
+      +'<button onclick="convCostoVenta()" style="background:var(--az);color:#fff;border:none;border-radius:11px;padding:12px 14px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.78rem;white-space:nowrap">Costo → Venta</button>'
+    +'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Precio de venta ($)</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:12px">'
+      +'<input type="number" id="ed_venta" value="'+p.venta+'" style="flex:1;border:2px solid var(--nar);border-radius:11px;padding:12px;font-family:inherit;font-size:1rem;font-weight:900;color:var(--nar);outline:none">'
+      +'<button onclick="convVentaCosto()" style="background:#F5F8FF;color:var(--az);border:1.5px solid var(--line);border-radius:11px;padding:12px 14px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.78rem;white-space:nowrap">Venta → Costo</button>'
+    +'</div>'
+    // categoría
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Categoría</div>'
+    +'<select id="ed_categoria" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;margin-bottom:12px;background:#fff">'
+      +cats.map(function(c){ return '<option value="'+c+'"'+(c===catActual?' selected':'')+'>'+c+'</option>'; }).join('')
+    +'</select>'
+    // características
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Características (pegá acá)</div>'
+    +'<textarea id="ed_desc" placeholder="Pegá las características del producto..." style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.86rem;min-height:100px;outline:none;resize:vertical;margin-bottom:14px">'+(p.desc||'')+'</textarea>'
+    +'<button onclick="guardarEdicion('+idx+')" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">✅ Guardar</button>'
+    +'<button onclick="cerrarAdmin();verDetalle('+idx+')" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">Cancelar</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+function convCostoVenta(){
+  var c=parseFloat(document.getElementById('ed_costo').value)||0;
+  if(!c){ alert('Poné el costo primero.'); return; }
+  document.getElementById('ed_venta').value=markupDeCosto(c);
+}
+function convVentaCosto(){
+  var v=parseFloat(document.getElementById('ed_venta').value)||0;
+  if(!v){ alert('Poné la venta primero.'); return; }
+  // busca qué costo, con el markup, daría esa venta
+  var mk=CONFIG.markup||CONFIG_DEFAULT.markup;
+  for(var i=0;i<mk.length;i++){
+    var estimado=Math.round(v/(1+mk[i].pct/100));
+    if(estimado<=mk[i].hasta){ document.getElementById('ed_costo').value=estimado; return; }
+  }
+  document.getElementById('ed_costo').value=Math.round(v/1.3);
+}
+function guardarEdicion(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+  var nom=g('ed_nombre'); if(!nom){ alert('Poné el nombre.'); return; }
+  var venta=parseFloat(g('ed_venta'))||p.venta;
+  var costo=parseFloat(g('ed_costo'))||null;
+  var cambióPrecio = venta!==p.venta;
+  p.nombre=nom;
+  p.venta=venta;
+  if(costo) p.costo=costo;
+  p.categoria=g('ed_categoria');
+  p.desc=g('ed_desc');
+  if(cambióPrecio) p.fechaPrecio=Date.now();   // precio nuevo = fecha nueva
   guardarCatalogo();
   render();
+  cerrarAdmin();
   verDetalle(idx);
-  alert('✅ Producto actualizado. Ya se ve en la tienda.');
+  alert('✅ Guardado. Ya se ve en la tienda.');
 }
 function borrarProducto(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
