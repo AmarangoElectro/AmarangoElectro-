@@ -234,12 +234,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
+<!-- Panel CARRITO -->
+<div class="overlay" id="carritoOverlay" onclick="if(event.target===this)cerrarCarrito()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <button class="x" onclick="cerrarCarrito()">✕</button>
+      <div class="nom">🛒 Mi carrito</div>
+    </div>
+    <div class="sheet-body" id="carritoBody"></div>
+  </div>
+</div>
+
 <!-- BARRA INFERIOR fija (estilo Mercado Libre) -->
 <div class="tabbar">
   <button id="tb-inicio" class="on" onclick="tabIr('inicio')"><span class="i">🏠</span>Inicio</button>
   <button id="tb-cats" onclick="tabIr('cats')"><span class="i">🗂️</span>Categorías</button>
+  <button onclick="abrirCarrito()" style="position:relative"><span class="i">🛒</span>Carrito<span id="cartBadge" style="display:none;position:absolute;top:0;right:50%;margin-right:-22px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:900;min-width:17px;height:17px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px">0</span></button>
   <button id="tb-favs" onclick="tabIr('favs')"><span class="i">❤️</span>Favoritos</button>
-  <button id="tb-ofertas" onclick="tabIr('ofertas')"><span class="i">🔥</span>Ofertas</button>
   <button id="tb-mas" onclick="abrirMas()"><span class="i">☰</span>Más</button>
 </div>
 
@@ -254,6 +265,117 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
+
+/* ═══════ CARRITO — que el cliente arme una compra de varias cosas ═══════
+   Se guarda en su teléfono. Al pedir, va TODO junto por WhatsApp con las
+   cuotas del total calculadas. Sin pedirle datos antes (menos fricción = más ventas). */
+function cargarCarrito(){ try{ return JSON.parse(localStorage.getItem('ae_carrito')||'[]'); }catch(e){ return []; } }
+function guardarCarrito(a){ try{ localStorage.setItem('ae_carrito', JSON.stringify(a)); }catch(e){} actualizarBadgeCarrito(); }
+function agregarAlCarrito(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var c=cargarCarrito();
+  var id=idProd(p);
+  var ya=c.find(function(x){return x.id===id;});
+  if(ya){ ya.cant=(ya.cant||1)+1; }
+  else { c.push({ id:id, nombre:p.nombre, venta:p.venta, foto:p.foto||'', cant:1 }); }
+  guardarCarrito(c);
+  toastCarrito('✅ Agregado al carrito');
+}
+function quitarDelCarrito(id){
+  var c=cargarCarrito().filter(function(x){return x.id!==id;});
+  guardarCarrito(c); abrirCarrito();
+}
+function cambiarCant(id, delta){
+  var c=cargarCarrito();
+  var it=c.find(function(x){return x.id===id;});
+  if(!it)return;
+  it.cant=(it.cant||1)+delta;
+  if(it.cant<1){ c=c.filter(function(x){return x.id!==id;}); }
+  guardarCarrito(c); abrirCarrito();
+}
+function totalCarrito(){ return cargarCarrito().reduce(function(s,x){ return s + x.venta*(x.cant||1); },0); }
+function cantCarrito(){ return cargarCarrito().reduce(function(s,x){ return s + (x.cant||1); },0); }
+function actualizarBadgeCarrito(){
+  var b=document.getElementById('cartBadge'); if(!b)return;
+  var n=cantCarrito();
+  b.textContent=n; b.style.display = n ? 'flex' : 'none';
+}
+function toastCarrito(msg){
+  var t=document.getElementById('toastMini');
+  if(!t){ t=document.createElement('div'); t.id='toastMini';
+    t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--az);color:#fff;padding:11px 18px;border-radius:22px;font-size:.82rem;font-weight:800;z-index:600;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;transition:opacity .2s';
+    document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(window._toastT);
+  window._toastT=setTimeout(function(){ t.style.opacity='0'; }, 1600);
+}
+
+function abrirCarrito(){
+  var c=cargarCarrito();
+  var html='';
+  if(!c.length){
+    html='<div style="text-align:center;padding:40px 20px;color:var(--sub)"><div style="font-size:3rem;margin-bottom:10px">🛒</div><div style="font-weight:800;color:var(--az);font-size:.95rem">Tu carrito está vacío</div><div style="font-size:.8rem;margin-top:4px">Agregá productos y armá tu pedido.</div></div>';
+  } else {
+    c.forEach(function(it){
+      var sub=it.venta*(it.cant||1);
+      html+='<div style="display:flex;gap:11px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:9px">'
+        +'<div style="width:54px;height:54px;flex:0 0 auto;border-radius:9px;background:'+(it.foto?'#fff url('+it.foto+') center/contain no-repeat':'#F5F8FF')+';display:flex;align-items:center;justify-content:center;font-size:1.4rem;border:1px solid var(--line)">'+(it.foto?'':'📦')+'</div>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:.78rem;font-weight:700;color:var(--txt);line-height:1.25">'+it.nombre+'</div>'
+          +'<div style="font-size:.84rem;font-weight:900;color:var(--az);margin-top:2px">'+fmt(sub)+'</div>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+          +'<button onclick="cambiarCant(\''+it.id+'\',-1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--az);font-weight:900;cursor:pointer;font-family:inherit">−</button>'
+          +'<span style="font-size:.84rem;font-weight:900;color:var(--az);min-width:18px;text-align:center">'+(it.cant||1)+'</span>'
+          +'<button onclick="cambiarCant(\''+it.id+'\',1)" style="width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--az);font-weight:900;cursor:pointer;font-family:inherit">+</button>'
+        +'</div>'
+        +'<button onclick="quitarDelCarrito(\''+it.id+'\')" style="background:none;border:none;color:#DC2626;font-size:1rem;cursor:pointer;padding:4px">✕</button>'
+        +'</div>';
+    });
+    var tot=totalCarrito();
+    // el gancho: las cuotas del TOTAL
+    var cuotasHtml='';
+    cuotasActivas().forEach(function(n){
+      cuotasHtml+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12)"><span style="font-size:.8rem;font-weight:700;color:#fff">'+n+' cuotas fijas</span><span style="font-size:.95rem;font-weight:900;color:#ffb968">'+fmt(valorCuota(tot,n))+'</span></div>';
+    });
+    html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:16px;margin-top:6px;color:#fff">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.7)">Total contado</span><span style="font-size:1.5rem;font-weight:900">'+fmt(tot)+'</span></div>'
+      +'<div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">O en cuotas fijas</div>'
+      +cuotasHtml
+      +'</div>';
+    html+='<button onclick="pedirCarrito()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:12px">💬 Pedir por WhatsApp</button>';
+    html+='<button onclick="vaciarCarrito()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;font-size:.8rem">Vaciar carrito</button>';
+  }
+  document.getElementById('carritoBody').innerHTML=html;
+  document.getElementById('carritoOverlay').classList.add('on');
+}
+function cerrarCarrito(){ document.getElementById('carritoOverlay').classList.remove('on'); }
+function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]); abrirCarrito(); } }
+
+/* Pedir: manda TODO junto por WhatsApp, eligiendo vendedor */
+function pedirCarrito(){
+  var c=cargarCarrito(); if(!c.length)return;
+  var tot=totalCarrito();
+  var lineas=c.map(function(it){ return '• '+it.nombre+(it.cant>1?' x'+it.cant:'')+' — '+fmt(it.venta*(it.cant||1)); });
+  var cuotasL=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(tot,n)); });
+  var msg='Hola! Quiero pedir esto 🛒\n\n'+lineas.join('\n')+'\n\n*TOTAL CONTADO: '+fmt(tot)+'*\n\n'+cuotasL.join('\n')+'\n\n¿Me confirmás disponibilidad? 🐝';
+
+  var vends=(CONFIG.vendedores&&CONFIG.vendedores.length)?CONFIG.vendedores:[];
+  if(!vends.length){
+    var wa=(CONFIG.whatsapp||'').replace(/[^0-9]/g,'');
+    window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+    return;
+  }
+  var html='<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">💬 Enviá tu pedido</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+cantCarrito()+' producto'+(cantCarrito()===1?'':'s')+' · '+fmt(tot)+'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Elegí con quién</div>';
+  vends.forEach(function(v){
+    html+='<button onclick="window.open(\'https://wa.me/'+String(v.wa).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
+  });
+  html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
+  document.getElementById('ayudaBody').innerHTML=html;
+  document.getElementById('ayudaOverlay').classList.add('on');
+}
 
 /* ═══════ BARRA INFERIOR + MENÚ "MÁS" (estilo Mercado Libre) ═══════ */
 function tabIr(t){
@@ -1123,7 +1245,7 @@ function bajarCatalogo(){
       if(r && r.data && r.data.datos){
         PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
         try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(r.data.datos)); }catch(e){}
-        actualizarFavCount();
+        actualizarFavCount(); actualizarBadgeCarrito();
         render();
       } else if(!PRODUCTOS.length){
         mostrarError('La nube respondió pero no hay productos cargados todavía.');
@@ -1341,6 +1463,7 @@ function renderBotonesDetalle(idx){
   else {
     // CLIENTE: comprar / carrito / consultar (como los grandes)
     html+='<button onclick="consultarProducto('+idx+')" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛒 Lo quiero · Consultar</button>';
+    html+='<button onclick="agregarAlCarrito('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--nar);color:var(--nar);border-radius:13px;padding:13px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">➕ Agregar al carrito</button>';
     html+='<button onclick="compartir('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--line);color:var(--az);border-radius:13px;padding:13px;font-size:.86rem;font-weight:800;cursor:pointer;font-family:inherit">📤 Compartir</button>';
   }
   cont.innerHTML=html;
