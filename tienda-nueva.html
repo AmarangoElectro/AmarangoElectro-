@@ -680,7 +680,7 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -705,6 +705,7 @@ function abrirModuloDueno(destino){
   if(destino==='cargar'){ abrirCargar(); return; }
   if(destino==='pedidos'){ abrirPedidos(); return; }
   if(destino==='stats'){ abrirEstadisticas(); return; }
+  if(destino==='pdf'){ abrirPDF(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
@@ -944,6 +945,110 @@ function toggleCajonOpciones(){
   c.style.display = abierto ? 'none' : 'grid';
   if(f) f.textContent = abierto ? '▼' : '▲';
 }
+/* ═══════ 📄 CATÁLOGO PDF — la herramienta de venta más potente ═══════
+   Genera un catálogo con fotos, precios y cuotas, con la marca de la tienda.
+   Se manda por WhatsApp de una y el cliente lo mira tranquilo. */
+function abrirPDF(){
+  var visibles=PRODUCTOS.filter(function(p){ return p.visible!==false && !p.sinStock; });
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📄 Catálogo PDF</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Armá un catálogo con tus productos, precios y cuotas — con tu marca. Lo mandás por WhatsApp y el cliente lo mira tranquilo. 🐝</div>'
+    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:13px;margin-bottom:14px">'
+      +'<div style="font-size:.82rem;color:var(--az);font-weight:800;margin-bottom:8px">📦 Va a incluir '+visibles.length+' productos</div>'
+      +'<div style="font-size:.72rem;color:var(--sub);line-height:1.6">✅ Los visibles y con stock<br>🚫 No van los ocultos ni los SIN STOCK</div>'
+    +'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">¿Qué categorías?</div>'
+    +'<select id="pdfCat" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;margin-bottom:12px;background:#fff">'
+      +'<option value="">Todas las categorías</option>'
+      +['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'].map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')
+    +'</select>'
+    +'<label style="display:flex;align-items:center;gap:9px;margin-bottom:14px;font-size:.82rem;color:var(--txt);cursor:pointer"><input type="checkbox" id="pdfSoloFoto" checked style="width:19px;height:19px"> Solo los que tienen foto</label>'
+    +'<button onclick="generarPDF()" style="width:100%;background:#DC2626;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">📄 Generar catálogo PDF</button>'
+    +'<div style="font-size:.7rem;color:var(--sub);text-align:center;margin-top:8px">Se abre para imprimir → elegí «Guardar como PDF»</div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver al panel</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+
+function generarPDF(){
+  var cat=(document.getElementById('pdfCat')||{}).value||'';
+  var soloFoto=(document.getElementById('pdfSoloFoto')||{}).checked;
+  var lista=PRODUCTOS.filter(function(p){
+    if(p.visible===false || p.sinStock) return false;
+    if(cat && catProd(p)!==cat) return false;
+    if(soloFoto && !p.foto) return false;
+    return true;
+  });
+  if(!lista.length){ alert('No hay productos con ese filtro.'); return; }
+
+  var neg=(CONFIG.negocio||'Mi Tienda');
+  var ig=(CONFIG.instagram||'');
+  var wa=(CONFIG.whatsapp||'');
+  var logo=CONFIG.logo||'';
+  var col1=CONFIG.colorPrincipal||'#0B2D6B';
+  var col2=CONFIG.colorAcento||'#FF7A00';
+  var hoy=new Date().toLocaleDateString('es-AR');
+
+  // arma las tarjetas, 3 por fila
+  var cards=lista.map(function(p){
+    var cuotasHtml=cuotasActivas().map(function(n){
+      return '<div class="cu"><span>'+n+' cuotas</span><b>'+fmt(valorCuota(p.venta,n))+'</b></div>';
+    }).join('');
+    var enOferta = p.precioAntes && p.precioAntes>p.venta;
+    return '<div class="card">'
+      +(p.foto?'<div class="foto"><img src="'+p.foto+'"></div>':'<div class="foto sinf">📦</div>')
+      +'<div class="nom">'+p.nombre+'</div>'
+      +(enOferta?'<div class="antes">'+fmt(p.precioAntes)+'</div>':'')
+      +'<div class="precio">'+fmt(p.venta)+'</div>'
+      +'<div class="cuotas">'+cuotasHtml+'</div>'
+      +'</div>';
+  }).join('');
+
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Catálogo '+neg+'</title><style>'
+    +'@page{size:A4;margin:12mm}'
+    +'*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1a1a2e}'
+    +'.head{background:'+col1+';color:#fff;padding:18px 20px;border-radius:12px;margin-bottom:16px;display:flex;align-items:center;gap:14px}'
+    +'.head img{width:56px;height:56px;border-radius:10px;object-fit:cover;background:#fff}'
+    +'.head .t{flex:1}'
+    +'.head h1{font-size:22px;font-weight:900;margin-bottom:2px}'
+    +'.head .sub{font-size:11px;opacity:.8}'
+    +'.head .cta{background:'+col2+';color:#fff;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:900;white-space:nowrap}'
+    +'.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}'
+    +'.card{border:1px solid #e5e7eb;border-radius:10px;padding:9px;page-break-inside:avoid;background:#fff}'
+    +'.foto{height:110px;display:flex;align-items:center;justify-content:center;background:#fafbfc;border-radius:7px;overflow:hidden;margin-bottom:7px}'
+    +'.foto img{max-width:100%;max-height:100%;object-fit:contain}'
+    +'.foto.sinf{font-size:34px;opacity:.3}'
+    +'.nom{font-size:10px;font-weight:700;line-height:1.3;height:26px;overflow:hidden;margin-bottom:4px}'
+    +'.antes{font-size:9px;color:#999;text-decoration:line-through}'
+    +'.precio{font-size:15px;font-weight:900;color:'+col1+';margin-bottom:5px}'
+    +'.cuotas{border-top:1px solid #f0f0f0;padding-top:5px}'
+    +'.cu{display:flex;justify-content:space-between;font-size:9px;padding:1.5px 0}'
+    +'.cu span{color:#888}'
+    +'.cu b{color:'+col2+';font-weight:900}'
+    +'.foot{margin-top:16px;padding:14px;background:'+col1+';color:#fff;border-radius:10px;text-align:center}'
+    +'.foot .big{font-size:15px;font-weight:900;margin-bottom:3px}'
+    +'.foot .sm{font-size:11px;opacity:.85}'
+    +'</style></head><body>'
+    +'<div class="head">'
+      +(logo?'<img src="'+logo+'">':'')
+      +'<div class="t"><h1>'+neg+'</h1><div class="sub">Catálogo actualizado · '+hoy+'</div></div>'
+      +'<div class="cta">🔥 EN CUOTAS FIJAS</div>'
+    +'</div>'
+    +'<div class="grid">'+cards+'</div>'
+    +'<div class="foot">'
+      +'<div class="big">📲 Consultanos y llevátelo hoy</div>'
+      +'<div class="sm">'+(wa?'WhatsApp: '+wa+'   ':'')+(ig?'· '+ig:'')+'</div>'
+      +'<div class="sm" style="margin-top:4px">⭐ Retirás pagando solo la 1ra cuota</div>'
+    +'</div>'
+    +'<script>window.onload=function(){setTimeout(function(){window.print();},600);}<\/script>'
+    +'</body></html>';
+
+  var w=window.open('','_blank');
+  if(!w){ alert('El navegador bloqueó la ventana. Permitilas y probá de nuevo.'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+
 /* ═══════ 📊 ESTADÍSTICAS — que el dueño vea cómo anda su negocio ═══════ */
 function abrirEstadisticas(){ cargarPedidos(renderEstadisticas); }
 function renderEstadisticas(){
