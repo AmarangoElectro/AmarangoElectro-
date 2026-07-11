@@ -260,6 +260,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 <!-- BOTÓN FLOTANTE 🐝 — atajo a cargar productos. SOLO lo ve el admin. -->
 <button id="beeFab" onclick="abrirCargarDirecto()" style="display:none;position:fixed;bottom:88px;right:16px;z-index:340;width:60px;height:60px;border-radius:50%;background:#fff;border:3px solid var(--nar);font-size:1.9rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);padding:0;line-height:1">🐝</button>
 
+<!-- VISOR DE FOTO a pantalla completa (tocás la foto y se ve entera) -->
+<div id="fotoZoom" onclick="cerrarZoom()" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.93);align-items:center;justify-content:center;flex-direction:column;padding:16px">
+  <button onclick="cerrarZoom()" style="position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.4rem;font-weight:900;cursor:pointer;z-index:2">✕</button>
+  <img id="fotoZoomImg" src="" style="max-width:100%;max-height:82vh;object-fit:contain;border-radius:8px">
+  <div id="fotoZoomNom" style="color:#fff;font-size:.86rem;font-weight:700;text-align:center;margin-top:14px;max-width:90%"></div>
+  <div style="color:rgba(255,255,255,.5);font-size:.72rem;margin-top:6px">Tocá en cualquier lado para cerrar</div>
+</div>
+
 <!-- Panel CARRITO -->
 <div class="overlay" id="carritoOverlay" onclick="if(event.target===this)cerrarCarrito()">
   <div class="sheet">
@@ -930,6 +938,18 @@ function toggleCajonOpciones(){
   c.style.display = abierto ? 'none' : 'grid';
   if(f) f.textContent = abierto ? '▼' : '▲';
 }
+/* ═══════ VISOR DE FOTO — tocás la foto y se ve entera ═══════
+   Funciona para los 3 roles: admin, revendedor y cliente. */
+function verFotoGrande(idx, ev){
+  if(ev) ev.stopPropagation();
+  var p=PRODUCTOS[idx]; if(!p || !p.foto) return;
+  document.getElementById('fotoZoomImg').src=p.foto;
+  document.getElementById('fotoZoomNom').textContent=p.nombre||'';
+  var z=document.getElementById('fotoZoom');
+  z.style.display='flex';
+}
+function cerrarZoom(){ document.getElementById('fotoZoom').style.display='none'; }
+
 /* Opciones del producto — directo desde la tarjeta, sin abrir el detalle */
 function abrirOpcionesRapidas(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
@@ -1812,6 +1832,7 @@ function render(){
         +(enOferta ? '<span class="badge">🔥 '+pctOff+'% OFF</span>' : '')
         +(p.sinStock ? '<span style="position:absolute;top:6px;left:6px;background:#DC2626;color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px">SIN STOCK</span>' : '')
         +(oculto ? '<span style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.65);color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px">🙈 OCULTO</span>' : '')
+        +(p.foto ? '<button onclick="verFotoGrande('+idx+',event)" style="position:absolute;bottom:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:none;font-size:.85rem;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2);line-height:1;padding:0">🔍</button>' : '')
         +'<button class="fav" onclick="toggleFav('+idx+',event)">'+(esFav(p)?'❤️':'🤍')+'</button>'
       +'</div>'
       +'<div class="body">'
@@ -1919,7 +1940,10 @@ function verDetalle(idx){
   var ph=document.getElementById('d-ph');
   // FOTO GRANDE Y ENTERA (estilo Mercado Libre) — usa <img> real para máxima calidad
   if(p.foto){
-    ph.innerHTML='<div class="foto-big"><img src="'+p.foto+'" alt="'+(p.nombre||'').replace(/"/g,'')+'"></div>';
+    ph.innerHTML='<div class="foto-big" onclick="verFotoGrande('+idx+',event)" style="cursor:zoom-in;position:relative">'
+      +'<img src="'+p.foto+'" alt="'+(p.nombre||'').replace(/"/g,'')+'">'
+      +'<div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.66rem;font-weight:700;padding:5px 10px;border-radius:14px;pointer-events:none">🔍 Tocá para ampliar</div>'
+      +'</div>';
   } else {
     ph.innerHTML='<div class="foto-big"><span class="sinfoto">'+catProd(p).split(' ')[0]+'</span></div>';
   }
