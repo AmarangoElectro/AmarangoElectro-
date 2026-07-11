@@ -595,6 +595,8 @@ function abrirCargar(){
   var cats=['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
   document.getElementById('adminBody').innerHTML=
      '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:12px">➕ Cargar producto</div>'
+    +'<button onclick="abrirPegadoMasivo()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px">📋 Pegar lista completa (muchos de una vez)</button>'
+    +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-bottom:14px">— o cargá uno por uno acá abajo —</div>'
     // foto
     +'<div style="text-align:center;margin-bottom:14px">'
       +'<div id="cargaFotoPrev" style="width:120px;height:120px;margin:0 auto 8px;border-radius:14px;background:#F5F8FF;border:1.5px dashed var(--nar);display:flex;align-items:center;justify-content:center;font-size:2.5rem">📷</div>'
@@ -695,6 +697,88 @@ function guardarProducto(){
 function guardarCatalogo(){
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(PRODUCTOS)); }catch(e){}
   if(sb){ sb.from('tienda_catalogo').upsert({id:'catalogo', datos:PRODUCTOS}).then(function(){}).catch(function(){}); }
+}
+
+/* ═══════ PEGADO MASIVO — cargar muchos productos de una lista ═══════ */
+var _masivoParsed=[];
+function abrirPegadoMasivo(){
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:8px">📋 Pegar lista completa</div>'
+    +'<div style="font-size:.74rem;color:var(--sub);margin-bottom:10px">Pegá la lista tal cual te la mandan. El que dice <b>usd</b> lo tomo en dólares; el resto en pesos. Aplico tu markup y te dejo revisar antes de guardar. 🐝</div>'
+    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:8px">'
+      +'<span style="font-size:.7rem;font-weight:800;color:var(--sub)">💵 Dólar hoy:</span>'
+      +'<input type="number" id="masivoDolar" value="'+(CONFIG.dolar||1500)+'" oninput="parsearMasivo()" style="flex:1;border:1.5px solid var(--line);border-radius:8px;padding:8px;font-family:inherit;font-weight:800;color:var(--az);outline:none;text-align:center">'
+    +'</div>'
+    +'<textarea id="masivoTxt" oninput="parsearMasivo()" placeholder="Pegá acá la lista de productos..." style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:.82rem;min-height:120px;outline:none;resize:vertical"></textarea>'
+    +'<div id="masivoPreview" style="margin-top:12px"></div>'
+    +'<button onclick="abrirCargar()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+}
+/* Parser: cada línea que tenga un precio es un producto */
+function parsearMasivo(){
+  var txt=document.getElementById('masivoTxt').value||'';
+  var cot=parseFloat(document.getElementById('masivoDolar').value)||1500;
+  var lineas=txt.split('\n');
+  _masivoParsed=[];
+  lineas.forEach(function(raw){
+    var linea=raw.replace(/[*_#]/g,'').trim();
+    if(!linea) return;
+    var precio=0, esUsd=false;
+    // formato 1: "110usd" o "110 usd" → dólares
+    var mUsd=linea.match(/(\d{2,4})\s*usd/i);
+    // formato 2: "-$185" o "$185" con 2-4 cifras → estos mayoristas lo usan para USD también
+    var mGuionPeso=linea.match(/[-–]\s*\$?\s*(\d{2,4})(?!\d)/);
+    // formato 3: precio en pesos grande (5+ cifras)
+    var mPeso=linea.match(/\$?\s*(\d{5,})/);
+    if(mUsd){ precio=parseInt(mUsd[1],10); esUsd=true; }
+    else if(mPeso){ precio=parseInt(mPeso[1].replace(/\./g,''),10); esUsd=false; }
+    else if(mGuionPeso){ precio=parseInt(mGuionPeso[1],10); esUsd=true; } // formato -$185 = USD en estas listas
+    if(!precio) return; // línea sin precio = título, la salteo
+    // nombre = la línea sin el precio ni palabras sueltas
+    var nombre=linea.replace(/[-–]?\s*\$?\s*\d[\d\.]*\s*usd/i,'').replace(/[-–]\s*\$?\s*\d{2,4}(?!\d)/,'').replace(/\$?\s*\d{5,}/,'')
+      .replace(/oferta\s*!*/i,'').replace(/nacional/i,'').replace(/racing edition/i,'').replace(/🇦🇷|📱|〽️|🔱|❗|!/g,'').trim();
+    nombre=nombre.replace(/\s{2,}/g,' ').replace(/[-–]\s*$/,'').trim();
+    if(nombre.length<3) return;
+    var costo = esUsd ? Math.round(precio*cot) : precio;
+    var venta = markupDeCosto(costo);
+    var esOferta = /oferta/i.test(linea);
+    _masivoParsed.push({ nombre:nombre, costo:costo, venta:venta, esUsd:esUsd, usd: esUsd?precio:null, oferta:esOferta, sospechoso:false });
+  });
+  // marcar precios sospechosos (muy fuera del rango del resto)
+  if(_masivoParsed.length>3){
+    var ventas=_masivoParsed.map(function(p){return p.venta;}).sort(function(a,b){return a-b;});
+    var mediana=ventas[Math.floor(ventas.length/2)];
+    _masivoParsed.forEach(function(p){ if(p.venta > mediana*5) p.sospechoso=true; });
+  }
+  renderMasivoPreview();
+}
+function renderMasivoPreview(){
+  var cont=document.getElementById('masivoPreview');
+  if(!_masivoParsed.length){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:16px;font-size:.8rem">Pegá una lista y te muestro los productos detectados.</div>'; return; }
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-weight:900;color:var(--az);font-size:.9rem">✅ '+_masivoParsed.length+' productos detectados</span></div>';
+  _masivoParsed.forEach(function(p,i){
+    html+='<div style="background:#fff;border:1px solid '+(p.sospechoso?'#EF4444':'var(--line)')+';border-radius:10px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:center;gap:8px">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.nombre+(p.oferta?' 🔥':'')+'</div>'
+      +'<div style="font-size:.64rem;color:var(--sub)">'+(p.esUsd?'U$'+p.usd+' → ':'')+'Vende: <b style="color:var(--az)">'+fmt(p.venta)+'</b> · 6c '+fmt(valorCuota(p.venta,6))+'</div>'
+      +(p.sospechoso?'<div style="font-size:.6rem;color:#EF4444;font-weight:700">⚠️ Precio raro, revisá</div>':'')+'</div>'
+      +'<button onclick="quitarMasivo('+i+')" style="background:none;border:none;color:#EF4444;font-size:1rem;cursor:pointer;padding:4px">✕</button></div>';
+  });
+  html+='<button onclick="guardarMasivo()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px">💾 Cargar los '+_masivoParsed.length+' productos</button>';
+  cont.innerHTML=html;
+}
+function quitarMasivo(i){ _masivoParsed.splice(i,1); renderMasivoPreview(); }
+function guardarMasivo(){
+  if(!_masivoParsed.length){ alert('No hay productos para cargar.'); return; }
+  if(!confirm('¿Cargar '+_masivoParsed.length+' productos a tu tienda?')) return;
+  _masivoParsed.forEach(function(p){
+    var prod={ id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), nombre:p.nombre, venta:p.venta, foto:'', categoria:'', visible:true };
+    if(p.oferta) prod.precioAntes=Math.round(p.venta*1.15/500)*500; // precio "antes" estimado para mostrar el tachado
+    PRODUCTOS.push(prod);
+  });
+  guardarCatalogo();
+  alert('✅ '+_masivoParsed.length+' productos cargados. Ya están en tu tienda.');
+  _masivoParsed=[];
+  render();
+  abrirPanelDueno();
 }
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
