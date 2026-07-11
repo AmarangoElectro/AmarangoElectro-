@@ -704,12 +704,13 @@ var _masivoParsed=[];
 function abrirPegadoMasivo(){
   document.getElementById('adminBody').innerHTML=
      '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:8px">📋 Pegar lista completa</div>'
-    +'<div style="font-size:.74rem;color:var(--sub);margin-bottom:10px">Pegá la lista tal cual te la mandan. El que dice <b>usd</b> lo tomo en dólares; el resto en pesos. Aplico tu markup y te dejo revisar antes de guardar. 🐝</div>'
+    +'<div style="font-size:.74rem;color:var(--sub);margin-bottom:10px">Pegá la lista tal cual te la mandan. Entiendo los dos formatos:<br>• <b>Nombre | Precio</b> (con barrita)<br>• <b>Samsung A06 110usd</b> (lista de mayorista)<br>El que dice <b>usd</b> lo tomo en dólares. Aplico tu markup. 🐝</div>'
     +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:10px;padding:10px;margin-bottom:10px;display:flex;align-items:center;gap:8px">'
       +'<span style="font-size:.7rem;font-weight:800;color:var(--sub)">💵 Dólar hoy:</span>'
       +'<input type="number" id="masivoDolar" value="'+(CONFIG.dolar||1500)+'" oninput="parsearMasivo()" style="flex:1;border:1.5px solid var(--line);border-radius:8px;padding:8px;font-family:inherit;font-weight:800;color:var(--az);outline:none;text-align:center">'
     +'</div>'
     +'<textarea id="masivoTxt" oninput="parsearMasivo()" placeholder="Pegá acá la lista de productos..." style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:.82rem;min-height:120px;outline:none;resize:vertical"></textarea>'
+    +'<label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;color:var(--txt);cursor:pointer"><input type="checkbox" id="masivoReemplazar" style="width:18px;height:18px"> Reemplazar todo el catálogo <span style="color:var(--sub)">(si no, agrega)</span></label>'
     +'<div id="masivoPreview" style="margin-top:12px"></div>'
     +'<button onclick="abrirCargar()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
 }
@@ -722,34 +723,68 @@ function parsearMasivo(){
   lineas.forEach(function(raw){
     var linea=raw.replace(/[*_#]/g,'').trim();
     if(!linea) return;
-    var precio=0, esUsd=false;
-    // formato 1: "110usd" o "110 usd" → dólares
+    var precio=0, esUsd=false, nombre='', dudoso=false;
+
+    // ===== FORMATO BARRITA: Nombre | Precio =====
+    if(linea.indexOf('|')>=0){
+      var partes=linea.split('|').map(function(x){return x.trim();});
+      nombre=partes[0];
+      var nums=partes.slice(1).filter(function(x){return /\d/.test(x);});
+      dudoso=nums.length>1;
+      var precioStr=nums.length?nums[nums.length-1]:'';
+      var mu=precioStr.match(/(\d[\d\.]*)\s*usd/i);
+      if(mu){ precio=parseInt(mu[1].replace(/\./g,''),10); esUsd=true; }
+      else { var mp=precioStr.match(/(\d[\d\.]*)/); if(mp){ precio=parseInt(mp[1].replace(/\./g,''),10); esUsd=/usd/i.test(precioStr); } }
+      if(!precio) return;
+      pushProd(nombre, precio, esUsd, /oferta/i.test(linea), dudoso, cot); return;
+    }
+
+    // ===== USD explícito (celulares mayorista): "110usd" =====
     var mUsd=linea.match(/(\d{2,4})\s*usd/i);
-    // formato 2: "-$185" o "$185" con 2-4 cifras → estos mayoristas lo usan para USD también
-    var mGuionPeso=linea.match(/[-–]\s*\$?\s*(\d{2,4})(?!\d)/);
-    // formato 3: precio en pesos grande (5+ cifras)
-    var mPeso=linea.match(/\$?\s*(\d{5,})/);
-    if(mUsd){ precio=parseInt(mUsd[1],10); esUsd=true; }
-    else if(mPeso){ precio=parseInt(mPeso[1].replace(/\./g,''),10); esUsd=false; }
-    else if(mGuionPeso){ precio=parseInt(mGuionPeso[1],10); esUsd=true; } // formato -$185 = USD en estas listas
-    if(!precio) return; // línea sin precio = título, la salteo
-    // nombre = la línea sin el precio ni palabras sueltas
-    var nombre=linea.replace(/[-–]?\s*\$?\s*\d[\d\.]*\s*usd/i,'').replace(/[-–]\s*\$?\s*\d{2,4}(?!\d)/,'').replace(/\$?\s*\d{5,}/,'')
-      .replace(/oferta\s*!*/i,'').replace(/nacional/i,'').replace(/racing edition/i,'').replace(/🇦🇷|📱|〽️|🔱|❗|!/g,'').trim();
-    nombre=nombre.replace(/\s{2,}/g,' ').replace(/[-–]\s*$/,'').trim();
-    if(nombre.length<3) return;
-    var costo = esUsd ? Math.round(precio*cot) : precio;
-    var venta = markupDeCosto(costo);
-    var esOferta = /oferta/i.test(linea);
-    _masivoParsed.push({ nombre:nombre, costo:costo, venta:venta, esUsd:esUsd, usd: esUsd?precio:null, oferta:esOferta, sospechoso:false });
+    if(mUsd){
+      precio=parseInt(mUsd[1],10); esUsd=true;
+      nombre=limpiarNombre(linea.replace(/\d{2,4}\s*usd/i,''));
+      if(nombre.length>=3) pushProd(nombre, precio, esUsd, /oferta/i.test(linea), false, cot);
+      return;
+    }
+
+    // ===== PRECIO CON $ (la regla principal de Max): $27.000, $ 27.000, 27.000$ =====
+    // busca un número pegado a un $ (antes o después, con espacio opcional)
+    var mDolar = linea.match(/\$\s*(\d[\d\.]{2,})/) || linea.match(/(\d[\d\.]{2,})\s*\$/);
+    if(mDolar){
+      precio=parseInt(mDolar[1].replace(/\./g,''),10);
+      // en celulares "-$185" es USD; en electro "$195000" es pesos. Distingo por tamaño:
+      esUsd = precio < 3000;  // menos de 3000 con $ = dólar (ningún electro cuesta $185 pesos)
+      nombre=limpiarNombre(linea.replace(mDolar[0],''));
+      if(nombre.length>=3) pushProd(nombre, precio, esUsd, /oferta/i.test(linea), false, cot);
+      return;
+    }
+
+    // ===== sin $ ni usd: no hay precio confiable, salteo (es título o medida suelta) =====
   });
-  // marcar precios sospechosos (muy fuera del rango del resto)
+  marcarSospechosos();
+  renderMasivoPreview();
+}
+/* helpers del parser */
+function limpiarNombre(s){
+  return (s||'').replace(/oferta\s*!*/i,'').replace(/nacional/i,'').replace(/racing edition/i,'')
+    .replace(/precio\s*costo/i,'').replace(/colores?\s+disponibles?.*/i,'')
+    .replace(/🇦🇷|📱|〽️|🔱|❗|💣|🌜|✅|💰|❄️|🍳|📺|🧺|☕|!/g,'')
+    .replace(/\(\s*\)/g,'')          // paréntesis vacíos ()
+    .replace(/\s{2,}/g,' ').replace(/[-–,]\s*$/,'').replace(/\s+$/,'').trim();
+}
+function pushProd(nombre, precio, esUsd, oferta, dudoso, cot){
+  var costo = esUsd ? Math.round(precio*cot) : precio;
+  var venta = markupDeCosto(costo);
+  _masivoParsed.push({ nombre:nombre, costo:costo, venta:venta, esUsd:esUsd, usd:esUsd?precio:null, oferta:oferta, sospechoso:dudoso });
+}
+function marcarSospechosos(){
+  // marca precios muy fuera del rango del resto (probable error de tipeo)
   if(_masivoParsed.length>3){
     var ventas=_masivoParsed.map(function(p){return p.venta;}).sort(function(a,b){return a-b;});
     var mediana=ventas[Math.floor(ventas.length/2)];
     _masivoParsed.forEach(function(p){ if(p.venta > mediana*5) p.sospechoso=true; });
   }
-  renderMasivoPreview();
 }
 function renderMasivoPreview(){
   var cont=document.getElementById('masivoPreview');
@@ -768,14 +803,19 @@ function renderMasivoPreview(){
 function quitarMasivo(i){ _masivoParsed.splice(i,1); renderMasivoPreview(); }
 function guardarMasivo(){
   if(!_masivoParsed.length){ alert('No hay productos para cargar.'); return; }
-  if(!confirm('¿Cargar '+_masivoParsed.length+' productos a tu tienda?')) return;
+  var reemplazar = document.getElementById('masivoReemplazar') && document.getElementById('masivoReemplazar').checked;
+  var msg = reemplazar
+    ? '⚠️ Vas a REEMPLAZAR todo el catálogo por estos '+_masivoParsed.length+' productos. Los de antes se borran. ¿Seguro?'
+    : '¿Agregar '+_masivoParsed.length+' productos a tu tienda?';
+  if(!confirm(msg)) return;
+  if(reemplazar) PRODUCTOS=[];
   _masivoParsed.forEach(function(p){
     var prod={ id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), nombre:p.nombre, venta:p.venta, foto:'', categoria:'', visible:true };
-    if(p.oferta) prod.precioAntes=Math.round(p.venta*1.15/500)*500; // precio "antes" estimado para mostrar el tachado
+    if(p.oferta) prod.precioAntes=Math.round(p.venta*1.15/500)*500;
     PRODUCTOS.push(prod);
   });
   guardarCatalogo();
-  alert('✅ '+_masivoParsed.length+' productos cargados. Ya están en tu tienda.');
+  alert('✅ '+_masivoParsed.length+' productos '+(reemplazar?'cargados (catálogo reemplazado)':'agregados')+'.');
   _masivoParsed=[];
   render();
   abrirPanelDueno();
