@@ -781,7 +781,8 @@ var CONFIG_DEFAULT = {
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
-  vendedores: [],          // [{nombre:'Maximiliano', wa:'5491162107212'}, ...]
+  admins: [],              // los que COBRAN (botón Comprar) — [{nombre,wa}]
+  vendedores: [],          // los que ATIENDEN (botón Consultar) — [{nombre,wa}]
   pin: "2580",
   pinRev: "1234"
 };
@@ -849,9 +850,12 @@ function abrirConfig(){
       +'<div style="flex:1">'+campo('4 cuotas','cf_c4',c.cuotas[4],'','number')+'</div>'
       +'<div style="flex:1">'+campo('6 cuotas','cf_c6',c.cuotas[6],'','number')+'</div>'
     +'</div>'
-    +sec('💬 Vendedores (para "Consultar")')
-    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Uno por línea: <b>Nombre, WhatsApp</b><br>Ej: Maximiliano, 5491162107212</div>'
-    +'<textarea id="cf_vendedores" placeholder="Maximiliano, 5491162107212&#10;Ángela, 5491168610532" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:70px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
+    +sec('👑 Administradores (los que COBRAN)')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Al tocar <b>🛒 Comprar</b>, el cliente elige entre estos. Son los que dan el alias y cobran.<br>Uno por línea: <b>Nombre, WhatsApp</b></div>'
+    +'<textarea id="cf_admins" placeholder="Maximiliano, 5491162107212&#10;Ángela, 5491168610532" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:64px;outline:none;resize:vertical;margin-bottom:11px">'+((c.admins||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
+    +sec('🤝 Vendedores (los que ATIENDEN)')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Al tocar <b>💬 Consultar</b>, el cliente elige entre estos. Responden dudas, no cobran.<br>Uno por línea: <b>Nombre, WhatsApp</b></div>'
+    +'<textarea id="cf_vendedores" placeholder="Selene, 5491168746034" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:64px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
     +sec('🔒 Seguridad')
     +campo('Clave del dueño (PIN)','cf_pin',c.pin,'','number')
     +campo('Clave de revendedor','cf_pinRev',c.pinRev||'1234','','number')
@@ -899,13 +903,16 @@ function guardarConfigDesdeForm(){
   CONFIG.cuotas = { 2:parseFloat(g('cf_c2'))||15, 4:parseFloat(g('cf_c4'))||55, 6:parseFloat(g('cf_c6'))||78 };
   CONFIG.pin = g('cf_pin')||'2580';
   CONFIG.pinRev = g('cf_pinRev')||'1234';
-  // vendedores: una línea por vendedor "Nombre, WhatsApp"
-  var vtxt=g('cf_vendedores');
-  CONFIG.vendedores = vtxt ? vtxt.split('\n').map(function(l){
-    var partes=l.split(','); if(partes.length<2) return null;
-    var nom=partes[0].trim(); var wa=partes[1].replace(/[^0-9]/g,'');
-    return (nom && wa) ? {nombre:nom, wa:wa} : null;
-  }).filter(Boolean) : [];
+  // dos listas: quiénes cobran (admins) y quiénes atienden (vendedores)
+  function parseLista(txt){
+    return txt ? txt.split('\n').map(function(l){
+      var partes=l.split(','); if(partes.length<2) return null;
+      var nom=partes[0].trim(); var wa=partes[1].replace(/[^0-9]/g,'');
+      return (nom && wa) ? {nombre:nom, wa:wa} : null;
+    }).filter(Boolean) : [];
+  }
+  CONFIG.admins = parseLista(g('cf_admins'));
+  CONFIG.vendedores = parseLista(g('cf_vendedores'));
   guardarConfig();
   render();
   alert('✅ Guardado. Tu tienda se actualizó.');
@@ -1497,6 +1504,7 @@ function bajarCatalogo(){
         PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
         try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(r.data.datos)); }catch(e){}
         actualizarFavCount(); actualizarBadgeCarrito(); actualizarBeeFab();
+        setTimeout(function(){ try{ mostrarBienvenida(); }catch(e){} }, 1200);
         render();
       } else if(!PRODUCTOS.length){
         mostrarError('La nube respondió pero no hay productos cargados todavía.');
@@ -1559,22 +1567,30 @@ function render(){
   wrap.innerHTML='<div class="grid">'+lista.map(function(p){
     var idx=PRODUCTOS.indexOf(p);
     var mc=mejorCuota(p.venta);
-    var marca=marcaDe(p.nombre);
+    var rolT=rolActual();
     var phStyle = p.foto ? 'style="background-image:url(\''+p.foto+'\')"' : '';
     var phIco = p.foto ? '' : catProd(p).split(' ')[0];
     var enOferta = p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta);
     var pctOff = enOferta ? Math.round((1-p.venta/parseFloat(p.precioAntes))*100) : 0;
+    // botones según QUIÉN mira: admin/revendedor comparten · el cliente COMPRA
+    var botones;
+    if(rolT==='admin' || rolT==='revendedor'){
+      botones='<button class="share" onclick="compartir('+idx+')">📤 Compartir</button>';
+    } else {
+      botones='<button onclick="verDetalle('+idx+')" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">📅 Ver cuotas</button>'
+        +'<button onclick="comprarProducto('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Comprar</button>'
+        +'<button onclick="consultarProducto('+idx+',event)" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Consultar</button>';
+    }
     return '<div class="card">'
       +'<div class="ph" '+phStyle+' onclick="verDetalle('+idx+')">'+phIco
         +(enOferta ? '<span class="badge">🔥 '+pctOff+'% OFF</span>' : '')
         +'<button class="fav" onclick="toggleFav('+idx+',event)">'+(esFav(p)?'❤️':'🤍')+'</button>'
       +'</div>'
       +'<div class="body">'
-        +(marca?'<div class="marca">'+marca+'</div>':'<div class="marca">&nbsp;</div>')
         +'<div class="nom" onclick="verDetalle('+idx+')">'+p.nombre+'</div>'
         +(mc?'<div class="cuota-v">'+fmt(mc.valor)+'</div><div class="cuota-n">en '+mc.n+' cuotas fijas</div>':'')
         +'<div class="contado">'+(enOferta?'<span style="text-decoration:line-through;color:#bbb">'+fmt(p.precioAntes)+'</span> ':'')+'Contado: '+fmt(p.venta)+'</div>'
-        +'<button class="share" onclick="compartir('+idx+')">📤 Compartir</button>'
+        +botones
       +'</div></div>';
   }).join('')+'</div>';
 }
@@ -1754,33 +1770,95 @@ function renderBotonesDetalle(idx){
     html+='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">📤 Compartir con foto</button>';
   }
   else {
-    // CLIENTE: comprar / carrito / consultar (como los grandes)
-    html+='<button onclick="consultarProducto('+idx+')" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛒 Lo quiero · Consultar</button>';
+    // CLIENTE: comprar (va al admin que cobra) · consultar (va al vendedor) · carrito
+    html+='<button onclick="comprarProducto('+idx+')" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛒 Comprar ahora</button>';
     html+='<button onclick="agregarAlCarrito('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--nar);color:var(--nar);border-radius:13px;padding:13px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">➕ Agregar al carrito</button>';
-    html+='<button onclick="compartir('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--line);color:var(--az);border-radius:13px;padding:13px;font-size:.86rem;font-weight:800;cursor:pointer;font-family:inherit">📤 Compartir</button>';
+    html+='<button onclick="consultarProducto('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Consultá este producto</button>';
   }
   cont.innerHTML=html;
 }
 
-/* CLIENTE: elegir con quién consultar (los vendedores salen de la config) */
-function consultarProducto(idx){
+/* ═══════ BIENVENIDA / REGISTRO del cliente (una sola vez) ═══════
+   Usa el nombre del negocio de la CONFIG (así Marcelo ve "Marcelo Hogar"). */
+function clienteRegistrado(){ try{ return !!localStorage.getItem('ae_cliente'); }catch(e){ return false; } }
+function mostrarBienvenida(){
+  if(rolActual()) return;              // admin/revendedor no ven esto
+  if(clienteRegistrado()) return;      // ya se registró
+  if(sessionStorage.getItem('ae_bienv')) return;  // ya lo vio en esta visita
+  try{ sessionStorage.setItem('ae_bienv','1'); }catch(e){}
+  var nombre=(CONFIG && CONFIG.negocio) ? CONFIG.negocio : 'nuestra tienda';
+  var logo=(CONFIG && CONFIG.logo) ? '<img src="'+CONFIG.logo+'" style="width:64px;height:64px;border-radius:14px;object-fit:cover;margin:0 auto 10px;display:block">' : '<div style="font-size:2.6rem;text-align:center;margin-bottom:8px">🐝</div>';
+  document.getElementById('ayudaBody').innerHTML=
+     logo
+    +'<div style="text-align:center;font-weight:900;color:var(--az);font-size:1.15rem;margin-bottom:6px">¡Bienvenido a '+nombre+'!</div>'
+    +'<div style="text-align:center;font-size:.84rem;color:var(--sub);line-height:1.5;margin-bottom:16px">Para comprar en cuotas te registramos una sola vez.<br>Después te reconocemos y comprás en segundos 🙌</div>'
+    +'<button onclick="abrirRegistro()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📝 Registrarme (1 minuto)</button>'
+    +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit">← Seguir mirando</button>';
+  document.getElementById('ayudaOverlay').classList.add('on');
+}
+function abrirRegistro(){
+  function campo(lbl,id,ph,tipo){ return '<div style="margin-bottom:11px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" '+(tipo?'type="'+tipo+'"':'')+' placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:.88rem;outline:none"></div>'; }
+  document.getElementById('ayudaBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📝 Registrate</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">Es rápido. Con esto te reconocemos y comprás más fácil. 🐝</div>'
+    +campo('Nombre y apellido','rg_nombre','Ej: Juan Pérez')
+    +campo('WhatsApp','rg_wa','Ej: 1122334455','tel')
+    +campo('Localidad','rg_loc','Ej: San Miguel')
+    +'<button onclick="guardarRegistro()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:6px">✅ Listo, registrarme</button>'
+    +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">← Cancelar</button>';
+}
+function guardarRegistro(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+  var nom=g('rg_nombre'), wa=g('rg_wa').replace(/[^0-9]/g,''), loc=g('rg_loc');
+  if(!nom || !wa){ alert('Poné al menos tu nombre y WhatsApp.'); return; }
+  var cli={ nombre:nom, wa:wa, loc:loc, fecha:Date.now() };
+  try{ localStorage.setItem('ae_cliente', JSON.stringify(cli)); }catch(e){}
+  // lo guarda en la nube para que el dueño lo vea
+  if(sb){
+    sb.from('tienda_catalogo').select('datos').eq('id','clientes').maybeSingle()
+      .then(function(r){
+        var arr=(r&&r.data&&r.data.datos)?r.data.datos:[];
+        arr.push(cli);
+        sb.from('tienda_catalogo').upsert({id:'clientes', datos:arr}).then(function(){}).catch(function(){});
+      }).catch(function(){});
+  }
+  cerrarConsulta();
+  toastCarrito('✅ ¡Listo, '+nom.split(' ')[0]+'! Ya estás registrado 🐝');
+}
+
+/* 🛒 COMPRAR → va a los ADMINISTRADORES (los que cobran y dan el alias) */
+function comprarProducto(idx, ev){
+  if(ev) ev.stopPropagation();
   var p=PRODUCTOS[idx]; if(!p)return;
-  var vends=(CONFIG.vendedores&&CONFIG.vendedores.length)?CONFIG.vendedores:[];
+  var lines=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(p.venta,n)); });
+  var msg='Hola! Quiero *COMPRAR* este producto 🛒\n\n*'+p.nombre+'*\n\n'+lines.join('\n')+'\n\n➡️ Contado: '+fmt(p.venta)+'\n\n¿Me pasás los datos para pagar? 🐝';
+  var admins=(CONFIG.admins&&CONFIG.admins.length)?CONFIG.admins:[];
+  elegirContacto(admins, msg, '🛒 Comprar', p.nombre+' · '+fmt(p.venta), 'Elegí con quién coordinar el pago');
+}
+/* 💬 CONSULTAR → va a los VENDEDORES (los que atienden dudas) */
+function consultarProducto(idx, ev){
+  if(ev) ev.stopPropagation();
+  var p=PRODUCTOS[idx]; if(!p)return;
   var msg='Hola! Me interesa el *'+p.nombre+'* ('+fmt(p.venta)+' contado). ¿Me pasás info de las cuotas? 🐝';
-  // si no hay vendedores cargados, usa el WhatsApp del negocio
-  if(!vends.length){
+  var vends=(CONFIG.vendedores&&CONFIG.vendedores.length)?CONFIG.vendedores:[];
+  elegirContacto(vends, msg, '💬 Consultá este producto', p.nombre+' · '+fmt(p.venta), 'Consultá con nosotros');
+}
+/* Ventana común para elegir a quién escribirle */
+function elegirContacto(lista, msg, titulo, subtitulo, etiqueta){
+  // si no hay nadie cargado, usa el WhatsApp del negocio
+  if(!lista.length){
     var wa=(CONFIG.whatsapp||'').replace(/[^0-9]/g,'');
-    if(wa) window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
-    else window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+    var url = wa ? 'https://wa.me/'+wa+'?text='+encodeURIComponent(msg) : 'https://wa.me/?text='+encodeURIComponent(msg);
+    window.open(url,'_blank');
     return;
   }
-  var html='<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">💬 Consultá este producto</div>'
-    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+p.nombre+' · '+fmt(p.venta)+'</div>'
-    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Elegí con quién</div>';
-  vends.forEach(function(v){
-    html+='<button onclick="window.open(\'https://wa.me/'+String(v.wa).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
+  var html='<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:3px">'+titulo+'</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+subtitulo+'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">'+etiqueta+'</div>';
+  lista.forEach(function(v){
+    html+='<button onclick="window.open(\'https://wa.me/'+String(v.wa).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
   });
-  html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
+  html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
   document.getElementById('ayudaBody').innerHTML=html;
   document.getElementById('ayudaOverlay').classList.add('on');
 }
