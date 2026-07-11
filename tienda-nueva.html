@@ -211,43 +211,92 @@ var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del 
 /* Si ya se pegó antes en este teléfono, la recuerda */
 try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
 
-/* ═══════ PUERTA OCULTA DEL DUEÑO ═══════
-   1ra vez: 5 toques en el logo + clave. Después queda la SESIÓN abierta:
-   con UN solo toque entrás. Se cierra con "Cerrar sesión". */
-var PIN_DUENO = "2580";
+/* ═══════ PUERTA OCULTA — DOS LLAVES, UN GESTO ═══════
+   5 toques en el logo + clave. La CLAVE decide el rol:
+   · clave admin → 👑 Admin (todo: costos, placas, cargar, config)
+   · clave revendedor → 🤝 Revendedor (solo venta, calculadora, compartir)
+   El cliente no ve ninguna puerta. */
+var PIN_DUENO = "2580";        // clave admin
+var PIN_REVENDEDOR = "1234";   // clave revendedor
 var _toquesAbeja = 0, _toqueTimer = null;
 
-/* ¿Hay sesión abierta en este teléfono? */
-function haySesion(){ try{ return localStorage.getItem('ae_sesion')==='1'; }catch(e){ return false; } }
-function abrirSesion(){ try{ localStorage.setItem('ae_sesion','1'); }catch(e){} }
+/* ROL actual: null (cliente) | 'admin' | 'revendedor' */
+function rolActual(){ try{ return localStorage.getItem('ae_rol')||null; }catch(e){ return null; } }
+function setRol(r){ try{ if(r) localStorage.setItem('ae_rol',r); else localStorage.removeItem('ae_rol'); }catch(e){} }
+function haySesion(){ return rolActual()!==null; }
+function esAdmin(){ return rolActual()==='admin'; }
+function esRevendedor(){ return rolActual()==='revendedor'; }
+
 function cerrarSesion(){
-  try{ localStorage.removeItem('ae_sesion'); }catch(e){}
+  setRol(null);
   cerrarAdmin();
-  alert('🔒 Sesión cerrada. Para volver a entrar: 5 toques en el logo + clave.');
+  render();
+  alert('🔒 Sesión cerrada. Para entrar: 5 toques en el logo + clave.');
 }
 
 function toqueAbeja(){
-  // si ya hay sesión abierta → entra directo con UN toque
-  if(haySesion()){ abrirPanelDueno(); document.getElementById('adminOverlay').classList.add('on'); return; }
-  // si no → hay que hacer los 5 toques + clave
+  // si ya hay sesión → entra directo con UN toque, al panel que le toca
+  if(haySesion()){ abrirPanelSegunRol(); return; }
   _toquesAbeja++;
   clearTimeout(_toqueTimer);
   _toqueTimer = setTimeout(function(){ _toquesAbeja = 0; }, 1500);
-  if(_toquesAbeja >= 5){
-    _toquesAbeja = 0;
-    pedirClaveAdmin();
-  }
+  if(_toquesAbeja >= 5){ _toquesAbeja = 0; pedirClaveAdmin(); }
 }
 function pedirClaveAdmin(){
-  var pin = prompt("🔒 Clave del dueño:");
+  var pin = prompt("🔒 Clave:");
   if(pin === null) return;
-  if(pin === PIN_DUENO){
-    abrirSesion();   // queda abierta, no pide más la clave
-    abrirPanelDueno();
-    document.getElementById('adminOverlay').classList.add('on');
-  }
+  if(pin === PIN_DUENO){ setRol('admin'); abrirPanelSegunRol(); render(); }
+  else if(pin === PIN_REVENDEDOR){ setRol('revendedor'); abrirPanelSegunRol(); render(); }
   else { alert("Clave incorrecta."); }
 }
+function abrirPanelSegunRol(){
+  if(esAdmin()) abrirPanelDueno();
+  else if(esRevendedor()) abrirPanelRevendedor();
+}
+/* ═══════ PANEL DEL REVENDEDOR ═══════
+   Solo trabaja con PRECIO DE VENTA. Nunca ve costos ni márgenes.
+   Tiene: calculadora de cuotas desde la venta + compartir. */
+function abrirPanelRevendedor(){
+  document.getElementById('adminBody').innerHTML =
+     '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px;margin-bottom:14px;text-align:center">'
+    +'<div style="font-size:1.6rem">🤝</div>'
+    +'<div style="font-weight:900;color:#059669;font-size:.95rem">Panel Revendedor</div>'
+    +'<div style="font-size:.7rem;color:var(--sub);margin-top:2px">Calculá cuotas y compartí productos</div>'
+    +'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🧮 Calculadora de cuotas</div>'
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Poné el precio de venta y te saco las cuotas.</div>'
+    +'<input type="number" id="revPrecio" oninput="calcRevendedor()" placeholder="Precio de venta (ej: 163500)" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px;font-family:inherit;font-size:1rem;font-weight:800;color:var(--az);outline:none;text-align:center">'
+    +'<input id="revNombre" oninput="calcRevendedor()" placeholder="Nombre del producto (opcional)" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px;font-family:inherit;font-size:.86rem;outline:none;margin-top:8px">'
+    +'<div id="revResultado" style="margin-top:14px"></div>'
+    +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:14px">🔒 Cerrar sesión</button>';
+  calcRevendedor();
+}
+function calcRevendedor(){
+  var cont=document.getElementById('revResultado'); if(!cont) return;
+  var venta=parseFloat(document.getElementById('revPrecio').value)||0;
+  var nombre=(document.getElementById('revNombre').value||'').trim();
+  if(!venta){ cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:18px;font-size:.82rem">Poné un precio de venta y te calculo las cuotas. 🐝</div>'; return; }
+  var cuotasHtml='', waLines=[];
+  cuotasActivas().forEach(function(n){
+    var vc=valorCuota(venta,n);
+    cuotasHtml+='<div style="background:rgba(255,255,255,.09);border-left:3px solid var(--nar);border-radius:10px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:.82rem;font-weight:800;color:#fff">'+n+' cuotas fijas</span><span style="font-size:1.05rem;font-weight:900;color:#ffb968">'+fmt(vc)+'</span></div>';
+    waLines.push('💳 '+n+' cuotas fijas de '+fmt(vc));
+  });
+  cont.innerHTML=
+     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff">'
+    +(nombre?'<div style="text-align:center;font-size:.9rem;font-weight:900;margin-bottom:6px">'+nombre+'</div>':'')
+    +'<div style="text-align:center;font-size:1.7rem;font-weight:900;margin-bottom:14px">'+fmt(venta)+'<div style="font-size:.62rem;color:rgba(255,255,255,.6);font-weight:700;margin-top:2px">PRECIO CONTADO</div></div>'
+    +cuotasHtml
+    +'<div style="text-align:center;font-size:.66rem;color:rgba(255,255,255,.7);margin-top:10px">'+(CONFIG.instagram||'@amarangoelectro')+' 🐝</div>'
+    +'</div>'
+    +'<button onclick="compartirRevendedor()" style="width:100%;margin-top:12px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Compartir por WhatsApp</button>';
+  window._revMsg='*'+(nombre||'PRODUCTO').toUpperCase()+'*\n\n'+waLines.join('\n')+'\n\n➡️ Contado: '+fmt(venta)+'\n'+(CONFIG.instagram||'@amarangoelectro')+' 🐝';
+}
+function compartirRevendedor(){
+  if(navigator.share){ navigator.share({text:window._revMsg}).catch(function(){ window.open('https://wa.me/?text='+encodeURIComponent(window._revMsg),'_blank'); }); }
+  else window.open('https://wa.me/?text='+encodeURIComponent(window._revMsg),'_blank');
+}
+
 function abrirPanelDueno(){
   // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
   var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
@@ -390,7 +439,8 @@ var CONFIG_DEFAULT = {
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
-  pin: "2580"
+  pin: "2580",
+  pinRev: "1234"
 };
 var CONFIG = null;
 function cargarConfig(cb){
@@ -412,6 +462,7 @@ function guardarConfig(){
 function aplicarConfig(){
   if(!CONFIG) return;
   PIN_DUENO = CONFIG.pin || "2580";
+  PIN_REVENDEDOR = CONFIG.pinRev || "1234";
   PLANES = { 2:{on:true,pct:CONFIG.cuotas[2]}, 4:{on:true,pct:CONFIG.cuotas[4]}, 6:{on:true,pct:CONFIG.cuotas[6]} };
   var h=document.querySelector('.brand h1'); if(h) h.textContent=CONFIG.negocio;
   // logo: imagen si hay, abeja si no (el gesto secreto funciona igual)
@@ -457,6 +508,8 @@ function abrirConfig(){
     +'</div>'
     +sec('🔒 Seguridad')
     +campo('Clave del dueño (PIN)','cf_pin',c.pin,'','number')
+    +campo('Clave de revendedor','cf_pinRev',c.pinRev||'1234','','number')
+    +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:8px">La clave de revendedor la compartís con tu equipo. Ellos solo ven precios de venta, nunca tus costos. 🐝</div>'
     +'<button onclick="guardarConfigDesdeForm()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px">💾 Guardar cambios</button>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
@@ -499,6 +552,7 @@ function guardarConfigDesdeForm(){
   CONFIG.colorAcento = g('cf_color2')||'#FF7A00';
   CONFIG.cuotas = { 2:parseFloat(g('cf_c2'))||15, 4:parseFloat(g('cf_c4'))||55, 6:parseFloat(g('cf_c6'))||78 };
   CONFIG.pin = g('cf_pin')||'2580';
+  CONFIG.pinRev = g('cf_pinRev')||'1234';
   guardarConfig();
   render();
   alert('✅ Guardado. Tu tienda se actualizó.');
