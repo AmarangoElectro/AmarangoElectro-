@@ -930,6 +930,23 @@ function toggleCajonOpciones(){
   c.style.display = abierto ? 'none' : 'grid';
   if(f) f.textContent = abierto ? '▼' : '▲';
 }
+/* Opciones del producto — directo desde la tarjeta, sin abrir el detalle */
+function abrirOpcionesRapidas(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:3px">⚙️ Opciones del producto</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">'+p.nombre+'</div>'
+    +opcProd(idx,'destacado','⭐','Destacado', !!p.destacado)
+    +opcProd(idx,'delDia','🌟','Producto del día', !!p.delDia)
+    +opcProd(idx,'ultimas','⏳','Últimas unidades', !!p.ultimas)
+    +opcProd(idx,'sinInteres','💳','Cuotas sin interés', !!p.sinInteres)
+    +opcProd(idx,'oferta','🔥','Poner en oferta', !!(p.precioAntes && p.precioAntes>p.venta))
+    +opcProd(idx,'oculto','🙈','Ocultar de la tienda', p.visible===false, true)
+    +opcProd(idx,'sinStock','⛔','Marcar SIN STOCK', !!p.sinStock, true)
+    +'<button onclick="cerrarAdmin()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:12px">✅ Listo</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+
 function opcProd(idx,k,ico,txt,on,peligro){
   var colOn = peligro ? '#DC2626' : 'var(--nar)';
   var bgOn  = peligro ? '#FEF2F2' : '#FFF0E0';
@@ -964,8 +981,10 @@ function toggleOpcProd(idx,k){
   }
   guardarCatalogo();
   render();
-  verDetalle(idx);
-  setTimeout(toggleCajonOpciones, 50);   // deja el cajón abierto
+  // si el panel de opciones está abierto, lo refresca ahí mismo
+  var adminAbierto = document.getElementById('adminOverlay').classList.contains('on');
+  if(adminAbierto){ abrirOpcionesRapidas(idx); }
+  else { verDetalle(idx); setTimeout(toggleCajonOpciones, 50); }
 }
 
 function opcionFormato(k,titulo,sub){
@@ -1754,9 +1773,20 @@ function render(){
     var pctOff = enOferta ? Math.round((1-p.venta/parseFloat(p.precioAntes))*100) : 0;
     // botones según QUIÉN mira: admin/revendedor comparten · el cliente COMPRA
     var botones;
-    if(rolT==='admin' || rolT==='revendedor'){
+    if(rolT==='admin'){
+      // ADMIN: acciones directo en la tarjeta (sin tener que abrir el producto)
+      botones='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">📤 Compartir</button>'
+        +'<div style="display:flex;gap:5px;margin-bottom:5px">'
+          +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">✏️ Editar</button>'
+          +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">🖼️ Foto</button>'
+          +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:8px;padding:8px 9px;font-size:.66rem;cursor:pointer;font-family:inherit">🗑️</button>'
+        +'</div>'
+        +'<button onclick="abrirOpcionesRapidas('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--nar);color:var(--nar);border-radius:8px;padding:8px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit">⚙️ Opciones del producto</button>';
+    }
+    else if(rolT==='revendedor'){
       botones='<button class="share" onclick="compartir('+idx+')">📤 Compartir</button>';
-    } else {
+    }
+    else {
       botones='<button onclick="verDetalle('+idx+')" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">📅 Ver cuotas</button>'
         +'<button onclick="comprarProducto('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Comprar</button>'
         +'<button onclick="consultarProducto('+idx+',event)" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Consultar</button>';
