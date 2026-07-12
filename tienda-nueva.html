@@ -499,15 +499,11 @@ function optimizarFotos(){
    Sin el service worker, solo hace un "acceso directo" con el ícono de Chrome. */
 function registrarServiceWorker(){
   if(!('serviceWorker' in navigator)) return;
-  // Service worker mínimo, generado al vuelo (no hace falta un archivo aparte)
-  var swCode = 'self.addEventListener("install",function(e){self.skipWaiting();});'
-    + 'self.addEventListener("activate",function(e){e.waitUntil(self.clients.claim());});'
-    + 'self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});';
-  try{
-    var blob=new Blob([swCode],{type:'application/javascript'});
-    var swUrl=URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl).catch(function(){});
-  }catch(e){}
+  // ⚠️ Chrome EXIGE un service worker que sea un ARCHIVO REAL en el servidor.
+  // Los generados al vuelo (blob:) NO sirven para instalar apps.
+  navigator.serviceWorker.register('sw.js')
+    .then(function(){ /* listo */ })
+    .catch(function(e){ console.warn('SW:', e && e.message); });
 }
 registrarServiceWorker();
 
