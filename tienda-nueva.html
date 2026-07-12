@@ -373,6 +373,18 @@ function irAlInicio(){
 }
 
 /* ═══════ 🆘 SOPORTE — reclamos y sugerencias directo a Amarango ═══════ */
+/* 🧹 Limpieza de emergencia: borra los datos locales contaminados por el bug viejo */
+function limpiarDatosLocales(){
+  if(!confirm('🧹 LIMPIAR DATOS DE ESTE TELÉFONO\n\nEsto borra lo guardado LOCALMENTE (config, catálogo, sesión) de esta tienda.\n\n✅ Tus datos en la NUBE no se tocan — se vuelven a bajar solos.\n\nUsalo si la tienda muestra datos de otra. ¿Dale?')) return;
+  try{
+    ['ae_config','ae_tienda_catalogo','ae_rol','ae_carrito','ae_favoritos','ae_cliente','ae_papelera','ae_pedidos','ae_clientes']
+      .forEach(function(k){ localStorage.removeItem(lsKey(k)); });
+    localStorage.removeItem('ae_tienda_id');
+  }catch(e){}
+  alert('✅ Limpio. Recargando…');
+  window.location.reload();
+}
+
 function abrirSoporte(){
   var neg=(CONFIG&&CONFIG.negocio)||'mi tienda';
   var peso=pesoCatalogo();
@@ -400,7 +412,10 @@ function abrirSoporte(){
     +botonSoporte('❓','Tengo una duda','No sé cómo usar algo','duda')
     +botonSoporte('💳','Tema de pago','Suscripción, factura, etc','pago')
     +'<div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">'
-      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6">🐝 <b style="color:var(--az)">Amarango</b><br>Estamos para ayudarte</div>'
+      +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Problemas raros</div>'
+      +'<button onclick="limpiarDatosLocales()" style="width:100%;background:#FFF9F0;border:1.5px solid var(--nar);color:var(--nar);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🧹 La tienda muestra datos de otra</button>'
+      +'<div style="font-size:.68rem;color:var(--sub);text-align:center;margin-top:5px">Limpia este teléfono. Tus datos en la nube no se tocan.</div>'
+      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6;margin-top:12px">🐝 <b style="color:var(--az)">Amarango</b> v2.1 · tienda: <b>'+TIENDA+'</b></div>'
     +'</div>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
@@ -849,7 +864,7 @@ function abrirMas(){
   }
   html+='</div>';
   // sello de versión (para saber si cargó el archivo nuevo)
-  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.0 · tienda: '+TIENDA+'</div>';
+  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.1 · tienda: '+TIENDA+'</div>';
   document.getElementById('masBody').innerHTML=html;
   document.getElementById('masOverlay').classList.add('on');
 }
@@ -1199,7 +1214,21 @@ function firmaTienda(){
 
 var CONFIG = null;
 function cargarConfig(cb){
-  try{ var l=localStorage.getItem(lsKey('ae_config')); if(l) CONFIG=JSON.parse(l); }catch(e){}
+  try{
+    var l=localStorage.getItem(lsKey('ae_config'));
+    if(l){
+      var c=JSON.parse(l);
+      // 🔒 VERIFICACIÓN: ¿esta config es realmente de ESTA tienda?
+      // (el bug viejo del cruce dejó configs ajenas guardadas)
+      if(c && c._tienda && c._tienda!==TIENDA){
+        console.warn('Config contaminada de otra tienda ('+c._tienda+'). Descartada.');
+        localStorage.removeItem(lsKey('ae_config'));
+        localStorage.removeItem(lsKey('ae_tienda_catalogo'));   // el catálogo también
+        c=null;
+      }
+      if(c) CONFIG=c;
+    }
+  }catch(e){}
   if(!CONFIG){
     CONFIG=JSON.parse(JSON.stringify(CONFIG_DEFAULT));
     // Si NO es la tienda de Max → arranca VACÍA, sin marca ajena
@@ -1218,11 +1247,22 @@ function cargarConfig(cb){
   if(cb) cb();
   if(sb){
     sb.from('amarango_config').select('datos').eq('id',keyConfig()).maybeSingle()
-      .then(function(r){ if(r&&r.data&&r.data.datos){ CONFIG=Object.assign(JSON.parse(JSON.stringify(CONFIG_DEFAULT)), r.data.datos); try{localStorage.setItem(lsKey('ae_config'),JSON.stringify(CONFIG));}catch(e){} aplicarConfig(); render(); } })
+      .then(function(r){
+        if(r&&r.data&&r.data.datos){
+          var d=r.data.datos;
+          // 🔒 si la config de la nube es de otra tienda, la ignoro (contaminación del bug viejo)
+          if(d._tienda && d._tienda!==TIENDA){ console.warn('Config en nube contaminada. Ignorada.'); return; }
+          CONFIG=Object.assign(JSON.parse(JSON.stringify(CONFIG_DEFAULT)), d);
+          CONFIG._tienda=TIENDA;
+          try{localStorage.setItem(lsKey('ae_config'),JSON.stringify(CONFIG));}catch(e){}
+          aplicarConfig(); render();
+        }
+      })
       .catch(function(){});
   }
 }
 function guardarConfig(){
+  if(CONFIG) CONFIG._tienda = TIENDA;   // 🔒 firma: esta config es de ESTA tienda
   try{ localStorage.setItem(lsKey('ae_config'), JSON.stringify(CONFIG)); }catch(e){}
   if(sb){ sb.from('amarango_config').upsert({id:keyConfig(), datos:CONFIG}).then(function(){}).catch(function(){}); }
   aplicarConfig();
