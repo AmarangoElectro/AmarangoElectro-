@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Tienda AmarangoElectro 🐝</title>
 <meta name="theme-color" content="#0B2D6B">
+<!-- PWA: se instala como app, con el logo de cada tienda -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" id="appleIcon" href="">
+<link rel="icon" id="favIcon" href="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ============================================================
@@ -281,7 +287,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 <!-- BARRA INFERIOR fija (estilo Mercado Libre) -->
 <div class="tabbar">
-  <button id="tb-inicio" class="on" onclick="tabIr('inicio')"><span class="i">🏠</span>Inicio</button>
+  <button id="tb-inicio" class="on" onclick="irAlInicio()"><span class="i">🏠</span>Inicio</button>
   <button id="tb-cats" onclick="tabIr('cats')"><span class="i">🗂️</span>Categorías</button>
   <button onclick="abrirCarrito()" style="position:relative"><span class="i">🛒</span>Carrito<span id="cartBadge" style="display:none;position:absolute;top:0;right:50%;margin-right:-22px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:900;min-width:17px;height:17px;border-radius:9px;align-items:center;justify-content:center;padding:0 4px">0</span></button>
   <button id="tb-favs" onclick="tabIr('favs')"><span class="i">❤️</span>Favoritos</button>
@@ -294,6 +300,264 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
    calculadora.html, en la línea que dice SB_KEY). Copiá y pegá
    entre las comillas. Sin la key, la tienda no baja productos.
    ═══════════════════════════════════════════════════════════ */
+/* Explica cómo instalar la app (Android e iPhone) */
+function instruccionesInstalar(){
+  var neg=(CONFIG&&CONFIG.negocio)||'esta tienda';
+  var logo=(CONFIG&&CONFIG.logo) ? '<img src="'+CONFIG.logo+'" style="width:72px;height:72px;border-radius:16px;object-fit:cover;margin:0 auto 10px;display:block;box-shadow:0 3px 12px rgba(0,0,0,.15)">' : '<div style="font-size:3rem;text-align:center;margin-bottom:8px">🐝</div>';
+  var html=logo
+    +'<div style="text-align:center;font-weight:900;color:var(--az);font-size:1.15rem;margin-bottom:4px">Instalá '+neg+'</div>'
+    +'<div style="text-align:center;font-size:.82rem;color:var(--sub);line-height:1.5;margin-bottom:16px">Te queda como una app más en el teléfono, con su ícono. Se abre más rápido y sin la barra del navegador.</div>';
+
+  // si el navegador ofrece instalación directa
+  if(_instalarEvento){
+    html+='<button onclick="instalarAhora()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px">📲 Instalar ahora</button>';
+  }
+  html+='<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:13px;padding:14px;margin-bottom:10px">'
+    +'<div style="font-weight:900;color:var(--az);font-size:.86rem;margin-bottom:7px">🤖 En Android (Chrome)</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);line-height:1.7">'
+      +'1. Tocá los <b>3 puntitos ⋮</b> arriba a la derecha<br>'
+      +'2. Elegí <b>«Instalar aplicación»</b> o <b>«Agregar a pantalla de inicio»</b><br>'
+      +'3. Listo 🐝'
+    +'</div></div>'
+    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:13px;padding:14px;margin-bottom:14px">'
+    +'<div style="font-weight:900;color:var(--az);font-size:.86rem;margin-bottom:7px">🍎 En iPhone (Safari)</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);line-height:1.7">'
+      +'1. Tocá el botón <b>Compartir</b> (el cuadradito con la flecha ↑)<br>'
+      +'2. Bajá y elegí <b>«Agregar a inicio»</b><br>'
+      +'3. Listo 🐝'
+    +'</div></div>'
+    +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit">← Volver</button>';
+  document.getElementById('ayudaBody').innerHTML=html;
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
+}
+function instalarAhora(){
+  if(!_instalarEvento) return;
+  _instalarEvento.prompt();
+  _instalarEvento.userChoice.then(function(r){
+    if(r.outcome==='accepted'){
+      cerrarConsulta();
+      var b=document.getElementById('btnInstalar'); if(b) b.remove();
+    }
+    _instalarEvento=null;
+  });
+}
+
+/* ═══════ 🔙 BOTÓN ATRÁS — que vuelva un paso, no que salga de la app ═══════ */
+var _pila=[];
+function empujarPantalla(nombre, cerrarFn){
+  _pila.push({nombre:nombre, cerrar:cerrarFn});
+  history.pushState({p:nombre}, '', '');
+}
+window.addEventListener('popstate', function(){
+  if(_pila.length){
+    var ult=_pila.pop();
+    try{ ult.cerrar(); }catch(e){}
+  }
+});
+/* Cierra todo y vuelve al inicio */
+function irAlInicio(){
+  _pila=[];
+  try{ cerrarAdmin(); }catch(e){}
+  try{ cerrarConsulta(); }catch(e){}
+  try{ cerrarCarrito(); }catch(e){}
+  try{ cerrarMas(); }catch(e){}
+  try{ cerrar(); }catch(e){}
+  try{ cerrarZoom(); }catch(e){}
+  viendoFavs=false; window._soloOfertas=false; catActiva='';
+  var inp=document.getElementById('buscador'); if(inp) inp.value='';
+  render();
+  window.scrollTo(0,0);
+  ['inicio','cats','favs'].forEach(function(x){
+    var b=document.getElementById('tb-'+x); if(b) b.classList.toggle('on', x==='inicio');
+  });
+}
+
+/* ═══════ 🆘 SOPORTE — reclamos y sugerencias directo a Amarango ═══════ */
+function abrirSoporte(){
+  var neg=(CONFIG&&CONFIG.negocio)||'mi tienda';
+  var pendientes=PRODUCTOS.filter(function(p){ return p.foto && p.foto.indexOf('data:')===0; }).length;
+  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🆘 Soporte</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">¿Algo no anda? ¿Se te ocurre una mejora? Escribinos. 🐝</div>';
+
+  // estado de las fotos (lo importante)
+  if(pendientes){
+    html+='<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:12px;padding:13px;margin-bottom:14px">'
+      +'<div style="font-weight:900;color:var(--nar);font-size:.86rem;margin-bottom:5px">📸 '+pendientes+' fotos sin guardar en la nube</div>'
+      +'<div style="font-size:.76rem;color:var(--sub);line-height:1.5;margin-bottom:9px">Están solo en este teléfono. Si se rompe o cambiás de celu, se pierden. Pasálas a la nube ahora.</div>'
+      +'<button onclick="migrarFotos()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.84rem">☁️ Guardar fotos en la nube</button>'
+      +'</div>';
+  } else {
+    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px;margin-bottom:14px;font-size:.8rem;color:#059669;font-weight:700;text-align:center">✅ Tus fotos están guardadas en la nube</div>';
+  }
+
+  html+='<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">¿Qué te pasa?</div>'
+    +botonSoporte('🐛','Algo no funciona','Reportar un problema','problema')
+    +botonSoporte('💡','Se me ocurrió algo','Sugerir una mejora','idea')
+    +botonSoporte('❓','Tengo una duda','No sé cómo usar algo','duda')
+    +botonSoporte('💳','Tema de pago','Suscripción, factura, etc','pago')
+    +'<div style="border-top:1px solid var(--line);margin-top:16px;padding-top:14px">'
+      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6">🐝 <b style="color:var(--az)">Amarango</b><br>Estamos para ayudarte</div>'
+    +'</div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver al panel</button>';
+  document.getElementById('adminBody').innerHTML=html;
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
+}
+function botonSoporte(ico,titulo,sub,tipo){
+  return '<button onclick="enviarSoporte(\''+tipo+'\')" style="width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;margin-bottom:8px">'
+    +'<span style="font-size:1.4rem">'+ico+'</span>'
+    +'<span style="flex:1"><span style="display:block;font-size:.86rem;font-weight:900;color:var(--az)">'+titulo+'</span>'
+    +'<span style="display:block;font-size:.72rem;color:var(--sub);margin-top:1px">'+sub+'</span></span>'
+    +'<span style="color:var(--sub)">›</span></button>';
+}
+function enviarSoporte(tipo){
+  var neg=(CONFIG&&CONFIG.negocio)||'mi tienda';
+  var titulos={
+    problema:'🐛 *PROBLEMA*',
+    idea:'💡 *SUGERENCIA*',
+    duda:'❓ *DUDA*',
+    pago:'💳 *TEMA DE PAGO*'
+  };
+  var msg=titulos[tipo]+'\n\nTienda: *'+neg+'*\nCódigo: '+TIENDA+'\n\n_(contame acá qué pasa)_\n\n🐝';
+  window.open('https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+/* ═══════ 📸 FOTOS EN LA NUBE (Supabase Storage) ═══════
+   ANTES: las fotos iban en base64, todas juntas en un registro → se llenaba y fallaba.
+   AHORA: cada foto va a un depósito aparte, y guardamos solo el link. No hay límite. */
+var BUCKET='fotos';
+
+function subirFotoNube(dataUrl, cb){
+  if(!sb){ cb(dataUrl); return; }              // sin nube: se queda como está
+  if(!dataUrl || dataUrl.indexOf('data:')!==0){ cb(dataUrl); return; }  // ya es un link
+  try{
+    // convierte el base64 en archivo
+    var partes=dataUrl.split(',');
+    var mime=(partes[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
+    var bin=atob(partes[1]);
+    var arr=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+    var blob=new Blob([arr],{type:mime});
+    var ext=mime.indexOf('png')>=0?'png':'jpg';
+    var nombre=TIENDA+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+
+    sb.storage.from(BUCKET).upload(nombre, blob, {contentType:mime, upsert:false})
+      .then(function(r){
+        if(r.error){ console.warn('Foto: no se pudo subir', r.error.message); cb(dataUrl); return; }
+        var pub=sb.storage.from(BUCKET).getPublicUrl(nombre);
+        var url=(pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : dataUrl;
+        cb(url);
+      })
+      .catch(function(){ cb(dataUrl); });
+  }catch(e){ cb(dataUrl); }
+}
+
+/* Migra las fotos viejas (base64) a la nube, de a poco */
+function migrarFotos(){
+  var pendientes=PRODUCTOS.filter(function(p){ return p.foto && p.foto.indexOf('data:')===0; });
+  if(!pendientes.length){ alert('✅ Todas tus fotos ya están en la nube.'); return; }
+  if(!confirm('📸 Encontré '+pendientes.length+' fotos guardadas de la forma vieja.\n\nLas voy a pasar a la nube para que no se pierdan y no se llene el espacio.\n\n¿Empiezo?')) return;
+
+  var hechas=0, total=pendientes.length;
+  var box=document.getElementById('adminBody');
+  function siguiente(){
+    if(!pendientes.length){
+      guardarCatalogo();
+      render();
+      alert('✅ Listo. '+hechas+' fotos guardadas en la nube.\n\nAhora no se pierden ni se llena el espacio. 🐝');
+      abrirSoporte();
+      return;
+    }
+    var p=pendientes.shift();
+    if(box) box.innerHTML='<div style="text-align:center;padding:50px 20px"><div style="font-size:2.6rem;margin-bottom:12px">☁️</div>'
+      +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">Guardando fotos en la nube…</div>'
+      +'<div style="font-size:.86rem;color:var(--sub)">'+(hechas+1)+' de '+total+'</div>'
+      +'<div style="background:#F0F4FF;border-radius:6px;height:8px;margin-top:14px;overflow:hidden"><div style="width:'+Math.round((hechas/total)*100)+'%;height:100%;background:var(--nar);transition:width .3s"></div></div>'
+      +'<div style="font-size:.72rem;color:var(--sub);margin-top:10px">No cierres esta pantalla 🐝</div></div>';
+    subirFotoNube(p.foto, function(url){
+      p.foto=url;
+      hechas++;
+      if(hechas%5===0) guardarCatalogo();   // guarda cada 5, por si se corta
+      setTimeout(siguiente, 120);
+    });
+  }
+  siguiente();
+}
+
+/* ═══════ 📱 PWA — que se instale como app, con el logo de cada tienda ═══════ */
+function armarManifest(){
+  if(!CONFIG) return;
+  var neg=CONFIG.negocio||'Mi Tienda';
+  var col=CONFIG.colorPrincipal||'#0B2D6B';
+  // el ícono: el logo del dueño, o la abeja si no cargó ninguno
+  var icono=CONFIG.logo || iconoAbeja(col, CONFIG.colorAcento||'#FF7A00');
+
+  // los <link> del ícono (para iOS y el favicon)
+  var ai=document.getElementById('appleIcon'); if(ai) ai.href=icono;
+  var fi=document.getElementById('favIcon'); if(fi) fi.href=icono;
+  var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', col);
+
+  var manifest={
+    name: neg,
+    short_name: neg.length>12 ? neg.slice(0,12) : neg,
+    description: (CONFIG.eslogan||'Tu tienda en cuotas'),
+    start_url: window.location.pathname + (TIENDA!=='amarango' ? '?t='+TIENDA : ''),
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#ffffff',
+    theme_color: col,
+    icons: [
+      { src: icono, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: icono, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  };
+  var blob=new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var link=document.getElementById('manifestLink');
+  if(!link){
+    link=document.createElement('link');
+    link.rel='manifest';
+    link.id='manifestLink';
+    document.head.appendChild(link);
+  }
+  link.href=url;
+  document.title=neg;
+}
+/* Si no cargó logo, dibuja una abeja con los colores de la tienda */
+function iconoAbeja(col1, col2){
+  var c=document.createElement('canvas');
+  c.width=512; c.height=512;
+  var x=c.getContext('2d');
+  x.fillStyle=col1; x.fillRect(0,0,512,512);
+  x.font='300px serif'; x.textAlign='center'; x.textBaseline='middle';
+  x.fillText('🐝', 256, 276);
+  return c.toDataURL('image/png');
+}
+
+/* Botón "Instalar app" cuando el navegador lo permite */
+var _instalarEvento=null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _instalarEvento=e;
+  mostrarBotonInstalar();
+});
+function mostrarBotonInstalar(){
+  if(!_instalarEvento) return;
+  if(document.getElementById('btnInstalar')) return;
+  var b=document.createElement('button');
+  b.id='btnInstalar';
+  b.innerHTML='📲 Instalar app';
+  b.style.cssText='position:fixed;bottom:88px;left:16px;z-index:340;background:var(--az);color:#fff;border:none;border-radius:22px;padding:11px 16px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.25)';
+  b.onclick=function(){
+    if(!_instalarEvento) return;
+    _instalarEvento.prompt();
+    _instalarEvento.userChoice.then(function(r){
+      if(r.outcome==='accepted'){ b.remove(); }
+      _instalarEvento=null;
+    });
+  };
+  document.body.appendChild(b);
+}
+
 /* ═══════════════════════════════════════════════════════════
    🏪 MULTI-TIENDA — el motor de Amarango
    Cada tienda tiene su CÓDIGO, y sus datos se guardan separados.
@@ -341,7 +605,7 @@ function actualizarBeeFab(){
 /* Abre la carga de productos directo, sin pasar por el panel */
 function abrirCargarDirecto(){
   abrirCargar();
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 
 /* ═══════ CARRITO — que el cliente arme una compra de varias cosas ═══════
@@ -425,7 +689,7 @@ function abrirCarrito(){
     html+='<button onclick="vaciarCarrito()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;font-size:.8rem">Vaciar carrito</button>';
   }
   document.getElementById('carritoBody').innerHTML=html;
-  document.getElementById('carritoOverlay').classList.add('on');
+  document.getElementById('carritoOverlay').classList.add('on'); empujarPantalla('carrito', cerrarCarrito);
 }
 function cerrarCarrito(){ document.getElementById('carritoOverlay').classList.remove('on'); }
 function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]); abrirCarrito(); } }
@@ -456,7 +720,7 @@ function pedirCarrito(){
   });
   html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
   document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on');
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 
 /* ═══════ BARRA INFERIOR + MENÚ "MÁS" (estilo Mercado Libre) ═══════ */
@@ -487,6 +751,7 @@ function abrirMas(){
   html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
 
   html+='<div class="mas-sec">Ayuda</div>';
+  html+=fila('📲','Instalar como app','cerrarMas();instruccionesInstalar()');
   html+=fila('❓','¿Cómo comprar?','cerrarMas();abrirAyuda()');
   if(CONFIG && CONFIG.whatsapp) html+=fila('💬','Escribinos por WhatsApp','cerrarMas();window.open(\'https://wa.me/'+CONFIG.whatsapp.replace(/[^0-9]/g,'')+'\',\'_blank\')');
   if(CONFIG && CONFIG.instagram) html+=fila('📷','Seguinos en Instagram','cerrarMas();window.open(\'https://instagram.com/'+CONFIG.instagram.replace('@','')+'\',\'_blank\')');
@@ -550,7 +815,7 @@ function abrirAyuda(){
   }
   html+='</div>';
   document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on');
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 function cerrarAyuda(){ document.getElementById('ayudaOverlay').classList.remove('on'); }
 function loginDesdeAyuda(){
@@ -687,7 +952,7 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -696,7 +961,7 @@ function abrirPanelDueno(){
       : '')
     +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">🔒 Cerrar sesión</button>'
     +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado</div>';
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 function botonPanel(ico, titulo, sub, destino){
   return '<button onclick="abrirModuloDueno(\''+destino+'\')" style="width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:13px">'
@@ -715,6 +980,7 @@ function abrirModuloDueno(destino){
   if(destino==='pdf'){ abrirPDF(); return; }
   if(destino==='backup'){ abrirBackup(); return; }
   if(destino==='clientes'){ abrirClientes(); return; }
+  if(destino==='soporte'){ abrirSoporte(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
@@ -898,6 +1164,7 @@ function aplicarConfig(){
   }
   document.documentElement.style.setProperty('--az', CONFIG.colorPrincipal);
   document.documentElement.style.setProperty('--nar', CONFIG.colorAcento);
+  try{ armarManifest(); }catch(e){}   // el ícono de la app toma el logo de la tienda
 }
 /* ═══════ FORMATOS DE CUOTA — cada tienda elige cómo mostrar el precio ═══════ */
 function precioTarjeta(p){
@@ -1033,7 +1300,7 @@ function renderClientes(){
   }
   html+='<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 
 /* Ficha completa de un cliente: sus datos + todo lo que compró */
@@ -1158,7 +1425,7 @@ function abrirBackup(){
       +'<input type="file" id="backupFile" accept=".json,application/json" style="display:none" onchange="restaurarBackup(event)">'
     +'</div>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 
 function descargarBackup(){
@@ -1250,7 +1517,7 @@ function abrirPDF(){
     +'<button onclick="generarPDF()" style="width:100%;background:#DC2626;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">📄 Generar catálogo PDF</button>'
     +'<div style="font-size:.7rem;color:var(--sub);text-align:center;margin-top:8px">Se abre para imprimir → elegí «Guardar como PDF»</div>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver al panel</button>';
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 
 function generarPDF(){
@@ -1375,7 +1642,7 @@ function renderEstadisticas(){
     html+='<div style="text-align:center;color:var(--sub);padding:36px 20px;font-size:.85rem"><div style="font-size:2.6rem;margin-bottom:8px">📊</div>Todavía no hay datos.<br><span style="font-size:.75rem">Cuando tengas pedidos, acá vas a ver cómo anda tu negocio. 🐝</span></div>'
       +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
     document.getElementById('adminBody').innerHTML=html;
-    document.getElementById('adminOverlay').classList.add('on');
+    document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
     return;
   }
 
@@ -1438,7 +1705,7 @@ function renderEstadisticas(){
 
   html+='<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 
 /* ═══════ 🧾 REMITO / COMPROBANTE ═══════
@@ -1625,7 +1892,7 @@ function renderPedidos(){
   }
   html+='<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 function marcarPedido(i,estado){ PEDIDOS[i].estado=estado; guardarPedidos(); renderPedidos(); }
 function borrarPedido(i){ if(confirm('¿Borrar este pedido?')){ PEDIDOS.splice(i,1); guardarPedidos(); renderPedidos(); } }
@@ -1656,7 +1923,7 @@ function abrirOpcionesRapidas(idx){
     +opcProd(idx,'oculto','🙈','Ocultar de la tienda', p.visible===false, true)
     +opcProd(idx,'sinStock','⛔','Marcar SIN STOCK', !!p.sinStock, true)
     +'<button onclick="cerrarAdmin()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:12px">✅ Listo</button>';
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 
 function opcProd(idx,k,ico,txt,on,peligro){
@@ -2726,7 +2993,7 @@ function verDetalle(idx){
   }).join('');
   renderBotonesDetalle(idx);
   renderSugeridos(idx);
-  document.getElementById('overlay').classList.add('on');
+  document.getElementById('overlay').classList.add('on'); empujarPantalla('detalle', cerrar);
   // sube el scroll del panel al abrir
   var sh=document.querySelector('#overlay .sheet'); if(sh) sh.scrollTop=0;
 }
@@ -2798,7 +3065,7 @@ function abrirCentroEmprendedor(){
     +'<div style="text-align:center;font-size:.72rem;color:var(--sub);margin-bottom:12px">Te respondemos y te la armamos hoy mismo</div>'
     +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit">← Volver a la tienda</button>';
   document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on');
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 function paso(num,titulo,txt){
   return '<div style="display:flex;gap:11px;margin-bottom:11px">'
@@ -2851,7 +3118,7 @@ function abrirSimulador(){
     +'<div id="simResultado"></div>'
     +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px">← Volver a la tienda</button>';
   document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on');
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
   // estilo del thumb del slider
   var st=document.createElement('style');
   st.textContent='#simSlider::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--nar);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35)}'
@@ -3090,7 +3357,7 @@ function mostrarBienvenida(){
     +'<div style="text-align:center;font-size:.84rem;color:var(--sub);line-height:1.5;margin-bottom:16px">Para comprar en cuotas te registramos una sola vez.<br>Después te reconocemos y comprás en segundos 🙌</div>'
     +'<button onclick="abrirRegistro()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📝 Registrarme (1 minuto)</button>'
     +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit">← Seguir mirando</button>';
-  document.getElementById('ayudaOverlay').classList.add('on');
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 function abrirRegistro(){
   function campo(lbl,id,ph,tipo){ return '<div style="margin-bottom:11px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" '+(tipo?'type="'+tipo+'"':'')+' placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:.88rem;outline:none"></div>'; }
@@ -3155,7 +3422,7 @@ function elegirContacto(lista, msg, titulo, subtitulo, etiqueta){
   });
   html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
   document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on');
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 /* registra el pedido en el historial (si hay uno pendiente) */
 function registrarPedidoPendiente(atendio){
@@ -3199,16 +3466,20 @@ function cambiarFotoProducto(idx){
     reader.onload=function(e){
       var img=new Image();
       img.onload=function(){
-        // foto en buena calidad para que se vea grande y linda
         var max=900,w=img.width,h=img.height;
         if(w>h&&w>max){h=Math.round(h*max/w);w=max;} else if(h>max){w=Math.round(w*max/h);h=max;}
         var cv=document.createElement('canvas');cv.width=w;cv.height=h;
         cv.getContext('2d').drawImage(img,0,0,w,h);
-        PRODUCTOS[idx].foto=cv.toDataURL('image/jpeg',0.88);
-        guardarCatalogo();
-        render();
-        verDetalle(idx);
-        alert('✅ Foto actualizada.');
+        var data=cv.toDataURL('image/jpeg',0.88);
+        // sube a la nube (así no se pierde ni llena el espacio)
+        toastCarrito('☁️ Guardando foto…');
+        subirFotoNube(data, function(url){
+          PRODUCTOS[idx].foto=url;
+          guardarCatalogo();
+          render();
+          verDetalle(idx);
+          toastCarrito('✅ Foto guardada');
+        });
       };
       img.src=e.target.result;
     };
@@ -3248,7 +3519,7 @@ function editarProducto(idx){
     +'<textarea id="ed_desc" placeholder="Pegá las características del producto..." style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.86rem;min-height:100px;outline:none;resize:vertical;margin-bottom:14px">'+(p.desc||'')+'</textarea>'
     +'<button onclick="guardarEdicion('+idx+')" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">✅ Guardar</button>'
     +'<button onclick="cerrarAdmin();verDetalle('+idx+')" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">Cancelar</button>';
-  document.getElementById('adminOverlay').classList.add('on');
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
 function convCostoVenta(){
   var c=parseFloat(document.getElementById('ed_costo').value)||0;
