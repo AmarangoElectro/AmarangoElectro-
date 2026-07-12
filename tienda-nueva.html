@@ -680,7 +680,7 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('📊','Clientes / CRM','Seguimiento de ventas y cobros','crm')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -706,6 +706,7 @@ function abrirModuloDueno(destino){
   if(destino==='pedidos'){ abrirPedidos(); return; }
   if(destino==='stats'){ abrirEstadisticas(); return; }
   if(destino==='pdf'){ abrirPDF(); return; }
+  if(destino==='backup'){ abrirBackup(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
@@ -945,6 +946,112 @@ function toggleCajonOpciones(){
   c.style.display = abierto ? 'none' : 'grid';
   if(f) f.textContent = abierto ? '▼' : '▲';
 }
+/* ═══════ 💾 BACKUP — la red de seguridad ═══════
+   Descarga TODO (productos, config, pedidos, clientes) en un archivo.
+   Si algo sale mal, se restaura. No vende, pero evita perderlo todo. */
+function abrirBackup(){
+  var ultimo=null;
+  try{ ultimo=localStorage.getItem(lsKey('ae_ultimo_backup')); }catch(e){}
+  var aviso='';
+  if(ultimo){
+    var d=Math.floor((Date.now()-parseInt(ultimo,10))/86400000);
+    if(d>=14) aviso='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:11px;padding:11px;margin-bottom:12px;font-size:.78rem;color:#DC2626;font-weight:700;text-align:center">⚠️ Hace '+d+' días que no hacés copia. Hacé una ahora.</div>';
+    else aviso='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:11px;padding:11px;margin-bottom:12px;font-size:.78rem;color:#059669;font-weight:700;text-align:center">✅ Última copia: hace '+d+' día'+(d===1?'':'s')+'</div>';
+  } else {
+    aviso='<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:11px;padding:11px;margin-bottom:12px;font-size:.78rem;color:var(--nar);font-weight:700;text-align:center">📌 Nunca hiciste una copia. Es rápido y te salva.</div>';
+  }
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">💾 Copias de seguridad</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Guardá todo tu negocio en un archivo. Si algo sale mal, lo recuperás. 🐝</div>'
+    +aviso
+    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:13px;margin-bottom:14px">'
+      +'<div style="font-size:.8rem;font-weight:800;color:var(--az);margin-bottom:7px">La copia incluye:</div>'
+      +'<div style="font-size:.74rem;color:var(--sub);line-height:1.8">'
+        +'📦 '+PRODUCTOS.length+' productos (con fotos y precios)<br>'
+        +'⚙️ Tu marca y configuración<br>'
+        +'📋 '+(PEDIDOS?PEDIDOS.length:0)+' pedidos<br>'
+        +'👥 Tus clientes registrados'
+      +'</div>'
+    +'</div>'
+    +'<button onclick="descargarBackup()" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:10px">💾 Descargar copia de seguridad</button>'
+    +'<div style="border-top:1px solid var(--line);margin:16px 0 12px;padding-top:14px">'
+      +'<div style="font-size:.8rem;font-weight:800;color:var(--az);margin-bottom:6px">📂 Restaurar una copia</div>'
+      +'<div style="font-size:.74rem;color:var(--sub);margin-bottom:9px">Subí un archivo de copia que hayas guardado antes.</div>'
+      +'<button onclick="document.getElementById(\'backupFile\').click()" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.86rem">📂 Elegir archivo de copia</button>'
+      +'<input type="file" id="backupFile" accept=".json,application/json" style="display:none" onchange="restaurarBackup(event)">'
+    +'</div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+
+function descargarBackup(){
+  var cliente=null;
+  try{ cliente=JSON.parse(localStorage.getItem('ae_cliente')||'null'); }catch(e){}
+  var data={
+    version: 1,
+    tienda: TIENDA,
+    fecha: Date.now(),
+    fechaLegible: new Date().toLocaleString('es-AR'),
+    config: CONFIG,
+    productos: PRODUCTOS,
+    pedidos: PEDIDOS||[],
+    subs: (typeof SUBS!=='undefined') ? SUBS : []
+  };
+  var txt=JSON.stringify(data, null, 2);
+  var blob=new Blob([txt], {type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  var neg=(CONFIG.negocio||'tienda').replace(/[^a-zA-Z0-9]/g,'-').toLowerCase();
+  var f=new Date();
+  var fecha=f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
+  a.href=url;
+  a.download='backup-'+neg+'-'+fecha+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  try{ localStorage.setItem(lsKey('ae_ultimo_backup'), String(Date.now())); }catch(e){}
+  alert('✅ Copia descargada.\n\nGuardala en un lugar seguro (Drive, mail, lo que uses). Si algo sale mal, con este archivo recuperás todo. 🐝');
+  abrirBackup();
+}
+
+function restaurarBackup(ev){
+  var file=ev.target.files && ev.target.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var data;
+    try{ data=JSON.parse(e.target.result); }
+    catch(err){ alert('❌ Ese archivo no es una copia válida.'); return; }
+    if(!data || !data.productos){ alert('❌ Ese archivo no parece una copia de tu tienda.'); return; }
+
+    var f=data.fechaLegible || new Date(data.fecha||0).toLocaleString('es-AR');
+    var msg='⚠️ ATENCIÓN\n\nVas a REEMPLAZAR todo lo que tenés ahora por esta copia:\n\n'
+      +'📅 Fecha: '+f+'\n'
+      +'🏪 Tienda: '+(data.tienda||'?')+'\n'
+      +'📦 '+(data.productos?data.productos.length:0)+' productos\n'
+      +'📋 '+(data.pedidos?data.pedidos.length:0)+' pedidos\n\n'
+      +'¿Seguro?';
+    if(!confirm(msg)) return;
+    if(!confirm('Última confirmación:\n\nLo que tenés ahora se va a la papelera.\n¿Restaurar esta copia?')) return;
+
+    // respaldo de lo actual antes de pisar
+    guardarEnPapelera(PRODUCTOS);
+
+    if(data.config){ CONFIG=data.config; guardarConfig(); }
+    PRODUCTOS=data.productos;
+    guardarCatalogo();
+    if(data.pedidos){ PEDIDOS=data.pedidos; guardarPedidos(); }
+    if(data.subs && typeof SUBS!=='undefined'){ SUBS=data.subs; subsGuardar(); }
+
+    aplicarConfig();
+    render();
+    alert('✅ Copia restaurada.\n\nTu tienda volvió al estado del '+f+'. 🐝');
+    cerrarAdmin();
+  };
+  reader.readAsText(file);
+}
+
 /* ═══════ 📄 CATÁLOGO PDF — la herramienta de venta más potente ═══════
    Genera un catálogo con fotos, precios y cuotas, con la marca de la tienda.
    Se manda por WhatsApp de una y el cliente lo mira tranquilo. */
