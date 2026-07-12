@@ -375,20 +375,24 @@ function irAlInicio(){
 /* ═══════ 🆘 SOPORTE — reclamos y sugerencias directo a Amarango ═══════ */
 function abrirSoporte(){
   var neg=(CONFIG&&CONFIG.negocio)||'mi tienda';
-  var pendientes=PRODUCTOS.filter(function(p){ return p.foto && p.foto.indexOf('data:')===0; }).length;
+  var peso=pesoCatalogo();
+  var conFoto=PRODUCTOS.filter(function(p){return p.foto;}).length;
+  var pesadas=PRODUCTOS.filter(function(p){ return p.foto && p.foto.indexOf('data:')===0 && p.foto.length>90000; }).length;
   var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🆘 Soporte</div>'
     +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">¿Algo no anda? ¿Se te ocurre una mejora? Escribinos. 🐝</div>';
 
-  // estado de las fotos (lo importante)
-  if(pendientes){
-    html+='<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:12px;padding:13px;margin-bottom:14px">'
-      +'<div style="font-weight:900;color:var(--nar);font-size:.86rem;margin-bottom:5px">📸 '+pendientes+' fotos sin guardar en la nube</div>'
-      +'<div style="font-size:.76rem;color:var(--sub);line-height:1.5;margin-bottom:9px">Están solo en este teléfono. Si se rompe o cambiás de celu, se pierden. Pasálas a la nube ahora.</div>'
-      +'<button onclick="migrarFotos()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.84rem">☁️ Guardar fotos en la nube</button>'
-      +'</div>';
-  } else {
-    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px;margin-bottom:14px;font-size:.8rem;color:#059669;font-weight:700;text-align:center">✅ Tus fotos están guardadas en la nube</div>';
+  // estado del catálogo: peso y fotos
+  var alerta = peso>3;
+  html+='<div style="background:'+(alerta?'#FEF2F2':'#F5F8FF')+';border:1.5px solid '+(alerta?'#FECACA':'#DDE7FA')+';border-radius:12px;padding:13px;margin-bottom:14px">'
+    +'<div style="font-weight:900;color:'+(alerta?'#DC2626':'var(--az)')+';font-size:.86rem;margin-bottom:6px">📦 Tu catálogo pesa '+peso+' MB</div>'
+    +'<div style="font-size:.74rem;color:var(--sub);line-height:1.5;margin-bottom:'+(pesadas?'9px':'0')+'">'
+      +PRODUCTOS.length+' productos · '+conFoto+' con foto<br>'
+      +(alerta ? '<span style="color:#DC2626;font-weight:700">⚠️ Está pesado. Optimizá las fotos para que no falle el guardado.</span>' : '✅ Todo bien. Tus datos se guardan en la nube.')
+    +'</div>';
+  if(pesadas){
+    html+='<button onclick="optimizarFotos()" style="width:100%;background:'+(alerta?'#DC2626':'var(--az)')+';color:#fff;border:none;border-radius:10px;padding:12px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.84rem">📸 Optimizar '+pesadas+' fotos pesadas</button>';
   }
+  html+='</div>';
 
   html+='<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">¿Qué te pasa?</div>'
     +botonSoporte('🐛','Algo no funciona','Reportar un problema','problema')
@@ -421,79 +425,92 @@ function enviarSoporte(tipo){
   window.open('https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent(msg),'_blank');
 }
 
-/* ═══════ 📸 FOTOS EN LA NUBE (Supabase Storage) ═══════
-   ANTES: las fotos iban en base64, todas juntas en un registro → se llenaba y fallaba.
-   AHORA: cada foto va a un depósito aparte, y guardamos solo el link. No hay límite. */
-var BUCKET='fotos';
+/* ═══════ 📸 FOTOS — comprimidas para que entren muchas y no se pierdan ═══════
+   Se guardan con el catálogo (en la nube de Supabase, tabla tienda_catalogo).
+   Están MUY comprimidas para que entren cientos de productos sin llenar el espacio. */
+var FOTO_MAX_PX = 520;      // tamaño máximo (suficiente para verse bien)
+var FOTO_CALIDAD = 0.72;    // calidad (se ve bien y pesa poco)
 
-function subirFotoNube(dataUrl, cb){
-  if(!sb){ cb(dataUrl, 'sin conexión a la nube'); return; }
-  if(!dataUrl || dataUrl.indexOf('data:')!==0){ cb(dataUrl, null); return; }  // ya es un link
-  try{
-    var partes=dataUrl.split(',');
-    var mime=(partes[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
-    var bin=atob(partes[1]);
-    var arr=new Uint8Array(bin.length);
-    for(var i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
-    var blob=new Blob([arr],{type:mime});
-    var ext=mime.indexOf('png')>=0?'png':'jpg';
-    var nombre=TIENDA+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
-
-    sb.storage.from(BUCKET).upload(nombre, blob, {contentType:mime, upsert:false})
-      .then(function(r){
-        if(r.error){ cb(dataUrl, r.error.message||'error al subir'); return; }
-        var pub=sb.storage.from(BUCKET).getPublicUrl(nombre);
-        var url=(pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : null;
-        if(!url){ cb(dataUrl, 'no se pudo obtener el link'); return; }
-        cb(url, null);   // ✅ subió bien
-      })
-      .catch(function(e){ cb(dataUrl, (e&&e.message)||'error de red'); });
-  }catch(e){ cb(dataUrl, (e&&e.message)||'error al preparar la foto'); }
+/* Comprime una foto para guardarla */
+function comprimirFoto(dataUrl, cb){
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width, h=img.height;
+    if(w>h && w>FOTO_MAX_PX){ h=Math.round(h*FOTO_MAX_PX/w); w=FOTO_MAX_PX; }
+    else if(h>FOTO_MAX_PX){ w=Math.round(w*FOTO_MAX_PX/h); h=FOTO_MAX_PX; }
+    var cv=document.createElement('canvas');
+    cv.width=w; cv.height=h;
+    var ctx=cv.getContext('2d');
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);   // fondo blanco (los PNG con transparencia pesan más)
+    ctx.drawImage(img,0,0,w,h);
+    cb(cv.toDataURL('image/jpeg', FOTO_CALIDAD));
+  };
+  img.onerror=function(){ cb(dataUrl); };
+  img.src=dataUrl;
 }
 
-/* Migra las fotos viejas (base64) a la nube, de a poco */
-function migrarFotos(){
-  var pendientes=PRODUCTOS.filter(function(p){ return p.foto && p.foto.indexOf('data:')===0; });
-  if(!pendientes.length){ alert('✅ Todas tus fotos ya están en la nube.'); return; }
-  if(!confirm('📸 Encontré '+pendientes.length+' fotos guardadas de la forma vieja.\n\nLas voy a pasar a la nube para que no se pierdan.\n\n¿Empiezo?')) return;
+/* Cuánto pesa el catálogo (para avisar antes de que se llene) */
+function pesoCatalogo(){
+  try{
+    var txt=JSON.stringify(PRODUCTOS);
+    return Math.round(txt.length/1024/1024*10)/10;   // en MB
+  }catch(e){ return 0; }
+}
+/* Achica TODAS las fotos que estén pesadas */
+function optimizarFotos(){
+  var pesadas=PRODUCTOS.filter(function(p){
+    return p.foto && p.foto.indexOf('data:')===0 && p.foto.length>90000;   // más de ~90KB
+  });
+  if(!pesadas.length){ alert('✅ Tus fotos ya están optimizadas.\n\nPeso del catálogo: '+pesoCatalogo()+' MB'); return; }
+  if(!confirm('📸 Encontré '+pesadas.length+' fotos pesadas.\n\nLas voy a achicar para que tu catálogo no se llene y no pierdas nada.\n\nSe van a ver igual de bien. ¿Dale?')) return;
 
-  var ok=0, fallaron=0, total=pendientes.length, primerError=null;
+  var hechas=0, total=pesadas.length;
+  var antes=pesoCatalogo();
   var box=document.getElementById('adminBody');
   function siguiente(){
-    if(!pendientes.length){
+    if(!pesadas.length){
       guardarCatalogo();
       render();
-      if(fallaron){
-        alert('⚠️ ATENCIÓN\n\n✅ Subieron: '+ok+'\n❌ Fallaron: '+fallaron+'\n\nMotivo: '+(primerError||'desconocido')+'\n\nLas que fallaron siguen guardadas en este teléfono. Avisame este mensaje y lo resolvemos. 🐝');
-      } else {
-        alert('✅ Listo. Las '+ok+' fotos están en la nube.\n\nYa no se pierden. 🐝');
-      }
+      var ahora=pesoCatalogo();
+      alert('✅ Listo!\n\n'+hechas+' fotos optimizadas.\n\nAntes: '+antes+' MB\nAhora: '+ahora+' MB\n\nGanaste '+(Math.round((antes-ahora)*10)/10)+' MB de espacio. 🐝');
       abrirSoporte();
       return;
     }
-    var p=pendientes.shift();
-    if(box) box.innerHTML='<div style="text-align:center;padding:50px 20px"><div style="font-size:2.6rem;margin-bottom:12px">☁️</div>'
-      +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">Guardando fotos en la nube…</div>'
-      +'<div style="font-size:.86rem;color:var(--sub)">'+(ok+fallaron+1)+' de '+total+'</div>'
-      +'<div style="background:#F0F4FF;border-radius:6px;height:8px;margin-top:14px;overflow:hidden"><div style="width:'+Math.round(((ok+fallaron)/total)*100)+'%;height:100%;background:var(--nar);transition:width .3s"></div></div>'
-      +(fallaron?'<div style="font-size:.72rem;color:#DC2626;margin-top:8px">⚠️ '+fallaron+' fallaron</div>':'')
+    var p=pesadas.shift();
+    if(box) box.innerHTML='<div style="text-align:center;padding:50px 20px"><div style="font-size:2.6rem;margin-bottom:12px">📸</div>'
+      +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">Optimizando fotos…</div>'
+      +'<div style="font-size:.86rem;color:var(--sub)">'+(hechas+1)+' de '+total+'</div>'
+      +'<div style="background:#F0F4FF;border-radius:6px;height:8px;margin-top:14px;overflow:hidden"><div style="width:'+Math.round((hechas/total)*100)+'%;height:100%;background:var(--nar);transition:width .3s"></div></div>'
       +'<div style="font-size:.72rem;color:var(--sub);margin-top:10px">No cierres esta pantalla 🐝</div></div>';
-    subirFotoNube(p.foto, function(url, error){
-      if(error){
-        fallaron++;
-        if(!primerError) primerError=error;
-      } else {
-        p.foto=url;
-        ok++;
-        if(ok%5===0) guardarCatalogo();
-      }
-      setTimeout(siguiente, 150);
+    comprimirFoto(p.foto, function(nueva){
+      p.foto=nueva;
+      hechas++;
+      if(hechas%5===0) guardarCatalogo();
+      setTimeout(siguiente, 60);
     });
   }
   siguiente();
 }
 
-/* ═══════ 📱 PWA — que se instale como app, con el logo de cada tienda ═══════ */
+/* ═══════ 📱 PWA — que se instale como app, con el logo de cada tienda ═══════
+   Chrome exige DOS cosas para instalar una app de verdad:
+   1) un manifest válido (no blob)
+   2) un Service Worker registrado
+   Sin el service worker, solo hace un "acceso directo" con el ícono de Chrome. */
+function registrarServiceWorker(){
+  if(!('serviceWorker' in navigator)) return;
+  // Service worker mínimo, generado al vuelo (no hace falta un archivo aparte)
+  var swCode = 'self.addEventListener("install",function(e){self.skipWaiting();});'
+    + 'self.addEventListener("activate",function(e){e.waitUntil(self.clients.claim());});'
+    + 'self.addEventListener("fetch",function(e){e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));});';
+  try{
+    var blob=new Blob([swCode],{type:'application/javascript'});
+    var swUrl=URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(function(){});
+  }catch(e){}
+}
+registrarServiceWorker();
+
 function armarManifest(){
   if(!CONFIG) return;
   var neg=CONFIG.negocio||'Mi Tienda';
@@ -511,17 +528,20 @@ function armarManifest(){
     short_name: neg.length>12 ? neg.slice(0,12) : neg,
     description: (CONFIG.eslogan||'Tu tienda en cuotas'),
     start_url: window.location.pathname + (TIENDA!=='amarango' ? '?t='+TIENDA : ''),
+    scope: window.location.pathname,
     display: 'standalone',
     orientation: 'portrait',
     background_color: '#ffffff',
     theme_color: col,
     icons: [
-      { src: icono, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-      { src: icono, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      { src: icono, sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: icono, sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: icono, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
     ]
   };
-  var blob=new Blob([JSON.stringify(manifest)], {type:'application/json'});
-  var url=URL.createObjectURL(blob);
+  // ⚠️ Chrome NO acepta manifests tipo blob: para instalar apps reales.
+  // Hay que usar data URL.
+  var url='data:application/manifest+json;charset=utf-8,'+encodeURIComponent(JSON.stringify(manifest));
   var link=document.getElementById('manifestLink');
   if(!link){
     link=document.createElement('link');
@@ -569,22 +589,67 @@ function mostrarBotonInstalar(){
 }
 
 /* ═══════════════════════════════════════════════════════════
+   🚦 EL PORTERO — controla si la tienda está habilitada
+   Cada tienda, al abrir, pregunta si está al día.
+   Si Max la marca como vencida → se bloquea.
+   La tienda de Max (amarango) NUNCA se bloquea.
+   ═══════════════════════════════════════════════════════════ */
+var TIENDA_BLOQUEADA = false;
+
+function verificarSuscripcion(cb){
+  // la tienda de Max nunca se bloquea
+  if(TIENDA==='amarango'){ cb(true); return; }
+  if(!sb){ cb(true); return; }   // sin conexión: la deja pasar (no la castigues por mala señal)
+
+  sb.from('amarango_subs').select('datos').eq('id','lista').maybeSingle()
+    .then(function(r){
+      var lista=(r && r.data && r.data.datos) ? r.data.datos : [];
+      var mia=lista.find(function(s){
+        return String(s.tienda||'').toLowerCase()===TIENDA;
+      });
+      // si no está en la lista → la deja pasar (todavía no la diste de alta)
+      if(!mia){ cb(true); return; }
+      // si está y figura como vencida → BLOQUEAR
+      cb(mia.estado==='ok');
+    })
+    .catch(function(){ cb(true); });   // ante la duda, la deja pasar
+}
+
+function bloquearTienda(){
+  TIENDA_BLOQUEADA=true;
+  document.body.innerHTML=
+     '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#020c2e,#0B2D6B);font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif">'
+    +'<div style="max-width:400px;width:100%;background:#fff;border-radius:20px;padding:32px 24px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+      +'<div style="font-size:3.5rem;margin-bottom:12px">🔒</div>'
+      +'<div style="font-weight:900;color:#0B2D6B;font-size:1.3rem;margin-bottom:8px">Tienda pausada</div>'
+      +'<div style="font-size:.92rem;color:#6B7280;line-height:1.6;margin-bottom:22px">'
+        +'Tu suscripción a Amarango está vencida.<br><br>'
+        +'Tus productos, clientes y pedidos <b style="color:#0B2D6B">están guardados</b>. Apenas regularices, todo vuelve como estaba.'
+      +'</div>'
+      +'<button onclick="window.open(\'https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent('Hola! Quiero reactivar mi tienda 🐝\n\nCódigo: '+TIENDA)+'\',\'_blank\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:12px">💬 Quiero reactivarla</button>'
+      +'<div style="font-size:.74rem;color:#9CA3AF">🐝 Amarango · Estamos para ayudarte</div>'
+    +'</div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════
    🏪 MULTI-TIENDA — el motor de Amarango
    Cada tienda tiene su CÓDIGO, y sus datos se guardan separados.
    Se elige con la dirección:  ...tienda-nueva.html?t=marcelo
    Sin código = 'amarango' (la tienda de Max, por compatibilidad).
    ═══════════════════════════════════════════════════════════ */
 function tiendaID(){
+  // 🔒 La tienda se define ÚNICAMENTE por la dirección (?t=...).
+  // NUNCA por lo que quedó guardado en el teléfono — eso cruzaba las tiendas.
   try{
     var p=new URLSearchParams(window.location.search);
     var t=(p.get('t')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'');
-    if(t) { try{ localStorage.setItem('ae_tienda_id', t); }catch(e){} return t; }
-    var guardada=localStorage.getItem('ae_tienda_id');
-    if(guardada) return guardada;
+    if(t) return t;
   }catch(e){}
-  return 'amarango';   // la de Max por defecto
+  return 'amarango';   // sin ?t= → siempre la tienda de Max
 }
 var TIENDA = tiendaID();
+/* limpia el rastro viejo que causaba el cruce */
+try{ localStorage.removeItem('ae_tienda_id'); }catch(e){}
 /* claves de guardado, separadas por tienda */
 function keyConfig(){  return TIENDA==='amarango' ? 'config'   : 'config_'+TIENDA; }
 function keyCatalogo(){return TIENDA==='amarango' ? 'catalogo' : 'catalogo_'+TIENDA; }
@@ -621,8 +686,8 @@ function abrirCargarDirecto(){
 /* ═══════ CARRITO — que el cliente arme una compra de varias cosas ═══════
    Se guarda en su teléfono. Al pedir, va TODO junto por WhatsApp con las
    cuotas del total calculadas. Sin pedirle datos antes (menos fricción = más ventas). */
-function cargarCarrito(){ try{ return JSON.parse(localStorage.getItem('ae_carrito')||'[]'); }catch(e){ return []; } }
-function guardarCarrito(a){ try{ localStorage.setItem('ae_carrito', JSON.stringify(a)); }catch(e){} actualizarBadgeCarrito(); }
+function cargarCarrito(){ try{ return JSON.parse(localStorage.getItem(lsKey('ae_carrito'))||'[]'); }catch(e){ return []; } }
+function guardarCarrito(a){ try{ localStorage.setItem(lsKey('ae_carrito'), JSON.stringify(a)); }catch(e){} actualizarBadgeCarrito(); }
 function agregarAlCarrito(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
   var c=cargarCarrito();
@@ -846,8 +911,8 @@ var PIN_REVENDEDOR = "1234";   // clave revendedor
 var _toquesAbeja = 0, _toqueTimer = null;
 
 /* ROL actual: null (cliente) | 'admin' | 'revendedor' */
-function rolActual(){ try{ return localStorage.getItem('ae_rol')||null; }catch(e){ return null; } }
-function setRol(r){ try{ if(r) localStorage.setItem('ae_rol',r); else localStorage.removeItem('ae_rol'); }catch(e){} try{ actualizarBeeFab(); }catch(e){} }
+function rolActual(){ try{ return localStorage.getItem(lsKey('ae_rol'))||null; }catch(e){ return null; } }
+function setRol(r){ try{ if(r) localStorage.setItem(lsKey('ae_rol'),r); else localStorage.removeItem(lsKey('ae_rol')); }catch(e){} try{ actualizarBeeFab(); }catch(e){} }
 function haySesion(){ return rolActual()!==null; }
 function esAdmin(){ return rolActual()==='admin'; }
 function esRevendedor(){ return rolActual()==='revendedor'; }
@@ -1060,27 +1125,34 @@ function renderSubs(){
 }
 
 function editarSub(i){
-  var s = i>=0 ? SUBS[i] : {nombre:'',negocio:'',vende:'',whatsapp:'',pagaHasta:'',monto:'',nota:'',estado:'ok'};
+  var s = i>=0 ? SUBS[i] : {nombre:'',tienda:'',negocio:'',vende:'',whatsapp:'',pagaHasta:'',monto:'',nota:'',estado:'ok'};
   function campo(lbl,id,val,ph){ return '<div style="margin-bottom:10px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" value="'+(val||'').replace(/"/g,'&quot;')+'" placeholder="'+(ph||'')+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'; }
-  document.getElementById('adminBody').innerHTML =
-     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:14px">'+(i>=0?'✏️ Editar suscriptor':'➕ Nuevo suscriptor')+'</div>'
-    +campo('Nombre','sb_nombre',s.nombre,'Ej: Marcelo Gómez')
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:14px">'+(i>=0?'Editar suscriptor':'Nuevo suscriptor')+'</div>'
+    +campo('Nombre','sb_nombre',s.nombre,'Ej: Marcelo Gomez')
+    +'<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:11px;padding:11px;margin-bottom:11px">'
+      +'<div style="font-size:.66rem;font-weight:800;color:var(--nar);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Codigo de su tienda</div>'
+      +'<input id="sb_tienda" value="'+(s.tienda||'').replace(/"/g,'&quot;')+'" placeholder="Ej: marcelo" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none;margin-bottom:6px">'
+      +'<div style="font-size:.7rem;color:var(--sub);line-height:1.4">Sin espacios ni acentos. Este codigo es el que le da acceso.</div>'
+    +'</div>'
     +campo('Negocio','sb_negocio',s.negocio,'Ej: Marcelo Hogar')
-    +campo('¿Qué vende?','sb_vende',s.vende,'Ej: Electro / Ropa / Comida')
+    +campo('Que vende','sb_vende',s.vende,'Ej: Electro / Ropa')
     +campo('WhatsApp','sb_whatsapp',s.whatsapp,'Ej: 5491122334455')
-    +campo('Pagó hasta','sb_pagaHasta',s.pagaHasta,'Ej: 31/08/2026')
-    +campo('Cuánto paga por mes','sb_monto',s.monto,'Ej: 20000')
+    +campo('Pago hasta','sb_pagaHasta',s.pagaHasta,'Ej: 31/08/2026')
+    +campo('Cuanto paga por mes','sb_monto',s.monto,'Ej: 20000')
     +campo('Nota','sb_nota',s.nota,'Lo que quieras anotar')
     +'<div style="display:flex;gap:8px;margin-top:6px">'
-    +'<button onclick="guardarSub('+i+')" style="flex:1;background:var(--nar);color:#fff;border:none;border-radius:11px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit">💾 Guardar</button>'
-    +(i>=0?'<button onclick="borrarSub('+i+')" style="background:#FEF2F2;color:#DC2626;border:none;border-radius:11px;padding:13px 16px;font-weight:800;cursor:pointer;font-family:inherit">🗑️</button>':'')
+    +'<button onclick="guardarSub('+i+')" style="flex:1;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit">Guardar</button>'
+    +(i>=0?'<button onclick="borrarSub('+i+')" style="background:#FEF2F2;color:#DC2626;border:none;border-radius:12px;padding:14px 16px;font-weight:800;cursor:pointer;font-family:inherit">Borrar</button>':'')
     +'</div>'
-    +'<button onclick="renderSubs()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Cancelar</button>';
+    +'<button onclick="renderSubs()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">Cancelar</button>';
 }
 function guardarSub(i){
   var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
-  var obj={ nombre:g('sb_nombre'), negocio:g('sb_negocio'), vende:g('sb_vende'), whatsapp:g('sb_whatsapp'), pagaHasta:g('sb_pagaHasta'), monto:g('sb_monto'), nota:g('sb_nota'), estado: i>=0?SUBS[i].estado:'ok' };
-  if(!obj.nombre){ alert('Poné al menos el nombre.'); return; }
+  var tienda=g('sb_tienda').toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  var obj={ nombre:g('sb_nombre'), tienda:tienda, negocio:g('sb_negocio'), vende:g('sb_vende'), whatsapp:g('sb_whatsapp'), pagaHasta:g('sb_pagaHasta'), monto:g('sb_monto'), nota:g('sb_nota'), estado: i>=0?SUBS[i].estado:'ok' };
+  if(!obj.nombre){ alert('Pone al menos el nombre.'); return; }
+  if(!obj.tienda){ alert('Pone el CODIGO de su tienda. Sin eso no podes prenderle ni apagarle la tienda.'); return; }
   if(i>=0) SUBS[i]=obj; else SUBS.push(obj);
   subsGuardar(); renderSubs();
 }
@@ -1440,7 +1512,7 @@ function abrirBackup(){
 
 function descargarBackup(){
   var cliente=null;
-  try{ cliente=JSON.parse(localStorage.getItem('ae_cliente')||'null'); }catch(e){}
+  try{ cliente=JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){}
   var data={
     version: 1,
     tienda: TIENDA,
@@ -1828,7 +1900,7 @@ var PEDIDOS=[];
 
 function guardarPedido(items, total, contacto){
   var cli=null;
-  try{ cli=JSON.parse(localStorage.getItem('ae_cliente')||'null'); }catch(e){}
+  try{ cli=JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){}
   var ped={
     id:'ped'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
     fecha: Date.now(),
@@ -2425,13 +2497,13 @@ function guardarEnPapelera(prods){
   if(!prods || !prods.length) return;
   try{
     var pap={ fecha:Date.now(), productos:JSON.parse(JSON.stringify(prods)) };
-    localStorage.setItem('ae_papelera', JSON.stringify(pap));
+    localStorage.setItem(lsKey('ae_papelera'), JSON.stringify(pap));
     if(sb) sb.from('tienda_catalogo').upsert({id:'papelera', datos:pap.productos}).then(function(){}).catch(function(){});
   }catch(e){}
 }
 function abrirPapelera(){
   var pap=null;
-  try{ pap=JSON.parse(localStorage.getItem('ae_papelera')||'null'); }catch(e){}
+  try{ pap=JSON.parse(localStorage.getItem(lsKey('ae_papelera'))||'null'); }catch(e){}
   var html='<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:10px">🗑️ Papelera</div>';
   if(!pap || !pap.productos || !pap.productos.length){
     html+='<div style="text-align:center;color:var(--sub);padding:30px 20px;font-size:.85rem">La papelera está vacía.<br><span style="font-size:.75rem">Acá van los productos si reemplazás todo el catálogo, por si te arrepentís. 🐝</span></div>';
@@ -2448,7 +2520,7 @@ function abrirPapelera(){
 }
 function restaurarPapelera(){
   var pap=null;
-  try{ pap=JSON.parse(localStorage.getItem('ae_papelera')||'null'); }catch(e){}
+  try{ pap=JSON.parse(localStorage.getItem(lsKey('ae_papelera'))||'null'); }catch(e){}
   if(!pap || !pap.productos) return;
   if(!confirm('¿Recuperar '+pap.productos.length+' productos de la papelera?')) return;
   pap.productos.forEach(function(p){ PRODUCTOS.push(p); });
@@ -2746,8 +2818,12 @@ function conectar(){
   if(!SB_KEY){ cargarConfig(); mostrarSetup(); return; }
   try{
     sb = window.supabase.createClient(SB_URL, SB_KEY);
-    cargarConfig();
-    bajarCatalogo();
+    // 🚦 EL PORTERO: primero verifica si la tienda está habilitada
+    verificarSuscripcion(function(habilitada){
+      if(!habilitada){ bloquearTienda(); return; }
+      cargarConfig();
+      bajarCatalogo();
+    });
   }catch(e){ mostrarError('No pude conectar. Revisá que la key esté bien pegada.'); }
 }
 function bajarCatalogo(){
@@ -2896,8 +2972,8 @@ function toggleSoloOfertas(){
 
 /* ===== FAVORITOS (guardados en el teléfono del cliente) ===== */
 function idProd(p){ return p.id!=null ? String(p.id) : (p.nombre||''); }
-function cargarFavs(){ try{ return JSON.parse(localStorage.getItem('ae_favoritos')||'[]'); }catch(e){ return []; } }
-function guardarFavs(a){ try{ localStorage.setItem('ae_favoritos', JSON.stringify(a)); }catch(e){} }
+function cargarFavs(){ try{ return JSON.parse(localStorage.getItem(lsKey('ae_favoritos'))||'[]'); }catch(e){ return []; } }
+function guardarFavs(a){ try{ localStorage.setItem(lsKey('ae_favoritos'), JSON.stringify(a)); }catch(e){} }
 function esFav(p){ return cargarFavs().indexOf(idProd(p))>=0; }
 function toggleFav(idx, ev){
   if(ev){ ev.stopPropagation(); }
@@ -3353,7 +3429,7 @@ function renderBotonesDetalle(idx){
 
 /* ═══════ BIENVENIDA / REGISTRO del cliente (una sola vez) ═══════
    Usa el nombre del negocio de la CONFIG (así Marcelo ve "Marcelo Hogar"). */
-function clienteRegistrado(){ try{ return !!localStorage.getItem('ae_cliente'); }catch(e){ return false; } }
+function clienteRegistrado(){ try{ return !!localStorage.getItem(lsKey('ae_cliente')); }catch(e){ return false; } }
 function mostrarBienvenida(){
   if(rolActual()) return;              // admin/revendedor no ven esto
   if(clienteRegistrado()) return;      // ya se registró
@@ -3385,7 +3461,7 @@ function guardarRegistro(){
   var nom=g('rg_nombre'), wa=g('rg_wa').replace(/[^0-9]/g,''), loc=g('rg_loc');
   if(!nom || !wa){ alert('Poné al menos tu nombre y WhatsApp.'); return; }
   var cli={ nombre:nom, wa:wa, loc:loc, fecha:Date.now() };
-  try{ localStorage.setItem('ae_cliente', JSON.stringify(cli)); }catch(e){}
+  try{ localStorage.setItem(lsKey('ae_cliente'), JSON.stringify(cli)); }catch(e){}
   // lo suma a la lista de clientes del dueño
   cargarClientes(function(){
     var ya=CLIENTES.find(function(c){ return String(c.wa).replace(/[^0-9]/g,'')===wa; });
@@ -3482,16 +3558,13 @@ function cambiarFotoProducto(idx){
         cv.getContext('2d').drawImage(img,0,0,w,h);
         var data=cv.toDataURL('image/jpeg',0.88);
         // sube a la nube (así no se pierde ni llena el espacio)
-        toastCarrito('☁️ Guardando foto…');
-        subirFotoNube(data, function(url, error){
-          if(error){
-            alert('⚠️ No se pudo guardar la foto en la nube.\n\nMotivo: '+error+'\n\nQuedó solo en este teléfono.');
-          }
-          PRODUCTOS[idx].foto=url;
+        toastCarrito('📸 Guardando foto…');
+        comprimirFoto(data, function(chica){
+          PRODUCTOS[idx].foto=chica;
           guardarCatalogo();
           render();
           verDetalle(idx);
-          if(!error) toastCarrito('✅ Foto guardada en la nube');
+          toastCarrito('✅ Foto guardada');
         });
       };
       img.src=e.target.result;
