@@ -427,10 +427,9 @@ function enviarSoporte(tipo){
 var BUCKET='fotos';
 
 function subirFotoNube(dataUrl, cb){
-  if(!sb){ cb(dataUrl); return; }              // sin nube: se queda como está
-  if(!dataUrl || dataUrl.indexOf('data:')!==0){ cb(dataUrl); return; }  // ya es un link
+  if(!sb){ cb(dataUrl, 'sin conexión a la nube'); return; }
+  if(!dataUrl || dataUrl.indexOf('data:')!==0){ cb(dataUrl, null); return; }  // ya es un link
   try{
-    // convierte el base64 en archivo
     var partes=dataUrl.split(',');
     var mime=(partes[0].match(/:(.*?);/)||[])[1]||'image/jpeg';
     var bin=atob(partes[1]);
@@ -442,42 +441,53 @@ function subirFotoNube(dataUrl, cb){
 
     sb.storage.from(BUCKET).upload(nombre, blob, {contentType:mime, upsert:false})
       .then(function(r){
-        if(r.error){ console.warn('Foto: no se pudo subir', r.error.message); cb(dataUrl); return; }
+        if(r.error){ cb(dataUrl, r.error.message||'error al subir'); return; }
         var pub=sb.storage.from(BUCKET).getPublicUrl(nombre);
-        var url=(pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : dataUrl;
-        cb(url);
+        var url=(pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : null;
+        if(!url){ cb(dataUrl, 'no se pudo obtener el link'); return; }
+        cb(url, null);   // ✅ subió bien
       })
-      .catch(function(){ cb(dataUrl); });
-  }catch(e){ cb(dataUrl); }
+      .catch(function(e){ cb(dataUrl, (e&&e.message)||'error de red'); });
+  }catch(e){ cb(dataUrl, (e&&e.message)||'error al preparar la foto'); }
 }
 
 /* Migra las fotos viejas (base64) a la nube, de a poco */
 function migrarFotos(){
   var pendientes=PRODUCTOS.filter(function(p){ return p.foto && p.foto.indexOf('data:')===0; });
   if(!pendientes.length){ alert('✅ Todas tus fotos ya están en la nube.'); return; }
-  if(!confirm('📸 Encontré '+pendientes.length+' fotos guardadas de la forma vieja.\n\nLas voy a pasar a la nube para que no se pierdan y no se llene el espacio.\n\n¿Empiezo?')) return;
+  if(!confirm('📸 Encontré '+pendientes.length+' fotos guardadas de la forma vieja.\n\nLas voy a pasar a la nube para que no se pierdan.\n\n¿Empiezo?')) return;
 
-  var hechas=0, total=pendientes.length;
+  var ok=0, fallaron=0, total=pendientes.length, primerError=null;
   var box=document.getElementById('adminBody');
   function siguiente(){
     if(!pendientes.length){
       guardarCatalogo();
       render();
-      alert('✅ Listo. '+hechas+' fotos guardadas en la nube.\n\nAhora no se pierden ni se llena el espacio. 🐝');
+      if(fallaron){
+        alert('⚠️ ATENCIÓN\n\n✅ Subieron: '+ok+'\n❌ Fallaron: '+fallaron+'\n\nMotivo: '+(primerError||'desconocido')+'\n\nLas que fallaron siguen guardadas en este teléfono. Avisame este mensaje y lo resolvemos. 🐝');
+      } else {
+        alert('✅ Listo. Las '+ok+' fotos están en la nube.\n\nYa no se pierden. 🐝');
+      }
       abrirSoporte();
       return;
     }
     var p=pendientes.shift();
     if(box) box.innerHTML='<div style="text-align:center;padding:50px 20px"><div style="font-size:2.6rem;margin-bottom:12px">☁️</div>'
       +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">Guardando fotos en la nube…</div>'
-      +'<div style="font-size:.86rem;color:var(--sub)">'+(hechas+1)+' de '+total+'</div>'
-      +'<div style="background:#F0F4FF;border-radius:6px;height:8px;margin-top:14px;overflow:hidden"><div style="width:'+Math.round((hechas/total)*100)+'%;height:100%;background:var(--nar);transition:width .3s"></div></div>'
+      +'<div style="font-size:.86rem;color:var(--sub)">'+(ok+fallaron+1)+' de '+total+'</div>'
+      +'<div style="background:#F0F4FF;border-radius:6px;height:8px;margin-top:14px;overflow:hidden"><div style="width:'+Math.round(((ok+fallaron)/total)*100)+'%;height:100%;background:var(--nar);transition:width .3s"></div></div>'
+      +(fallaron?'<div style="font-size:.72rem;color:#DC2626;margin-top:8px">⚠️ '+fallaron+' fallaron</div>':'')
       +'<div style="font-size:.72rem;color:var(--sub);margin-top:10px">No cierres esta pantalla 🐝</div></div>';
-    subirFotoNube(p.foto, function(url){
-      p.foto=url;
-      hechas++;
-      if(hechas%5===0) guardarCatalogo();   // guarda cada 5, por si se corta
-      setTimeout(siguiente, 120);
+    subirFotoNube(p.foto, function(url, error){
+      if(error){
+        fallaron++;
+        if(!primerError) primerError=error;
+      } else {
+        p.foto=url;
+        ok++;
+        if(ok%5===0) guardarCatalogo();
+      }
+      setTimeout(siguiente, 150);
     });
   }
   siguiente();
@@ -3473,12 +3483,15 @@ function cambiarFotoProducto(idx){
         var data=cv.toDataURL('image/jpeg',0.88);
         // sube a la nube (así no se pierde ni llena el espacio)
         toastCarrito('☁️ Guardando foto…');
-        subirFotoNube(data, function(url){
+        subirFotoNube(data, function(url, error){
+          if(error){
+            alert('⚠️ No se pudo guardar la foto en la nube.\n\nMotivo: '+error+'\n\nQuedó solo en este teléfono.');
+          }
           PRODUCTOS[idx].foto=url;
           guardarCatalogo();
           render();
           verDetalle(idx);
-          toastCarrito('✅ Foto guardada');
+          if(!error) toastCarrito('✅ Foto guardada en la nube');
         });
       };
       img.src=e.target.result;
