@@ -499,10 +499,11 @@ function optimizarFotos(){
    Sin el service worker, solo hace un "acceso directo" con el ícono de Chrome. */
 function registrarServiceWorker(){
   if(!('serviceWorker' in navigator)) return;
-  // ⚠️ Chrome EXIGE un service worker que sea un ARCHIVO REAL en el servidor.
-  // Los generados al vuelo (blob:) NO sirven para instalar apps.
   navigator.serviceWorker.register('sw.js')
-    .then(function(){ /* listo */ })
+    .then(function(reg){
+      // fuerza buscar una versión nueva del service worker
+      if(reg && reg.update) reg.update();
+    })
     .catch(function(e){ console.warn('SW:', e && e.message); });
 }
 registrarServiceWorker();
@@ -822,7 +823,11 @@ function abrirMas(){
   html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
 
   html+='<div class="mas-sec">Ayuda</div>';
-  html+=fila('📲','Instalar como app','cerrarMas();instruccionesInstalar()');
+  html+='<div onclick="cerrarMas();instruccionesInstalar()" style="background:linear-gradient(135deg,var(--az),#1e5bc8);border-radius:12px;padding:13px;display:flex;align-items:center;gap:11px;cursor:pointer;margin-bottom:10px">'
+    +'<span style="font-size:1.5rem">📲</span>'
+    +'<div style="flex:1"><div style="color:#fff;font-size:.86rem;font-weight:900">Instalar como app</div>'
+    +'<div style="color:rgba(255,255,255,.75);font-size:.7rem;margin-top:1px">Que quede en tu pantalla de inicio</div></div>'
+    +'<span style="color:#ffb968;font-size:1.2rem">›</span></div>';
   html+=fila('❓','¿Cómo comprar?','cerrarMas();abrirAyuda()');
   if(CONFIG && CONFIG.whatsapp) html+=fila('💬','Escribinos por WhatsApp','cerrarMas();window.open(\'https://wa.me/'+CONFIG.whatsapp.replace(/[^0-9]/g,'')+'\',\'_blank\')');
   if(CONFIG && CONFIG.instagram) html+=fila('📷','Seguinos en Instagram','cerrarMas();window.open(\'https://instagram.com/'+CONFIG.instagram.replace('@','')+'\',\'_blank\')');
@@ -843,6 +848,8 @@ function abrirMas(){
     html+='<button onclick="loginDesdeAyuda()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.8rem">🔑 Iniciar sesión</button>';
   }
   html+='</div>';
+  // sello de versión (para saber si cargó el archivo nuevo)
+  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.0 · tienda: '+TIENDA+'</div>';
   document.getElementById('masBody').innerHTML=html;
   document.getElementById('masOverlay').classList.add('on');
 }

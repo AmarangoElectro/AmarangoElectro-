@@ -1,33 +1,25 @@
-/* Service Worker de Amarango
-   Sirve para que la tienda se instale como app de verdad.
-   Es el mismo para TODAS las tiendas (no hay que separarlo). */
-
-const CACHE = 'amarango-v1';
+/* Service Worker de Amarango — v2
+   Sirve SOLO para que la tienda se pueda instalar como app.
+   ⚠️ NO cachea el HTML: siempre trae la versión fresca del servidor.
+   (La v1 cacheaba todo y servía versiones viejas — eso causaba problemas) */
 
 self.addEventListener('install', function(e){
-  self.skipWaiting();
+  self.skipWaiting();   // toma el control enseguida
 });
 
 self.addEventListener('activate', function(e){
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    // borra TODO lo que haya guardado la versión vieja
+    caches.keys().then(function(nombres){
+      return Promise.all(nombres.map(function(n){ return caches.delete(n); }));
+    }).then(function(){
+      return self.clients.claim();
+    })
+  );
 });
 
 self.addEventListener('fetch', function(e){
-  // primero la red; si no hay, lo que esté guardado
-  e.respondWith(
-    fetch(e.request)
-      .then(function(r){
-        // guarda una copia para cuando no haya señal
-        if(e.request.method === 'GET' && r && r.status === 200){
-          const copia = r.clone();
-          caches.open(CACHE).then(function(c){
-            c.put(e.request, copia).catch(function(){});
-          });
-        }
-        return r;
-      })
-      .catch(function(){
-        return caches.match(e.request);
-      })
-  );
+  // Siempre va a la red. Nunca sirve una versión vieja.
+  // (Chrome solo necesita que exista este listener para permitir instalar la app)
+  return;
 });
