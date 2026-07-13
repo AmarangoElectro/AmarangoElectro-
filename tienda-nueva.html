@@ -211,6 +211,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <input id="tope" type="number" inputmode="numeric" placeholder="Cuota hasta $" oninput="render()">
   <button id="btnOfertas" class="f-oferta" onclick="toggleSoloOfertas()">🔥 Ofertas</button>
 </div>
+<div id="banner-wrap"></div>
 <div id="saludo-wrap"></div>
 <div id="destacados-wrap"></div>
 <div class="section-h" id="section-h">Cargando…</div>
@@ -679,7 +680,7 @@ try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kG
 /* La abeja flotante SOLO la ve el admin. Atajo directo a cargar productos. */
 function actualizarBeeFab(){
   var b=document.getElementById('beeFab'); if(!b)return;
-  b.style.display = (rolActual()==='admin') ? 'block' : 'none';
+  b.style.display = (rolEfectivo()==='admin') ? 'block' : 'none';
   // si el usuario tiene logo propio, la abeja se reemplaza por su logo
   if(CONFIG && CONFIG.logo && rolActual()==='admin'){
     b.textContent='';
@@ -1037,6 +1038,112 @@ function compartirRevendedor(){
   else window.open('https://wa.me/?text='+encodeURIComponent(window._revMsg),'_blank');
 }
 
+/* ═══════ 👁️ VER COMO CLIENTE — probá tu tienda sin cerrar sesión ═══════ */
+var _viendoComoCliente = false;
+function toggleVerComoCliente(){
+  _viendoComoCliente = !_viendoComoCliente;
+  cerrarAdmin();
+  render();
+  try{ actualizarBeeFab(); }catch(e){}
+  mostrarAvisoCliente();
+  window.scrollTo(0,0);
+}
+function mostrarAvisoCliente(){
+  var v=document.getElementById('avisoCliente');
+  if(!_viendoComoCliente){ if(v) v.remove(); return; }
+  if(v) return;
+  v=document.createElement('div');
+  v.id='avisoCliente';
+  v.onclick=toggleVerComoCliente;
+  v.style.cssText='position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:345;background:var(--az);color:#fff;padding:11px 18px;border-radius:24px;font-size:.76rem;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;font-family:inherit';
+  v.innerHTML='👁️ Viendo como CLIENTE — tocá para volver';
+  document.body.appendChild(v);
+}
+/* el rol "efectivo": si está viendo como cliente, se comporta como cliente */
+function rolEfectivo(){ return _viendoComoCliente ? null : rolActual(); }
+
+/* ═══════ 📣 BANNER DE AVISOS ═══════ */
+function renderBanner(){
+  var wrap=document.getElementById('banner-wrap');
+  if(!wrap) return;
+  var msg=(CONFIG && CONFIG.banner) ? String(CONFIG.banner).trim() : '';
+  if(!msg){ wrap.innerHTML=''; return; }
+  wrap.innerHTML='<div style="margin:12px 14px 0;background:linear-gradient(135deg,var(--nar),#ff9a3d);border-radius:12px;padding:12px 15px;color:#fff;font-size:.86rem;font-weight:800;text-align:center">'+msg+'</div>';
+}
+
+/* ═══════ 🎰 RULETA (para fechas especiales) ═══════ */
+function mostrarBotonRuleta(){
+  var b=document.getElementById('btnRuleta');
+  var on = CONFIG && CONFIG.ruletaOn && !rolEfectivo();
+  if(!on){ if(b) b.remove(); return; }
+  if(b) return;
+  b=document.createElement('button');
+  b.id='btnRuleta';
+  b.onclick=abrirRuleta;
+  b.style.cssText='position:fixed;bottom:88px;right:16px;z-index:340;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#DC2626,#F59E0B);border:3px solid #fff;font-size:1.7rem;cursor:pointer;box-shadow:0 4px 16px rgba(220,38,38,.4);padding:0';
+  b.innerHTML='🎰';
+  document.body.appendChild(b);
+}
+var _girando=false;
+function abrirRuleta(){
+  var yaJugo=false;
+  try{ yaJugo = localStorage.getItem(lsKey('ae_ruleta_hoy'))===new Date().toDateString(); }catch(e){}
+  var html='<div style="text-align:center">'
+    +'<div style="font-size:3rem;margin-bottom:6px">🎰</div>'
+    +'<div style="font-weight:900;color:var(--az);font-size:1.2rem;margin-bottom:4px">¡Girá y ganá!</div>'
+    +'<div style="font-size:.82rem;color:var(--sub);margin-bottom:16px">'+(yaJugo?'Ya jugaste hoy. Volvé mañana 🐝':'Tenés un giro. ¡Suerte!')+'</div>'
+    +'<div id="ruletaResultado" style="min-height:80px;display:flex;align-items:center;justify-content:center;background:#F5F8FF;border:2px dashed var(--nar);border-radius:14px;padding:18px;margin-bottom:14px">'
+      +'<span style="font-size:.9rem;color:var(--sub);font-weight:700">'+(yaJugo?'🎁 Volvé mañana':'🎁 Tu premio aparece acá')+'</span>'
+    +'</div>'
+    +(yaJugo?'':'<button onclick="girarRuleta()" id="btnGirar" style="width:100%;background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:9px">🎰 ¡GIRAR!</button>')
+    +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit">Cerrar</button>'
+    +'</div>';
+  document.getElementById('ayudaBody').innerHTML=html;
+  document.getElementById('ayudaOverlay').classList.add('on');
+}
+function girarRuleta(){
+  if(_girando) return;
+  _girando=true;
+  var premios=(CONFIG.ruletaPremios&&CONFIG.ruletaPremios.length) ? CONFIG.ruletaPremios : ['5% OFF','10% OFF','Segui participando'];
+  var res=document.getElementById('ruletaResultado');
+  var btn=document.getElementById('btnGirar');
+  if(btn) btn.disabled=true;
+  var vueltas=0;
+  var t=setInterval(function(){
+    var p=premios[Math.floor(Math.random()*premios.length)];
+    if(res) res.innerHTML='<span style="font-size:1.1rem;font-weight:900;color:var(--az)">'+p+'</span>';
+    vueltas++;
+    if(vueltas>=18){
+      clearInterval(t);
+      var premio=premios[Math.floor(Math.random()*premios.length)];
+      var gano = !/sin premio|segu/i.test(premio);
+      if(res) res.innerHTML='<div><div style="font-size:2rem;margin-bottom:4px">'+(gano?'🎉':'😅')+'</div>'
+        +'<div style="font-size:1.15rem;font-weight:900;color:'+(gano?'#059669':'var(--sub)')+'">'+premio+'</div>'
+        +(gano?'<div style="font-size:.72rem;color:var(--sub);margin-top:5px">Mostrá esto al comprar 🐝</div>':'')+'</div>';
+      try{ localStorage.setItem(lsKey('ae_ruleta_hoy'), new Date().toDateString()); }catch(e){}
+      _girando=false;
+    }
+  }, 90);
+}
+
+/* ═══════ 📱 QR de la tienda ═══════ */
+function abrirQR(){
+  var link=linkTienda();
+  var neg=(CONFIG&&CONFIG.negocio)||'Mi Tienda';
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=400x400&data='+encodeURIComponent(link);
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📱 QR de tu tienda</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">Imprimilo, ponelo en el local o en un volante. La gente lo escanea y entra a tu tienda. 🐝</div>'
+    +'<div style="background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:20px;text-align:center;margin-bottom:14px">'
+      +'<img src="'+qrUrl+'" style="width:100%;max-width:240px;border-radius:8px" alt="QR">'
+      +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-top:10px">'+neg+'</div>'
+    +'</div>'
+    +'<button onclick="window.open(\''+qrUrl+'\',\'_blank\')" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">⬇️ Descargar QR</button>'
+    +'<button onclick="copiarLink()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">📋 Copiar link</button>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit">‹ Volver al panel</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+
 function abrirPanelDueno(){
   // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
   var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
@@ -1045,14 +1152,14 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
       ? '<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">'
         +'<button onclick="abrirModuloDueno(\'subs\')" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.78rem;display:flex;align-items:center;justify-content:center;gap:6px">👥 Suscripciones Amarango</button></div>'
       : '')
-    +'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">🔒 Cerrar sesión</button>'
+    +'<button onclick="toggleVerComoCliente()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">👁️ Ver como cliente</button>'+'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">🔒 Cerrar sesión</button>'
     +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado</div>';
   document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
 }
@@ -1074,6 +1181,7 @@ function abrirModuloDueno(destino){
   if(destino==='backup'){ abrirBackup(); return; }
   if(destino==='clientes'){ abrirClientes(); return; }
   if(destino==='soporte'){ abrirSoporte(); return; }
+  if(destino==='qr'){ abrirQR(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
@@ -1201,6 +1309,9 @@ var CONFIG_DEFAULT = {
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
   admins: [],              // los que COBRAN (botón Comprar) — [{nombre,wa}]
   vendedores: [],          // los que ATIENDEN (botón Consultar) — [{nombre,wa}]
+  banner: '',              // mensaje de aviso arriba de la tienda
+  ruletaOn: false,         // ruleta de premios (para fechas especiales)
+  ruletaPremios: ['5% OFF','10% OFF','Envío gratis','Seguí participando','15% OFF','Sin premio'],
   pin: "2580",
   pinRev: "1234"
 };
@@ -2100,6 +2211,12 @@ function opcVenta(k,ico,titulo,sub){
     +'<span style="display:block;font-size:.72rem;color:var(--sub);margin-top:1px">'+sub+'</span></span>'
     +'<span style="font-size:1.1rem">'+(on?'✅':'⬜')+'</span></button>';
 }
+function toggleRuleta(){
+  CONFIG.ruletaOn = !CONFIG.ruletaOn;
+  guardarConfig();
+  render();
+  abrirConfig();
+}
 function elegirModoVenta(k){
   CONFIG.modoVenta=k;
   guardarConfig();
@@ -2224,6 +2341,20 @@ function abrirConfig(){
     + (c.modoVenta==='contado'
       ? '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:11px;padding:11px;margin-bottom:14px;font-size:.78rem;color:#059669;font-weight:700;text-align:center">✅ Tu tienda vende solo al contado. Las cuotas no se muestran.</div>'
       : renderPlanesConfig(c))
+    +sec('📣 Aviso en la tienda')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:7px">Un cartelito naranja arriba de todo. Dejalo vacío si no querés mostrarlo.</div>'
+    +campo('Mensaje del aviso','cf_banner',c.banner,'Ej: 🔥 Envío gratis esta semana')
+    +sec('🎰 Ruleta de premios')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Para fechas especiales. Los clientes giran y ganan descuentos.</div>'
+    +'<button onclick="toggleRuleta()" style="width:100%;text-align:left;background:'+(c.ruletaOn?'#FFF0E0':'#fff')+';border:2px solid '+(c.ruletaOn?'var(--nar)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;margin-bottom:9px">'
+      +'<span style="font-size:1.5rem">🎰</span>'
+      +'<span style="flex:1"><span style="display:block;font-size:.88rem;font-weight:900;color:'+(c.ruletaOn?'var(--nar)':'var(--txt)')+'">'+(c.ruletaOn?'Ruleta ENCENDIDA':'Ruleta apagada')+'</span>'
+      +'<span style="display:block;font-size:.72rem;color:var(--sub)">'+(c.ruletaOn?'Los clientes la ven':'Tocá para encenderla')+'</span></span>'
+      +'<span style="font-size:1.2rem">'+(c.ruletaOn?'✅':'⬜')+'</span></button>'
+    +(c.ruletaOn
+      ? '<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Premios (uno por línea)</div>'
+        +'<textarea id="cf_premios" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:90px;outline:none;resize:vertical;margin-bottom:11px">'+((c.ruletaPremios||[]).join('\n'))+'</textarea>'
+      : '')
     +sec('🔒 Seguridad')
     +campo('Clave del dueño (PIN)','cf_pin',c.pin,'','number')
     +campo('Clave de revendedor','cf_pinRev',c.pinRev||'1234','','number')
@@ -2269,6 +2400,9 @@ function guardarConfigDesdeForm(){
   CONFIG.colorPrincipal = g('cf_color1')||'#0B2D6B';
   CONFIG.colorAcento = g('cf_color2')||'#FF7A00';
   // las cuotas y planes se guardan al vuelo desde los botones de arriba
+  CONFIG.banner = g('cf_banner');
+  var pr=g('cf_premios');
+  if(pr) CONFIG.ruletaPremios = pr.split('\n').map(function(x){return x.trim();}).filter(Boolean);
   CONFIG.pin = g('cf_pin')||'2580';
   CONFIG.pinRev = g('cf_pinRev')||'1234';
   // dos listas: quiénes cobran (admins) y quiénes atienden (vendedores)
@@ -2931,7 +3065,7 @@ function render(){
     var okTope=!tope || cuotaRef(p)<=tope;
     var okFav=!viendoFavs || esFav(p);
     // los OCULTOS: el admin los ve (en gris), el cliente NO
-    var okVisible = (rolActual()==='admin') ? true : (p.visible!==false);
+    var okVisible = (rolEfectivo()==='admin') ? true : (p.visible!==false);
     return okCat && okQ && okOferta && okTope && okFav && okVisible;
   });
 
@@ -2945,6 +3079,8 @@ function render(){
 
   // Producto del día + Destacados: solo en la portada (sin buscar, sin filtrar, sin favoritos)
   var portada = !q && !catActiva && !soloOfertas && !tope && !orden && !viendoFavs;
+  renderBanner();
+  try{ mostrarBotonRuleta(); }catch(e){}
   renderSaludo(portada);
   renderDestacados(portada);
 
@@ -2962,7 +3098,7 @@ function render(){
   wrap.innerHTML='<div class="grid">'+lista.map(function(p){
     var idx=PRODUCTOS.indexOf(p);
     var mc=mejorCuota(p.venta);
-    var rolT=rolActual();
+    var rolT=rolEfectivo();
     var phStyle = p.foto ? 'style="background-image:url(\''+p.foto+'\')"' : '';
     var phIco = p.foto ? '' : catProd(p).split(' ')[0];
     var enOferta = p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta);
@@ -3215,7 +3351,7 @@ function ventaja(ico,txt){
 /* El cartelito discreto que va al pie de TODAS las tiendas */
 /* Los dos banners van AL FINAL del catálogo (no arriba, para no tapar los productos) */
 function pieBanners(){
-  if(rolActual()) return '';   // el dueño no los ve
+  if(rolEfectivo()) return '';   // el dueño no los ve
   var html='';
   // simulador (solo si vende en cuotas)
   if(!(CONFIG && CONFIG.modoVenta==='contado')){
@@ -3229,7 +3365,7 @@ function pieBanners(){
   return html;
 }
 function bannerAmarango(){
-  if(rolActual()) return '';   // el dueño y los vendedores no lo ven
+  if(rolEfectivo()) return '';   // el dueño y los vendedores no lo ven
   return '<div onclick="abrirCentroEmprendedor()" style="margin:14px;padding:15px 16px;background:linear-gradient(135deg,#FF7A00,#ff9a3d);border-radius:16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 3px 14px rgba(255,122,0,.25)">'
     +'<span style="font-size:2rem">🐝</span>'
     +'<div style="flex:1">'
@@ -3450,7 +3586,7 @@ function renderSugeridos(idx){
 function renderBotonesDetalle(idx){
   var cont=document.getElementById('d-acciones'); if(!cont) return;
   var p=PRODUCTOS[idx];
-  var rol=rolActual();
+  var rol=rolEfectivo();
   var html='';
 
   if(rol==='admin'){
