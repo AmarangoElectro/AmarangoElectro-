@@ -2606,32 +2606,35 @@ function subirFotoCatalogo(ev){
 var _catParsed=[];
 function parsearCatalogo(){
   var txt=document.getElementById('catTxt'); if(!txt)return;
-  var lineas=(txt.value||'').split('\n');
   var cot=parseFloat((document.getElementById('catDolar')||{}).value)||CONFIG.dolar||1500;
+  var esUSD = _catModo==='usd';
   _catParsed=[];
+
+  // 🧠 usa el parser inteligente: une líneas partidas, salta encabezados, etc.
+  var lineas = preprocesarLineas(txt.value||'');
+
   lineas.forEach(function(raw){
     var linea=raw.replace(/[*_#]/g,'').trim();
     if(!linea) return;
     var nombre='', precio=0;
+
+    // formato con barra: Nombre | Precio
     if(linea.indexOf('|')>=0){
       var partes=linea.split('|');
       nombre=partes[0].trim();
-      var ps=(partes[1]||'').trim();          // ← lo que sigue a la barra = precio
-      var mp=ps.match(/(\d[\d\.]*)/);
+      var mp=(partes[1]||'').match(/(\d[\d\.]*)/);
       if(mp) precio=parseInt(mp[1].replace(/\./g,''),10);
     } else {
-      // sin barra: busca un precio con $ o usd en la línea
-      var mu=linea.match(/(\d{2,4})\s*usd/i);
-      var md=linea.match(/\$\s*(\d[\d\.]{2,})/) || linea.match(/(\d[\d\.]{2,})\s*\$/);
-      if(mu){ precio=parseInt(mu[1],10); nombre=limpiarNombre(linea.replace(/\d{2,4}\s*usd/i,'')); }
-      else if(md){ precio=parseInt(md[1].replace(/\./g,''),10); nombre=limpiarNombre(linea.replace(md[0],'')); }
+      precio = detectarPrecioLinea(linea, esUSD) || 0;
+      nombre = detectarNombreLinea(linea);
     }
     if(!precio || !nombre || nombre.length<3) return;
+
     var costo, venta;
-    if(_catModo==='usd'){ costo=Math.round(precio*cot); venta=markupDeCosto(costo); }
+    if(esUSD){ costo=Math.round(precio*cot); venta=markupDeCosto(costo); }
     else if(_catModo==='costo'){ costo=precio; venta=markupDeCosto(costo); }
     else { costo=null; venta=precio; }
-    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(_catModo==='usd'?precio:null) });
+    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(esUSD?precio:null) });
   });
   renderCatPreview();
 }
@@ -2651,27 +2654,77 @@ function renderCatPreview(){
 function guardarCatalogoPegado(){
   if(!_catParsed.length){ alert('Pegá al menos un producto.'); return; }
   var reemplazar=document.getElementById('catReemplazar') && document.getElementById('catReemplazar').checked;
+
+  // ⚠️ avisos de coherencia de memoria (más GB ≤ menos GB = precio raro)
+  var avisos=chequearCoherenciaMemoria(_catParsed);
+  if(avisos.length){
+    var txt='⚠️ PRECIOS RAROS\n\nEncontré '+avisos.length+' modelo(s) donde MÁS memoria sale IGUAL o MENOS:\n\n';
+    txt+=avisos.slice(0,5).join('\n\n');
+    if(avisos.length>5) txt+='\n\n…y '+(avisos.length-5)+' más';
+    txt+='\n\n¿Cargar igual?';
+    if(!confirm(txt)) return;
+  }
+
   if(reemplazar){
-    // 🚨 confirmación doble — es peligroso
     if(!confirm('⚠️ ATENCIÓN\n\nVas a BORRAR los '+PRODUCTOS.length+' productos que ya tenés y dejar solo estos '+_catParsed.length+'.\n\n¿Estás seguro?')) return;
-    if(!confirm('Última confirmación:\n\n¿Seguro que querés reemplazar TODO el catálogo?\n\n(Los productos viejos van a la papelera, se pueden recuperar)')) return;
-    guardarEnPapelera(PRODUCTOS);   // respaldo antes de borrar
+    if(!confirm('Última confirmación:\n\n¿Seguro que querés reemplazar TODO el catálogo?\n\n(Los viejos van a la papelera)')) return;
+    guardarEnPapelera(PRODUCTOS);
     PRODUCTOS=[];
   }
-  var nuevos=[];
-  _catParsed.forEach(function(p,i){
-    var prod={
-      id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-      nombre:p.nombre, venta:p.venta, foto:(i===0?_catFoto:''), categoria:'', visible:true, fechaPrecio:Date.now()
-    };
-    nuevos.push(prod);
+
+  // 🔄 ACTUALIZACIÓN INTELIGENTE:
+  // · si el producto YA existe → le actualiza el precio (y le deja la foto)
+  // · si es nuevo → lo agrega
+  // · los que NO vinieron en la lista → los marca SIN STOCK
+  var vinieron={};
+  var actualizados=0, agregados=0, sinStock=0;
+
+  _catParsed.forEach(function(np, i){
+    var k=claveModelo(np.nombre);
+    vinieron[k]=true;
+    var existente=PRODUCTOS.find(function(p){ return claveModelo(p.nombre)===k; });
+    if(existente){
+      // ya existe: actualizo precio, dejo la foto y las marcas
+      existente.venta=np.venta;
+      if(np.costo) existente.costo=np.costo;
+      existente.fechaPrecio=Date.now();
+      existente.sinStock=false;          // volvió a estar en la lista → hay stock
+      actualizados++;
+    } else {
+      var prod={
+        id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+        nombre:np.nombre, venta:np.venta, foto:(i===0?_catFoto:''), categoria:'',
+        visible:true, fechaPrecio:Date.now()
+      };
+      if(np.costo) prod.costo=np.costo;
+      PRODUCTOS.push(prod);
+      agregados++;
+    }
   });
-  reasignarFotosDesdeBanco(nuevos);   // 🖼️ recupera las fotos guardadas
-  nuevos.forEach(function(p){ PRODUCTOS.push(p); });
+
+  // los que NO vinieron → SIN STOCK (solo si NO es reemplazo total)
+  if(!reemplazar){
+    PRODUCTOS.forEach(function(p){
+      var k=claveModelo(p.nombre);
+      if(!vinieron[k] && !p.sinStock){
+        p.sinStock=true;
+        sinStock++;
+      }
+    });
+  }
+
+  // 🖼️ reasigna las fotos guardadas
+  reasignarFotosDesdeBanco(PRODUCTOS);
+
   guardarCatalogo();
-  var n=_catParsed.length;
+  var msg='✅ LISTO\n\n';
+  if(agregados) msg+='➕ '+agregados+' productos nuevos\n';
+  if(actualizados) msg+='🔄 '+actualizados+' precios actualizados\n';
+  if(sinStock) msg+='⛔ '+sinStock+' marcados SIN STOCK (no vinieron en la lista)\n';
+  var conFoto=PRODUCTOS.filter(function(p){return p.foto;}).length;
+  msg+='\n🖼️ '+conFoto+' con foto';
+  alert(msg);
   _catParsed=[]; _catFoto='';
-  alert('✅ '+n+' producto'+(n===1?'':'s')+' '+(reemplazar?'cargado'+(n===1?'':'s')+' (catálogo reemplazado)':'agregado'+(n===1?'':'s'))+'. Ya está en tu tienda.');
   render();
   abrirPanelDueno();
 }
@@ -2819,6 +2872,280 @@ function guardarProducto(){
   abrirPanelDueno();
 }
 /* guarda el catálogo (firmado con la tienda, para que nunca se cruce) */
+
+/* ═══════════════════════════════════════════════════════════
+   📱 PARSER INTELIGENTE DE LISTAS (traído de la tienda vieja)
+   Une líneas partidas, reconoce colores, ignora precios tachados,
+   salta encabezados, y no confunde 128GB con el precio.
+   ═══════════════════════════════════════════════════════════ */
+function limpiarTextoLista(s){
+  if(!s) return '';
+  s=s.replace(/\uFFFD/g,'');
+  s=s.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g,'');
+  s=s.replace(/(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/g,'$1');
+  s=s.replace(/^(?:\s|\*|〽️|〽|🔱|📱|🍎|✳️|✳|▪️|▪|◾|•|[-–—>»·\uFE0F])+/,'');
+  s=s.replace(/🇦🇷|🇺🇸|✅|✨|🔥|⭐️|⭐|❗|❕|💣|🌜|💰|💵/g,'');
+  s=s.replace(/\s*[!¡]{1,}\s*$/,'');
+  s=s.replace(/\s+(oferta|promo|nacional|liquidaci[oó]n|[uú]ltim[ao]s?|hay stock|sim f[ií]sica|racing edition|precio\s*costo)\b[^]*$/i,'');
+  s=s.replace(/[ \t]{2,}/g,' ');
+  s=s.replace(/[\s\-–—,]+$/,'');
+  return s.trim();
+}
+
+/* Une las líneas partidas (nombre arriba, precio o color abajo) */
+function preprocesarLineas(txt){
+  var crudas=(txt||'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  function tienePrecio(l){ return /\$\s*\d|[-–]\s*\$?\s*\d|\d{3,}/.test(l); }
+  function esContinuacion(l){
+    if(/^[-–$(]/.test(l) || /^\d/.test(l)) return true;
+    if(!/\d/.test(l) && /^[a-zA-Záéíóú][a-zA-Záéíóú \-\/,]*$/.test(l) && l.length<40){
+      var pal=l.toLowerCase().split(/[-\/,\s]+/);
+      var col=['silver','blue','orange','black','white','yellow','green','red','purple','lavander','lavender','gold','gray','grey','pink','desert','natural','titanium','graphite','sage','mint','celeste','negro','blanco','azul','rojo','verde','dorado','plata','gris','rosa','violeta','lila','naranja'];
+      if(pal.every(function(p){ return !p || col.indexOf(p)>=0; })) return true;
+    }
+    return false;
+  }
+  function tieneNombre(l){
+    if(esContinuacion(l)) return false;
+    var limpio=l.replace(/\([^)]*\)/g,'').replace(/\$?\s*\d[\d.,]*/g,'').replace(/[^a-zA-Z0-9 ]/g,'').trim();
+    return limpio.length>=3;
+  }
+  function esEncabezado(l){
+    return !tienePrecio(l) && /(sellado|gtia|garant|oficial|meses|^lista|precios|hay stock|consult|entraron|modelos de)/i.test(l);
+  }
+  var out=[];
+  for(var i=0;i<crudas.length;i++){
+    var l=crudas[i];
+    if(esEncabezado(l)) continue;
+    if(tieneNombre(l)){
+      var j=i+1;
+      while(j<crudas.length && esContinuacion(crudas[j]) && !tieneNombre(crudas[j])){
+        l=l+' '+crudas[j]; j++;
+        if(tienePrecio(crudas[j-1]) && /\)/.test(crudas[j-1])) break;
+      }
+      i=j-1;
+      out.push(l);
+    }
+  }
+  return out;
+}
+
+/* Saca nombre + precio de una línea (inteligente) */
+function parsearLineaLista(linea){
+  // ignorar precios tachados de WhatsApp (~precio viejo~)
+  linea=linea.replace(/\*?~[^~]*~\*?/g,' ').replace(/\s{2,}/g,' ').trim();
+  var precio=0, esUsd=false;
+
+  // 1) precio con usd/u$s pegado
+  var mu=linea.match(/(?:usd|u\$s|us\$|d[oó]lares?)\s*\$?\s*([\d][\d.,]*)/i) || linea.match(/([\d][\d.,]*)\s*(?:usd|u\$s|us\$|d[oó]lares?)/i);
+  if(mu){ precio=parseFloat(mu[1].replace(/\./g,'').replace(/,/g,'.')); esUsd=true; }
+
+  // 2) precio con $
+  if(!precio){
+    var m=linea.match(/💲\s*\$?\s*([\d][\d.,]*)/) || linea.match(/\$\s*([\d][\d.,]*)/) || linea.match(/([\d][\d.,]*)\s*\$/);
+    if(m){
+      precio=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));
+      esUsd = precio<3000;   // si tiene $ y es chico → es dólar (ningún electro cuesta $185)
+    }
+  }
+
+  // 3) sin símbolo: el número MÁS GRANDE (no confunde 128GB con el precio)
+  if(!precio){
+    var nums=linea.match(/[\d][\d.]*/g)||[];
+    var cand=[];
+    nums.forEach(function(x){ var v=parseFloat(x.replace(/\./g,'')); if(!isNaN(v)) cand.push(v); });
+    if(cand.length) precio=Math.max.apply(null,cand);
+    esUsd = precio<3000 && precio>=20;
+  }
+
+  var minimo = esUsd ? 20 : 1000;
+  if(!precio || precio<minimo) return null;
+
+  // colores entre paréntesis
+  var colores=[];
+  var mc=linea.match(/\(([^)]*)\)/);
+  if(mc){
+    mc[1].split(/[-,\/]/).forEach(function(c){
+      c=c.trim();
+      if(c && /[a-zA-Záéíóúñ]{2,}/.test(c)) colores.push(c);
+    });
+  }
+
+  var nombre=linea
+    .replace(/\([^)]*\)/g,'')
+    .replace(/(?:usd|u\$s|us\$|d[oó]lares?)\s*\$?\s*[\d][\d.,]*/i,'')
+    .replace(/[\d][\d.,]*\s*(?:usd|u\$s|us\$|d[oó]lares?)/i,'')
+    .replace(/\$\s*[\d][\d.,]*/,'')
+    .replace(/[\d][\d.,]*\s*\$/,'')
+    .replace(/[*_•▪️📱🍎]/g,'')
+    .replace(/[-–—]\s*$/,'')
+    .replace(/\s{2,}/g,' ').trim();
+  nombre=limpiarTextoLista(nombre);
+  if(!nombre || nombre.length<2) return null;
+
+  return { nombre:nombre.substring(0,60), precio:precio, esUsd:esUsd, colores:colores };
+}
+
+/* Al reemplazar el catálogo: actualiza precios de los repetidos
+   y marca SIN STOCK los que no vinieron en la lista nueva */
+function fusionarConStock(nuevos, viejos){
+  var mapaViejo={};
+  (viejos||[]).forEach(function(v){ mapaViejo[claveModelo(v.nombre)]=v; });
+
+  var resultado=[];
+  var vistos={};
+
+  // 1) los que vinieron en la lista nueva → precio actualizado, CON stock
+  nuevos.forEach(function(n){
+    var k=claveModelo(n.nombre);
+    vistos[k]=true;
+    var viejo=mapaViejo[k];
+    if(viejo){
+      // ya existía: actualizo precio, mantengo foto/destacado/etc
+      viejo.venta = n.venta;
+      viejo.fechaPrecio = Date.now();
+      viejo.sinStock = false;
+      viejo.visible = true;
+      if(!viejo.foto && n.foto) viejo.foto = n.foto;
+      resultado.push(viejo);
+    } else {
+      resultado.push(n);
+    }
+  });
+
+  // 2) los que NO vinieron → los dejo pero SIN STOCK
+  var sinStock=0;
+  (viejos||[]).forEach(function(v){
+    var k=claveModelo(v.nombre);
+    if(!vistos[k]){
+      v.sinStock = true;
+      resultado.push(v);
+      sinStock++;
+    }
+  });
+
+  return { productos:resultado, sinStock:sinStock, actualizados:Object.keys(vistos).length };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   📱 PARSER INTELIGENTE (viene de la tienda vieja — es mucho mejor)
+   · Une líneas partidas (nombre arriba, precio abajo)
+   · Detecta colores, ignora precios tachados (~viejos~)
+   · Toma el número MÁS GRANDE (no confunde 128GB con el precio)
+   · Salta encabezados ("sellado", "garantía", "lista")
+   ═══════════════════════════════════════════════════════════ */
+function preprocesarLineas(txt){
+  var crudas=txt.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  function tienePrecio(l){ return /\$\s*\d|[-–]\s*\$?\s*\d|\d{3,}/.test(l); }
+  function esContinuacion(l){
+    if(/^[-–$(]/.test(l) || /^\d/.test(l)) return true;
+    if(!/\d/.test(l) && /^[a-zA-Záéíóú][a-zA-Záéíóú \-\/,]*$/.test(l) && l.length<40){
+      var pal=l.toLowerCase().split(/[-\/,\s]+/);
+      var colores=['silver','blue','orange','black','white','yellow','green','red','purple','lavander','lavender','gold','gray','grey','pink','desert','natural','titanium','graphite','sage','mint','celeste','negro','blanco','azul','rojo','verde','dorado','plata','gris','rosa','violeta','lila','naranja'];
+      if(pal.every(function(p){ return !p || colores.indexOf(p)>=0; })) return true;
+    }
+    return false;
+  }
+  function tieneNombre(l){
+    if(esContinuacion(l)) return false;
+    var limpio=l.replace(/\([^)]*\)/g,'').replace(/\$?\s*\d[\d.,]*/g,'').replace(/[^a-zA-Z0-9 ]/g,'').trim();
+    return limpio.length>=3;
+  }
+  function esEncabezado(l){
+    return !tienePrecio(l) && /(sellado|gtia|garant|oficial|meses|^lista|precios|hay stock|consult)/i.test(l);
+  }
+  var out=[];
+  for(var i=0;i<crudas.length;i++){
+    var l=crudas[i];
+    if(esEncabezado(l)) continue;
+    if(tieneNombre(l)){
+      var j=i+1;
+      while(j<crudas.length && esContinuacion(crudas[j]) && !tieneNombre(crudas[j])){
+        l=l+' '+crudas[j]; j++;
+        if(tienePrecio(crudas[j-1]) && /\)/.test(crudas[j-1])) break;
+      }
+      i=j-1;
+      out.push(l);
+    }
+  }
+  return out;
+}
+
+/* Detecta el precio de una línea (ignora memorias y precios tachados) */
+function detectarPrecioLinea(linea, esUSD){
+  linea=linea.replace(/\*?~[^~]*~\*?/g,' ').replace(/\s{2,}/g,' ').trim();
+  var precio=0;
+  var mu=linea.match(/(?:usd|u\$s|us\$|d[oó]lares?)\s*\$?\s*([\d][\d.,]*)/i) || linea.match(/([\d][\d.,]*)\s*(?:usd|u\$s|us\$|d[oó]lares?)/i);
+  if(mu) precio=parseFloat(mu[1].replace(/\./g,'').replace(/,/g,'.'));
+  if(!precio){
+    var m=linea.match(/💲\s*\$?\s*([\d][\d.,]*)/) || linea.match(/\$\s*([\d][\d.,]*)/) || linea.match(/([\d][\d.,]*)\s*\$/);
+    if(m) precio=parseFloat(m[1].replace(/\./g,'').replace(/,/g,'.'));
+  }
+  if(!precio){
+    var nums=linea.match(/[\d][\d.]*/g)||[];
+    var cand=[];
+    nums.forEach(function(s){ var v=parseFloat(s.replace(/\./g,'')); if(!isNaN(v)) cand.push(v); });
+    if(cand.length) precio=Math.max.apply(null, cand);
+  }
+  var minimo = esUSD ? 20 : 1000;
+  if(!precio || precio<minimo) return null;
+  return precio;
+}
+
+/* Saca el nombre de la línea (le quita el precio y la basura) */
+function detectarNombreLinea(linea){
+  return (linea||'')
+    .replace(/\*?~[^~]*~\*?/g,' ')
+    .replace(/(?:usd|u\$s|us\$)\s*\$?\s*[\d][\d.,]*/ig,' ')
+    .replace(/[\d][\d.,]*\s*(?:usd|u\$s|us\$)/ig,' ')
+    .replace(/💲\s*\$?\s*[\d][\d.,]*/g,' ')
+    .replace(/[-–]?\s*\$\s*[\d][\d.,]*/g,' ')
+    .replace(/[\d][\d.,]*\s*\$/g,' ')
+    .replace(/oferta\s*!*/ig,' ')
+    .replace(/nacional|racing edition|precio\s*costo/ig,' ')
+    .replace(/🇦🇷|📱|〽️|🔱|❗|💣|🌜|✅|💰|❄️|🍳|📺|🧺|☕|🔥|\*/g,' ')
+    .replace(/\(\s*\)/g,' ')
+    .replace(/\s{2,}/g,' ')
+    .replace(/[-–,]\s*$/,'')
+    .trim();
+}
+
+/* ═══════ ⚠️ COHERENCIA DE MEMORIA ═══════
+   Avisa si un modelo con MÁS memoria sale igual o menos que uno con MENOS. */
+function chequearCoherenciaMemoria(lista){
+  var avisos=[];
+  function memGB(nombre){
+    var m=(nombre||'').match(/(\d+)\s*(tb|gb)/i);
+    if(!m) return null;
+    var n=parseInt(m[1],10);
+    if(/tb/i.test(m[2])) n=n*1024;
+    return n;
+  }
+  function baseModelo(nombre){
+    return (nombre||'').toLowerCase().replace(/\d+\s*(tb|gb)/ig,'').replace(/\d+\s*\/\s*\d+/g,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+  }
+  var grupos={};
+  lista.forEach(function(c){
+    var mem=memGB(c.nombre);
+    if(mem===null) return;
+    var base=baseModelo(c.nombre);
+    if(!grupos[base]) grupos[base]=[];
+    grupos[base].push({nombre:c.nombre, precio:c.venta, mem:mem});
+  });
+  for(var base in grupos){
+    var arr=grupos[base];
+    if(arr.length<2) continue;
+    arr.sort(function(a,b){ return a.mem-b.mem; });
+    for(var i=1;i<arr.length;i++){
+      if(arr[i].precio<=arr[i-1].precio){
+        avisos.push(arr[i].nombre+' ('+fmt(arr[i].precio)+') sale igual o menos que '+arr[i-1].nombre+' ('+fmt(arr[i-1].precio)+'), teniendo más memoria');
+      }
+    }
+  }
+  return avisos;
+}
+
+
 /* ═══════ 🖼️ BANCO DE FOTOS — las fotos sobreviven a la actualización de precios ═══════
    Guarda las fotos POR MODELO, aparte del catálogo.
    Actualizás precios 100 veces y las fotos se reasignan solas. */
