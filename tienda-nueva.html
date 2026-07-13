@@ -2677,10 +2677,15 @@ function guardarProducto(){
   render();
   abrirPanelDueno();
 }
-/* guarda el catálogo completo en Supabase (misma tabla que lee la vidriera) */
+/* guarda el catálogo (firmado con la tienda, para que nunca se cruce) */
 function guardarCatalogo(){
   try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(PRODUCTOS)); }catch(e){}
-  if(sb){ sb.from('tienda_catalogo').upsert({id:keyCatalogo(), datos:PRODUCTOS}).then(function(){}).catch(function(){}); }
+  if(sb){
+    // guarda un objeto con la firma de la tienda + los productos
+    var paquete = PRODUCTOS.slice();
+    paquete._tienda = TIENDA;
+    sb.from('tienda_catalogo').upsert({id:keyCatalogo(), datos:paquete}).then(function(){}).catch(function(){});
+  }
 }
 
 /* ═══════ PEGADO MASIVO — cargar muchos productos de una lista ═══════ */
@@ -2870,23 +2875,35 @@ function conectar(){
   }catch(e){ mostrarError('No pude conectar. Revisá que la key esté bien pegada.'); }
 }
 function bajarCatalogo(){
-  // 1) intenta mostrar lo que haya en el teléfono al toque (rápido)
-  try{ var local=JSON.parse(localStorage.getItem(lsKey('ae_tienda_catalogo'))||'[]'); if(local.length){ PRODUCTOS=local; render(); } }catch(e){}
+  // 1) muestra lo que haya en el teléfono (rápido) — pero solo si es de ESTA tienda
+  try{
+    var local=JSON.parse(localStorage.getItem(lsKey('ae_tienda_catalogo'))||'[]');
+    if(local.length){ PRODUCTOS=local; render(); }
+  }catch(e){}
   // 2) baja lo último de la nube
   sb.from('tienda_catalogo').select('datos').eq('id',keyCatalogo()).maybeSingle()
     .then(function(r){
       if(r && r.data && r.data.datos){
-        PRODUCTOS = r.data.datos.filter(function(p){ return p.visible!==false; });
-        try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(r.data.datos)); }catch(e){}
+        var datos=r.data.datos;
+        // 🔒 verifica que el catálogo sea de ESTA tienda (el bug viejo cruzaba datos)
+        if(datos._tienda && datos._tienda!==TIENDA){
+          console.warn('Catálogo en nube contaminado. Ignorado.');
+          PRODUCTOS=[];
+          render();
+          return;
+        }
+        var arr = Array.isArray(datos) ? datos : (datos.productos||[]);
+        PRODUCTOS = arr.filter(function(p){ return p.visible!==false || rolActual()==='admin'; });
+        try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(arr)); }catch(e){}
         actualizarFavCount(); actualizarBadgeCarrito(); actualizarBeeFab();
         setTimeout(function(){ try{ mostrarBienvenida(); }catch(e){} }, 1200);
         try{ cargarPedidos(function(){ _mapaJuntos=null; }); }catch(e){}
         render();
       } else if(!PRODUCTOS.length){
-        mostrarError('La nube respondió pero no hay productos cargados todavía.');
+        mostrarError('Tu tienda está vacía. Entrá como admin y cargá tus productos. 🐝');
       }
     })
-    .catch(function(){ if(!PRODUCTOS.length) mostrarError('No pude bajar el catálogo. Revisá la key o tu conexión.'); });
+    .catch(function(){ if(!PRODUCTOS.length) mostrarError('No pude bajar el catálogo. Revisá tu conexión.'); });
 }
 
 /* ===== Render ===== */
@@ -3002,7 +3019,7 @@ function render(){
         +precioTarjeta(p)
         +botones
       +'</div></div>';
-  }).join('')+'</div>'+pieAmarango();
+  }).join('')+'</div>'+pieBanners();
 }
 function setCat(k){ catActiva=(catActiva===k?'':k); render(); }
 
@@ -3048,16 +3065,7 @@ function renderSaludo(mostrar){
   else if(h>=13 && h<20){ emo='☀️'; hola='¡Buenas tardes!'; sub='Mirá lo nuevo y calculá tus cuotas al toque'; }
   else { emo='🌙'; hola='¡Buenas noches!'; sub='Tranqui, elegí lo tuyo y te lo llevás en cuotas'; }
   wrap.innerHTML='<div class="saludo"><span class="emo">'+emo+'</span>'
-    +'<div class="txt"><div class="hola">'+hola+'</div><div class="sub">'+sub+'</div></div></div>'
-    // el simulador, bien visible (solo para el cliente)
-    +((rolActual()||(CONFIG&&CONFIG.modoVenta==='contado'))?'':'<div onclick="abrirSimulador()" style="margin:10px 14px 2px;background:linear-gradient(135deg,var(--az),#1e5bc8);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:0 2px 10px rgba(11,45,107,.18)">'
-      +'<span style="font-size:1.6rem">🧮</span>'
-      +'<div style="flex:1"><div style="color:#fff;font-size:.86rem;font-weight:900">¿Cuánto podés pagar por mes?</div>'
-      +'<div style="color:rgba(255,255,255,.7);font-size:.7rem;margin-top:1px">Decime tu presupuesto y te muestro qué te llevás</div></div>'
-      +'<span style="color:#ffb968;font-size:1.2rem">›</span>'
-      +'</div>')
-    // el banner de Amarango, bien visible (solo lo ve el cliente)
-    + bannerAmarango();
+    +'<div class="txt"><div class="hola">'+hola+'</div><div class="sub">'+sub+'</div></div></div>';
 }
 
 /* Producto del día (marcado con delDia) + Destacados (marcado con destacado) */
@@ -3159,14 +3167,12 @@ function abrirCentroEmprendedor(){
     +paso('5️⃣','Cobrás y entregás','Vos coordinás el pago. La plata es tuya, no pasa por nadie.')
     // el modelo de las cuotas (lo que Max quería explicar)
     +'<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:14px;padding:15px;margin:16px 0">'
-      +'<div style="font-weight:900;color:var(--nar);font-size:.92rem;margin-bottom:8px">💳 Vendé en cuotas, sin riesgo</div>'
+      +'<div style="font-weight:900;color:var(--nar);font-size:.92rem;margin-bottom:8px">💳 Vendé como quieras</div>'
       +'<div style="font-size:.82rem;color:var(--txt);line-height:1.6">'
-        +'El cliente <b>retira pagando solo la 1ra cuota</b>. Las otras te las va pagando mes a mes.<br><br>'
-        +'<b style="color:var(--az)">¿Por qué así?</b><br>'
-        +'Porque achica el riesgo. No ponés plata de tu bolsillo esperando que te paguen todo junto. '
-        +'Cobrás desde el primer día, y el cliente se lleva lo que necesita.<br><br>'
-        +'<b style="color:var(--az)">¿Y si no querés cuotas?</b><br>'
-        +'También podés vender <b>solo al contado</b>. Vos elegís cómo trabajar.'
+        +'Podés vender <b>en cuotas fijas</b> (como AmarangoElectro) o <b>solo al contado</b>.<br><br>'
+        +'Vos elegís cómo trabajar, y el sistema se adapta.<br><br>'
+        +'<b style="color:var(--az)">Te enseñamos nuestro sistema.</b><br>'
+        +'Cuando arranques, te explicamos cómo lo hacemos nosotros para vender más y arriesgar menos. 🐝'
       +'</div>'
     +'</div>'
     // qué se lleva
@@ -3207,8 +3213,21 @@ function ventaja(ico,txt){
 }
 
 /* El cartelito discreto que va al pie de TODAS las tiendas */
-/* Banner de Amarango — BIEN VISIBLE en la portada.
-   Antes lo tenía enterrado al final de 73 productos: nadie lo veía. */
+/* Los dos banners van AL FINAL del catálogo (no arriba, para no tapar los productos) */
+function pieBanners(){
+  if(rolActual()) return '';   // el dueño no los ve
+  var html='';
+  // simulador (solo si vende en cuotas)
+  if(!(CONFIG && CONFIG.modoVenta==='contado')){
+    html+='<div onclick="abrirSimulador()" style="margin:20px 14px 10px;background:linear-gradient(135deg,var(--az),#1e5bc8);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer">'
+      +'<span style="font-size:1.6rem">🧮</span>'
+      +'<div style="flex:1"><div style="color:#fff;font-size:.86rem;font-weight:900">¿Cuánto podés pagar por mes?</div>'
+      +'<div style="color:rgba(255,255,255,.7);font-size:.7rem;margin-top:1px">Decime tu presupuesto y te muestro qué te llevás</div></div>'
+      +'<span style="color:#ffb968;font-size:1.2rem">›</span></div>';
+  }
+  html+=bannerAmarango();
+  return html;
+}
 function bannerAmarango(){
   if(rolActual()) return '';   // el dueño y los vendedores no lo ven
   return '<div onclick="abrirCentroEmprendedor()" style="margin:14px;padding:15px 16px;background:linear-gradient(135deg,#FF7A00,#ff9a3d);border-radius:16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 3px 14px rgba(255,122,0,.25)">'
@@ -3740,7 +3759,14 @@ function guardarKey(){
   conectar();
 }
 function mostrarError(txt){
-  document.getElementById('grid-wrap').innerHTML='<div class="estado"><div class="e-i">😕</div>'+txt+'</div>';
+  var esAdmin = rolActual()==='admin';
+  document.getElementById('grid-wrap').innerHTML='<div class="estado" style="padding:50px 24px">'
+    +'<div class="e-i">🐝</div>'
+    +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">'+txt+'</div>'
+    +(esAdmin
+      ? '<button onclick="abrirCargarDirecto()" style="background:var(--nar);color:#fff;border:none;border-radius:12px;padding:13px 22px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:14px">📦 Cargar mis productos</button>'
+      : '<div style="font-size:.82rem;color:var(--sub);margin-top:6px">Volvé en un rato 🐝</div>')
+    +'</div>';
 }
 
 /* arranque */
