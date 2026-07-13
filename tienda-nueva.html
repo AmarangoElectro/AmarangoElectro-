@@ -540,8 +540,8 @@ function armarManifest(){
     name: neg,
     short_name: neg.length>12 ? neg.slice(0,12) : neg,
     description: (CONFIG.eslogan||'Tu tienda en cuotas'),
-    start_url: window.location.pathname + (TIENDA!=='amarango' ? '?t='+TIENDA : ''),
-    scope: window.location.pathname,
+    start_url: './',
+    scope: './',
     display: 'standalone',
     orientation: 'portrait',
     background_color: '#ffffff',
@@ -651,14 +651,25 @@ function bloquearTienda(){
    Sin código = 'amarango' (la tienda de Max, por compatibilidad).
    ═══════════════════════════════════════════════════════════ */
 function tiendaID(){
-  // 🔒 La tienda se define ÚNICAMENTE por la dirección (?t=...).
-  // NUNCA por lo que quedó guardado en el teléfono — eso cruzaba las tiendas.
+  // 🔒 La tienda se detecta SOLA. Dos formas, en este orden:
+  //    1) Por la CARPETA:  /marcelo/  →  tienda "marcelo"   (así cada una es app propia)
+  //    2) Por el ?t=:      ?t=marcelo →  tienda "marcelo"   (compatibilidad)
+  // El MISMO archivo funciona en todas las carpetas. No hay que editarlo nunca.
   try{
+    // 1) la carpeta manda
+    var ruta = window.location.pathname.split('/').filter(Boolean);
+    // saca el nombre del archivo (index.html, tienda-nueva.html…)
+    if(ruta.length && /\.html?$/i.test(ruta[ruta.length-1])) ruta.pop();
+    var carpeta = ruta.length ? ruta[ruta.length-1].toLowerCase().replace(/[^a-z0-9_-]/g,'') : '';
+    // ignoro carpetas técnicas
+    if(carpeta && ['docs','assets','img','js','css','public'].indexOf(carpeta)<0) return carpeta;
+
+    // 2) si no hay carpeta, el ?t=
     var p=new URLSearchParams(window.location.search);
     var t=(p.get('t')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'');
     if(t) return t;
   }catch(e){}
-  return 'amarango';   // sin ?t= → siempre la tienda de Max
+  return 'amarango';   // raíz sin nada → la tienda de Max
 }
 var TIENDA = tiendaID();
 /* limpia el rastro viejo que causaba el cruce */
@@ -1146,6 +1157,155 @@ function abrirQR(){
   document.getElementById('adminOverlay').classList.add('on');
 }
 
+/* ═══════════════════════════════════════════════════════════
+   📈 ANÁLISIS DE INVERSIÓN (de la tienda vieja)
+   Calcula cuánta plata REAL tenés que poner para vender un producto.
+   La clave: la 1ra cuota del cliente te financia parte del costo.
+   CAPITAL = costo + comisión revendedor + envío − 1ra cuota
+   ═══════════════════════════════════════════════════════════ */
+var _invPlan = 6;          // plan elegido (2, 4, 6... o 'contado')
+var _inversores = [];      // [{nombre:'Juan', pct:50}]
+
+function abrirInversion(){
+  var planes=cuotasActivas();
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📈 Análisis de inversión</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Cuánta plata real tenés que poner para vender un producto. 🐝</div>'
+    // costo
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">💰 Precio de costo</div>'
+    +'<input type="number" id="inv_costo" oninput="calcInversion()" placeholder="Ej: 150000" style="width:100%;border:2px solid var(--nar);border-radius:12px;padding:14px;font-family:inherit;font-size:1.1rem;font-weight:900;color:var(--nar);outline:none;text-align:center;margin-bottom:12px">'
+    // envío
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🚚 Envío (opcional)</div>'
+    +'<input type="number" id="inv_envio" oninput="calcInversion()" placeholder="0" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px;font-family:inherit;font-size:.9rem;outline:none;margin-bottom:12px">'
+    // plan
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📅 ¿Cómo lo vende?</div>'
+    +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">'
+      +botonPlanInv('contado','Contado')
+      +planes.map(function(n){ return botonPlanInv(n, n+' cuotas'); }).join('')
+    +'</div>'
+    // inversores
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🤝 Inversionistas (opcional)</div>'
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:7px">Uno por línea: <b>Nombre, %</b><br>Ej: Juan, 50</div>'
+    +'<textarea id="inv_socios" oninput="calcInversion()" placeholder="Juan, 50&#10;María, 50" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:11px;font-family:inherit;font-size:.84rem;min-height:60px;outline:none;resize:vertical;margin-bottom:14px">'+(_inversores.map(function(i){return i.nombre+', '+i.pct;}).join('\n'))+'</textarea>'
+    +'<div id="inv_resultado"></div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver al panel</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+  calcInversion();
+}
+function botonPlanInv(p, txt){
+  var on = String(_invPlan)===String(p);
+  return '<button onclick="setPlanInv(\''+p+'\')" style="flex:1;min-width:70px;border:2px solid '+(on?'var(--az)':'var(--line)')+';background:'+(on?'var(--az)':'#fff')+';color:'+(on?'#fff':'var(--txt)')+';border-radius:11px;padding:10px 6px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit">'+txt+'</button>';
+}
+function setPlanInv(p){ _invPlan = (p==='contado') ? 'contado' : parseInt(p,10); abrirInversion(); }
+
+function calcInversion(){
+  var cont=document.getElementById('inv_resultado'); if(!cont) return;
+  var costo=parseFloat((document.getElementById('inv_costo')||{}).value)||0;
+  var envio=parseFloat((document.getElementById('inv_envio')||{}).value)||0;
+
+  if(!costo){
+    cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:26px 20px;font-size:.85rem"><div style="font-size:2.4rem;margin-bottom:8px">📈</div>Poné el precio de costo y te muestro cuánta plata tenés que poner. 🐝</div>';
+    return;
+  }
+
+  // precio de venta con tu markup
+  var venta = markupDeCosto(costo);
+  var esCuotas = (_invPlan!=='contado');
+  var n = esCuotas ? _invPlan : 1;
+
+  // total que cobra y primera cuota
+  var totalPlan, primeraCuota;
+  if(!esCuotas){ totalPlan=venta; primeraCuota=venta; }
+  else {
+    var pct = (CONFIG.cuotas && CONFIG.cuotas[n]!=null) ? CONFIG.cuotas[n] : 0;
+    totalPlan = Math.round(venta*(1+pct/100));
+    primeraCuota = valorCuota(venta, n);
+  }
+
+  // comisión del revendedor: 10% contado / 15% en cuotas
+  var comisionTotal = Math.round(venta*(esCuotas?0.15:0.10)/500)*500;
+  // la primera parte de la comisión (se paga en partes)
+  var partes;
+  if(!esCuotas) partes=1;
+  else if(n===2) partes=2;
+  else { partes=3; if(Math.round(comisionTotal/3)<10000) partes=2; }
+  var primeraParteComision = Math.round(comisionTotal/partes/500)*500;
+
+  // 💰 LA FÓRMULA: capital real que ponés
+  var capital = costo + primeraParteComision + envio - primeraCuota;
+  if(capital<0) capital=0;
+
+  var ganancia = totalPlan - costo - comisionTotal - envio;
+  var roi = capital>0 ? Math.round(ganancia/capital*100) : 0;
+
+  // inversores
+  _inversores=[];
+  var txt=(document.getElementById('inv_socios')||{}).value||'';
+  txt.split('\n').forEach(function(l){
+    var p=l.split(',');
+    if(p.length<2) return;
+    var nom=p[0].trim(), pc=parseFloat(p[1])||0;
+    if(nom && pc>0) _inversores.push({nombre:nom, pct:pc});
+  });
+
+  var html=
+    // la caja grande: cuánta plata poner
+     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff;margin-bottom:14px;text-align:center">'
+      +'<div style="font-size:.66rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.7px">Plata que tenés que poner</div>'
+      +'<div style="font-size:2.1rem;font-weight:900;margin:4px 0">'+fmt(capital)+'</div>'
+      +'<div style="font-size:.74rem;color:#ffb968;font-weight:700">💡 El cliente te adelanta '+fmt(primeraCuota)+' con la 1ra cuota</div>'
+    +'</div>'
+    // el desglose
+    +'<div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px">'
+      +'<div style="font-weight:900;color:var(--az);font-size:.86rem;margin-bottom:9px">🧮 De dónde sale</div>'
+      +filaInv('Costo del producto', fmt(costo), false)
+      +(envio?filaInv('Envío', fmt(envio), false):'')
+      +filaInv('1ra parte comisión revendedor', fmt(primeraParteComision), false)
+      +filaInv('− El cliente te paga (1ra cuota)', '− '+fmt(primeraCuota), false, '#059669')
+      +'<div style="border-top:1.5px solid var(--line);margin-top:8px;padding-top:8px">'
+      +filaInv('CAPITAL REAL', fmt(capital), true)
+      +'</div></div>'
+    // la ganancia
+    +'<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:14px;padding:14px;margin-bottom:12px">'
+      +'<div style="font-weight:900;color:#059669;font-size:.86rem;margin-bottom:9px">💰 Lo que ganás</div>'
+      +filaInv('Precio de venta', fmt(venta), false)
+      +filaInv('Total que cobra ('+(esCuotas?n+' cuotas':'contado')+')', fmt(totalPlan), false)
+      +filaInv('Comisión revendedor ('+(esCuotas?'15':'10')+'%)', '− '+fmt(comisionTotal), false)
+      +'<div style="border-top:1.5px solid #A7F3D0;margin-top:8px;padding-top:8px">'
+      +filaInv('GANANCIA NETA', fmt(ganancia), true, '#059669')
+      +(capital>0?'<div style="text-align:center;font-size:.78rem;color:#059669;font-weight:800;margin-top:6px">📈 Rinde '+roi+'% sobre lo que pusiste</div>':'')
+      +'</div></div>';
+
+  // reparto entre inversores
+  if(_inversores.length){
+    var sumaPct=_inversores.reduce(function(s,i){return s+i.pct;},0);
+    html+='<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:14px;padding:14px">'
+      +'<div style="font-weight:900;color:var(--az);font-size:.86rem;margin-bottom:9px">🤝 Reparto entre socios</div>';
+    _inversores.forEach(function(inv){
+      var pone=Math.round(capital*inv.pct/100);
+      var gana=Math.round(ganancia*inv.pct/100);
+      html+='<div style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:6px">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+          +'<span style="font-weight:900;color:var(--az);flex:1;font-size:.86rem">'+inv.nombre+'</span>'
+          +'<span style="font-size:.72rem;font-weight:800;color:var(--sub)">'+inv.pct+'%</span></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:.76rem">'
+          +'<span style="color:var(--sub)">Pone: <b style="color:var(--az)">'+fmt(pone)+'</b></span>'
+          +'<span style="color:var(--sub)">Gana: <b style="color:#059669">'+fmt(gana)+'</b></span></div>'
+        +'</div>';
+    });
+    if(sumaPct!==100){
+      html+='<div style="font-size:.72rem;color:#DC2626;font-weight:700;text-align:center;margin-top:5px">⚠️ Los porcentajes suman '+sumaPct+'% (deberían sumar 100%)</div>';
+    }
+    html+='</div>';
+  }
+  cont.innerHTML=html;
+}
+function filaInv(lbl, val, fuerte, color){
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0">'
+    +'<span style="font-size:'+(fuerte?'.84rem':'.78rem')+';color:'+(fuerte?'var(--az)':'var(--sub)')+';font-weight:'+(fuerte?'900':'600')+'">'+lbl+'</span>'
+    +'<span style="font-size:'+(fuerte?'1rem':'.84rem')+';font-weight:900;color:'+(color||'var(--az)')+'">'+val+'</span></div>';
+}
+
 function abrirPanelDueno(){
   // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
   var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
@@ -1433,7 +1593,15 @@ function precioTarjeta(p){
 
 /* El link único de esta tienda (para compartir con los clientes) */
 function linkTienda(){
-  var base=window.location.origin+window.location.pathname;
+  var ruta=window.location.pathname;
+  // si está en una carpeta (/marcelo/), el link es la carpeta
+  var enCarpeta = ruta.split('/').filter(Boolean).some(function(x){ return !/\.html?$/i.test(x); });
+  if(enCarpeta){
+    var partes=ruta.split('/').filter(Boolean);
+    if(/\.html?$/i.test(partes[partes.length-1])) partes.pop();
+    return window.location.origin + '/' + partes.join('/') + '/';
+  }
+  var base=window.location.origin+ruta;
   return TIENDA==='amarango' ? base : base+'?t='+TIENDA;
 }
 function copiarLink(){
