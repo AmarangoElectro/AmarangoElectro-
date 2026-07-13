@@ -5,22 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Tienda AmarangoElectro 🐝🛒</title>
 <meta name="theme-color" content="#0B2D6B">
-<meta name="description" content="Electrodomésticos y celulares en cuotas fijas. TV, celulares, heladeras, cocina, lavado y mucho más. Mínimos requisitos y atención personalizada.">
-
-<!-- ===== Preview del enlace (WhatsApp, Instagram, Facebook) ===== -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="AmarangoElectro">
-<meta property="og:title" content="🐝 AmarangoElectro | Electrodomésticos y celulares en cuotas">
-<meta property="og:description" content="✨ Equipá tu casa sin complicaciones. 📺 TV • 📱 Celulares • ❄️ Heladeras • 🍳 Cocina • 🧺 Lavado y mucho más.&#10;✅ Cuotas fijas ✅ Mínimos requisitos ✅ Atención personalizada&#10;👇 Mirá el catálogo completo y calculá tus cuotas">
-<meta property="og:url" content="https://amarangoelectro.com.ar">
-<meta property="og:image" content="https://amarangoelectro.com.ar/icon.png">
-<meta property="og:image:alt" content="AmarangoElectro">
-<meta property="og:locale" content="es_AR">
-<!-- Twitter / X -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="🐝 AmarangoElectro | Electrodomésticos y celulares en cuotas">
-<meta name="twitter:description" content="✨ Equipá tu casa sin complicaciones. Cuotas fijas ✅ Mínimos requisitos ✅ Atención personalizada. 👇 Mirá el catálogo y calculá tus cuotas.">
-<meta name="twitter:image" content="https://amarangoelectro.com.ar/icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
@@ -31,7 +15,7 @@
 <meta name="application-name" content="Tienda Amarango">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&display=swap');
-:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F7F8FA;--bor:#ECEEF2;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
@@ -235,7 +219,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 </div>
 
 <div class="header">
-  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
+  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onclick="toqueLogoTrabajo()" style="cursor:pointer" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
   <div class="header-info">
     <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
     <p style="color:var(--nar);font-weight:700;font-style:italic;">Equipá tu casa, fácil y en cuotas</p>
@@ -250,7 +234,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="ib-close" onclick="cerrarBannerInstall()">✕</button>
 </div>
 
-<div class="tabs">
+<!-- ═══ FRENTE LIMPIO: las pestañas de trabajo se esconden en un menú ═══ -->
+<div class="tabs" id="tabs-viejas" style="display:none">
   <div class="tab on" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
   <div class="tab" id="tab-btn-pegar" onclick="showTab('pegar')" style="display:none;">📋 Pegar precio</div>
   <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')" style="display:none;">📱 Celulares</div>
@@ -258,6 +243,34 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <div class="tab" id="tab-btn-revend" onclick="accesoRevendedores()">👥 Revendedores</div>
   <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Admin</div>
 </div>
+
+<!-- Menú de trabajo (solo lo abre quien sabe: 3 toques en el logo o el botón ☰) -->
+<div id="menuTrabajo" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(2,8,20,.6);align-items:flex-end;justify-content:center" onclick="if(event.target===this)cerrarMenuTrabajo()">
+  <div style="background:#fff;width:100%;max-width:520px;border-radius:20px 20px 0 0;padding:18px 16px 24px;max-height:80vh;overflow-y:auto">
+    <div style="width:38px;height:4px;background:#ddd;border-radius:3px;margin:0 auto 14px"></div>
+    <div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:12px;text-align:center">🔧 Herramientas</div>
+    <button onclick="cerrarMenuTrabajo();showTab('tienda')" style="width:100%;text-align:left;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;margin-bottom:8px">
+      <span style="font-size:1.4rem">🛒</span><span style="flex:1;font-size:.9rem;font-weight:800;color:var(--az)">Tienda</span><span style="color:#999">›</span></button>
+    <button onclick="cerrarMenuTrabajo();accesoRevendedores()" style="width:100%;text-align:left;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;margin-bottom:8px">
+      <span style="font-size:1.4rem">👥</span><span style="flex:1;font-size:.9rem;font-weight:800;color:var(--az)">Revendedores</span><span style="color:#999">›</span></button>
+    <button onclick="cerrarMenuTrabajo();showTab('admin')" style="width:100%;text-align:left;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;margin-bottom:8px">
+      <span style="font-size:1.4rem">🔒</span><span style="flex:1;font-size:.9rem;font-weight:800;color:var(--az)">Admin</span><span style="color:#999">›</span></button>
+    <button onclick="cerrarMenuTrabajo()" style="width:100%;background:none;border:1.5px solid #e5e7eb;color:#666;border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px">Cerrar</button>
+  </div>
+</div>
+
+<script>
+/* 🔧 El menú de trabajo se abre con 3 toques en el logo (invisible para el cliente) */
+var _toquesLogo=0, _tLogo=null;
+function toqueLogoTrabajo(){
+  _toquesLogo++;
+  clearTimeout(_tLogo);
+  _tLogo=setTimeout(function(){ _toquesLogo=0; }, 1200);
+  if(_toquesLogo>=3){ _toquesLogo=0; abrirMenuTrabajo(); }
+}
+function abrirMenuTrabajo(){ document.getElementById('menuTrabajo').style.display='flex'; }
+function cerrarMenuTrabajo(){ document.getElementById('menuTrabajo').style.display='none'; }
+</script>
 
 <!-- Sub-pestañas de Administradores (aparecen al entrar al cajón) -->
 <div id="admin-subtabs" style="display:none;background:#fff;border-bottom:1px solid var(--bor);padding:8px 12px;gap:6px;flex-wrap:wrap">
