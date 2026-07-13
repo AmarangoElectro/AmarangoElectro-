@@ -3359,15 +3359,40 @@ var CATS = [
   {k:'☕ Electro hogar',ico:'☕', txt:'Electro'},
   {k:'📦 Otros',       ico:'📦', txt:'Otros'}
 ];
+/* 🏷️ DETECCIÓN DE CATEGORÍA — reconoce marcas, modelos y palabras clave */
 function categoriaDe(nombre){
-  var n=(nombre||'').toLowerCase();
-  if(/samsung|motorola|xiaomi|iphone|celular|smartphone/.test(n))return '📱 Celulares';
-  if(/heladera|freezer|frio/.test(n))return '❄️ Heladeras';
-  if(/cocina|anafe|horno|microonda/.test(n))return '🍳 Cocina';
-  if(/tv|televis|smart tv|tcl|led/.test(n))return '📺 TV';
-  if(/ventilador|turbo|aire|calefact|estufa|caloventor/.test(n))return '🌀 Climatización';
-  if(/lavarrop|secarrop|lavavaj/.test(n))return '🧺 Lavado';
-  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich/.test(n))return '☕ Electro hogar';
+  var n=(nombre||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');   // saca acentos
+
+  // ── 📱 CELULARES (todas las marcas y modelos que maneja Max)
+  if(/samsung|galaxy|\bs2[0-9]\b|\ba[0-9]{2}\b|\bm[0-9]{2}\b/.test(n)) return '📱 Celulares';
+  if(/motorola|\bmoto\b|\bg[0-9]{2}\b|\be[0-9]{2}\b|edge/.test(n)) return '📱 Celulares';
+  if(/xiaomi|redmi|\bpoco\b|\bnote 1[0-9]/.test(n)) return '📱 Celulares';
+  if(/iphone|\bipad\b|apple/.test(n)) return '📱 Celulares';
+  if(/infinix|tecno|realme|honor|huawei|oppo|vivo|zte|nokia|alcatel|tcl.*(?:5g|movil)/.test(n)) return '📱 Celulares';
+  if(/celular|smartphone|\b5g\b.*\bgb\b|\bgb\b.*\b5g\b/.test(n)) return '📱 Celulares';
+  // patrón típico de celu: "128/8gb", "256/12gb"
+  if(/\d{2,4}\s*\/\s*\d{1,2}\s*gb/.test(n)) return '📱 Celulares';
+
+  // ── ❄️ HELADERAS
+  if(/heladera|freezer|frigorific|no frost|cava|conservadora/.test(n)) return '❄️ Heladeras';
+
+  // ── 🍳 COCINA
+  if(/cocina|anafe|horno|microonda|multigas|parrilla|grill|campana/.test(n)) return '🍳 Cocina';
+
+  // ── 📺 TV
+  if(/\btv\b|televis|smart\s*tv|\boled\b|\bqled\b|\bled\b.*pulg|\d{2}\s*(pulg|")|monitor|proyector/.test(n)) return '📺 TV';
+
+  // ── 🌀 CLIMATIZACIÓN
+  if(/ventilador|turbo|aire acond|split|calefact|estufa|caloventor|calorific|panel calefac|radiador|deshumid|purificador/.test(n)) return '🌀 Climatización';
+
+  // ── 🧺 LAVADO
+  if(/lavarrop|secarrop|lavavaj|lavaseca|centrifug/.test(n)) return '🧺 Lavado';
+
+  // ── ☕ ELECTRO HOGAR
+  if(/termo|pava|cafeter|licuad|batidor|mixer|procesador|freidora|air ?fryer|yogurt|tostad|sandwich|waflera|exprimidor|juguera|multiprocesador|minipimer|olla|vaporera|plancha|aspirador|robot/.test(n)) return '☕ Electro hogar';
+
+  // ── 🛏️ OTROS (sommier, colchones, bicis, etc)
   return '📦 Otros';
 }
 function catProd(p){ return p.categoria || categoriaDe(p.nombre); }
