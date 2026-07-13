@@ -2564,6 +2564,10 @@ function abrirCargarCatalogo(){
     +'</div>'
     // reemplazar (peligroso → con confirmación)
     +'<label style="display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:.8rem;color:var(--txt);cursor:pointer"><input type="checkbox" id="catReemplazar" style="width:19px;height:19px"> Reemplazar todo el catálogo <span style="color:var(--sub);font-size:.74rem">(si no, agrega)</span></label>'
+    // 🖼️ el banco de fotos: aviso de que las fotos no se pierden
+    +(cuantasFotosBanco()
+      ? '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:11px;padding:11px;margin-bottom:12px;font-size:.78rem;color:#059669;font-weight:700;text-align:center">🖼️ Tenés '+cuantasFotosBanco()+' fotos guardadas.<br><span style="font-weight:600;font-size:.72rem">Se reasignan solas a los productos que carguen. No las perdés.</span></div>'
+      : '')
     +'<div id="catPreview" style="margin-bottom:12px"></div>'
     +'<button onclick="guardarCatalogoPegado()" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">✅ Cargar productos</button>'
     +'<div style="display:flex;gap:8px;margin-top:10px">'
@@ -2654,13 +2658,16 @@ function guardarCatalogoPegado(){
     guardarEnPapelera(PRODUCTOS);   // respaldo antes de borrar
     PRODUCTOS=[];
   }
+  var nuevos=[];
   _catParsed.forEach(function(p,i){
     var prod={
       id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
       nombre:p.nombre, venta:p.venta, foto:(i===0?_catFoto:''), categoria:'', visible:true, fechaPrecio:Date.now()
     };
-    PRODUCTOS.push(prod);
+    nuevos.push(prod);
   });
+  reasignarFotosDesdeBanco(nuevos);   // 🖼️ recupera las fotos guardadas
+  nuevos.forEach(function(p){ PRODUCTOS.push(p); });
   guardarCatalogo();
   var n=_catParsed.length;
   _catParsed=[]; _catFoto='';
@@ -2812,6 +2819,62 @@ function guardarProducto(){
   abrirPanelDueno();
 }
 /* guarda el catálogo (firmado con la tienda, para que nunca se cruce) */
+/* ═══════ 🖼️ BANCO DE FOTOS — las fotos sobreviven a la actualización de precios ═══════
+   Guarda las fotos POR MODELO, aparte del catálogo.
+   Actualizás precios 100 veces y las fotos se reasignan solas. */
+function claveModelo(n){
+  return (n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+}
+function keyBanco(){ return TIENDA==='amarango' ? 'banco_fotos' : 'banco_fotos_'+TIENDA; }
+function cargarBancoFotos(){
+  try{ var g=localStorage.getItem(lsKey('ae_banco_fotos')); if(g) return JSON.parse(g); }catch(e){}
+  return {};
+}
+function guardarBancoFotos(banco){
+  try{ localStorage.setItem(lsKey('ae_banco_fotos'), JSON.stringify(banco)); }catch(e){}
+  if(sb){ sb.from('tienda_catalogo').upsert({id:keyBanco(), datos:banco}).then(function(){}).catch(function(){}); }
+}
+function bajarBancoFotos(){
+  if(!sb) return;
+  sb.from('tienda_catalogo').select('datos').eq('id',keyBanco()).maybeSingle()
+    .then(function(r){ if(r && r.data && r.data.datos){ try{ localStorage.setItem(lsKey('ae_banco_fotos'), JSON.stringify(r.data.datos)); }catch(e){} } })
+    .catch(function(){});
+}
+/* Cada vez que se pone una foto, se guarda en el banco */
+function guardarFotoEnBanco(nombre, foto){
+  if(!nombre) return;
+  var banco=cargarBancoFotos();
+  var k=claveModelo(nombre);
+  if(foto){ banco[k]=foto; } else { delete banco[k]; }
+  guardarBancoFotos(banco);
+}
+/* Reasigna las fotos guardadas a los productos que no tienen */
+function reasignarFotosDesdeBanco(lista){
+  var banco=cargarBancoFotos();
+  var claves=Object.keys(banco);
+  if(!claves.length) return lista;
+  (lista||[]).forEach(function(p){
+    if(!p || p.foto) return;
+    var k=claveModelo(p.nombre);
+    // 1) coincidencia exacta
+    if(banco[k]){ p.foto=banco[k]; return; }
+    // 2) coincidencia parcial (la más específica gana)
+    var mejor='', mejorLen=0;
+    for(var i=0;i<claves.length;i++){
+      var kb=claves[i];
+      if(!kb || kb.length<5) continue;
+      if(k.indexOf(kb)!==-1 || kb.indexOf(k)!==-1){
+        var largo=Math.min(k.length, kb.length);
+        if(largo>mejorLen){ mejorLen=largo; mejor=kb; }
+      }
+    }
+    if(mejor && banco[mejor]){ p.foto=banco[mejor]; }
+  });
+  return lista;
+}
+/* Cuántas fotos hay guardadas */
+function cuantasFotosBanco(){ return Object.keys(cargarBancoFotos()).length; }
+
 function guardarCatalogo(){
   try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(PRODUCTOS)); }catch(e){}
   if(sb){
@@ -3027,6 +3090,7 @@ function bajarCatalogo(){
           return;
         }
         var arr = Array.isArray(datos) ? datos : (datos.productos||[]);
+        try{ bajarBancoFotos(); reasignarFotosDesdeBanco(arr); }catch(e){}
         PRODUCTOS = arr.filter(function(p){ return p.visible!==false || rolActual()==='admin'; });
         try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(arr)); }catch(e){}
         actualizarFavCount(); actualizarBadgeCarrito(); actualizarBeeFab();
@@ -3759,6 +3823,7 @@ function cambiarFotoProducto(idx){
         toastCarrito('📸 Guardando foto…');
         comprimirFoto(data, function(chica){
           PRODUCTOS[idx].foto=chica;
+          guardarFotoEnBanco(PRODUCTOS[idx].nombre, chica);   // 🖼️ al banco
           guardarCatalogo();
           render();
           verDetalle(idx);
