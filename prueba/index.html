@@ -9,6 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" id="appleIcon" href="">
 <link rel="icon" id="favIcon" href="">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -528,43 +529,18 @@ function armarManifest(){
   if(!CONFIG) return;
   var neg=CONFIG.negocio||'Mi Tienda';
   var col=CONFIG.colorPrincipal||'#0B2D6B';
-  // el ícono: el logo del dueño, o la abeja si no cargó ninguno
   var icono=CONFIG.logo || iconoAbeja(col, CONFIG.colorAcento||'#FF7A00');
 
-  // los <link> del ícono (para iOS y el favicon)
+  // los íconos visuales (iOS y favicon)
   var ai=document.getElementById('appleIcon'); if(ai) ai.href=icono;
   var fi=document.getElementById('favIcon'); if(fi) fi.href=icono;
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.setAttribute('content', col);
-
-  var manifest={
-    name: neg,
-    short_name: neg.length>12 ? neg.slice(0,12) : neg,
-    description: (CONFIG.eslogan||'Tu tienda en cuotas'),
-    start_url: './',
-    scope: './',
-    display: 'standalone',
-    orientation: 'portrait',
-    background_color: '#ffffff',
-    theme_color: col,
-    icons: [
-      { src: icono, sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: icono, sizes: '512x512', type: 'image/png', purpose: 'any' },
-      { src: icono, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
-    ]
-  };
-  // ⚠️ Chrome NO acepta manifests tipo blob: para instalar apps reales.
-  // Hay que usar data URL.
-  var url='data:application/manifest+json;charset=utf-8,'+encodeURIComponent(JSON.stringify(manifest));
-  var link=document.getElementById('manifestLink');
-  if(!link){
-    link=document.createElement('link');
-    link.rel='manifest';
-    link.id='manifestLink';
-    document.head.appendChild(link);
-  }
-  link.href=url;
   document.title=neg;
+
+  // ⚠️ El manifest REAL es manifest.json (archivo en el servidor).
+  // Chrome NO acepta manifests generados al vuelo (data: o blob:) para instalar apps.
 }
+
 /* Si no cargó logo, dibuja una abeja con los colores de la tienda */
 function iconoAbeja(col1, col2){
   var c=document.createElement('canvas');
