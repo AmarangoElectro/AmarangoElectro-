@@ -1,17 +1,24 @@
-/* Service Worker de Amarango — v2
-   Sirve SOLO para que la tienda se pueda instalar como app.
-   ⚠️ NO cachea el HTML: siempre trae la versión fresca del servidor.
-   (La v1 cacheaba todo y servía versiones viejas — eso causaba problemas) */
+/* Service Worker de Amarango — v3
+   🔑 CLAVE: el caché lleva el nombre de la CARPETA.
+   Así cada tienda tiene su propio espacio y Chrome NO las confunde. */
+
+// el nombre del caché sale de la carpeta donde vive este archivo
+const CARPETA = self.location.pathname.replace(/\/sw\.js$/, '') || '/';
+const CACHE = 'amarango' + CARPETA.replace(/\//g, '-') + '-v3';
 
 self.addEventListener('install', function(e){
-  self.skipWaiting();   // toma el control enseguida
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', function(e){
   e.waitUntil(
-    // borra TODO lo que haya guardado la versión vieja
+    // borra SOLO los cachés viejos de ESTA tienda (no toca los de otras)
     caches.keys().then(function(nombres){
-      return Promise.all(nombres.map(function(n){ return caches.delete(n); }));
+      return Promise.all(
+        nombres
+          .filter(function(n){ return n.indexOf('amarango' + CARPETA.replace(/\//g,'-')) === 0 && n !== CACHE; })
+          .map(function(n){ return caches.delete(n); })
+      );
     }).then(function(){
       return self.clients.claim();
     })
@@ -19,7 +26,6 @@ self.addEventListener('activate', function(e){
 });
 
 self.addEventListener('fetch', function(e){
-  // Siempre va a la red. Nunca sirve una versión vieja.
-  // (Chrome solo necesita que exista este listener para permitir instalar la app)
+  // siempre a la red (nunca sirve versiones viejas)
   return;
 });
