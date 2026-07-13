@@ -672,10 +672,12 @@ function keySubs(){    return 'lista'; }   // los suscriptores son SOLO de Max
 function lsKey(base){ return TIENDA==='amarango' ? base : base+'_'+TIENDA; }
 
 var SB_URL = "https://zctaukyrhsmpjkcddcqq.supabase.co";
-var SB_KEY = "";   // se completa sola desde el cuadrito o desde la memoria del teléfono
+/* 🔑 La clave viene puesta. NADIE tiene que pegar nada.
+   (Es la clave pública de Supabase — la misma que usa la calculadora) */
+var SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
 
-/* Si ya se pegó antes en este teléfono, la recuerda */
-try{ var _kGuardada=localStorage.getItem('ae_sb_key'); if(_kGuardada) SB_KEY=_kGuardada; }catch(e){}
+/* limpia keys viejas guardadas en el teléfono (ya no hacen falta) */
+try{ localStorage.removeItem('ae_sb_key'); }catch(e){}
 
 /* La abeja flotante SOLO la ve el admin. Atajo directo a cargar productos. */
 function actualizarBeeFab(){
