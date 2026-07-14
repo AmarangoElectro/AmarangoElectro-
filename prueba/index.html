@@ -212,6 +212,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <input id="tope" type="number" inputmode="numeric" placeholder="Cuota hasta $" oninput="render()">
   <button id="btnOfertas" class="f-oferta" onclick="toggleSoloOfertas()">🔥 Ofertas</button>
 </div>
+<div id="progreso-wrap"></div>
 <div id="banner-wrap"></div>
 <div id="saludo-wrap"></div>
 <div id="destacados-wrap"></div>
@@ -920,7 +921,12 @@ var _toquesAbeja = 0, _toqueTimer = null;
 
 /* ROL actual: null (cliente) | 'admin' | 'revendedor' */
 function rolActual(){ try{ return localStorage.getItem(lsKey('ae_rol'))||null; }catch(e){ return null; } }
-function setRol(r){ try{ if(r) localStorage.setItem(lsKey('ae_rol'),r); else localStorage.removeItem(lsKey('ae_rol')); }catch(e){} try{ actualizarBeeFab(); }catch(e){} }
+function setRol(r){
+  try{ if(r) localStorage.setItem(lsKey('ae_rol'),r); else localStorage.removeItem(lsKey('ae_rol')); }catch(e){}
+  try{ actualizarBeeFab(); }catch(e){}
+  // 👋 primera vez como admin → tour de bienvenida (idea de Max)
+  if(r==='admin'){ setTimeout(function(){ try{ arrancarTour(); }catch(e){} }, 900); }
+}
 function haySesion(){ return rolActual()!==null; }
 function esAdmin(){ return rolActual()==='admin'; }
 function esRevendedor(){ return rolActual()==='revendedor'; }
@@ -1050,6 +1056,192 @@ function mostrarAvisoCliente(){
 }
 /* el rol "efectivo": si está viendo como cliente, se comporta como cliente */
 function rolEfectivo(){ return _viendoComoCliente ? null : rolActual(); }
+
+/* ═══════════════════════════════════════════════════════════
+   👋 TOUR DE BIENVENIDA — idea de Max 🏆
+   La primera vez que entra un admin, le señala dónde está cada cosa.
+   Solo una vez. Nunca más molesta.
+   ═══════════════════════════════════════════════════════════ */
+var _tourPaso = 0;
+var TOUR = [
+  {
+    sel: '#beeFab',
+    tit: '🐝 Tu botón mágico',
+    txt: 'Tocá la abeja y cargás productos al toque. Es lo que más vas a usar.',
+    pos: 'arriba'
+  },
+  {
+    sel: '#progreso-wrap',
+    tit: '📊 Tu progreso',
+    txt: 'Acá te digo qué te falta para que tu tienda esté lista. Seguí los pasos y listo.',
+    pos: 'abajo'
+  },
+  {
+    sel: '.brand',
+    tit: '🔑 Tu puerta secreta',
+    txt: 'Tocá tu logo para entrar a tu panel. Nadie más sabe que está ahí.',
+    pos: 'abajo'
+  },
+  {
+    sel: '#tb-mas',
+    tit: '☰ El menú',
+    txt: 'Acá tenés ayuda, tu panel y todo lo demás. Si te perdés, entrá acá.',
+    pos: 'arriba'
+  }
+];
+
+function yaHizoTour(){ try{ return localStorage.getItem(lsKey('ae_tour'))==='1'; }catch(e){ return true; } }
+function marcarTourHecho(){ try{ localStorage.setItem(lsKey('ae_tour'),'1'); }catch(e){} }
+
+function arrancarTour(){
+  if(yaHizoTour()) return;
+  if(rolActual()!=='admin') return;
+  _tourPaso=0;
+  mostrarPasoTour();
+}
+
+function mostrarPasoTour(){
+  limpiarTour();
+  if(_tourPaso>=TOUR.length){ terminarTour(); return; }
+
+  var p=TOUR[_tourPaso];
+  var el=document.querySelector(p.sel);
+  // si el elemento no está (ej: la abeja si no es admin), salta al siguiente
+  if(!el || el.offsetParent===null){ _tourPaso++; mostrarPasoTour(); return; }
+
+  var r=el.getBoundingClientRect();
+
+  // el fondo oscuro con el "agujero" que ilumina el elemento
+  var fondo=document.createElement('div');
+  fondo.id='tourFondo';
+  fondo.style.cssText='position:fixed;inset:0;z-index:9990;pointer-events:auto';
+  fondo.innerHTML='<svg width="100%" height="100%" style="position:absolute;inset:0">'
+    +'<defs><mask id="tourMask">'
+      +'<rect width="100%" height="100%" fill="white"/>'
+      +'<rect x="'+(r.left-8)+'" y="'+(r.top-8)+'" width="'+(r.width+16)+'" height="'+(r.height+16)+'" rx="14" fill="black"/>'
+    +'</mask></defs>'
+    +'<rect width="100%" height="100%" fill="rgba(2,8,20,.82)" mask="url(#tourMask)"/>'
+    +'</svg>';
+  document.body.appendChild(fondo);
+
+  // el marco que resalta
+  var marco=document.createElement('div');
+  marco.id='tourMarco';
+  marco.style.cssText='position:fixed;left:'+(r.left-8)+'px;top:'+(r.top-8)+'px;width:'+(r.width+16)+'px;height:'+(r.height+16)+'px;'
+    +'border:3px solid #FF7A00;border-radius:14px;z-index:9991;pointer-events:none;box-shadow:0 0 0 4px rgba(255,122,0,.25);animation:tourPulso 1.6s infinite';
+  document.body.appendChild(marco);
+
+  // el cartelito
+  var arriba = p.pos==='arriba';
+  var caja=document.createElement('div');
+  caja.id='tourCaja';
+  var top = arriba ? (r.top - 8 - 150) : (r.bottom + 20);
+  if(top<70) top=r.bottom+20;
+  if(top>window.innerHeight-170) top=r.top-8-150;
+  caja.style.cssText='position:fixed;left:16px;right:16px;top:'+Math.max(70,top)+'px;z-index:9992;'
+    +'background:#fff;border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35);font-family:-apple-system,BlinkMacSystemFont,sans-serif';
+  caja.innerHTML=
+     '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
+      +'<span style="flex:1;font-weight:900;color:#0B2D6B;font-size:1rem">'+p.tit+'</span>'
+      +'<span style="font-size:.68rem;color:#9CA3AF;font-weight:700">'+(_tourPaso+1)+'/'+TOUR.length+'</span>'
+    +'</div>'
+    +'<div style="font-size:.86rem;color:#4B5563;line-height:1.5;margin-bottom:13px">'+p.txt+'</div>'
+    +'<div style="display:flex;gap:8px">'
+      +'<button onclick="saltarTour()" style="background:none;border:none;color:#9CA3AF;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;padding:10px 6px">Saltar</button>'
+      +'<div style="flex:1"></div>'
+      +'<button onclick="siguientePasoTour()" style="background:#FF7A00;color:#fff;border:none;border-radius:11px;padding:11px 22px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.86rem">'
+        +(_tourPaso===TOUR.length-1 ? '¡Listo! 🐝' : 'Siguiente →')+'</button>'
+    +'</div>';
+  document.body.appendChild(caja);
+
+  // la animación del pulso
+  if(!document.getElementById('tourStyle')){
+    var st=document.createElement('style');
+    st.id='tourStyle';
+    st.textContent='@keyframes tourPulso{0%,100%{box-shadow:0 0 0 4px rgba(255,122,0,.25)}50%{box-shadow:0 0 0 9px rgba(255,122,0,.1)}}';
+    document.head.appendChild(st);
+  }
+}
+function siguientePasoTour(){ _tourPaso++; mostrarPasoTour(); }
+function saltarTour(){ terminarTour(); }
+function terminarTour(){
+  limpiarTour();
+  marcarTourHecho();
+  toastCarrito('🐝 ¡Listo! Cualquier duda, entrá a ☰ Más');
+}
+function limpiarTour(){
+  ['tourFondo','tourMarco','tourCaja'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.remove();
+  });
+}
+
+/* ═══════ 📊 BARRA DE PROGRESO ═══════
+function pasosConfig(){
+  var c=CONFIG||{};
+  return [
+    { ok: !!(c.negocio && c.negocio!=='Mi Tienda'), ico:'🏪', txt:'Ponele nombre a tu tienda', accion:'abrirConfig()' },
+    { ok: !!c.logo,                                  ico:'🎨', txt:'Subí tu logo',              accion:'abrirConfig()' },
+    { ok: (PRODUCTOS && PRODUCTOS.length>0),         ico:'📦', txt:'Cargá tus productos',      accion:'abrirCargarDirecto()' },
+    { ok: !!(c.admins && c.admins.length),           ico:'📱', txt:'Poné tu WhatsApp',         accion:'abrirConfig()' },
+    { ok: (PRODUCTOS && PRODUCTOS.some(function(p){return p.foto;})), ico:'📷', txt:'Ponele foto a un producto', accion:'irAlInicio()' },
+    { ok: !!leyoLink(),                              ico:'🔗', txt:'Compartí tu tienda',       accion:'abrirQR()' }
+  ];
+}
+function leyoLink(){ try{ return localStorage.getItem(lsKey('ae_compartio'))==='1'; }catch(e){ return false; } }
+function marcarCompartio(){ try{ localStorage.setItem(lsKey('ae_compartio'),'1'); }catch(e){} }
+
+function renderProgreso(){
+  var wrap=document.getElementById('progreso-wrap');
+  if(!wrap) return;
+  // solo la ve el ADMIN
+  if(rolEfectivo()!=='admin'){ wrap.innerHTML=''; return; }
+
+  var pasos=pasosConfig();
+  var hechos=pasos.filter(function(p){return p.ok;}).length;
+  var total=pasos.length;
+  var pct=Math.round(hechos/total*100);
+
+  // ✅ tienda completa → mensaje lindo y chau barra
+  if(hechos===total){
+    var yaVio=false;
+    try{ yaVio = localStorage.getItem(lsKey('ae_progreso_listo'))==='1'; }catch(e){}
+    if(yaVio){ wrap.innerHTML=''; return; }
+    wrap.innerHTML='<div style="margin:12px 14px;background:linear-gradient(135deg,#10B981,#34D399);border-radius:14px;padding:15px;color:#fff;text-align:center">'
+      +'<div style="font-size:1.8rem;margin-bottom:4px">🎉</div>'
+      +'<div style="font-weight:900;font-size:1rem">¡Tu tienda está lista!</div>'
+      +'<div style="font-size:.8rem;opacity:.9;margin-top:2px">Ya podés empezar a vender 🐝</div>'
+      +'<button onclick="cerrarProgreso()" style="background:rgba(255,255,255,.25);color:#fff;border:none;border-radius:9px;padding:8px 16px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.78rem;margin-top:10px">Entendido</button>'
+      +'</div>';
+    return;
+  }
+
+  // el siguiente paso pendiente (el que hay que hacer AHORA)
+  var siguiente=pasos.find(function(p){ return !p.ok; });
+
+  wrap.innerHTML='<div style="margin:12px 14px;background:#fff;border:1.5px solid var(--nar);border-radius:14px;padding:14px">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">'
+      +'<span style="font-size:1.2rem">🐝</span>'
+      +'<span style="flex:1;font-weight:900;color:var(--az);font-size:.88rem">Tu tienda está '+pct+'% lista</span>'
+      +'<span style="font-size:.72rem;font-weight:800;color:var(--sub)">'+hechos+'/'+total+'</span>'
+    +'</div>'
+    // la barra
+    +'<div style="background:#F0F4FF;border-radius:6px;height:8px;overflow:hidden;margin-bottom:11px">'
+      +'<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--nar),#ff9a3d);transition:width .4s"></div>'
+    +'</div>'
+    // el siguiente paso, bien grande
+    +'<button onclick="'+siguiente.accion+'" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:11px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.88rem;display:flex;align-items:center;justify-content:center;gap:8px">'
+      +'<span style="font-size:1.1rem">'+siguiente.ico+'</span>'+siguiente.txt+' →</button>'
+    // los demás pasos, chiquitos
+    +'<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;justify-content:center">'
+      +pasos.map(function(p){
+        return '<span style="font-size:.9rem;opacity:'+(p.ok?'1':'.25')+'" title="'+p.txt+'">'+(p.ok?'✅':p.ico)+'</span>';
+      }).join('')
+    +'</div></div>';
+}
+function cerrarProgreso(){
+  try{ localStorage.setItem(lsKey('ae_progreso_listo'),'1'); }catch(e){}
+  renderProgreso();
+}
 
 /* ═══════ 📣 BANNER DE AVISOS ═══════ */
 function renderBanner(){
@@ -1581,6 +1773,7 @@ function linkTienda(){
   return TIENDA==='amarango' ? base : base+'?t='+TIENDA;
 }
 function copiarLink(){
+  marcarCompartio();
   var l=linkTienda();
   if(navigator.clipboard){ navigator.clipboard.writeText(l).then(function(){ alert('✅ Link copiado. Ya lo podés compartir.'); }).catch(function(){ prompt('Copiá este link:', l); }); }
   else prompt('Copiá este link:', l);
@@ -3641,6 +3834,7 @@ function render(){
 
   // Producto del día + Destacados: solo en la portada (sin buscar, sin filtrar, sin favoritos)
   var portada = !q && !catActiva && !soloOfertas && !tope && !orden && !viendoFavs;
+  try{ renderProgreso(); }catch(e){}
   renderBanner();
   try{ mostrarBotonRuleta(); }catch(e){}
   renderSaludo(portada);
@@ -3844,62 +4038,146 @@ var AMARANGO_IG = "@amarangoelectro";
 
 function abrirCentroEmprendedor(){
   var deTienda = (CONFIG && CONFIG.negocio) ? CONFIG.negocio : 'una tienda Amarango';
-  var msg='Hola! Vi la tienda de *'+deTienda+'* y quiero tener la mía 🐝\n\n¿Cómo hago para empezar a vender con Amarango?';
   var html=
-     '<div style="text-align:center;margin-bottom:18px">'
+     '<div style="text-align:center;margin-bottom:16px">'
       +'<div style="font-size:3rem;margin-bottom:6px">🐝</div>'
       +'<div style="font-weight:900;color:var(--az);font-size:1.35rem;line-height:1.2">Tené tu propia tienda</div>'
       +'<div style="font-size:.92rem;color:var(--nar);font-weight:800;margin-top:4px">y empezá a vender hoy</div>'
     +'</div>'
-    // el gancho emocional
+    // ⚖️ LA COMPARACIÓN — el arma de venta
+    +'<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:10px;text-align:center">⚖️ Mirá la diferencia</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px">'
+      +'<div style="flex:1;background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:12px 10px">'
+        +'<div style="font-size:.72rem;font-weight:900;color:#DC2626;text-align:center;margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Sin Amarango</div>'
+        +filaComp('❌','Local con horarios')
+        +filaComp('❌','Catálogo en PDF')
+        +filaComp('❌','Fotos una por una')
+        +filaComp('❌','Imagen improvisada')
+        +filaComp('❌','Todo a mano')
+        +filaComp('❌','Cuentas en papel')
+      +'</div>'
+      +'<div style="flex:1;background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px 10px">'
+        +'<div style="font-size:.72rem;font-weight:900;color:#059669;text-align:center;margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Con Amarango</div>'
+        +filaComp('✅','Abierto 24/7')
+        +filaComp('✅','Catálogo vivo')
+        +filaComp('✅','Un solo link')
+        +filaComp('✅','Marca profesional')
+        +filaComp('✅','Todo del celular')
+        +filaComp('✅','Cuentas solas')
+      +'</div>'
+    +'</div>'
+    // 💰 lo que te ahorrás
+    +'<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:14px;padding:15px;margin-bottom:16px">'
+      +'<div style="font-weight:900;color:var(--nar);font-size:.92rem;margin-bottom:9px">💰 Lo que NO tenés que pagar</div>'
+      +'<div style="font-size:.8rem;color:var(--txt);line-height:1.9">'
+        +'🚫 Un empleado administrativo<br>'
+        +'🚫 Un diseñador para cada publicación<br>'
+        +'🚫 Una página web a medida<br>'
+        +'🚫 Catálogos impresos<br>'
+        +'🚫 Un local con alquiler'
+      +'</div>'
+    +'</div>'
+    // el gancho
     +'<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:14px;padding:16px;color:#fff;margin-bottom:16px;text-align:center">'
       +'<div style="font-size:.88rem;font-weight:800;line-height:1.5">No necesitás saber de tecnología.<br>Ni tener stock. Ni plata para empezar.</div>'
       +'<div style="font-size:.78rem;color:#ffb968;font-weight:700;margin-top:8px">Solo ganas de trabajar 🐝</div>'
     +'</div>'
-    // cómo funciona (las instrucciones que pidió Max)
-    +'<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:10px">📖 Cómo funciona</div>'
-    +paso('1️⃣','Te damos tu tienda','Con tu nombre, tu logo y tus colores. En minutos.')
-    +paso('2️⃣','Cargás tus productos','Pegás la lista de tu proveedor y se cargan solos, con precio y cuotas calculadas.')
-    +paso('3️⃣','Compartís el link','Lo mandás por WhatsApp, Instagram, donde quieras. O generás un catálogo PDF.')
-    +paso('4️⃣','Te llegan los pedidos','El cliente elige, toca «Comprar», y te escribe directo a vos.')
-    +paso('5️⃣','Cobrás y entregás','Vos coordinás el pago. La plata es tuya, no pasa por nadie.')
-    // el modelo de las cuotas (lo que Max quería explicar)
-    +'<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:14px;padding:15px;margin:16px 0">'
-      +'<div style="font-weight:900;color:var(--nar);font-size:.92rem;margin-bottom:8px">💳 Vendé como quieras</div>'
-      +'<div style="font-size:.82rem;color:var(--txt);line-height:1.6">'
-        +'Podés vender <b>en cuotas fijas</b> (como AmarangoElectro) o <b>solo al contado</b>.<br><br>'
-        +'Vos elegís cómo trabajar, y el sistema se adapta.<br><br>'
-        +'<b style="color:var(--az)">Te enseñamos nuestro sistema.</b><br>'
-        +'Cuando arranques, te explicamos cómo lo hacemos nosotros para vender más y arriesgar menos. 🐝'
-      +'</div>'
-    +'</div>'
-    // qué se lleva
-    +'<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:10px">🎁 Todo esto viene incluido</div>'
-    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:14px;padding:15px;margin-bottom:16px">'
-      +ventaja('🏪','Tu tienda con tu marca, logo y colores')
-      +ventaja('⚡','Cargás 70 productos en 2 minutos')
-      +ventaja('💳','Cuotas fijas calculadas solas (o contado, vos elegís)')
-      +ventaja('🧮','Calculadora de precios con tu ganancia')
-      +ventaja('📄','Catálogo PDF para mandar por WhatsApp')
-      +ventaja('📊','Estadísticas: qué vendés, cuánto ganás')
-      +ventaja('👥','Tus clientes y pedidos, ordenados')
-      +ventaja('🤝','Sumá vendedores a tu equipo')
-      +ventaja('🐝','Y todo lo que le vayamos agregando')
-    +'</div>'
-    // para quién sirve
-    +'<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:14px;padding:15px;margin-bottom:16px">'
-      +'<div style="font-weight:900;color:#059669;font-size:.9rem;margin-bottom:7px">✅ Sirve para vender lo que sea</div>'
-      +'<div style="font-size:.8rem;color:var(--txt);line-height:1.7">'
-        +'📱 Electro y celulares · 👕 Ropa · 🏠 Muebles · 🍬 Kiosco<br>'
-        +'💄 Cosmética · 🛠️ Herramientas · Lo que vos vendas.'
-      +'</div>'
-    +'</div>'
-    +'<button onclick="window.open(\'https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent(msg)+'\',\'_blank\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:9px">💬 Quiero mi tienda</button>'
-    +'<div style="text-align:center;font-size:.72rem;color:var(--sub);margin-bottom:12px">Te respondemos y te la armamos hoy mismo</div>'
+    +'<button onclick="empezarEmbudo()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:9px">🚀 Quiero mi tienda</button>'
+    +'<div style="text-align:center;font-size:.72rem;color:var(--sub);margin-bottom:12px">Te hacemos unas preguntas rápidas</div>'
     +'<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit">← Volver a la tienda</button>';
   document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
+  document.getElementById('ayudaOverlay').classList.add('on');
 }
+function filaComp(ico, txt){
+  return '<div style="display:flex;align-items:flex-start;gap:5px;margin-bottom:6px"><span style="font-size:.72rem">'+ico+'</span><span style="font-size:.72rem;color:var(--txt);line-height:1.3;flex:1">'+txt+'</span></div>';
+}
+
+/* ═══════ 🎯 EMBUDO — filtra curiosos, capta comprometidos ═══════ */
+var _embudo = {};
+var _pasoEmbudo = 0;
+var PREGUNTAS = [
+  { k:'vende',  q:'¿Qué querés vender?',
+    ops:['📱 Electro y celulares','👕 Ropa','🏠 Muebles y hogar','🍬 Kiosco y golosinas','💄 Cosmética','📦 Otra cosa'] },
+  { k:'ya',     q:'¿Ya estás vendiendo hoy?',
+    ops:['Sí, y quiero crecer','Sí, pero me cuesta','Todavía no, quiero empezar'] },
+  { k:'tiempo', q:'¿Cuánto tiempo por semana le podés dedicar?',
+    ops:['Menos de 5 horas','5 a 15 horas','Más de 15 horas','Todo el que haga falta'] },
+  { k:'compro', q:'Del 1 al 10, ¿qué tan comprometido estás con hacer crecer tu negocio?',
+    ops:['1 a 5 — todavía lo estoy pensando','6 a 8 — bastante decidido','9 a 10 — le pongo todo'] },
+  { k:'invers', q:'Si Amarango te ayudara a vender más y ahorrar tiempo, ¿cuánto sería una inversión razonable por mes?',
+    ops:['Menos de $10.000','$10.000 a $20.000','$20.000 a $50.000','Más de $50.000'],
+    nota:'Esta respuesta NO es un compromiso de compra. Nos ayuda a diseñar el mejor plan para tu negocio. 🐝' }
+];
+
+function empezarEmbudo(){ _embudo={}; _pasoEmbudo=0; renderEmbudo(); }
+function renderEmbudo(){
+  if(_pasoEmbudo>=PREGUNTAS.length){ pedirDatosEmbudo(); return; }
+  var p=PREGUNTAS[_pasoEmbudo];
+  var pct=Math.round((_pasoEmbudo)/(PREGUNTAS.length+1)*100);
+  var html=
+     '<div style="background:#F0F4FF;border-radius:5px;height:6px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="width:'+pct+'%;height:100%;background:var(--nar);transition:width .3s"></div></div>'
+    +'<div style="font-size:.7rem;color:var(--sub);font-weight:700;margin-bottom:5px">Paso '+(_pasoEmbudo+1)+' de '+(PREGUNTAS.length+1)+'</div>'
+    +'<div style="font-weight:900;color:var(--az);font-size:1.05rem;line-height:1.3;margin-bottom:14px">'+p.q+'</div>';
+  p.ops.forEach(function(o,i){
+    html+='<button onclick="respEmbudo(\''+p.k+'\', \''+o.replace(/'/g,"\\'")+'\')" style="width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;font-family:inherit;font-size:.88rem;font-weight:700;color:var(--txt);margin-bottom:8px">'+o+'</button>';
+  });
+  if(p.nota){
+    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:11px;padding:11px;margin-top:8px;font-size:.74rem;color:#059669;line-height:1.5;font-weight:600">'+p.nota+'</div>';
+  }
+  html+='<button onclick="'+(_pasoEmbudo?'volverEmbudo()':'abrirCentroEmprendedor()')+'" style="width:100%;background:none;border:none;color:var(--sub);padding:12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.8rem;margin-top:6px">← Volver</button>';
+  document.getElementById('ayudaBody').innerHTML=html;
+}
+function respEmbudo(k, v){ _embudo[k]=v; _pasoEmbudo++; renderEmbudo(); }
+function volverEmbudo(){ if(_pasoEmbudo>0) _pasoEmbudo--; renderEmbudo(); }
+
+function pedirDatosEmbudo(){
+  function campo(lbl,id,ph){ return '<div style="margin-bottom:11px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px;font-family:inherit;font-size:.9rem;outline:none"></div>'; }
+  document.getElementById('ayudaBody').innerHTML=
+     '<div style="background:#F0F4FF;border-radius:5px;height:6px;overflow:hidden;margin-bottom:16px">'
+      +'<div style="width:85%;height:100%;background:var(--nar)"></div></div>'
+    +'<div style="font-size:.7rem;color:var(--sub);font-weight:700;margin-bottom:5px">Último paso</div>'
+    +'<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">Casi listo 🐝</div>'
+    +'<div style="font-size:.82rem;color:var(--sub);margin-bottom:14px">Dejanos tus datos y te contactamos.</div>'
+    +campo('Tu nombre','em_nombre','Ej: Marcelo Gómez')
+    +campo('WhatsApp','em_wa','Ej: 1122334455')
+    +campo('Ciudad','em_ciudad','Ej: San Miguel')
+    +campo('Instagram (opcional)','em_ig','@tunegocio')
+    +'<button onclick="enviarEmbudo()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:14px;padding:16px;font-size:.98rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:6px">✅ Enviar mi solicitud</button>'
+    +'<button onclick="volverEmbudo()" style="width:100%;background:none;border:none;color:var(--sub);padding:12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.8rem">← Volver</button>';
+}
+
+function enviarEmbudo(){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+  var nom=g('em_nombre'), wa=g('em_wa'), ciu=g('em_ciudad'), ig=g('em_ig');
+  if(!nom || !wa){ alert('Poné al menos tu nombre y WhatsApp.'); return; }
+  var deTienda=(CONFIG && CONFIG.negocio) ? CONFIG.negocio : 'una tienda Amarango';
+
+  var msg='🐝 *SOLICITUD AMARANGO*\n\n'
+    +'👤 *'+nom+'*\n'
+    +'📱 '+wa+'\n'
+    +'📍 '+(ciu||'—')+'\n'
+    +(ig?'📷 '+ig+'\n':'')
+    +'\n───────────\n'
+    +'🛍️ Vende: '+(_embudo.vende||'—')+'\n'
+    +'📊 Hoy: '+(_embudo.ya||'—')+'\n'
+    +'⏰ Tiempo: '+(_embudo.tiempo||'—')+'\n'
+    +'🔥 Compromiso: '+(_embudo.compro||'—')+'\n'
+    +'💰 Invertiría: '+(_embudo.invers||'—')+'\n'
+    +'───────────\n'
+    +'🔗 Vino de: '+deTienda;
+
+  // pantalla final (la que da estatus, como pidió Max)
+  document.getElementById('ayudaBody').innerHTML=
+     '<div style="text-align:center;padding:16px 0">'
+      +'<div style="font-size:3.5rem;margin-bottom:10px">🎉</div>'
+      +'<div style="font-weight:900;color:var(--az);font-size:1.2rem;line-height:1.3;margin-bottom:10px">¡Excelente, '+nom.split(' ')[0]+'!</div>'
+      +'<div style="font-size:.88rem;color:var(--txt);line-height:1.6;margin-bottom:18px">Tu perfil coincide con el tipo de emprendedores que buscamos en <b style="color:var(--az)">Amarango</b>.<br><br>Vamos a revisar tu solicitud y nos comunicamos con vos. 🐝</div>'
+      +'<button onclick="window.open(\'https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Enviar por WhatsApp</button>'
+      +'<div style="font-size:.72rem;color:var(--sub);margin-top:10px">Tocá para mandarnos tu solicitud</div>'
+    +'</div>';
+}
+
 function paso(num,titulo,txt){
   return '<div style="display:flex;gap:11px;margin-bottom:11px">'
     +'<span style="font-size:1.2rem;flex:0 0 auto">'+num+'</span>'
