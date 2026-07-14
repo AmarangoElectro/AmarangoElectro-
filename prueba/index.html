@@ -1673,6 +1673,123 @@ function filaInv(lbl, val, fuerte, color){
     +'<span style="font-size:'+(fuerte?'1rem':'.84rem')+';font-weight:900;color:'+(color||'var(--az)')+'">'+val+'</span></div>';
 }
 
+/* ═══════════════════════════════════════════════════════════
+   💰 COMISIONES DE REVENDEDORES — formato Amarango
+   · Contado  → 10% del precio de venta
+   · Cuotas   → 15% del precio de CONTADO (no del financiado)
+   · 2 cuotas → se paga en 2 partes
+   · 4 o 6    → se paga en 3 partes
+   · Si la parte es muy chica → menos partes (no cobros insignificantes)
+   Todo editable. Cada tienda pone sus números.
+   ═══════════════════════════════════════════════════════════ */
+function calcularComision(venta, nCuotas){
+  var c=CONFIG||{};
+  var esContado = !nCuotas || nCuotas<=1;
+  var pct = esContado ? (c.comContado!=null?c.comContado:10) : (c.comCuotas!=null?c.comCuotas:15);
+
+  // ⚠️ SIEMPRE sobre el precio de CONTADO (nunca sobre el financiado)
+  var total = Math.round(venta * pct/100 / 500) * 500;
+
+  // en cuántas partes se paga
+  var partes;
+  if(esContado) partes = 1;
+  else if(nCuotas === 2) partes = 2;
+  else partes = 3;                    // 4 o 6 cuotas → 3 partes
+
+  // excepción: si cada parte queda muy chica, se pagan en menos partes
+  var minParte = c.comMinParte!=null ? c.comMinParte : 10000;
+  if(partes === 3 && Math.round(total/3) < minParte) partes = 2;
+  if(partes === 2 && Math.round(total/2) < minParte && !esContado) partes = 1;
+
+  var porParte = Math.round(total/partes/500)*500;
+
+  return { total: total, pct: pct, partes: partes, porParte: porParte, esContado: esContado };
+}
+
+function abrirComisiones(){
+  var c=CONFIG||{};
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:3px">💰 Comisiones</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Cuánto gana tu equipo por cada venta. 🐝</div>'
+    // calculadora
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">🧮 Calculá una comisión</div>'
+    +'<input type="number" id="com_venta" oninput="calcVistaComision()" placeholder="Precio de venta (ej: 250000)" style="width:100%;border:2px solid var(--nar);border-radius:12px;padding:14px;font-family:inherit;font-size:1.05rem;font-weight:900;color:var(--nar);outline:none;text-align:center;margin-bottom:11px">'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">¿Cómo lo paga el cliente?</div>'
+    +'<div id="com_planes" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">'
+      +botonComPlan(0,'Contado')
+      +cuotasActivas().map(function(n){ return botonComPlan(n, n+' cuotas'); }).join('')
+    +'</div>'
+    +'<div id="com_resultado" style="margin-bottom:16px"></div>'
+    // los porcentajes (editables)
+    +'<div style="border-top:1px solid var(--line);padding-top:14px">'
+      +'<div style="font-weight:900;color:var(--az);font-size:.88rem;margin-bottom:3px">⚙️ Tus porcentajes</div>'
+      +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:11px">Estos son los de Amarango. Podés cambiarlos.</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:10px">'
+        +'<div style="flex:1"><div style="font-size:.64rem;font-weight:800;color:var(--sub);margin-bottom:4px">CONTADO</div>'
+          +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="com_pct1" value="'+(c.comContado!=null?c.comContado:10)+'" oninput="guardarComPct()" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-weight:900;color:var(--az);outline:none;text-align:center"><span style="font-weight:900;color:var(--sub)">%</span></div></div>'
+        +'<div style="flex:1"><div style="font-size:.64rem;font-weight:800;color:var(--sub);margin-bottom:4px">EN CUOTAS</div>'
+          +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="com_pct2" value="'+(c.comCuotas!=null?c.comCuotas:15)+'" oninput="guardarComPct()" style="flex:1;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-weight:900;color:var(--nar);outline:none;text-align:center"><span style="font-weight:900;color:var(--sub)">%</span></div></div>'
+      +'</div>'
+      +'<div style="font-size:.64rem;font-weight:800;color:var(--sub);margin-bottom:4px">PARTE MÍNIMA (si es menos, se paga en menos veces)</div>'
+      +'<input type="number" id="com_min" value="'+(c.comMinParte!=null?c.comMinParte:10000)+'" oninput="guardarComPct()" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.88rem;outline:none;text-align:center;margin-bottom:11px">'
+      // cómo funciona
+      +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:12px;font-size:.76rem;color:var(--sub);line-height:1.7">'
+        +'<b style="color:var(--az)">📖 Cómo funciona</b><br>'
+        +'• La comisión se calcula sobre el <b>precio de contado</b> (nunca sobre el financiado)<br>'
+        +'• <b>2 cuotas</b> → se paga en 2 partes<br>'
+        +'• <b>4 o 6 cuotas</b> → se paga en 3 partes<br>'
+        +'• Si una parte queda muy chica, se paga en menos veces'
+      +'</div>'
+    +'</div>'
+    +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">‹ Volver al panel</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+  calcVistaComision();
+}
+var _comPlan = 0;
+function botonComPlan(n, txt){
+  var on = _comPlan===n;
+  return '<button onclick="setComPlan('+n+')" style="flex:1;min-width:66px;border:2px solid '+(on?'var(--az)':'var(--line)')+';background:'+(on?'var(--az)':'#fff')+';color:'+(on?'#fff':'var(--txt)')+';border-radius:11px;padding:10px 5px;font-size:.76rem;font-weight:800;cursor:pointer;font-family:inherit">'+txt+'</button>';
+}
+function setComPlan(n){ _comPlan=n; abrirComisiones(); }
+function guardarComPct(){
+  var g=function(id){var e=document.getElementById(id);return e?parseFloat(e.value)||0:0;};
+  CONFIG.comContado = g('com_pct1');
+  CONFIG.comCuotas  = g('com_pct2');
+  CONFIG.comMinParte= g('com_min');
+  guardarConfig();
+  calcVistaComision();
+}
+function calcVistaComision(){
+  var cont=document.getElementById('com_resultado'); if(!cont) return;
+  var venta=parseFloat((document.getElementById('com_venta')||{}).value)||0;
+  if(!venta){
+    cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:22px;font-size:.84rem">Poné un precio y te muestro cuánto gana tu vendedor. 🐝</div>';
+    return;
+  }
+  var r=calcularComision(venta, _comPlan);
+  var html=
+     '<div style="background:linear-gradient(160deg,#059669,#10B981);border-radius:16px;padding:18px;color:#fff;text-align:center;margin-bottom:11px">'
+      +'<div style="font-size:.64rem;font-weight:800;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.7px">Gana tu vendedor</div>'
+      +'<div style="font-size:2rem;font-weight:900;margin:3px 0">'+fmt(r.total)+'</div>'
+      +'<div style="font-size:.76rem;color:rgba(255,255,255,.9);font-weight:700">'+r.pct+'% '+(r.esContado?'del contado':'sobre el precio de contado')+'</div>'
+    +'</div>';
+  // el reparto en partes
+  if(r.partes>1){
+    html+='<div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px">'
+      +'<div style="font-weight:900;color:var(--az);font-size:.86rem;margin-bottom:9px">📅 Se le paga en '+r.partes+' partes</div>';
+    for(var i=1;i<=r.partes;i++){
+      var monto = (i===r.partes) ? (r.total - r.porParte*(r.partes-1)) : r.porParte;
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;'+(i<r.partes?'border-bottom:1px solid var(--line)':'')+'">'
+        +'<span style="font-size:.8rem;color:var(--sub);font-weight:600">Parte '+i+'</span>'
+        +'<span style="font-size:.95rem;font-weight:900;color:#059669">'+fmt(monto)+'</span></div>';
+    }
+    html+='<div style="font-size:.7rem;color:var(--sub);text-align:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)">Se le paga a medida que el cliente va pagando 🐝</div></div>';
+  } else {
+    html+='<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:12px;text-align:center;font-size:.8rem;color:#059669;font-weight:700">💵 Se le paga todo junto</div>';
+  }
+  cont.innerHTML=html;
+}
+
 function abrirPanelDueno(){
   // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
   var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
@@ -1681,7 +1798,7 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -1711,6 +1828,7 @@ function abrirModuloDueno(destino){
   if(destino==='clientes'){ abrirClientes(); return; }
   if(destino==='soporte'){ abrirSoporte(); return; }
   if(destino==='qr'){ abrirQR(); return; }
+  if(destino==='comisiones'){ abrirComisiones(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
@@ -1834,7 +1952,11 @@ var CONFIG_DEFAULT = {
   planesActivos: [2,4,6],  // qué planes se muestran (editable, hasta 12)
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
-  formatoCuota: 'limpio',  // 'simple' | 'caja' | 'destacado'
+  formatoCuota: 'limpio',
+  // 💰 Comisiones — formato Amarango (editable por cada tienda)
+  comContado: 10,      // % sobre el precio de venta
+  comCuotas: 15,       // % sobre el precio de CONTADO (no el financiado)
+  comMinParte: 10000,  // si la parte queda por debajo, se paga en menos partes  // 'simple' | 'caja' | 'destacado'
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
   admins: [],              // los que COBRAN (botón Comprar) — [{nombre,wa}]
   vendedores: [],          // los que ATIENDEN (botón Consultar) — [{nombre,wa}]
