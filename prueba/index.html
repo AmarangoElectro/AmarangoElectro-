@@ -1058,6 +1058,205 @@ function mostrarAvisoCliente(){
 function rolEfectivo(){ return _viendoComoCliente ? null : rolActual(); }
 
 /* ═══════════════════════════════════════════════════════════
+   🎨 ILUSTRACIÓN AUTOMÁTICA — si no hay foto, se ve linda igual
+   Una tienda sin fotos se ve pobre. Con esto, se ve profesional
+   desde el minuto uno, aunque el dueño no haya subido nada.
+   ═══════════════════════════════════════════════════════════ */
+var ILUSTRACIONES = {
+  '📱 Celulares':     { emo:'📱', c1:'#1e3a8a', c2:'#3b82f6' },
+  '📺 TV':            { emo:'📺', c1:'#1e293b', c2:'#475569' },
+  '❄️ Heladeras':     { emo:'❄️', c1:'#0e7490', c2:'#22d3ee' },
+  '🍳 Cocina':        { emo:'🍳', c1:'#b45309', c2:'#f59e0b' },
+  '🌀 Climatización': { emo:'🌀', c1:'#0369a1', c2:'#38bdf8' },
+  '🧺 Lavado':        { emo:'🧺', c1:'#5b21b6', c2:'#a78bfa' },
+  '☕ Electro hogar': { emo:'☕', c1:'#7c2d12', c2:'#ea580c' },
+  '📦 Otros':         { emo:'📦', c1:'#334155', c2:'#64748b' }
+};
+/* más específico todavía: reconoce el producto por el nombre */
+function emojiProducto(nombre){
+  var n=(nombre||'').toLowerCase();
+  if(/pizza|pizzer/.test(n)) return '🍕';
+  if(/bicicl|bici\b/.test(n)) return '🚲';
+  if(/sommier|colch|cama/.test(n)) return '🛏️';
+  if(/cafeter|caf[eé]/.test(n)) return '☕';
+  if(/pava|termo/.test(n)) return '🫖';
+  if(/licuad|batidor|mixer|juguer/.test(n)) return '🥤';
+  if(/freidor|air ?fryer/.test(n)) return '🍟';
+  if(/tostad|sandwich|waf/.test(n)) return '🍞';
+  if(/microond/.test(n)) return '🔥';
+  if(/plancha/.test(n)) return '👔';
+  if(/aspirad/.test(n)) return '🧹';
+  if(/ventilad/.test(n)) return '💨';
+  if(/estufa|calefact|caloventor/.test(n)) return '🔥';
+  if(/parrilla|asador/.test(n)) return '🍖';
+  if(/ropa|remer|pantal|campera|zapat/.test(n)) return '👕';
+  if(/perfum|cosmet|maquill|crema/.test(n)) return '💄';
+  if(/golosin|chocolat|caramel|alfajor/.test(n)) return '🍬';
+  if(/herramient|taladr|amolad/.test(n)) return '🛠️';
+  if(/auricul|parlant|bocina|sonido/.test(n)) return '🔊';
+  if(/notebook|laptop|compu/.test(n)) return '💻';
+  if(/tablet/.test(n)) return '📲';
+  if(/reloj|smartwatch/.test(n)) return '⌚';
+  return null;
+}
+/* dibuja la ilustración (fondo con degradé + emoji grande) */
+function ilustracion(p, alto){
+  var cat=catProd(p);
+  var d=ILUSTRACIONES[cat] || ILUSTRACIONES['📦 Otros'];
+  var emo = emojiProducto(p.nombre) || d.emo;
+  return '<div style="width:100%;height:'+(alto||'100%')+';background:linear-gradient(140deg,'+d.c1+','+d.c2+');display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">'
+    +'<div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.18), transparent 55%)"></div>'
+    +'<span style="font-size:'+(alto&&parseInt(alto)>200?'5rem':'2.8rem')+';filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));position:relative">'+emo+'</span>'
+    +'</div>';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   📡 SEÑAL DE VIDA — cada tienda avisa cómo anda
+   ⚠️ SOLO datos de actividad. NUNCA precios, clientes ni ventas.
+   Los datos de Marcelo son de Marcelo. Esto es solo para saber
+   a quién ayudar antes de que abandone.
+   ═══════════════════════════════════════════════════════════ */
+function mandarSenal(){
+  if(!sb) return;
+  if(TIENDA==='amarango') return;        // mi propia tienda no hace falta
+  try{
+    var senal = {
+      tienda: TIENDA,
+      negocio: (CONFIG && CONFIG.negocio) || '',
+      ultimoIngreso: Date.now(),
+      productos: (PRODUCTOS||[]).length,
+      conFoto: (PRODUCTOS||[]).filter(function(p){return p.foto;}).length,
+      pedidos: (PEDIDOS||[]).length,
+      vendidos: (PEDIDOS||[]).filter(function(p){return p.estado==='vendido';}).length,
+      tieneLogo: !!(CONFIG && CONFIG.logo),
+      tieneWA: !!(CONFIG && CONFIG.admins && CONFIG.admins.length),
+      compartio: !!leyoLink()
+    };
+    // guarda la señal (una fila por tienda)
+    sb.from('tienda_catalogo').select('datos').eq('id','amarango_senales').maybeSingle()
+      .then(function(r){
+        var todas = (r && r.data && r.data.datos) ? r.data.datos : {};
+        todas[TIENDA] = senal;
+        sb.from('tienda_catalogo').upsert({id:'amarango_senales', datos:todas}).then(function(){}).catch(function(){});
+      }).catch(function(){});
+  }catch(e){}
+}
+
+/* ═══════ 📊 PANEL DE CONTROL DE AMARANGO (solo para Max) ═══════ */
+function abrirPanelAmarango(){
+  if(!sb){ alert('Sin conexión.'); return; }
+  document.getElementById('adminBody').innerHTML='<div style="text-align:center;padding:50px 20px"><div style="font-size:2.4rem;margin-bottom:10px">📡</div><div style="color:var(--sub);font-size:.86rem">Buscando tus tiendas…</div></div>';
+  document.getElementById('adminOverlay').classList.add('on');
+
+  Promise.all([
+    sb.from('tienda_catalogo').select('datos').eq('id','amarango_senales').maybeSingle(),
+    sb.from('amarango_subs').select('datos').eq('id','lista').maybeSingle()
+  ]).then(function(res){
+    var senales = (res[0] && res[0].data && res[0].data.datos) ? res[0].data.datos : {};
+    var subs = (res[1] && res[1].data && res[1].data.datos) ? res[1].data.datos : [];
+    renderPanelAmarango(senales, subs);
+  }).catch(function(){
+    document.getElementById('adminBody').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--sub)">No pude cargar las tiendas.</div>';
+  });
+}
+
+function renderPanelAmarango(senales, subs){
+  var ahora=Date.now();
+  var dia=86400000;
+
+  // arma la lista cruzando suscriptores + señales
+  var tiendas = subs.map(function(s){
+    var sen = senales[s.tienda] || {};
+    var dias = sen.ultimoIngreso ? Math.floor((ahora - sen.ultimoIngreso)/dia) : null;
+    var estado, color, icono;
+    if(s.estado!=='ok'){ estado='Bloqueada'; color='#9CA3AF'; icono='🔒'; }
+    else if(dias===null){ estado='Nunca entró'; color='#DC2626'; icono='⚠️'; }
+    else if(dias>14){ estado='Abandonó'; color='#DC2626'; icono='🔴'; }
+    else if(dias>5){ estado='Enfriándose'; color='#EA580C'; icono='🟠'; }
+    else if((sen.productos||0)===0){ estado='Sin productos'; color='#EA580C'; icono='🟠'; }
+    else { estado='Activo'; color='#059669'; icono='🟢'; }
+    return {s:s, sen:sen, dias:dias, estado:estado, color:color, icono:icono};
+  });
+
+  // ordena: los que necesitan ayuda primero
+  var orden={'⚠️':0,'🔴':1,'🟠':2,'🟢':3,'🔒':4};
+  tiendas.sort(function(a,b){ return (orden[a.icono]||9)-(orden[b.icono]||9); });
+
+  var activos=tiendas.filter(function(t){return t.icono==='🟢';}).length;
+  var riesgo=tiendas.filter(function(t){return t.icono==='🔴'||t.icono==='⚠️';}).length;
+  var facturaMes=subs.filter(function(s){return s.estado==='ok';}).reduce(function(sum,s){return sum+(parseFloat(s.monto)||0);},0);
+
+  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:3px">📊 Mis tiendas</div>'
+    +'<div style="font-size:.76rem;color:var(--sub);margin-bottom:14px">Cómo le va a cada uno. 🐝</div>';
+
+  // resumen
+  html+='<div style="display:flex;gap:7px;margin-bottom:14px">'
+    +'<div style="flex:1;background:#F0FDF4;border:1px solid #A7F3D0;border-radius:11px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:#059669">'+activos+'</div><div style="font-size:.56rem;color:#059669;font-weight:800">ACTIVOS</div></div>'
+    +'<div style="flex:1;background:#FEF2F2;border:1px solid #FECACA;border-radius:11px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:#DC2626">'+riesgo+'</div><div style="font-size:.56rem;color:#DC2626;font-weight:800">EN RIESGO</div></div>'
+    +'<div style="flex:1.4;background:#F5F8FF;border:1px solid #DDE7FA;border-radius:11px;padding:10px;text-align:center"><div style="font-size:.9rem;font-weight:900;color:var(--az)">'+fmt(facturaMes)+'</div><div style="font-size:.56rem;color:var(--az);font-weight:800">POR MES</div></div>'
+    +'</div>';
+
+  if(riesgo){
+    html+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:11px;margin-bottom:14px;font-size:.78rem;color:#DC2626;font-weight:700;text-align:center">⚠️ '+riesgo+' tienda(s) necesitan tu ayuda</div>';
+  }
+
+  if(!tiendas.length){
+    html+='<div style="text-align:center;color:var(--sub);padding:34px 20px;font-size:.85rem"><div style="font-size:2.6rem;margin-bottom:8px">🐝</div>Todavía no tenés tiendas.<br><span style="font-size:.75rem">Cargá tu primer suscriptor y aparece acá.</span></div>';
+  } else {
+    tiendas.forEach(function(t, i){
+      var sen=t.sen;
+      html+='<div style="background:#fff;border:1px solid var(--line);border-left:4px solid '+t.color+';border-radius:12px;padding:12px;margin-bottom:9px">'
+        +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">'
+          +'<span>'+t.icono+'</span>'
+          +'<span style="flex:1;font-weight:900;color:var(--az);font-size:.9rem">'+(sen.negocio || t.s.negocio || t.s.nombre)+'</span>'
+          +'<span style="font-size:.6rem;font-weight:800;color:'+t.color+'">'+t.estado.toUpperCase()+'</span>'
+        +'</div>'
+        +'<div style="font-size:.7rem;color:var(--sub);font-family:monospace;margin-bottom:6px">?t='+t.s.tienda+'</div>'
+        // los números
+        +'<div style="display:flex;gap:12px;font-size:.72rem;color:var(--sub);margin-bottom:8px">'
+          +'<span>📦 <b style="color:var(--az)">'+(sen.productos||0)+'</b></span>'
+          +'<span>📷 <b style="color:var(--az)">'+(sen.conFoto||0)+'</b></span>'
+          +'<span>🛒 <b style="color:var(--az)">'+(sen.pedidos||0)+'</b></span>'
+          +'<span>✅ <b style="color:#059669">'+(sen.vendidos||0)+'</b></span>'
+        +'</div>'
+        +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">'
+          +(t.dias===null ? '⚠️ Nunca abrió su tienda' : '🕐 Última vez: '+(t.dias===0?'hoy':'hace '+t.dias+' día'+(t.dias===1?'':'s')))
+        +'</div>'
+        // qué le falta (para poder ayudarlo)
+        +((!sen.tieneLogo || !sen.tieneWA || !sen.compartio) && t.dias!==null
+          ? '<div style="background:#FFF9F0;border-radius:8px;padding:7px 9px;font-size:.68rem;color:var(--nar);font-weight:700;margin-bottom:8px">Le falta: '
+            +[!sen.tieneLogo?'logo':'', !sen.tieneWA?'WhatsApp':'', !sen.compartio?'compartir':''].filter(Boolean).join(' · ')
+            +'</div>'
+          : '')
+        // acciones
+        +'<div style="display:flex;gap:6px">'
+          +(t.s.whatsapp?'<button onclick="ayudarTienda('+i+',\''+String(t.s.whatsapp).replace(/[^0-9]/g,'')+'\',\''+(t.s.nombre||'').replace(/\'/g,'')+'\',\''+t.icono+'\')" style="flex:1;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Escribirle</button>':'')
+          +'<button onclick="window.open(\''+linkDeTienda(t.s.tienda)+'\',\'_blank\')" style="background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:9px;padding:9px 12px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit">👁️ Ver</button>'
+        +'</div></div>';
+    });
+  }
+  html+='<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
+  document.getElementById('adminBody').innerHTML=html;
+}
+
+function linkDeTienda(cod){
+  return window.location.origin + '/' + cod + '/';
+}
+/* Mensajes de ayuda según cómo esté la tienda (neuroventa, nunca invasivo) */
+function ayudarTienda(i, wa, nombre, icono){
+  var nom=(nombre||'').split(' ')[0];
+  var msgs={
+    '⚠️': 'Hola '+nom+'! 🐝 Vi que todavía no arrancaste con tu tienda. ¿Querés que te dé una mano para dejarla lista? Es rápido y quedás vendiendo hoy mismo.',
+    '🔴': 'Hola '+nom+'! 🐝 ¿Cómo venís con la tienda? Hace un tiempo que no la abrís. ¿Necesitás una mano con algo?',
+    '🟠': 'Hola '+nom+'! 🐝 Vi que tu tienda está casi lista. ¿Te ayudo a terminar de configurarla? Con unos toques queda perfecta.',
+    '🟢': 'Hola '+nom+'! 🐝 ¿Cómo va todo con la tienda? Contame si necesitás algo.',
+    '🔒': 'Hola '+nom+'! 🐝 Tu tienda está pausada. Cuando quieras la reactivamos y seguís vendiendo.'
+  };
+  var msg = msgs[icono] || msgs['🟢'];
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+}
+
+/* ═══════════════════════════════════════════════════════════
    👋 TOUR DE BIENVENIDA — idea de Max 🏆
    La primera vez que entra un admin, le señala dónde está cada cosa.
    Solo una vez. Nunca más molesta.
@@ -1487,7 +1686,7 @@ function abrirPanelDueno(){
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
       ? '<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:12px">'
-        +'<button onclick="abrirModuloDueno(\'subs\')" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.78rem;display:flex;align-items:center;justify-content:center;gap:6px">👥 Suscripciones Amarango</button></div>'
+        +'<button onclick="abrirPanelAmarango()" style="width:100%;background:linear-gradient(135deg,var(--az),#1e5bc8);color:#fff;border:none;border-radius:11px;padding:12px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.82rem;margin-bottom:7px">📊 Mis tiendas</button>'+'<button onclick="abrirModuloDueno(\'subs\')" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;font-size:.78rem">👥 Suscripciones</button></div>'
       : '')
     +'<button onclick="toggleVerComoCliente()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">👁️ Ver como cliente</button>'+'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">🔒 Cerrar sesión</button>'
     +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado</div>';
@@ -3786,7 +3985,7 @@ function bajarCatalogo(){
         try{ localStorage.setItem(lsKey('ae_tienda_catalogo'), JSON.stringify(arr)); }catch(e){}
         actualizarFavCount(); actualizarBadgeCarrito(); actualizarBeeFab();
         setTimeout(function(){ try{ mostrarBienvenida(); }catch(e){} }, 1200);
-        try{ cargarPedidos(function(){ _mapaJuntos=null; }); }catch(e){}
+        try{ cargarPedidos(function(){ _mapaJuntos=null; try{ mandarSenal(); }catch(e){} }); }catch(e){}
         render();
       } else if(!PRODUCTOS.length){
         mostrarError('Tu tienda está vacía. Entrá como admin y cargá tus productos. 🐝');
@@ -3856,7 +4055,7 @@ function render(){
     var mc=mejorCuota(p.venta);
     var rolT=rolEfectivo();
     var phStyle = p.foto ? 'style="background-image:url(\''+p.foto+'\')"' : '';
-    var phIco = p.foto ? '' : catProd(p).split(' ')[0];
+    var phIco = p.foto ? '' : ilustracion(p);
     var enOferta = p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta);
     var pctOff = enOferta ? Math.round((1-p.venta/parseFloat(p.precioAntes))*100) : 0;
     // botones según QUIÉN mira: admin/revendedor comparten · el cliente COMPRA
@@ -4013,7 +4212,7 @@ function verDetalle(idx){
       +'<div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.66rem;font-weight:700;padding:5px 10px;border-radius:14px;pointer-events:none">🔍 Tocá para ampliar</div>'
       +'</div>';
   } else {
-    ph.innerHTML='<div class="foto-big"><span class="sinfoto">'+catProd(p).split(' ')[0]+'</span></div>';
+    ph.innerHTML='<div class="foto-big" style="padding:0">'+ilustracion(p, '290px')+'</div>';
   }
   document.getElementById('d-nom').textContent=p.nombre;
   document.getElementById('d-precio').textContent=fmt(p.venta);
@@ -4274,9 +4473,35 @@ function calcSimulador(){
 
   var cont=document.getElementById('simResultado');
   if(!opciones.length){
-    cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:30px 20px;font-size:.86rem">'
-      +'<div style="font-size:2.4rem;margin-bottom:8px">🤔</div>'
-      +'Con ese monto todavía no llegamos.<br><span style="font-size:.78rem">Subí un poco el deslizador y probá. 🐝</span></div>';
+    // 🎯 neuroventa: nunca decir "no alcanza". Mostrar lo más cerca y el camino.
+    var masBarato=null;
+    PRODUCTOS.forEach(function(p){
+      if(p.visible===false || p.sinStock) return;
+      var act=cuotasActivas();
+      if(!act.length) return;
+      var n=act[act.length-1];
+      var c=valorCuota(p.venta, n);
+      if(!masBarato || c<masBarato.cuota) masBarato={p:p, n:n, cuota:c};
+    });
+    if(masBarato){
+      var falta=masBarato.cuota-tope;
+      cont.innerHTML='<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:14px;padding:16px;text-align:center">'
+        +'<div style="font-size:2rem;margin-bottom:6px">🎯</div>'
+        +'<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">Estás muy cerca</div>'
+        +'<div style="font-size:.82rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Con <b style="color:var(--nar)">'+fmt(masBarato.cuota)+'</b> por mes ya te llevás tu primer producto.</div>'
+        +'<div onclick="cerrarConsulta();verDetalle('+PRODUCTOS.indexOf(masBarato.p)+')" style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;cursor:pointer;display:flex;gap:10px;align-items:center;text-align:left">'
+          +'<div style="width:48px;height:48px;flex:0 0 auto;border-radius:9px;background:'+(masBarato.p.foto?'#fff url('+masBarato.p.foto+') center/contain no-repeat':'#F5F8FF')+';border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.3rem">'+(masBarato.p.foto?'':'📦')+'</div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:.76rem;font-weight:700;color:var(--txt);line-height:1.25">'+masBarato.p.nombre+'</div>'
+          +'<div style="font-size:.86rem;font-weight:900;color:var(--nar);margin-top:2px">'+fmt(masBarato.cuota)+'<span style="font-size:.64rem;color:var(--sub);font-weight:600"> x '+masBarato.n+' cuotas</span></div></div>'
+          +'<span style="color:var(--sub)">›</span>'
+        +'</div>'
+        +'<div style="font-size:.72rem;color:var(--sub);margin-top:10px">💬 ¿Necesitás un plan a tu medida? Escribinos 🐝</div>'
+        +'</div>';
+    } else {
+      cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:30px 20px;font-size:.86rem">'
+        +'<div style="font-size:2.4rem;margin-bottom:8px">🐝</div>'
+        +'Movés el deslizador y te muestro todo lo que te podés llevar.</div>';
+    }
     return;
   }
 
@@ -4412,7 +4637,7 @@ function renderSugeridos(idx){
     var si=PRODUCTOS.indexOf(s);
     var mc=mejorCuota(s.venta);
     html+='<div class="sug-card" onclick="verDetalle('+si+')">'
-      +'<div class="sf">'+(s.foto?'<img src="'+s.foto+'">':'<span style="font-size:1.8rem;opacity:.3">'+catProd(s).split(' ')[0]+'</span>')+'</div>'
+      +'<div class="sf" style="padding:0">'+(s.foto?'<img src="'+s.foto+'">':ilustracion(s, '92px'))+'</div>'
       +'<div class="sb"><div class="sn">'+s.nombre+'</div>'
       +'<div class="sp">'+fmt(s.venta)+'</div>'
       +(mc?'<div class="sc">💳 '+mc.n+' cuotas de '+fmt(mc.valor)+'</div>':'')
