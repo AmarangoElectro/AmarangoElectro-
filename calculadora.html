@@ -5,6 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>Tienda AmarangoElectro 🐝🛒</title>
 <meta name="theme-color" content="#0B2D6B">
+<meta name="description" content="Electrodomésticos y celulares en cuotas fijas. TV, celulares, heladeras, cocina, lavado y mucho más. Mínimos requisitos y atención personalizada.">
+
+<!-- ===== Preview del enlace (WhatsApp, Instagram, Facebook) ===== -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AmarangoElectro">
+<meta property="og:title" content="🐝 AmarangoElectro | Electrodomésticos y celulares en cuotas">
+<meta property="og:description" content="✨ Equipá tu casa sin complicaciones. 📺 TV • 📱 Celulares • ❄️ Heladeras • 🍳 Cocina • 🧺 Lavado y mucho más.&#10;✅ Cuotas fijas ✅ Mínimos requisitos ✅ Atención personalizada&#10;👇 Mirá el catálogo completo y calculá tus cuotas">
+<meta property="og:url" content="https://amarangoelectro.com.ar">
+<meta property="og:image" content="https://amarangoelectro.com.ar/icon.png">
+<meta property="og:image:alt" content="AmarangoElectro">
+<meta property="og:locale" content="es_AR">
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🐝 AmarangoElectro | Electrodomésticos y celulares en cuotas">
+<meta name="twitter:description" content="✨ Equipá tu casa sin complicaciones. Cuotas fijas ✅ Mínimos requisitos ✅ Atención personalizada. 👇 Mirá el catálogo y calculá tus cuotas.">
+<meta name="twitter:image" content="https://amarangoelectro.com.ar/icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
@@ -39,6 +55,27 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .tab{flex:1;padding:11px 8px;font-size:.68rem;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center;transition:all .2s;min-width:80px}
 .tab.on{color:var(--az);border-bottom-color:var(--nar);font-weight:800}
 .tab-content{display:none;padding:16px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
+
+/* ═══ Cajón lateral (menú deslizable) ═══ */
+.hdr-menu-btn{position:absolute;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
+.hdr-menu-btn:active{transform:scale(.92)}
+#cajon-overlay{position:fixed;inset:0;background:rgba(3,10,35,.55);z-index:2990;opacity:0;pointer-events:none;transition:opacity .28s;backdrop-filter:blur(2px)}
+#cajon-overlay.abierto{opacity:1;pointer-events:auto}
+#cajon-lateral{position:fixed;top:0;right:0;height:100%;width:250px;max-width:80vw;background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 55%,#123e8f 100%);z-index:3000;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:-6px 0 24px rgba(0,0,0,.4);display:flex;flex-direction:column;padding:0;overflow-y:auto}
+#cajon-lateral.abierto{transform:translateX(0)}
+.cajon-head{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between}
+.cajon-head b{color:#fff;font-size:1rem;font-weight:900;letter-spacing:.3px}
+.cajon-close{background:rgba(255,255,255,.14);border:none;color:#fff;width:32px;height:32px;border-radius:9px;font-size:1rem;cursor:pointer;font-family:inherit}
+.cajon-item{display:flex;align-items:center;gap:12px;padding:15px 18px;color:#fff;font-size:.92rem;font-weight:700;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:inherit;border-bottom:1px solid rgba(255,255,255,.07);transition:background .15s}
+.cajon-item:active{background:rgba(255,255,255,.1)}
+.cajon-item .ci-ic{font-size:1.25rem;width:28px;text-align:center;flex-shrink:0}
+.cajon-item.admin{color:#ffb968}
+.cajon-sep{font-size:.62rem;font-weight:800;color:rgba(255,255,255,.4);padding:14px 18px 6px;letter-spacing:1px;text-transform:uppercase}
+/* Buscador dentro del header azul */
+.hdr-buscar{width:100%;position:relative;z-index:1;margin-top:6px;padding:0 2px}
+.hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
+.hdr-buscar .hb-lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
+.hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
 .tab-content.on{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:16px;padding:16px;margin-bottom:16px}
@@ -219,12 +256,33 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 </div>
 
 <div class="header">
+  <button class="hdr-menu-btn" onclick="abrirCajon()" title="Menú" aria-label="Menú">☰</button>
   <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
   <div class="header-info">
     <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
     <p style="color:var(--nar);font-weight:700;font-style:italic;">Equipá tu casa, fácil y en cuotas</p>
   </div>
-  <div class="header-badge">🛒 Tienda</div>
+  <div class="hdr-buscar">
+    <span class="hb-lupa">🔍</span>
+    <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
+      oninput="hdrBuscarSync()">
+    <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
+  </div>
+</div>
+
+<!-- ═══ Cajón lateral deslizable ═══ -->
+<div id="cajon-overlay" onclick="cerrarCajon()"></div>
+<div id="cajon-lateral">
+  <div class="cajon-head">
+    <b>🐝 AmarangoElectro</b>
+    <button class="cajon-close" onclick="cerrarCajon()">✕</button>
+  </div>
+  <button class="cajon-item" onclick="cerrarCajon();mostrarQR()"><span class="ci-ic">📱</span> Código QR</button>
+  <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">📤</span> Compartir tienda</button>
+  <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
+  <div class="cajon-sep">Equipo</div>
+  <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Revendedores</button>
+  <button class="cajon-item admin" id="cajon-admin-item" onclick="cerrarCajon();tiendaLoginAdmin()"><span class="ci-ic" id="cajon-admin-ic">🔒</span> <span id="cajon-admin-txt">Admin</span></button>
 </div>
 
 <div class="install-banner" id="install-banner">
@@ -476,16 +534,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <!-- Contenido de la tienda -->
   <div id="tienda-cont">
 
-    <!-- Barra superior: título + botón admin -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-size:.95rem;font-weight:900;color:var(--az);">🛒 Tienda AmarangoElectro</div>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button id="btn-qr-tienda" onclick="mostrarQR()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Código QR">📱</button>
-        <button id="btn-compartir-tienda" onclick="compartirTienda()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Compartir tienda">📤</button>
-        <button id="btn-modo-oscuro" onclick="toggleModoOscuro()" style="font-size:1rem;padding:5px 10px;background:var(--bg);border:1.5px solid var(--bor);border-radius:20px;cursor:pointer;font-family:inherit;" title="Modo oscuro">🌙</button>
-        <button id="tienda-btn-admin" style="font-size:.68rem;padding:6px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaLoginAdmin()">🔒 Admin</button>
-      </div>
-    </div>
+    <!-- Barra superior movida al cajón lateral (☰). El buscador está en el header azul. -->
 
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
@@ -496,12 +545,11 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- Buscador (fijo arriba estilo Frávega) -->
     <div id="tienda-buscar-wrap" style="position:sticky;top:0;background:var(--wh);padding:10px 0 8px;z-index:20;box-shadow:0 4px 12px rgba(11,45,107,.06);border-bottom:1px solid var(--bor);margin:0 -4px;">
-      <div style="position:relative;padding:0 4px;">
-        <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;">🔍</span>
+      <!-- El buscador visible ahora vive en el header azul. Este input queda oculto pero funcional (lo usan las funciones de render y se sincroniza con el del header). -->
+      <div style="display:none;">
         <input id="tienda-buscar" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
-          oninput="tiendaRender();tiendaToggleLimpiar()"
-          style="width:100%;padding:13px 40px 13px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.92rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 8px rgba(255,122,0,.12);">
-        <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()" style="display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0;">✕</button>
+          oninput="tiendaRender();tiendaToggleLimpiar()">
+        <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
       <div id="tienda-chips" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none;padding:0 4px;"></div>
       <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;padding:0 4px;"></div>
@@ -1575,18 +1623,19 @@ function tiendaAplicarModo(){
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
   var btnSub=document.getElementById('tienda-btn-subs'); if(btnSub)btnSub.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
-  var bAdmin=document.getElementById('tienda-btn-admin');
-  if(tiendaEsAdmin){
-    bAdmin.style.display='none';
-  }else if(adminUnlocked||revUnlocked){
-    // logueado pero viendo como cliente: mostrar botón cerrar sesión
-    bAdmin.style.display='inline-block';
-    bAdmin.textContent='🚪 Salir';
-    bAdmin.setAttribute('onclick','cerrarSesion()');
-  }else{
-    bAdmin.style.display='inline-block';
-    bAdmin.textContent='🔒 Admin';
-    bAdmin.setAttribute('onclick','tiendaLoginAdmin()');
+  // Botón admin ahora vive en el cajón lateral: actualizamos su ícono/texto/acción
+  var cItem=document.getElementById('cajon-admin-item');
+  var cIc=document.getElementById('cajon-admin-ic');
+  var cTxt=document.getElementById('cajon-admin-txt');
+  if(cItem&&cIc&&cTxt){
+    if(adminUnlocked||revUnlocked){
+      // logueado (admin o viendo como cliente): permitir cerrar sesión
+      cIc.textContent='🚪'; cTxt.textContent='Cerrar sesión';
+      cItem.setAttribute('onclick','cerrarCajon();cerrarSesion()');
+    }else{
+      cIc.textContent='🔒'; cTxt.textContent='Admin';
+      cItem.setAttribute('onclick','cerrarCajon();tiendaLoginAdmin()');
+    }
   }
 }
 
@@ -1803,9 +1852,52 @@ function buscarProd(id){
   return null;
 }
 
+// ═══ Cajón lateral ═══
+function abrirCajon(){
+  var c=document.getElementById('cajon-lateral');
+  var o=document.getElementById('cajon-overlay');
+  if(c)c.classList.add('abierto');
+  if(o)o.classList.add('abierto');
+}
+function cerrarCajon(){
+  var c=document.getElementById('cajon-lateral');
+  var o=document.getElementById('cajon-overlay');
+  if(c)c.classList.remove('abierto');
+  if(o)o.classList.remove('abierto');
+}
+
+// ═══ Buscador del header (espeja el buscador interno tienda-buscar) ═══
+function hdrBuscarSync(){
+  var h=document.getElementById('hdr-buscar-input');
+  var inp=document.getElementById('tienda-buscar');
+  if(!h)return;
+  if(inp) inp.value=h.value;
+  var x=document.getElementById('hdr-buscar-x');
+  if(x) x.style.display=(h.value.trim()?'block':'none');
+  if(typeof tiendaRender==='function') tiendaRender();
+  if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
+}
+function hdrBuscarLimpiar(){
+  var h=document.getElementById('hdr-buscar-input');
+  if(h){ h.value=''; h.focus(); }
+  var inp=document.getElementById('tienda-buscar');
+  if(inp) inp.value='';
+  if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
+  if(typeof marcarNavActiva==='function') marcarNavActiva('');
+  var x=document.getElementById('hdr-buscar-x');
+  if(x) x.style.display='none';
+  if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
+  if(typeof tiendaRender==='function') tiendaRender();
+}
+
 // muestra/oculta la X según haya texto en el buscador
 function tiendaToggleLimpiar(){
   var inp=document.getElementById('tienda-buscar');
+  // mantener sincronizado el buscador del header
+  var h=document.getElementById('hdr-buscar-input');
+  var hx=document.getElementById('hdr-buscar-x');
+  if(inp&&h&&h.value!==inp.value) h.value=inp.value;
+  if(hx&&inp) hx.style.display=(inp.value.trim()?'block':'none');
   var x=document.getElementById('tienda-buscar-x');
   if(inp&&x)x.style.display=(inp.value.trim()?'block':'none');
 }
