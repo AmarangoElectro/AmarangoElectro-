@@ -1834,7 +1834,7 @@ var CONFIG_DEFAULT = {
   planesActivos: [2,4,6],  // qué planes se muestran (editable, hasta 12)
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
-  formatoCuota: 'simple',  // 'simple' | 'caja' | 'destacado'
+  formatoCuota: 'limpio',  // 'simple' | 'caja' | 'destacado'
   duenoPlataforma: true,   // true = Max (ve Suscriptores) · false = cliente (Marcelo, no lo ve)
   admins: [],              // los que COBRAN (botón Comprar) — [{nombre,wa}]
   vendedores: [],          // los que ATIENDEN (botón Consultar) — [{nombre,wa}]
@@ -1932,30 +1932,64 @@ function aplicarConfig(){
   try{ armarManifest(); }catch(e){}   // el ícono de la app toma el logo de la tienda
 }
 /* ═══════ FORMATOS DE CUOTA — cada tienda elige cómo mostrar el precio ═══════ */
+/* ═══════════════════════════════════════════════════════════
+   💰 FORMATOS DE PRECIO — los que usan las grandes
+   · limpio    → solo el precio (contado, lo más usado)
+   · ml        → estilo Mercado Libre: precio grande, cuota abajo
+   · cajita    → estilo Frávega: la cuota destacada en una cajita
+   · cuota     → la cuota bien grande (para vender en cuotas)
+   ═══════════════════════════════════════════════════════════ */
 function precioTarjeta(p){
-  var mc=mejorCuota(p.venta);
-  var fmt_=(CONFIG&&CONFIG.formatoCuota)||'simple';
-  var enOferta = p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta);
-  var tachado = enOferta ? '<span style="text-decoration:line-through;color:#bbb;font-size:.7rem">'+fmt(p.precioAntes)+'</span> ' : '';
+  var f = (CONFIG && CONFIG.formatoCuota) || 'limpio';
+  var mc = mejorCuota(p.venta);
+  var enOferta = p.precioAntes && parseFloat(p.precioAntes) > parseFloat(p.venta);
+  var pctOff = enOferta ? Math.round((1 - p.venta/parseFloat(p.precioAntes))*100) : 0;
+  var sinCuotas = !mc || (CONFIG && CONFIG.modoVenta==='contado');
 
-  if(fmt_==='caja'){
-    // estilo Frávega: cajita naranja con la cuota bien grande
-    if(!mc) return '<div class="cuota-v">'+fmt(p.venta)+'</div>';
+  // ── 🏷️ LIMPIO: solo el precio (el más usado en el mundo)
+  if(f==='limpio' || sinCuotas){
+    return (enOferta
+        ? '<div style="display:flex;align-items:center;gap:6px;margin-bottom:1px">'
+          +'<span style="font-size:.72rem;color:#9CA3AF;text-decoration:line-through">'+fmt(p.precioAntes)+'</span>'
+          +'<span style="background:#DCFCE7;color:#059669;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:4px">'+pctOff+'% OFF</span>'
+          +'</div>'
+        : '')
+      +'<div style="font-size:1.35rem;font-weight:900;color:var(--txt);line-height:1.1;letter-spacing:-.5px">'+fmt(p.venta)+'</div>'
+      +(mc && !(CONFIG&&CONFIG.modoVenta==='contado')
+        ? '<div style="font-size:.72rem;color:var(--gr);font-weight:700;margin-top:2px">'+mc.n+' cuotas de '+fmt(mc.valor)+'</div>'
+        : '<div style="height:6px"></div>');
+  }
+
+  // ── 🛒 MERCADO LIBRE: precio grande arriba, cuota verde abajo
+  if(f==='ml'){
+    return (enOferta
+        ? '<div style="display:flex;align-items:center;gap:6px;margin-bottom:1px">'
+          +'<span style="font-size:.72rem;color:#9CA3AF;text-decoration:line-through">'+fmt(p.precioAntes)+'</span>'
+          +'<span style="background:#DCFCE7;color:#059669;font-size:.6rem;font-weight:900;padding:2px 6px;border-radius:4px">'+pctOff+'% OFF</span>'
+          +'</div>'
+        : '')
+      +'<div style="font-size:1.4rem;font-weight:900;color:var(--txt);line-height:1.1;letter-spacing:-.6px">'+fmt(p.venta)+'</div>'
+      +'<div style="font-size:.74rem;color:var(--gr);font-weight:800;margin-top:1px">en '+mc.n+' cuotas de '+fmt(mc.valor)+'</div>'
+      +'<div style="height:5px"></div>';
+  }
+
+  // ── 🏬 CAJITA (estilo Frávega): la cuota en una cajita naranja
+  if(f==='cajita'){
     return '<div style="background:#FFF6EE;border:1px solid #FFE0C2;border-radius:9px;padding:8px 10px;margin-bottom:6px">'
-      +'<div style="font-size:.6rem;font-weight:800;color:var(--nar);text-transform:uppercase;letter-spacing:.3px">'+mc.n+' cuotas fijas de</div>'
-      +'<div style="font-size:1.15rem;font-weight:900;color:var(--az);line-height:1.1">'+fmt(mc.valor)+'</div>'
+        +'<div style="font-size:.58rem;font-weight:900;color:var(--nar);text-transform:uppercase;letter-spacing:.4px">'+mc.n+' cuotas fijas de</div>'
+        +'<div style="font-size:1.2rem;font-weight:900;color:var(--az);line-height:1.1">'+fmt(mc.valor)+'</div>'
       +'</div>'
-      +'<div class="contado">'+tachado+'Contado: '+fmt(p.venta)+'</div>';
+      +'<div style="font-size:.72rem;color:var(--sub)">'
+        +(enOferta?'<span style="text-decoration:line-through;color:#bbb">'+fmt(p.precioAntes)+'</span> ':'')
+        +'Contado: <b style="color:var(--txt)">'+fmt(p.venta)+'</b></div>';
   }
-  if(fmt_==='destacado'){
-    // el CONTADO grande arriba, la cuota abajo chiquita
-    return '<div style="font-size:1.15rem;font-weight:900;color:var(--az);line-height:1.1">'+tachado+fmt(p.venta)+'</div>'
-      +(mc?'<div style="font-size:.68rem;color:var(--gr);font-weight:700;margin-top:2px">💳 '+mc.n+' cuotas de '+fmt(mc.valor)+'</div>':'')
-      +'<div style="height:6px"></div>';
-  }
-  // 'simple' (por defecto): la CUOTA grande en naranja, el contado abajo
-  return (mc?'<div class="cuota-v">'+fmt(mc.valor)+'</div><div class="cuota-n">en '+mc.n+' cuotas fijas</div>':'')
-    +'<div class="contado">'+tachado+'Contado: '+fmt(p.venta)+'</div>';
+
+  // ── 💳 CUOTA GRANDE (el de siempre, para los que venden en cuotas)
+  return '<div class="cuota-v">'+fmt(mc.valor)+'</div>'
+    +'<div class="cuota-n">en '+mc.n+' cuotas fijas</div>'
+    +'<div class="contado">'
+      +(enOferta?'<span style="text-decoration:line-through;color:#bbb">'+fmt(p.precioAntes)+'</span> ':'')
+      +'Contado: '+fmt(p.venta)+'</div>';
 }
 
 /* El link único de esta tienda (para compartir con los clientes) */
@@ -2812,11 +2846,29 @@ function cambiarPct(n,v){
 }
 
 function opcionFormato(k,titulo,sub){
-  var on=((CONFIG&&CONFIG.formatoCuota)||'simple')===k;
-  return '<button onclick="elegirFormato(\''+k+'\')" style="width:100%;text-align:left;background:'+(on?'#F5F8FF':'#fff')+';border:2px solid '+(on?'var(--az)':'var(--line)')+';border-radius:12px;padding:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:10px">'
-    +'<span style="font-size:1.1rem">'+(on?'✅':'⬜')+'</span>'
+  var on=((CONFIG&&CONFIG.formatoCuota)||'limpio')===k;
+  // ejemplo con un producto de $250.000
+  var ej=250000;
+  var mc=mejorCuota(ej);
+  var prev='';
+  if(k==='limpio'){
+    prev='<div style="font-size:1.05rem;font-weight:900;color:var(--txt)">'+fmt(ej)+'</div>'
+      +(mc?'<div style="font-size:.6rem;color:var(--gr);font-weight:700">'+mc.n+' cuotas de '+fmt(mc.valor)+'</div>':'');
+  } else if(k==='ml'){
+    prev='<div style="font-size:1.05rem;font-weight:900;color:var(--txt)">'+fmt(ej)+'</div>'
+      +(mc?'<div style="font-size:.62rem;color:var(--gr);font-weight:800">en '+mc.n+' cuotas de '+fmt(mc.valor)+'</div>':'');
+  } else if(k==='cajita'){
+    prev=(mc?'<div style="background:#FFF6EE;border:1px solid #FFE0C2;border-radius:6px;padding:4px 7px;display:inline-block"><div style="font-size:.52rem;font-weight:900;color:var(--nar)">'+mc.n+' CUOTAS DE</div><div style="font-size:.88rem;font-weight:900;color:var(--az)">'+fmt(mc.valor)+'</div></div>':'')
+      +'<div style="font-size:.6rem;color:var(--sub);margin-top:2px">Contado: '+fmt(ej)+'</div>';
+  } else {
+    prev=(mc?'<div style="font-size:1.05rem;font-weight:900;color:var(--nar)">'+fmt(mc.valor)+'</div><div style="font-size:.58rem;color:var(--gr);font-weight:700">en '+mc.n+' cuotas fijas</div>':'')
+      +'<div style="font-size:.6rem;color:var(--sub)">Contado: '+fmt(ej)+'</div>';
+  }
+  return '<button onclick="elegirFormato(\''+k+'\')" style="width:100%;text-align:left;background:'+(on?'#F5F8FF':'#fff')+';border:2px solid '+(on?'var(--az)':'var(--line)')+';border-radius:13px;padding:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:12px">'
     +'<span style="flex:1"><span style="display:block;font-size:.86rem;font-weight:900;color:'+(on?'var(--az)':'var(--txt)')+'">'+titulo+'</span>'
-    +'<span style="display:block;font-size:.7rem;color:var(--sub);margin-top:1px">'+sub+'</span></span></button>';
+    +'<span style="display:block;font-size:.68rem;color:var(--sub);margin-top:1px">'+sub+'</span></span>'
+    +'<span style="background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px 9px;min-width:104px;text-align:left">'+prev+'</span>'
+    +'<span style="font-size:1rem">'+(on?'✅':'⬜')+'</span></button>';
 }
 function elegirFormato(k){
   CONFIG.formatoCuota=k;
@@ -2864,12 +2916,13 @@ function abrirConfig(){
     +sec('🤝 Vendedores (los que ATIENDEN)')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Al tocar <b>💬 Consultar</b>, el cliente elige entre estos. Responden dudas, no cobran.<br>Uno por línea: <b>Nombre, WhatsApp</b></div>'
     +'<textarea id="cf_vendedores" placeholder="Selene, 5491168746034" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:64px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
-    +sec('💳 Cómo se ve el precio')
-    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Elegí cómo se muestran los precios en tu tienda.</div>'
-    +'<div id="cf_formatos" style="display:grid;gap:8px;margin-bottom:12px">'
-      +opcionFormato('simple','Cuota grande','La cuota en grande, el contado abajo')
-      +opcionFormato('caja','Cajita (estilo Frávega)','La cuota en una cajita naranja')
-      +opcionFormato('destacado','Contado grande','El precio total en grande, cuota abajo')
+    +sec('💰 Cómo se ve el precio')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:10px">Elegí el estilo. Así lo ven tus clientes.</div>'
+    +'<div style="display:grid;gap:9px;margin-bottom:12px">'
+      +opcionFormato('limpio','🏷️ Precio limpio','Solo el precio. El más usado en el mundo.')
+      +opcionFormato('ml','🛒 Estilo Mercado Libre','Precio grande, cuota abajo en verde.')
+      +opcionFormato('cajita','🏬 Estilo Frávega','La cuota en una cajita destacada.')
+      +opcionFormato('cuota','💳 Cuota grande','La cuota bien grande. Vende el "por mes".')
     +'</div>'
     +sec('💰 ¿Cómo vas a vender?')
     +'<div style="display:grid;gap:8px;margin-bottom:14px">'
