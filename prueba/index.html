@@ -176,6 +176,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </style>
 </head>
 <body>
+<!-- ═══ VERSIÓN: tienda-nueva · 15-jul-2026 · base membresía ═══ -->
+<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 15-jul</div>
 
 <!-- Panel de AYUDA -->
 <div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
@@ -1449,6 +1451,125 @@ function cerrarProgreso(){
   renderProgreso();
 }
 
+/* ═══════════════════════════════════════════════════════════
+   🛡️ BLOQUE DE CONFIANZA — lo que usan las grandes
+   Sellos, garantías y reseñas REALES. Nunca inventadas.
+   Si el dueño no carga reseñas, no se muestra nada.
+   ═══════════════════════════════════════════════════════════ */
+function bloqueConfianza(){
+  if(rolEfectivo()) return '';
+  var c=(CONFIG && CONFIG.confianza) || {};
+  if(c.on===false) return '';
+
+  var items=[];
+  if(c.envios)   items.push({ico:'🚚', txt:c.envios});
+  if(c.garantia) items.push({ico:'🛡️', txt:c.garantia});
+  if(c.pago)     items.push({ico:'✅', txt:c.pago});
+  if(!items.length) return '';
+
+  var html='<div style="margin:16px 14px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px">'
+    +'<div style="display:grid;grid-template-columns:repeat('+Math.min(items.length,3)+',1fr);gap:10px">';
+  items.forEach(function(i){
+    html+='<div style="text-align:center">'
+      +'<div style="font-size:1.5rem;margin-bottom:3px">'+i.ico+'</div>'
+      +'<div style="font-size:.68rem;color:var(--sub);font-weight:700;line-height:1.3">'+i.txt+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  if(c.desde){
+    html+='<div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px;text-align:center;font-size:.72rem;color:var(--sub);font-weight:700">🏆 '+c.desde+'</div>';
+  }
+  html+='</div>';
+  return html;
+}
+
+/* ⭐ RESEÑAS — solo reales, cargadas por el dueño */
+function bloqueResenas(){
+  if(rolEfectivo()) return '';
+  var r=(CONFIG && CONFIG.resenas) || [];
+  if(!r.length) return '';   // sin reseñas → no muestra nada (nunca inventar)
+
+  var html='<div style="margin:16px 14px">'
+    +'<div style="font-weight:900;color:var(--az);font-size:.92rem;margin-bottom:10px">⭐ Lo que dicen nuestros clientes</div>'
+    +'<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none">';
+  r.forEach(function(re){
+    var ini=(re.nombre||'?').charAt(0).toUpperCase();
+    html+='<div style="flex:0 0 auto;width:230px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<div style="width:34px;height:34px;border-radius:50%;background:var(--az);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem">'+ini+'</div>'
+        +'<div style="flex:1"><div style="font-size:.8rem;font-weight:800;color:var(--txt)">'+(re.nombre||'Cliente')+'</div>'
+        +'<div style="font-size:.7rem;color:#F59E0B">⭐⭐⭐⭐⭐</div></div>'
+      +'</div>'
+      +'<div style="font-size:.76rem;color:var(--sub);line-height:1.45">"'+(re.texto||'')+'"</div>'
+      +(re.producto?'<div style="font-size:.66rem;color:var(--az);font-weight:700;margin-top:7px">📦 '+re.producto+'</div>':'')
+      +'</div>';
+  });
+  html+='</div></div>';
+  return html;
+}
+
+/* Panel para cargar las reseñas (admin) */
+function abrirResenas(){
+  var r=(CONFIG && CONFIG.resenas) || [];
+  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:3px">⭐ Reseñas</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Lo que dicen tus clientes. Genera muchísima confianza. 🐝</div>'
+    // aviso importante
+    +'<div style="background:#FFF9F0;border:1.5px solid var(--nar);border-radius:12px;padding:12px;margin-bottom:14px;font-size:.76rem;color:var(--txt);line-height:1.5">'
+      +'<b style="color:var(--nar)">⚠️ Solo reseñas REALES</b><br>'
+      +'Pedile permiso al cliente antes de publicarla. Una reseña inventada te puede costar toda la confianza.'
+    +'</div>'
+    +'<button onclick="editarResena(-1)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px">➕ Agregar reseña</button>';
+
+  if(!r.length){
+    html+='<div style="text-align:center;color:var(--sub);padding:30px 20px;font-size:.85rem"><div style="font-size:2.4rem;margin-bottom:8px">⭐</div>Todavía no tenés reseñas.<br><span style="font-size:.75rem">Pedile a un cliente contento que te deje una. 🐝</span></div>';
+  } else {
+    r.forEach(function(re,i){
+      html+='<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:9px">'
+        +'<div style="font-weight:900;color:var(--az);font-size:.86rem">'+(re.nombre||'Cliente')+'</div>'
+        +'<div style="font-size:.76rem;color:var(--sub);line-height:1.45;margin:5px 0">"'+(re.texto||'')+'"</div>'
+        +(re.producto?'<div style="font-size:.68rem;color:var(--az);font-weight:700">📦 '+re.producto+'</div>':'')
+        +'<div style="display:flex;gap:6px;margin-top:9px">'
+          +'<button onclick="editarResena('+i+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:9px;padding:8px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit">✏️ Editar</button>'
+          +'<button onclick="borrarResena('+i+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:9px;padding:8px 12px;font-size:.72rem;cursor:pointer;font-family:inherit">🗑️</button>'
+        +'</div></div>';
+    });
+  }
+  html+='<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al panel</button>';
+  document.getElementById('adminBody').innerHTML=html;
+  document.getElementById('adminOverlay').classList.add('on');
+}
+function editarResena(i){
+  var r=(CONFIG.resenas||[]);
+  var re = i>=0 ? r[i] : {nombre:'', texto:'', producto:''};
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:14px">'+(i>=0?'✏️ Editar reseña':'➕ Nueva reseña')+'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Nombre del cliente</div>'
+    +'<input id="re_nombre" value="'+(re.nombre||'').replace(/"/g,'&quot;')+'" placeholder="Ej: María G." style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;margin-bottom:11px">'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Qué dijo</div>'
+    +'<textarea id="re_texto" placeholder="Ej: Excelente atención, me llegó todo perfecto." style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;min-height:80px;outline:none;resize:vertical;margin-bottom:11px">'+(re.texto||'')+'</textarea>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Qué compró (opcional)</div>'
+    +'<input id="re_producto" value="'+(re.producto||'').replace(/"/g,'&quot;')+'" placeholder="Ej: Heladera No Frost" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;margin-bottom:14px">'
+    +'<button onclick="guardarResena('+i+')" style="width:100%;background:#10B981;color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit">💾 Guardar</button>'
+    +'<button onclick="abrirResenas()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">Cancelar</button>';
+}
+function guardarResena(i){
+  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
+  var obj={ nombre:g('re_nombre'), texto:g('re_texto'), producto:g('re_producto') };
+  if(!obj.nombre || !obj.texto){ alert('Poné el nombre y lo que dijo.'); return; }
+  if(!CONFIG.resenas) CONFIG.resenas=[];
+  if(i>=0) CONFIG.resenas[i]=obj; else CONFIG.resenas.push(obj);
+  guardarConfig();
+  render();
+  abrirResenas();
+}
+function borrarResena(i){
+  if(!confirm('¿Borrar esta reseña?')) return;
+  CONFIG.resenas.splice(i,1);
+  guardarConfig();
+  render();
+  abrirResenas();
+}
+
 /* ═══════ 📣 BANNER DE AVISOS ═══════ */
 function renderBanner(){
   var wrap=document.getElementById('banner-wrap');
@@ -1805,7 +1926,7 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -1836,6 +1957,7 @@ function abrirModuloDueno(destino){
   if(destino==='soporte'){ abrirSoporte(); return; }
   if(destino==='qr'){ abrirQR(); return; }
   if(destino==='comisiones'){ abrirComisiones(); return; }
+  if(destino==='resenas'){ abrirResenas(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
   document.getElementById('adminBody').innerHTML=
@@ -1957,6 +2079,15 @@ var CONFIG_DEFAULT = {
   cuotas: { 2:15, 4:55, 6:78 },
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
+  // 🛡️ Confianza (todo configurable, todo opcional)
+  confianza: {
+    on: true,
+    envios: 'Envíos a todo el país',
+    garantia: 'Garantía oficial',
+    pago: 'Pagás cuando lo recibís',
+    desde: ''                    // "Vendiendo desde 2019"
+  },
+  resenas: [],                   // [{nombre, texto, producto}] — SOLO reales
   planesActivos: [2,4,6],  // qué planes se muestran (editable, hasta 12)
   markup: [ {hasta:50000,pct:80}, {hasta:100000,pct:60}, {hasta:250000,pct:50}, {hasta:350000,pct:40}, {hasta:999999999,pct:30} ],
   dolar: 1500,
@@ -3067,6 +3198,12 @@ function abrirConfig(){
     +sec('🤝 Vendedores (los que ATIENDEN)')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Al tocar <b>💬 Consultar</b>, el cliente elige entre estos. Responden dudas, no cobran.<br>Uno por línea: <b>Nombre, WhatsApp</b></div>'
     +'<textarea id="cf_vendedores" placeholder="Selene, 5491168746034" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:64px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
+    +sec('🛡️ Confianza')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Los sellos que ven tus clientes. Dejalos vacíos si no aplican.</div>'
+    +campo('🚚 Envíos','cf_envios',(c.confianza&&c.confianza.envios)||'','Ej: Envíos a todo el país')
+    +campo('🛡️ Garantía','cf_garantia',(c.confianza&&c.confianza.garantia)||'','Ej: Garantía oficial')
+    +campo('✅ Pago','cf_pago',(c.confianza&&c.confianza.pago)||'','Ej: Pagás cuando lo recibís')
+    +campo('🏆 Trayectoria','cf_desde',(c.confianza&&c.confianza.desde)||'','Ej: Vendiendo desde 2019')
     +sec('🛒 ¿Cómo te compran?')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Elegí cómo querés que te lleguen los pedidos.</div>'
     +'<div style="display:grid;gap:8px;margin-bottom:14px">'
@@ -3154,6 +3291,13 @@ function guardarConfigDesdeForm(){
   CONFIG.colorPrincipal = g('cf_color1')||'#0B2D6B';
   CONFIG.colorAcento = g('cf_color2')||'#FF7A00';
   // las cuotas y planes se guardan al vuelo desde los botones de arriba
+  CONFIG.confianza = {
+    on: true,
+    envios: g('cf_envios'),
+    garantia: g('cf_garantia'),
+    pago: g('cf_pago'),
+    desde: g('cf_desde')
+  };
   CONFIG.banner = g('cf_banner');
   var pr=g('cf_premios');
   if(pr) CONFIG.ruletaPremios = pr.split('\n').map(function(x){return x.trim();}).filter(Boolean);
@@ -4339,7 +4483,7 @@ function render(){
         +precioTarjeta(p)
         +botones
       +'</div></div>';
-  }).join('')+'</div>'+pieBanners();
+  }).join('')+'</div>'+bloqueConfianza()+bloqueResenas()+pieBanners();
 }
 function setCat(k){ catActiva=(catActiva===k?'':k); render(); }
 
