@@ -3514,15 +3514,16 @@ function parsearCatalogo(){
   lineas.forEach(function(raw){
     var linea=raw.replace(/[*_#]/g,'').trim();
     if(!linea) return;
-    var nombre='', precio=0, desc='';
+    var nombre='', precio=0, desc='', categoria='';
 
-    // formato con barra: Nombre | Precio | Descripción(opcional)
+    // formato con barra: Nombre | Precio | Descripción(opc) | Categoría(opc)
     if(linea.indexOf('|')>=0){
       var partes=linea.split('|');
       nombre=partes[0].trim();
       var mp=(partes[1]||'').match(/(\d[\d\.]*)/);
       if(mp) precio=parseInt(mp[1].replace(/\./g,''),10);
-      if(partes.length>=3) desc=partes.slice(2).join('|').trim();
+      if(partes.length>=3) desc=(partes[2]||'').trim();
+      if(partes.length>=4) categoria=(partes[3]||'').trim();
     } else {
       precio = detectarPrecioLinea(linea, esUSD) || 0;
       nombre = detectarNombreLinea(linea);
@@ -3533,7 +3534,7 @@ function parsearCatalogo(){
     if(esUSD){ costo=Math.round(precio*cot); venta=markupDeCosto(costo); }
     else if(_catModo==='costo'){ costo=precio; venta=markupDeCosto(costo); }
     else { costo=null; venta=precio; }
-    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(esUSD?precio:null), desc:desc });
+    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(esUSD?precio:null), desc:desc, categoria:categoria });
   });
   renderCatPreview();
 }
@@ -3589,13 +3590,14 @@ function guardarCatalogoPegado(){
       existente.venta=np.venta;
       if(np.costo) existente.costo=np.costo;
       if(np.desc && !existente.desc) existente.desc=np.desc;  // completa specs si no tenía
+      if(np.categoria && !existente.categoria) existente.categoria=np.categoria;  // completa categoría si no tenía
       existente.fechaPrecio=Date.now();
       existente.sinStock=false;          // volvió a estar en la lista → hay stock
       actualizados++;
     } else {
       var prod={
         id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
-        nombre:np.nombre, venta:np.venta, foto:(i===0?_catFoto:''), categoria:'',
+        nombre:np.nombre, venta:np.venta, foto:(i===0?_catFoto:''), categoria:(np.categoria||''),
         visible:true, fechaPrecio:Date.now(), desc:(np.desc||'')
       };
       if(np.costo) prod.costo=np.costo;
