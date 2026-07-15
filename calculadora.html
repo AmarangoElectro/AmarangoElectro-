@@ -1274,9 +1274,9 @@ function mostrarSaludoHora(){
   var el=document.getElementById('tienda-saludo-hora');
   if(!el)return;
   var h=new Date().getHours(), txt;
-  if(h>=6 && h<13)      txt='Buenos días 🌅';
-  else if(h>=13 && h<20)txt='Buenas tardes ☀️';
-  else                  txt='Buenas noches 🌙';
+  if(h>=6 && h<13)      txt='Buenos días 🌅 [PRUEBA-777]';
+  else if(h>=13 && h<20)txt='Buenas tardes ☀️ [PRUEBA-777]';
+  else                  txt='Buenas noches 🌙 [PRUEBA-777]';
   el.textContent=txt;
 }
 // Banner rotativo: mensajes que van cambiando
