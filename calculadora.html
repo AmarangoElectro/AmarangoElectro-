@@ -71,6 +71,15 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .cajon-item .ci-ic{font-size:1.25rem;width:28px;text-align:center;flex-shrink:0}
 .cajon-item.admin{color:#ffb968}
 .cajon-sep{font-size:.62rem;font-weight:800;color:rgba(255,255,255,.4);padding:14px 18px 6px;letter-spacing:1px;text-transform:uppercase}
+/* Grilla de categorías estilo app (cuadros grandes) */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:4px 2px 2px;}
+.cat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 4px;border-radius:16px;background:var(--wh);border:1.5px solid var(--bor);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:78px;}
+.cat-tile:active{transform:scale(.95);}
+.cat-tile.on{background:linear-gradient(160deg,var(--nar),#ff9a3d);border-color:var(--nar);box-shadow:0 3px 10px rgba(255,122,0,.3);}
+.cat-tile.on .cat-tile-txt{color:#fff;}
+.cat-tile-ic{font-size:1.7rem;line-height:1;}
+.cat-tile-txt{font-size:.62rem;font-weight:800;color:var(--az);text-align:center;line-height:1.1;}
+@media(max-width:360px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
 /* Buscador dentro del header azul */
 .hdr-buscar{width:100%;position:relative;z-index:1;margin-top:6px;padding:0 2px}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
@@ -277,11 +286,41 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <b>🐝 AmarangoElectro</b>
     <button class="cajon-close" onclick="cerrarCajon()">✕</button>
   </div>
-  <button class="cajon-item" onclick="cerrarCajon();mostrarQR()"><span class="ci-ic">📱</span> Código QR</button>
-  <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">📤</span> Compartir tienda</button>
-  <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
-  <div class="cajon-sep">Equipo</div>
+
+  <div class="cajon-sep">Navegación</div>
+  <button class="cajon-item" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
+  <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
+  <button class="cajon-item cj-rev" id="cajon-cuotas" style="display:none;" onclick="cerrarCajon();showTab('cuotas')"><span class="ci-ic">📅</span> Cuotas</button>
   <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Revendedores</button>
+
+  <div class="cajon-sep">Herramientas</div>
+  <div style="padding:8px 16px 4px;display:flex;flex-direction:column;gap:8px;">
+    <select id="cajon-orden" onchange="cajonAplicarOrden(this.value)" style="width:100%;padding:10px;border-radius:10px;border:none;font-family:inherit;font-weight:700;font-size:.8rem;color:var(--az);">
+      <option value="">Ordenar por…</option>
+      <option value="menor">💰 Precio: menor a mayor</option>
+      <option value="mayor">💰 Precio: mayor a menor</option>
+      <option value="az">🔤 Nombre A-Z</option>
+      <option value="nuevos">✨ Novedades primero</option>
+      <option value="sininteres">✨ Sin interés primero</option>
+      <option value="ofertas">🔥 Ofertas primero</option>
+    </select>
+    <input id="cajon-maxprecio" type="number" inputmode="numeric" placeholder="Precio hasta $…" oninput="cajonAplicarMax(this.value)" style="width:100%;padding:10px;border-radius:10px;border:none;font-family:inherit;font-weight:700;font-size:.8rem;">
+  </div>
+  <button class="cajon-item" onclick="cerrarCajon();toggleVerFavoritos()"><span class="ci-ic">❤️</span> Ver favoritos</button>
+  <button class="cajon-item" onclick="cerrarCajon();tiendaToggleVista()"><span class="ci-ic">▦</span> Cambiar vista</button>
+  <button class="cajon-item" onclick="cerrarCajon();tiendaToggleModoSelec()"><span class="ci-ic">📤</span> Compartir varios</button>
+  <button class="cajon-item" onclick="cerrarCajon();mostrarQR()"><span class="ci-ic">📱</span> Código QR</button>
+  <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">🔗</span> Compartir tienda</button>
+  <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
+
+  <div class="cajon-sep cj-admin" id="cajon-sep-admin" style="display:none;">Administrador</div>
+  <button class="cajon-item cj-admin" id="cajon-marc-mostrar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('mostrar')"><span class="ci-ic">👁️</span> Mostrar marcados</button>
+  <button class="cajon-item cj-admin" id="cajon-marc-ocultar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('ocultar')"><span class="ci-ic">🙈</span> Ocultar marcados</button>
+  <button class="cajon-item cj-admin" id="cajon-cargar-celu" style="display:none;" onclick="cerrarCajon();showTab('celulares')"><span class="ci-ic">📱</span> Cargar celulares</button>
+  <button class="cajon-item cj-admin" id="cajon-ver-cliente" style="display:none;" onclick="cerrarCajon();toggleVistaCliente()"><span class="ci-ic">👁️</span> Ver como cliente</button>
+  <button class="cajon-item cj-admin" id="cajon-ruleta" style="display:none;" onclick="toggleRuleta()"><span class="ci-ic">🎰</span> <span id="cajon-ruleta-txt">Ruleta: apagada</span></button>
+
+  <div class="cajon-sep">Cuenta</div>
   <button class="cajon-item admin" id="cajon-admin-item" onclick="cerrarCajon();tiendaLoginAdmin()"><span class="ci-ic" id="cajon-admin-ic">🔒</span> <span id="cajon-admin-txt">Admin</span></button>
 </div>
 
@@ -292,7 +331,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="ib-close" onclick="cerrarBannerInstall()">✕</button>
 </div>
 
-<div class="tabs">
+<div class="tabs" style="display:none;">
   <div class="tab on" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
   <div class="tab" id="tab-btn-pegar" onclick="showTab('pegar')" style="display:none;">📋 Pegar precio</div>
   <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')" style="display:none;">📱 Celulares</div>
@@ -551,10 +590,11 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
           oninput="tiendaRender();tiendaToggleLimpiar()">
         <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
-      <div id="tienda-chips" style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none;padding:0 4px;"></div>
+      <div id="tienda-chips" class="cat-grid" style="padding:6px 4px 2px;"></div>
       <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;padding:0 4px;"></div>
-      <div style="display:flex;gap:6px;margin-top:8px;align-items:center;padding:0 4px;">
-        <select id="tienda-orden" onchange="tiendaRender()" style="flex:1;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;color:var(--az);font-weight:700;background:var(--wh);">
+      <!-- Fila de orden/filtros movida al cajón lateral (☰). Inputs ocultos pero funcionales. -->
+      <div style="display:none;">
+        <select id="tienda-orden" onchange="tiendaRender()">
           <option value="">Ordenar por…</option>
           <option value="menor">💰 Precio: menor a mayor</option>
           <option value="mayor">💰 Precio: mayor a menor</option>
@@ -563,10 +603,10 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
           <option value="sininteres">✨ Sin interés primero</option>
           <option value="ofertas">🔥 Ofertas primero</option>
         </select>
-        <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()" style="width:90px;padding:8px 10px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;">
-        <button id="btn-ver-favs" onclick="toggleVerFavoritos()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Ver mis favoritos">❤️</button>
-        <button id="btn-vista" onclick="tiendaToggleVista()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Cambiar vista">☰</button>
-        <button id="btn-modo-selec" onclick="tiendaToggleModoSelec()" style="padding:8px 12px;border:1.5px solid var(--bor);border-radius:10px;font-size:.72rem;font-family:inherit;font-weight:700;cursor:pointer;background:var(--wh);white-space:nowrap;" title="Compartir varios productos">📤</button>
+        <input id="tienda-maxprecio" type="number" inputmode="numeric" placeholder="Hasta $" oninput="tiendaRender()">
+        <button id="btn-ver-favs" onclick="toggleVerFavoritos()">❤️</button>
+        <button id="btn-vista" onclick="tiendaToggleVista()">☰</button>
+        <button id="btn-modo-selec" onclick="tiendaToggleModoSelec()">📤</button>
       </div>
     </div>
 
@@ -1597,14 +1637,14 @@ function tiendaAplicarModo(){
   document.body.classList.remove('rol-admin','rol-revendedor');
   if(tiendaEsAdmin || adminUnlocked) document.body.classList.add('rol-admin');
   else if(revUnlocked) document.body.classList.add('rol-revendedor');
-  document.getElementById('tienda-admin-banner').style.display = tiendaEsAdmin?'block':'none';
-  document.getElementById('tienda-tanda-bar').style.display = tiendaEsAdmin?'flex':'none';
-  var adminTop=document.getElementById('tienda-admin-top'); if(adminTop)adminTop.style.display = tiendaEsAdmin?'flex':'none';
+  document.getElementById('tienda-admin-banner').style.display = 'none';
+  document.getElementById('tienda-tanda-bar').style.display = 'none';
+  var adminTop=document.getElementById('tienda-admin-top'); if(adminTop)adminTop.style.display = 'none';
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
   var cargarFab=document.getElementById('cargar-fab'); if(cargarFab) cargarFab.style.display = tiendaEsAdmin?'flex':'none';
-  var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab) ruletaFab.style.display = tiendaEsAdmin?'none':'flex';
+  var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab){ var ruOn=(localStorage.getItem('ae_ruleta_on')==='1'); ruletaFab.style.display=(ruOn && !tiendaEsAdmin)?'flex':'none'; }
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
   var btnSubir=document.getElementById('tienda-btn-subir'); if(btnSubir)btnSubir.style.display = tiendaEsAdmin?'block':'none';
@@ -1856,6 +1896,21 @@ function buscarProd(id){
 function abrirCajon(){
   var c=document.getElementById('cajon-lateral');
   var o=document.getElementById('cajon-overlay');
+  // sincronizar orden/precio con el estado actual
+  var so=document.getElementById('tienda-orden'), co=document.getElementById('cajon-orden');
+  if(so&&co) co.value=so.value;
+  var sm=document.getElementById('tienda-maxprecio'), cm=document.getElementById('cajon-maxprecio');
+  if(sm&&cm) cm.value=sm.value;
+  // mostrar secciones según rol
+  var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
+  var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
+  });
+  var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
+  ['cajon-pegar','cajon-cuotas'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
+  });
   if(c)c.classList.add('abierto');
   if(o)o.classList.add('abierto');
 }
@@ -1864,6 +1919,24 @@ function cerrarCajon(){
   var o=document.getElementById('cajon-overlay');
   if(c)c.classList.remove('abierto');
   if(o)o.classList.remove('abierto');
+}
+// Aplican orden y precio máximo desde el cajón (espejan los inputs ocultos)
+function cajonAplicarOrden(v){
+  var so=document.getElementById('tienda-orden'); if(so){ so.value=v; }
+  if(typeof tiendaRender==='function') tiendaRender();
+}
+function cajonAplicarMax(v){
+  var sm=document.getElementById('tienda-maxprecio'); if(sm){ sm.value=v; }
+  if(typeof tiendaRender==='function') tiendaRender();
+}
+// Enciende/apaga la ruleta de descuentos (preferencia del admin, apagada por defecto)
+function toggleRuleta(){
+  var on=(localStorage.getItem('ae_ruleta_on')==='1');
+  var nuevo=!on;
+  try{ localStorage.setItem('ae_ruleta_on', nuevo?'1':'0'); }catch(e){}
+  var rt=document.getElementById('cajon-ruleta-txt'); if(rt) rt.textContent = nuevo?'Ruleta: encendida':'Ruleta: apagada';
+  if(typeof tiendaRender==='function') tiendaRender();
+  if(typeof mostrarToast==='function') mostrarToast(nuevo?'🎰 Ruleta encendida':'🎰 Ruleta apagada');
 }
 
 // ═══ Buscador del header (espeja el buscador interno tienda-buscar) ═══
@@ -1946,13 +2019,15 @@ function tiendaRender(){
   if(!universo.length){ vacia.style.display='block'; cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML=''; return; }
   vacia.style.display='none';
 
-  // chips de categorías
+  // chips de categorías → cuadros grandes estilo app (ícono + nombre)
   var cats={};
   universo.forEach(function(p){ var c=catProd(p); cats[c]=(cats[c]||0)+1; });
-  var chipsHtml='<div onclick="tiendaFiltrarCat(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(tiendaCategoriaActiva===''?'var(--nar);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
+  function catIcono(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(0,i):'📦'; }
+  function catTexto(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(i+1).trim():s; }
+  var chipsHtml='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" onclick="tiendaFiltrarCat(\'\')"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
   Object.keys(cats).forEach(function(c){
     var on=tiendaCategoriaActiva===c;
-    chipsHtml+='<div onclick="tiendaFiltrarCat(\''+c+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:20px;font-size:.7rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(on?'var(--nar);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+c+'</div>';
+    chipsHtml+='<div class="cat-tile'+(on?' on':'')+'" onclick="tiendaFiltrarCat(\''+c+'\')"><span class="cat-tile-ic">'+catIcono(c)+'</span><span class="cat-tile-txt">'+catTexto(c)+'</span></div>';
   });
   document.getElementById('tienda-chips').innerHTML=chipsHtml;
 
@@ -2627,7 +2702,18 @@ function tiendaMarcados(accion){
   alert('✅ '+cont+' producto(s) '+(vis?'ahora VISIBLES en la tienda':'ahora OCULTOS de la tienda (siguen guardados en admin)')+'.');
 }
 
-function tiendaFiltrarCat(c){ tiendaCategoriaActiva=(tiendaCategoriaActiva===c?'':c); tiendaRender(); }
+function tiendaFiltrarCat(c){
+  var estabaActiva=(tiendaCategoriaActiva===c);
+  tiendaCategoriaActiva=(estabaActiva?'':c);
+  tiendaRender();
+  // si se seleccionó una categoría (no al deseleccionar), bajar a los productos
+  if(!estabaActiva && tiendaCategoriaActiva){
+    setTimeout(function(){
+      var destino=document.getElementById('tienda-grid')||document.getElementById('tienda-contador');
+      if(destino && destino.scrollIntoView){ destino.scrollIntoView({behavior:'smooth', block:'start'}); }
+    }, 60);
+  }
+}
 // ===== BARRA DE NAVEGACIÓN INFERIOR =====
 var verSoloOfertas=false;
 function navTienda(accion){
