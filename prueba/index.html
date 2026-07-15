@@ -3514,14 +3514,15 @@ function parsearCatalogo(){
   lineas.forEach(function(raw){
     var linea=raw.replace(/[*_#]/g,'').trim();
     if(!linea) return;
-    var nombre='', precio=0;
+    var nombre='', precio=0, desc='';
 
-    // formato con barra: Nombre | Precio
+    // formato con barra: Nombre | Precio | Descripción(opcional)
     if(linea.indexOf('|')>=0){
       var partes=linea.split('|');
       nombre=partes[0].trim();
       var mp=(partes[1]||'').match(/(\d[\d\.]*)/);
       if(mp) precio=parseInt(mp[1].replace(/\./g,''),10);
+      if(partes.length>=3) desc=partes.slice(2).join('|').trim();
     } else {
       precio = detectarPrecioLinea(linea, esUSD) || 0;
       nombre = detectarNombreLinea(linea);
@@ -3532,7 +3533,7 @@ function parsearCatalogo(){
     if(esUSD){ costo=Math.round(precio*cot); venta=markupDeCosto(costo); }
     else if(_catModo==='costo'){ costo=precio; venta=markupDeCosto(costo); }
     else { costo=null; venta=precio; }
-    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(esUSD?precio:null) });
+    _catParsed.push({ nombre:nombre, costo:costo, venta:venta, usd:(esUSD?precio:null), desc:desc });
   });
   renderCatPreview();
 }
@@ -3543,7 +3544,9 @@ function renderCatPreview(){
   _catParsed.slice(0,8).forEach(function(p){
     html+='<div style="background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 11px;margin-bottom:5px">'
       +'<div style="font-size:.76rem;font-weight:700;color:var(--txt)">'+p.nombre+'</div>'
-      +'<div style="font-size:.66rem;color:var(--sub)">'+(p.usd?'U$'+p.usd+' → ':'')+'Vende: <b style="color:var(--az)">'+fmt(p.venta)+'</b> · 6 cuotas '+fmt(valorCuota(p.venta,6))+'</div></div>';
+      +'<div style="font-size:.66rem;color:var(--sub)">'+(p.usd?'U$'+p.usd+' → ':'')+'Vende: <b style="color:var(--az)">'+fmt(p.venta)+'</b> · 6 cuotas '+fmt(valorCuota(p.venta,6))+'</div>'
+      +(p.desc?'<div style="font-size:.62rem;color:#2e7d32;margin-top:3px">📋 '+p.desc+'</div>':'')
+      +'</div>';
   });
   if(_catParsed.length>8) html+='<div style="text-align:center;font-size:.72rem;color:var(--sub);padding:4px">…y '+(_catParsed.length-8)+' más</div>';
   c.innerHTML=html;
@@ -3585,6 +3588,7 @@ function guardarCatalogoPegado(){
       // ya existe: actualizo precio, dejo la foto y las marcas
       existente.venta=np.venta;
       if(np.costo) existente.costo=np.costo;
+      if(np.desc && !existente.desc) existente.desc=np.desc;  // completa specs si no tenía
       existente.fechaPrecio=Date.now();
       existente.sinStock=false;          // volvió a estar en la lista → hay stock
       actualizados++;
@@ -3592,7 +3596,7 @@ function guardarCatalogoPegado(){
       var prod={
         id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
         nombre:np.nombre, venta:np.venta, foto:(i===0?_catFoto:''), categoria:'',
-        visible:true, fechaPrecio:Date.now()
+        visible:true, fechaPrecio:Date.now(), desc:(np.desc||'')
       };
       if(np.costo) prod.costo=np.costo;
       PRODUCTOS.push(prod);
