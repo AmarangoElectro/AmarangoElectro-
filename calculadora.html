@@ -5092,7 +5092,61 @@ function setCeluModo(m){
     : '📋 Un celu por línea, con su precio de venta en pesos. La lista nueva reemplaza la anterior.';
 }
 // clave para comparar nombres: minúsculas, sin espacios de más
-function claveNombre(n){return (n||'').toLowerCase().replace(/\s+/g,' ').trim();}
+// Genera una clave única por MARCA + MODELO + MEMORIA para reconocer el mismo
+// celular aunque esté escrito distinto ("Moto G15 128gb" == "Motorola G15 128").
+function claveNombre(n){
+  var s=(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // 1) normalizar abreviaturas de marca a un nombre canónico
+  var marcas=[
+    [/\b(moto|motorola)\b/, 'motorola'],
+    [/\b(iph|iphone|apple)\b/, 'iphone'],
+    [/\b(sams|samsung|sam)\b/, 'samsung'],
+    [/\b(xiao|xiaomi|redmi|poco|mi)\b/, 'xiaomi'],
+    [/\b(hon|honor)\b/, 'honor'],
+    [/\b(huaw|huawei)\b/, 'huawei'],
+    [/\b(realme)\b/, 'realme'],
+    [/\b(oppo)\b/, 'oppo'],
+    [/\b(vivo)\b/, 'vivo'],
+    [/\b(nokia)\b/, 'nokia'],
+    [/\b(tcl)\b/, 'tcl'],
+    [/\b(zte)\b/, 'zte'],
+    [/\b(lg)\b/, 'lg'],
+    [/\b(alcatel)\b/, 'alcatel'],
+    [/\b(infinix)\b/, 'infinix'],
+    [/\b(tecno)\b/, 'tecno']
+  ];
+  var marca='';
+  for(var i=0;i<marcas.length;i++){ if(marcas[i][0].test(s)){ marca=marcas[i][1]; break; } }
+  // 2) extraer memoria (128, 256, 512, 1024/1tb). "1tb" -> 1024
+  var mem='';
+  var mtb=s.match(/(\d+)\s*tb\b/);
+  if(mtb){ mem=String(parseInt(mtb[1],10)*1024); }
+  else{
+    var mgb=s.match(/\b(\d{2,4})\s*gb\b/) || s.match(/\b(16|32|64|128|256|512|1024)\b/);
+    if(mgb) mem=mgb[1];
+  }
+  // 3) RAM opcional (ej "8+256", "8/256", "8gb ram") para no confundir variantes de RAM
+  var ram='';
+  var mram=s.match(/\b(\d{1,2})\s*(?:\+|\/)\s*\d{2,4}\b/) || s.match(/\b(\d{1,2})\s*gb\s*ram\b/);
+  if(mram) ram=mram[1];
+  // 4) modelo: sacar marca, memoria, ram, palabras comerciales y dejar letras+números del modelo
+  var resto=s
+    .replace(/\b(moto|motorola|iph|iphone|apple|sams|samsung|sam|xiao|xiaomi|redmi|poco|mi|hon|honor|huaw|huawei|realme|oppo|vivo|nokia|tcl|zte|lg|alcatel|infinix|tecno)\b/g,' ')
+    .replace(/\b\d+\s*tb\b/g,' ')
+    .replace(/\b\d{2,4}\s*gb\b/g,' ')
+    .replace(/\b\d{1,2}\s*(?:\+|\/)\s*\d{2,4}\b/g,' ')
+    .replace(/\b\d{1,2}\s*gb\s*ram\b/g,' ')
+    .replace(/\b(ram|dual|sim|global|nacional|libre|nuevo|nueva|sellado|4g|5g|lte|gb|tb)\b/g,' ')
+    .replace(/[^a-z0-9]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+  // si detectamos memoria como número suelto en 'resto', quitarla del modelo
+  if(mem){ resto=resto.replace(new RegExp('\\b'+mem+'\\b'),'').replace(/\s+/g,' ').trim(); }
+  var modelo=resto.replace(/\s+/g,'');
+  // clave final. Si no se reconoció marca, usar el texto limpio como fallback (mejor no fusionar de más)
+  if(!marca && !modelo) return (n||'').toLowerCase().replace(/\s+/g,' ').trim();
+  return [marca, modelo, mem, ram].filter(Boolean).join('-');
+}
 // Caja de borrado con botones (no usa prompt, que falla en algunos celulares)
 var borrarBoxAbierto=false;
 function toggleBorrarBox(){
