@@ -177,7 +177,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 <!-- ═══ VERSIÓN: tienda-nueva · 15-jul-2026 · base membresía ═══ -->
-<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 15-jul</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 16-jul ✓SW</div>
 
 <!-- Panel de AYUDA -->
 <div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
@@ -420,7 +420,7 @@ function abrirSoporte(){
       +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Problemas raros</div>'
       +'<button onclick="limpiarDatosLocales()" style="width:100%;background:#FFF9F0;border:1.5px solid var(--nar);color:var(--nar);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🧹 La tienda muestra datos de otra</button>'
       +'<div style="font-size:.68rem;color:var(--sub);text-align:center;margin-top:5px">Limpia este teléfono. Tus datos en la nube no se tocan.</div>'
-      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6;margin-top:12px">🐝 <b style="color:var(--az)">Amarango</b> v2.2 · tienda: <b>'+TIENDA+'</b></div>'
+      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6;margin-top:12px">🐝 <b style="color:var(--az)">Amarango</b> v2.3 · tienda: <b>'+TIENDA+'</b></div>'
     +'</div>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
@@ -518,15 +518,74 @@ function optimizarFotos(){
    2) un Service Worker registrado
    Sin el service worker, solo hace un "acceso directo" con el ícono de Chrome. */
 function registrarServiceWorker(){
+  // ⚠️ NO registramos sw.js: ese archivo no existe (daba 404) y era la causa
+  // de que la tienda se quedara con versiones viejas. Sin Service Worker,
+  // la tienda carga SIEMPRE la última versión directo del servidor.
   if(!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register('sw.js')
-    .then(function(reg){
-      // fuerza buscar una versión nueva del service worker
-      if(reg && reg.update) reg.update();
-    })
-    .catch(function(e){ console.warn('SW:', e && e.message); });
+  // Limpieza: si un intento anterior dejó un SW roto instalado, lo damos de baja
+  // y borramos su caché. Esto libera a los celulares que quedaron "atascados".
+  try{
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(r){ r.unregister(); });
+    }).catch(function(){});
+    if('caches' in window){
+      caches.keys().then(function(keys){
+        keys.forEach(function(k){ caches.delete(k); });
+      }).catch(function(){});
+    }
+  }catch(e){}
 }
 registrarServiceWorker();
+
+/* 📤 Compartir la tienda entera por WhatsApp / apps del celu */
+function compartirTienda(){
+  var neg = (CONFIG && CONFIG.negocio) ? CONFIG.negocio : 'mi tienda';
+  // link limpio de la tienda (sin parámetros de admin ni nada raro)
+  var url = window.location.origin + window.location.pathname;
+  var p = new URLSearchParams(window.location.search);
+  var t = p.get('t');
+  if(t) url += '?t=' + t;   // conserva la tienda si va por ?t=
+  var texto = '🛍️ Mirá los productos de *' + neg + '*\n\n'
+    + 'Tenemos cuotas fijas y precios especiales 🐝\n\n'
+    + '👉 ' + url;
+  // 1) si el celu tiene "compartir" nativo (Android/iOS), lo usa (elige WhatsApp, IG, etc.)
+  if(navigator.share){
+    navigator.share({ title:neg, text:texto, url:url })
+      .catch(function(){ /* si cancela, nada */ });
+    return;
+  }
+  // 2) si no, WhatsApp directo
+  window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+}
+function copiarLinkTienda(){
+  var url = window.location.origin + window.location.pathname;
+  var p = new URLSearchParams(window.location.search);
+  var t = p.get('t'); if(t) url += '?t=' + t;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){ toastCarrito('📋 Link copiado'); })
+      .catch(function(){ prompt('Copiá el link de tu tienda:', url); });
+  } else { prompt('Copiá el link de tu tienda:', url); }
+}
+
+/* 🔄 Botón manual "Actualizar app" — red de seguridad definitiva.
+   Borra TODO el caché, da de baja el SW y recarga limpio. Nunca más reinstalar. */
+async function forzarActualizacion(){
+  try{ toastCarrito && toastCarrito('🔄 Actualizando…'); }catch(e){}
+  try{
+    if('caches' in window){
+      const claves = await caches.keys();
+      await Promise.all(claves.map(k => caches.delete(k)));
+    }
+  }catch(e){ console.warn(e); }
+  try{
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  }catch(e){ console.warn(e); }
+  // recarga saltando la caché del navegador
+  location.reload(true);
+}
 
 function armarManifest(){
   if(!CONFIG) return;
@@ -826,6 +885,13 @@ function abrirMas(){
   function fila(ico,txt,fn){ return '<div class="mas-row" onclick="'+fn+'"><span class="ic">'+ico+'</span><span class="tx">'+txt+'</span><span class="ar">›</span></div>'; }
 
   html+='<div class="mas-sec">Tu cuenta</div>';
+  // 📤 Compartir la tienda — destacado (verde WhatsApp)
+  html+='<div onclick="cerrarMas();compartirTienda()" style="background:linear-gradient(135deg,#25D366,#128C7E);border-radius:12px;padding:14px;display:flex;align-items:center;gap:11px;cursor:pointer;margin-bottom:8px;box-shadow:0 4px 14px rgba(37,211,102,.3)">'
+    +'<span style="font-size:1.6rem">📤</span>'
+    +'<div style="flex:1"><div style="color:#fff;font-size:.9rem;font-weight:900">Compartir mi tienda</div>'
+    +'<div style="color:rgba(255,255,255,.85);font-size:.72rem;margin-top:1px">Mandá el link por WhatsApp a tus clientes</div></div>'
+    +'<span style="color:#fff;font-size:1.2rem">›</span></div>';
+  html+=fila('🔗','Copiar link de mi tienda','cerrarMas();copiarLinkTienda()');
   html+=fila('🧮','¿Cuánto puedo pagar por mes?','cerrarMas();abrirSimulador()');
   html+=fila('❤️','Mis favoritos','cerrarMas();tabIr(\'favs\')');
   html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
@@ -837,6 +903,7 @@ function abrirMas(){
     +'<div style="color:rgba(255,255,255,.75);font-size:.7rem;margin-top:1px">Que quede en tu pantalla de inicio</div></div>'
     +'<span style="color:#ffb968;font-size:1.2rem">›</span></div>';
   html+=fila('❓','¿Cómo comprar?','cerrarMas();abrirAyuda()');
+  html+=fila('🔄','Actualizar la app','forzarActualizacion()');
   if(CONFIG && CONFIG.whatsapp) html+=fila('💬','Escribinos por WhatsApp','cerrarMas();window.open(\'https://wa.me/'+CONFIG.whatsapp.replace(/[^0-9]/g,'')+'\',\'_blank\')');
   if(CONFIG && CONFIG.instagram) html+=fila('📷','Seguinos en Instagram','cerrarMas();window.open(\'https://instagram.com/'+CONFIG.instagram.replace('@','')+'\',\'_blank\')');
 
@@ -857,7 +924,7 @@ function abrirMas(){
   }
   html+='</div>';
   // sello de versión (para saber si cargó el archivo nuevo)
-  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.2 · tienda: '+TIENDA+'</div>';
+  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.3 · tienda: '+TIENDA+'</div>';
   document.getElementById('masBody').innerHTML=html;
   document.getElementById('masOverlay').classList.add('on');
 }
