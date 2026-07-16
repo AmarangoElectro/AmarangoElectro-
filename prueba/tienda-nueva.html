@@ -1922,10 +1922,21 @@ function abrirPanelDueno(){
   // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
   var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
   document.getElementById('adminBody').innerHTML =
-     '<div style="display:grid;gap:10px">'
+     // 🐝 Oferta Sistema Amarango — solo para el dueño de SU tienda (no para Max)
+     (!esDuenoAmarango
+      ? '<button onclick="abrirSistemaAmarango()" style="width:100%;text-align:left;background:linear-gradient(135deg,#020c2e,var(--az));border:none;border-radius:15px;padding:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:13px;margin-bottom:12px;box-shadow:0 6px 20px rgba(11,45,107,.25);position:relative;overflow:hidden">'
+        +'<span style="position:absolute;top:-14px;right:-6px;font-size:3.5rem;opacity:.1">🐝</span>'
+        +'<span style="font-size:1.9rem">🚀</span>'
+        +'<span style="flex:1;position:relative"><span style="display:block;font-size:.94rem;font-weight:900;color:#fff">Sumate al Sistema Amarango</span>'
+        +'<span style="display:block;font-size:.74rem;color:rgba(255,255,255,.8);margin-top:2px">Vendé con nuestro método completo</span></span>'
+        +'<span style="color:#ffb968;font-size:1.3rem;position:relative">›</span>'
+        +'</button>'
+      : '')
+    +'<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('📦','Stock','Marcá qué hay y qué se agotó, de a uno o todos','stock')
+    +botonPanel('🧮','Calculadora de ganancia','Pegá el costo, poné tu % y te da el precio','calcganancia')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
     +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
     +'</div>'
@@ -1951,6 +1962,7 @@ function abrirModuloDueno(destino){
   if(destino==='placas'){ abrirPlacas(); return; }
   if(destino==='cargar'){ abrirCargar(); return; }
   if(destino==='stock'){ abrirGestionStock(); return; }
+  if(destino==='calcganancia'){ abrirCalcGanancia(); return; }
   if(destino==='pedidos'){ abrirPedidos(); return; }
   if(destino==='stats'){ abrirEstadisticas(); return; }
   if(destino==='pdf'){ abrirPDF(); return; }
@@ -2079,6 +2091,7 @@ var CONFIG_DEFAULT = {
   instagram: "@amarangoelectro", whatsapp: "", logo: "",
   colorPrincipal: "#0B2D6B", colorAcento: "#FF7A00",
   cuotas: {},              // (reservado) el sistema de cuotas es Amarango, calculado
+  gananciaPct: 30,         // % de la calculadora de ganancia (nivel gratis)
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
   // 🛡️ Confianza (todo configurable, todo opcional)
@@ -2985,6 +2998,203 @@ function verFotoGrande(idx, ev){
   z.style.display='flex';
 }
 function cerrarZoom(){ document.getElementById('fotoZoom').style.display='none'; }
+
+/* ═══════ 🐝 SISTEMA AMARANGO — página de venta del nivel PAGO ═══════
+   Vende el MÉTODO completo (no revela números). Tono cercano.
+   Embudo de preguntas → CTA a WhatsApp de Amarango (Ángela). */
+var _emb = { compromiso:null, capital:null, rubro:null };
+function abrirSistemaAmarango(){
+  var AZ='#0B2D6B', NAR='#FF7A00';
+  var html='';
+  // HERO
+  html+='<div style="margin:-4px -4px 0;background:linear-gradient(165deg,#020c2e 0%,'+AZ+' 65%,#12356f 100%);border-radius:18px;padding:26px 20px 24px;color:#fff;position:relative;overflow:hidden">'
+    +'<div style="position:absolute;top:-30px;right:-30px;font-size:9rem;opacity:.06">🐝</div>'
+    +'<div style="font-size:.66rem;font-weight:800;letter-spacing:2px;color:#ffb968;text-transform:uppercase;margin-bottom:10px">El sistema Amarango</div>'
+    +'<div style="font-size:1.7rem;font-weight:900;line-height:1.15;margin-bottom:10px">La forma en que <span style="color:#ffb968">Amarango</span> vende, ahora trabajando para vos.</div>'
+    +'<div style="font-size:.9rem;color:rgba(255,255,255,.82);line-height:1.5">No te damos una tienda más. Te abrimos la puerta al método completo con el que vendemos todos los días. 🐝</div>'
+    +'</div>';
+
+  // EL MÉTODO COMPLETO (las piezas de valor real)
+  function pieza(ico,t,s){
+    return '<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)">'
+      +'<div style="font-size:1.5rem;flex:0 0 auto;width:30px;text-align:center">'+ico+'</div>'
+      +'<div><div style="font-size:.92rem;font-weight:900;color:'+AZ+';margin-bottom:2px">'+t+'</div>'
+      +'<div style="font-size:.8rem;color:var(--sub);line-height:1.45">'+s+'</div></div></div>';
+  }
+  html+='<div style="margin:22px 2px 6px"><div style="font-size:.72rem;font-weight:900;color:'+NAR+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Para cualquier rubro</div></div>';
+  html+='<div style="padding:0 2px">'
+    +pieza('💳','Cuotas ya resueltas','Copiás, pegás y las cuotas salen calculadas al toque. El método que nos llevó años afinar, listo desde el día uno. Sirve para lo que vendas: ropa, tecnología, hogar, lo que sea.')
+    +pieza('🚀','Vendé apalancándote','El secreto real de cómo crecemos sin frenar por la plata. Te lo mostramos y te acompañamos a aplicarlo en tu negocio.')
+    +pieza('🤝','Te acompañamos','No te dejamos solo con una app. Estás adentro de la forma Amarango, con nosotros del otro lado ayudándote a crecer.')
+    +'</div>';
+
+  // BLOQUE ELECTRO — mayoristas propios (solo este rubro)
+  html+='<div style="margin:22px 2px 6px"><div style="font-size:.72rem;font-weight:900;color:'+NAR+';text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Si vendés electro y celulares</div>'
+    +'<div style="font-size:.74rem;color:var(--sub);margin-top:2px">Acá está lo nuestro de verdad. Los mayoristas que nos hicieron.</div></div>';
+  html+='<div style="padding:0 2px">'
+    +pieza('📦','Nuestros mayoristas de electro','No los de siempre, los que googlea cualquiera. Los nuestros. Precios y modelos que no vas a encontrar solo.')
+    +'</div>';
+  // ⭐ LA ESTRELLA — mayorista de 70 celulares
+  html+='<div style="margin:10px 2px 0;background:linear-gradient(135deg,#12356f,'+AZ+');border:1.5px solid #ffb96855;border-radius:16px;padding:18px;color:#fff;position:relative;overflow:hidden">'
+    +'<span style="position:absolute;top:-16px;right:-8px;font-size:4.5rem;opacity:.12">📱</span>'
+    +'<div style="font-size:.62rem;font-weight:900;letter-spacing:1.5px;color:#ffb968;text-transform:uppercase;margin-bottom:6px">⭐ La joya de Amarango</div>'
+    +'<div style="font-size:1.25rem;font-weight:900;line-height:1.2;margin-bottom:6px">Un mayorista con <span style="color:#ffb968">70 modelos</span> de celulares</div>'
+    +'<div style="font-size:.84rem;color:rgba(255,255,255,.85);line-height:1.5;position:relative">Samsung, iPhone, Infinix, Motorola y Xiaomi. El acceso que hace la diferencia entre vender de a uno y tener una tienda de verdad.</div>'
+    +'</div>';
+
+  // ESCALONES DE ACOMPAÑAMIENTO
+  html+='<div style="margin:24px 2px 10px"><div style="font-size:.72rem;font-weight:900;color:'+NAR+';text-transform:uppercase;letter-spacing:1px">Crecemos juntos, paso a paso</div></div>';
+  function escalon(num,t,s){
+    return '<div style="display:flex;gap:12px;align-items:center;background:#F5F8FF;border:1px solid #DDE7FA;border-radius:13px;padding:12px 14px;margin-bottom:8px">'
+      +'<div style="flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:'+AZ+';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem">'+num+'</div>'
+      +'<div><div style="font-size:.86rem;font-weight:900;color:'+AZ+'">'+t+'</div><div style="font-size:.76rem;color:var(--sub);line-height:1.4">'+s+'</div></div></div>';
+  }
+  html+='<div style="padding:0 2px">'
+    +escalon('1','Arrancás con nosotros','Empezás con el método y tu primer acceso. Vendés desde el día uno.')
+    +escalon('2','Ganás confianza','Cuando ves que funciona, te abrimos más mayoristas y herramientas.')
+    +escalon('3','Llegás a la joya','Acceso pleno, incluido el mayorista de los 70 modelos de celulares. Ya vendés igual que Amarango.')
+    +'</div>';
+
+  // PRECIO (en dólares, con promo)
+  html+='<div style="margin:24px 2px 0;background:linear-gradient(160deg,#020c2e,'+AZ+');border-radius:18px;padding:22px 20px;color:#fff;text-align:center">'
+    +'<div style="font-size:.66rem;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:8px">Membresía mensual</div>'
+    +'<div style="font-size:2.6rem;font-weight:900;line-height:1">USD 30<span style="font-size:1rem;font-weight:700;color:rgba(255,255,255,.6)">/mes</span></div>'
+    +'<div style="font-size:.74rem;color:rgba(255,255,255,.65);margin-top:4px">El método completo, los mayoristas y nuestro acompañamiento.</div>'
+    // promo 6 meses
+    +'<div style="background:rgba(255,184,104,.14);border:1px solid rgba(255,184,104,.4);border-radius:13px;padding:13px;margin-top:16px">'
+      +'<div style="font-size:.64rem;font-weight:800;color:#ffb968;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px">🔥 Si te adelantás 6 meses</div>'
+      +'<div style="font-size:.9rem;color:#fff"><span style="text-decoration:line-through;color:rgba(255,255,255,.45)">USD 180</span> &nbsp;<b style="font-size:1.3rem;color:#ffb968">USD 150</b></div>'
+      +'<div style="font-size:.72rem;color:rgba(255,255,255,.7);margin-top:3px">Pagás una vez y quedás cubierto medio año.</div>'
+    +'</div>'
+    +'</div>';
+
+  // MINI EMBUDO
+  html+='<div style="margin:24px 2px 10px"><div style="font-size:.72rem;font-weight:900;color:'+NAR+';text-transform:uppercase;letter-spacing:1px">¿Es para vos? Contanos</div>'
+    +'<div style="font-size:.76rem;color:var(--sub);margin-top:3px">3 preguntas rápidas. Con esto llegamos a la charla ya sabiendo cómo ayudarte.</div></div>';
+  html+='<div id="embBody" style="padding:0 2px"></div>';
+
+  html+='<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:'+AZ+';border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:18px">‹ Volver</button>';
+
+  document.getElementById('adminBody').innerHTML=html;
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
+  renderEmbSA();
+}
+function renderEmbSA(){
+  var cont=document.getElementById('embBody'); if(!cont) return;
+  var AZ='#0B2D6B', NAR='#FF7A00';
+  function bloque(campo,pregunta,ops){
+    var h='<div style="font-size:.82rem;font-weight:800;color:'+AZ+';margin-bottom:7px">'+pregunta+'</div><div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">';
+    ops.forEach(function(o){
+      var on=_emb[campo]===o;
+      h+='<button onclick="setEmb(\''+campo+'\',\''+o.replace(/'/g,"\\'")+'\')" style="border:1.5px solid '+(on?NAR:'var(--line)')+';background:'+(on?NAR:'#fff')+';color:'+(on?'#fff':'var(--sub)')+';border-radius:20px;padding:9px 15px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit">'+o+'</button>';
+    });
+    return h+'</div>';
+  }
+  var html='';
+  html+=bloque('rubro','¿Qué vendés?',['Electro','Ropa','Varios','Otro']);
+  html+=bloque('capital','¿Con cuánto arrancás?',['Poco','Medio','Tengo capital']);
+  html+=bloque('compromiso','¿Qué tan en serio lo tomás?',['Probando','Voy en serio','Todo o nada']);
+
+  // CTA solo se activa cuando respondió las 3
+  var listo=_emb.rubro && _emb.capital && _emb.compromiso;
+  if(listo){
+    var esElectro = _emb.rubro==='Electro';
+    var msg='Hola! Quiero sumarme al Sistema Amarango 🐝\n\n'
+      +'• Vendo: '+_emb.rubro+'\n'
+      +'• Arranco con: '+_emb.capital+'\n'
+      +'• Compromiso: '+_emb.compromiso+'\n'
+      +(esElectro?'• Me interesan sus mayoristas (incluido el de los 70 celulares) 📱\n':'')
+      +'\n¿Cómo seguimos?';
+    html+='<button onclick="window.open(\'https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent(msg)+'\',\'_blank\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:16px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,.3)">💬 Hablar con Amarango</button>'
+      +'<div style="text-align:center;font-size:.7rem;color:var(--sub);margin-top:8px">Te respondemos y vemos juntos si es tu momento. 🐝</div>';
+  } else {
+    html+='<div style="background:#F7F8FA;border:1px dashed var(--line);border-radius:12px;padding:14px;text-align:center;font-size:.78rem;color:var(--sub)">Respondé las 3 para hablar con nosotros 👆</div>';
+  }
+  cont.innerHTML=html;
+}
+function setEmb(campo,val){ _emb[campo]=val; renderEmbSA(); }
+
+/* ═══════ 🧮 CALCULADORA DE GANANCIA (nivel gratis) ═══════
+   Pegás el costo del mayorista, ponés TU % de ganancia y te da el precio.
+   Simple, sin sistema Amarango. Es el anzuelo. */
+var _gananciaPct = null;
+function abrirCalcGanancia(){
+  var pct = (_gananciaPct!=null) ? _gananciaPct : (CONFIG && CONFIG.gananciaPct!=null ? CONFIG.gananciaPct : 30);
+  _gananciaPct = pct;
+  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:2px">🧮 Calculadora de ganancia</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">Pegá el producto del mayorista con su costo. Poné cuánto querés ganar y te doy el precio de venta. 🐝</div>'
+    // pegar texto del mayorista
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📋 Pegá el producto (con el costo)</div>'
+    +'<textarea id="cg_txt" oninput="calcGanancia()" placeholder="Ej: Remera oversize negra $10.000" style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:.86rem;min-height:80px;outline:none;resize:vertical;box-sizing:border-box"></textarea>'
+    // % de ganancia
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px">💰 ¿Cuánto querés ganar?</div>'
+    +'<div id="cg_pcts" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px"></div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      +'<span style="font-size:.76rem;color:var(--sub);font-weight:700">Otro %:</span>'
+      +'<input type="number" id="cg_otro" value="'+pct+'" oninput="setGananciaPct(this.value)" style="width:80px;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.9rem;font-weight:900;color:var(--nar);outline:none;text-align:center">'
+      +'<span style="font-weight:900;color:var(--sub)">%</span>'
+    +'</div>'
+    +'<div id="cg_resultado" style="margin-top:14px"></div>';
+  document.getElementById('adminBody').innerHTML=html;
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
+  renderPctsGanancia();
+  calcGanancia();
+}
+function renderPctsGanancia(){
+  var cont=document.getElementById('cg_pcts'); if(!cont) return;
+  cont.innerHTML=[10,20,30,40,50].map(function(p){
+    var on=_gananciaPct===p;
+    return '<button onclick="setGananciaPct('+p+')" style="border:1.5px solid '+(on?'var(--nar)':'var(--line)')+';background:'+(on?'var(--nar)':'#fff')+';color:'+(on?'#fff':'var(--sub)')+';border-radius:20px;padding:8px 15px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit">'+p+'%</button>';
+  }).join('');
+}
+function setGananciaPct(v){
+  _gananciaPct = Math.max(0, parseFloat(v)||0);
+  if(CONFIG){ CONFIG.gananciaPct=_gananciaPct; try{ guardarConfig(); }catch(e){} }
+  var otro=document.getElementById('cg_otro'); if(otro && otro.value!=String(_gananciaPct)) otro.value=_gananciaPct;
+  renderPctsGanancia();
+  calcGanancia();
+}
+function calcGanancia(){
+  var cont=document.getElementById('cg_resultado'); if(!cont) return;
+  var txt=(document.getElementById('cg_txt')||{}).value||'';
+  var costo=detectarPrecioPlaca(txt);
+  if(!costo){
+    cont.innerHTML='<div style="text-align:center;color:var(--sub);padding:22px 16px;font-size:.82rem;background:#F7F8FA;border-radius:12px"><div style="font-size:2rem;margin-bottom:6px">📋</div>Pegá un producto con su precio de costo (con $).</div>';
+    return;
+  }
+  var pct=_gananciaPct||0;
+  var venta=Math.round(costo*(1+pct/100)/500)*500;   // redondeo a $500
+  var ganancia=venta-costo;
+  var nombre=(typeof limpiarNombre==='function') ? limpiarNombre(txt) : txt.split('\n')[0];
+  cont.innerHTML=
+     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff;text-align:center">'
+      +'<div style="font-size:.66rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px">Precio de venta</div>'
+      +'<div style="font-size:2.1rem;font-weight:900;margin:2px 0">'+fmt(venta)+'</div>'
+      +'<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:.72rem">'
+        +'<span style="color:rgba(255,255,255,.7)">Costo: <b style="color:#fff">'+fmt(costo)+'</b></span>'
+        +'<span style="color:#86efac">Ganás: <b>'+fmt(ganancia)+'</b> ('+pct+'%)</span>'
+      +'</div>'
+    +'</div>'
+    // botón para sumarlo a la tienda directo
+    +'<button onclick="agregarDesdeCalc()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:12px">➕ Agregar a mi tienda</button>'
+    +'<button onclick="copiarPrecioCalc('+venta+')" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px;font-size:.82rem">📋 Copiar precio</button>';
+  // guardo lo último calculado para el botón agregar
+  window._ultCalc={ nombre:nombre, venta:venta, costo:costo };
+}
+function copiarPrecioCalc(venta){
+  var t=fmt(venta);
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ toastCarrito('📋 Precio copiado'); }).catch(function(){ prompt('Copiá:', t); }); }
+  else prompt('Copiá:', t);
+}
+function agregarDesdeCalc(){
+  var u=window._ultCalc; if(!u || !u.venta){ toastCarrito('Primero pegá un producto'); return; }
+  var prod={ nombre:u.nombre||'Producto', venta:u.venta, costo:u.costo, visible:true, fechaPrecio:Date.now() };
+  PRODUCTOS.unshift(prod);
+  guardarCatalogo(); render();
+  toastCarrito('✅ Agregado a tu tienda');
+  // limpio el texto para cargar el siguiente
+  var t=document.getElementById('cg_txt'); if(t){ t.value=''; calcGanancia(); }
+}
 
 /* Marca/desmarca SIN STOCK directo desde la tarjeta (sin abrir opciones) */
 function toggleStockRapido(idx){
