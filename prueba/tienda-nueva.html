@@ -1925,6 +1925,7 @@ function abrirPanelDueno(){
      '<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
+    +botonPanel('📦','Stock','Marcá qué hay y qué se agotó, de a uno o todos','stock')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
     +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
     +'</div>'
@@ -1949,6 +1950,7 @@ function abrirModuloDueno(destino){
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
   if(destino==='cargar'){ abrirCargar(); return; }
+  if(destino==='stock'){ abrirGestionStock(); return; }
   if(destino==='pedidos'){ abrirPedidos(); return; }
   if(destino==='stats'){ abrirEstadisticas(); return; }
   if(destino==='pdf'){ abrirPDF(); return; }
@@ -2076,8 +2078,7 @@ var CONFIG_DEFAULT = {
   negocio: "AmarangoElectro", eslogan: "Equipá tu casa en cuotas",
   instagram: "@amarangoelectro", whatsapp: "", logo: "",
   colorPrincipal: "#0B2D6B", colorAcento: "#FF7A00",
-  cuotas: {},              // solo se usa en sistema 'propio' (el dueño pone los suyos)
-  sistemaCuotas: 'amarango',  // 'amarango' (oculto, calcula solo) | 'propio' (editable)
+  cuotas: {},              // (reservado) el sistema de cuotas es Amarango, calculado
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
   // 🛡️ Confianza (todo configurable, todo opcional)
@@ -2985,6 +2986,64 @@ function verFotoGrande(idx, ev){
 }
 function cerrarZoom(){ document.getElementById('fotoZoom').style.display='none'; }
 
+/* Marca/desmarca SIN STOCK directo desde la tarjeta (sin abrir opciones) */
+function toggleStockRapido(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  p.sinStock=!p.sinStock;
+  guardarCatalogo();
+  render();
+  toastCarrito(p.sinStock?'⛔ Marcado sin stock':'✅ Marcado con stock');
+}
+
+/* Panel de gestión de STOCK: de a uno o todos a la vez */
+function abrirGestionStock(){
+  var conStock=PRODUCTOS.filter(function(p){return !p.sinStock;}).length;
+  var sinStk=PRODUCTOS.length-conStock;
+  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:2px">📦 Stock</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:12px">Tocá un producto para marcarlo con o sin stock. 🐝</div>'
+    // resumen
+    +'<div style="display:flex;gap:7px;margin-bottom:12px">'
+      +'<div style="flex:1;background:#F0FDF4;border:1px solid #A7F3D0;border-radius:11px;padding:9px;text-align:center"><div style="font-size:1.2rem;font-weight:900;color:#059669">'+conStock+'</div><div style="font-size:.56rem;color:#059669;font-weight:800">CON STOCK</div></div>'
+      +'<div style="flex:1;background:#FEF2F2;border:1px solid #FECACA;border-radius:11px;padding:9px;text-align:center"><div style="font-size:1.2rem;font-weight:900;color:#DC2626">'+sinStk+'</div><div style="font-size:.56rem;color:#DC2626;font-weight:800">SIN STOCK</div></div>'
+    +'</div>'
+    // acciones masivas
+    +'<div style="display:flex;gap:7px;margin-bottom:14px">'
+      +'<button onclick="stockTodos(false)" style="flex:1;background:#F0FDF4;border:1.5px solid #A7F3D0;color:#059669;border-radius:10px;padding:11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit">✅ Todos con stock</button>'
+      +'<button onclick="stockTodos(true)" style="flex:1;background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:10px;padding:11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit">⛔ Todos sin stock</button>'
+    +'</div>';
+  if(!PRODUCTOS.length){
+    html+='<div style="text-align:center;color:var(--sub);padding:26px;font-size:.85rem">Todavía no hay productos.</div>';
+  } else {
+    html+='<div style="display:grid;gap:6px">';
+    PRODUCTOS.forEach(function(p){
+      var idx=PRODUCTOS.indexOf(p);
+      var sin=!!p.sinStock;
+      html+='<button onclick="stockUno('+idx+')" style="display:flex;align-items:center;gap:10px;text-align:left;background:'+(sin?'#FEF2F2':'#fff')+';border:1.5px solid '+(sin?'#FECACA':'var(--line)')+';border-radius:10px;padding:10px 12px;cursor:pointer;font-family:inherit">'
+        +'<span style="font-size:1.1rem">'+(sin?'⛔':'✅')+'</span>'
+        +'<span style="flex:1;min-width:0;font-size:.8rem;font-weight:700;color:'+(sin?'#DC2626':'var(--txt)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.nombre+'</span>'
+        +'<span style="font-size:.66rem;font-weight:800;color:'+(sin?'#DC2626':'#059669')+'">'+(sin?'Sin stock':'Con stock')+'</span>'
+        +'</button>';
+    });
+    html+='</div>';
+  }
+  document.getElementById('adminBody').innerHTML=html;
+  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
+}
+function stockUno(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  p.sinStock=!p.sinStock;
+  guardarCatalogo(); render();
+  abrirGestionStock();
+}
+function stockTodos(sinStock){
+  var txt = sinStock ? 'marcar TODOS los productos SIN stock' : 'marcar TODOS los productos CON stock';
+  if(!confirm('¿Seguro que querés '+txt+'?')) return;
+  PRODUCTOS.forEach(function(p){ p.sinStock=sinStock; });
+  guardarCatalogo(); render();
+  abrirGestionStock();
+  toastCarrito(sinStock?'⛔ Todo marcado sin stock':'✅ Todo marcado con stock');
+}
+
 /* Opciones del producto — directo desde la tarjeta, sin abrir el detalle */
 function abrirOpcionesRapidas(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
@@ -3080,50 +3139,22 @@ function elegirModoVenta(k){
 /* Los planes de cuotas: editables, hasta 12 */
 function renderPlanesConfig(c){
   var activos=c.planesActivos||[2,4,6];
-  var esPropio = c.sistemaCuotas==='propio';
-  var esMax = (TIENDA==='amarango' || c.duenoPlataforma===true);  // Maxi/Ángela
   var html='';
 
-  // ── Selector de SISTEMA ──
-  html+='<div style="font-size:.72rem;color:var(--sub);margin-bottom:9px">Elegí con qué sistema calculás las cuotas.</div>'
-    +'<div style="display:grid;gap:8px;margin-bottom:14px">';
-  // opción Amarango
-  html+='<button onclick="setSistemaCuotas(\'amarango\')" style="text-align:left;background:'+(!esPropio?'#FFF0E0':'#fff')+';border:2px solid '+(!esPropio?'var(--nar)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px">'
-    +'<span style="font-size:1.5rem">🐝</span>'
-    +'<div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Sistema Amarango</div><div style="font-size:.72rem;color:var(--sub);line-height:1.35">'+(esMax?'Nuestros porcentajes. Solo Maxi y Ángela los controlan.':'Cuotas ya calculadas y probadas. Vos ves el precio final listo.')+'</div></div>'
-    +(!esPropio?'<span style="font-size:1.1rem">✅</span>':'')
-    +'</button>';
-  // opción propio
-  html+='<button onclick="setSistemaCuotas(\'propio\')" style="text-align:left;background:'+(esPropio?'#FFF0E0':'#fff')+';border:2px solid '+(esPropio?'var(--nar)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px">'
-    +'<span style="font-size:1.5rem">✏️</span>'
-    +'<div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Mi propio sistema</div><div style="font-size:.72rem;color:var(--sub);line-height:1.35">Vos ponés el porcentaje de cada plan de cuotas.</div></div>'
-    +(esPropio?'<span style="font-size:1.1rem">✅</span>':'')
-    +'</button>';
-  html+='</div>';
-
-  // ── Planes activos (siempre podés elegir CUÁNTAS cuotas, en los dos sistemas) ──
-  html+='<div style="font-size:.7rem;font-weight:800;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">En cuántas cuotas vendés</div>'
+  // ── Elegir en cuántas cuotas vende (el % es Amarango, oculto) ──
+  html+='<div style="font-size:.72rem;color:var(--sub);margin-bottom:9px">Elegí en cuántas cuotas vendés. Los valores los calcula el sistema Amarango. 🐝</div>'
     +'<div style="display:grid;gap:7px;margin-bottom:12px">';
   [2,3,4,5,6,9,12].forEach(function(n){
     var on=activos.indexOf(n)>=0;
     html+='<div style="display:flex;align-items:center;gap:8px;background:'+(on?'#FFF9F0':'#fff')+';border:1.5px solid '+(on?'var(--nar)':'var(--line)')+';border-radius:11px;padding:9px 11px">'
       +'<button onclick="togglePlan('+n+')" style="background:none;border:none;font-size:1.1rem;cursor:pointer;padding:0">'+(on?'✅':'⬜')+'</button>'
-      +'<span style="flex:1;font-size:.84rem;font-weight:800;color:'+(on?'var(--az)':'var(--sub)')+'">'+n+' cuotas</span>';
-    // el input de % SOLO en sistema propio
-    if(on && esPropio){
-      var pct=(c.cuotas && c.cuotas[n]!=null) ? c.cuotas[n] : 0;
-      html+='<input type="number" id="pl_'+n+'" value="'+pct+'" oninput="cambiarPct('+n+',this.value)" placeholder="%" style="width:64px;border:1.5px solid var(--line);border-radius:8px;padding:7px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--nar);outline:none;text-align:center">'
-        +'<span style="font-size:.76rem;font-weight:800;color:var(--sub)">%</span>';
-    } else if(on){
-      html+='<span style="font-size:.72rem;color:#059669;font-weight:800">activo</span>';
-    } else {
-      html+='<span style="font-size:.72rem;color:var(--sub)">apagado</span>';
-    }
-    html+='</div>';
+      +'<span style="flex:1;font-size:.84rem;font-weight:800;color:'+(on?'var(--az)':'var(--sub)')+'">'+n+' cuotas</span>'
+      +(on?'<span style="font-size:.72rem;color:#059669;font-weight:800">activo</span>':'<span style="font-size:.72rem;color:var(--sub)">apagado</span>')
+      +'</div>';
   });
   html+='</div>';
 
-  // ── Ejemplo en vivo (SIEMPRE muestra el resultado, NUNCA el %) ──
+  // ── Ejemplo en vivo (muestra el RESULTADO, nunca el %) ──
   var ej=100000;
   var lineas=activos.slice().sort(function(a,b){return a-b;}).map(function(n){
     var v=Math.round(ej*(1+pctPlan(n)/100)/n/1000)*1000;
@@ -3132,25 +3163,16 @@ function renderPlanesConfig(c){
   html+='<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:11px;padding:11px;margin-bottom:12px">'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--az);margin-bottom:5px">📊 Ejemplo: un producto de '+fmt(ej)+'</div>'
     +lineas
-    +(!esPropio?'<div style="font-size:.66rem;color:var(--sub);margin-top:7px;line-height:1.4">Así le quedan las cuotas a tus clientes con el sistema Amarango. 🐝</div>':'')
+    +'<div style="font-size:.66rem;color:var(--sub);margin-top:7px;line-height:1.4">Así le quedan las cuotas a tus clientes. 🐝</div>'
     +'</div>';
   return html;
 }
-function setSistemaCuotas(modo){
-  CONFIG.sistemaCuotas = modo;
-  // si pasa a propio y no tiene sus %, arranca en blanco (que los ponga él)
-  if(modo==='propio' && !CONFIG.cuotas) CONFIG.cuotas={};
-  guardarConfig(); aplicarConfig(); render(); abrirConfig();
-}
-function sugerirPct(n){ return 0; }   // ya no expone valores; el sistema calcula solo
+function sugerirPct(n){ return 0; }
 function togglePlan(n){
   var a=CONFIG.planesActivos||[2,4,6];
   var i=a.indexOf(n);
   if(i>=0){ a.splice(i,1); }
-  else {
-    a.push(n);
-    if(CONFIG.sistemaCuotas==='propio'){ if(!CONFIG.cuotas) CONFIG.cuotas={}; if(CONFIG.cuotas[n]==null) CONFIG.cuotas[n]=0; }
-  }
+  else { a.push(n); }
   if(!a.length){ alert('Tenés que dejar al menos un plan de cuotas.\n\nSi no querés vender en cuotas, elegí «Solo contado» arriba.'); return; }
   CONFIG.planesActivos=a.sort(function(x,y){return x-y;});
   guardarConfig(); aplicarConfig();
@@ -4285,10 +4307,7 @@ var PLANES = {};   // se arma en aplicarConfig() según el sistema elegido
 var _AX = { 2:[3,5], 3:[5,5], 4:[11,5], 5:[13,5], 6:[13,6], 9:[22,5], 12:[29,5] };
 function _ax(n){ var p=_AX[n]; return p ? (p[0]*p[1]) : 0; }   // 2→15, 4→55, 6→78, …
 function pctPlan(n){
-  // si la tienda usa el sistema propio, manda su config; si no, el sistema Amarango
-  if(CONFIG && CONFIG.sistemaCuotas==='propio'){
-    return (CONFIG.cuotas && CONFIG.cuotas[n]!=null) ? CONFIG.cuotas[n] : 0;
-  }
+  // el sistema es siempre Amarango (oculto). Se ignora cualquier % guardado antes.
   return _ax(n);
 }
 function valorCuota(venta,n){ return Math.round(venta*(1+pctPlan(n)/100)/n/1000)*1000; }
@@ -4484,7 +4503,10 @@ function render(){
           +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">🖼️ Foto</button>'
           +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:8px;padding:8px 9px;font-size:.66rem;cursor:pointer;font-family:inherit">🗑️</button>'
         +'</div>'
-        +'<button onclick="abrirOpcionesRapidas('+idx+')" style="width:100%;background:#fff;border:1.5px solid var(--nar);color:var(--nar);border-radius:8px;padding:8px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit">⚙️ Opciones del producto</button>';
+        +'<div style="display:flex;gap:5px">'
+          +'<button onclick="toggleStockRapido('+idx+')" style="flex:1;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
+          +'<button onclick="abrirOpcionesRapidas('+idx+')" style="flex:1;background:#fff;border:1.5px solid var(--nar);color:var(--nar);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">⚙️ Opciones</button>'
+        +'</div>';
     }
     else if(rolT==='revendedor'){
       botones='<button class="share" onclick="compartir('+idx+')">📤 Compartir</button>';
