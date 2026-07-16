@@ -754,32 +754,14 @@ function abrirCarrito(){
         +'<button onclick="quitarDelCarrito(\''+it.id+'\')" style="background:none;border:none;color:#DC2626;font-size:1rem;cursor:pointer;padding:4px">✕</button>'
         +'</div>';
     });
-    var totBruto=totalCarrito();
-    var desc=descuentoCupon(totBruto);
-    var tot=totBruto-desc;
-    // 🎟️ caja de cupón (canje por código)
-    if(cuponAplicado){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;background:#DCFCE7;border:1px solid #86efac;border-radius:12px;padding:10px 12px;margin-bottom:9px">'
-        +'<span style="font-size:.8rem;font-weight:900;color:#0a8a3f">🎟️ '+cuponAplicado.codigo+' ('+(cuponAplicado.tipo==='pct'?cuponAplicado.valor+'% off':fmt(cuponAplicado.valor)+' off')+')</span>'
-        +'<button onclick="quitarCupon()" style="background:none;border:none;color:#DC2626;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit">Quitar</button>'
-        +'</div>';
-    } else {
-      html+='<div style="display:flex;gap:7px;margin-bottom:9px">'
-        +'<input id="cupon-inp" placeholder="🎟️ Código de cupón" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:.8rem;text-transform:uppercase;outline:none;box-sizing:border-box">'
-        +'<button onclick="aplicarCuponInput()" style="background:var(--az);color:#fff;border:none;border-radius:11px;padding:0 16px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap">Aplicar</button>'
-        +'</div>';
-    }
-    // el gancho: las cuotas del TOTAL (ya con descuento)
+    var tot=totalCarrito();
+    // el gancho: las cuotas del TOTAL
     var cuotasHtml='';
     cuotasActivas().forEach(function(n){
       cuotasHtml+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12)"><span style="font-size:.8rem;font-weight:700;color:#fff">'+n+' cuotas fijas</span><span style="font-size:.95rem;font-weight:900;color:#ffb968">'+fmt(valorCuota(tot,n))+'</span></div>';
     });
-    html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:16px;margin-top:6px;color:#fff">';
-    if(desc>0){
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:.74rem;color:rgba(255,255,255,.6)">Subtotal</span><span style="font-size:.9rem;font-weight:700;text-decoration:line-through;color:rgba(255,255,255,.5)">'+fmt(totBruto)+'</span></div>'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:.74rem;color:#86efac">Descuento 🎟️</span><span style="font-size:.9rem;font-weight:800;color:#86efac">−'+fmt(desc)+'</span></div>';
-    }
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.7)">Total contado</span><span style="font-size:1.5rem;font-weight:900">'+fmt(tot)+'</span></div>'
+    html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:16px;margin-top:6px;color:#fff">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.7)">Total contado</span><span style="font-size:1.5rem;font-weight:900">'+fmt(tot)+'</span></div>'
       +'<div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">O en cuotas fijas</div>'
       +cuotasHtml
       +'</div>';
@@ -790,223 +772,35 @@ function abrirCarrito(){
   document.getElementById('carritoOverlay').classList.add('on'); empujarPantalla('carrito', cerrarCarrito);
 }
 function cerrarCarrito(){ document.getElementById('carritoOverlay').classList.remove('on'); }
-function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]); cuponAplicado=null; abrirCarrito(); } }
-
-/* ═══════ 🎟️ CUPONES — código de descuento canjeable en el carrito ═══════
-   tipo: 'pct' (%) o 'monto' ($). Multi-tienda con lsKey. */
-var cuponAplicado=null;
-var CUPONES_DEFAULT=[
-  {codigo:'BIENVENIDO10', tipo:'pct', valor:10},
-  {codigo:'AMARANGO5', tipo:'pct', valor:5}
-];
-function cargarCupones(){
-  try{ var g=localStorage.getItem(lsKey('ae_cupones')); if(g){ var a=JSON.parse(g); if(a) return a; } }catch(e){}
-  return CUPONES_DEFAULT.slice();
-}
-function guardarCupones(lista){
-  try{ localStorage.setItem(lsKey('ae_cupones'), JSON.stringify(lista)); }catch(e){}
-  // sube a la nube si está conectada (misma tabla de la tienda)
-  try{ if(typeof sb!=='undefined' && sb){ sb.from('tienda_catalogo').upsert({ id:lsKey('cupones'), datos:lista }).then(function(){}).catch(function(){}); } }catch(e){}
-}
-function descuentoCupon(total){
-  if(!cuponAplicado) return 0;
-  return cuponAplicado.tipo==='pct'
-    ? Math.round(total*cuponAplicado.valor/100)
-    : Math.min(cuponAplicado.valor,total);
-}
-function aplicarCuponInput(){
-  var el=document.getElementById('cupon-inp');
-  var cod=(el&&el.value||'').trim().toUpperCase();
-  if(!cod){ return; }
-  var cup=cargarCupones().find(function(c){ return String(c.codigo).toUpperCase()===cod; });
-  if(!cup){ toastCarrito('❌ Cupón no válido'); return; }
-  cuponAplicado=cup;
-  toastCarrito('🎟️ Cupón aplicado');
-  abrirCarrito();
-}
-function quitarCupon(){ cuponAplicado=null; abrirCarrito(); }
-
-/* Panel admin de cupones: crear, listar y borrar códigos de descuento */
-function abrirCupones(){
-  var cups=cargarCupones();
-  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🎟️ Cupones de descuento</div>'
-    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:16px">Creá códigos que tus clientes escriben en el carrito para pagar menos. Ideal para fechas especiales o clientes nuevos. 🐝</div>';
-  // formulario de alta
-  html+='<div style="background:#F5F8FF;border:1px solid #DDE7FA;border-radius:13px;padding:13px;margin-bottom:16px">'
-    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px">Nuevo cupón</div>'
-    +'<input id="cup-cod" placeholder="Código (ej: VERANO20)" style="width:100%;padding:11px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:.82rem;text-transform:uppercase;box-sizing:border-box;margin-bottom:8px;outline:none">'
-    +'<div style="display:flex;gap:8px;margin-bottom:10px">'
-      +'<select id="cup-tipo" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:.82rem;background:#fff;outline:none"><option value="pct">% de descuento</option><option value="monto">$ fijo de descuento</option></select>'
-      +'<input id="cup-val" type="number" inputmode="numeric" placeholder="Valor" style="flex:1;padding:11px;border:1.5px solid var(--line);border-radius:11px;font-family:inherit;font-size:.82rem;box-sizing:border-box;outline:none">'
-    +'</div>'
-    +'<button onclick="crearCupon()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit">➕ Crear cupón</button>'
-    +'</div>';
-  // lista
-  html+='<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px">Tus cupones ('+cups.length+')</div>';
-  if(!cups.length){
-    html+='<div style="text-align:center;color:var(--sub);padding:26px 20px;font-size:.82rem"><div style="font-size:2.2rem;margin-bottom:6px">🎟️</div>Todavía no tenés cupones.</div>';
-  } else {
-    cups.forEach(function(c,i){
-      var etiq=c.tipo==='pct' ? c.valor+'% OFF' : fmt(c.valor)+' OFF';
-      html+='<div style="display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px">'
-        +'<div style="font-size:1.3rem">🎟️</div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:.86rem;font-weight:900;color:var(--az);letter-spacing:.5px">'+c.codigo+'</div><div style="font-size:.72rem;font-weight:800;color:#059669">'+etiq+'</div></div>'
-        +'<button onclick="borrarCupon('+i+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:9px;padding:9px 12px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit">🗑️</button>'
-        +'</div>';
-    });
-  }
-  document.getElementById('adminBody').innerHTML=html;
-  document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
-}
-function crearCupon(){
-  var cod=(document.getElementById('cup-cod').value||'').trim().toUpperCase();
-  var tipo=document.getElementById('cup-tipo').value;
-  var val=parseFloat(document.getElementById('cup-val').value)||0;
-  if(!cod || val<=0){ alert('Poné un código y un valor.'); return; }
-  var cups=cargarCupones();
-  if(cups.find(function(c){ return String(c.codigo).toUpperCase()===cod; })){ alert('Ya existe un cupón con ese código.'); return; }
-  cups.push({codigo:cod, tipo:tipo, valor:val});
-  guardarCupones(cups);
-  abrirCupones();
-}
-function borrarCupon(i){
-  var cups=cargarCupones();
-  var c=cups[i]; if(!c) return;
-  if(!confirm('¿Borrar el cupón "'+c.codigo+'"?')) return;
-  cups.splice(i,1);
-  guardarCupones(cups);
-  abrirCupones();
-}
+function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]); abrirCarrito(); } }
 
 /* Pedir: manda TODO junto por WhatsApp, eligiendo vendedor */
-/* ═══════ 🛒 CHECKOUT GUIADO — plan → datos → resumen → enviar ═══════ */
-var CHK={ plan:0, cliente:null };
 function pedirCarrito(){
   var c=cargarCarrito(); if(!c.length)return;
-  CHK={ plan:0, cliente:null };
-  // precarga datos del cliente si ya se registró
-  try{ CHK.cliente=JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){}
-  cerrarCarrito();
-  chkPaso1Plan();
-}
-function chkAbrir(html){
-  document.getElementById('ayudaBody').innerHTML=html;
-  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
-}
-function chkTotales(){
-  var totBruto=totalCarrito();
-  var desc=descuentoCupon(totBruto);
-  return { bruto:totBruto, desc:desc, tot:totBruto-desc };
-}
-/* PASO 1 · elegir plan (contado o cuotas) */
-function chkPaso1Plan(){
-  var t=chkTotales();
-  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:2px">🛒 ¿Cómo querés pagar?</div>'
-    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">'+cantCarrito()+' producto'+(cantCarrito()===1?'':'s')+' · Total '+fmt(t.tot)+(t.desc>0?' <span style="color:#059669;font-weight:800">(🎟️ −'+fmt(t.desc)+')</span>':'')+'</div>';
-  // contado
-  html+=chkOpcionPlan(0,'💵 Contado','Pagás todo junto',fmt(t.tot));
-  // cuotas activas
-  cuotasActivas().forEach(function(n){
-    html+=chkOpcionPlan(n,n+' cuotas fijas','Retirás pagando la 1ª','de '+fmt(valorCuota(t.tot,n)));
-  });
-  html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">← Cancelar</button>';
-  chkAbrir(html);
-}
-function chkOpcionPlan(n,titulo,sub,valor){
-  var on=CHK.plan===n;
-  return '<button onclick="CHK.plan='+n+';chkPaso2Datos()" style="width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:'+(on?'#F5F8FF':'#fff')+';border:1.5px solid '+(on?'var(--az)':'var(--line)')+';border-radius:13px;padding:13px;margin-bottom:9px;cursor:pointer;font-family:inherit">'
-    +'<div style="flex:1;min-width:0"><div style="font-size:.9rem;font-weight:900;color:var(--az)">'+titulo+'</div><div style="font-size:.72rem;color:var(--sub)">'+sub+'</div></div>'
-    +'<div style="font-size:1rem;font-weight:900;color:var(--nar);white-space:nowrap">'+valor+'</div>'
-    +'<span style="font-size:1.1rem;color:var(--az)">›</span>'
-    +'</button>';
-}
-/* PASO 2 · datos del cliente (reusa ae_cliente si ya está) */
-function chkPaso2Datos(){
-  var cl=CHK.cliente||{};
-  function campo(lbl,id,ph,val,tipo){ return '<div style="margin-bottom:10px"><div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">'+lbl+'</div><input id="'+id+'" '+(tipo?'type="'+tipo+'"':'')+' value="'+(val||'').replace(/"/g,'&quot;')+'" placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;box-sizing:border-box"></div>'; }
-  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:2px">👤 Tus datos</div>'
-    +'<div style="font-size:.78rem;color:var(--sub);margin-bottom:14px">Para coordinar la entrega y las cuotas. 🐝</div>'
-    +campo('Nombre y apellido','chk_nombre','Ej: Juan Pérez',cl.nombre,'text')
-    +campo('WhatsApp','chk_wa','Ej: 1122334455',cl.wa,'tel')
-    +campo('Localidad','chk_loc','Ej: San Miguel',cl.loc,'text');
-  if(CHK.plan>0){
-    html+=campo('DNI','chk_dni','Ej: 40123456',cl.dni,'text')
-      +campo('Domicilio','chk_dom','Calle, número, localidad',cl.dom,'text')
-      +campo('Ocupación / Ingresos','chk_ing','Ej: Empleado, $500.000',cl.ing,'text');
-  }
-  html+='<button onclick="chkGuardarDatos()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px">Continuar →</button>'
-    +'<button onclick="chkPaso1Plan()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">← Cambiar plan</button>';
-  chkAbrir(html);
-}
-function chkGuardarDatos(){
-  var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
-  var nom=g('chk_nombre'), wa=g('chk_wa').replace(/[^0-9]/g,''), loc=g('chk_loc');
-  if(!nom || !wa){ alert('Poné al menos tu nombre y WhatsApp.'); return; }
-  CHK.cliente={ nombre:nom, wa:wa, loc:loc, dni:g('chk_dni'), dom:g('chk_dom'), ing:g('chk_ing'), fecha:Date.now() };
-  // guarda/actualiza al cliente (para reconocerlo la próxima)
-  try{ localStorage.setItem(lsKey('ae_cliente'), JSON.stringify(CHK.cliente)); }catch(e){}
-  try{ cargarClientes(function(){ var ya=CLIENTES.find(function(c){ return String(c.wa).replace(/[^0-9]/g,'')===wa; }); if(!ya){ CLIENTES.push(CHK.cliente); guardarClientes(); } }); }catch(e){}
-  chkPaso3Resumen();
-}
-/* PASO 3 · resumen + elegir a quién enviar */
-function chkPaso3Resumen(){
-  var c=cargarCarrito(); var t=chkTotales(); var n=CHK.plan;
-  var primera = n>0 ? valorCuota(t.tot,n) : t.tot;
-  var textoPlan = n>0 ? (n+' cuotas de '+fmt(primera)) : ('Contado '+fmt(t.tot));
-  var lista=c.map(function(it){ return '• '+it.nombre+(it.cant>1?' x'+it.cant:'')+' — '+fmt(it.venta*(it.cant||1)); }).join('<br>');
-  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:12px">🧾 Confirmá tu compra</div>'
-    +'<div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px"><div style="font-size:.64rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px">Producto</div><div style="font-size:.8rem;color:var(--az);font-weight:700;line-height:1.5">'+lista+'</div></div>';
-  if(t.desc>0){ html+='<div style="display:flex;justify-content:space-between;padding:0 4px;margin-bottom:8px"><span style="font-size:.76rem;color:#059669;font-weight:800">🎟️ '+cuponAplicado.codigo+'</span><span style="font-size:.8rem;color:#059669;font-weight:800">−'+fmt(t.desc)+'</span></div>'; }
-  html+='<div style="border:1.5px solid var(--nar);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#FFF9F0">'
-    +'<div style="display:flex;justify-content:space-between;margin-bottom:'+(n>0?'4px':'0')+'"><span style="font-size:.75rem;color:var(--sub);font-weight:700">Plan elegido</span><span style="font-size:.82rem;color:var(--az);font-weight:900">'+textoPlan+'</span></div>'
-    +(n>0?'<div style="display:flex;justify-content:space-between"><span style="font-size:.75rem;color:var(--sub);font-weight:700">1ª cuota a abonar</span><span style="font-size:.98rem;color:#059669;font-weight:900">'+fmt(primera)+'</span></div>':'')
-    +'</div>'
-    +'<div style="border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin-bottom:12px"><div style="font-size:.64rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:5px">Tus datos</div><div style="font-size:.76rem;color:var(--txt);line-height:1.55">👤 '+CHK.cliente.nombre+'<br>📱 '+CHK.cliente.wa+(CHK.cliente.loc?'<br>📍 '+CHK.cliente.loc:'')+'</div></div>'
-    +'<div style="background:#F5F8FF;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.68rem;color:var(--sub);line-height:1.6">ℹ️ <b>Cómo sigue:</b><br>1️⃣ Coordinás el pago de la 1ª cuota.<br>2️⃣ Dentro de 48 hs de abonarla, coordinamos la entrega. 🐝</div>';
-  // a quién enviar
+  var tot=totalCarrito();
+  var lineas=c.map(function(it){ return '• '+it.nombre+(it.cant>1?' x'+it.cant:'')+' — '+fmt(it.venta*(it.cant||1)); });
+  var cuotasL=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(tot,n)); });
+  var msg='Hola! Quiero pedir esto 🛒\n\n'+lineas.join('\n')+'\n\n*TOTAL CONTADO: '+fmt(tot)+'*\n\n'+cuotasL.join('\n')+'\n\n¿Me confirmás disponibilidad? 🐝';
+
+  // guarda el pedido del carrito en el historial
+  window._pedidoPendiente={ items:c.map(function(it){return {nombre:it.nombre, venta:it.venta, cant:it.cant||1};}), total:tot };
+
   var vends=(CONFIG.admins&&CONFIG.admins.length)?CONFIG.admins:((CONFIG.vendedores&&CONFIG.vendedores.length)?CONFIG.vendedores:[]);
   if(!vends.length){
-    html+='<button onclick="chkEnviar(\'\',\'\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📲 Enviar mi compra</button>';
-  } else {
-    html+='<div style="font-size:.64rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📲 Enviá tu compra a</div>';
-    vends.forEach(function(v){
-      var nom=String(v.nombre).replace(/'/g,"\\'");
-      html+='<button onclick="chkEnviar(\''+String(v.wa).replace(/[^0-9]/g,'')+'\',\''+nom+'\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
-    });
+    var wa=(CONFIG.whatsapp||'').replace(/[^0-9]/g,'');
+    registrarPedidoPendiente('');
+    window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+    return;
   }
-  html+='<button onclick="chkPaso2Datos()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">← Atrás</button>';
-  chkAbrir(html);
-}
-/* arma el mensaje cocinado y lo manda */
-function chkEnviar(tel, nombreVendedor){
-  var c=cargarCarrito(); var t=chkTotales(); var n=CHK.plan; var cl=CHK.cliente||{};
-  var msg='🛒 *NUEVA COMPRA — '+((CONFIG&&CONFIG.negocio)||'Tienda')+'* 🐝\n\n📦 *PRODUCTO:*\n';
-  c.forEach(function(it){ msg+='• '+(it.cant>1?it.cant+'x ':'')+it.nombre+' — '+fmt(it.venta*(it.cant||1))+'\n'; });
-  if(t.desc>0) msg+='🎟️ Cupón '+cuponAplicado.codigo+': −'+fmt(t.desc)+'\n';
-  msg+='\n💳 *PLAN ELEGIDO:*\n';
-  if(n>0){
-    var vc=valorCuota(t.tot,n);
-    msg+='📆 '+n+' cuotas de '+fmt(vc)+'\n✅ 1ª cuota a abonar: *'+fmt(vc)+'*\n   (quedan '+(n-1)+' cuota'+(n-1===1?'':'s')+' de '+fmt(vc)+')\n';
-  } else { msg+='💵 Contado: '+fmt(t.tot)+'\n'; }
-  msg+='\n👤 *DATOS DEL CLIENTE:*\n• Nombre: '+(cl.nombre||'—')+'\n';
-  if(cl.wa) msg+='• Tel: '+cl.wa+'\n';
-  if(cl.dni) msg+='• DNI: '+cl.dni+'\n';
-  if(cl.dom) msg+='• Domicilio: '+cl.dom+'\n';
-  else if(cl.loc) msg+='• Localidad: '+cl.loc+'\n';
-  if(cl.ing) msg+='• Ocupación/Ingresos: '+cl.ing+'\n';
-  msg+='\n📦 Entrega dentro de 48 hs de abonada la 1ª cuota.\n\n';
-  msg+=(nombreVendedor?'Hola '+nombreVendedor+'! ':'')+'Ya completé todo, quiero avanzar con esta compra 🙌';
-  // guarda el pedido en el historial del dueño
-  window._pedidoPendiente={ items:c.map(function(it){return {nombre:it.nombre, venta:it.venta, cant:it.cant||1};}), total:t.tot, cliente:{nombre:cl.nombre, wa:cl.wa} };
-  registrarPedidoPendiente(nombreVendedor||'');
-  // abre WhatsApp (método robusto Android)
-  var url='https://wa.me/'+(tel||'')+'?text='+encodeURIComponent(msg);
-  try{ var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); setTimeout(function(){ try{document.body.removeChild(a);}catch(e){} },300); }
-  catch(e){ window.open(url,'_blank'); }
-  // limpia carrito y cupón
-  guardarCarrito([]); cuponAplicado=null;
-  cerrarConsulta();
-  toastCarrito('✅ ¡Compra enviada! Coordinamos por WhatsApp 🐝');
+  var html='<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">💬 Enviá tu pedido</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+cantCarrito()+' producto'+(cantCarrito()===1?'':'s')+' · '+fmt(tot)+'</div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Elegí con quién</div>';
+  vends.forEach(function(v){
+    html+='<button onclick="registrarPedidoPendiente(\''+v.nombre.replace(/'/g,"\\'")+'\');window.open(\'https://wa.me/'+String(v.wa).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
+  });
+  html+='<button onclick="cerrarConsulta()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Cancelar</button>';
+  document.getElementById('ayudaBody').innerHTML=html;
+  document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 
 /* ═══════ BARRA INFERIOR + MENÚ "MÁS" (estilo Mercado Libre) ═══════ */
@@ -2132,7 +1926,7 @@ function abrirPanelDueno(){
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('🎟️','Cupones','Códigos de descuento para tus clientes','cupones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -2163,7 +1957,6 @@ function abrirModuloDueno(destino){
   if(destino==='soporte'){ abrirSoporte(); return; }
   if(destino==='qr'){ abrirQR(); return; }
   if(destino==='comisiones'){ abrirComisiones(); return; }
-  if(destino==='cupones'){ abrirCupones(); return; }
   if(destino==='resenas'){ abrirResenas(); return; }
   // el resto por ahora en construcción — los llenamos de a uno en los próximos bloques
   var nombres={crm:'📊 Clientes / CRM'};
@@ -2283,7 +2076,8 @@ var CONFIG_DEFAULT = {
   negocio: "AmarangoElectro", eslogan: "Equipá tu casa en cuotas",
   instagram: "@amarangoelectro", whatsapp: "", logo: "",
   colorPrincipal: "#0B2D6B", colorAcento: "#FF7A00",
-  cuotas: { 2:15, 4:55, 6:78 },
+  cuotas: {},              // solo se usa en sistema 'propio' (el dueño pone los suyos)
+  sistemaCuotas: 'amarango',  // 'amarango' (oculto, calcula solo) | 'propio' (editable)
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
   // 🛡️ Confianza (todo configurable, todo opcional)
@@ -2384,8 +2178,7 @@ function aplicarConfig(){
   if(CONFIG.modoVenta!=='contado'){
     var activos = CONFIG.planesActivos || [2,4,6];
     activos.forEach(function(n){
-      var pct = (CONFIG.cuotas && CONFIG.cuotas[n]!=null) ? CONFIG.cuotas[n] : 0;
-      PLANES[n] = {on:true, pct:pct};
+      PLANES[n] = {on:true, pct:pctPlan(n)};
     });
   }
   var h=document.querySelector('.brand h1'); if(h) h.textContent=CONFIG.negocio;
@@ -3287,50 +3080,87 @@ function elegirModoVenta(k){
 /* Los planes de cuotas: editables, hasta 12 */
 function renderPlanesConfig(c){
   var activos=c.planesActivos||[2,4,6];
-  var html='<div style="font-size:.72rem;color:var(--sub);margin-bottom:9px">Elegí en cuántas cuotas vendés y qué porcentaje le sumás a cada plan.</div>'
+  var esPropio = c.sistemaCuotas==='propio';
+  var esMax = (TIENDA==='amarango' || c.duenoPlataforma===true);  // Maxi/Ángela
+  var html='';
+
+  // ── Selector de SISTEMA ──
+  html+='<div style="font-size:.72rem;color:var(--sub);margin-bottom:9px">Elegí con qué sistema calculás las cuotas.</div>'
+    +'<div style="display:grid;gap:8px;margin-bottom:14px">';
+  // opción Amarango
+  html+='<button onclick="setSistemaCuotas(\'amarango\')" style="text-align:left;background:'+(!esPropio?'#FFF0E0':'#fff')+';border:2px solid '+(!esPropio?'var(--nar)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px">'
+    +'<span style="font-size:1.5rem">🐝</span>'
+    +'<div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Sistema Amarango</div><div style="font-size:.72rem;color:var(--sub);line-height:1.35">'+(esMax?'Nuestros porcentajes. Solo Maxi y Ángela los controlan.':'Cuotas ya calculadas y probadas. Vos ves el precio final listo.')+'</div></div>'
+    +(!esPropio?'<span style="font-size:1.1rem">✅</span>':'')
+    +'</button>';
+  // opción propio
+  html+='<button onclick="setSistemaCuotas(\'propio\')" style="text-align:left;background:'+(esPropio?'#FFF0E0':'#fff')+';border:2px solid '+(esPropio?'var(--nar)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px">'
+    +'<span style="font-size:1.5rem">✏️</span>'
+    +'<div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Mi propio sistema</div><div style="font-size:.72rem;color:var(--sub);line-height:1.35">Vos ponés el porcentaje de cada plan de cuotas.</div></div>'
+    +(esPropio?'<span style="font-size:1.1rem">✅</span>':'')
+    +'</button>';
+  html+='</div>';
+
+  // ── Planes activos (siempre podés elegir CUÁNTAS cuotas, en los dos sistemas) ──
+  html+='<div style="font-size:.7rem;font-weight:800;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">En cuántas cuotas vendés</div>'
     +'<div style="display:grid;gap:7px;margin-bottom:12px">';
   [2,3,4,5,6,9,12].forEach(function(n){
     var on=activos.indexOf(n)>=0;
-    var pct=(c.cuotas && c.cuotas[n]!=null) ? c.cuotas[n] : sugerirPct(n);
     html+='<div style="display:flex;align-items:center;gap:8px;background:'+(on?'#FFF9F0':'#fff')+';border:1.5px solid '+(on?'var(--nar)':'var(--line)')+';border-radius:11px;padding:9px 11px">'
       +'<button onclick="togglePlan('+n+')" style="background:none;border:none;font-size:1.1rem;cursor:pointer;padding:0">'+(on?'✅':'⬜')+'</button>'
-      +'<span style="flex:1;font-size:.84rem;font-weight:800;color:'+(on?'var(--az)':'var(--sub)')+'">'+n+' cuotas</span>'
-      +(on?'<input type="number" id="pl_'+n+'" value="'+pct+'" oninput="cambiarPct('+n+',this.value)" style="width:64px;border:1.5px solid var(--line);border-radius:8px;padding:7px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--nar);outline:none;text-align:center">'
-        +'<span style="font-size:.76rem;font-weight:800;color:var(--sub)">%</span>':'<span style="font-size:.72rem;color:var(--sub)">apagado</span>')
-      +'</div>';
+      +'<span style="flex:1;font-size:.84rem;font-weight:800;color:'+(on?'var(--az)':'var(--sub)')+'">'+n+' cuotas</span>';
+    // el input de % SOLO en sistema propio
+    if(on && esPropio){
+      var pct=(c.cuotas && c.cuotas[n]!=null) ? c.cuotas[n] : 0;
+      html+='<input type="number" id="pl_'+n+'" value="'+pct+'" oninput="cambiarPct('+n+',this.value)" placeholder="%" style="width:64px;border:1.5px solid var(--line);border-radius:8px;padding:7px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--nar);outline:none;text-align:center">'
+        +'<span style="font-size:.76rem;font-weight:800;color:var(--sub)">%</span>';
+    } else if(on){
+      html+='<span style="font-size:.72rem;color:#059669;font-weight:800">activo</span>';
+    } else {
+      html+='<span style="font-size:.72rem;color:var(--sub)">apagado</span>';
+    }
+    html+='</div>';
   });
   html+='</div>';
-  // ejemplo en vivo
+
+  // ── Ejemplo en vivo (SIEMPRE muestra el resultado, NUNCA el %) ──
   var ej=100000;
-  var lineas=activos.sort(function(a,b){return a-b;}).map(function(n){
-    var pct=(c.cuotas&&c.cuotas[n]!=null)?c.cuotas[n]:sugerirPct(n);
-    var v=Math.round(ej*(1+pct/100)/n/1000)*1000;
+  var lineas=activos.slice().sort(function(a,b){return a-b;}).map(function(n){
+    var v=Math.round(ej*(1+pctPlan(n)/100)/n/1000)*1000;
     return '<div style="display:flex;justify-content:space-between;padding:3px 0"><span style="font-size:.76rem;color:var(--sub)">'+n+' cuotas</span><b style="font-size:.82rem;color:var(--az)">'+fmt(v)+'</b></div>';
   }).join('');
   html+='<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:11px;padding:11px;margin-bottom:12px">'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--az);margin-bottom:5px">📊 Ejemplo: un producto de '+fmt(ej)+'</div>'
-    +lineas+'</div>';
+    +lineas
+    +(!esPropio?'<div style="font-size:.66rem;color:var(--sub);margin-top:7px;line-height:1.4">Así le quedan las cuotas a tus clientes con el sistema Amarango. 🐝</div>':'')
+    +'</div>';
   return html;
 }
-function sugerirPct(n){
-  // sugerencias razonables si el dueño no puso nada
-  var s={2:15, 3:25, 4:55, 5:65, 6:78, 9:110, 12:145};
-  return s[n]||0;
+function setSistemaCuotas(modo){
+  CONFIG.sistemaCuotas = modo;
+  // si pasa a propio y no tiene sus %, arranca en blanco (que los ponga él)
+  if(modo==='propio' && !CONFIG.cuotas) CONFIG.cuotas={};
+  guardarConfig(); aplicarConfig(); render(); abrirConfig();
 }
+function sugerirPct(n){ return 0; }   // ya no expone valores; el sistema calcula solo
 function togglePlan(n){
   var a=CONFIG.planesActivos||[2,4,6];
   var i=a.indexOf(n);
   if(i>=0){ a.splice(i,1); }
-  else { a.push(n); if(!CONFIG.cuotas[n]) CONFIG.cuotas[n]=sugerirPct(n); }
+  else {
+    a.push(n);
+    if(CONFIG.sistemaCuotas==='propio'){ if(!CONFIG.cuotas) CONFIG.cuotas={}; if(CONFIG.cuotas[n]==null) CONFIG.cuotas[n]=0; }
+  }
   if(!a.length){ alert('Tenés que dejar al menos un plan de cuotas.\n\nSi no querés vender en cuotas, elegí «Solo contado» arriba.'); return; }
   CONFIG.planesActivos=a.sort(function(x,y){return x-y;});
-  guardarConfig();
+  guardarConfig(); aplicarConfig();
   render();
   abrirConfig();
 }
 function cambiarPct(n,v){
+  if(!CONFIG.cuotas) CONFIG.cuotas={};
   CONFIG.cuotas[n]=parseFloat(v)||0;
-  guardarConfig();
+  guardarConfig(); aplicarConfig();
   render();
 }
 
@@ -4447,8 +4277,21 @@ function guardarMasivo(){
 }
 
 /* ===== Cuotas reales de Max: 15/55/78, redondeo $1.000 ===== */
-var PLANES = { 2:{on:true,pct:15}, 4:{on:true,pct:55}, 6:{on:true,pct:78} };
-function valorCuota(venta,n){ return Math.round(venta*(1+PLANES[n].pct/100)/n/1000)*1000; }
+var PLANES = {};   // se arma en aplicarConfig() según el sistema elegido
+/* ═══════ 🐝 SISTEMA AMARANGO — tabla propietaria (no exhibida) ═══════
+   Los valores del sistema Amarango no se guardan como número directo.
+   _ax() los reconstruye al vuelo; la tienda cliente ve el RESULTADO
+   (la cuota final), nunca el porcentaje. Control: Maxi + Ángela. */
+var _AX = { 2:[3,5], 3:[5,5], 4:[11,5], 5:[13,5], 6:[13,6], 9:[22,5], 12:[29,5] };
+function _ax(n){ var p=_AX[n]; return p ? (p[0]*p[1]) : 0; }   // 2→15, 4→55, 6→78, …
+function pctPlan(n){
+  // si la tienda usa el sistema propio, manda su config; si no, el sistema Amarango
+  if(CONFIG && CONFIG.sistemaCuotas==='propio'){
+    return (CONFIG.cuotas && CONFIG.cuotas[n]!=null) ? CONFIG.cuotas[n] : 0;
+  }
+  return _ax(n);
+}
+function valorCuota(venta,n){ return Math.round(venta*(1+pctPlan(n)/100)/n/1000)*1000; }
 function fmt(n){ return '$'+Math.round(n).toLocaleString('es-AR'); }
 function cuotasActivas(){
   if(CONFIG && CONFIG.modoVenta==='contado') return [];   // sin cuotas: solo contado
@@ -4539,12 +4382,6 @@ function bajarCatalogo(){
   try{
     var local=JSON.parse(localStorage.getItem(lsKey('ae_tienda_catalogo'))||'[]');
     if(local.length){ PRODUCTOS=local; render(); }
-  }catch(e){}
-  // 2b) baja los cupones de esta tienda (para sincronizar entre admins)
-  try{
-    sb.from('tienda_catalogo').select('datos').eq('id',lsKey('cupones')).maybeSingle()
-      .then(function(r){ if(r&&r.data&&Array.isArray(r.data.datos)){ try{ localStorage.setItem(lsKey('ae_cupones'), JSON.stringify(r.data.datos)); }catch(e){} } })
-      .catch(function(){});
   }catch(e){}
   // 2) baja lo último de la nube
   sb.from('tienda_catalogo').select('datos').eq('id',keyCatalogo()).maybeSingle()
