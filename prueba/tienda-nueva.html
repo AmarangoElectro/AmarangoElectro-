@@ -420,7 +420,7 @@ function abrirSoporte(){
       +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Problemas raros</div>'
       +'<button onclick="limpiarDatosLocales()" style="width:100%;background:#FFF9F0;border:1.5px solid var(--nar);color:var(--nar);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🧹 La tienda muestra datos de otra</button>'
       +'<div style="font-size:.68rem;color:var(--sub);text-align:center;margin-top:5px">Limpia este teléfono. Tus datos en la nube no se tocan.</div>'
-      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6;margin-top:12px">🐝 <b style="color:var(--az)">Amarango</b> v2.1 · tienda: <b>'+TIENDA+'</b></div>'
+      +'<div style="font-size:.72rem;color:var(--sub);text-align:center;line-height:1.6;margin-top:12px">🐝 <b style="color:var(--az)">Amarango</b> v2.2 · tienda: <b>'+TIENDA+'</b></div>'
     +'</div>'
     +'<button onclick="abrirPanelDueno()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver al panel</button>';
   document.getElementById('adminBody').innerHTML=html;
@@ -857,7 +857,7 @@ function abrirMas(){
   }
   html+='</div>';
   // sello de versión (para saber si cargó el archivo nuevo)
-  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.1 · tienda: '+TIENDA+'</div>';
+  html+='<div style="text-align:center;font-size:.62rem;color:var(--sub);margin-top:14px;opacity:.7">🐝 Amarango v2.2 · tienda: '+TIENDA+'</div>';
   document.getElementById('masBody').innerHTML=html;
   document.getElementById('masOverlay').classList.add('on');
 }
@@ -3010,8 +3010,8 @@ function abrirSistemaAmarango(){
   html+='<div style="margin:-4px -4px 0;background:linear-gradient(165deg,#020c2e 0%,'+AZ+' 65%,#12356f 100%);border-radius:18px;padding:26px 20px 24px;color:#fff;position:relative;overflow:hidden">'
     +'<div style="position:absolute;top:-30px;right:-30px;font-size:9rem;opacity:.06">🐝</div>'
     +'<div style="font-size:.66rem;font-weight:800;letter-spacing:2px;color:#ffb968;text-transform:uppercase;margin-bottom:10px">El sistema Amarango</div>'
-    +'<div style="font-size:1.7rem;font-weight:900;line-height:1.15;margin-bottom:10px">La forma en que <span style="color:#ffb968">Amarango</span> vende, ahora trabajando para vos.</div>'
-    +'<div style="font-size:.9rem;color:rgba(255,255,255,.82);line-height:1.5">No te damos una tienda más. Te abrimos la puerta al método completo con el que vendemos todos los días. 🐝</div>'
+    +'<div style="font-size:1.7rem;font-weight:900;line-height:1.15;margin-bottom:10px">Empezá a vender como <span style="color:#ffb968">Amarango</span>, aunque arranques de cero.</div>'
+    +'<div style="font-size:.9rem;color:rgba(255,255,255,.82);line-height:1.5">No te damos una tienda más. Te damos el método completo y te acompañamos paso a paso, desde el primer día. 🐝</div>'
     +'</div>';
 
   // EL MÉTODO COMPLETO (las piezas de valor real)
@@ -3026,6 +3026,7 @@ function abrirSistemaAmarango(){
     +pieza('💳','Cuotas ya resueltas','Copiás, pegás y las cuotas salen calculadas al toque. El método que nos llevó años afinar, listo desde el día uno. Sirve para lo que vendas: ropa, tecnología, hogar, lo que sea.')
     +pieza('🚀','Vendé apalancándote','El secreto real de cómo crecemos sin frenar por la plata. Te lo mostramos y te acompañamos a aplicarlo en tu negocio.')
     +pieza('🤝','Te acompañamos','No te dejamos solo con una app. Estás adentro de la forma Amarango, con nosotros del otro lado ayudándote a crecer.')
+    +pieza('📞','Soporte por llamada','¿Recién arrancás? Te llamamos y te guiamos en los primeros pasos, hasta que le agarres la mano. No estás solo en esto.')
     +'</div>';
 
   // BLOQUE ELECTRO — mayoristas propios (solo este rubro)
@@ -3050,7 +3051,7 @@ function abrirSistemaAmarango(){
       +'<div><div style="font-size:.86rem;font-weight:900;color:'+AZ+'">'+t+'</div><div style="font-size:.76rem;color:var(--sub);line-height:1.4">'+s+'</div></div></div>';
   }
   html+='<div style="padding:0 2px">'
-    +escalon('1','Arrancás con nosotros','Empezás con el método y tu primer acceso. Vendés desde el día uno.')
+    +escalon('1','Arrancás con nosotros','Te sumamos al método, te damos tu primer acceso y te llamamos para guiarte. Vendés desde el día uno, acompañado.')
     +escalon('2','Ganás confianza','Cuando ves que funciona, te abrimos más mayoristas y herramientas.')
     +escalon('3','Llegás a la joya','Acceso pleno, incluido el mayorista de los 70 modelos de celulares. Ya vendés igual que Amarango.')
     +'</div>';
