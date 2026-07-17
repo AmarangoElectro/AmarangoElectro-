@@ -191,6 +191,8 @@ body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border
 #ayuda-drawer.abierto{transform:translateX(0);}
 /* Botón ayuda fijo esquina superior izquierda */
 #ayuda-btn{position:fixed;top:12px;left:12px;z-index:1380;background:rgba(11,45,107,.9);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.25);display:flex;align-items:center;gap:4px;}
+#btn-atras{display:none;position:fixed;top:12px;left:12px;z-index:1385;background:rgba(11,45,107,.92);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:7px 14px 7px 11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(0,0,0,.28);align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;}
+#btn-atras:active{transform:scale(.96);}
 /* ═══ MODO LUJO ✨ ═══ */
 body.lujo h1,body.lujo .tienda-saludo,body.lujo #tienda-saludo-hora{font-family:'Playfair Display',serif !important;letter-spacing:.5px;}
 body.lujo .prod-nombre{font-family:'Playfair Display',serif !important;font-weight:700 !important;letter-spacing:.3px;}
@@ -240,6 +242,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 </head>
 <body>
 <div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">calc v: 17-jul ✓placas·asesores</div>
+<button id="btn-atras" onclick="volverAtras()">← Atrás</button>
 <div id="version-check" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#00c853;color:#fff;text-align:center;font-weight:900;font-size:13px;padding:6px;font-family:sans-serif;">✅ VERSIÓN v3 COMPLETA — tabs y ruleta en el cajón · tocá acá para ocultar</div>
 <script>document.getElementById('version-check').onclick=function(){this.style.display='none';};</script>
 
@@ -938,7 +941,31 @@ function validarRevendedor(){
 }
 function cerrarRevOverlay(){ var ov=document.getElementById('rev-overlay'); if(ov)ov.style.display='none'; }
 
-function showTab(t){
+// Pila de navegación para el botón "Atrás" (un paso para atrás, no directo al inicio)
+var _navHist=[];
+var _navActual='tienda';
+function registrarNav(destino){
+  // no apilar si es el mismo lugar
+  if(destino===_navActual) return;
+  if(_navActual) _navHist.push(_navActual);
+  if(_navHist.length>25) _navHist.shift(); // no crecer infinito
+  _navActual=destino;
+}
+// Vuelve un paso atrás. Si no hay historial, va a la Tienda.
+function volverAtras(){
+  var prev=_navHist.pop();
+  if(!prev){ prev='tienda'; }
+  _navActual=null; // evitar que showTab lo re-apile como actual
+  showTab(prev, true);
+}
+// Muestra u oculta el botón "Atrás" según dónde estemos (en la Tienda/inicio no se muestra)
+function actualizarBotonAtras(t){
+  var b=document.getElementById('btn-atras');
+  if(!b) return;
+  // en la tienda (inicio) no hace falta atrás
+  b.style.display=(t==='tienda')?'none':'flex';
+}
+function showTab(t, esAtras){
   // "Pegar precio" es para asesores de ventas (pide clave de asesor)
   if(t==='pegar' && !revUnlocked){
     pedirClaveRevendedor(t);
@@ -969,6 +996,8 @@ function showTab(t){
     document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
     document.getElementById("tab-btn-admin").classList.add("on");
     document.getElementById("admin-subtabs").style.display="flex";
+    if(!esAtras) registrarNav('admin');
+    actualizarBotonAtras('admin');
     showAdminSub('contado');
     return;
   }
@@ -987,6 +1016,9 @@ function showTab(t){
   if(t==='celulares'){renderListaCelus();bajarCelusNube();}
   if(t==='placas'){renderPlacaCuotas();calcPlaca();}
   if(t==='tienda')tiendaInit();
+  // registrar en el historial (salvo cuando venimos del propio botón Atrás)
+  if(!esAtras) registrarNav(t);
+  actualizarBotonAtras(t);
 }
 
 // Sub-pestañas dentro del cajón Administradores
@@ -1028,6 +1060,7 @@ function cancelAdminLogin(){
   document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
   document.getElementById("tab-pegar").classList.add("on");
   document.getElementById("tab-btn-pegar").classList.add("on");
+  if(typeof actualizarBotonAtras==='function') actualizarBotonAtras('pegar');
 }
 
 function clearTab(t){
