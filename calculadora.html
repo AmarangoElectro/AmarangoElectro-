@@ -239,7 +239,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">calc v: 16-jul ✓placas</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">calc v: 17-jul ✓placas·asesores</div>
 <div id="version-check" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#00c853;color:#fff;text-align:center;font-weight:900;font-size:13px;padding:6px;font-family:sans-serif;">✅ VERSIÓN v3 COMPLETA — tabs y ruleta en el cajón · tocá acá para ocultar</div>
 <script>document.getElementById('version-check').onclick=function(){this.style.display='none';};</script>
 
@@ -293,8 +293,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <div class="cajon-sep">Navegación</div>
   <button class="cajon-item" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
-  <button class="cajon-item cj-rev" id="cajon-cuotas" style="display:none;" onclick="cerrarCajon();showTab('cuotas')"><span class="ci-ic">📅</span> Cuotas</button>
-  <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Revendedores</button>
+  <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
+  <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Asesores de ventas</button>
 
   <div class="cajon-sep">Herramientas</div>
   <div style="padding:8px 16px 4px;display:flex;flex-direction:column;gap:8px;">
@@ -338,8 +338,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <div class="tab on" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
   <div class="tab" id="tab-btn-pegar" onclick="showTab('pegar')" style="display:none;">📋 Pegar precio</div>
   <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')" style="display:none;">📱 Celulares</div>
-  <div class="tab" id="tab-btn-cuotas" onclick="showTab('cuotas')" style="display:none;">📅 Cuotas</div>
-  <div class="tab" id="tab-btn-revend" onclick="accesoRevendedores()">👥 Revendedores</div>
+  <div class="tab" id="tab-btn-placas" onclick="showTab('placas')" style="display:none;">🎨 Placas</div>
+  <div class="tab" id="tab-btn-revend" onclick="accesoRevendedores()">👥 Asesores de ventas</div>
   <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Admin</div>
 </div>
 
@@ -452,22 +452,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   </div>
 </div>
 
-<div class="tab-content" id="tab-cuotas">
-  <div class="precio-input-wrap">
-    <div class="precio-label">Precio de venta ($ARS) — editá acá</div>
-    <div class="precio-input-row">
-      <span class="precio-sign">$</span>
-      <input type="number" class="precio-input" id="inp-cuotas" placeholder="0" oninput="calcCuotas()">
-    </div>
-    <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">✏️ Ingresá el precio de venta y mirá las cuotas al instante</div>
-    <button class="clear-btn" onclick="clearTab('cuotas')">Limpiar</button>
-  </div>
-  <div id="res-cuotas" class="empty-state">
-    <div class="empty-icon">📅</div>
-    <p>Ingresá el precio de venta para ver los planes de cuotas</p>
-  </div>
-</div>
-
 <div class="tab-content" id="tab-comisiones">
   <div class="precio-input-wrap">
     <div class="precio-label">Precio de venta al contado ($ARS)</div>
@@ -498,7 +482,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   </div>
   <div id="res-comisiones" class="empty-state">
     <div class="empty-icon">🤝</div>
-    <p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor</p>
+    <p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del asesor de ventas</p>
   </div>
 </div>
 
@@ -905,14 +889,17 @@ function accesoRevendedores(){
   if(revUnlocked){ mostrarPestanasRev(); showTab('pegar'); return; }
   pedirClaveRevendedor('pegar');
 }
-// muestra las pestañas de cálculo para revendedores
+// muestra las pestañas de cálculo para asesores de ventas (solo Pegar precio)
 function mostrarPestanasRev(){
   document.getElementById('tab-btn-pegar').style.display='';
-  document.getElementById('tab-btn-cuotas').style.display='';
+  // Placas es solo para admin; si NO es admin, se mantiene oculta
+  var esAdmin=(typeof adminUnlocked!=='undefined' && adminUnlocked);
+  var tp=document.getElementById('tab-btn-placas'); if(tp) tp.style.display=esAdmin?'':'none';
 }
-// muestra TODO (para admin): pestañas de cálculo + celulares
+// muestra TODO (para admin): pestañas de cálculo + Placas
 function mostrarPestanasAdmin(){
-  mostrarPestanasRev();
+  document.getElementById('tab-btn-pegar').style.display='';
+  document.getElementById('tab-btn-placas').style.display='';
 }
 function pedirClaveRevendedor(destino){
   window._revDestino=destino;
@@ -923,7 +910,7 @@ function pedirClaveRevendedor(destino){
     ov.style.cssText='position:fixed;inset:0;background:rgba(2,12,46,.92);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;';
     ov.innerHTML='<div style="background:#fff;border-radius:18px;padding:24px;max-width:340px;width:100%;text-align:center;">'
       +'<div style="font-size:2rem;">🐝</div>'
-      +'<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;margin:6px 0;">Acceso revendedores</h3>'
+      +'<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;margin:6px 0;">Acceso asesores de ventas</h3>'
       +'<p style="font-size:.75rem;color:var(--sub);margin-bottom:14px;">Ingresá la clave para usar las herramientas de precios</p>'
       +'<input type="password" id="rev-pass" placeholder="Clave" style="width:100%;text-align:center;font-size:1.1rem;letter-spacing:3px;padding:12px;border:2px solid var(--bor);border-radius:12px;box-sizing:border-box;" onkeydown="if(event.key===\'Enter\')validarRevendedor()">'
       +'<div id="rev-err" style="color:var(--red);font-size:.75rem;font-weight:700;margin-top:8px;display:none;">Clave incorrecta</div>'
@@ -952,9 +939,19 @@ function validarRevendedor(){
 function cerrarRevOverlay(){ var ov=document.getElementById('rev-overlay'); if(ov)ov.style.display='none'; }
 
 function showTab(t){
-  // Pestañas de cálculo (Pegar precio, Cuotas) protegidas con clave de revendedor
-  if((t==='pegar' || t==='cuotas') && !revUnlocked){
+  // "Pegar precio" es para asesores de ventas (pide clave de asesor)
+  if(t==='pegar' && !revUnlocked){
     pedirClaveRevendedor(t);
+    return;
+  }
+  // "Placas" es SOLO para admin (pide clave de admin)
+  if(t==='placas' && !adminUnlocked){
+    pendingTab='placas';
+    document.getElementById("admin-pass").value="";
+    document.getElementById("pass-err").classList.remove("show");
+    document.getElementById("admin-pass").classList.remove("error");
+    document.getElementById("login-overlay").style.display="flex";
+    setTimeout(function(){document.getElementById("admin-pass").focus();},200);
     return;
   }
   // El cajón "admin" pide clave una vez y muestra sub-pestañas
@@ -988,6 +985,7 @@ function showTab(t){
     });
   }
   if(t==='celulares'){renderListaCelus();bajarCelusNube();}
+  if(t==='placas'){renderPlacaCuotas();calcPlaca();}
   if(t==='tienda')tiendaInit();
 }
 
@@ -1045,7 +1043,7 @@ function clearTab(t){
     planInversion='contado';renderPlanesInversion();
     inversores=[{nombre:'Inversor 1',pct:100}];renderInversores();
   }
-  var labels={contado:'💰 Ingresá el precio de costo en $ARS para ver el precio de venta y las cuotas',cuotas:'📅 Ingresá el precio de venta para ver los planes de cuotas',comisiones:'🤝 Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor',inversion:'📊 Ingresá el precio de costo en $ARS para ver el análisis de inversión'};
+  var labels={contado:'💰 Ingresá el precio de costo en $ARS para ver el precio de venta y las cuotas',cuotas:'📅 Ingresá el precio de venta para ver los planes de cuotas',comisiones:'🤝 Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del asesor de ventas',inversion:'📊 Ingresá el precio de costo en $ARS para ver el análisis de inversión'};
   var icons={contado:'💰',cuotas:'📅',comisiones:'🤝',inversion:'📊'};
   document.getElementById('res-'+t).innerHTML='<div class="empty-icon">'+icons[t]+'</div><p>'+labels[t]+'</p>';
   document.getElementById('res-'+t).className='empty-state';
@@ -1058,7 +1056,6 @@ function toggleOff(tab){
   if(offState[tab]){btn.style.background='var(--gr)';btn.innerHTML='✅ 10% Off aplicado';}
   else{btn.style.background='rgba(255,255,255,.15)';btn.innerHTML='🏷️ Aplicar 10% Off';}
   if(tab==='contado')calcContado();
-  if(tab==='cuotas')calcCuotas();
 }
 
 var planesDefault={2:{activo:true,pct:15},3:{activo:false,pct:36},4:{activo:true,pct:55},5:{activo:false,pct:66},6:{activo:true,pct:78},7:{activo:false,pct:87},8:{activo:false,pct:93},9:{activo:false,pct:99},10:{activo:false,pct:105},11:{activo:false,pct:111},12:{activo:false,pct:117}};
@@ -1103,7 +1100,7 @@ function renderPlanesConfig(){
 }
 function refrescarPlanesEnTodaLaApp(){
   guardarPlanesConfig();calcContado();
-  var inpCuotas=document.getElementById('inp-cuotas');if(inpCuotas && inpCuotas.value)calcCuotas();
+  var inpPlaca=document.getElementById('inp-placa');if(inpPlaca && inpPlaca.value){renderPlacaCuotas();calcPlaca();}
   var inpPegar=document.getElementById('inp-pegar');if(inpPegar && inpPegar.value)calcPegar();
   var metPagoList=document.getElementById('met-pago-list');if(metPagoList){renderMetodosPago();calcComisiones();}
   var planInvList=document.getElementById('plan-inv-list');if(planInvList){renderPlanesInversion();calcInversion();}
@@ -1620,7 +1617,7 @@ function cerrarSesion(){
   try{ localStorage.removeItem('ae_sesion_admin'); localStorage.removeItem('ae_sesion_rev'); }catch(e){}
   // ocultar pestañas de cálculo
   document.getElementById('tab-btn-pegar').style.display='none';
-  document.getElementById('tab-btn-cuotas').style.display='none';
+  var tpl=document.getElementById('tab-btn-placas'); if(tpl)tpl.style.display='none';
   var tc=document.getElementById('tab-btn-celulares'); if(tc)tc.style.display='none';
   tiendaAplicarModo();
   showTab('tienda');
@@ -1907,11 +1904,11 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar','cajon-cuotas'].forEach(function(id){
+  ['cajon-pegar'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
   if(c)c.classList.add('abierto');
@@ -3738,10 +3735,9 @@ function ayudaAbrir(){
       {ic:'☁️',t:'Todo se guarda solo',d:'Los cambios se sincronizan en la nube. Angela y los demás ven lo mismo que vos.'}
     ];
   } else if(esRev){
-    icono='🤝'; titulo='Instrucciones para Revendedores'; subtitulo='Cómo trabajar con la tienda:';
+    icono='🤝'; titulo='Instrucciones para Asesores de ventas'; subtitulo='Cómo trabajar con la tienda:';
     pasos=[
       {ic:'📋',t:'Pegar precio',d:'En la pestaña "Pegar precio", pegá el mensaje con el precio y te arma las cuotas y un texto listo para responder.'},
-      {ic:'💳',t:'Ver cuotas',d:'En "Cuotas" calculás rápido cuánto sale cualquier producto en cuotas para pasarle al cliente.'},
       {ic:'🔍',t:'Buscar productos',d:'Buscá en el catálogo lo que el cliente necesita y compartí con el botón "Compartir".'},
       {ic:'💰',t:'Tu ganancia',d:'Vos vendés al precio de la tienda. Consultá con el admin tu comisión por cada venta.'},
       {ic:'📤',t:'Compartir',d:'Cada producto tiene "Compartir" con foto y precio, listo para mandar por WhatsApp.'}
@@ -5763,26 +5759,6 @@ function calcContado(){
   var el=document.getElementById('res-contado');el.innerHTML=html;el.className='tab-results';
 }
 
-function calcCuotas(){
-  var precio=parseFloat(document.getElementById('inp-cuotas').value)||0;
-  if(!precio){document.getElementById('res-cuotas').innerHTML='<div class="empty-icon">📅</div><p>Ingresá el precio de venta para ver los planes de cuotas</p>';document.getElementById('res-cuotas').className='empty-state';return;}
-  var html='<div class="result-contado"><div class="result-label">Precio de venta</div><div class="result-precio">'+fmt(precio)+'</div></div>';
-  html+='<div class="cuotas-grid"><div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Planes de financiamiento</div>';
-  var hayPlanes=false;
-  for(var n=2;n<=12;n++){
-    if(planesConfig[n].activo){
-      hayPlanes=true;var totalPlan=calcularTotalPlan(precio,n);var valorCuota=Math.round(totalPlan/n/1000)*1000;
-      html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-    }
-  }
-  if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Activalos desde la pestaña Contado (admin).</div>';
-  html+='</div>';
-  html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600">⭐ El cliente retira pagando solo la 1ra cuota ese mismo día</div>';
-  var msg=armarMensajeAmarango('Producto', precio, armarCuotasLines(precio));
-  html+='<div class="share-row"><button class="share-btn wa" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\')">💬 Compartir por WhatsApp</button></div>';
-  var el=document.getElementById('res-cuotas');el.innerHTML=html;el.className='tab-results';
-}
-
 var metodoPago='contado';
 function renderMetodosPago(){
   var el=document.getElementById('met-pago-list');if(!el)return;
@@ -5795,7 +5771,7 @@ function renderMetodosPago(){
 function setMetodoPago(m){metodoPago=m;renderMetodosPago();calcComisiones();}
 function calcComisiones(){
   var precio=parseFloat(document.getElementById('inp-comisiones').value)||0;
-  if(!precio){document.getElementById('res-comisiones').innerHTML='<div class="empty-icon">🤝</div><p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor</p>';document.getElementById('res-comisiones').className='empty-state';return;}
+  if(!precio){document.getElementById('res-comisiones').innerHTML='<div class="empty-icon">🤝</div><p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del asesor de ventas</p>';document.getElementById('res-comisiones').className='empty-state';return;}
   var pctComContado=parseFloat(document.getElementById('pct-com-contado').value)||10;
   var pctComCuotas=parseFloat(document.getElementById('pct-com-cuotas').value)||15;
   var limiteExcepcion=parseFloat(document.getElementById('limite-excepcion').value)||10000;
@@ -5810,7 +5786,7 @@ function calcComisiones(){
   var montoPorPago=Math.round(comisionTotal/partesPago/500)*500;
   var html='';
   html+='<div class="result-contado"><div class="result-label">Precio de venta al contado</div><div class="result-precio">'+fmt(precio)+'</div></div>';
-  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🤝 Comisión del revendedor</div>';
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🤝 Comisión del asesor de ventas</div>';
   html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">Comisión total ('+pctComision+'%)</div><div class="com-desc">'+(metodoPago==='contado'?'Venta al contado':'Venta financiada en cuotas')+'</div></div><div class="com-val">'+fmt(comisionTotal)+'</div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:14px">💵 Distribución del pago</div>';
   for(var i=1;i<=partesPago;i++){
@@ -5898,7 +5874,7 @@ function calcInversion(){
   html+='<div class="inv-row"><span class="inv-label">Recargo aplicado</span><span class="inv-val white">'+pct+'%</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Precio de venta (contado)</span><span class="inv-val">'+fmt(precio)+'</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Total cobrado ('+(planInversion==='contado'?'contado':planInversion+' cuotas')+')</span><span class="inv-val">'+fmt(totalPlan)+'</span></div>';
-  html+='<div class="inv-row"><span class="inv-label">Comisión revendedor ('+(esCuotas?'15':'10')+'%)</span><span class="inv-val white">'+fmt(comisionTotal)+'</span></div>';
+  html+='<div class="inv-row"><span class="inv-label">Comisión asesor de ventas ('+(esCuotas?'15':'10')+'%)</span><span class="inv-val white">'+fmt(comisionTotal)+'</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Ganancia neta del plan</span><span class="inv-val">'+fmt(ganancia)+'</span></div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💰 Cálculo de inversión real (fórmula AmarangoElectro)</div>';
   html+='<div class="comision-card"><div class="com-info"><div class="com-n">Precio de costo</div></div><div class="com-val" style="color:var(--az)">'+fmt(costo)+'</div></div>';
