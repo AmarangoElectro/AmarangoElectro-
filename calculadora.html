@@ -323,6 +323,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <div class="cajon-sep cj-admin" id="cajon-sep-admin" style="display:none;">Administrador</div>
   <button class="cajon-item cj-admin" id="cajon-marc-mostrar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('mostrar')"><span class="ci-ic">👁️</span> Mostrar marcados</button>
   <button class="cajon-item cj-admin" id="cajon-marc-ocultar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('ocultar')"><span class="ci-ic">🙈</span> Ocultar marcados</button>
+  <button class="cajon-item cj-admin" id="cajon-capcomp" style="display:none;" onclick="cerrarCajon();abrirCapitalCompartido()"><span class="ci-ic">🧮</span> Calculadora Capital Compartido</button>
   <button class="cajon-item cj-admin" id="cajon-cargar-celu" style="display:none;" onclick="cerrarCajon();showTab('celulares')"><span class="ci-ic">📱</span> Cargar celulares</button>
   <button class="cajon-item cj-admin" id="cajon-ver-cliente" style="display:none;" onclick="cerrarCajon();toggleVistaCliente()"><span class="ci-ic">👁️</span> Ver como cliente</button>
   <button class="cajon-item cj-admin" id="cajon-ruleta" style="display:none;" onclick="toggleRuleta()"><span class="ci-ic">🎰</span> <span id="cajon-ruleta-txt">Ruleta: apagada</span></button>
@@ -388,6 +389,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
         <div style="color:rgba(255,255,255,.6);font-size:.62rem;font-weight:700;margin-bottom:4px">💵 Valor del dólar (editable)</div>
         <input type="number" id="celu-cotiz" placeholder="Ej: 1520" value="1500" style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 10px;color:#fff;font-size:.95rem;font-weight:800;outline:none">
       </div>
+      <!-- Actualizar dólar sin volver a pegar la lista -->
+      <button class="calc-btn" onclick="actualizarDolarCelus()" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-weight:900;box-shadow:0 4px 12px rgba(16,185,129,.3)">💵 Actualizar dólar (sin pegar nada)</button>
       <textarea class="pegar-area" id="inp-celulista" placeholder="Pegá un celular por línea con su precio. Ej:&#10;Samsung A06 $167.000&#10;Moto G15 $235.500"></textarea>
       <div id="celu-admin-hint" style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">📋 Un celu por línea, con su precio de venta en pesos. Los repetidos se actualizan, los nuevos se agregan.</div>
       <div style="display:flex;gap:8px;margin-top:10px">
@@ -919,10 +922,87 @@ function mostrarColaborador(){
     +'<div style="background:#FFF9F0;border:1px solid var(--nar);border-radius:12px;padding:11px 13px;font-size:.74rem;color:#8a5200;line-height:1.5;margin-bottom:14px;">'
     +'  💬 No es una inversión financiera ni una promesa de rendimiento fijo. Es una <b>colaboración entre conocidos</b>: nos juntamos, te contamos cómo es, y decidís con toda la info.'
     +'</div>'
-    +'<a href="'+link+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#25D366;color:#fff;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.35);">💬 Quiero que me cuenten</a>'
+    +'<a href="'+link+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#25D366;color:#fff;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.35);">🐝 Quiero conocer cómo funciona</a>'
     +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
+}
+
+/* ═══════════ CALCULADORA CAPITAL COMPARTIDO (SOLO ADMIN) ═══════════
+   Metés el costo del producto y te dice al toque cuánto pone el colaborador,
+   cuánto gana y cuánto recupera. Los retornos bajan cuanto más caro el producto,
+   porque ahí nuestro markup es más fino. */
+function retornoCapComp(costo){
+  if(costo<=50000)  return 45;
+  if(costo<=100000) return 40;
+  if(costo<=250000) return 35;
+  if(costo<=350000) return 30;
+  return 28;
+}
+function abrirCapitalCompartido(){
+  if(!adminUnlocked){ alert('🔒 Esta herramienta es solo para administradores.'); return; }
+  var html=''
+    +'<div style="text-align:center;margin-bottom:4px;">'
+    +'  <div style="font-size:2.2rem;">🧮</div>'
+    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:4px 0 2px;">Capital Compartido</h2>'
+    +'  <div style="color:var(--sub);font-size:.72rem;font-weight:700;">Calculadora privada · solo admin</div>'
+    +'</div>'
+    +'<div style="background:var(--az);border-radius:14px;padding:14px;margin:12px 0;">'
+    +'  <div style="color:rgba(255,255,255,.7);font-size:.62rem;font-weight:800;letter-spacing:.5px;margin-bottom:6px;">COSTO DEL PRODUCTO ($ARS)</div>'
+    +'  <input type="number" id="cc-costo" inputmode="numeric" placeholder="Ej: 180000" oninput="calcCapitalCompartido()" style="width:100%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:12px;color:#fff;font-size:1.35rem;font-weight:900;outline:none;">'
+    +'  <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px;">Lo que te sale a vos el producto. El retorno se ajusta solo según el tramo.</div>'
+    +'</div>'
+    +'<div id="cc-res"></div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  setTimeout(function(){ var i=document.getElementById('cc-costo'); if(i) i.focus(); },250);
+}
+function calcCapitalCompartido(){
+  var costo=parseFloat((document.getElementById('cc-costo').value||'').toString().replace(/\./g,'').replace(/,/g,'.'))||0;
+  var out=document.getElementById('cc-res');
+  if(!out) return;
+  if(costo<=0){ out.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px;">Poné el costo y te calculo todo 🐝</div>'; return; }
+
+  var pct=retornoCapComp(costo);
+  var gana=Math.round(costo*pct/100);
+  var recupera=costo+gana;
+  // lo nuestro (privado): venta con markup, financiada en 6 cuotas
+  var venta=markupVentaCRM(costo);
+  var total6=Math.round(venta*1.78);
+  var cuota=Math.round(total6/6/1000)*1000;
+  var totalReal=cuota*6;
+  var ganTotal=totalReal-costo;
+  var ganNuestra=ganTotal-gana;
+
+  var msg='🤝 *Capital Compartido · AmarangoElectro* 🐝\n\n'
+    +'📦 Capital a colaborar: *'+fmt(costo)+'*\n'
+    +'📈 Rendimiento: *'+pct+'%*\n'
+    +'💰 Recuperás en total: *'+fmt(recupera)+'*\n'
+    +'📅 Plazo: 2 meses (en 2 tramos)\n\n'
+    +'🛡️ Tu rendimiento está garantizado por AmarangoElectro. Si el cliente no paga, te devolvemos igual.\n\n'
+    +'Cualquier duda escribime 🤝';
+
+  out.innerHTML=''
+    +'<div style="background:#ECFDF5;border:2px solid #10B981;border-radius:14px;padding:14px;margin-bottom:10px;">'
+    +'  <div style="font-size:.6rem;font-weight:800;color:#047857;letter-spacing:.8px;margin-bottom:8px;">👤 LO QUE VE EL COLABORADOR</div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;"><span style="color:var(--sub);font-weight:600;">Pone</span><b style="color:var(--az);">'+fmt(costo)+'</b></div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;"><span style="color:var(--sub);font-weight:600;">Rendimiento</span><b style="color:#047857;">'+pct+'%</b></div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;"><span style="color:var(--sub);font-weight:600;">Gana</span><b style="color:#047857;">'+fmt(gana)+'</b></div>'
+    +'  <div style="border-top:1px dashed #86EFAC;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:var(--az);font-size:.8rem;">Recupera</span><b style="color:#047857;font-size:1.25rem;">'+fmt(recupera)+'</b></div>'
+    +'  <div style="text-align:center;color:#047857;font-size:.62rem;font-weight:700;margin-top:6px;">📅 en 2 meses · 2 tramos</div>'
+    +'</div>'
+    +'<div style="background:#FFF7ED;border:2px solid var(--nar);border-radius:14px;padding:14px;margin-bottom:10px;">'
+    +'  <div style="font-size:.6rem;font-weight:800;color:#9A3412;letter-spacing:.8px;margin-bottom:8px;">🔒 PRIVADO · SOLO VOS</div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">Venta contado</span><b style="color:var(--az);">'+fmt(venta)+'</b></div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">6 cuotas de</span><b style="color:var(--az);">'+fmt(cuota)+'</b></div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">Cliente paga total</span><b style="color:var(--az);">'+fmt(totalReal)+'</b></div>'
+    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">Ganancia total</span><b style="color:var(--az);">'+fmt(ganTotal)+'</b></div>'
+    +'  <div style="border-top:1px dashed #FDBA74;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:#9A3412;font-size:.8rem;">Te queda a vos</span><b style="color:var(--nar);font-size:1.25rem;">'+fmt(ganNuestra)+'</b></div>'
+    +'  <div style="text-align:center;color:#9A3412;font-size:.62rem;font-weight:700;margin-top:6px;">Ganás '+(gana>0?(ganNuestra/gana).toFixed(1):'—')+'x más que el colaborador, sin poner un peso</div>'
+    +'</div>'
+    +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(document.getElementById(\'cc-msg\').value),\'_blank\')">📲 Mandarle la propuesta al colaborador</button>'
+    +'<textarea id="cc-msg" style="display:none;">'+msg+'</textarea>';
 }
 // muestra las pestañas de cálculo para asesores de ventas (solo Pegar precio)
 function mostrarPestanasRev(){
@@ -1969,7 +2049,7 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
@@ -5285,6 +5365,44 @@ function ordenarPorMarca(lista){
   });
   return resultado;
 }
+// ═══ ACTUALIZAR DÓLAR: recalcula todos los celulares cargados en USD ═══
+// Evita tener que volver a pegar la lista cuando el mayorista sube el dólar.
+function actualizarDolarCelus(){
+  var celus=cargarListaCelus();
+  var enUsd=celus.filter(function(c){ return c.usd>0; });
+  if(!celus.length){ alert('Primero cargá la lista de celulares.'); return; }
+  if(!enUsd.length){
+    alert('Ningún celular está guardado en dólares.\n\nPara usar esta función, cargá la lista con la opción "💵 Precio en USD". A partir de ahí vas a poder cambiar el dólar sin volver a pegar nada.');
+    return;
+  }
+  // cotización anterior (la del último celular que la tenga guardada)
+  var cotizAnt=0;
+  for(var i=enUsd.length-1;i>=0;i--){ if(enUsd[i].cotizUsada>0){ cotizAnt=enUsd[i].cotizUsada; break; } }
+  var txt='💵 ACTUALIZAR DÓLAR\n\n'
+    +'Tenés '+enUsd.length+' celular(es) guardados en dólares.'
+    +(cotizAnt?('\n\nDólar actual: $'+cotizAnt):'')
+    +'\n\nEscribí el nuevo valor del dólar y recalculo todos los precios solo.';
+  var nuevo=prompt(txt, cotizAnt||'');
+  if(nuevo===null) return;
+  var cotiz=parseFloat(String(nuevo).replace(/\./g,'').replace(/,/g,'.'))||0;
+  if(cotiz<=0){ alert('Poné un valor de dólar válido.'); return; }
+
+  var cambiados=0;
+  celus.forEach(function(c){
+    if(c.usd>0){
+      var costo=c.usd*cotiz;
+      c.precio=markupVentaCRM(costo);
+      c.cotizUsada=cotiz;
+      cambiados++;
+    }
+  });
+  try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
+  subirCelusNube(celus);
+  if(typeof renderListaCelus==='function') renderListaCelus();
+  if(typeof tiendaInit==='function' && document.getElementById('tab-tienda') && document.getElementById('tab-tienda').classList.contains('on')) tiendaInit();
+  alert('✅ Listo!\n\nActualicé '+cambiados+' celular(es) con el dólar a $'+cotiz.toLocaleString('es-AR')+'.\n\nLos precios ya están al día. No hace falta pegar nada. 🐝');
+}
+
 function guardarListaCelus(){
   var txt=document.getElementById('inp-celulista').value||'';
   var lineas=preprocesarLineasCelus(txt);
@@ -5296,7 +5414,13 @@ function guardarListaCelus(){
   lineas.forEach(function(l){
     var c=parsearCeluLinea(l, esUSD);
     if(!c){ descartadas.push(l); return; }
-    if(esUSD){var costo=c.precio*cotiz;c.precio=markupVentaCRM(costo);}
+    if(esUSD){
+      // Guardamos el precio en dólares para poder recalcular después sin volver a pegar
+      c.usd = c.precio;
+      c.cotizUsada = cotiz;
+      var costo=c.precio*cotiz;
+      c.precio=markupVentaCRM(costo);
+    }
     nuevos.push(c);
   });
   // aviso de diagnóstico si se descartaron líneas
