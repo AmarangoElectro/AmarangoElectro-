@@ -216,11 +216,11 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 /* Vistas de tarjetas: chica (3 col), normal (2 col), grande (1 col) */
 #tienda-grid.vista-chica{grid-template-columns:1fr 1fr 1fr !important;gap:7px !important;}
 #tienda-grid.vista-chica .prod-card{padding:7px !important;}
-#tienda-grid.vista-chica .prod-foto{height:78px !important;}
+#tienda-grid.vista-chica .prod-foto{height:105px !important;}
 #tienda-grid.vista-chica .prod-nombre{font-size:.64rem !important;min-height:auto !important;}
 #tienda-grid.vista-chica .calc-btn{font-size:.58rem !important;padding:6px 2px !important;}
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
-#tienda-grid.vista-lista .prod-foto{height:200px !important;}
+#tienda-grid.vista-lista .prod-foto{height:240px !important;}
 /* 🎰 Ruleta de descuentos */
 #ruleta-fab{position:fixed;bottom:145px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
 @keyframes ruletaPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
@@ -2560,21 +2560,14 @@ function abrirFotoGrande(src, nombre){
     ov.style.cssText='display:none;position:fixed;inset:0;z-index:6000;background:rgba(8,16,38,.94);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;padding:16px;';
     ov.innerHTML=''
       +'<button onclick="cerrarFotoGrande()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>'
-      +'<img id="foto-visor-img" src="" alt="" style="max-width:100%;max-height:76vh;border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.5);transition:transform .25s ease;transform-origin:center;cursor:zoom-in;object-fit:contain;background:#fff;">'
+      +'<img id="foto-visor-img" src="" alt="" style="max-width:100%;max-height:78vh;border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.5);object-fit:contain;background:#fff;">'
       +'<div id="foto-visor-tit" style="color:#fff;font-size:.9rem;font-weight:800;text-align:center;margin-top:16px;max-width:90%;line-height:1.35;"></div>'
-      +'<div style="color:rgba(255,255,255,.55);font-size:.68rem;margin-top:8px;">Tocá la foto para agrandar · tocá el fondo para cerrar</div>';
+      +'<div style="color:rgba(255,255,255,.55);font-size:.68rem;margin-top:8px;">Tocá afuera para cerrar</div>';
     document.body.appendChild(ov);
     ov.addEventListener('click', function(e){ if(e.target===ov) cerrarFotoGrande(); });
-    var im=ov.querySelector('#foto-visor-img');
-    im.addEventListener('click', function(){
-      var z=this.getAttribute('data-zoom')==='1';
-      this.style.transform = z ? 'scale(1)' : 'scale(1.9)';
-      this.style.cursor = z ? 'zoom-in' : 'zoom-out';
-      this.setAttribute('data-zoom', z ? '0' : '1');
-    });
   }
   var img=document.getElementById('foto-visor-img');
-  img.src=src; img.style.transform='scale(1)'; img.style.cursor='zoom-in'; img.setAttribute('data-zoom','0');
+  img.src=src;
   document.getElementById('foto-visor-tit').textContent=nombre||'';
   ov.style.display='flex';
 }
@@ -2779,9 +2772,9 @@ function tiendaRender(){
 
     card+='<div style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:150px;border-radius:13px 13px 0 0;background:#fff url(\''+p.foto+'\') center/contain no-repeat;cursor:pointer;"></div>'
-          +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:7px;left:7px;background:rgba(11,45,107,.8);border:none;border-radius:7px;padding:4px 8px;font-size:.6rem;color:#fff;font-weight:800;cursor:pointer;backdrop-filter:blur(3px);line-height:1;">🔍 Ampliar</button>'
-        : '<div onclick="tiendaVerDetalle('+pid+')" style="height:150px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
+        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:190px;border-radius:13px 13px 0 0;background:#fff url(\''+p.foto+'\') center/cover no-repeat;cursor:pointer;"></div>'
+          +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
+        : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="position:absolute;top:7px;right:7px;background:rgba(255,255,255,.94);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);line-height:1;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>';
