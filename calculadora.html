@@ -34,9 +34,9 @@
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
-body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;}
+body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
 .header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:relative;overflow:hidden}
@@ -54,7 +54,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;padding:11px 8px;font-size:.68rem;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center;transition:all .2s;min-width:80px}
 .tab.on{color:var(--az);border-bottom-color:var(--nar);font-weight:800}
-.tab-content{display:none;padding:16px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
+.tab-content{display:none;padding:18px 16px 20px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
 
 /* ═══ Cajón lateral (menú deslizable) ═══ */
 .hdr-menu-btn{position:absolute;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
@@ -87,7 +87,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
 .tab-content.on{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:16px;padding:16px;margin-bottom:16px}
+.precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(11,45,107,.16);}
 .precio-label{color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .precio-input-row{display:flex;align-items:center;gap:8px}
 .precio-sign{color:var(--nar);font-size:1.8rem;font-weight:900}
@@ -99,12 +99,12 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .clear-btn{background:rgba(255,255,255,.1);border:none;border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.7);font-weight:700;font-size:.75rem;cursor:pointer;font-family:inherit;margin-top:8px;width:100%}
 .pegar-area{width:100%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:12px;padding:12px;color:#fff;font-size:.9rem;font-family:inherit;outline:none;resize:vertical;min-height:90px;line-height:1.4}
 .pegar-area::placeholder{color:rgba(255,255,255,.4)}
-.result-contado{background:#CCFBF1;border-radius:14px;border:2px solid #14B8A6;padding:14px;margin-bottom:12px;text-align:center}
+.result-contado{background:#CCFBF1;border-radius:16px;border:2px solid #14B8A6;padding:16px;margin-bottom:12px;text-align:center;box-shadow:0 6px 18px rgba(20,184,166,.14);}
 .result-label{font-size:.6rem;font-weight:700;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
 .result-precio{font-size:2.2rem;font-weight:900;color:var(--az);letter-spacing:-1px}
 .result-sub{font-size:.65rem;color:var(--sub);margin-top:4px}
-.cuotas-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.cuota-card{border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:none}
+.cuotas-grid{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.cuota-card{border-radius:14px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;border:none;box-shadow:0 3px 10px rgba(11,45,107,.07);}
 .cuota-card.c2{background:#FEF9C3;border-left:4px solid #EAB308}
 .cuota-card.c3{background:#DBEAFE;border-left:4px solid #3B82F6}
 .cuota-card.c4{background:#FFF0E0;border-left:4px solid var(--nar)}
@@ -153,7 +153,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .share-btn:active{background:var(--az);color:#fff;border-color:var(--az)}
 .share-btn.wa{border-color:#25D366;color:#25D366}
 .share-btn.wa:active{background:#25D366;color:#fff}
-.msg-lindo{background:var(--wh);border:2px solid var(--bor);border-radius:14px;padding:16px;margin-bottom:10px;white-space:pre-wrap;font-size:.85rem;line-height:1.7;color:var(--txt);word-break:break-word}
+.msg-lindo{background:var(--wh);border:2px solid var(--bor);border-radius:16px;padding:18px;margin-bottom:10px;white-space:pre-wrap;font-size:.85rem;line-height:1.7;color:var(--txt);word-break:break-word;box-shadow:0 4px 14px rgba(11,45,107,.06);}
 .footer{text-align:center;padding:16px;font-size:.6rem;color:var(--sub)}
 .footer span{color:var(--nar);font-weight:700}
 .install-banner{background:linear-gradient(135deg,var(--nar),#ff9a3c);margin:12px 16px 0;border-radius:12px;padding:12px 14px;display:none;align-items:center;gap:10px}
@@ -241,7 +241,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">calc v: 17-jul ✓placas·asesores</div>
+
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
 <div id="version-check" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#00c853;color:#fff;text-align:center;font-weight:900;font-size:13px;padding:6px;font-family:sans-serif;">✅ VERSIÓN v3 COMPLETA — tabs y ruleta en el cajón · tocá acá para ocultar</div>
 <script>document.getElementById('version-check').onclick=function(){this.style.display='none';};</script>
@@ -298,6 +298,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
   <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Asesores de ventas</button>
+  <button class="cajon-item" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🤝</span> Sumate como colaborador</button>
 
   <div class="cajon-sep">Herramientas</div>
   <div style="padding:8px 16px 4px;display:flex;flex-direction:column;gap:8px;">
@@ -892,6 +893,37 @@ function accesoRevendedores(){
   if(revUnlocked){ mostrarPestanasRev(); showTab('pegar'); return; }
   pedirClaveRevendedor('pegar');
 }
+
+// Promo de colaborador de capital. OJO: es una INVITACIÓN A CONVERSAR, no una
+// oferta pública de inversión con % garantizado (eso está regulado en Argentina).
+// El objetivo es que gente de confianza con capital te escriba por WhatsApp.
+function mostrarColaborador(){
+  var wa='5491168610532'; // WhatsApp de Maxi (consultas de colaboradores)
+  var msg='Hola! Vi lo de sumarme como colaborador de AmarangoElectro 🐝 y me gustaría que me cuentes cómo funciona.';
+  var link='https://wa.me/'+wa+'?text='+encodeURIComponent(msg);
+  var html=''
+    +'<div style="text-align:center;margin-bottom:6px;">'
+    +'  <div style="font-size:2.6rem;">🤝</div>'
+    +'  <h2 style="color:var(--az);font-size:1.25rem;font-weight:900;margin:6px 0 2px;">Sumate como colaborador</h2>'
+    +'  <div style="color:var(--sub);font-size:.8rem;font-weight:600;">Hacé crecer tu capital con nosotros</div>'
+    +'</div>'
+    +'<div style="background:#F0F4FF;border-radius:14px;padding:15px;margin:14px 0;font-size:.86rem;line-height:1.55;color:var(--txt);">'
+    +'  ¿Tenés un capital parado y querés que trabaje? En AmarangoElectro sumamos colaboradores que ponen capital para financiar ventas en cuotas. '
+    +'  <b>Vos ponés la plata, nosotros ponemos el producto, la venta, la cobranza y la garantía.</b>'
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:10px;margin:14px 0;">'
+    +'  <div style="display:flex;align-items:flex-start;gap:10px;"><span style="font-size:1.2rem;">📈</span><div style="font-size:.82rem;color:var(--txt);"><b>Tu plata rinde</b> más que quieta en el banco, prestada por unos meses.</div></div>'
+    +'  <div style="display:flex;align-items:flex-start;gap:10px;"><span style="font-size:1.2rem;">🛡️</span><div style="font-size:.82rem;color:var(--txt);"><b>Nosotros ponemos el trabajo</b> y bancamos el riesgo, la cobranza y la garantía.</div></div>'
+    +'  <div style="display:flex;align-items:flex-start;gap:10px;"><span style="font-size:1.2rem;">🤝</span><div style="font-size:.82rem;color:var(--txt);"><b>Trato claro y de palabra</b>, cara a cara. Te explicamos todo sin vueltas.</div></div>'
+    +'</div>'
+    +'<div style="background:#FFF9F0;border:1px solid var(--nar);border-radius:12px;padding:11px 13px;font-size:.74rem;color:#8a5200;line-height:1.5;margin-bottom:14px;">'
+    +'  💬 No es una inversión financiera ni una promesa de rendimiento fijo. Es una <b>colaboración entre conocidos</b>: nos juntamos, te contamos cómo es, y decidís con toda la info.'
+    +'</div>'
+    +'<a href="'+link+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#25D366;color:#fff;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.35);">💬 Quiero que me cuenten</a>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
 // muestra las pestañas de cálculo para asesores de ventas (solo Pegar precio)
 function mostrarPestanasRev(){
   document.getElementById('tab-btn-pegar').style.display='';
@@ -1305,9 +1337,9 @@ function mostrarSaludoHora(){
   var el=document.getElementById('tienda-saludo-hora');
   if(!el)return;
   var h=new Date().getHours(), txt;
-  if(h>=6 && h<13)      txt='Buenos días 🌅 [PRUEBA-777]';
-  else if(h>=13 && h<20)txt='Buenas tardes ☀️ [PRUEBA-777]';
-  else                  txt='Buenas noches 🌙 [PRUEBA-777]';
+  if(h>=6 && h<13)      txt='Buenos días 🌅';
+  else if(h>=13 && h<20)txt='Buenas tardes ☀️';
+  else                  txt='Buenas noches 🌙';
   el.textContent=txt;
 }
 // Banner rotativo: mensajes que van cambiando
