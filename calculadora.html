@@ -56,6 +56,13 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .tab.on{color:var(--az);border-bottom-color:var(--nar);font-weight:800}
 .tab-content{display:none;padding:18px 16px 20px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
 
+/* ═══ Banda de marcas: da confianza al toque (Samsung, iPhone, JBL...) ═══ */
+.marcas-wrap{background:var(--wh);border:1px solid var(--bor);border-radius:14px;padding:11px 0 12px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 10px rgba(11,45,107,.05);}
+.marcas-tit{font-size:.6rem;font-weight:800;color:var(--sub);letter-spacing:1.2px;text-align:center;margin-bottom:9px;text-transform:uppercase;}
+.marcas-track{display:flex;gap:8px;overflow-x:auto;padding:0 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.marcas-track::-webkit-scrollbar{display:none;}
+.marca-chip{flex-shrink:0;background:#F4F7FD;border:1px solid #DCE5F5;border-radius:9px;padding:7px 13px;font-size:.7rem;font-weight:900;color:var(--az);letter-spacing:.3px;white-space:nowrap;}
+
 /* ═══ Cajón lateral (menú deslizable) ═══ */
 .hdr-menu-btn{position:absolute;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
 .hdr-menu-btn:active{transform:scale(.92)}
@@ -615,6 +622,25 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <!-- Banner rotativo de mensajes -->
     <div id="tienda-banner-rot" style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:.82rem;font-weight:800;text-align:center;box-shadow:0 2px 8px rgba(255,122,0,.25);transition:opacity .4s;min-height:20px;"></div>
 
+    <!-- Marcas con las que trabajamos: genera confianza apenas entra el cliente -->
+    <div class="marcas-wrap">
+      <div class="marcas-tit">✨ Trabajamos con las mejores marcas</div>
+      <div class="marcas-track">
+        <span class="marca-chip">SAMSUNG</span>
+        <span class="marca-chip">iPHONE</span>
+        <span class="marca-chip">XIAOMI</span>
+        <span class="marca-chip">MOTOROLA</span>
+        <span class="marca-chip">JBL</span>
+        <span class="marca-chip">SONY</span>
+        <span class="marca-chip">PLAYSTATION</span>
+        <span class="marca-chip">INFINIX</span>
+        <span class="marca-chip">PHILIPS</span>
+        <span class="marca-chip">LUSQTOFF</span>
+        <span class="marca-chip">DAEWOO</span>
+        <span class="marca-chip">y muchas más</span>
+      </div>
+    </div>
+
     <!-- Barra flotante de compartir varios -->
     <div id="tienda-selec-bar" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:1450;background:var(--wh);border-top:2px solid var(--nar);box-shadow:0 -4px 16px rgba(0,0,0,.18);padding:10px 14px;gap:8px;align-items:center;">
       <div style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);"><span id="selec-count">0</span> seleccionado(s)</div>
@@ -929,8 +955,12 @@ function mostrarGanchoCapital(){
     +'  <div style="font-size:1.1rem;margin-top:10px;">🐝</div>'
     +'</div>'
     +'<div style="height:1px;background:var(--bor);margin:22px 0;"></div>'
-    +'<a href="'+lMaxi+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;background:var(--az);color:#fff;border-radius:13px;padding:16px;font-size:.92rem;font-weight:900;text-decoration:none;margin-bottom:9px;box-shadow:0 4px 16px rgba(11,45,107,.22);">🐝 Quiero conocer el programa</a>'
-    +'<a href="'+lAnge+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;background:#fff;color:var(--az);border:2px solid var(--az);border-radius:13px;padding:14px;font-size:.86rem;font-weight:800;text-decoration:none;">Consultar con Ángela</a>'
+    +'<a href="'+lMaxi+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;background:var(--az);color:#fff;border-radius:13px;padding:16px;font-size:.92rem;font-weight:900;text-decoration:none;margin-bottom:14px;box-shadow:0 4px 16px rgba(11,45,107,.22);">🐝 Quiero conocer el programa</a>'
+    +'<div style="text-align:center;color:var(--sub);font-size:.68rem;font-weight:800;letter-spacing:.5px;margin-bottom:9px;">CONSULTAR CON</div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'  <a href="'+lAnge+'" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--az);border:2px solid var(--az);border-radius:13px;padding:13px 6px;font-size:.82rem;font-weight:800;text-decoration:none;">Ángela</a>'
+    +'  <a href="'+lMaxi+'" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--az);border:2px solid var(--az);border-radius:13px;padding:13px 6px;font-size:.82rem;font-weight:800;text-decoration:none;">Maximiliano</a>'
+    +'</div>'
     +'<div style="text-align:center;color:var(--sub);font-size:.7rem;margin-top:16px;line-height:1.5;">También podés consultarlo con cualquier integrante<br>del equipo AmarangoElectro.</div>'
     +'<button class="calc-btn" style="width:100%;margin-top:20px;background:transparent;color:var(--sub);border:none;font-weight:700;" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
