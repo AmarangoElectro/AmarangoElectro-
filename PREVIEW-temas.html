@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);padding:16px;max-width:480px;margin:0 auto;transition:background .3s}
+h3{font-size:.7rem;font-weight:800;color:var(--az);margin:16px 0 8px;letter-spacing:.5px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prod-card{background:var(--wh);border:1px solid var(--bor);border-top:3px solid var(--nar);border-bottom:3px solid var(--az);border-radius:14px;box-shadow:0 3px 14px rgba(11,45,107,.10);padding:9px;position:relative}
+.prod-foto{width:100%;height:132px;border-radius:12px;background:#fff center/contain no-repeat;margin-bottom:4px;border:1px solid var(--bor)}
+.lupa{position:absolute;bottom:8px;left:5px;background:rgba(11,45,107,.82);border:none;border-radius:8px;padding:4px 8px;font-size:.62rem;color:#fff;font-weight:800}
+.nom{font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px}
+.cuo{font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.1}
+.sub{font-size:.62rem;font-weight:700;color:#0a8a3f}
+.cont{font-size:.66rem;color:var(--sub);margin-bottom:6px}
+.temas{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tema{cursor:pointer;border:2.5px solid transparent;border-radius:14px;padding:10px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.sw{display:flex;gap:4px;margin-bottom:7px}
+.sw span{flex:1;height:22px;border-radius:6px}
+.tn{font-size:.76rem;font-weight:900}
+</style></head><body>
+
+<h3>TARJETA DE PRODUCTO NUEVA (foto más grande + botón ver foto)</h3>
+<div class="grid">
+  <div class="prod-card">
+    <div class="prod-foto" style="background-image:url('https://images.samsung.com/is/image/samsung/p6pim/ar/sm-a155mzkdaro/gallery/ar-galaxy-a15-sm-a155-sm-a155mzkdaro-thumb-539248866')"></div>
+    <button class="lupa">🔍 Ver foto</button>
+    <div class="nom">Samsung Galaxy A15 128GB</div>
+    <div class="cuo">$65.000</div>
+    <div class="sub">en 6 cuotas fijas</div>
+    <div class="cont">Contado: $210.000</div>
+  </div>
+  <div class="prod-card">
+    <div class="prod-foto" style="background:#f0f2f8;display:flex;align-items:center;justify-content:center;font-size:2.4rem">📺</div>
+    <button class="lupa">🔍 Ver foto</button>
+    <div class="nom">Smart TV 50" 4K</div>
+    <div class="cuo">$98.000</div>
+    <div class="sub">en 6 cuotas fijas</div>
+    <div class="cont">Contado: $320.000</div>
+  </div>
+</div>
+
+<h3>PALETAS DE COLOR DISPONIBLES</h3>
+<div class="temas">
+  <div class="tema" style="background:#F4F1EA;border-color:#FF7A00"><div class="sw"><span style="background:#0B2D6B"></span><span style="background:#FF7A00"></span><span style="background:#fff;border:1px solid #EBD9B4"></span></div><div class="tn" style="color:#0B2D6B">🐝 Amarango ✓</div></div>
+  <div class="tema" style="background:#0a1830"><div class="sw"><span style="background:#7fa8e0"></span><span style="background:#FF9838"></span><span style="background:#122442;border:1px solid #1e3a5f"></span></div><div class="tn" style="color:#7fa8e0">🌙 Nocturno</div></div>
+  <div class="tema" style="background:#F0FAF5"><div class="sw"><span style="background:#065F46"></span><span style="background:#F59E0B"></span><span style="background:#fff;border:1px solid #C6E9D9"></span></div><div class="tn" style="color:#065F46">💚 Esmeralda</div></div>
+  <div class="tema" style="background:#FBF3F5"><div class="sw"><span style="background:#7B1E3A"></span><span style="background:#E8A33D"></span><span style="background:#fff;border:1px solid #EBD3DA"></span></div><div class="tn" style="color:#7B1E3A">🍷 Vino</div></div>
+  <div class="tema" style="background:#EFF8FC"><div class="sw"><span style="background:#0E4C6E"></span><span style="background:#00B4D8"></span><span style="background:#fff;border:1px solid #CBE6F0"></span></div><div class="tn" style="color:#0E4C6E">🌊 Océano</div></div>
+  <div class="tema" style="background:#F5F6F8"><div class="sw"><span style="background:#1F2937"></span><span style="background:#F97316"></span><span style="background:#fff;border:1px solid #DDE1E7"></span></div><div class="tn" style="color:#1F2937">⚫ Grafito</div></div>
+  <div class="tema" style="background:#F7F4FD"><div class="sw"><span style="background:#4C2A85"></span><span style="background:#EC4899"></span><span style="background:#fff;border:1px solid #DDD2F0"></span></div><div class="tn" style="color:#4C2A85">💜 Lavanda</div></div>
+</div>
+<div style="margin-top:14px;background:#fff;border:1px solid #EBD9B4;border-radius:12px;padding:12px;font-size:.76rem;color:#6B7280;line-height:1.5">
+🔊 <b>Sonido de tecla:</b> se activa/apaga desde el menú. Suena un "tick" corto y seco al tocar botones y al escribir.
+</div>
+</body></html>

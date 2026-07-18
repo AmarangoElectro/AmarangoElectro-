@@ -324,6 +324,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();tiendaToggleModoSelec()"><span class="ci-ic">📤</span> Compartir varios</button>
   <button class="cajon-item" onclick="cerrarCajon();mostrarQR()"><span class="ci-ic">📱</span> Código QR</button>
   <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">🔗</span> Compartir tienda</button>
+  <button class="cajon-item cj-rev" id="cajon-color" style="display:none;" onclick="cerrarCajon();abrirTemasTienda()"><span class="ci-ic">🎨</span> Color de la tienda</button>
+  <button class="cajon-item cj-rev" id="cajon-sonido" style="display:none;" onclick="cerrarCajon();abrirSonidos()"><span class="ci-ic">🔊</span> <span id="cajon-sonido-txt">Sonido: Tecla</span></button>
   <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
 
   <div class="cajon-sep">Programa</div>
@@ -2144,7 +2146,7 @@ function abrirCajon(){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar','cajon-colab'].forEach(function(id){
+  ['cajon-pegar','cajon-colab','cajon-color','cajon-sonido'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
   if(c)c.classList.add('abierto');
@@ -2218,6 +2220,222 @@ function tiendaLimpiarBusqueda(){
   if(typeof marcarNavActiva==='function') marcarNavActiva('');
   tiendaToggleLimpiar();
   tiendaRender();
+}
+
+/* ═══ TEMAS DE COLOR DE LA TIENDA ═══
+   Cambian fondo, paneles y letras pisando las variables CSS. Se guarda la elección. */
+var TEMAS_TIENDA = {
+  amarango: {n:'Amarango', ic:'🐝', az:'#0B2D6B', nar:'#FF7A00', bg:'#F4F1EA', bor:'#EBD9B4', txt:'#1A1A2E', sub:'#6B7280', wh:'#ffffff'},
+  nocturno: {n:'Nocturno', ic:'🌙', az:'#7fa8e0', nar:'#FF9838', bg:'#0a1830', bor:'#1e3a5f', txt:'#e8eef7', sub:'#9bb3d4', wh:'#122442'},
+  esmeralda:{n:'Esmeralda',ic:'💚', az:'#065F46', nar:'#F59E0B', bg:'#F0FAF5', bor:'#C6E9D9', txt:'#10241C', sub:'#5C7A70', wh:'#ffffff'},
+  vino:     {n:'Vino',     ic:'🍷', az:'#7B1E3A', nar:'#E8A33D', bg:'#FBF3F5', bor:'#EBD3DA', txt:'#2A1119', sub:'#8A6A73', wh:'#ffffff'},
+  oceano:   {n:'Océano',   ic:'🌊', az:'#0E4C6E', nar:'#00B4D8', bg:'#EFF8FC', bor:'#CBE6F0', txt:'#0C1F2B', sub:'#5D7C8A', wh:'#ffffff'},
+  grafito:  {n:'Grafito',  ic:'⚫', az:'#1F2937', nar:'#F97316', bg:'#F5F6F8', bor:'#DDE1E7', txt:'#111827', sub:'#6B7280', wh:'#ffffff'},
+  lavanda:  {n:'Lavanda',  ic:'💜', az:'#4C2A85', nar:'#EC4899', bg:'#F7F4FD', bor:'#DDD2F0', txt:'#20143A', sub:'#75699A', wh:'#ffffff'}
+};
+var temaTiendaActual=(function(){ try{ return localStorage.getItem('ae_tema_tienda')||'amarango'; }catch(e){ return 'amarango'; } })();
+
+function aplicarTemaTienda(id, guardar){
+  var t=TEMAS_TIENDA[id]; if(!t) return;
+  var r=document.documentElement;
+  r.style.setProperty('--az', t.az);
+  r.style.setProperty('--nar', t.nar);
+  r.style.setProperty('--bg', t.bg);
+  r.style.setProperty('--bor', t.bor);
+  r.style.setProperty('--txt', t.txt);
+  r.style.setProperty('--sub', t.sub);
+  r.style.setProperty('--wh', t.wh);
+  document.body.style.background=t.bg;
+  // las tarjetas tienen fondo fijo por CSS: lo acompañamos al tema
+  var st=document.getElementById('tema-extra');
+  if(!st){ st=document.createElement('style'); st.id='tema-extra'; document.head.appendChild(st); }
+  st.textContent='.prod-card{background:'+t.wh+' !important;border-color:'+t.bor+' !important;}'
+    +'.marcas-wrap{background:'+t.wh+' !important;}'
+    +'.marca-chip{background:'+t.bg+' !important;color:'+t.az+' !important;border-color:'+t.bor+' !important;}';
+  temaTiendaActual=id;
+  if(guardar!==false){ try{ localStorage.setItem('ae_tema_tienda', id); }catch(e){} }
+}
+
+/* Quién puede tocar apariencia (color / sonido): el equipo, no el cliente comprador. */
+function esEquipo(){
+  var okAdm=false, okRev=false;
+  try{
+    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
+    okRev = (typeof revUnlocked!=='undefined' && revUnlocked===true) || (localStorage.getItem('ae_sesion_rev')==='1');
+  }catch(e){}
+  var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
+  return (okAdm||okRev) && !enVistaCliente;
+}
+
+function abrirTemasTienda(){
+  if(!esEquipo()){ alert('🔒 Opción para el equipo de AmarangoElectro.'); return; }
+  var html='<div style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:2.2rem;">🎨</div>'
+    +'<h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Color de la tienda</h2>'
+    +'<div style="color:var(--sub);font-size:.75rem;font-weight:600;">Elegí una combinación y se aplica al instante</div>'
+    +'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">';
+  for(var k in TEMAS_TIENDA){
+    var t=TEMAS_TIENDA[k];
+    var sel=(k===temaTiendaActual);
+    html+='<div onclick="aplicarTemaTienda(\''+k+'\');abrirTemasTienda();" style="cursor:pointer;border:2.5px solid '+(sel?t.nar:'transparent')+';border-radius:14px;padding:10px;background:'+t.bg+';box-shadow:0 2px 10px rgba(0,0,0,.07);">'
+      +'<div style="display:flex;gap:4px;margin-bottom:7px;">'
+        +'<span style="flex:1;height:22px;border-radius:6px;background:'+t.az+';"></span>'
+        +'<span style="flex:1;height:22px;border-radius:6px;background:'+t.nar+';"></span>'
+        +'<span style="flex:1;height:22px;border-radius:6px;background:'+t.wh+';border:1px solid '+t.bor+';"></span>'
+      +'</div>'
+      +'<div style="font-size:.76rem;font-weight:900;color:'+t.az+';">'+t.ic+' '+t.n+(sel?' ✓':'')+'</div>'
+      +'</div>';
+  }
+  html+='</div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Listo</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+/* ═══ SONIDO DE TECLA (estilo teclado moderno) ═══
+   Se genera con Web Audio, sin archivos externos. Se puede apagar desde el menú. */
+var _audioCtx=null;
+var sonidoTeclaOn=(function(){ try{ return localStorage.getItem('ae_sonido_tecla')!=='0'; }catch(e){ return true; } })();
+var sonidoTipo=(function(){ try{ return localStorage.getItem('ae_sonido_tipo')||'tecla'; }catch(e){ return 'tecla'; } })();
+
+var SONIDOS = {
+  tecla:   {n:'Tecla',    ic:'⌨️', d:'Click seco de teclado'},
+  suave:   {n:'Suave',    ic:'💧', d:'Gota corta y redondeada'},
+  mercado: {n:'Campanita',ic:'🔔', d:'Dos notas alegres, estilo tienda'},
+  burbuja: {n:'Burbuja',  ic:'🫧', d:'Pop grave y simpático'}
+};
+
+function _ctx(){
+  if(!_audioCtx){
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return null;
+    _audioCtx=new AC();
+  }
+  if(_audioCtx.state==='suspended'){ try{ _audioCtx.resume(); }catch(e){} }
+  return _audioCtx;
+}
+// Reproduce una nota simple con caída de volumen
+function _nota(ctx, t0, f1, f2, tipo, vol, dur){
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=tipo;
+  o.frequency.setValueAtTime(f1, t0);
+  if(f2 && f2!==f1){ o.frequency.exponentialRampToValueAtTime(f2, t0+dur*0.7); }
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0004, t0+dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0+dur+0.01);
+}
+function tickTecla(forzarTipo){
+  if(!sonidoTeclaOn && !forzarTipo) return;
+  var ctx=_ctx(); if(!ctx) return;
+  var t=ctx.currentTime;
+  var tipo=forzarTipo||sonidoTipo;
+  try{
+    if(tipo==='tecla'){
+      _nota(ctx, t, 1750, 620, 'square', 0.055, 0.045);
+    }
+    else if(tipo==='suave'){
+      _nota(ctx, t, 880, 520, 'sine', 0.10, 0.11);
+    }
+    else if(tipo==='mercado'){
+      // dos notas ascendentes, tipo confirmación de tienda
+      _nota(ctx, t,        784, 784, 'sine', 0.075, 0.10);
+      _nota(ctx, t+0.075, 1175,1175, 'sine', 0.070, 0.14);
+    }
+    else if(tipo==='burbuja'){
+      _nota(ctx, t, 420, 200, 'sine', 0.11, 0.13);
+    }
+  }catch(e){}
+}
+function toggleSonidoTecla(){
+  sonidoTeclaOn=!sonidoTeclaOn;
+  try{ localStorage.setItem('ae_sonido_tecla', sonidoTeclaOn?'1':'0'); }catch(e){}
+  actualizarTextoSonido();
+  if(sonidoTeclaOn) tickTecla();
+}
+function actualizarTextoSonido(){
+  var t=document.getElementById('cajon-sonido-txt');
+  if(t) t.textContent = sonidoTeclaOn ? ('Sonido: '+(SONIDOS[sonidoTipo]?SONIDOS[sonidoTipo].n:'activado')) : 'Sonido: apagado';
+}
+function elegirSonido(tipo){
+  sonidoTipo=tipo;
+  try{ localStorage.setItem('ae_sonido_tipo', tipo); }catch(e){}
+  if(!sonidoTeclaOn){ sonidoTeclaOn=true; try{ localStorage.setItem('ae_sonido_tecla','1'); }catch(e){} }
+  tickTecla(tipo);
+  actualizarTextoSonido();
+  abrirSonidos();
+}
+function abrirSonidos(){
+  if(!esEquipo()){ alert('🔒 Opción para el equipo de AmarangoElectro.'); return; }
+  var html='<div style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:2.2rem;">🔊</div>'
+    +'<h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Sonido al tocar</h2>'
+    +'<div style="color:var(--sub);font-size:.75rem;font-weight:600;">Tocá uno para escucharlo y elegirlo</div>'
+    +'</div>';
+  for(var k in SONIDOS){
+    var s=SONIDOS[k];
+    var sel=(k===sonidoTipo && sonidoTeclaOn);
+    html+='<div onclick="elegirSonido(\''+k+'\')" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:'+(sel?'#EEF4FF':'var(--wh)')+';border:2px solid '+(sel?'var(--nar)':'var(--bor)')+';border-radius:13px;padding:13px;margin-bottom:9px;">'
+      +'<div style="font-size:1.5rem;">'+s.ic+'</div>'
+      +'<div style="flex:1;"><div style="font-size:.88rem;font-weight:900;color:var(--az);">'+s.n+(sel?' ✓':'')+'</div>'
+      +'<div style="font-size:.7rem;color:var(--sub);">'+s.d+'</div></div>'
+      +'<div style="font-size:1rem;color:var(--sub);">▶</div>'
+      +'</div>';
+  }
+  html+='<button class="calc-btn" style="width:100%;margin-top:4px;background:'+(sonidoTeclaOn?'var(--bg)':'var(--nar)')+';color:'+(sonidoTeclaOn?'var(--sub)':'#fff')+';border:2px solid var(--bor);" onclick="toggleSonidoTecla();abrirSonidos();">'+(sonidoTeclaOn?'🔇 Apagar sonido':'🔊 Activar sonido')+'</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Listo</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+// Enganchamos el sonido a los toques de botones y campos de la app
+document.addEventListener('click', function(e){
+  var el=e.target;
+  if(!el) return;
+  var t=(el.tagName||'').toLowerCase();
+  if(t==='button' || t==='a' || el.classList.contains('calc-btn') ||
+     el.classList.contains('cajon-item') || el.classList.contains('tab') ||
+     el.classList.contains('cat-tile') || el.classList.contains('metodo-btn')){
+    tickTecla();
+  }
+}, true);
+document.addEventListener('keydown', function(e){
+  var el=document.activeElement;
+  if(!el) return;
+  var t=(el.tagName||'').toLowerCase();
+  if(t==='input' || t==='textarea'){ tickTecla(); }
+}, true);
+
+/* ═══ VISOR DE FOTO: abre la imagen grande, con zoom al tocar ═══ */
+function abrirFotoGrande(src, nombre){
+  if(!src) return;
+  var ov=document.getElementById('foto-visor');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='foto-visor';
+    ov.style.cssText='display:none;position:fixed;inset:0;z-index:6000;background:rgba(8,16,38,.94);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;padding:16px;';
+    ov.innerHTML=''
+      +'<button onclick="cerrarFotoGrande()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>'
+      +'<img id="foto-visor-img" src="" alt="" style="max-width:100%;max-height:76vh;border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.5);transition:transform .25s ease;transform-origin:center;cursor:zoom-in;object-fit:contain;background:#fff;">'
+      +'<div id="foto-visor-tit" style="color:#fff;font-size:.9rem;font-weight:800;text-align:center;margin-top:16px;max-width:90%;line-height:1.35;"></div>'
+      +'<div style="color:rgba(255,255,255,.55);font-size:.68rem;margin-top:8px;">Tocá la foto para agrandar · tocá el fondo para cerrar</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov) cerrarFotoGrande(); });
+    var im=ov.querySelector('#foto-visor-img');
+    im.addEventListener('click', function(){
+      var z=this.getAttribute('data-zoom')==='1';
+      this.style.transform = z ? 'scale(1)' : 'scale(1.9)';
+      this.style.cursor = z ? 'zoom-in' : 'zoom-out';
+      this.setAttribute('data-zoom', z ? '0' : '1');
+    });
+  }
+  var img=document.getElementById('foto-visor-img');
+  img.src=src; img.style.transform='scale(1)'; img.style.cursor='zoom-in'; img.setAttribute('data-zoom','0');
+  document.getElementById('foto-visor-tit').textContent=nombre||'';
+  ov.style.display='flex';
+}
+function cerrarFotoGrande(){
+  var ov=document.getElementById('foto-visor');
+  if(ov) ov.style.display='none';
 }
 
 function tiendaRender(){
@@ -2431,7 +2649,8 @@ function tiendaRender(){
 
     card+='<div style="position:relative;">'
       +(p.foto
-        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
+        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:132px;border-radius:12px;background:#fff url(\''+p.foto+'\') center/contain no-repeat;margin-bottom:4px;cursor:pointer;border:1px solid var(--bor);box-shadow:inset 0 0 0 1px rgba(255,255,255,.6);"></div>'
+          +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:5px;background:rgba(11,45,107,.82);border:none;border-radius:8px;padding:4px 8px;font-size:.62rem;color:#fff;font-weight:800;cursor:pointer;backdrop-filter:blur(3px);line-height:1;">🔍 Ver foto</button>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:.95rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);line-height:1;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>'
@@ -6217,6 +6436,8 @@ function cerrarBannerInstall(){
 })();
 
 // La tienda es la pestaña de inicio (pública): inicializarla al cargar
+try{ aplicarTemaTienda(temaTiendaActual, false); }catch(e){}
+try{ actualizarTextoSonido(); }catch(e){}
 try{ tiendaInit(); }catch(e){}
 
 // Ocultar la pantalla de bienvenida a los ~1.8 segundos

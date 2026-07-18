@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--sub:#6B7280;--wh:#fff}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);padding:18px;max-width:480px;margin:0 auto}
+.card{background:var(--wh);border-radius:16px;padding:20px;box-shadow:0 6px 24px rgba(11,45,107,.1)}
+.op{cursor:pointer;display:flex;align-items:center;gap:12px;background:var(--wh);border:2px solid var(--bor);border-radius:13px;padding:13px;margin-bottom:9px;transition:.15s}
+.op:active{transform:scale(.98)}
+.op.sel{background:#EEF4FF;border-color:var(--nar)}
+</style></head><body>
+<div class="card">
+  <div style="text-align:center;margin-bottom:16px">
+    <div style="font-size:2.2rem">🔊</div>
+    <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px">Sonido al tocar</h2>
+    <div style="color:var(--sub);font-size:.75rem;font-weight:600">Tocá uno para escucharlo 👇</div>
+  </div>
+  <div class="op sel" onclick="play('tecla',this)"><div style="font-size:1.5rem">⌨️</div><div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Tecla ✓</div><div style="font-size:.7rem;color:var(--sub)">Click seco de teclado</div></div><div style="color:var(--sub)">▶</div></div>
+  <div class="op" onclick="play('suave',this)"><div style="font-size:1.5rem">💧</div><div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Suave</div><div style="font-size:.7rem;color:var(--sub)">Gota corta y redondeada</div></div><div style="color:var(--sub)">▶</div></div>
+  <div class="op" onclick="play('mercado',this)"><div style="font-size:1.5rem">🔔</div><div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Campanita</div><div style="font-size:.7rem;color:var(--sub)">Dos notas alegres, estilo tienda</div></div><div style="color:var(--sub)">▶</div></div>
+  <div class="op" onclick="play('burbuja',this)"><div style="font-size:1.5rem">🫧</div><div style="flex:1"><div style="font-size:.88rem;font-weight:900;color:var(--az)">Burbuja</div><div style="font-size:.7rem;color:var(--sub)">Pop grave y simpático</div></div><div style="color:var(--sub)">▶</div></div>
+  <div style="margin-top:14px;background:var(--bg);border-radius:10px;padding:12px;font-size:.74rem;color:var(--sub);line-height:1.5">
+    💡 Subí el volumen del celu. Si no escuchás nada, tocá una vez la pantalla primero (Android pide un toque antes de dejar sonar).
+  </div>
+</div>
+<script>
+var ctx=null;
+function C(){ if(!ctx){var A=window.AudioContext||window.webkitAudioContext; if(!A)return null; ctx=new A();} if(ctx.state==='suspended')ctx.resume(); return ctx; }
+function nota(c,t0,f1,f2,tipo,vol,dur){var o=c.createOscillator(),g=c.createGain();o.type=tipo;o.frequency.setValueAtTime(f1,t0);if(f2&&f2!==f1)o.frequency.exponentialRampToValueAtTime(f2,t0+dur*0.7);g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(0.0004,t0+dur);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+dur+0.01);}
+function play(tipo,el){
+  var c=C(); if(!c)return; var t=c.currentTime;
+  if(tipo==='tecla') nota(c,t,1750,620,'square',0.055,0.045);
+  if(tipo==='suave') nota(c,t,880,520,'sine',0.10,0.11);
+  if(tipo==='mercado'){ nota(c,t,784,784,'sine',0.075,0.10); nota(c,t+0.075,1175,1175,'sine',0.070,0.14); }
+  if(tipo==='burbuja') nota(c,t,420,200,'sine',0.11,0.13);
+  document.querySelectorAll('.op').forEach(function(x){x.classList.remove('sel');});
+  el.classList.add('sel');
+}
+</script>
+</body></html>
