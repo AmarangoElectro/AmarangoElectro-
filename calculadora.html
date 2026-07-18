@@ -2854,8 +2854,7 @@ function tiendaRender(){
           return '<div style="font-size:1.2rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
             +'<div style="margin-bottom:6px;">'+bloquePrecioAntes(p)+'</div>';
         }
-      })()
-      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
+      })();
 
     if(tiendaEsAdmin){
       // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
@@ -2884,14 +2883,13 @@ function tiendaRender(){
         +(p.esCelu?'':'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
       +'</div>';
     }else{
-      // botones públicos: COMPRAR (deja la venta casi hecha) + Consultar
-      card+='<button class="calc-btn" style="font-size:.78rem;padding:10px;background:var(--nar);margin-bottom:6px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar</button>'
-        +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>';
+      // Un solo botón: la foto y el precio son los protagonistas.
+      // "Ver cuotas" y "Consultar" quedan adentro del detalle del producto.
+      card+='<button class="calc-btn" style="font-size:.8rem;padding:11px;background:var(--nar);margin-top:2px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.32);" onclick="tiendaVerDetalle('+pid+')">Ver producto</button>';
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
-        card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')">📤 Compartir</button>';
+        card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')">📤 Compartir</button>';
       }
-      card+='<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
     }
     card+='</div>';
     return card;
@@ -3551,8 +3549,9 @@ function tiendaVerDetalle(id){
   var pid="'"+p.id+"'";
   var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
   // acciones
+  html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--az);font-weight:800;" onclick="tiendaVerCuotas('+pid+')">📅 Ver todas las cuotas</button>';
   if(!esVend){
-    html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar ahora</button>';
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar ahora</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--bor);" onclick="agregarAlCarrito('+pid+')">➕ Agregar al carrito</button>';
   }else{
     html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);" onclick="agregarAlCarrito('+pid+')">🛒 Agregar al carrito</button>';
