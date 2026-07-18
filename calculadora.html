@@ -319,6 +319,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">🔗</span> Compartir tienda</button>
   <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
 
+  <div class="cajon-sep">Programa</div>
+  <button class="cajon-item" id="cajon-gancho" onclick="cerrarCajon();mostrarGanchoCapital()" style="color:#FFD166;font-weight:800;"><span class="ci-ic">🔒</span> Programa Colaborador</button>
+
   <div class="cajon-sep cj-admin" id="cajon-sep-admin" style="display:none;">Administrador</div>
   <button class="cajon-item cj-admin" id="cajon-marc-mostrar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('mostrar')"><span class="ci-ic">👁️</span> Mostrar marcados</button>
   <button class="cajon-item cj-admin" id="cajon-marc-ocultar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('ocultar')"><span class="ci-ic">🙈</span> Ocultar marcados</button>
@@ -899,6 +902,41 @@ function accesoRevendedores(){
 // Promo de colaborador de capital. OJO: es una INVITACIÓN A CONVERSAR, no una
 // oferta pública de inversión con % garantizado (eso está regulado en Argentina).
 // El objetivo es que gente de confianza con capital te escriba por WhatsApp.
+/* ═══ PROGRAMA COLABORADOR AMARANGO ═══
+   Enfoque: acceso por invitación, no oferta abierta. La curiosidad y la
+   exclusividad venden más que prometer un número. Se evita a propósito el
+   vocabulario financiero: esto es un programa privado, no una publicidad. */
+function mostrarGanchoCapital(){
+  var waMaxi='5491168610532', waAnge='5491168746034';
+  var msg='Hola! Vi el Programa Colaborador Amarango 🐝 y me gustaría conocer de qué se trata.';
+  var lMaxi='https://wa.me/'+waMaxi+'?text='+encodeURIComponent(msg);
+  var lAnge='https://wa.me/'+waAnge+'?text='+encodeURIComponent(msg);
+  var html=''
+    +'<div style="text-align:center;padding:14px 4px 6px;">'
+    +'  <div style="font-size:2.9rem;line-height:1;">🔒</div>'
+    +'  <h2 style="color:var(--az);font-size:1.2rem;font-weight:900;margin:14px 0 6px;letter-spacing:-.02em;">Programa Colaborador<br>Amarango</h2>'
+    +'  <div style="display:inline-block;background:var(--az);color:#FFD166;font-size:.62rem;font-weight:900;letter-spacing:1.2px;padding:6px 14px;border-radius:20px;margin-top:4px;">ACCESO ÚNICAMENTE POR INVITACIÓN</div>'
+    +'</div>'
+    +'<div style="height:1px;background:var(--bor);margin:22px 0;"></div>'
+    +'<div style="font-size:.88rem;line-height:1.75;color:var(--txt);text-align:center;padding:0 6px;">'
+    +'  Este programa está pensado exclusivamente para personas que ya forman parte del ecosistema Amarango o que fueron invitadas por nosotros.'
+    +'</div>'
+    +'<div style="font-size:.88rem;line-height:1.75;color:var(--txt);text-align:center;padding:0 6px;margin-top:16px;">'
+    +'  Creemos que los mejores negocios empiezan con confianza. Por eso primero conocemos a las personas, trabajamos juntos y, cuando llega el momento, les presentamos cómo funciona nuestro Programa Colaborador.'
+    +'</div>'
+    +'<div style="text-align:center;margin:26px 0 22px;padding:0 10px;">'
+    +'  <div style="color:var(--az);font-size:1rem;font-weight:900;line-height:1.5;letter-spacing:-.01em;">Primero construimos confianza.<br>Después hacemos negocios.</div>'
+    +'  <div style="font-size:1.1rem;margin-top:10px;">🐝</div>'
+    +'</div>'
+    +'<div style="height:1px;background:var(--bor);margin:22px 0;"></div>'
+    +'<a href="'+lMaxi+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;background:var(--az);color:#fff;border-radius:13px;padding:16px;font-size:.92rem;font-weight:900;text-decoration:none;margin-bottom:9px;box-shadow:0 4px 16px rgba(11,45,107,.22);">🐝 Quiero conocer el programa</a>'
+    +'<a href="'+lAnge+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;background:#fff;color:var(--az);border:2px solid var(--az);border-radius:13px;padding:14px;font-size:.86rem;font-weight:800;text-decoration:none;">Consultar con Ángela</a>'
+    +'<div style="text-align:center;color:var(--sub);font-size:.7rem;margin-top:16px;line-height:1.5;">También podés consultarlo con cualquier integrante<br>del equipo AmarangoElectro.</div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:20px;background:transparent;color:var(--sub);border:none;font-weight:700;" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
 function mostrarColaborador(){
   // 🔒 Solo asesores de ventas y administradores. El cliente comprador no la ve.
   var okRev=false, okAdm=false;
