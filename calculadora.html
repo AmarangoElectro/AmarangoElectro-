@@ -184,6 +184,10 @@ img,video,canvas,svg,iframe{max-width:100%;}
 /* Efecto vidrio: las tarjetas dejan ver el fondo de colmena suavemente */
 .prod-card{background:#ffffff !important;border:1px solid var(--bor);border-radius:14px;box-shadow:0 2px 12px rgba(11,45,107,.09);transition:box-shadow .2s,transform .2s;overflow:hidden;padding:9px;}
 .prod-card:active{transform:scale(.985);box-shadow:0 1px 6px rgba(11,45,107,.12);}
+.pd-campo{margin-bottom:10px;}
+.pd-campo label{display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:4px;letter-spacing:.2px;}
+.pd-campo input{width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:600;outline:none;}
+.pd-campo input:focus{border-color:var(--nar);}
 .prod-card:active{box-shadow:0 5px 20px rgba(11,45,107,.16);}
 body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border-top:3px solid var(--nar);}
 /* Cajón lateral de Ayuda (drawer) */
@@ -319,6 +323,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();tiendaToggleModoSelec()"><span class="ci-ic">📤</span> Compartir varios</button>
   <button class="cajon-item" onclick="cerrarCajon();mostrarQR()"><span class="ci-ic">📱</span> Código QR</button>
   <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">🔗</span> Compartir tienda</button>
+  <button class="cajon-item cj-rev" id="cajon-pedido" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();abrirPedido()"><span class="ci-ic">🧾</span> Cargar pedido</button>
   <button class="cajon-item cj-rev" id="cajon-color" style="display:none;" onclick="cerrarCajon();abrirTemasTienda()"><span class="ci-ic">🎨</span> Color de la tienda</button>
   <button class="cajon-item cj-rev" id="cajon-sonido" style="display:none;" onclick="cerrarCajon();abrirSonidos()"><span class="ci-ic">🔊</span> <span id="cajon-sonido-txt">Sonido: Tecla</span></button>
   <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
@@ -2122,7 +2127,7 @@ function abrirCajon(){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar','cajon-colab','cajon-color','cajon-sonido'].forEach(function(id){
+  ['cajon-pegar','cajon-colab','cajon-color','cajon-sonido','cajon-pedido'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
   if(c)c.classList.add('abierto');
@@ -2229,6 +2234,171 @@ function aplicarTemaTienda(id, guardar){
     ;
   temaTiendaActual=id;
   if(guardar!==false){ try{ localStorage.setItem('ae_tema_tienda', id); }catch(e){} }
+}
+
+/* ═══════════ PEDIDOS DEL ASESOR DE VENTAS ═══════════
+   El asesor carga el pedido acá y le llega a Maxi por WhatsApp en un formato
+   ordenado, listo para pegar en el CRM. Los datos del cliente quedan guardados
+   en su teléfono: la segunda vez solo elige el cliente y carga el producto. */
+var WA_PEDIDOS='5491168610532'; // adonde llegan los pedidos
+
+function agendaClientes(){
+  try{ return JSON.parse(localStorage.getItem('ae_agenda_clientes')||'[]'); }catch(e){ return []; }
+}
+function guardarAgenda(a){
+  try{ localStorage.setItem('ae_agenda_clientes', JSON.stringify(a)); }catch(e){}
+}
+function guardarClienteAgenda(cli){
+  var a=agendaClientes();
+  var i=a.findIndex(function(x){ return (x.dni&&cli.dni&&x.dni===cli.dni) || (x.nombre||'').toLowerCase()===(cli.nombre||'').toLowerCase(); });
+  if(i>=0) a[i]=cli; else a.push(cli);
+  guardarAgenda(a);
+}
+function borrarClienteAgenda(i){
+  var a=agendaClientes();
+  if(!confirm('¿Borrar a "'+(a[i]?a[i].nombre:'')+'" de tu agenda?')) return;
+  a.splice(i,1); guardarAgenda(a); abrirPedido();
+}
+
+function abrirPedido(){
+  if(!esEquipo()){ alert('🔒 Herramienta para el equipo de AmarangoElectro.'); return; }
+  var ag=agendaClientes();
+  var opts='<option value="">— Cliente nuevo —</option>';
+  ag.forEach(function(c,i){ opts+='<option value="'+i+'">'+(c.nombre||'')+(c.dni?' · '+c.dni:'')+'</option>'; });
+
+  var html=''
+    +'<div style="text-align:center;margin-bottom:14px;">'
+    +'  <div style="font-size:2.2rem;">🧾</div>'
+    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Cargar pedido</h2>'
+    +'  <div style="color:var(--sub);font-size:.74rem;font-weight:600;">Se envía por WhatsApp listo para el sistema</div>'
+    +'</div>'
+
+    +'<div style="background:#EEF4FF;border-radius:12px;padding:12px;margin-bottom:14px;">'
+    +'  <div style="font-size:.64rem;font-weight:800;color:var(--az);letter-spacing:.4px;margin-bottom:6px;">👤 CLIENTE</div>'
+    +'  <select id="pd-cli" onchange="cargarClienteEnPedido()" style="width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:700;">'+opts+'</select>'
+    +(ag.length?'<div style="font-size:.62rem;color:var(--sub);margin-top:5px;">Tenés '+ag.length+' cliente(s) guardados. Elegí uno y saltás al producto 👇</div>':'')
+    +'</div>'
+
+    +'<div id="pd-datos-cli">'
+    +'  <div class="pd-campo"><label>Nombre y apellido *</label><input id="pd-nombre" placeholder="Ej: Juan Pérez"></div>'
+    +'  <div style="display:flex;gap:8px;">'
+    +'    <div class="pd-campo" style="flex:1;"><label>DNI</label><input id="pd-dni" inputmode="numeric" placeholder="30111222"></div>'
+    +'    <div class="pd-campo" style="flex:1;"><label>Teléfono *</label><input id="pd-tel" inputmode="tel" placeholder="11 5555-5555"></div>'
+    +'  </div>'
+    +'  <div class="pd-campo"><label>Dirección de entrega</label><input id="pd-dir" placeholder="Calle, número, localidad"></div>'
+    +'</div>'
+
+    +'<div style="height:1px;background:var(--bor);margin:16px 0;"></div>'
+    +'<div style="font-size:.64rem;font-weight:800;color:var(--az);letter-spacing:.4px;margin-bottom:8px;">📦 PRODUCTO</div>'
+    +'<div class="pd-campo"><label>Producto *</label><input id="pd-prod" placeholder="Ej: Samsung A15 128GB"></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'  <div class="pd-campo" style="flex:1;"><label>Precio de venta *</label><input id="pd-precio" inputmode="numeric" placeholder="$" oninput="pdCalcular()"></div>'
+    +'  <div class="pd-campo" style="flex:1;"><label>Cuotas</label><select id="pd-cuotas" onchange="pdCalcular()" style="width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:700;"><option value="0">Contado</option><option value="2">2 cuotas</option><option value="3">3 cuotas</option><option value="4">4 cuotas</option><option value="6" selected>6 cuotas</option></select></div>'
+    +'</div>'
+    +'<div class="pd-campo"><label>Seña o entrega <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-senia" inputmode="numeric" placeholder="$ que dejó"></div>'
+    +'<div class="pd-campo"><label>Notas <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-notas" placeholder="Ej: entregar el sábado"></div>'
+    +'<div id="pd-resumen" style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:11px;padding:12px;margin:12px 0;display:none;"></div>'
+
+    +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;padding:15px;" onclick="enviarPedido()">📲 Enviar pedido por WhatsApp</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+function cargarClienteEnPedido(){
+  var i=document.getElementById('pd-cli').value;
+  var box=document.getElementById('pd-datos-cli');
+  if(i===''){
+    box.style.display='';
+    ['pd-nombre','pd-dni','pd-tel','pd-dir'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+    return;
+  }
+  var c=agendaClientes()[parseInt(i,10)];
+  if(!c) return;
+  document.getElementById('pd-nombre').value=c.nombre||'';
+  document.getElementById('pd-dni').value=c.dni||'';
+  document.getElementById('pd-tel').value=c.tel||'';
+  document.getElementById('pd-dir').value=c.dir||'';
+  // ya tenemos sus datos: los mostramos plegados para que vaya directo al producto
+  box.style.display='none';
+  var r=document.getElementById('pd-resumen');
+  r.style.display='block';
+  r.innerHTML='<div style="font-size:.72rem;font-weight:800;color:#047857;">✅ '+(c.nombre||'')+'</div>'
+    +'<div style="font-size:.66rem;color:var(--sub);margin-top:3px;">'+(c.tel||'')+(c.dir?' · '+c.dir:'')+'</div>'
+    +'<button onclick="document.getElementById(\'pd-datos-cli\').style.display=\'\';this.parentNode.style.display=\'none\';" style="margin-top:7px;background:none;border:none;color:var(--az);font-size:.66rem;font-weight:800;text-decoration:underline;cursor:pointer;padding:0;">✏️ Editar datos</button>';
+}
+
+function pdCalcular(){
+  var precio=parseFloat((document.getElementById('pd-precio').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
+  var n=parseInt(document.getElementById('pd-cuotas').value,10)||0;
+  var r=document.getElementById('pd-resumen');
+  if(!precio || !n){ if(r && document.getElementById('pd-cli').value==='') r.style.display='none'; return; }
+  var total=calcularTotalPlan(precio,n);
+  var cuota=Math.round(total/n/1000)*1000;
+  r.style.display='block';
+  r.innerHTML='<div style="display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;"><span style="color:var(--sub);font-weight:600;">Contado</span><b style="color:var(--az);">'+fmt(precio)+'</b></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;"><span style="color:var(--sub);font-weight:600;">'+n+' cuotas de</span><b style="color:#047857;font-size:1rem;">'+fmt(cuota)+'</b></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:3px 0;border-top:1px dashed #86EFAC;margin-top:4px;padding-top:6px;"><span style="color:var(--sub);font-weight:600;">Total financiado</span><b style="color:var(--az);">'+fmt(cuota*n)+'</b></div>';
+}
+
+function enviarPedido(){
+  var nombre=(document.getElementById('pd-nombre').value||'').trim();
+  var dni=(document.getElementById('pd-dni').value||'').trim();
+  var tel=(document.getElementById('pd-tel').value||'').trim();
+  var dir=(document.getElementById('pd-dir').value||'').trim();
+  var prod=(document.getElementById('pd-prod').value||'').trim();
+  var precio=parseFloat((document.getElementById('pd-precio').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
+  var n=parseInt(document.getElementById('pd-cuotas').value,10)||0;
+  var senia=(document.getElementById('pd-senia').value||'').trim();
+  var notas=(document.getElementById('pd-notas').value||'').trim();
+
+  if(!nombre){ alert('Falta el nombre del cliente.'); return; }
+  if(!tel){ alert('Falta el teléfono del cliente.'); return; }
+  if(!prod){ alert('Falta el producto.'); return; }
+  if(!precio){ alert('Falta el precio de venta.'); return; }
+
+  // guardamos al cliente en la agenda del asesor para la próxima vez
+  guardarClienteAgenda({nombre:nombre, dni:dni, tel:tel, dir:dir});
+
+  var quien='';
+  try{ quien=localStorage.getItem('ae_nombre_asesor')||''; }catch(e){}
+  if(!quien){
+    quien=(prompt('¿Cómo te llamás? (queda guardado para los próximos pedidos)')||'').trim();
+    if(quien){ try{ localStorage.setItem('ae_nombre_asesor', quien); }catch(e){} }
+  }
+
+  var cuota=0, total=0;
+  if(n>0){ total=calcularTotalPlan(precio,n); cuota=Math.round(total/n/1000)*1000; }
+
+  // Formato pensado para copiar campo por campo al CRM
+  var m='🧾 *PEDIDO NUEVO* 🐝\n';
+  m+='━━━━━━━━━━━━━━\n';
+  m+='*CLIENTE*\n';
+  m+='Nombre: '+nombre+'\n';
+  m+='DNI: '+(dni||'-')+'\n';
+  m+='Teléfono: '+tel+'\n';
+  m+='Dirección: '+(dir||'-')+'\n';
+  m+='━━━━━━━━━━━━━━\n';
+  m+='*VENTA*\n';
+  m+='Producto: '+prod+'\n';
+  m+='Precio: '+fmt(precio)+'\n';
+  if(n>0){
+    m+='Cuotas: '+n+'\n';
+    m+='Valor cuota: '+fmt(cuota)+'\n';
+    m+='Total: '+fmt(cuota*n)+'\n';
+  } else {
+    m+='Cuotas: contado\n';
+  }
+  if(senia) m+='Seña: '+senia+'\n';
+  m+='━━━━━━━━━━━━━━\n';
+  if(notas) m+='Notas: '+notas+'\n';
+  m+='Vendió: '+(quien||'—')+'\n';
+  m+='Fecha: '+new Date().toLocaleDateString('es-AR')+'\n';
+
+  window.open('https://wa.me/'+WA_PEDIDOS+'?text='+encodeURIComponent(m),'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
+  setTimeout(function(){ alert('✅ Pedido enviado.\n\nEl cliente quedó guardado en tu agenda: la próxima vez solo cargás el producto. 🐝'); },400);
 }
 
 /* Quién puede tocar apariencia (color / sonido): el equipo, no el cliente comprador. */
