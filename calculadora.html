@@ -243,8 +243,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 <body>
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
-<div id="version-check" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#00c853;color:#fff;text-align:center;font-weight:900;font-size:13px;padding:6px;font-family:sans-serif;">✅ VERSIÓN v3 COMPLETA — tabs y ruleta en el cajón · tocá acá para ocultar</div>
-<script>document.getElementById('version-check').onclick=function(){this.style.display='none';};</script>
+
 
 <div id="splash-screen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 55%,#1e5bc8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <img src="icon.png" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}" style="width:120px;height:120px;border-radius:50%;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:splashPulse 1.4s ease-in-out infinite;">
@@ -298,7 +297,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
   <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Asesores de ventas</button>
-  <button class="cajon-item" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🤝</span> Sumate como colaborador</button>
+  <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🤝</span> Sumate como colaborador</button>
 
   <div class="cajon-sep">Herramientas</div>
   <div style="padding:8px 16px 4px;display:flex;flex-direction:column;gap:8px;">
@@ -901,6 +900,17 @@ function accesoRevendedores(){
 // oferta pública de inversión con % garantizado (eso está regulado en Argentina).
 // El objetivo es que gente de confianza con capital te escriba por WhatsApp.
 function mostrarColaborador(){
+  // 🔒 Solo asesores de ventas y administradores. El cliente comprador no la ve.
+  var okRev=false, okAdm=false;
+  try{
+    okRev = (typeof revUnlocked!=='undefined' && revUnlocked===true) || (localStorage.getItem('ae_sesion_rev')==='1');
+    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
+  }catch(e){}
+  var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
+  if((!okRev && !okAdm) || enVistaCliente){
+    alert('🔒 Esta información es para el equipo de AmarangoElectro.');
+    return;
+  }
   var wa='5491168610532'; // WhatsApp de Maxi (consultas de colaboradores)
   var msg='Hola! Vi lo de sumarme como colaborador de AmarangoElectro 🐝 y me gustaría que me cuentes cómo funciona.';
   var link='https://wa.me/'+wa+'?text='+encodeURIComponent(msg);
@@ -940,7 +950,16 @@ function retornoCapComp(costo){
   return 28;
 }
 function abrirCapitalCompartido(){
-  if(!adminUnlocked){ alert('🔒 Esta herramienta es solo para administradores.'); return; }
+  // 🔒 CANDADO: solo administradores. Verificamos en memoria Y en el almacenamiento,
+  // y bloqueamos también si está activa la vista previa de cliente.
+  var okMem = (typeof adminUnlocked!=='undefined' && adminUnlocked===true);
+  var okLS  = false;
+  try{ okLS = (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okLS=false; }
+  var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
+  if(!okMem || !okLS || enVistaCliente){
+    alert('🔒 Herramienta exclusiva de administradores.\n\nEsta calculadora muestra costos y ganancias internas, por eso está protegida.');
+    return;
+  }
   var html=''
     +'<div style="text-align:center;margin-bottom:4px;">'
     +'  <div style="font-size:2.2rem;">🧮</div>'
@@ -959,6 +978,10 @@ function abrirCapitalCompartido(){
   setTimeout(function(){ var i=document.getElementById('cc-costo'); if(i) i.focus(); },250);
 }
 function calcCapitalCompartido(){
+  // 🔒 Segundo candado: aunque alguien llame esta función directo, sin admin no calcula.
+  var okAdm=false;
+  try{ okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) && (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okAdm=false; }
+  if(!okAdm){ var o=document.getElementById('cc-res'); if(o) o.innerHTML=''; return; }
   var costo=parseFloat((document.getElementById('cc-costo').value||'').toString().replace(/\./g,'').replace(/,/g,'.'))||0;
   var out=document.getElementById('cc-res');
   if(!out) return;
@@ -2053,7 +2076,7 @@ function abrirCajon(){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar'].forEach(function(id){
+  ['cajon-pegar','cajon-colab'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
   if(c)c.classList.add('abierto');
