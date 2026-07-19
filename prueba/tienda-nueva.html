@@ -66,6 +66,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .searchbar span{font-size:1rem;opacity:.5}
 .searchbar input{flex:1;border:none;outline:none;font-size:.9rem;font-family:inherit;background:transparent;color:var(--txt)}
 
+/* ═══ BLOQUE 1 NUEVO: barra de confianza + hero (estilo maqueta) ═══ */
+.trust-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 14px 4px;}
+.trust-card{background:#fff;border-radius:14px;padding:13px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(11,45,107,.06);border:1px solid var(--line);}
+.trust-card .tc-ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,#FFF1E3,#FFE2C7);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.trust-card .tc-tx{font-size:.72rem;font-weight:800;color:var(--az);line-height:1.25;}
+@media(min-width:430px){.trust-row{grid-template-columns:repeat(4,1fr);}}
+
+.hero{margin:14px;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#020c2e 0%,var(--az) 55%,var(--az2) 100%);padding:22px 20px;position:relative;box-shadow:0 10px 30px rgba(11,45,107,.22);border:1.5px solid rgba(255,122,0,.35);}
+.hero h2{color:#fff;font-size:1.6rem;font-weight:900;line-height:1.1;letter-spacing:-.02em;}
+.hero h2 .nar{color:var(--nar);}
+.hero p{color:rgba(255,255,255,.82);font-size:.82rem;line-height:1.4;margin-top:10px;max-width:70%;}
+.hero .hero-btn{margin-top:16px;display:inline-block;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:12px 26px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 6px 16px rgba(255,122,0,.35);}
+.hero .hero-emoji{position:absolute;right:-6px;bottom:-6px;font-size:5.5rem;opacity:.16;transform:rotate(-12deg);pointer-events:none;}
+
+
 /* CATEGORÍAS */
 .cats{display:flex;gap:10px;overflow-x:auto;padding:14px;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
@@ -203,6 +218,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 
 <div class="vista on" id="vista-tienda">
+<!-- ═══ BLOQUE 1: barra de confianza (diferenciales Amarango) ═══ -->
+<div class="trust-row">
+  <div class="trust-card"><div class="tc-ic">🛍️</div><div class="tc-tx">Retirá con tu<br>primera cuota</div></div>
+  <div class="trust-card"><div class="tc-ic">💳</div><div class="tc-tx">Hasta 6 cuotas<br>fijas</div></div>
+  <div class="trust-card"><div class="tc-ic">🚚</div><div class="tc-tx">Envíos a todo<br>el país</div></div>
+  <div class="trust-card"><div class="tc-ic">🛡️</div><div class="tc-tx">Compra 100%<br>segura</div></div>
+</div>
+<!-- ═══ BLOQUE 1: hero ═══ -->
+<div class="hero">
+  <h2>Equipá tu casa<br><span class="nar">fácil y en cuotas</span></h2>
+  <p>Los mejores productos, con la mejor financiación.</p>
+  <button class="hero-btn" onclick="verOfertasHero()">Ver ofertas</button>
+  <span class="hero-emoji">🐝</span>
+</div>
 <div class="cats" id="cats"></div>
 <div class="filtros" id="filtros" style="display:none">
   <select id="orden" onchange="render()">
@@ -4848,6 +4877,15 @@ function toggleSoloOfertas(){
   var b=document.getElementById('btnOfertas');
   if(b) b.classList.toggle('on', window._soloOfertas);
   render();
+}
+// Botón "Ver ofertas" del hero: muestra las ofertas y baja al catálogo
+function verOfertasHero(){
+  window._soloOfertas = true;
+  viendoFavs=false;
+  var b=document.getElementById('btnOfertas'); if(b) b.classList.add('on');
+  render();
+  var grid=document.getElementById('grid-wrap')||document.getElementById('section-h');
+  if(grid){ setTimeout(function(){ grid.scrollIntoView({behavior:'smooth',block:'start'}); },100); }
 }
 
 /* ===== FAVORITOS (guardados en el teléfono del cliente) ===== */
