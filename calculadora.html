@@ -311,8 +311,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
+  <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🐝</span> Programa Colaborador</button>
   <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Asesores de ventas</button>
-  <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🤝</span> Sumate como colaborador</button>
 
   <div class="cajon-sep">Herramientas</div>
   <div style="padding:8px 16px 4px;display:flex;flex-direction:column;gap:8px;">
@@ -336,9 +336,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item cj-rev" id="cajon-color" style="display:none;" onclick="cerrarCajon();abrirTemasTienda()"><span class="ci-ic">🎨</span> Color de la tienda</button>
   <button class="cajon-item cj-rev" id="cajon-sonido" style="display:none;" onclick="cerrarCajon();abrirSonidos()"><span class="ci-ic">🔊</span> <span id="cajon-sonido-txt">Sonido: Tecla</span></button>
   <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
-
-  <div class="cajon-sep">Programa</div>
-  <button class="cajon-item" id="cajon-gancho" onclick="cerrarCajon();mostrarGanchoCapital()" style="color:#FFD166;font-weight:800;"><span class="ci-ic">🔒</span> Programa Colaborador</button>
 
   <div class="cajon-sep cj-admin" id="cajon-sep-admin" style="display:none;">Administrador</div>
   <button class="cajon-item cj-admin" id="cajon-marc-mostrar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('mostrar')"><span class="ci-ic">👁️</span> Mostrar marcados</button>
@@ -927,6 +924,10 @@ function accesoRevendedores(){
    Enfoque: acceso por invitación, no oferta abierta. La curiosidad y la
    exclusividad venden más que prometer un número. Se evita a propósito el
    vocabulario financiero: esto es un programa privado, no una publicidad. */
+/* ⚠️ DESACTIVADA — era la puerta pública del Programa Colaborador, visible para
+   cualquier visitante. La sacamos del menú porque contradecía el "es por invitación"
+   y generaba consultas de clientes que no son revendedores.
+   Queda acá por si en algún momento querés volver a usarla. */
 function mostrarGanchoCapital(){
   var waMaxi='5491168610532', waAnge='5491168746034';
   var msg='Hola! Vi el Programa Colaborador Amarango 🐝 y me gustaría conocer de qué se trata.';
@@ -962,6 +963,13 @@ function mostrarGanchoCapital(){
   document.getElementById('modal-cuotas').style.display='block';
 }
 
+/* Embudo del Programa Colaborador.
+   No explica el programa: despierta curiosidad. La persona avanza pantalla por
+   pantalla y decide sola que quiere saber más. La conversación real (y el PDF)
+   van después, por WhatsApp, cuando ya sabemos si cumple el perfil.
+   Sin números, sin porcentajes, sin la palabra "capital". */
+var colabPaso = 0;
+
 function mostrarColaborador(){
   // 🔒 Solo asesores de ventas y administradores. El cliente comprador no la ve.
   var okRev=false, okAdm=false;
@@ -970,35 +978,92 @@ function mostrarColaborador(){
     okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
   }catch(e){}
   var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
-  if((!okRev && !okAdm) || enVistaCliente){
+  // Los invitados entran con ?colab=1 en el link que les mandamos por WhatsApp.
+  var invitado=false;
+  try{ invitado = (location.search.indexOf('colab=1')>-1); }catch(e){}
+  if(((!okRev && !okAdm) && !invitado) || enVistaCliente){
     alert('🔒 Esta información es para el equipo de AmarangoElectro.');
     return;
   }
-  var wa='5491168610532'; // WhatsApp de Maxi (consultas de colaboradores)
-  var msg='Hola! Vi lo de sumarme como colaborador de AmarangoElectro 🐝 y me gustaría que me cuentes cómo funciona.';
-  var link='https://wa.me/'+wa+'?text='+encodeURIComponent(msg);
-  var html=''
-    +'<div style="text-align:center;margin-bottom:6px;">'
-    +'  <div style="font-size:2.6rem;">🤝</div>'
-    +'  <h2 style="color:var(--az);font-size:1.25rem;font-weight:900;margin:6px 0 2px;">Sumate como colaborador</h2>'
-    +'  <div style="color:var(--sub);font-size:.8rem;font-weight:600;">Hacé crecer tu capital con nosotros</div>'
-    +'</div>'
-    +'<div style="background:#F0F4FF;border-radius:14px;padding:15px;margin:14px 0;font-size:.86rem;line-height:1.55;color:var(--txt);">'
-    +'  ¿Tenés un capital parado y querés que trabaje? En AmarangoElectro sumamos colaboradores que ponen capital para financiar ventas en cuotas. '
-    +'  <b>Vos ponés la plata, nosotros ponemos el producto, la venta, la cobranza y la garantía.</b>'
-    +'</div>'
-    +'<div style="display:flex;flex-direction:column;gap:10px;margin:14px 0;">'
-    +'  <div style="display:flex;align-items:flex-start;gap:10px;"><span style="font-size:1.2rem;">📈</span><div style="font-size:.82rem;color:var(--txt);"><b>Tu plata rinde</b> más que quieta en el banco, prestada por unos meses.</div></div>'
-    +'  <div style="display:flex;align-items:flex-start;gap:10px;"><span style="font-size:1.2rem;">🛡️</span><div style="font-size:.82rem;color:var(--txt);"><b>Nosotros ponemos el trabajo</b> y bancamos el riesgo, la cobranza y la garantía.</div></div>'
-    +'  <div style="display:flex;align-items:flex-start;gap:10px;"><span style="font-size:1.2rem;">🤝</span><div style="font-size:.82rem;color:var(--txt);"><b>Trato claro y de palabra</b>, cara a cara. Te explicamos todo sin vueltas.</div></div>'
-    +'</div>'
-    +'<div style="background:#FFF9F0;border:1px solid var(--nar);border-radius:12px;padding:11px 13px;font-size:.74rem;color:#8a5200;line-height:1.5;margin-bottom:14px;">'
-    +'  💬 No es una inversión financiera ni una promesa de rendimiento fijo. Es una <b>colaboración entre conocidos</b>: nos juntamos, te contamos cómo es, y decidís con toda la info.'
-    +'</div>'
-    +'<a href="'+link+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#25D366;color:#fff;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.35);">🐝 Quiero conocer cómo funciona</a>'
-    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
-  document.getElementById('modal-cuotas-body').innerHTML=html;
+  colabPaso = 0;
+  pintarColaborador();
   document.getElementById('modal-cuotas').style.display='block';
+}
+
+function colabSiguiente(){ colabPaso++; pintarColaborador(); }
+function colabVolver(){ if(colabPaso>0){ colabPaso--; pintarColaborador(); } }
+function colabRevelar(){
+  var cta=document.getElementById('colab-cta');
+  var ct=document.getElementById('colab-contactos');
+  if(cta) cta.style.display='none';
+  if(ct) ct.style.display='block';
+}
+
+function pintarColaborador(){
+  // Cada paso es una sola idea. El visitante decide avanzar cinco veces:
+  // eso es lo que construye el deseo, no la información.
+  var pasos = [
+    { ic:'🐝', t:'Hay algo que no está en la tienda.', s:'' },
+    { ic:'🪜', t:'Existe un escalón más dentro de Amarango.', s:'No todos llegan.' },
+    { ic:'📈', t:'¿Y si pudieras ganar más con las mismas ventas que ya hacés?', s:'Aprovechando las ventas que ya generás.' },
+    { ic:'✉️', t:'No se puede pedir.', s:'Se recibe la invitación.' },
+    { ic:'🐝', t:'Si llegaste hasta acá, queremos conocerte.', s:'' }
+  ];
+  var p = pasos[colabPaso];
+  var ultimo = (colabPaso === pasos.length-1);
+
+  // puntitos de progreso
+  var dots='';
+  for(var i=0;i<pasos.length;i++){
+    dots += '<span style="display:inline-block;width:'+(i===colabPaso?'20px':'6px')+';height:6px;border-radius:3px;margin:0 3px;background:'+(i===colabPaso?'var(--nar)':(i<colabPaso?'#FDBA74':'var(--bor)'))+';transition:all .25s;"></span>';
+  }
+
+  var msg='Hola! Vi lo del Programa Colaborador 🐝 y quiero saber cómo funciona.';
+  var waMaxi='https://wa.me/5491168610532?text='+encodeURIComponent(msg);
+  var waAnge='https://wa.me/5491168746034?text='+encodeURIComponent(msg);
+
+  var html=''
+    +'<div style="text-align:center;padding:14px 0 6px;">'+dots+'</div>'
+
+    +'<div style="text-align:center;padding:26px 12px 22px;min-height:190px;display:flex;flex-direction:column;justify-content:center;">'
+    +'  <div style="font-size:3rem;margin-bottom:16px;">'+p.ic+'</div>'
+    +'  <div style="color:var(--az);font-size:1.22rem;font-weight:900;line-height:1.4;letter-spacing:-.2px;">'+p.t+'</div>'
+    + (p.s ? '  <div style="color:var(--sub);font-size:.92rem;font-weight:600;margin-top:10px;line-height:1.5;">'+p.s+'</div>' : '')
+    +'</div>';
+
+  if(!ultimo){
+    html += ''
+      +'<button class="calc-btn" style="width:100%;background:var(--az);color:#fff;font-weight:900;font-size:.95rem;padding:15px;" onclick="colabSiguiente()">Seguir</button>';
+  } else {
+    html += ''
+      +'<div style="font-size:.8rem;color:var(--sub);text-align:center;line-height:1.65;margin-bottom:16px;padding:0 6px;">'
+      +'  Escribinos y te contamos cómo funciona el Programa Colaborador.<br>'
+      +'  <span style="font-size:.74rem;">Si es para vos, te enviamos toda la información.</span>'
+      +'</div>'
+      // Un solo botón: la única decisión es avanzar. Recién después elige con quién habla.
+      +'<div id="colab-cta">'
+      +'  <button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;font-size:.95rem;padding:16px;box-shadow:0 4px 16px rgba(37,211,102,.32);" onclick="colabRevelar()">🐝 Quiero conocer el siguiente escalón</button>'
+      +'</div>'
+      +'<div id="colab-contactos" style="display:none;">'
+      +'  <div style="text-align:center;font-size:.74rem;color:var(--sub);font-weight:700;margin-bottom:9px;">Escribinos por WhatsApp</div>'
+      +'  <div style="display:flex;gap:9px;">'
+      +'    <a href="'+waMaxi+'" target="_blank" rel="noopener" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#25D366;color:#fff;border-radius:13px;padding:14px 8px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.3);">'
+      +'      <span style="font-size:1.3rem;">💬</span><span style="font-size:.88rem;font-weight:900;">Maxi</span>'
+      +'    </a>'
+      +'    <a href="'+waAnge+'" target="_blank" rel="noopener" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#25D366;color:#fff;border-radius:13px;padding:14px 8px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.3);">'
+      +'      <span style="font-size:1.3rem;">💬</span><span style="font-size:.88rem;font-weight:900;">Ángela</span>'
+      +'    </a>'
+      +'  </div>'
+      +'</div>';
+  }
+
+  html += ''
+    +'<div style="display:flex;gap:8px;margin-top:8px;">'
+    + (colabPaso>0 ? '<button class="calc-btn" style="flex:1;background:var(--bg);color:var(--sub);border:2px solid var(--bor);font-size:.82rem;padding:11px;" onclick="colabVolver()">← Volver</button>' : '')
+    +'  <button class="calc-btn" style="flex:1;background:var(--bg);color:var(--sub);border:2px solid var(--bor);font-size:.82rem;padding:11px;" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>'
+    +'</div>';
+
+  document.getElementById('modal-cuotas-body').innerHTML=html;
 }
 
 /* ═══════════ MOTOR DE COLABORACIÓN AMARANGO (SOLO ADMIN) ═══════════
@@ -1025,6 +1090,8 @@ var CC_BASE = {
   comFinanc: 15,     // comisión revendedor en venta financiada (%)
   partesRev: 3,      // en cuántas partes se le paga al revendedor (máx.)
   minParte: 10000,   // ninguna parte puede bajar de este monto
+  pisoMora: 10,      // si el cliente desaparece: capital + este % (para que no pierda
+                     // contra la inflación). No es el rendimiento pactado, es el piso.
   aporte: 50,        // % del costo que pone el colaborador
   r2: 15, r4: 55, r6: 78,   // recargos por plan de cuotas (%)
   ratioMin: 2.0,     // por debajo de esto NO conviene (Amarango vs colaborador)
@@ -1096,6 +1163,11 @@ function ccMotor(costo, plan){
   var rend = Math.round(pone*pctRend/100);
   var recupera = pone+rend;
   var tramo = Math.round(recupera/2);
+  // Escenario de mora: si el cliente desaparece antes de que el colaborador cobre
+  // todo, le completamos hasta capital + piso. Si ya cobró los dos tramos, terminó.
+  var pisoTotal = Math.round(pone*(1+CC.pisoMora/100));
+  var faltaSiCae = Math.max(0, pisoTotal - tramo);   // lo que falta si cae tras el 1er tramo
+  var ahorroMora = recupera - pisoTotal;             // lo que te ahorrás vs pagar todo
 
   // el colaborador NO cobra comisión: gana sólo el rendimiento
   var ganaColab = rend;
@@ -1149,6 +1221,7 @@ function ccMotor(costo, plan){
 
   return { venta:venta, rec:rec, cuota:cuota, totalReal:totalReal, comision:comision, sug:sug,
            partesRev:partesRev, parteRev:parteRev,
+           pisoTotal:pisoTotal, faltaSiCae:faltaSiCae, ahorroMora:ahorroMora,
            pone:pone, rend:rend, pctRend:pctRend, recupera:recupera, tramo:tramo, ganaColab:ganaColab,
            queda:queda, ratio:ratio, ventaja:ventaja, flujoOk:flujoOk,
            luz:luz, titulo:titulo, motivo:motivo };
@@ -1220,6 +1293,7 @@ function abrirCapitalCompartido(){
     + ccInputParam('comContado','Comisión revendedor contado (%)')
     + ccInputParam('partesRev','Partes de pago al revendedor')
     + ccInputParam('minParte','Mínimo por parte ($)')
+    + ccInputParam('pisoMora','Piso si el cliente desaparece (%)')
     + ccInputParam('r4','Recargo 4 cuotas (%)')
     + ccInputParam('r6','Recargo 6 cuotas (%)')
     + ccInputParam('ratioMin','Ratio mínimo Amarango/colab.')
@@ -1276,7 +1350,8 @@ function calcCapitalCompartido(){
     +'📅 A los 30 días: '+fmt(m.tramo)+'\n'
     +'📅 A los 60 días: '+fmt(m.tramo)+'\n\n'
     +'💚 Ganás *'+fmt(m.rend)+'* en 2 meses\n\n'
-    +'🛡️ Garantizado por Amarango. Si el cliente no paga, cobrás igual.\n\n'
+    +'🛡️ Si el cliente cumple, cobrás lo pactado.\n'
+    +'Si el cliente desaparece, te devolvemos tu plata con un ajuste para que no pierdas contra la inflación.\n\n'
     +'¿Te sumás?';
 
   out.innerHTML=''
@@ -1353,6 +1428,20 @@ function calcCapitalCompartido(){
     +'  <div style="text-align:center;font-size:.58rem;color:var(--sub);margin-top:8px;line-height:1.4;">El revendedor no pone capital. El colaborador pone '+fmt(m.pone)+' y gana '+fmt(m.rend-m.comision)+' más.</div>'
     +'</div>'
 
+    // ── SI EL CLIENTE DESAPARECE ──
+    +'<div style="background:#FEF7ED;border:1px solid #FDBA74;border-radius:14px;padding:12px;margin-bottom:10px;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:#9A3412;letter-spacing:.7px;margin-bottom:8px;">🛡️ SI EL CLIENTE DESAPARECE</div>'
+    +'  <div style="font-size:.68rem;color:var(--sub);line-height:1.55;margin-bottom:9px;">'
+    +'    Le devolvés su capital más '+CC.pisoMora+'% para que no pierda contra la inflación. No el rendimiento pactado.'
+    +'  </div>'
+    + fila('Le corresponde', fmt(m.pisoTotal))
+    + fila('Si ya cobró el 1er tramo, le falta', fmt(m.faltaSiCae))
+    + fila('Te ahorrás vs pagar todo', fmt(m.ahorroMora), '#047857')
+    +'  <div style="background:#fff;border-radius:9px;padding:8px;margin-top:8px;font-size:.62rem;color:var(--sub);line-height:1.5;text-align:center;">'
+    +'    Si ya cobró los dos tramos, la operación terminó para él. El riesgo de ahí en más es tuyo.'
+    +'  </div>'
+    +'</div>'
+
     // ── SUGERENCIA DEL MOTOR ──
     + (m.sug ? '<div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:12px;padding:11px;margin-bottom:10px;font-size:.68rem;color:#1E40AF;font-weight:700;line-height:1.5;">'+m.sug+'</div>' : '')
 
@@ -1369,7 +1458,7 @@ function calcCapitalCompartido(){
         +'  📅 A los 30 días: '+fmt(m.tramo)+'<br>'
         +'  📅 A los 60 días: '+fmt(m.tramo)+'<br><br>'
         +'  💚 Ganás <b style="color:#047857;font-size:.92rem;">'+fmt(m.rend)+'</b> en 2 meses<br><br>'
-        +'  <span style="font-size:.66rem;color:var(--sub);">🛡️ Garantizado por Amarango. Si el cliente no paga, cobrás igual.</span>'
+        +'  <span style="font-size:.66rem;color:var(--sub);">🛡️ Si el cliente cumple, cobrás lo pactado. Si el cliente desaparece, te devolvemos tu plata con un ajuste para que no pierdas contra la inflación.</span>'
         +'</div></div>'
         +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(document.getElementById(\'cc-msg\').value),\'_blank\')">📲 Invitar al colaborador</button>'
         +'<textarea id="cc-msg" style="display:none;">'+msg+'</textarea>');
@@ -2423,9 +2512,15 @@ function abrirCajon(){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar','cajon-colab','cajon-color','cajon-sonido','cajon-pedido'].forEach(function(id){
+  ['cajon-pegar','cajon-color','cajon-sonido','cajon-pedido'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
+  // El Programa Colaborador lo ven revendedores, admins, y los invitados que
+  // abren el link con ?colab=1 que les mandamos personalmente por WhatsApp.
+  var invitadoColab=false;
+  try{ invitadoColab = (location.search.indexOf('colab=1')>-1); }catch(e){}
+  var ec=document.getElementById('cajon-colab');
+  if(ec) ec.style.display=(esAdmin||esRev||invitadoColab)?'':'none';
   if(c)c.classList.add('abierto');
   if(o)o.classList.add('abierto');
 }
