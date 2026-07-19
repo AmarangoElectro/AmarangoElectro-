@@ -39,7 +39,15 @@ html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
 body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
-.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:relative;overflow:hidden}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:sticky;top:0;z-index:900;overflow:hidden;transition:padding .28s cubic-bezier(.4,0,.2,1);will-change:padding;}
+/* Al bajar, el header se compacta: logo y título colapsan suave y queda el buscador */
+.header-logo,.header-info{transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .18s ease,transform .28s cubic-bezier(.4,0,.2,1),margin .28s ease;transform-origin:center top;overflow:hidden;}
+.header-logo{max-height:120px;}
+.header-info{max-height:80px;}
+.header.compacto{padding:8px 16px;gap:0;}
+.header.compacto .header-logo{max-height:0;opacity:0;transform:scale(.7);margin:0;}
+.header.compacto .header-info{max-height:0;opacity:0;transform:scale(.9);margin:0;}
+.header.compacto .hdr-buscar{margin-top:0;}
 .header::before{content:'';position:absolute;top:-40%;left:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(120,170,255,.35),transparent 70%);transform:rotate(20deg);pointer-events:none}
 .header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
 .header-logo{width:66px;height:66px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.15);position:relative;z-index:1}
@@ -2400,6 +2408,34 @@ function enviarPedido(){
   document.getElementById('modal-cuotas').style.display='none';
   setTimeout(function(){ alert('✅ Pedido enviado.\n\nEl cliente quedó guardado en tu agenda: la próxima vez solo cargás el producto. 🐝'); },400);
 }
+
+/* ═══ HEADER FIJO INTELIGENTE ═══
+   El header queda pegado arriba. Al bajar se compacta (esconde logo y título)
+   para que el buscador esté siempre a mano sin comerse la pantalla.
+   Zona muerta amplia (60↔140) para que no titile si el dedo queda en el medio. */
+(function(){
+  var ticking=false, compacto=false, bloqueado=false;
+  function ajustarHeader(){
+    ticking=false;
+    if(bloqueado) return;
+    var h=document.querySelector('.header');
+    if(!h) return;
+    var y=window.pageYOffset||document.documentElement.scrollTop||0;
+    // histéresis: se compacta pasando 140, se expande recién bajo 60.
+    // Entre medio no cambia nada, así no parpadea.
+    if(!compacto && y>140){
+      compacto=true; h.classList.add('compacto');
+      bloqueado=true; setTimeout(function(){ bloqueado=false; },300);
+    } else if(compacto && y<60){
+      compacto=false; h.classList.remove('compacto');
+      bloqueado=true; setTimeout(function(){ bloqueado=false; },300);
+    }
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ window.requestAnimationFrame(ajustarHeader); ticking=true; }
+  }, {passive:true});
+  document.addEventListener('DOMContentLoaded', ajustarHeader);
+})();
 
 /* Quién puede tocar apariencia (color / sonido): el equipo, no el cliente comprador. */
 function esEquipo(){
