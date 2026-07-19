@@ -39,7 +39,9 @@ html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
 body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
-.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:sticky;top:0;z-index:900;overflow:hidden;transition:padding .28s cubic-bezier(.4,0,.2,1);will-change:padding;}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:padding .28s cubic-bezier(.4,0,.2,1);will-change:padding;}
+/* espaciador: ocupa el lugar del header fijo para que el contenido no quede tapado */
+#header-espacio{height:0;transition:height .28s cubic-bezier(.4,0,.2,1);}
 /* Al bajar, el header se compacta: logo y título colapsan suave y queda el buscador */
 .header-logo,.header-info{transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .18s ease,transform .28s cubic-bezier(.4,0,.2,1),margin .28s ease;transform-origin:center top;overflow:hidden;}
 .header-logo{max-height:120px;}
@@ -297,6 +299,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
   </div>
 </div>
+<div id="header-espacio"></div>
 
 <!-- ═══ Cajón lateral deslizable ═══ -->
 <div id="cajon-overlay" onclick="cerrarCajon()"></div>
@@ -2409,32 +2412,44 @@ function enviarPedido(){
   setTimeout(function(){ alert('✅ Pedido enviado.\n\nEl cliente quedó guardado en tu agenda: la próxima vez solo cargás el producto. 🐝'); },400);
 }
 
-/* ═══ HEADER FIJO INTELIGENTE ═══
-   El header queda pegado arriba. Al bajar se compacta (esconde logo y título)
-   para que el buscador esté siempre a mano sin comerse la pantalla.
-   Zona muerta amplia (60↔140) para que no titile si el dedo queda en el medio. */
+/* ═══ HEADER FIJO ═══
+   Usamos position:fixed porque el body tiene overflow-x:hidden, y eso rompe
+   position:sticky en los navegadores. El espaciador de abajo ocupa el lugar
+   del header para que el contenido no quede tapado. */
 (function(){
   var ticking=false, compacto=false, bloqueado=false;
+  function medir(){
+    var h=document.querySelector('.header');
+    var e=document.getElementById('header-espacio');
+    if(!h||!e) return;
+    e.style.height = h.offsetHeight + 'px';
+  }
+  window._medirHeader=medir;
   function ajustarHeader(){
     ticking=false;
-    if(bloqueado) return;
     var h=document.querySelector('.header');
     if(!h) return;
     var y=window.pageYOffset||document.documentElement.scrollTop||0;
-    // histéresis: se compacta pasando 140, se expande recién bajo 60.
-    // Entre medio no cambia nada, así no parpadea.
-    if(!compacto && y>140){
-      compacto=true; h.classList.add('compacto');
-      bloqueado=true; setTimeout(function(){ bloqueado=false; },300);
-    } else if(compacto && y<60){
-      compacto=false; h.classList.remove('compacto');
-      bloqueado=true; setTimeout(function(){ bloqueado=false; },300);
+    if(!bloqueado){
+      // histéresis: se compacta pasando 140, se expande recién bajo 60.
+      if(!compacto && y>140){
+        compacto=true; h.classList.add('compacto');
+        bloqueado=true; setTimeout(function(){ bloqueado=false; medir(); },300);
+        setTimeout(medir,30);
+      } else if(compacto && y<60){
+        compacto=false; h.classList.remove('compacto');
+        bloqueado=true; setTimeout(function(){ bloqueado=false; medir(); },300);
+        setTimeout(medir,30);
+      }
     }
   }
   window.addEventListener('scroll', function(){
     if(!ticking){ window.requestAnimationFrame(ajustarHeader); ticking=true; }
   }, {passive:true});
-  document.addEventListener('DOMContentLoaded', ajustarHeader);
+  window.addEventListener('resize', medir, {passive:true});
+  window.addEventListener('load', medir);
+  document.addEventListener('DOMContentLoaded', function(){ medir(); setTimeout(medir,200); setTimeout(medir,600); });
+  setTimeout(medir, 1200);
 })();
 
 /* Quién puede tocar apariencia (color / sonido): el equipo, no el cliente comprador. */
