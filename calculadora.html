@@ -1016,13 +1016,15 @@ var CC_BASE = {
   // En montos chicos hace falta un % alto para que la cifra en pesos valga la
   // espera de 60 días. En montos grandes, un % menor ya da una cifra atractiva.
   // El colaborador nunca ve el costo ni el %: sólo pesos y fechas.
-  t1: 50000,  p1: 70,   // hasta $50.000 → 70%
-  t2: 100000, p2: 65,   // hasta $100.000 → 65%
-  t3: 175000, p3: 58,   // hasta $175.000 → 58%
-  t4: 250000, p4: 52,   // hasta $250.000 → 52%
-  p5: 45,               // más de $250.000 → 45%
+  t1: 50000,  p1: 62,   // hasta $50.000 → 62%
+  t2: 100000, p2: 56,   // hasta $100.000 → 56%
+  t3: 175000, p3: 50,   // hasta $175.000 → 50%
+  t4: 250000, p4: 45,   // hasta $250.000 → 45%
+  p5: 42,               // más de $250.000 → 42%
   comContado: 10,    // comisión revendedor en venta de contado (%)
   comFinanc: 15,     // comisión revendedor en venta financiada (%)
+  partesRev: 3,      // en cuántas partes se le paga al revendedor (máx.)
+  minParte: 10000,   // ninguna parte puede bajar de este monto
   aporte: 50,        // % del costo que pone el colaborador
   r2: 15, r4: 55, r6: 78,   // recargos por plan de cuotas (%)
   ratioMin: 2.0,     // por debajo de esto NO conviene (Amarango vs colaborador)
@@ -1083,6 +1085,11 @@ function ccMotor(costo, plan){
 
   // el revendedor cobra su comisión el día 0, al entrar la primera cuota
   var comision = Math.round(venta*CC.comFinanc/100);
+  // El revendedor cobra en hasta 3 partes: día 0 (cuando paga el cliente),
+  // día 30 y día 60. Ninguna parte puede quedar por debajo del mínimo.
+  var partesRev = CC.partesRev;
+  while(partesRev>1 && (comision/partesRev)<CC.minParte) partesRev--;
+  var parteRev = Math.round(comision/partesRev);
 
   var pone = Math.round(costo*CC.aporte/100);
   var pctRend = ccRendPorTramo(pone);
@@ -1141,6 +1148,7 @@ function ccMotor(costo, plan){
   }
 
   return { venta:venta, rec:rec, cuota:cuota, totalReal:totalReal, comision:comision, sug:sug,
+           partesRev:partesRev, parteRev:parteRev,
            pone:pone, rend:rend, pctRend:pctRend, recupera:recupera, tramo:tramo, ganaColab:ganaColab,
            queda:queda, ratio:ratio, ventaja:ventaja, flujoOk:flujoOk,
            luz:luz, titulo:titulo, motivo:motivo };
@@ -1210,6 +1218,8 @@ function abrirCapitalCompartido(){
     + ccInputParam('aporte','Aporte del colaborador (% del costo)')
     + ccInputParam('comFinanc','Comisión revendedor financiado (%)')
     + ccInputParam('comContado','Comisión revendedor contado (%)')
+    + ccInputParam('partesRev','Partes de pago al revendedor')
+    + ccInputParam('minParte','Mínimo por parte ($)')
     + ccInputParam('r4','Recargo 4 cuotas (%)')
     + ccInputParam('r6','Recargo 6 cuotas (%)')
     + ccInputParam('ratioMin','Ratio mínimo Amarango/colab.')
@@ -1260,13 +1270,14 @@ function calcCapitalCompartido(){
   }
 
   // mensaje simple para el colaborador: sólo pesos y fechas, sin porcentajes
-  var msg='🐝 *Te invitamos a colaborar en esta operación*\n\n'
+  var msg='🐝 *Colaboración Amarango*\n\n'
     +'Ponés *'+fmt(m.pone)+'*\n'
-    +'En 60 días recuperás *'+fmt(m.recupera)+'*\n\n'
-    +'📅 Día 30: '+fmt(m.tramo)+'\n'
-    +'📅 Día 60: '+fmt(m.tramo)+'\n\n'
-    +'Tu ganancia: *'+fmt(m.rend)+'*\n\n'
-    +'Amarango garantiza la devolución. Si el cliente no paga, cobrás igual. 🛡️';
+    +'Recuperás *'+fmt(m.recupera)+'*\n\n'
+    +'📅 A los 30 días: '+fmt(m.tramo)+'\n'
+    +'📅 A los 60 días: '+fmt(m.tramo)+'\n\n'
+    +'💚 Ganás *'+fmt(m.rend)+'* en 2 meses\n\n'
+    +'🛡️ Garantizado por Amarango. Si el cliente no paga, cobrás igual.\n\n'
+    +'¿Te sumás?';
 
   out.innerHTML=''
     // ── SEMÁFORO (primero, es la respuesta del motor) ──
@@ -1287,7 +1298,7 @@ function calcCapitalCompartido(){
     +'    <b style="color:#047857;font-size:1.05rem;">'+fmt(m.ganaColab)+'</b>'
     +'  </div>'
     +'  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;">'
-    +'    <div><div style="font-weight:800;font-size:.8rem;color:var(--az);">🛒 Revendedor</div><div style="font-size:.58rem;color:var(--sub);">sólo vende · cobra el día 0</div></div>'
+    +'    <div><div style="font-weight:800;font-size:.8rem;color:var(--az);">🛒 Revendedor</div><div style="font-size:.58rem;color:var(--sub);">sólo vende · '+m.partesRev+(m.partesRev>1?' partes de ':' pago de ')+fmt(m.parteRev)+'</div></div>'
     +'    <b style="color:var(--sub);font-size:1.05rem;">'+fmt(m.comision)+'</b>'
     +'  </div>'
     +'  <div style="background:'+(m.ventaja>=CC.ventajaMin?'#ECFDF5':'#FFF8E1')+';border-radius:9px;padding:8px;margin-top:9px;text-align:center;font-size:.63rem;font-weight:700;color:'+(m.ventaja>=CC.ventajaMin?'#047857':'#8A6D00')+';">'
@@ -1316,6 +1327,32 @@ function calcCapitalCompartido(){
     + fila(m.flujoOk?'Te sobra por cuota':'Te falta por cuota', fmt(Math.abs(m.cuota-m.tramo)), m.flujoOk?'#047857':'#B91C1C')
     +'</div>'
 
+    // ── CUÁNDO COBRA CADA UNO ──
+    +'<div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:12px;margin-bottom:10px;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:8px;">CUÁNDO COBRA CADA UNO · LOS DOS EN 2 MESES</div>'
+    +'  <div style="display:flex;gap:8px;">'
+    +'    <div style="flex:1;background:#F0FDF4;border-radius:10px;padding:9px;">'
+    +'      <div style="font-size:.62rem;font-weight:800;color:#047857;margin-bottom:5px;">🤝 Colaborador</div>'
+    +'      <div style="font-size:.6rem;color:var(--sub);line-height:1.7;">'
+    +'        Día 0: <b style="color:#B91C1C;">−'+fmt(m.pone)+'</b><br>'
+    +'        Día 30: <b style="color:#047857;">'+fmt(m.tramo)+'</b><br>'
+    +'        Día 60: <b style="color:#047857;">'+fmt(m.tramo)+'</b>'
+    +'      </div>'
+    +'      <div style="border-top:1px dashed #86EFAC;margin-top:6px;padding-top:5px;font-size:.62rem;font-weight:800;color:#047857;">Gana '+fmt(m.rend)+'</div>'
+    +'    </div>'
+    +'    <div style="flex:1;background:#F8FAFC;border-radius:10px;padding:9px;">'
+    +'      <div style="font-size:.62rem;font-weight:800;color:var(--sub);margin-bottom:5px;">🛒 Revendedor</div>'
+    +'      <div style="font-size:.6rem;color:var(--sub);line-height:1.7;">'
+    +'        Día 0: <b style="color:var(--az);">'+fmt(m.parteRev)+'</b><br>'
+    + (m.partesRev>1 ? '        Día 30: <b style="color:var(--az);">'+fmt(m.parteRev)+'</b><br>' : '        Día 30: —<br>')
+    + (m.partesRev>2 ? '        Día 60: <b style="color:var(--az);">'+fmt(m.parteRev)+'</b>' : '        Día 60: —')
+    +'      </div>'
+    +'      <div style="border-top:1px dashed #E2E8F0;margin-top:6px;padding-top:5px;font-size:.62rem;font-weight:800;color:var(--sub);">Gana '+fmt(m.comision)+'</div>'
+    +'    </div>'
+    +'  </div>'
+    +'  <div style="text-align:center;font-size:.58rem;color:var(--sub);margin-top:8px;line-height:1.4;">El revendedor no pone capital. El colaborador pone '+fmt(m.pone)+' y gana '+fmt(m.rend-m.comision)+' más.</div>'
+    +'</div>'
+
     // ── SUGERENCIA DEL MOTOR ──
     + (m.sug ? '<div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:12px;padding:11px;margin-bottom:10px;font-size:.68rem;color:#1E40AF;font-weight:700;line-height:1.5;">'+m.sug+'</div>' : '')
 
@@ -1325,13 +1362,14 @@ function calcCapitalCompartido(){
     + (m.luz==='rojo' ? ''
       : '<div style="background:#F0FDF4;border:1px dashed #10B981;border-radius:12px;padding:12px;margin-bottom:9px;">'
         +'<div style="font-size:.58rem;font-weight:800;color:#047857;letter-spacing:.7px;margin-bottom:7px;">ESTO LE LLEGA AL COLABORADOR</div>'
-        +'<div style="font-size:.74rem;line-height:1.6;color:var(--az);">'
-        +'  <b>🐝 Te invitamos a colaborar en esta operación</b><br><br>'
-        +'  Ponés <b>'+fmt(m.pone)+'</b>. En 60 días recuperás <b>'+fmt(m.recupera)+'</b>.<br><br>'
-        +'  📅 Día 30: '+fmt(m.tramo)+'<br>'
-        +'  📅 Día 60: '+fmt(m.tramo)+'<br><br>'
-        +'  Tu ganancia: <b style="color:#047857;">'+fmt(m.rend)+'</b><br><br>'
-        +'  <span style="font-size:.66rem;color:var(--sub);">🛡️ Amarango garantiza la devolución. Si el cliente no paga, cobrás igual.</span>'
+        +'<div style="font-size:.76rem;line-height:1.7;color:var(--az);">'
+        +'  <b>🐝 Colaboración Amarango</b><br><br>'
+        +'  Ponés <b>'+fmt(m.pone)+'</b><br>'
+        +'  Recuperás <b>'+fmt(m.recupera)+'</b><br><br>'
+        +'  📅 A los 30 días: '+fmt(m.tramo)+'<br>'
+        +'  📅 A los 60 días: '+fmt(m.tramo)+'<br><br>'
+        +'  💚 Ganás <b style="color:#047857;font-size:.92rem;">'+fmt(m.rend)+'</b> en 2 meses<br><br>'
+        +'  <span style="font-size:.66rem;color:var(--sub);">🛡️ Garantizado por Amarango. Si el cliente no paga, cobrás igual.</span>'
         +'</div></div>'
         +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(document.getElementById(\'cc-msg\').value),\'_blank\')">📲 Invitar al colaborador</button>'
         +'<textarea id="cc-msg" style="display:none;">'+msg+'</textarea>');
