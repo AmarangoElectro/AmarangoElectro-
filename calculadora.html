@@ -39,20 +39,22 @@ html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
 body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
-.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:box-shadow .3s ease;}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:11px 14px 12px;display:flex;flex-direction:column;align-items:stretch;gap:9px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:box-shadow .3s ease;}
+/* fila superior: logo + nombre juntos, a la izquierda; menú a la derecha */
+.hdr-marca{display:flex;align-items:center;gap:10px;padding-right:50px;}
 /* espaciador: ocupa el lugar del header fijo para que el contenido no quede tapado */
 #header-espacio{height:0;}
 /* Al bajar, solo una sombra sutil: da sensación de profundidad sin mover nada */
 .header.bajando{box-shadow:0 6px 22px rgba(3,10,35,.34);}
 .header::before{content:'';position:absolute;top:-40%;left:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(120,170,255,.35),transparent 70%);transform:rotate(20deg);pointer-events:none}
 .header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
-.header-logo{width:66px;height:66px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.15);position:relative;z-index:1}
-.header-info{text-align:center;position:relative;z-index:1}
-.header-info h1{color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:.3px;text-shadow:0 0 1px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.45)}
+.header-logo{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.18);position:relative;z-index:1;flex-shrink:0}
+.header-info{text-align:left;position:relative;z-index:1;min-width:0;flex:1}
+.header-info h1{color:#fff;font-size:1.06rem;font-weight:900;letter-spacing:.2px;line-height:1.15;text-shadow:0 0 1px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.45)}
 .header-info h1 .pwr{display:inline-block;position:relative;width:.6em;height:.6em;vertical-align:baseline;margin:0 1px}
 .header-info h1 .pwr::before{content:'';position:absolute;inset:0;border:2.5px solid #fff;border-radius:50%;border-top-color:transparent;box-shadow:0 0 2px var(--nar),0 0 4px rgba(255,122,0,.6)}
 .header-info h1 .pwr::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:45%;background:#fff;border-radius:2px;box-shadow:0 0 2px var(--nar),0 0 4px rgba(255,122,0,.6)}
-.header-info p{color:rgba(255,255,255,.7);font-size:.66rem;margin-top:2px}
+.header-info p{color:var(--nar);font-size:.63rem;margin-top:1px;font-weight:700;font-style:italic;line-height:1.2}
 .header-badge{background:rgba(255,122,0,.25);border:1px solid var(--nar);border-radius:20px;padding:4px 14px;font-size:.62rem;font-weight:800;color:#ffb968;white-space:nowrap;position:relative;z-index:1;margin-top:2px}
 .tabs{display:flex;background:var(--wh);border-bottom:2px solid var(--bor);overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -62,7 +64,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 
 
 /* ═══ Cajón lateral (menú deslizable) ═══ */
-.hdr-menu-btn{position:absolute;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
+.hdr-menu-btn{position:absolute;top:11px;right:14px;z-index:5;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.18rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
 .hdr-menu-btn:active{transform:scale(.92)}
 #cajon-overlay{position:fixed;inset:0;background:rgba(3,10,35,.55);z-index:2990;opacity:0;pointer-events:none;transition:opacity .28s;backdrop-filter:blur(2px)}
 #cajon-overlay.abierto{opacity:1;pointer-events:auto}
@@ -199,8 +201,8 @@ body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border
 #ayuda-overlay.abierto{opacity:1;pointer-events:auto;}
 #ayuda-drawer{position:fixed;top:0;left:0;height:100%;width:88%;max-width:400px;background:var(--wh);z-index:2060;box-shadow:6px 0 24px rgba(0,0,0,.25);transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:18px;}
 #ayuda-drawer.abierto{transform:translateX(0);}
-/* Botones flotantes abajo-izquierda: así no chocan con el header fijo */
-#ayuda-btn{position:fixed;bottom:82px;left:12px;z-index:1380;background:rgba(11,45,107,.9);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.3);display:flex;align-items:center;gap:4px;}
+/* Ayuda ahora vive en la barra inferior; este flotante queda oculto */
+#ayuda-btn{display:none !important;}
 #btn-atras{display:none;position:fixed;bottom:82px;left:12px;z-index:1385;background:rgba(11,45,107,.92);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:7px 14px 7px 11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 14px rgba(0,0,0,.32);align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;}
 #btn-atras:active{transform:scale(.96);}
 /* ═══ MODO LUJO ✨ ═══ */
@@ -281,10 +283,12 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
 <div class="header">
   <button class="hdr-menu-btn" onclick="abrirCajon()" title="Menú" aria-label="Menú">☰</button>
-  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
-  <div class="header-info">
-    <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
-    <p style="color:var(--nar);font-weight:700;font-style:italic;">Equipá tu casa, fácil y en cuotas</p>
+  <div class="hdr-marca">
+    <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
+    <div class="header-info">
+      <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
+      <p>Equipá tu casa, fácil y en cuotas</p>
+    </div>
   </div>
   <div class="hdr-buscar">
     <span class="hb-lupa">🔍</span>
@@ -664,6 +668,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- ===== BARRA DE NAVEGACIÓN INFERIOR (estilo Mercado Libre) ===== -->
     <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
+      <button onclick="ayudaAbrir()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:22px;line-height:1;">❓</span><span style="font-size:.62rem;font-weight:700;">Ayuda</span>
+      </button>
       <button class="nav-item" onclick="navTienda('categorias')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--az);">
         <span style="font-size:22px;line-height:1;">📂</span><span style="font-size:.62rem;font-weight:700;">Categorías</span>
       </button>
