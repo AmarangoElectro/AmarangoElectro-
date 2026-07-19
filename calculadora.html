@@ -1002,16 +1002,49 @@ function mostrarColaborador(){
 }
 
 /* ═══════════ CALCULADORA CAPITAL COMPARTIDO (SOLO ADMIN) ═══════════
-   Metés el costo del producto y te dice al toque cuánto pone el colaborador,
-   cuánto gana y cuánto recupera. Los retornos bajan cuanto más caro el producto,
-   porque ahí nuestro markup es más fino. */
-function retornoCapComp(costo){
-  if(costo<=50000)  return 45;
-  if(costo<=100000) return 40;
-  if(costo<=250000) return 35;
-  if(costo<=350000) return 30;
-  return 28;
+   Modelo Amarango: el colaborador invitado pone una parte del costo y cobra
+   rendimiento sobre lo que puso, más su comisión de venta. Amarango es el
+   inversor principal y siempre queda arriba en la repartija.
+   Los parámetros son editables para probar, pero al recargar vuelven solos. */
+
+// Valores originales del modelo. Si tocás los de abajo y recargás, vuelven acá.
+var CC_BASE = { rend:30, comision:15, r2:15, r4:55, r6:78, topeNormal:50, topeAlto:30, cortealto:350000 };
+var CC = JSON.parse(JSON.stringify(CC_BASE));  // copia de trabajo (se pierde al recargar)
+var ccPlan = 4;
+var ccModo = 'costo';
+var ccAporte = 50;
+
+function ccResetParams(){
+  CC = JSON.parse(JSON.stringify(CC_BASE));
+  abrirCapitalCompartido();
 }
+function ccSetParam(k,v){
+  var n = parseFloat(v);
+  if(!isNaN(n)) CC[k] = n;
+  calcCapitalCompartido();
+}
+function ccModificado(){
+  for(var k in CC_BASE){ if(CC[k]!==CC_BASE[k]) return true; }
+  return false;
+}
+function ccSetPlan(p){ ccPlan=p; abrirCapitalCompartido(); }
+function ccSetModo(m){ ccModo=m; abrirCapitalCompartido(); }
+function ccSetAporte(v){
+  ccAporte = parseInt(v)||0;
+  calcCapitalCompartido();
+}
+// costo estimado hacia atrás desde el precio de venta
+function ccCostoDesdeVenta(venta){
+  var c = venta/1.5;
+  for(var i=0;i<14;i++){
+    var m;
+    if(c<=50000)m=1.80; else if(c<=100000)m=1.60; else if(c<=250000)m=1.50;
+    else if(c<=350000)m=1.40; else m=1.30;
+    c = venta/m;
+  }
+  return Math.round(c);
+}
+
 function abrirCapitalCompartido(){
   // 🔒 CANDADO: solo administradores. Verificamos en memoria Y en el almacenamiento,
   // y bloqueamos también si está activa la vista previa de cliente.
@@ -1023,70 +1056,208 @@ function abrirCapitalCompartido(){
     alert('🔒 Herramienta exclusiva de administradores.\n\nEsta calculadora muestra costos y ganancias internas, por eso está protegida.');
     return;
   }
+  var valPrev='';
+  var prev=document.getElementById('cc-costo'); if(prev) valPrev=prev.value;
+
+  function btnPlan(n,rec){
+    var on=(ccPlan===n);
+    return '<button onclick="ccSetPlan('+n+')" style="flex:1;border:2px solid '+(on?'var(--nar)':'var(--bor)')+';background:'+(on?'#FFF5EB':'#fff')+';color:'+(on?'var(--nar)':'var(--sub)')+';border-radius:11px;padding:9px 3px;font-weight:900;font-size:.95rem;cursor:pointer;font-family:inherit;">'+n+'<span style="display:block;font-size:.55rem;font-weight:700;opacity:.8;">+'+rec+'%</span></button>';
+  }
+  function btnModo(m,txt){
+    var on=(ccModo===m);
+    return '<button onclick="ccSetModo(\''+m+'\')" style="flex:1;border:0;background:'+(on?'var(--az)':'transparent')+';color:'+(on?'#fff':'var(--sub)')+';padding:9px 5px;border-radius:9px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:inherit;">'+txt+'</button>';
+  }
+
   var html=''
     +'<div style="text-align:center;margin-bottom:4px;">'
     +'  <div style="font-size:2.2rem;">🧮</div>'
     +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:4px 0 2px;">Capital Compartido</h2>'
     +'  <div style="color:var(--sub);font-size:.72rem;font-weight:700;">Calculadora privada · solo admin</div>'
     +'</div>'
-    +'<div style="background:var(--az);border-radius:14px;padding:14px;margin:12px 0;">'
-    +'  <div style="color:rgba(255,255,255,.7);font-size:.62rem;font-weight:800;letter-spacing:.5px;margin-bottom:6px;">COSTO DEL PRODUCTO ($ARS)</div>'
-    +'  <input type="number" id="cc-costo" inputmode="numeric" placeholder="Ej: 180000" oninput="calcCapitalCompartido()" style="width:100%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:12px;color:#fff;font-size:1.35rem;font-weight:900;outline:none;">'
-    +'  <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px;">Lo que te sale a vos el producto. El retorno se ajusta solo según el tramo.</div>'
+
+    // selector costo / venta
+    +'<div style="display:flex;background:#EEF2F8;border-radius:11px;padding:3px;margin:12px 0 8px;">'
+    + btnModo('costo','Costo') + btnModo('venta','Precio de venta')
     +'</div>'
+
+    +'<div style="background:var(--az);border-radius:14px;padding:14px;margin-bottom:10px;">'
+    +'  <div style="color:rgba(255,255,255,.7);font-size:.62rem;font-weight:800;letter-spacing:.5px;margin-bottom:6px;">'+(ccModo==='costo'?'COSTO DEL PRODUCTO ($ARS)':'PRECIO DE VENTA CONTADO ($ARS)')+'</div>'
+    +'  <input type="number" id="cc-costo" inputmode="numeric" value="'+valPrev+'" placeholder="Ej: 180000" oninput="calcCapitalCompartido()" style="width:100%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:12px;color:#fff;font-size:1.35rem;font-weight:900;outline:none;">'
+    +'  <div id="cc-hint" style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px;">'+(ccModo==='costo'?'Lo que te sale a vos el producto.':'Pegás la venta y te estimo el costo.')+'</div>'
+    +'</div>'
+
+    // plan de cuotas
+    +'<div style="margin-bottom:10px;">'
+    +'  <div style="font-size:.6rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:6px;">PLAN DE CUOTAS</div>'
+    +'  <div style="display:flex;gap:7px;">'+btnPlan(2,CC.r2)+btnPlan(4,CC.r4)+btnPlan(6,CC.r6)+'</div>'
+    +'</div>'
+
+    // aporte del invitado
+    +'<div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:13px;margin-bottom:10px;">'
+    +'  <div style="display:flex;justify-content:space-between;align-items:baseline;">'
+    +'    <span style="font-size:.6rem;font-weight:800;color:var(--sub);letter-spacing:.7px;">APORTE DEL COLABORADOR INVITADO</span>'
+    +'    <b id="cc-aporte-txt" style="color:var(--nar);font-size:1.05rem;">—</b>'
+    +'  </div>'
+    +'  <input type="range" id="cc-aporte" min="0" max="50" step="5" value="'+ccAporte+'" oninput="ccSetAporte(this.value)" style="width:100%;margin:10px 0 2px;accent-color:var(--nar);">'
+    +'  <div id="cc-aporte-hint" style="font-size:.62rem;color:var(--sub);line-height:1.4;"></div>'
+    +'</div>'
+
     +'<div id="cc-res"></div>'
+
+    // parametros editables
+    +'<details style="margin-top:12px;border:1px solid var(--bor);border-radius:12px;padding:10px;background:#fff;">'
+    +'  <summary style="font-size:.68rem;font-weight:800;color:var(--sub);cursor:pointer;letter-spacing:.5px;">⚙️ MÁRGENES Y PORCENTAJES</summary>'
+    +'  <div style="font-size:.6rem;color:var(--sub);margin:8px 0 10px;line-height:1.4;">Podés tocarlos para probar. Al recargar la página vuelven solos a los valores originales.</div>'
+    + ccInputParam('rend','Rendimiento al invitado (%)')
+    + ccInputParam('comision','Comisión de venta (%)')
+    + ccInputParam('r2','Recargo 2 cuotas (%)')
+    + ccInputParam('r4','Recargo 4 cuotas (%)')
+    + ccInputParam('r6','Recargo 6 cuotas (%)')
+    + ccInputParam('topeNormal','Tope de aporte normal (%)')
+    + ccInputParam('topeAlto','Tope de aporte alto costo (%)')
+    + ccInputParam('cortealto','Costo desde el que aplica tope alto ($)')
+    +'  <button onclick="ccResetParams()" style="width:100%;margin-top:8px;background:var(--bg);border:2px solid var(--bor);border-radius:10px;padding:9px;font-size:.72rem;font-weight:800;color:var(--sub);cursor:pointer;font-family:inherit;">↩️ Restaurar valores originales</button>'
+    +'</details>'
+
     +'<button class="calc-btn" style="width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
-  setTimeout(function(){ var i=document.getElementById('cc-costo'); if(i) i.focus(); },250);
+  calcCapitalCompartido();
+  if(!valPrev) setTimeout(function(){ var i=document.getElementById('cc-costo'); if(i) i.focus(); },250);
 }
+
+function ccInputParam(k,label){
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.7rem;">'
+    +'<span style="color:var(--sub);flex:1;">'+label+'</span>'
+    +'<input type="number" value="'+CC[k]+'" oninput="ccSetParam(\''+k+'\',this.value)" style="width:88px;border:1px solid var(--bor);border-radius:8px;padding:6px;text-align:right;font-weight:800;color:var(--az);font-family:inherit;font-size:.78rem;">'
+    +'</div>';
+}
+
 function calcCapitalCompartido(){
   // 🔒 Segundo candado: aunque alguien llame esta función directo, sin admin no calcula.
   var okAdm=false;
   try{ okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) && (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okAdm=false; }
   if(!okAdm){ var o=document.getElementById('cc-res'); if(o) o.innerHTML=''; return; }
-  var costo=parseFloat((document.getElementById('cc-costo').value||'').toString().replace(/\./g,'').replace(/,/g,'.'))||0;
+
+  var val=parseFloat((document.getElementById('cc-costo').value||'').toString().replace(/\./g,'').replace(/,/g,'.'))||0;
   var out=document.getElementById('cc-res');
   if(!out) return;
-  if(costo<=0){ out.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px;">Poné el costo y te calculo todo 🐝</div>'; return; }
+  if(val<=0){ out.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px;">Poné el monto y te calculo todo 🐝</div>'; return; }
 
-  var pct=retornoCapComp(costo);
-  var gana=Math.round(costo*pct/100);
-  var recupera=costo+gana;
-  // lo nuestro (privado): venta con markup, financiada en 6 cuotas
-  var venta=markupVentaCRM(costo);
-  var total6=Math.round(venta*1.78);
-  var cuota=Math.round(total6/6/1000)*1000;
-  var totalReal=cuota*6;
-  var ganTotal=totalReal-costo;
-  var ganNuestra=ganTotal-gana;
+  var costo, venta;
+  if(ccModo==='costo'){ costo=val; venta=markupVentaCRM(costo); }
+  else { venta=val; costo=ccCostoDesdeVenta(venta); }
+
+  var hint=document.getElementById('cc-hint');
+  if(hint){
+    hint.textContent = (ccModo==='costo')
+      ? 'Venta contado '+fmt(venta)
+      : 'Costo estimado '+fmt(costo);
+  }
+
+  // tope de aporte segun costo
+  var tope = (costo>CC.cortealto) ? CC.topeAlto : CC.topeNormal;
+  var sl=document.getElementById('cc-aporte');
+  if(sl){ sl.max=tope; if(parseInt(sl.value)>tope){ sl.value=tope; ccAporte=tope; } }
+  var pct = Math.min(ccAporte,tope);
+
+  var rec = (ccPlan===2)?CC.r2:(ccPlan===4)?CC.r4:CC.r6;
+  var total = venta*(1+rec/100);
+  var cuota = Math.round(total/ccPlan/1000)*1000;
+  var totalReal = cuota*ccPlan;
+
+  var pone = Math.round(costo*pct/100);
+  var rend = Math.round(pone*CC.rend/100);
+  var comision = Math.round(venta*CC.comision/100);
+  var ganaColab = rend+comision;
+  var recupera = pone+rend;
+  var tramo = Math.round(recupera/2);
+  var queda = totalReal - costo - rend - comision;
+  var ratio = ganaColab>0 ? queda/ganaColab : 99;
+  var flujoOk = (pone===0) || (cuota>=tramo);
+
+  var at=document.getElementById('cc-aporte-txt');
+  if(at) at.textContent = fmt(pone)+' ('+pct+'%)';
+  var ah=document.getElementById('cc-aporte-hint');
+  if(ah){
+    ah.innerHTML = (pct===0)
+      ? 'Sin invitado: Amarango pone todo el capital.'
+      : 'El invitado cubre el '+pct+'% del costo. Amarango pone '+fmt(costo-pone)+'.'
+        + (costo>CC.cortealto ? '<br><b style="color:#B91C1C;">🔒 Tope '+tope+'% · producto de alto costo</b>' : '');
+  }
+
+  // semaforo
+  var sColor, sBorde, sBg, sTit, sSub;
+  if(ganaColab>queda || !flujoOk){
+    sColor='#B91C1C'; sBorde='#B91C1C'; sBg='#FDECEA'; sTit='🔴 No conviene';
+    sSub = (ganaColab>queda)
+      ? 'El invitado gana más que Amarango. Bajá el aporte o pasá a más cuotas.'
+      : 'La cuota del cliente ('+fmt(cuota)+') no cubre el tramo de '+fmt(tramo)+' que hay que pagarle.';
+  } else if(ratio<2){
+    sColor='#8A6D00'; sBorde='#E0AA00'; sBg='#FFF8E1'; sTit='🟡 Buena elección';
+    sSub='Amarango gana '+ratio.toFixed(1)+'x que el invitado. Sirve, pero el margen es justo. A más cuotas mejora.';
+  } else {
+    sColor='#047857'; sBorde='#10B981'; sBg='#ECFDF5'; sTit='🟢 Muy buena elección';
+    sSub='Amarango gana '+ratio.toFixed(1)+'x que el invitado y '+(comision>0?(queda/comision).toFixed(1):'—')+'x que un revendedor.';
+  }
 
   var msg='🤝 *Capital Compartido · AmarangoElectro* 🐝\n\n'
-    +'📦 Capital a colaborar: *'+fmt(costo)+'*\n'
-    +'📈 Rendimiento: *'+pct+'%*\n'
+    +'📦 Capital a colaborar: *'+fmt(pone)+'*\n'
+    +'📈 Rendimiento: *'+CC.rend+'%*\n'
     +'💰 Recuperás en total: *'+fmt(recupera)+'*\n'
-    +'📅 Plazo: 2 meses (en 2 tramos)\n\n'
+    +'📅 Plazo: 2 meses · '+fmt(tramo)+' a los 30 días y '+fmt(tramo)+' a los 60\n\n'
     +'🛡️ Tu rendimiento está garantizado por AmarangoElectro. Si el cliente no paga, te devolvemos igual.\n\n'
     +'Cualquier duda escribime 🤝';
 
+  function fila(l,v,c){
+    return '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.78rem;"><span style="color:var(--sub);font-weight:600;">'+l+'</span><b style="color:'+(c||'var(--az)')+';">'+v+'</b></div>';
+  }
+
   out.innerHTML=''
+    // bloque colaborador
     +'<div style="background:#ECFDF5;border:2px solid #10B981;border-radius:14px;padding:14px;margin-bottom:10px;">'
-    +'  <div style="font-size:.6rem;font-weight:800;color:#047857;letter-spacing:.8px;margin-bottom:8px;">👤 LO QUE VE EL COLABORADOR</div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;"><span style="color:var(--sub);font-weight:600;">Pone</span><b style="color:var(--az);">'+fmt(costo)+'</b></div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;"><span style="color:var(--sub);font-weight:600;">Rendimiento</span><b style="color:#047857;">'+pct+'%</b></div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;"><span style="color:var(--sub);font-weight:600;">Gana</span><b style="color:#047857;">'+fmt(gana)+'</b></div>'
-    +'  <div style="border-top:1px dashed #86EFAC;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:var(--az);font-size:.8rem;">Recupera</span><b style="color:#047857;font-size:1.25rem;">'+fmt(recupera)+'</b></div>'
-    +'  <div style="text-align:center;color:#047857;font-size:.62rem;font-weight:700;margin-top:6px;">📅 en 2 meses · 2 tramos</div>'
+    +'  <div style="font-size:.6rem;font-weight:800;color:#047857;letter-spacing:.8px;margin-bottom:8px;">👤 LO QUE VE EL COLABORADOR INVITADO</div>'
+    + fila('Pone', fmt(pone))
+    + fila('Rendimiento ('+CC.rend+'% a 2 meses)', fmt(rend), '#047857')
+    + fila('Comisión por vender ('+CC.comision+'%)', fmt(comision), '#047857')
+    +'  <div style="border-top:1px dashed #86EFAC;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:var(--az);font-size:.8rem;">Gana en total</span><b style="color:#047857;font-size:1.25rem;">'+fmt(ganaColab)+'</b></div>'
+    +'  <div style="background:#fff;border-radius:10px;padding:9px;margin-top:9px;font-size:.7rem;">'
+    +'    <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:var(--sub);">📅 Día 30 · cobra</span><b style="color:var(--az);">'+fmt(tramo)+'</b></div>'
+    +'    <div style="display:flex;justify-content:space-between;padding:3px 0;"><span style="color:var(--sub);">📅 Día 60 · cobra</span><b style="color:var(--az);">'+fmt(tramo)+'</b></div>'
+    +'    <div style="display:flex;justify-content:space-between;padding:6px 0 0;margin-top:3px;border-top:1px dashed #E5E7EB;"><span style="color:var(--sub);font-weight:700;">Recupera</span><b style="color:#047857;">'+fmt(recupera)+'</b></div>'
+    +'  </div>'
     +'</div>'
+
+    // bloque privado
     +'<div style="background:#FFF7ED;border:2px solid var(--nar);border-radius:14px;padding:14px;margin-bottom:10px;">'
-    +'  <div style="font-size:.6rem;font-weight:800;color:#9A3412;letter-spacing:.8px;margin-bottom:8px;">🔒 PRIVADO · SOLO VOS</div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">Venta contado</span><b style="color:var(--az);">'+fmt(venta)+'</b></div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">6 cuotas de</span><b style="color:var(--az);">'+fmt(cuota)+'</b></div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">Cliente paga total</span><b style="color:var(--az);">'+fmt(totalReal)+'</b></div>'
-    +'  <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.76rem;"><span style="color:var(--sub);">Ganancia total</span><b style="color:var(--az);">'+fmt(ganTotal)+'</b></div>'
-    +'  <div style="border-top:1px dashed #FDBA74;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:#9A3412;font-size:.8rem;">Te queda a vos</span><b style="color:var(--nar);font-size:1.25rem;">'+fmt(ganNuestra)+'</b></div>'
-    +'  <div style="text-align:center;color:#9A3412;font-size:.62rem;font-weight:700;margin-top:6px;">Ganás '+(gana>0?(ganNuestra/gana).toFixed(1):'—')+'x más que el colaborador, sin poner un peso</div>'
+    +'  <div style="font-size:.6rem;font-weight:800;color:#9A3412;letter-spacing:.8px;margin-bottom:8px;">🔒 PRIVADO · SOLO VOS (AMARANGO)</div>'
+    + fila('Venta contado', fmt(venta))
+    + fila(ccPlan+' cuotas de', fmt(cuota))
+    + fila('Cliente paga total', fmt(totalReal))
+    + fila('Costo del producto', '− '+fmt(costo))
+    + fila('Rendimiento al invitado', '− '+fmt(rend))
+    + fila('Comisión de venta', '− '+fmt(comision))
+    +'  <div style="border-top:1px dashed #FDBA74;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:#9A3412;font-size:.8rem;">Te queda a vos</span><b style="color:var(--nar);font-size:1.25rem;">'+fmt(queda)+'</b></div>'
+    +'  <div style="text-align:center;color:#9A3412;font-size:.6rem;font-weight:700;margin-top:6px;">Amarango puso '+fmt(costo-pone)+' · el invitado '+fmt(pone)+'</div>'
     +'</div>'
+
+    // semaforo
+    +'<div style="background:'+sBg+';border:2px solid '+sBorde+';border-radius:14px;padding:13px;text-align:center;margin-bottom:10px;">'
+    +'  <div style="font-size:1.02rem;font-weight:900;color:'+sColor+';margin-bottom:3px;">'+sTit+'</div>'
+    +'  <div style="font-size:.66rem;font-weight:600;color:'+sColor+';line-height:1.45;opacity:.92;">'+sSub+'</div>'
+    +'</div>'
+
+    // orden de reparto
+    +'<div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:12px;margin-bottom:10px;font-size:.74rem;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:7px;">CONTROL DE ORDEN</div>'
+    + fila('🥇 Amarango (inversor)', fmt(queda))
+    + fila('🥈 Colaborador invitado', fmt(ganaColab))
+    + fila('🥉 Revendedor (no invierte)', fmt(comision))
+    +'</div>'
+
+    + (ccModificado() ? '<div style="background:#FFF4E0;border:1px solid var(--nar);border-radius:10px;padding:9px;font-size:.65rem;color:#9A3412;font-weight:700;text-align:center;margin-bottom:10px;">⚠️ Estás usando márgenes modificados. Al recargar vuelven a los originales.</div>' : '')
+
     +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(document.getElementById(\'cc-msg\').value),\'_blank\')">📲 Mandarle la propuesta al colaborador</button>'
     +'<textarea id="cc-msg" style="display:none;">'+msg+'</textarea>';
 }
