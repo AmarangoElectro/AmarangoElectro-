@@ -39,17 +39,11 @@ html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
 body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
-.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:padding .28s cubic-bezier(.4,0,.2,1);will-change:padding;}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:box-shadow .3s ease;}
 /* espaciador: ocupa el lugar del header fijo para que el contenido no quede tapado */
-#header-espacio{height:0;transition:height .28s cubic-bezier(.4,0,.2,1);}
-/* Al bajar, el header se compacta: logo y título colapsan suave y queda el buscador */
-.header-logo,.header-info{transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .18s ease,transform .28s cubic-bezier(.4,0,.2,1),margin .28s ease;transform-origin:center top;overflow:hidden;}
-.header-logo{max-height:120px;}
-.header-info{max-height:80px;}
-.header.compacto{padding:8px 16px;gap:0;}
-.header.compacto .header-logo{max-height:0;opacity:0;transform:scale(.7);margin:0;}
-.header.compacto .header-info{max-height:0;opacity:0;transform:scale(.9);margin:0;}
-.header.compacto .hdr-buscar{margin-top:0;}
+#header-espacio{height:0;}
+/* Al bajar, solo una sombra sutil: da sensación de profundidad sin mover nada */
+.header.bajando{box-shadow:0 6px 22px rgba(3,10,35,.34);}
 .header::before{content:'';position:absolute;top:-40%;left:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(120,170,255,.35),transparent 70%);transform:rotate(20deg);pointer-events:none}
 .header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
 .header-logo{width:66px;height:66px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.15);position:relative;z-index:1}
@@ -205,9 +199,9 @@ body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border
 #ayuda-overlay.abierto{opacity:1;pointer-events:auto;}
 #ayuda-drawer{position:fixed;top:0;left:0;height:100%;width:88%;max-width:400px;background:var(--wh);z-index:2060;box-shadow:6px 0 24px rgba(0,0,0,.25);transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:18px;}
 #ayuda-drawer.abierto{transform:translateX(0);}
-/* Botón ayuda fijo esquina superior izquierda */
-#ayuda-btn{position:fixed;top:12px;left:12px;z-index:1380;background:rgba(11,45,107,.9);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.25);display:flex;align-items:center;gap:4px;}
-#btn-atras{display:none;position:fixed;top:12px;left:12px;z-index:1385;background:rgba(11,45,107,.92);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:7px 14px 7px 11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(0,0,0,.28);align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;}
+/* Botones flotantes abajo-izquierda: así no chocan con el header fijo */
+#ayuda-btn{position:fixed;bottom:82px;left:12px;z-index:1380;background:rgba(11,45,107,.9);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.3);display:flex;align-items:center;gap:4px;}
+#btn-atras{display:none;position:fixed;bottom:82px;left:12px;z-index:1385;background:rgba(11,45,107,.92);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:7px 14px 7px 11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 14px rgba(0,0,0,.32);align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;}
 #btn-atras:active{transform:scale(.96);}
 /* ═══ MODO LUJO ✨ ═══ */
 body.lujo h1,body.lujo .tienda-saludo,body.lujo #tienda-saludo-hora{font-family:'Playfair Display',serif !important;letter-spacing:.5px;}
@@ -2413,11 +2407,12 @@ function enviarPedido(){
 }
 
 /* ═══ HEADER FIJO ═══
-   Usamos position:fixed porque el body tiene overflow-x:hidden, y eso rompe
-   position:sticky en los navegadores. El espaciador de abajo ocupa el lugar
-   del header para que el contenido no quede tapado. */
+   Queda quieto arriba, sin achicarse (simple y sin fallas).
+   Usamos position:fixed porque el body tiene overflow-x:hidden y eso rompe
+   position:sticky. El espaciador ocupa su lugar para que nada quede tapado.
+   Único efecto: una sombra sutil al bajar, que da profundidad sin mover nada. */
 (function(){
-  var ticking=false, compacto=false, bloqueado=false;
+  var ticking=false, conSombra=false;
   function medir(){
     var h=document.querySelector('.header');
     var e=document.getElementById('header-espacio');
@@ -2425,26 +2420,16 @@ function enviarPedido(){
     e.style.height = h.offsetHeight + 'px';
   }
   window._medirHeader=medir;
-  function ajustarHeader(){
+  function alScroll(){
     ticking=false;
     var h=document.querySelector('.header');
     if(!h) return;
     var y=window.pageYOffset||document.documentElement.scrollTop||0;
-    if(!bloqueado){
-      // histéresis: se compacta pasando 140, se expande recién bajo 60.
-      if(!compacto && y>140){
-        compacto=true; h.classList.add('compacto');
-        bloqueado=true; setTimeout(function(){ bloqueado=false; medir(); },300);
-        setTimeout(medir,30);
-      } else if(compacto && y<60){
-        compacto=false; h.classList.remove('compacto');
-        bloqueado=true; setTimeout(function(){ bloqueado=false; medir(); },300);
-        setTimeout(medir,30);
-      }
-    }
+    if(y>12 && !conSombra){ conSombra=true; h.classList.add('bajando'); }
+    else if(y<=12 && conSombra){ conSombra=false; h.classList.remove('bajando'); }
   }
   window.addEventListener('scroll', function(){
-    if(!ticking){ window.requestAnimationFrame(ajustarHeader); ticking=true; }
+    if(!ticking){ window.requestAnimationFrame(alScroll); ticking=true; }
   }, {passive:true});
   window.addEventListener('resize', medir, {passive:true});
   window.addEventListener('load', medir);

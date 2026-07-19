@@ -2,23 +2,22 @@
 <style>
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--sub:#6B7280}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
-/* IMPORTANTE: replico el overflow-x:hidden que tiene tu app, para probar en igualdad */
 html{overflow-x:hidden;width:100%}
-body{background:var(--bg);max-width:480px;margin:0 auto;overflow-x:hidden;position:relative}
-.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:padding .28s cubic-bezier(.4,0,.2,1);will-change:padding}
-#header-espacio{height:0;transition:height .28s cubic-bezier(.4,0,.2,1)}
-.header-logo,.header-info{transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .18s ease,transform .28s cubic-bezier(.4,0,.2,1),margin .28s ease;transform-origin:center top;overflow:hidden}
-.header-logo{max-height:120px;width:66px;height:66px;border-radius:50%;background:radial-gradient(circle,#fff,#dbe6f5);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0}
-.header-info{max-height:80px;text-align:center}
-.header.compacto{padding:8px 16px;gap:0}
-.header.compacto .header-logo{max-height:0;opacity:0;transform:scale(.7);margin:0}
-.header.compacto .header-info{max-height:0;opacity:0;transform:scale(.9);margin:0}
-.header.compacto .hdr-buscar{margin-top:0}
+body{background:var(--bg);max-width:480px;margin:0 auto;overflow-x:hidden;position:relative;padding-bottom:80px}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:16px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:box-shadow .3s ease}
+.header.bajando{box-shadow:0 6px 22px rgba(3,10,35,.34)}
+#header-espacio{height:0}
+.header-logo{width:66px;height:66px;border-radius:50%;background:radial-gradient(circle,#fff,#dbe6f5);display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0}
+.header-info{text-align:center}
 .header-info h1{color:#fff;font-size:1.12rem;font-weight:900}
 .header-info p{color:var(--nar);font-weight:700;font-style:italic;font-size:.76rem}
-.hdr-buscar{width:100%;background:#fff;border-radius:12px;border:2px solid var(--nar);padding:11px 14px;display:flex;align-items:center;gap:9px;margin-top:8px;transition:margin .28s ease}
+.hdr-buscar{width:100%;background:#fff;border-radius:12px;border:2px solid var(--nar);padding:11px 14px;display:flex;align-items:center;gap:9px;margin-top:8px}
 .hdr-buscar input{flex:1;border:none;outline:none;font-size:.88rem;font-family:inherit}
 .menu{position:absolute;top:12px;right:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;width:36px;height:36px;font-size:1.05rem;z-index:5}
+#ayuda-btn{position:fixed;bottom:82px;left:12px;z-index:1380;background:rgba(11,45,107,.9);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;box-shadow:0 3px 12px rgba(0,0,0,.3)}
+.navb{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--bor);display:flex;justify-content:space-around;padding:9px 0 12px;z-index:1000}
+.navb div{text-align:center;font-size:.62rem;font-weight:800;color:var(--sub)}
+.navb div span{display:block;font-size:1.15rem;margin-bottom:1px}
 .cont{padding:14px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .card{background:#fff;border:1px solid var(--bor);border-radius:14px;padding:9px;overflow:hidden;box-shadow:0 2px 12px rgba(11,45,107,.09)}
@@ -28,7 +27,6 @@ body{background:var(--bg);max-width:480px;margin:0 auto;overflow-x:hidden;positi
 .sb{font-size:.6rem;font-weight:700;color:#0a8a3f}
 .ct{font-size:.64rem;color:var(--sub);margin-bottom:8px}
 .btn{width:100%;border:none;border-radius:10px;padding:10px;font-size:.76rem;font-weight:900;color:#fff;background:var(--nar);font-family:inherit}
-.aviso{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(11,45,107,.95);color:#fff;padding:10px 18px;border-radius:24px;font-size:.74rem;font-weight:800;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 </style></head><body>
 <div class="header" id="hd">
   <button class="menu">☰</button>
@@ -38,16 +36,16 @@ body{background:var(--bg);max-width:480px;margin:0 auto;overflow-x:hidden;positi
 </div>
 <div id="header-espacio"></div>
 <div class="cont"><div class="grid" id="g"></div></div>
-<div class="aviso" id="av">👆 Deslizá — el header queda fijo</div>
+<button id="ayuda-btn">❓ Ayuda</button>
+<div class="navb"><div><span>📂</span>Categorías</div><div><span>🛒</span>Carrito</div><div><span>❤️</span>Favoritos</div><div><span>🔥</span>Ofertas</div></div>
 <script>
 var prods=[['🔥','SIRENA Calefactor 2400KCAL','$100.000','$337.500'],['🔆','DELHI Estufa Cuarzo','$9.000','$29.000'],['❄️','Aire Split 3500W','$180.000','$580.000'],['📱','Samsung Galaxy A15','$65.000','$210.000'],['📺','Smart TV 50" 4K','$98.000','$320.000'],['🧊','Heladera No Frost','$120.000','$390.000'],['🔊','Parlante JBL','$25.000','$82.000'],['🧺','Lavarropas 7kg','$140.000','$450.000'],['☕','Cafetera Express','$18.000','$59.000'],['🍳','Freidora de aire','$32.000','$105.000']];
 var h='';prods.forEach(function(p){h+='<div class="card"><div class="foto">'+p[0]+'</div><div class="nom">'+p[1]+'</div><div class="cu">'+p[2]+'</div><div class="sb">en 6 cuotas fijas</div><div class="ct">Contado: '+p[3]+'</div><button class="btn">Ver producto</button></div>';});
 document.getElementById('g').innerHTML=h;
-(function(){var tick=false,comp=false,bloq=false;
+(function(){var tick=false,som=false;
 function medir(){var hd=document.getElementById('hd'),e=document.getElementById('header-espacio');if(hd&&e)e.style.height=hd.offsetHeight+'px';}
 function aj(){tick=false;var hd=document.getElementById('hd');var y=window.pageYOffset||0;
-if(!bloq){if(!comp&&y>140){comp=true;hd.classList.add('compacto');bloq=true;setTimeout(function(){bloq=false;medir();},300);setTimeout(medir,30);document.getElementById('av').textContent='✅ Compacto — buscador siempre visible';}
-else if(comp&&y<60){comp=false;hd.classList.remove('compacto');bloq=true;setTimeout(function(){bloq=false;medir();},300);setTimeout(medir,30);document.getElementById('av').textContent='👆 Deslizá — el header queda fijo';}}}
+if(y>12&&!som){som=true;hd.classList.add('bajando');}else if(y<=12&&som){som=false;hd.classList.remove('bajando');}}
 window.addEventListener('scroll',function(){if(!tick){requestAnimationFrame(aj);tick=true;}},{passive:true});
 window.addEventListener('resize',medir,{passive:true});window.addEventListener('load',medir);
 medir();setTimeout(medir,200);setTimeout(medir,600);})();
