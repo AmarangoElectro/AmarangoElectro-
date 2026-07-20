@@ -177,7 +177,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 <!-- ═══ VERSIÓN: tienda-nueva · 15-jul-2026 · base membresía ═══ -->
-<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 16-jul ✓candado</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 16-jul ✓precios</div>
 
 <!-- Panel de AYUDA -->
 <div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
@@ -776,12 +776,24 @@ function guardarCarrito(a){ try{ localStorage.setItem(lsKey('ae_carrito'), JSON.
 function agregarAlCarrito(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
   var c=cargarCarrito();
-  var id=idProd(p);
+  // 👕 si tiene variantes, cada opción es un ítem distinto
+  var vr = (p.variantes && p.variantes.length) ? (_varElegida || p.variantes[0]) : '';
+  var id=idProd(p) + (vr ? '::'+vr : '');
+  // 📦 mayorista: arranca en el mínimo del producto
+  var paso = minimoProducto(p);
   var ya=c.find(function(x){return x.id===id;});
-  if(ya){ ya.cant=(ya.cant||1)+1; }
-  else { c.push({ id:id, nombre:p.nombre, venta:p.venta, foto:p.foto||'', cant:1 }); }
+  if(ya){ ya.cant=(ya.cant||1)+paso; }
+  else { c.push({ id:id, nombre:p.nombre + (vr ? ' ('+vr+')' : ''), venta:p.venta, foto:p.foto||'', cant:paso, variante:vr, escala:p.escala||null, porBulto:p.porBulto||0 }); }
+  // recalcular precio unitario según cantidad (escala mayorista)
+  c.forEach(function(x){
+    if(x.escala && x.escala.length){
+      var pr=x.venta;
+      for(var i=0;i<x.escala.length;i++){ if((x.cant||1) >= x.escala[i].desde) pr=x.escala[i].precio; }
+      x.precioAplicado = pr;
+    }
+  });
   guardarCarrito(c);
-  toastCarrito('✅ Agregado al carrito');
+  toastCarrito('✅ Agregado'+(paso>1?' ('+paso+' u.)':'')+(vr?' · '+vr:''));
 }
 function quitarDelCarrito(id){
   var c=cargarCarrito().filter(function(x){return x.id!==id;});
@@ -793,9 +805,168 @@ function cambiarCant(id, delta){
   if(!it)return;
   it.cant=(it.cant||1)+delta;
   if(it.cant<1){ c=c.filter(function(x){return x.id!==id;}); }
+  // 📦 recalcular precio unitario según la escala mayorista
+  c.forEach(function(x){
+    if(x.escala && x.escala.length){
+      var pr=x.venta;
+      for(var i=0;i<x.escala.length;i++){ if((x.cant||1) >= x.escala[i].desde) pr=x.escala[i].precio; }
+      x.precioAplicado = pr;
+    }
+  });
   guardarCarrito(c); abrirCarrito();
 }
-function totalCarrito(){ return cargarCarrito().reduce(function(s,x){ return s + x.venta*(x.cant||1); },0); }
+/* ═══════ 📋 LISTA DE PRECIOS (para mayoristas) ═══════
+   Genera un texto prolijo con todos los productos y sus precios por cantidad.
+   Se puede copiar, mandar por WhatsApp o descargar como archivo. */
+function armarListaPrecios(){
+  var visibles=PRODUCTOS.filter(function(p){ return p.visible!==false; });
+  var porCat={};
+  visibles.forEach(function(p){ var c=catProd(p)||'Otros'; (porCat[c]=porCat[c]||[]).push(p); });
+  var hoy=new Date().toLocaleDateString('es-AR');
+  var txt='📋 LISTA DE PRECIOS — '+(CONFIG.negocio||'Mi tienda')+'\n';
+  txt+='Actualizada: '+hoy+'\n';
+  if(esMayorista() && CONFIG.mayorista.minimoUnidades>0) txt+='Pedido mínimo: '+CONFIG.mayorista.minimoUnidades+' unidades\n';
+  txt+='━━━━━━━━━━━━━━━━━━━━\n\n';
+  Object.keys(porCat).sort().forEach(function(cat){
+    txt+='▍'+cat.toUpperCase()+'\n';
+    porCat[cat].forEach(function(p){
+      txt+='• '+p.nombre+'\n';
+      if(p.porBulto>1) txt+='   '+palabraBulto()+' x'+p.porBulto+' u.\n';
+      if(p.escala && p.escala.length){
+        txt+='   1+ : '+fmt(p.venta)+'\n';
+        p.escala.forEach(function(t){ txt+='   '+t.desde+'+ : '+fmt(t.precio)+'\n'; });
+      } else {
+        txt+='   '+fmt(p.venta)+(p.minCant>1?'  (mín. '+p.minCant+' u.)':'')+'\n';
+      }
+      if(p.sinStock) txt+='   ⛔ SIN STOCK\n';
+      txt+='\n';
+    });
+  });
+  txt+='━━━━━━━━━━━━━━━━━━━━\n';
+  if(CONFIG.whatsapp) txt+='📲 Pedidos: '+CONFIG.whatsapp+'\n';
+  txt+='🐝 '+(CONFIG.negocio||'')+'\n';
+  return txt;
+}
+function abrirListaPrecios(){
+  var visibles=PRODUCTOS.filter(function(p){ return p.visible!==false; });
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📋 Lista de precios</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Una lista prolija con todos tus precios. Ideal para mandar por WhatsApp a tus clientes mayoristas.</div>'
+    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:13px;margin-bottom:14px">'
+      +'<div style="font-size:.82rem;color:var(--az);font-weight:800">📦 '+visibles.length+' productos</div>'
+      +'<div style="font-size:.72rem;color:var(--sub);margin-top:3px">Incluye precios por cantidad si los cargaste.</div>'
+    +'</div>'
+    +'<button onclick="copiarListaPrecios()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">📋 Copiar lista</button>'
+    +'<button onclick="mandarListaWa()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 Mandar por WhatsApp</button>'
+    +'<button onclick="descargarListaPrecios()" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:13px;padding:14px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:14px">⬇️ Descargar archivo</button>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px">Vista previa</div>'
+    +'<pre style="background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;font-size:.72rem;line-height:1.5;white-space:pre-wrap;max-height:280px;overflow:auto;font-family:ui-monospace,monospace;color:var(--txt)">'+armarListaPrecios().replace(/</g,'&lt;')+'</pre>'
+    +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+}
+function copiarListaPrecios(){
+  var t=armarListaPrecios();
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ toastCarrito('📋 Lista copiada'); }).catch(function(){ prompt('Copiá la lista:', t); }); }
+  else prompt('Copiá la lista:', t);
+}
+function mandarListaWa(){
+  window.open('https://wa.me/?text='+encodeURIComponent(armarListaPrecios()),'_blank');
+}
+function descargarListaPrecios(){
+  try{
+    var blob=new Blob([armarListaPrecios()],{type:'text/plain;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='lista-precios-'+(CONFIG.negocio||'tienda').replace(/[^a-zA-Z0-9]/g,'-').toLowerCase()+'.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    toastCarrito('⬇️ Descargando…');
+  }catch(e){ alert('No se pudo descargar. Probá con "Copiar lista".'); }
+}
+
+/* ═══════ ✏️ EDITAR PRECIOS RÁPIDO ═══════ */
+function abrirEditarPrecios(){
+  var ps=PRODUCTOS.filter(function(p){ return p.visible!==false; });
+  var filas=ps.map(function(p,i){
+    var idx=PRODUCTOS.indexOf(p);
+    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.nombre+'</div>'
+      +(p.porBulto>1?'<div style="font-size:.66rem;color:var(--sub)">'+palabraBulto()+' x'+p.porBulto+'</div>':'')+'</div>'
+      +'<input id="ep_'+idx+'" type="number" inputmode="numeric" value="'+(p.venta||0)+'" style="width:104px;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.86rem;font-weight:800;text-align:right;outline:none;color:var(--az)">'
+      +'</div>';
+  }).join('');
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">✏️ Editar precios</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Cambiá los precios acá mismo y guardá todo junto. Rápido, sin entrar a cada producto.</div>'
+    +'<div style="background:#FFF7ED;border:1.5px solid var(--nar);border-radius:12px;padding:12px;margin-bottom:12px">'
+      +'<div style="font-size:.74rem;font-weight:900;color:var(--nar);margin-bottom:7px">📈 Ajustar todos de golpe</div>'
+      +'<div style="display:flex;gap:7px;align-items:center">'
+        +'<input id="ep_pct" type="number" inputmode="numeric" placeholder="15" style="flex:1;border:1.5px solid var(--line);border-radius:9px;padding:10px;font-family:inherit;font-size:.86rem;text-align:center;font-weight:800;outline:none">'
+        +'<span style="font-weight:900;color:var(--nar)">%</span>'
+        +'<button onclick="ajustarPreciosMasivo(1)" style="background:#16A34A;color:#fff;border:none;border-radius:9px;padding:10px 13px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.82rem">▲ Subir</button>'
+        +'<button onclick="ajustarPreciosMasivo(-1)" style="background:#DC2626;color:#fff;border:none;border-radius:9px;padding:10px 13px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.82rem">▼ Bajar</button>'
+      +'</div>'
+      +'<div style="font-size:.68rem;color:var(--sub);margin-top:6px">Se aplica a los precios de abajo. Después tocá Guardar.</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 13px;margin-bottom:12px;max-height:340px;overflow:auto">'+(filas||'<div style="padding:16px;text-align:center;color:var(--sub);font-size:.82rem">No hay productos cargados.</div>')+'</div>'
+    +'<button onclick="guardarPreciosEditados()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">💾 Guardar precios</button>'
+    +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+}
+/* Sube o baja todos los precios de la pantalla un % */
+function ajustarPreciosMasivo(signo){
+  var pct=parseFloat(document.getElementById('ep_pct').value)||0;
+  if(pct<=0){ alert('Poné el porcentaje.'); return; }
+  var f = 1 + (signo*pct/100);
+  PRODUCTOS.forEach(function(p,idx){
+    var inp=document.getElementById('ep_'+idx);
+    if(inp){ inp.value = Math.round((parseFloat(inp.value)||0)*f/100)*100; }
+  });
+  toastCarrito((signo>0?'▲ Subidos ':'▼ Bajados ')+pct+'% — revisá y guardá');
+}
+function guardarPreciosEditados(){
+  var cambios=0;
+  PRODUCTOS.forEach(function(p,idx){
+    var inp=document.getElementById('ep_'+idx);
+    if(inp){
+      var v=parseFloat(inp.value)||0;
+      if(v>0 && v!==p.venta){ p.venta=v; p.fechaPrecio=Date.now(); cambios++; }
+    }
+  });
+  if(!cambios){ toastCarrito('No hubo cambios'); return; }
+  guardarCatalogo();
+  try{ render(); }catch(e){}
+  toastCarrito('✅ '+cambios+' precio'+(cambios>1?'s':'')+' actualizado'+(cambios>1?'s':''));
+  abrirEditarPrecios();
+}
+function esMayorista(){ return !!(CONFIG && CONFIG.mayorista && CONFIG.mayorista.on); }
+function palabraBulto(){ return (CONFIG && CONFIG.mayorista && CONFIG.mayorista.palabraBulto) || 'Bulto'; }
+/* Precio unitario según cuánto lleva (usa la escala si el producto la tiene) */
+function precioPorCantidad(p, cant){
+  if(!p) return 0;
+  if(!p.escala || !p.escala.length) return p.venta;
+  var precio = p.venta;
+  for(var i=0;i<p.escala.length;i++){
+    if(cant >= p.escala[i].desde) precio = p.escala[i].precio;
+  }
+  return precio;
+}
+/* Cuántas unidades trae un bulto (1 si no es por bulto) */
+function unidadesBulto(p){ return (p && p.porBulto>1) ? p.porBulto : 1; }
+/* Mínimo que se puede llevar de ese producto */
+function minimoProducto(p){ return (p && p.minCant>1) ? p.minCant : 1; }
+
+function totalCarrito(){ return cargarCarrito().reduce(function(s,x){ return s + (x.precioAplicado||x.venta)*(x.cant||1); },0); }
+/* 🚚 Costo de envío según lo que configuró el dueño. 0 = sin envío o gratis. */
+function costoEnvio(subtotal){
+  var e = (CONFIG && CONFIG.envio) ? CONFIG.envio : null;
+  if(!e || !e.costo) return 0;
+  if(e.gratisDesde>0 && subtotal>=e.gratisDesde) return 0;
+  return e.costo;
+}
+/* Si hay pedido mínimo y no llega, devuelve cuánto falta (0 = puede comprar) */
+function faltaParaMinimo(subtotal){
+  var e = (CONFIG && CONFIG.envio) ? CONFIG.envio : null;
+  if(!e || !e.minimo) return 0;
+  return Math.max(0, e.minimo - subtotal);
+}
 function cantCarrito(){ return cargarCarrito().reduce(function(s,x){ return s + (x.cant||1); },0); }
 function actualizarBadgeCarrito(){
   var b=document.getElementById('cartBadge'); if(!b)return;
@@ -858,7 +1029,12 @@ function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]
 function pedirCarrito(){
   var c=cargarCarrito(); if(!c.length)return;
   var tot=totalCarrito();
+  var falta=faltaParaMinimo(tot);
+  if(falta>0){ alert('El pedido mínimo es '+fmt(CONFIG.envio.minimo)+'. Te faltan '+fmt(falta)+'.'); return; }
+  var env=costoEnvio(tot);
   var lineas=c.map(function(it){ return '• '+it.nombre+(it.cant>1?' x'+it.cant:'')+' — '+fmt(it.venta*(it.cant||1)); });
+  if(env>0) lineas.push('🚚 Envío — '+fmt(env));
+  tot = tot + env;
   var cuotasL=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(tot,n)); });
   var msg='Hola! Quiero pedir esto 🛒\n\n'+lineas.join('\n')+'\n\n*TOTAL CONTADO: '+fmt(tot)+'*\n\n'+cuotasL.join('\n')+'\n\n¿Me confirmás disponibilidad? 🐝';
 
@@ -2069,6 +2245,8 @@ function abrirPanelDueno(){
       : '')
     +'<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
+    +botonPanel('✏️','Editar precios','Cambiá todos los precios de una, o subilos un %','editarprecios')
+    +botonPanel('📋','Lista de precios','Mandá tu lista completa por WhatsApp','listaprecios')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
     +botonPanel('📦','Stock','Marcá qué hay y qué se agotó, de a uno o todos','stock')
     +botonPanel('🧮','Calculadora de ganancia','Pegá el costo, poné tu % y te da el precio','calcganancia')
@@ -2095,6 +2273,8 @@ function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
+  if(destino==='editarprecios'){ abrirEditarPrecios(); return; }
+  if(destino==='listaprecios'){ abrirListaPrecios(); return; }
   if(destino==='cargar'){ abrirCargar(); return; }
   if(destino==='stock'){ abrirGestionStock(); return; }
   if(destino==='calcganancia'){ abrirCalcGanancia(); return; }
@@ -2229,6 +2409,23 @@ function avisarSub(i){
    Acá vive TODO lo que cambia entre una tienda y otra: marca, colores,
    cuotas, clave. Cambiar esto = crear una tienda nueva.
    AmarangoElectro es simplemente la primera config. */
+/* ═══════ 🏷️ RUBROS Y SUS CATEGORÍAS SUGERIDAS ═══════
+   El emprendedor elige su rubro y ya le quedan las categorías cargadas.
+   Igual las puede editar, agregar o borrar. */
+var PRESETS_RUBRO = {
+  'ropa': { nombre:'👕 Ropa y calzado', cats:['👕 Remeras','👚 Blusas y camisas','👖 Pantalones','🩳 Shorts','👗 Vestidos','🧥 Camperas y buzos','👟 Calzado','🧦 Ropa interior','🎒 Accesorios'] },
+  'comida': { nombre:'🍽️ Comida / rotisería', cats:['🍕 Pizzas','🍔 Hamburguesas','🥟 Empanadas','🍝 Pastas','🍗 Pollo','🥗 Ensaladas','🍟 Guarniciones','🥤 Bebidas','🍰 Postres'] },
+  'golosinas': { nombre:'🍫 Golosinas / kiosco', cats:['🍫 Chocolates','🍬 Caramelos','🍪 Galletitas','🥤 Bebidas','🍺 Cervezas','🥔 Snacks','🍦 Helados','🚬 Cigarrillos','🧃 Jugos'] },
+  'libreria': { nombre:'📚 Librería / regalería', cats:['📓 Cuadernos','✏️ Escritura','🎨 Arte','📐 Escolar','🎁 Regalería','🖨️ Impresión','📎 Oficina','🎈 Cotillón'] },
+  'electro': { nombre:'📱 Electro y tecnología', cats:['📱 Celulares','📺 TV','❄️ Heladeras','🍳 Cocina','🌀 Climatización','🧺 Lavado','☕ Electro hogar','💻 Informática'] },
+  'belleza': { nombre:'💄 Belleza y cuidado', cats:['💄 Maquillaje','🧴 Cuidado facial','🧼 Cuidado corporal','💇 Cabello','💅 Uñas','🌸 Perfumes'] },
+  'ferreteria': { nombre:'🔧 Ferretería', cats:['🔧 Herramientas','🔩 Tornillería','🎨 Pinturas','💡 Electricidad','🚰 Plomería','🪛 Construcción'] },
+  'mascotas': { nombre:'🐶 Mascotas', cats:['🦴 Alimento perros','🐱 Alimento gatos','🧸 Juguetes','🛏️ Camas','🧴 Higiene','💊 Salud'] },
+  'may_golosinas': { nombre:'📦 Mayorista de golosinas', mayorista:true, cats:['🍫 Chocolates','🍬 Caramelos y chupetines','🍪 Galletitas','🥔 Snacks y papas','🥤 Gaseosas','🧃 Jugos','🍺 Cervezas','🍦 Helados','🎂 Repostería','🚬 Cigarrillos'] },
+  'may_electro': { nombre:'📦 Mayorista de electrodomésticos', mayorista:true, cats:['📱 Celulares','📺 TV y audio','❄️ Heladeras y freezers','🧺 Lavarropas','🍳 Cocinas y hornos','🌀 Aires y ventilación','☕ Pequeños electro','💻 Informática','🔌 Accesorios'] },
+  'otro': { nombre:'🏪 Otro rubro', cats:[] }
+};
+
 var CONFIG_DEFAULT = {
   negocio: "AmarangoElectro", eslogan: "Equipá tu casa en cuotas",
   rubro: "",               // ej: "Ropa", "Golosinas", "Librería" — solo para textos
@@ -2240,6 +2437,21 @@ var CONFIG_DEFAULT = {
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
   cuotasActivadas: false,  // 🔒 las cuotas arrancan OCULTAS. Se activan con el PIN de dueño.
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
+  // 📦 Modo MAYORISTA: vende por bulto, con mínimos y precios por cantidad
+  mayorista: {
+    on: false,
+    palabraBulto: 'Bulto',   // "Bulto", "Caja", "Pack", "Docena"…
+    minimoUnidades: 0,       // mínimo total de unidades por pedido
+    mostrarUnitario: true    // mostrar también el precio por unidad
+  },
+  // 🚚 Envíos (opcional, sirve para cualquier rubro)
+  envio: {
+    on: false,
+    costo: 0,              // costo fijo del envío
+    gratisDesde: 0,        // 0 = nunca gratis
+    zonas: '',             // "Lanús, Avellaneda, Banfield"
+    minimo: 0              // pedido mínimo para comprar
+  },
   // 🛡️ Confianza (todo configurable, todo opcional)
   confianza: {
     on: true,
@@ -3657,8 +3869,14 @@ function abrirConfig(){
     +'</div>'
     +campo('Nombre del negocio','cf_negocio',c.negocio,'Ej: Marcelo Hogar')
     +campo('Eslogan','cf_eslogan',c.eslogan,'Ej: Equipá tu casa en cuotas')
-    +sec('🏷️ Tus categorías')
-    +'<div style="font-size:.74rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Escribí las categorías de TU rubro, una por línea. Podés empezar con un emoji.<br>Ej: 👕 Remeras · 👖 Pantalones · 👟 Calzado<br><i>Si lo dejás vacío, se ordenan solas (electro).</i></div>'
+    +sec('🏷️ Tus categorías')    +'<div style="font-size:.74rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Elegí tu rubro y te cargamos las categorías. Después las podés editar como quieras.</div>'
+    +'<select id="cf_rubro" onchange="aplicarPresetRubro(this.value)" style="width:100%;border:1.5px solid var(--az);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;background:#fff;font-weight:800;color:var(--az);margin-bottom:10px">'
+      +'<option value="">— Elegí tu rubro —</option>'
+      +Object.keys(PRESETS_RUBRO).map(function(k){
+          return '<option value="'+k+'"'+((c.rubro===k)?' selected':'')+'>'+PRESETS_RUBRO[k].nombre+'</option>';
+        }).join('')
+    +'</select>'
+    +'<div style="font-size:.74rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Una categoría por línea. Podés empezar con un emoji.<br><i>Si lo dejás vacío, se ordenan solas.</i></div>'
     +'<textarea id="cf_categorias" placeholder="👕 Remeras&#10;👖 Pantalones&#10;👟 Calzado" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:12px;font-family:inherit;font-size:.86rem;min-height:110px;outline:none;resize:vertical;margin-bottom:12px">'+((c.categorias||[]).join('\n'))+'</textarea>'
     +campo('Instagram','cf_instagram',c.instagram,'@tunegocio')
     +campo('WhatsApp','cf_whatsapp',c.whatsapp,'5491122334455')
@@ -3673,6 +3891,32 @@ function abrirConfig(){
     +sec('🤝 Vendedores (los que ATIENDEN)')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Al tocar <b>💬 Consultar</b>, el cliente elige entre estos. Responden dudas, no cobran.<br>Uno por línea: <b>Nombre, WhatsApp</b></div>'
     +'<textarea id="cf_vendedores" placeholder="Selene, 5491168746034" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.82rem;min-height:64px;outline:none;resize:vertical;margin-bottom:11px">'+((c.vendedores||[]).map(function(v){return v.nombre+', '+v.wa;}).join('\n'))+'</textarea>'
+    +sec('📦 Modo mayorista')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Si vendés por bulto o caja. Se activa solo si elegís un rubro mayorista.</div>'
+    +'<button onclick="toggleMayorista()" style="width:100%;text-align:left;background:'+((c.mayorista&&c.mayorista.on)?'#FFF7ED':'#fff')+';border:2px solid '+((c.mayorista&&c.mayorista.on)?'var(--nar)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px;margin-bottom:8px">'
+      +'<span style="font-size:1.5rem">📦</span>'
+      +'<span style="flex:1"><span style="display:block;font-size:.88rem;font-weight:900;color:'+((c.mayorista&&c.mayorista.on)?'var(--nar)':'var(--txt)')+'">Vender por bulto</span>'
+      +'<span style="display:block;font-size:.72rem;color:var(--sub);margin-top:1px">Cantidades mínimas y precio por cantidad</span></span>'
+      +'<span style="font-size:1.1rem">'+((c.mayorista&&c.mayorista.on)?'✅':'⬜')+'</span></button>'
+    +((c.mayorista&&c.mayorista.on)
+      ? '<div style="display:flex;gap:8px;margin-bottom:12px">'
+        +'<div style="flex:1"><label style="display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:3px">¿Cómo lo llamás?</label>'
+        +'<input id="cf_mayPalabra" value="'+((c.mayorista.palabraBulto)||'Bulto')+'" placeholder="Bulto / Caja / Pack" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.84rem;outline:none"></div>'
+        +'<div style="flex:1"><label style="display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:3px">Mín. unidades/pedido</label>'
+        +'<input id="cf_mayMinUnid" type="number" inputmode="numeric" value="'+((c.mayorista.minimoUnidades)||0)+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.84rem;outline:none"></div>'
+      +'</div>'
+      : '')
+    +sec('🚚 Envíos y pedido mínimo')
+    +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Opcional. Si lo dejás en 0, no se cobra ni se muestra.</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:8px">'
+      +'<div style="flex:1"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Costo de envío</label>'
+      +'<input id="cf_envioCosto" type="number" inputmode="numeric" value="'+((c.envio&&c.envio.costo)||0)+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'
+      +'<div style="flex:1"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Gratis desde</label>'
+      +'<input id="cf_envioGratis" type="number" inputmode="numeric" value="'+((c.envio&&c.envio.gratisDesde)||0)+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'
+    +'</div>'
+    +'<div style="margin-bottom:8px"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px">Pedido mínimo</label>'
+    +'<input id="cf_envioMinimo" type="number" inputmode="numeric" value="'+((c.envio&&c.envio.minimo)||0)+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none"></div>'
+    +campo('Zonas de entrega','cf_envioZonas',(c.envio&&c.envio.zonas)||'','Ej: Lanús, Avellaneda, Banfield')
     +sec('🛡️ Confianza')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Los sellos que ven tus clientes. Dejalos vacíos si no aplican.</div>'
     +campo('🚚 Envíos','cf_envios',(c.confianza&&c.confianza.envios)||'','Ej: Envíos a todo el país')
@@ -3760,6 +4004,29 @@ function quitarLogo(){
   CONFIG.logo = '';
   abrirConfig();
 }
+/* 📦 Prender/apagar el modo mayorista */
+function toggleMayorista(){
+  if(!CONFIG.mayorista) CONFIG.mayorista={on:false, palabraBulto:'Bulto', minimoUnidades:0, mostrarUnitario:true};
+  CONFIG.mayorista.on = !CONFIG.mayorista.on;
+  guardarConfig(); abrirConfig();
+}
+/* Al elegir un rubro, carga sus categorías sugeridas en el textarea */
+function aplicarPresetRubro(k){
+  var ta=document.getElementById('cf_categorias'); if(!ta) return;
+  var preset=PRESETS_RUBRO[k];
+  if(!preset || !preset.cats.length){ return; }
+  var actual=(ta.value||'').trim();
+  if(actual && !confirm('¿Reemplazar tus categorías por las de '+preset.nombre+'?')) return;
+  ta.value = preset.cats.join('\n');
+  // 📦 si el rubro es mayorista, prende el modo automáticamente
+  if(preset.mayorista){
+    if(!CONFIG.mayorista) CONFIG.mayorista={palabraBulto:'Bulto', minimoUnidades:0, mostrarUnitario:true};
+    CONFIG.mayorista.on = true;
+    try{ toastCarrito('📦 Modo mayorista activado'); }catch(e){}
+  }
+  try{ toastCarrito('Categorías de '+preset.nombre+' cargadas'); }catch(e){}
+}
+
 function guardarConfigDesdeForm(){
   var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
   CONFIG.negocio = g('cf_negocio')||'Mi Tienda';
@@ -3767,6 +4034,20 @@ function guardarConfigDesdeForm(){
   // 🏷️ categorías propias del dueño (una por línea) — sirven para cualquier rubro
   var cats=g('cf_categorias');
   CONFIG.categorias = cats ? cats.split('\n').map(function(x){return x.trim();}).filter(Boolean) : [];
+  var rb=document.getElementById('cf_rubro'); if(rb) CONFIG.rubro = rb.value||'';
+  // 📦 mayorista
+  if(!CONFIG.mayorista) CONFIG.mayorista={on:false};
+  var mp=document.getElementById('cf_mayPalabra'); if(mp) CONFIG.mayorista.palabraBulto = mp.value.trim()||'Bulto';
+  var mu=document.getElementById('cf_mayMinUnid'); if(mu) CONFIG.mayorista.minimoUnidades = parseInt(mu.value)||0;
+  // 🚚 envíos
+  var num=function(id){ var e=document.getElementById(id); return e?(parseFloat(e.value)||0):0; };
+  CONFIG.envio = {
+    on: (num('cf_envioCosto')>0 || num('cf_envioMinimo')>0 || !!g('cf_envioZonas')),
+    costo: num('cf_envioCosto'),
+    gratisDesde: num('cf_envioGratis'),
+    minimo: num('cf_envioMinimo'),
+    zonas: g('cf_envioZonas')
+  };
   CONFIG.instagram = g('cf_instagram');
   CONFIG.whatsapp = g('cf_whatsapp');
   CONFIG.colorPrincipal = g('cf_color1')||'#0B2D6B';
@@ -4184,7 +4465,27 @@ function abrirCargarUno(){
       +'<option value="">Automática (según el nombre)</option>'
       +cats.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')
     +'</select>'
+    +((CONFIG&&CONFIG.mayorista&&CONFIG.mayorista.on)
+      ? '<div style="background:#FFF7ED;border:1.5px solid var(--nar);border-radius:12px;padding:12px;margin-bottom:12px">'
+        +'<div style="font-size:.72rem;font-weight:900;color:var(--nar);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📦 Venta por '+((CONFIG.mayorista.palabraBulto)||'Bulto')+'</div>'
+        +'<div style="display:flex;gap:8px;margin-bottom:7px">'
+          +'<div style="flex:1"><label style="display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:3px">Unidades por '+((CONFIG.mayorista.palabraBulto)||'bulto').toLowerCase()+'</label>'
+          +'<input id="cg_porBulto" type="number" inputmode="numeric" placeholder="24" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.84rem;outline:none"></div>'
+          +'<div style="flex:1"><label style="display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:3px">Mínimo a llevar</label>'
+          +'<input id="cg_minCant" type="number" inputmode="numeric" placeholder="1" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.84rem;outline:none"></div>'
+        +'</div>'
+        +'<label style="display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:3px">Precio por cantidad (opcional)</label>'
+        +'<input id="cg_escala" placeholder="Ej: 10=950, 50=900, 100=850" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.84rem;outline:none">'
+        +'<div style="font-size:.68rem;color:var(--sub);margin-top:5px;line-height:1.4">Desde 10 unidades a $950 c/u, desde 50 a $900… Dejalo vacío si el precio es siempre el mismo.</div>'
+      +'</div>'
+      : '')
     +campoC('Descripción (opcional)','cg_desc','Specs, detalles, lo que quieras')
+    +'<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:12px;margin-bottom:12px">'
+      +'<div style="font-size:.72rem;font-weight:900;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">👕 Opciones del producto (opcional)</div>'
+      +'<div style="font-size:.72rem;color:var(--sub);line-height:1.45;margin-bottom:8px">Si tu producto viene en talles, colores o sabores, ponelos separados por coma. El cliente los elige al comprar.</div>'
+      +'<input id="cg_varLabel" placeholder="¿Cómo se llama? Ej: Talle, Color, Sabor" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.84rem;outline:none;margin-bottom:7px">'
+      +'<input id="cg_variantes" placeholder="Ej: S, M, L, XL" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.84rem;outline:none">'
+    +'</div>'
     // toggles
     +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin:6px 0 8px">Mostrar como</div>'
     +'<div id="cg_toggles" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">'
@@ -4250,6 +4551,22 @@ function guardarProducto(){
     delDia: _cgToggles.delDia,
     visible: true
   };
+  // 👕 variantes (talles, colores, sabores…) — separadas por coma
+  var vr=g('cg_variantes');
+  if(vr){ prod.variantes = vr.split(',').map(function(x){return x.trim();}).filter(Boolean); }
+  var vlbl=g('cg_varLabel'); if(vlbl) prod.varLabel = vlbl;
+  // 📦 datos mayoristas
+  var pb=parseInt(g('cg_porBulto'))||0; if(pb>1) prod.porBulto=pb;
+  var mc=parseInt(g('cg_minCant'))||0; if(mc>1) prod.minCant=mc;
+  var esc=g('cg_escala');
+  if(esc){
+    // "10=950, 50=900" → [{desde:10,precio:950},{desde:50,precio:900}]
+    var tramos=esc.split(',').map(function(t){
+      var p=t.split('='); var d=parseInt(p[0]); var v=parseFloat(p[1]);
+      return (d>0&&v>0)?{desde:d, precio:v}:null;
+    }).filter(Boolean).sort(function(a,b){return a.desde-b.desde;});
+    if(tramos.length) prod.escala=tramos;
+  }
   if(_cgToggles.oferta){ var pa=parseFloat(g('cg_precioAntes'))||0; if(pa>venta) prod.precioAntes=pa; }
   // si es producto del día, saco el flag de los otros
   if(prod.delDia){ PRODUCTOS.forEach(function(p){ p.delDia=false; }); }
@@ -5559,11 +5876,36 @@ function renderSugeridos(idx){
 }
 
 /* Los botones cambian según QUIÉN mira (admin / revendedor / cliente) */
+var _varElegida = '';
+function elegirVariante(v, btn){
+  _varElegida = v;
+  try{
+    var cont = btn.parentNode;
+    cont.querySelectorAll('.var-chip').forEach(function(b){
+      b.style.background='#fff'; b.style.color='var(--az)';
+    });
+    btn.style.background='var(--az)'; btn.style.color='#fff';
+  }catch(e){}
+}
+
 function renderBotonesDetalle(idx){
   var cont=document.getElementById('d-acciones'); if(!cont) return;
   var p=PRODUCTOS[idx];
   var rol=rolEfectivo();
   var html='';
+
+  // 👕 si el producto tiene variantes (talles, colores…), el cliente elige antes de comprar
+  if(p.variantes && p.variantes.length){
+    var lbl = p.varLabel || 'Opción';
+    html+='<div style="background:#F5F8FF;border:1.5px solid #DDE7FA;border-radius:12px;padding:12px;margin-bottom:10px">'
+      +'<div style="font-size:.74rem;font-weight:900;color:var(--az);margin-bottom:7px">'+lbl+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
+      +p.variantes.map(function(v,i){
+          return '<button onclick="elegirVariante(\''+String(v).replace(/'/g,"\\'")+'\',this)" class="var-chip" style="background:'+(i===0?'var(--az)':'#fff')+';color:'+(i===0?'#fff':'var(--az)')+';border:1.5px solid var(--az);border-radius:9px;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:inherit">'+v+'</button>';
+        }).join('')
+      +'</div></div>';
+    try{ _varElegida = p.variantes[0]; }catch(e){}
+  } else { try{ _varElegida=''; }catch(e){} }
 
   if(rol==='admin'){
     // ADMIN: vender + compartir + editar
