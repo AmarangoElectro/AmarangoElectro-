@@ -57,7 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .construccion .cs{font-size:.82rem;line-height:1.5}
 
 /* HEADER con degradé (identidad Amarango, se mantiene) */
-.top{position:sticky;top:0;z-index:100;background:linear-gradient(160deg,#020c2e 0%,var(--az) 55%,var(--az2) 100%);padding:13px 16px 15px;box-shadow:0 2px 12px rgba(11,45,107,.2)}
+.top{position:sticky;top:0;z-index:100;background:linear-gradient(160deg,var(--az-osc) 0%,var(--az) 55%,var(--az2) 100%);padding:13px 16px 15px;box-shadow:0 2px 12px rgba(11,45,107,.2)}
 .brand{display:flex;align-items:center;gap:9px;margin-bottom:12px}
 .brand .bee{font-size:1.35rem}
 .brand h1{color:#fff;font-size:1.05rem;font-weight:900;letter-spacing:.2px}
@@ -139,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .overlay.on{display:flex}
 .sheet{background:var(--bg);width:100%;max-width:520px;border-radius:22px 22px 0 0;max-height:88vh;overflow-y:auto;animation:up .28s cubic-bezier(.2,.9,.3,1)}
 @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.sheet-head{background:linear-gradient(160deg,#020c2e,var(--az));padding:18px;position:sticky;top:0;z-index:2}
+.sheet-head{background:linear-gradient(160deg,var(--az-osc),var(--az));padding:18px;position:sticky;top:0;z-index:2}
 /* botón cerrar BIEN VISIBLE (antes nadie sabía dónde tocar) */
 .sheet-head .x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:#fff;border:none;color:var(--az);font-size:1.25rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.3);z-index:6;line-height:1;display:flex;align-items:center;justify-content:center}
 .sheet-head .ph-big{width:100%;height:180px;border-radius:14px;background:#0a1a3a center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:3.5rem;margin-bottom:10px}
@@ -1205,7 +1205,7 @@ function abrirCarrito(){
     cuotasActivas().forEach(function(n){
       cuotasHtml+='<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12)"><span style="font-size:.8rem;font-weight:700;color:#fff">'+n+' cuotas fijas</span><span style="font-size:.95rem;font-weight:900;color:#ffb968">'+fmt(valorCuota(tot,n))+'</span></div>';
     });
-    html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:16px;margin-top:6px;color:#fff">'
+    html+='<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:16px;padding:16px;margin-top:6px;color:#fff">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.7)">Total contado</span><span style="font-size:1.5rem;font-weight:900">'+fmt(tot)+'</span></div>'
       +'<div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">O en cuotas fijas</div>'
       +cuotasHtml
@@ -1525,7 +1525,7 @@ function calcRevendedor(){
       cuotasHtml+='<div style="background:rgba(255,255,255,.09);border-left:3px solid var(--nar);border-radius:9px;padding:9px 12px;display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.78rem;font-weight:800;color:#fff">'+n+' cuotas fijas</span><span style="font-size:.95rem;font-weight:900;color:#ffb968">'+fmt(vc)+'</span></div>';
       waLines.push('💳 '+n+' cuotas fijas de '+fmt(vc));
     });
-    html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:15px;padding:16px;color:#fff;margin-bottom:10px">'
+    html+='<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:15px;padding:16px;color:#fff;margin-bottom:10px">'
       +'<div style="text-align:center;font-size:.88rem;font-weight:900;margin-bottom:5px">'+it.nombre+'</div>'
       +'<div style="text-align:center;font-size:1.5rem;font-weight:900;margin-bottom:12px">'+fmt(it.venta)+'<div style="font-size:.6rem;color:rgba(255,255,255,.6);font-weight:700">PRECIO CONTADO</div></div>'
       +cuotasHtml
@@ -2252,7 +2252,7 @@ function calcInversion(){
 
   var html=
     // la caja grande: cuánta plata poner
-     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff;margin-bottom:14px;text-align:center">'
+     '<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:16px;padding:18px;color:#fff;margin-bottom:14px;text-align:center">'
       +'<div style="font-size:.66rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.7px">Plata que tenés que poner</div>'
       +'<div style="font-size:2.1rem;font-weight:900;margin:4px 0">'+fmt(capital)+'</div>'
       +'<div style="font-size:.74rem;color:#ffb968;font-weight:700">💡 El cliente te adelanta '+fmt(primeraCuota)+' con la 1ra cuota</div>'
@@ -2431,7 +2431,7 @@ function abrirPanelDueno(){
   document.getElementById('adminBody').innerHTML =
      // 🐝 Oferta Sistema Amarango — solo para el dueño de SU tienda (no para Max)
      (!esDuenoAmarango
-      ? '<button onclick="abrirSistemaAmarango()" style="width:100%;text-align:left;background:linear-gradient(135deg,#020c2e,var(--az));border:none;border-radius:15px;padding:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:13px;margin-bottom:12px;box-shadow:0 6px 20px rgba(11,45,107,.25);position:relative;overflow:hidden">'
+      ? '<button onclick="abrirSistemaAmarango()" style="width:100%;text-align:left;background:linear-gradient(135deg,var(--az-osc),var(--az));border:none;border-radius:15px;padding:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:13px;margin-bottom:12px;box-shadow:0 6px 20px rgba(11,45,107,.25);position:relative;overflow:hidden">'
         +'<span style="position:absolute;top:-14px;right:-6px;font-size:3.5rem;opacity:.1">🐝</span>'
         +'<span style="font-size:1.9rem">🚀</span>'
         +'<span style="flex:1;position:relative"><span style="display:block;font-size:.94rem;font-weight:900;color:#fff">Sumate al Sistema Amarango</span>'
@@ -2449,7 +2449,7 @@ function abrirPanelDueno(){
     +botonPanel('📦','Stock','Marcá qué hay y qué se agotó, de a uno o todos','stock')
     +botonPanel('🧮','Calculadora de ganancia','Pegá el costo, poné tu % y te da el precio','calcganancia')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')+botonPanel('🗑️','Borrar productos','Elegí varios y borralos de una vez','borrarvarios')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -2471,6 +2471,7 @@ function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
+  if(destino==='borrarvarios'){ abrirBorrarVarios(); return; }
   if(destino==='tiendanueva'){ abrirTiendaNueva(); return; }
   if(destino==='porcategoria'){ abrirPorCategoria(); return; }
   if(destino==='editarprecios'){ abrirEditarPrecios(); return; }
@@ -2780,7 +2781,28 @@ function aplicarConfig(){
   }
   document.documentElement.style.setProperty('--az', CONFIG.colorPrincipal);
   document.documentElement.style.setProperty('--nar', CONFIG.colorAcento);
+  // 🎨 los tonos derivados también siguen el color elegido (antes quedaban azules)
+  document.documentElement.style.setProperty('--az2', aclararColor(CONFIG.colorPrincipal, 35));
+  document.documentElement.style.setProperty('--az-osc', oscurecerColor(CONFIG.colorPrincipal, 45));
   try{ armarManifest(); }catch(e){}   // el ícono de la app toma el logo de la tienda
+}
+/* 🎨 Tonos derivados del color principal (para degradés y fondos) */
+function _hex2rgb(h){
+  h=(h||'#0B2D6B').replace('#','');
+  if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+}
+function _rgb2hex(r,g,b){
+  var f=function(v){ v=Math.max(0,Math.min(255,Math.round(v))); return ('0'+v.toString(16)).slice(-2); };
+  return '#'+f(r)+f(g)+f(b);
+}
+function aclararColor(hex, pct){
+  var c=_hex2rgb(hex), p=pct/100;
+  return _rgb2hex(c[0]+(255-c[0])*p, c[1]+(255-c[1])*p, c[2]+(255-c[2])*p);
+}
+function oscurecerColor(hex, pct){
+  var c=_hex2rgb(hex), p=1-(pct/100);
+  return _rgb2hex(c[0]*p, c[1]*p, c[2]*p);
 }
 /* ═══════ FORMATOS DE CUOTA — cada tienda elige cómo mostrar el precio ═══════ */
 /* ═══════════════════════════════════════════════════════════
@@ -2975,7 +2997,7 @@ function verFichaCliente(i){
 
   var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:12px">👤 '+(c.nombre||'Cliente')+'</div>';
   // resumen
-  html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:14px;padding:15px;color:#fff;margin-bottom:14px">'
+  html+='<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:14px;padding:15px;color:#fff;margin-bottom:14px">'
     +'<div style="font-size:.62rem;color:rgba(255,255,255,.6);font-weight:800;text-transform:uppercase;letter-spacing:.6px">Te compró por</div>'
     +'<div style="font-size:1.6rem;font-weight:900;margin:2px 0 6px">'+fmt(gasto)+'</div>'
     +'<div style="font-size:.72rem;color:rgba(255,255,255,.75)">'+vendidos.length+' compra'+(vendidos.length===1?'':'s')+' · '+peds.length+' pedido'+(peds.length===1?'':'s')+'</div>'
@@ -3313,7 +3335,7 @@ function renderEstadisticas(){
   }
 
   // ── plata
-  html+='<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:16px;color:#fff;margin-bottom:12px">'
+  html+='<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:16px;padding:16px;color:#fff;margin-bottom:12px">'
     +'<div style="font-size:.62rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px">Vendiste este mes</div>'
     +'<div style="font-size:1.9rem;font-weight:900;line-height:1.1;margin:2px 0 8px">'+fmt(totalMes)+'</div>'
     +'<div style="display:flex;gap:14px;font-size:.72rem;color:rgba(255,255,255,.75)">'
@@ -3583,7 +3605,7 @@ function abrirSistemaAmarango(){
   var AZ='#0B2D6B', NAR='#FF7A00';
   var html='';
   // HERO
-  html+='<div style="margin:-4px -4px 0;background:linear-gradient(165deg,#020c2e 0%,'+AZ+' 65%,#12356f 100%);border-radius:18px;padding:26px 20px 24px;color:#fff;position:relative;overflow:hidden">'
+  html+='<div style="margin:-4px -4px 0;background:linear-gradient(165deg,'+oscurecerColor(AZ,45)+' 0%,'+AZ+' 65%,'+aclararColor(AZ,18)+' 100%);border-radius:18px;padding:26px 20px 24px;color:#fff;position:relative;overflow:hidden">'
     +'<div style="position:absolute;top:-30px;right:-30px;font-size:9rem;opacity:.06">🐝</div>'
     +'<div style="font-size:.66rem;font-weight:800;letter-spacing:2px;color:#ffb968;text-transform:uppercase;margin-bottom:10px">El sistema Amarango</div>'
     +'<div style="font-size:1.7rem;font-weight:900;line-height:1.15;margin-bottom:10px">Empezá a vender como <span style="color:#ffb968">Amarango</span>, aunque arranques de cero.</div>'
@@ -3633,7 +3655,7 @@ function abrirSistemaAmarango(){
     +'</div>';
 
   // PRECIO (en dólares, con promo)
-  html+='<div style="margin:24px 2px 0;background:linear-gradient(160deg,#020c2e,'+AZ+');border-radius:18px;padding:22px 20px;color:#fff;text-align:center">'
+  html+='<div style="margin:24px 2px 0;background:linear-gradient(160deg,'+oscurecerColor(AZ,45)+','+AZ+');border-radius:18px;padding:22px 20px;color:#fff;text-align:center">'
     +'<div style="font-size:.66rem;font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:8px">Membresía mensual</div>'
     +'<div style="font-size:2.6rem;font-weight:900;line-height:1">USD 30<span style="font-size:1rem;font-weight:700;color:rgba(255,255,255,.6)">/mes</span></div>'
     +'<div style="font-size:.74rem;color:rgba(255,255,255,.65);margin-top:4px">El método completo, los mayoristas y nuestro acompañamiento.</div>'
@@ -3744,7 +3766,7 @@ function calcGanancia(){
   var ganancia=venta-costo;
   var nombre=(typeof limpiarNombre==='function') ? limpiarNombre(txt) : txt.split('\n')[0];
   cont.innerHTML=
-     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff;text-align:center">'
+     '<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:16px;padding:18px;color:#fff;text-align:center">'
       +'<div style="font-size:.66rem;font-weight:800;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px">Precio de venta</div>'
       +'<div style="font-size:2.1rem;font-weight:900;margin:2px 0">'+fmt(venta)+'</div>'
       +'<div style="display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:.72rem">'
@@ -3946,7 +3968,7 @@ function ocultarCuotas(){
 function ofrecerPlanCuotas(){
   var msg='Hola! Quiero sumar el *sistema de cuotas* a mi tienda 🐝\n\nMi tienda: '+(CONFIG&&CONFIG.negocio?CONFIG.negocio:TIENDA)+'\nCódigo: '+TIENDA+'\n\n¿Cómo hago?';
   document.getElementById('adminBody').innerHTML=
-     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:18px;padding:22px;color:#fff;text-align:center;margin-bottom:14px;position:relative;overflow:hidden">'
+     '<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:18px;padding:22px;color:#fff;text-align:center;margin-bottom:14px;position:relative;overflow:hidden">'
       +'<span style="position:absolute;top:-16px;right:-8px;font-size:4.5rem;opacity:.12">💳</span>'
       +'<div style="font-size:2.6rem;margin-bottom:8px">🔒</div>'
       +'<div style="font-size:1.25rem;font-weight:900;margin-bottom:8px">Vendé en cuotas, sin banco</div>'
@@ -4414,7 +4436,7 @@ function armarPlaca(){
   else if(costo!==null){ costoBox='<div style="background:#FFF9F0;border:1px dashed var(--nar);border-radius:11px;padding:10px 13px;margin-top:10px;display:flex;justify-content:space-between;font-size:.72rem;color:var(--sub)"><span>👁️ Solo vos — costo</span><span style="font-weight:900;color:var(--az)">'+fmt(costo)+'</span></div>'; }
 
   cont.innerHTML=
-     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff">'
+     '<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:16px;padding:18px;color:#fff">'
     +'<div style="text-align:center;font-size:.9rem;font-weight:900;margin-bottom:8px">'+nombre+'</div>'
     +'<div style="text-align:center;font-size:1.7rem;font-weight:900;margin-bottom:14px">'+ventaHtml+'</div>'
     +cuotasHtml
@@ -5166,6 +5188,70 @@ function guardarCatalogo(){
 }
 
 /* ═══════ PEGADO MASIVO — cargar muchos productos de una lista ═══════ */
+/* 📄 Leer un PDF de lista de precios y volcar su texto en el cuadro.
+   Funciona si el PDF tiene texto seleccionable (no si son fotos escaneadas). */
+function cargarScriptPDF(url){
+  return new Promise(function(res, rej){
+    var s=document.createElement('script'); s.src=url;
+    s.onload=res; s.onerror=function(){ rej(new Error('no se pudo cargar')); };
+    document.head.appendChild(s);
+  });
+}
+async function leerPDFLista(input){
+  var f = input.files && input.files[0];
+  if(!f) return;
+  var est = document.getElementById('pdfEstado');
+  var poner = function(t){ if(est) est.innerHTML = t; };
+  poner('⏳ Leyendo el PDF…');
+  try{
+    if(typeof pdfjsLib === 'undefined'){
+      await cargarScriptPDF('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+      if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+    var buf = await f.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({data:buf}).promise;
+    var todo = '';
+    for(var i=1; i<=pdf.numPages; i++){
+      poner('⏳ Leyendo página '+i+' de '+pdf.numPages+'…');
+      var pg = await pdf.getPage(i);
+      var tc = await pg.getTextContent();
+      // 📐 Catálogos en 2 columnas: separo por posición X para no mezclar
+      var vp = pg.getViewport({scale:1});
+      var medio = vp.width/2;
+      var izq = {}, der = {};
+      tc.items.forEach(function(it){
+        var x = it.transform[4], y = Math.round(it.transform[5]/6)*6;
+        var caja = (x < medio) ? izq : der;
+        (caja[y] = caja[y] || []).push({x:x, t:it.str});
+      });
+      var armar = function(caja){
+        var out = [];
+        Object.keys(caja).sort(function(a,b){ return b-a; }).forEach(function(y){
+          var l = caja[y].sort(function(a,b){ return a.x-b.x; })
+                    .map(function(o){ return o.t; }).join(' ').replace(/\s+/g,' ').trim();
+          if(l) out.push(l);
+        });
+        return out;
+      };
+      // primero toda la columna izquierda, después la derecha
+      todo += armar(izq).join('\n') + '\n' + armar(der).join('\n') + '\n';
+    }
+    var ta = document.getElementById('masivoTxt');
+    if(ta){ ta.value = todo; parsearMasivo(); }
+    var lineasN = todo.split('\n').filter(Boolean).length;
+    if(!lineasN){
+      poner('<span style="color:#DC2626;font-weight:800">⚠️ El PDF no tiene texto (parece escaneado). Probá copiando y pegando.</span>');
+    } else {
+      poner('<span style="color:#059669;font-weight:800">✅ '+lineasN+' líneas leídas de '+pdf.numPages+' página(s)</span>');
+      try{ sonar('exito'); }catch(e){}
+    }
+  }catch(e){
+    console.warn('PDF:', e);
+    poner('<span style="color:#DC2626;font-weight:800">⚠️ No se pudo leer. Necesitás internet la primera vez.</span>');
+  }
+  input.value='';
+}
+
 var _masivoParsed=[];
 function abrirPegadoMasivo(){
   document.getElementById('adminBody').innerHTML=
@@ -5175,6 +5261,9 @@ function abrirPegadoMasivo(){
       +'<span style="font-size:.7rem;font-weight:800;color:var(--sub)">💵 Dólar hoy:</span>'
       +'<input type="number" id="masivoDolar" value="'+(CONFIG.dolar||1500)+'" oninput="parsearMasivo()" style="flex:1;border:1.5px solid var(--line);border-radius:8px;padding:8px;font-family:inherit;font-weight:800;color:var(--az);outline:none;text-align:center">'
     +'</div>'
+    +'<button onclick="document.getElementById(\'pdfInput\').click()" style="width:100%;background:#fff;border:1.5px dashed var(--az);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px">📄 Subir PDF del mayorista</button>'
+    +'<input type="file" id="pdfInput" accept="application/pdf,.pdf" style="display:none" onchange="leerPDFLista(this)">'
+    +'<div id="pdfEstado" style="font-size:.72rem;color:var(--sub);margin-bottom:10px;text-align:center"></div>'
     +'<textarea id="masivoTxt" oninput="parsearMasivo()" placeholder="Pegá acá la lista de productos..." style="width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;font-size:.82rem;min-height:120px;outline:none;resize:vertical"></textarea>'
     +'<label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.78rem;color:var(--txt);cursor:pointer"><input type="checkbox" id="masivoReemplazar" style="width:18px;height:18px"> Reemplazar todo el catálogo <span style="color:var(--sub)">(si no, agrega)</span></label>'
     +'<div id="masivoPreview" style="margin-top:12px"></div>'
@@ -5187,6 +5276,32 @@ function parsearMasivo(){
   var cot=parseFloat(document.getElementById('masivoDolar').value)||1500;
   var lineas=txt.split('\n');
   _masivoParsed=[];
+
+  // 📦 FORMATO CATÁLOGO MAYORISTA: una línea con el precio ($unit/$bulto o $precio)
+  //    y en la línea siguiente el nombre. Se detecta solo.
+  var esLineaPrecio = function(l){ return /^\$[\d.,\/$\s]+$/.test(l.trim()) || /^agotado$/i.test(l.trim()); };
+  var precioSueltos = lineas.filter(function(l){ return esLineaPrecio(l); }).length;
+  if(precioSueltos >= 4){
+    var lim = lineas.map(function(l){ return l.replace(/[*_#]/g,'').trim(); }).filter(Boolean);
+    for(var i=0; i<lim.length-1; i++){
+      if(!esLineaPrecio(lim[i])) continue;
+      var nom = lim[i+1];
+      if(!nom || esLineaPrecio(nom)) continue;
+      if(nom.toUpperCase()===nom && nom.length>4 && !/\d/.test(nom)) continue;  // título de marca
+      if(/^agotado$/i.test(lim[i])) { i++; continue; }                            // sin stock: se saltea
+      // "$1170/$23407" → me quedo con el precio de BULTO (el segundo). Si hay uno solo, ese.
+      var nums = lim[i].split('/').map(function(x){
+        var v = x.replace(/[^\d.,]/g,'').replace(/\./g,'').replace(',','.');
+        return parseFloat(v)||0;
+      }).filter(function(v){ return v>0; });
+      if(!nums.length) { i++; continue; }
+      var precio = Math.round(nums.length>1 ? nums[1] : nums[0]);
+      if(precio>0){ pushProd(nom, precio, false, false, false, cot); }
+      i++;
+    }
+    if(_masivoParsed.length){ marcarSospechosos(); renderMasivoPreview(); return; }
+  }
+
   lineas.forEach(function(raw){
     var linea=raw.replace(/[*_#]/g,'').trim();
     if(!linea) return;
@@ -5752,7 +5867,7 @@ function abrirCentroEmprendedor(){
       +'</div>'
     +'</div>'
     // el gancho
-    +'<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:14px;padding:16px;color:#fff;margin-bottom:16px;text-align:center">'
+    +'<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:14px;padding:16px;color:#fff;margin-bottom:16px;text-align:center">'
       +'<div style="font-size:.88rem;font-weight:800;line-height:1.5">No necesitás saber de tecnología.<br>Ni tener stock. Ni plata para empezar.</div>'
       +'<div style="font-size:.78rem;color:#ffb968;font-weight:700;margin-top:8px">Solo ganas de trabajar 🐝</div>'
     +'</div>'
@@ -5906,7 +6021,7 @@ function abrirSimulador(){
   var html='<div style="font-weight:900;color:var(--az);font-size:1.1rem;margin-bottom:4px">🧮 ¿Cuánto podés pagar por mes?</div>'
     +'<div style="font-size:.82rem;color:var(--sub);line-height:1.5;margin-bottom:16px">Poné cuánto te alcanza pagar por mes y te muestro todo lo que te podés llevar. 🐝</div>'
     // el deslizador
-    +'<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:16px;padding:18px;color:#fff;margin-bottom:16px">'
+    +'<div style="background:linear-gradient(160deg,var(--az-osc),var(--az));border-radius:16px;padding:18px;color:#fff;margin-bottom:16px">'
       +'<div style="text-align:center;font-size:.66rem;color:rgba(255,255,255,.6);font-weight:800;text-transform:uppercase;letter-spacing:.6px">Puedo pagar por mes</div>'
       +'<div id="simValor" style="text-align:center;font-size:2.2rem;font-weight:900;margin:4px 0 14px">$30.000</div>'
       +'<input type="range" id="simSlider" min="5000" max="300000" step="5000" value="30000" oninput="calcSimulador()" style="width:100%;height:8px;-webkit-appearance:none;appearance:none;background:rgba(255,255,255,.2);border-radius:5px;outline:none;cursor:pointer">'
@@ -6451,6 +6566,68 @@ function guardarEdicion(idx){
   verDetalle(idx);
   alert('✅ Guardado. Ya se ve en la tienda.');
 }
+/* ═══════ 🗑️ BORRAR VARIOS PRODUCTOS ═══════
+   Seleccionás de a uno, varios o todos, y borrás de una vez. */
+var _selBorrar = [];
+function abrirBorrarVarios(){
+  _selBorrar = [];
+  pintarBorrarVarios();
+}
+function pintarBorrarVarios(){
+  var ps = PRODUCTOS || [];
+  if(!ps.length){
+    document.getElementById('adminBody').innerHTML =
+      '<div style="text-align:center;padding:26px 10px"><div style="font-size:2.4rem;margin-bottom:8px">📦</div>'
+      +'<div style="font-weight:900;color:var(--az)">No hay productos cargados</div></div>'
+      +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+    return;
+  }
+  var filas = ps.map(function(p, i){
+    var sel = _selBorrar.indexOf(i) >= 0;
+    return '<div onclick="toggleSelBorrar('+i+')" style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--line);cursor:pointer;background:'+(sel?'#FEF2F2':'#fff')+'">'
+      +'<div style="width:22px;height:22px;border-radius:6px;border:2px solid '+(sel?'#DC2626':'var(--line)')+';background:'+(sel?'#DC2626':'#fff')+';display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#fff;font-weight:900;font-size:.8rem">'+(sel?'✓':'')+'</div>'
+      +(p.foto?'<div style="width:38px;height:38px;border-radius:8px;background:url('+p.foto+') center/cover;flex:0 0 auto"></div>':'<div style="width:38px;height:38px;border-radius:8px;background:#F5F8FF;display:flex;align-items:center;justify-content:center;flex:0 0 auto">📦</div>')
+      +'<div style="flex:1;min-width:0"><div style="font-size:.8rem;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.nombre+'</div>'
+      +'<div style="font-size:.7rem;color:var(--sub)">'+fmt(p.venta||0)+'</div></div>'
+      +'</div>';
+  }).join('');
+  var n = _selBorrar.length;
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🗑️ Borrar productos</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Tocá los que querés borrar. Podés elegir de a uno, varios o todos.</div>'
+    +'<div style="display:flex;gap:7px;margin-bottom:10px">'
+      +'<button onclick="selBorrarTodos()" style="flex:1;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:10px;padding:10px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit">☑️ Todos</button>'
+      +'<button onclick="selBorrarNinguno()" style="flex:1;background:#fff;border:1.5px solid var(--line);color:var(--sub);border-radius:10px;padding:10px;font-size:.78rem;font-weight:800;cursor:pointer;font-family:inherit">✖️ Ninguno</button>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:360px;overflow-y:auto;margin-bottom:12px">'+filas+'</div>'
+    +'<button onclick="confirmarBorrarVarios()" style="width:100%;background:'+(n?'#DC2626':'#F1F3F7')+';color:'+(n?'#fff':'var(--sub)')+';border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:'+(n?'pointer':'default')+';font-family:inherit">'
+      +(n? '🗑️ Borrar '+n+' producto'+(n>1?'s':'') : 'Elegí al menos uno')+'</button>'
+    +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+}
+function toggleSelBorrar(i){
+  var k = _selBorrar.indexOf(i);
+  if(k>=0) _selBorrar.splice(k,1); else _selBorrar.push(i);
+  try{ sonar('tap'); }catch(e){}
+  pintarBorrarVarios();
+}
+function selBorrarTodos(){ _selBorrar = (PRODUCTOS||[]).map(function(p,i){ return i; }); pintarBorrarVarios(); }
+function selBorrarNinguno(){ _selBorrar = []; pintarBorrarVarios(); }
+function confirmarBorrarVarios(){
+  var n = _selBorrar.length;
+  if(!n) return;
+  var nombres = _selBorrar.slice(0,3).map(function(i){ return '• '+PRODUCTOS[i].nombre; }).join('\n');
+  if(n>3) nombres += '\n• …y '+(n-3)+' más';
+  if(!confirm('¿Borrar '+n+' producto'+(n>1?'s':'')+'?\n\n'+nombres+'\n\nEsto no se puede deshacer.')) return;
+  // borrar de mayor a menor índice para no correr las posiciones
+  _selBorrar.sort(function(a,b){ return b-a; }).forEach(function(i){ PRODUCTOS.splice(i,1); });
+  guardarCatalogo();
+  try{ render(); }catch(e){}
+  try{ sonar('exito'); }catch(e){}
+  toastCarrito('🗑️ '+n+' producto'+(n>1?'s':'')+' borrado'+(n>1?'s':''));
+  _selBorrar = [];
+  pintarBorrarVarios();
+}
+
 function borrarProducto(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
   if(!confirm('¿Borrar "'+p.nombre+'" de la tienda?')) return;
