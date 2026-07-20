@@ -177,7 +177,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 <!-- ═══ VERSIÓN: tienda-nueva · 15-jul-2026 · base membresía ═══ -->
-<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 16-jul ✓precios</div>
 
 <!-- Panel de AYUDA -->
 <div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
@@ -489,7 +488,8 @@ function optimizarFotos(){
   var box=document.getElementById('adminBody');
   function siguiente(){
     if(!pesadas.length){
-      guardarCatalogo();
+      sonar('exito');
+  guardarCatalogo();
       render();
       var ahora=pesoCatalogo();
       alert('✅ Listo!\n\n'+hechas+' fotos optimizadas.\n\nAntes: '+antes+' MB\nAhora: '+ahora+' MB\n\nGanaste '+(Math.round((antes-ahora)*10)/10)+' MB de espacio. 🐝');
@@ -731,6 +731,69 @@ function tiendaID(){
   return 'amarango';   // raíz sin nada → la tienda de Max
 }
 var TIENDA = tiendaID();
+
+/* ═══════ 🔊 SONIDOS DE LA TIENDA ═══════
+   4 sonidos generados al vuelo (no pesan nada, no necesitan internet).
+   El cliente los puede apagar. */
+var _audioCtx = null;
+function _ctx(){
+  try{
+    if(!_audioCtx){ _audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+    if(_audioCtx.state==='suspended') _audioCtx.resume();
+    return _audioCtx;
+  }catch(e){ return null; }
+}
+function sonidoActivo(){
+  try{ return localStorage.getItem(lsKey('ae_sonido'))!=='off'; }catch(e){ return true; }
+}
+function toggleSonido(){
+  var on = sonidoActivo();
+  try{ localStorage.setItem(lsKey('ae_sonido'), on?'off':'on'); }catch(e){}
+  if(!on) sonar('tap');    // al prenderlo, suena para confirmar
+  return !on;
+}
+/* Toca una nota simple */
+function _nota(freq, dur, tipo, vol, delay){
+  var ctx=_ctx(); if(!ctx) return;
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type = tipo||'sine';
+  o.frequency.value = freq;
+  var t0 = ctx.currentTime + (delay||0);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol||0.14, t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+(dur||0.12));
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0+(dur||0.12)+0.02);
+}
+/* Los 4 sonidos de la tienda */
+function sonar(cual){
+  if(!sonidoActivo()) return;
+  try{
+    switch(cual){
+      // 1) TAP — toque suave, para navegar (categorías, tabs, abrir cosas)
+      case 'tap':
+        _nota(660, 0.07, 'sine', 0.10);
+        break;
+      // 2) AGREGAR — dos notas que suben, para sumar al carrito / favoritos
+      case 'agregar':
+        _nota(587, 0.09, 'triangle', 0.13);
+        _nota(880, 0.13, 'triangle', 0.12, 0.07);
+        break;
+      // 3) ÉXITO — acorde alegre, para guardar / pedido enviado / listo
+      case 'exito':
+        _nota(523, 0.11, 'sine', 0.13);
+        _nota(659, 0.11, 'sine', 0.12, 0.09);
+        _nota(784, 0.20, 'sine', 0.13, 0.18);
+        break;
+      // 4) ERROR — dos notas bajas, para avisos y cosas que no se pueden
+      case 'error':
+        _nota(330, 0.10, 'square', 0.09);
+        _nota(220, 0.18, 'square', 0.09, 0.09);
+        break;
+    }
+  }catch(e){}
+}
+
 /* limpia el rastro viejo que causaba el cruce */
 try{ localStorage.removeItem('ae_tienda_id'); }catch(e){}
 /* claves de guardado, separadas por tienda */
@@ -793,6 +856,7 @@ function agregarAlCarrito(idx){
     }
   });
   guardarCarrito(c);
+  sonar('agregar');
   toastCarrito('✅ Agregado'+(paso>1?' ('+paso+' u.)':'')+(vr?' · '+vr:''));
 }
 function quitarDelCarrito(id){
@@ -815,6 +879,136 @@ function cambiarCant(id, delta){
   });
   guardarCarrito(c); abrirCarrito();
 }
+/* ═══════ 🆕 TIENDA NUEVA DE CERO ═══════
+   Deja la tienda vacía y lista para que otro la llene. Genera el link para compartir. */
+function abrirTiendaNueva(){
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🆕 Crear tienda para un amigo</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Armá una tienda vacía, lista para que la llene con sus productos. Cada tienda es independiente: sus datos no se mezclan con los tuyos.</div>'
+    +'<div style="background:#F5F8FF;border:1.5px solid var(--az);border-radius:12px;padding:13px;margin-bottom:12px">'
+      +'<label style="display:block;font-size:.68rem;font-weight:800;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Código de la tienda</label>'
+      +'<input id="tn_codigo" placeholder="ej: marcelo, kioscolucia, ropaana" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:.9rem;outline:none;font-weight:700" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_-]/g,\'\')">'
+      +'<div style="font-size:.7rem;color:var(--sub);margin-top:6px;line-height:1.4">Sin espacios ni acentos. Es lo que va en el link.</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:12px">'
+      +'<label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Rubro (opcional)</label>'
+      +'<select id="tn_rubro" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;background:#fff;font-weight:700">'
+        +'<option value="">— Que lo elija él —</option>'
+        +Object.keys(PRESETS_RUBRO).map(function(k){ return '<option value="'+k+'">'+PRESETS_RUBRO[k].nombre+'</option>'; }).join('')
+      +'</select>'
+    +'</div>'
+    +'<button onclick="generarLinkTiendaNueva()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">🔗 Generar el link</button>'
+    +'<div id="tn_resultado" style="margin-top:14px"></div>'
+    +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+}
+function generarLinkTiendaNueva(){
+  var cod=(document.getElementById('tn_codigo').value||'').trim();
+  if(!cod){ alert('Poné el código de la tienda.'); return; }
+  var rubro=document.getElementById('tn_rubro').value||'';
+  var base=window.location.origin+window.location.pathname;
+  var link=base+'?t='+cod+(rubro?'&r='+rubro:'');
+  var msg='🐝 Te armé tu tienda!\n\n'
+    +'Entrá con este link y ya podés empezar a cargar tus productos:\n'+link+'\n\n'
+    +'Cuando entres:\n'
+    +'1️⃣ Tocá la abeja 🐝 y poné la clave 2580\n'
+    +'2️⃣ Andá a Configuración y ponele tu nombre y tu rubro\n'
+    +'3️⃣ Cargá tus productos y listo\n\n'
+    +'Cualquier cosa me escribís 💬';
+  document.getElementById('tn_resultado').innerHTML=
+     '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:13px;margin-bottom:10px">'
+      +'<div style="font-size:.72rem;font-weight:900;color:#0a7a3f;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">✅ Tienda lista</div>'
+      +'<div style="font-size:.76rem;color:var(--txt);word-break:break-all;background:#fff;border-radius:8px;padding:9px;font-family:ui-monospace,monospace">'+link+'</div>'
+    +'</div>'
+    +'<button onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 Mandársela por WhatsApp</button>'
+    +'<button onclick="copiarTextoSimple(\''+link.replace(/'/g,"\\'")+'\')" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit">🔗 Copiar link</button>';
+}
+function copiarTextoSimple(t){
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ toastCarrito('🔗 Copiado'); }).catch(function(){ prompt('Copiá:', t); }); }
+  else prompt('Copiá:', t);
+}
+
+/* ═══════ 🏷️ AJUSTES POR CATEGORÍA ═══════
+   Cada categoría con su markup y sus cantidades. Arranca vacío: lo llena el dueño. */
+function abrirPorCategoria(){
+  var cats = (CONFIG.categorias && CONFIG.categorias.length) ? CONFIG.categorias : [];
+  if(!cats.length){
+    document.getElementById('adminBody').innerHTML=
+       '<div style="text-align:center;padding:26px 10px">'
+        +'<div style="font-size:2.6rem;margin-bottom:8px">🏷️</div>'
+        +'<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:6px">Todavía no tenés categorías</div>'
+        +'<div style="font-size:.82rem;color:var(--sub);line-height:1.5;margin-bottom:16px">Andá a Configuración, elegí tu rubro y se cargan solas. Después volvé acá para ponerle a cada una su margen.</div>'
+        +'<button onclick="abrirConfig()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit">⚙️ Ir a Configuración</button>'
+      +'</div>'
+      +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+    return;
+  }
+  CONFIG.porCategoria = CONFIG.porCategoria || {};
+  var may = esMayorista();
+  var filas = cats.map(function(cat,i){
+    var d = CONFIG.porCategoria[cat] || {markup:0, porBulto:0, minCant:0};
+    return '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:9px">'
+      +'<div style="font-size:.86rem;font-weight:900;color:var(--az);margin-bottom:9px">'+cat+'</div>'
+      +'<div style="display:flex;gap:7px">'
+        +'<div style="flex:1"><label style="display:block;font-size:.63rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:3px">Markup %</label>'
+        +'<input id="pc_mk_'+i+'" type="number" inputmode="numeric" value="'+(d.markup||'')+'" placeholder="0" style="width:100%;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;text-align:center;font-weight:800;outline:none;color:#16A34A"></div>'        +(may
+          ? '<div style="flex:1"><label style="display:block;font-size:.63rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:3px">'+palabraBulto()+' x</label>'
+            +'<input id="pc_pb_'+i+'" type="number" inputmode="numeric" value="'+(d.porBulto||'')+'" placeholder="0" style="width:100%;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;text-align:center;font-weight:800;outline:none;color:var(--nar)"></div>'
+            +'<div style="flex:1"><label style="display:block;font-size:.63rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:3px">Mínimo</label>'
+            +'<input id="pc_mc_'+i+'" type="number" inputmode="numeric" value="'+(d.minCant||'')+'" placeholder="0" style="width:100%;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.84rem;text-align:center;font-weight:800;outline:none;color:var(--nar)"></div>'
+          : '')
+      +'</div>'
+      +'<div style="display:flex;gap:5px;margin-top:7px;flex-wrap:wrap">'
+        +[20,30,40,50,60,80].map(function(v){
+          return '<button onclick="setPctCat('+i+','+v+')" style="flex:1;min-width:44px;background:#F5F8FF;border:1px solid var(--line);color:var(--az);border-radius:8px;padding:6px 4px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit">'+v+'%</button>';
+        }).join('')
+      +'</div>'
+      +'</div>';
+  }).join('');
+  document.getElementById('adminBody').innerHTML=
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🏷️ Ajustes por categoría</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Cada rubro tiene márgenes distintos. Poné acá el markup de cada categoría'+(may?' y cómo se venden (bulto y mínimo)':'')+'. Cuando cargues un producto, se aplica solo.</div>'
+    +'<div style="background:#EEF6FF;border:1px solid #CFE3FF;border-radius:11px;padding:11px;font-size:.75rem;color:var(--txt);line-height:1.5;margin-bottom:12px">💡 Dejá en 0 lo que no uses. Los que estén en 0 usan el markup general de tu tienda.</div>'
+    +filas
+    +'<button onclick="guardarPorCategoria()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:4px">💾 Guardar</button>'
+    +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+}
+/* Botón rápido: pone un % en la categoría sin tipear */
+function setPctCat(i, v){
+  var e=document.getElementById('pc_mk_'+i);
+  if(e){ e.value=v; e.style.background='#F0FDF4'; setTimeout(function(){ e.style.background=''; },400); }
+}
+function guardarPorCategoria(){
+  var cats = CONFIG.categorias || [];
+  CONFIG.porCategoria = CONFIG.porCategoria || {};
+  cats.forEach(function(cat,i){
+    var mk=document.getElementById('pc_mk_'+i);
+    var pb=document.getElementById('pc_pb_'+i);
+    var mc=document.getElementById('pc_mc_'+i);
+    CONFIG.porCategoria[cat] = {
+      markup: mk?(parseFloat(mk.value)||0):0,
+      porBulto: pb?(parseInt(pb.value)||0):0,
+      minCant: mc?(parseInt(mc.value)||0):0
+    };
+  });
+  guardarConfig();
+  toastCarrito('✅ Ajustes guardados');
+  abrirPorCategoria();
+}
+/* Redondeo inteligente: fino en productos baratos (golosinas, librería),
+   grueso en caros (electro). Así el markup se respeta en todos los rubros. */
+function redondearPrecio(v){
+  if(v < 2000)   return Math.round(v/10)*10;      // golosinas, kiosco
+  if(v < 20000)  return Math.round(v/50)*50;      // comida, librería
+  if(v < 100000) return Math.round(v/100)*100;    // ropa, indumentaria
+  return Math.round(v/500)*500;                   // electro
+}
+/* Markup a aplicar según la categoría del producto (si no tiene, usa el general) */
+function markupDeCategoria(cat, costo){
+  var d = (CONFIG.porCategoria||{})[cat];
+  if(d && d.markup>0) return redondearPrecio(costo*(1+d.markup/100));
+  return markupDeCosto(costo);   // el markup general por tramos
+}
+
 /* ═══════ 📋 LISTA DE PRECIOS (para mayoristas) ═══════
    Genera un texto prolijo con todos los productos y sus precios por cantidad.
    Se puede copiar, mandar por WhatsApp o descargar como archivo. */
@@ -1026,7 +1220,7 @@ function cerrarCarrito(){ document.getElementById('carritoOverlay').classList.re
 function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]); abrirCarrito(); } }
 
 /* Pedir: manda TODO junto por WhatsApp, eligiendo vendedor */
-function pedirCarrito(){
+function pedirCarrito(){ sonar('exito');
   var c=cargarCarrito(); if(!c.length)return;
   var tot=totalCarrito();
   var falta=faltaParaMinimo(tot);
@@ -1060,7 +1254,7 @@ function pedirCarrito(){
 }
 
 /* ═══════ BARRA INFERIOR + MENÚ "MÁS" (estilo Mercado Libre) ═══════ */
-function tabIr(t){
+function tabIr(t){ sonar('tap');
   ['inicio','cats','favs','ofertas'].forEach(function(x){
     var b=document.getElementById('tb-'+x); if(b) b.classList.toggle('on', x===t);
   });
@@ -1076,7 +1270,7 @@ function tabIr(t){
   render();
   window.scrollTo(0,0);
 }
-function abrirMas(){
+function abrirMas(){ sonar('tap');
   var rol=rolActual();
   var html='';
   function fila(ico,txt,fn){ return '<div class="mas-row" onclick="'+fn+'"><span class="ic">'+ico+'</span><span class="tx">'+txt+'</span><span class="ar">›</span></div>'; }
@@ -1092,6 +1286,7 @@ function abrirMas(){
   html+=fila('🧮','¿Cuánto puedo pagar por mes?','cerrarMas();abrirSimulador()');
   html+=fila('❤️','Mis favoritos','cerrarMas();tabIr(\'favs\')');
   html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
+  html+=fila(sonidoActivo()?'🔊':'🔇', sonidoActivo()?'Sonidos: activados':'Sonidos: apagados','toggleSonido();cerrarMas();abrirMas()');
 
   // 🛠️ Herramientas del dueño — acceso rápido, sin entrar al panel
   if(rol==='admin' || rol==='dueno' || rol==='revendedor'){
@@ -1226,6 +1421,7 @@ function validarClaveHerramienta(){
     var fn = window._trasDesbloquear; window._trasDesbloquear=null;
     if(typeof fn==='function') fn();
   } else {
+    sonar('error');
     if(err) err.textContent='Clave incorrecta';
     if(i){ i.value=''; i.focus(); }
   }
@@ -2245,6 +2441,8 @@ function abrirPanelDueno(){
       : '')
     +'<div style="display:grid;gap:10px">'
     +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
+    +botonPanel('🆕','Crear tienda para un amigo','Armá una tienda vacía y mandale el link','tiendanueva')
+    +botonPanel('🏷️','Ajustes por categoría','Markup y cantidades de cada categoría','porcategoria')
     +botonPanel('✏️','Editar precios','Cambiá todos los precios de una, o subilos un %','editarprecios')
     +botonPanel('📋','Lista de precios','Mandá tu lista completa por WhatsApp','listaprecios')
     +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
@@ -2273,6 +2471,8 @@ function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
+  if(destino==='tiendanueva'){ abrirTiendaNueva(); return; }
+  if(destino==='porcategoria'){ abrirPorCategoria(); return; }
   if(destino==='editarprecios'){ abrirEditarPrecios(); return; }
   if(destino==='listaprecios'){ abrirListaPrecios(); return; }
   if(destino==='cargar'){ abrirCargar(); return; }
@@ -2437,6 +2637,10 @@ var CONFIG_DEFAULT = {
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
   cuotasActivadas: false,  // 🔒 las cuotas arrancan OCULTAS. Se activan con el PIN de dueño.
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
+  // 🏷️ Ajustes por categoría: cada una con su markup y sus cantidades.
+  // Se crea vacío al elegir el rubro; lo llena el dueño (él sabe sus márgenes).
+  // Formato: { "🍫 Chocolates": {markup:0, porBulto:0, minCant:0}, ... }
+  porCategoria: {},
   // 📦 Modo MAYORISTA: vende por bulto, con mínimos y precios por cantidad
   mayorista: {
     on: false,
@@ -2488,6 +2692,9 @@ function firmaTienda(){
 
 var CONFIG = null;
 function cargarConfig(cb){
+  // 🆕 si viene ?r=rubro en el link (tienda nueva), precargo sus categorías
+  var _rubroLink='';
+  try{ _rubroLink=(new URLSearchParams(window.location.search).get('r')||'').trim(); }catch(e){}
   try{
     var l=localStorage.getItem(lsKey('ae_config'));
     if(l){
@@ -2515,6 +2722,15 @@ function cargarConfig(cb){
       CONFIG.admins=[];
       CONFIG.vendedores=[];
       CONFIG.duenoPlataforma=false;   // no ve Suscripciones (eso es de Max)
+      // 🆕 si el link traía ?r=rubro, le dejo las categorías listas
+      if(_rubroLink && PRESETS_RUBRO[_rubroLink]){
+        var pr=PRESETS_RUBRO[_rubroLink];
+        CONFIG.rubro=_rubroLink;
+        CONFIG.categorias=pr.cats.slice();
+        CONFIG.porCategoria={};
+        pr.cats.forEach(function(cat){ CONFIG.porCategoria[cat]={markup:0,porBulto:0,minCant:0}; });
+        if(pr.mayorista){ CONFIG.mayorista={on:true, palabraBulto:'Bulto', minimoUnidades:0, mostrarUnitario:true}; }
+      }
     }
   }
   aplicarConfig();
@@ -3906,6 +4122,19 @@ function abrirConfig(){
         +'<input id="cf_mayMinUnid" type="number" inputmode="numeric" value="'+((c.mayorista.minimoUnidades)||0)+'" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:.84rem;outline:none"></div>'
       +'</div>'
       : '')
+    +sec('📈 Tu markup general')
+    +'<div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Cuánto le sumás al costo para sacar el precio de venta, según lo que sale el producto. Se usa cuando la categoría no tiene su propio markup.</div>'
+    +(function(){
+        var mk=(c.markup&&c.markup.length)?c.markup:CONFIG_DEFAULT.markup;
+        var etq=['Hasta $50.000','$50.000 a $100.000','$100.000 a $250.000','$250.000 a $350.000','Más de $350.000'];
+        return mk.map(function(t,i){
+          return '<div style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px;margin-bottom:7px">'
+            +'<div style="flex:1;font-size:.8rem;font-weight:700;color:var(--txt)">'+(etq[i]||'Tramo '+(i+1))+'</div>'
+            +'<input id="cf_mk_'+i+'" type="number" inputmode="numeric" value="'+t.pct+'" style="width:82px;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.88rem;text-align:center;font-weight:900;outline:none;color:#16A34A">'
+            +'<span style="font-weight:900;color:#16A34A">%</span></div>';
+        }).join('');
+      })()
+    +'<div style="font-size:.7rem;color:var(--sub);margin-bottom:12px">💡 Tocá cada número y poné el tuyo. Cuanto más caro el producto, menos margen se suele usar.</div>'
     +sec('🚚 Envíos y pedido mínimo')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Opcional. Si lo dejás en 0, no se cobra ni se muestra.</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:8px">'
@@ -4018,6 +4247,13 @@ function aplicarPresetRubro(k){
   var actual=(ta.value||'').trim();
   if(actual && !confirm('¿Reemplazar tus categorías por las de '+preset.nombre+'?')) return;
   ta.value = preset.cats.join('\n');
+  // 🏷️ armo la estructura vacía por categoría, lista para que el dueño la llene
+  CONFIG.porCategoria = CONFIG.porCategoria || {};
+  var nuevo={};
+  preset.cats.forEach(function(cat){
+    nuevo[cat] = CONFIG.porCategoria[cat] || {markup:0, porBulto:0, minCant:0};
+  });
+  CONFIG.porCategoria = nuevo;
   // 📦 si el rubro es mayorista, prende el modo automáticamente
   if(preset.mayorista){
     if(!CONFIG.mayorista) CONFIG.mayorista={palabraBulto:'Bulto', minimoUnidades:0, mostrarUnitario:true};
@@ -4035,6 +4271,14 @@ function guardarConfigDesdeForm(){
   var cats=g('cf_categorias');
   CONFIG.categorias = cats ? cats.split('\n').map(function(x){return x.trim();}).filter(Boolean) : [];
   var rb=document.getElementById('cf_rubro'); if(rb) CONFIG.rubro = rb.value||'';
+  // 📈 markup general por tramos (editable por el dueño)
+  var mkBase=(CONFIG.markup&&CONFIG.markup.length)?CONFIG.markup:CONFIG_DEFAULT.markup;
+  var mkNuevo=[];
+  mkBase.forEach(function(t,i){
+    var e=document.getElementById('cf_mk_'+i);
+    mkNuevo.push({ hasta:t.hasta, pct: e?(parseFloat(e.value)||t.pct):t.pct });
+  });
+  CONFIG.markup = mkNuevo;
   // 📦 mayorista
   if(!CONFIG.mayorista) CONFIG.mayorista={on:false};
   var mp=document.getElementById('cf_mayPalabra'); if(mp) CONFIG.mayorista.palabraBulto = mp.value.trim()||'Bulto';
@@ -4538,7 +4782,9 @@ function guardarProducto(){
   var g=function(id){var e=document.getElementById(id);return e?e.value.trim():'';};
   var nombre=g('cg_nombre'); if(!nombre){ alert('Poné el nombre del producto.'); return; }
   var precio=parseFloat(g('cg_precio'))||0; if(!precio){ alert('Poné el precio.'); return; }
-  var venta = _cargaModo==='costo' ? markupDeCosto(precio) : precio;
+  var catSel = g('cg_categoria')||'';
+  // 🏷️ si la categoría tiene su propio markup, se usa ese; si no, el general
+  var venta = _cargaModo==='costo' ? markupDeCategoria(catSel, precio) : precio;
   var prod={
     id: 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
     nombre: nombre,
@@ -4555,9 +4801,10 @@ function guardarProducto(){
   var vr=g('cg_variantes');
   if(vr){ prod.variantes = vr.split(',').map(function(x){return x.trim();}).filter(Boolean); }
   var vlbl=g('cg_varLabel'); if(vlbl) prod.varLabel = vlbl;
-  // 📦 datos mayoristas
-  var pb=parseInt(g('cg_porBulto'))||0; if(pb>1) prod.porBulto=pb;
-  var mc=parseInt(g('cg_minCant'))||0; if(mc>1) prod.minCant=mc;
+  // 📦 datos mayoristas (si no los cargó a mano, toma los de su categoría)
+  var dCat = (CONFIG.porCategoria||{})[catSel] || {};
+  var pb=parseInt(g('cg_porBulto'))|| dCat.porBulto || 0; if(pb>1) prod.porBulto=pb;
+  var mc=parseInt(g('cg_minCant'))|| dCat.minCant || 0; if(mc>1) prod.minCant=mc;
   var esc=g('cg_escala');
   if(esc){
     // "10=950, 50=900" → [{desde:10,precio:950},{desde:50,precio:900}]
@@ -5340,7 +5587,7 @@ function render(){
       +'</div></div>';
   }).join('')+'</div>'+bloqueConfianza()+bloqueResenas()+pieBanners();
 }
-function setCat(k){ catActiva=(catActiva===k?'':k); render(); }
+function setCat(k){ sonar('tap'); catActiva=(catActiva===k?'':k); render(); }
 
 function toggleSoloOfertas(){
   window._soloOfertas = !window._soloOfertas;
@@ -5354,7 +5601,7 @@ function idProd(p){ return p.id!=null ? String(p.id) : (p.nombre||''); }
 function cargarFavs(){ try{ return JSON.parse(localStorage.getItem(lsKey('ae_favoritos'))||'[]'); }catch(e){ return []; } }
 function guardarFavs(a){ try{ localStorage.setItem(lsKey('ae_favoritos'), JSON.stringify(a)); }catch(e){} }
 function esFav(p){ return cargarFavs().indexOf(idProd(p))>=0; }
-function toggleFav(idx, ev){
+function toggleFav(idx, ev){ sonar('agregar');
   if(ev){ ev.stopPropagation(); }
   var p=PRODUCTOS[idx]; if(!p)return;
   var favs=cargarFavs(); var id=idProd(p); var i=favs.indexOf(id);
