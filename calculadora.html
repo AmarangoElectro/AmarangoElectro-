@@ -31,7 +31,7 @@
 <meta name="application-name" content="Tienda Amarango">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&display=swap');
-:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#FFFFFF;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
@@ -242,8 +242,8 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 /* Fondo colmena AmarangoElectro (marca) */
 body{background:#f4f6fb;background-attachment:scroll;} /* fondo liviano por defecto (cliente) */
 /* Fondos por rol: celeste clarito para revendedores, naranja clarito para admin */
-body.rol-revendedor{background:#eaf3fc !important;}
-body.rol-admin{background:#fff4e8 !important;}
+body.rol-revendedor{background:#fff !important;}
+body.rol-admin{background:#fff !important;}
 body.oscuro.rol-revendedor{background:#0a1830 !important;}
 body.oscuro.rol-admin{background:#0a1830 !important;}
 body.oscuro{background:#0a1830;background-attachment:scroll;}
@@ -2233,9 +2233,7 @@ function tiendaAplicarModo(){
   // cliente = blanco, vendedor = miel clarito, admin = miel más fuerte
   var cont=document.getElementById('tab-tienda');
   if(cont){
-    if(tiendaEsAdmin || adminUnlocked)      cont.style.background='#fdf0d5';   // miel más fuerte
-    else if(revUnlocked)                    cont.style.background='#fef8ec';   // miel clarito
-    else                                    cont.style.background='';          // blanco (cliente)
+    cont.style.background='#fff';   // blanco para todos
   }
   // fondo de pantalla según rol: admin naranja clarito, revendedor celeste clarito, cliente normal
   document.body.classList.remove('rol-admin','rol-revendedor');
@@ -2441,6 +2439,29 @@ function tiendaCategoria(nombre){
 // lista de categorías disponibles para elegir
 var TIENDA_CATEGORIAS=['📱 Celulares','❄️ Heladeras','🍳 Cocina','📺 TV','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
 // categoría efectiva de un producto: la manual si tiene, sino la automática
+/* 🚦 SEMÁFORO DEL PRECIO — cuánto hace que no se actualiza (solo lo ve el admin)
+   Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
+function badgePrecioFecha(p){
+  if(!tiendaEsAdmin) return '';
+  var ts = p.precioActualizado || p.fechaPrecio || 0;
+  if(!ts){
+    return '<div style="background:#F7F8FA;border-radius:6px;padding:4px 7px;font-size:.58rem;color:var(--sub);font-weight:700;text-align:center;margin-bottom:5px;">🕐 Sin fecha</div>';
+  }
+  var dias = Math.floor((Date.now()-ts)/86400000);
+  var col,bg,ico,txt;
+  if(dias>=28){ col='#DC2626'; bg='#FEF2F2'; ico='🔴'; txt='REVISAR'; }
+  else if(dias>=14){ col='#D97706'; bg='#FFFBEB'; ico='🟡'; txt=''; }
+  else { col='#059669'; bg='#F0FDF4'; ico='🟢'; txt=''; }
+  var cuando = dias===0 ? 'hoy' : (dias===1 ? 'ayer' : 'hace '+dias+'d');
+  return '<div style="background:'+bg+';border-radius:6px;padding:4px 7px;font-size:.58rem;color:'+col+';font-weight:800;text-align:center;margin-bottom:5px;">'
+    +ico+' Precio '+cuando+(txt?' · '+txt:'')+'</div>';
+}
+/* ⚙️ Abre el cajón de opciones del producto */
+function tiendaAbrirOpciones(id){
+  var det = document.getElementById('opts-'+id);
+  if(det){ det.open = !det.open; det.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+  else { tiendaVerDetalle(id); }
+}
 function catProd(p){ return (p && p.categoria) ? p.categoria : tiendaCategoria(p.nombre); }
 // ===== BÚSQUEDA INTELIGENTE (tolera acentos y errores de tipeo) =====
 // quita acentos, pasa a minúscula, deja solo letras y números
@@ -3213,6 +3234,7 @@ function tiendaRender(){
     }
 
     card+=''
+      +badgePrecioFecha(p)
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
@@ -3278,7 +3300,7 @@ function tiendaRender(){
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
-      card+='<details style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;">⚙️ Opciones del producto ▾</summary><div style="padding-top:6px;">';
+      card+='<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;">⚙️ Opciones del producto ▾</summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
@@ -3292,10 +3314,14 @@ function tiendaRender(){
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
       card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')">📤 Compartir</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
-      card+='<div style="display:flex;gap:6px;">'
-        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
-        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
-        +(p.esCelu?'':'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
+      card+='<div style="display:flex;gap:5px;margin-bottom:5px;">'
+        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
+        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
+        +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
+      +'</div>'
+      +'<div style="display:flex;gap:5px;">'
+        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
+        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#fff;color:var(--nar);border:1.5px solid var(--nar);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaAbrirOpciones('+pid+')">⚙️ Opciones</button>'
       +'</div>';
     }else{
       // Un solo botón: la foto y el precio son los protagonistas.
