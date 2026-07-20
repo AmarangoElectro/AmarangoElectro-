@@ -177,7 +177,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 <!-- ═══ VERSIÓN: tienda-nueva · 15-jul-2026 · base membresía ═══ -->
-<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 16-jul ✓multirubro</div>
+<div id="version-tag" style="position:fixed;bottom:4px;left:4px;z-index:99999;background:rgba(11,45,107,.85);color:#fff;font-size:9px;padding:2px 7px;border-radius:6px;font-family:sans-serif;pointer-events:none;">v: 16-jul ✓candado</div>
 
 <!-- Panel de AYUDA -->
 <div class="overlay" id="ayudaOverlay" onclick="if(event.target===this)cerrarAyuda()">
@@ -646,6 +646,17 @@ function mostrarBotonInstalar(){
    La tienda de Max (amarango) NUNCA se bloquea.
    ═══════════════════════════════════════════════════════════ */
 var TIENDA_BLOQUEADA = false;
+/* 🔒 Plan de esta tienda: 'basico' (solo contado) o 'full' (con cuotas Amarango).
+   ADEMÁS: las cuotas están OCULTAS por defecto en todas las tiendas.
+   Solo se muestran si alguien las activó con el PIN de dueño. */
+var PLAN_TIENDA = 'full';
+function tieneCuotas(){
+  // el plan tiene que permitirlo...
+  var planOk = (TIENDA==='amarango') || (CONFIG && CONFIG.duenoPlataforma===true) || (PLAN_TIENDA==='full');
+  if(!planOk) return false;
+  // ...y además el dueño tiene que haberlas activado con la clave
+  return (CONFIG && CONFIG.cuotasActivadas===true);
+}
 
 function verificarSuscripcion(cb){
   // la tienda de Max nunca se bloquea
@@ -660,6 +671,16 @@ function verificarSuscripcion(cb){
       });
       // si no está en la lista → la deja pasar (todavía no la diste de alta)
       if(!mia){ cb(true); return; }
+      // 🔒 guardo qué plan tiene esta tienda (basico = solo contado, full = con cuotas)
+      try{
+        var planAntes = PLAN_TIENDA;
+        PLAN_TIENDA = mia.plan || 'basico';
+        // si cambió respecto de lo que asumimos, recalculo planes y repinto
+        if(planAntes !== PLAN_TIENDA){
+          try{ aplicarConfig(); }catch(e){}
+          try{ render(); }catch(e){}
+        }
+      }catch(e){}
       // si está y figura como vencida → BLOQUEAR
       cb(mia.estado==='ok');
     })
@@ -997,6 +1018,42 @@ function loginDesdeAyuda(){
    El cliente no ve ninguna puerta. */
 var PIN_DUENO = "2580";        // clave admin
 var PIN_REVENDEDOR = "1234";   // clave revendedor
+
+/* 🔒 CANDADO DE HERRAMIENTAS (Cuotas y Placas)
+   La tienda muestra SOLO contado. Cuotas y Placas piden el PIN de dueño.
+   El desbloqueo dura mientras la pestaña esté abierta (no queda guardado). */
+var _desbloqueado = false;
+function herramientasDesbloqueadas(){ return _desbloqueado===true; }
+function pedirClaveHerramienta(nombre, alDesbloquear){
+  var cont = document.getElementById('adminBody');
+  var html =
+     '<div style="text-align:center;padding:6px 0 14px">'
+      +'<div style="font-size:2.8rem;margin-bottom:8px">🔒</div>'
+      +'<div style="font-weight:900;color:var(--az);font-size:1.1rem;margin-bottom:4px">'+nombre+'</div>'
+      +'<div style="font-size:.82rem;color:var(--sub);line-height:1.5">Esta herramienta está protegida.<br>Ingresá la clave para continuar.</div>'
+    +'</div>'
+    +'<input id="clv_input" type="password" inputmode="numeric" placeholder="Clave" style="width:100%;border:2px solid var(--line);border-radius:12px;padding:14px;font-family:inherit;font-size:1.1rem;text-align:center;letter-spacing:5px;font-weight:900;outline:none;margin-bottom:6px">'
+    +'<div id="clv_error" style="font-size:.78rem;color:#DC2626;font-weight:700;text-align:center;height:18px;margin-bottom:8px"></div>'
+    +'<button onclick="validarClaveHerramienta()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit">Desbloquear</button>'
+    +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+  if(cont){ cont.innerHTML = html; }
+  window._trasDesbloquear = alDesbloquear || null;
+  setTimeout(function(){ var i=document.getElementById('clv_input'); if(i){ i.focus();
+    i.addEventListener('keydown', function(e){ if(e.key==='Enter') validarClaveHerramienta(); }); } }, 80);
+}
+function validarClaveHerramienta(){
+  var i=document.getElementById('clv_input');
+  var err=document.getElementById('clv_error');
+  var v=i?i.value.trim():'';
+  if(v===PIN_DUENO){
+    _desbloqueado = true;
+    var fn = window._trasDesbloquear; window._trasDesbloquear=null;
+    if(typeof fn==='function') fn();
+  } else {
+    if(err) err.textContent='Clave incorrecta';
+    if(i){ i.value=''; i.focus(); }
+  }
+}
 var _toquesAbeja = 0, _toqueTimer = null;
 
 /* ROL actual: null (cliente) | 'admin' | 'revendedor' */
@@ -2134,6 +2191,14 @@ function editarSub(i){
     +campo('WhatsApp','sb_whatsapp',s.whatsapp,'Ej: 5491122334455')
     +campo('Pago hasta','sb_pagaHasta',s.pagaHasta,'Ej: 31/08/2026')
     +campo('Cuanto paga por mes','sb_monto',s.monto,'Ej: 20000')
+    +'<div style="background:#F5F8FF;border:1.5px solid var(--az);border-radius:11px;padding:11px;margin-bottom:11px">'
+      +'<div style="font-size:.66rem;font-weight:800;color:var(--az);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Plan contratado</div>'
+      +'<select id="sb_plan" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:.86rem;outline:none;background:#fff;font-weight:800">'
+        +'<option value="basico"'+((s.plan||'basico')==='basico'?' selected':'')+'>🔵 Básico — solo contado</option>'
+        +'<option value="full"'+(s.plan==='full'?' selected':'')+'>⭐ Full — con cuotas Amarango</option>'
+      +'</select>'
+      +'<div style="font-size:.7rem;color:var(--sub);line-height:1.4;margin-top:6px">El plan Básico vende solo al contado. El sistema de cuotas queda con candado 🔒 hasta que pase a Full.</div>'
+    +'</div>'
     +campo('Nota','sb_nota',s.nota,'Lo que quieras anotar')
     +'<div style="display:flex;gap:8px;margin-top:6px">'
     +'<button onclick="guardarSub('+i+')" style="flex:1;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;cursor:pointer;font-family:inherit">Guardar</button>'
@@ -2144,7 +2209,7 @@ function editarSub(i){
 function guardarSub(i){
   var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
   var tienda=g('sb_tienda').toLowerCase().replace(/[^a-z0-9_-]/g,'');
-  var obj={ nombre:g('sb_nombre'), tienda:tienda, negocio:g('sb_negocio'), vende:g('sb_vende'), whatsapp:g('sb_whatsapp'), pagaHasta:g('sb_pagaHasta'), monto:g('sb_monto'), nota:g('sb_nota'), estado: i>=0?SUBS[i].estado:'ok' };
+  var obj={ nombre:g('sb_nombre'), tienda:tienda, negocio:g('sb_negocio'), vende:g('sb_vende'), whatsapp:g('sb_whatsapp'), pagaHasta:g('sb_pagaHasta'), monto:g('sb_monto'), nota:g('sb_nota'), plan:(document.getElementById('sb_plan')?document.getElementById('sb_plan').value:'basico'), estado: i>=0?SUBS[i].estado:'ok' };
   if(!obj.nombre){ alert('Pone al menos el nombre.'); return; }
   if(!obj.tienda){ alert('Pone el CODIGO de su tienda. Sin eso no podes prenderle ni apagarle la tienda.'); return; }
   if(i>=0) SUBS[i]=obj; else SUBS.push(obj);
@@ -2173,6 +2238,7 @@ var CONFIG_DEFAULT = {
   cuotas: {},              // (reservado) el sistema de cuotas es Amarango, calculado
   gananciaPct: 30,         // % de la calculadora de ganancia (nivel gratis)
   modoVenta: 'cuotas',     // 'cuotas' | 'contado' — define TODA la experiencia
+  cuotasActivadas: false,  // 🔒 las cuotas arrancan OCULTAS. Se activan con el PIN de dueño.
   modoCompra: 'carrito',   // 'carrito' | 'whatsapp' — cómo compra el cliente
   // 🛡️ Confianza (todo configurable, todo opcional)
   confianza: {
@@ -2269,7 +2335,9 @@ function aplicarConfig(){
   PIN_REVENDEDOR = CONFIG.pinRev || "1234";
   // arma los planes según lo que el dueño configuró
   PLANES={};
-  if(CONFIG.modoVenta!=='contado'){
+  // 🔒 si la tienda es plan Básico, no hay cuotas aunque estén configuradas
+  var puedeCuotas = (typeof tieneCuotas!=='function') || tieneCuotas();
+  if(CONFIG.modoVenta!=='contado' && puedeCuotas){
     var activos = CONFIG.planesActivos || [2,4,6];
     activos.forEach(function(n){
       PLANES[n] = {on:true, pct:pctPlan(n)};
@@ -3409,11 +3477,65 @@ function elegirModoCompra(k){
 }
 function opcVenta(k,ico,titulo,sub){
   var on=((CONFIG&&CONFIG.modoVenta)||'cuotas')===k;
+  // 🔒 la opción de CUOTAS siempre pide clave (y además el plan tiene que permitirlo)
+  var esCuotas = (k!=='contado');
+  var activadas = (CONFIG && CONFIG.cuotasActivadas===true);
+  if(esCuotas && !activadas){
+    return '<button onclick="desbloquearCuotas()" style="width:100%;text-align:left;background:linear-gradient(135deg,#FFF9F0,#FFF3E0);border:2px dashed var(--nar);border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px">'
+      +'<span style="font-size:1.5rem;opacity:.55">'+ico+'</span>'
+      +'<span style="flex:1"><span style="display:block;font-size:.88rem;font-weight:900;color:var(--nar)">'+titulo+'</span>'
+      +'<span style="display:block;font-size:.72rem;color:var(--sub);margin-top:1px">Sistema protegido. Tocá para desbloquear.</span></span>'
+      +'<span style="font-size:1.3rem">🔒</span></button>';
+  }
   return '<button onclick="elegirModoVenta(\''+k+'\')" style="width:100%;text-align:left;background:'+(on?'#F5F8FF':'#fff')+';border:2px solid '+(on?'var(--az)':'var(--line)')+';border-radius:12px;padding:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:11px">'
     +'<span style="font-size:1.5rem">'+ico+'</span>'
     +'<span style="flex:1"><span style="display:block;font-size:.88rem;font-weight:900;color:'+(on?'var(--az)':'var(--txt)')+'">'+titulo+'</span>'
     +'<span style="display:block;font-size:.72rem;color:var(--sub);margin-top:1px">'+sub+'</span></span>'
     +'<span style="font-size:1.1rem">'+(on?'✅':'⬜')+'</span></button>';
+}
+/* 🔒 Desbloquear el sistema de cuotas con el PIN de dueño */
+function desbloquearCuotas(){
+  // si el plan no lo permite, ofrecemos sumarlo
+  var planOk = (TIENDA==='amarango') || (CONFIG && CONFIG.duenoPlataforma===true) || (PLAN_TIENDA==='full');
+  if(!planOk){ ofrecerPlanCuotas(); return; }
+  pedirClaveHerramienta('💳 Sistema de cuotas', function(){
+    CONFIG.cuotasActivadas = true;
+    CONFIG.modoVenta = 'cuotas';
+    guardarConfig();
+    try{ render(); }catch(e){}
+    abrirConfig();
+  });
+}
+/* Volver a ocultar las cuotas (deja la tienda solo en contado) */
+function ocultarCuotas(){
+  CONFIG.cuotasActivadas = false;
+  CONFIG.modoVenta = 'contado';
+  guardarConfig();
+  try{ render(); }catch(e){}
+  abrirConfig();
+}
+/* 🔒 Pantalla que invita a sumar el sistema de cuotas (venta de la membresía) */
+function ofrecerPlanCuotas(){
+  var msg='Hola! Quiero sumar el *sistema de cuotas* a mi tienda 🐝\n\nMi tienda: '+(CONFIG&&CONFIG.negocio?CONFIG.negocio:TIENDA)+'\nCódigo: '+TIENDA+'\n\n¿Cómo hago?';
+  document.getElementById('adminBody').innerHTML=
+     '<div style="background:linear-gradient(160deg,#020c2e,var(--az));border-radius:18px;padding:22px;color:#fff;text-align:center;margin-bottom:14px;position:relative;overflow:hidden">'
+      +'<span style="position:absolute;top:-16px;right:-8px;font-size:4.5rem;opacity:.12">💳</span>'
+      +'<div style="font-size:2.6rem;margin-bottom:8px">🔒</div>'
+      +'<div style="font-size:1.25rem;font-weight:900;margin-bottom:8px">Vendé en cuotas, sin banco</div>'
+      +'<div style="font-size:.86rem;color:rgba(255,255,255,.85);line-height:1.5">El sistema de cuotas de Amarango es lo que hace que la gente te compre lo que hoy no puede pagar de una.</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px">'
+      +'<div style="font-size:.72rem;font-weight:900;color:var(--nar);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Qué se abre para vos</div>'
+      +[['💳','Cuotas calculadas solas','Ponés el precio y las cuotas salen armadas. Sin planillas, sin cuentas.'],
+        ['📈','Vendés más caro sin que duela','El cliente mira la cuota, no el total. Cierra compras que hoy pierde.'],
+        ['🤝','Sin tarjeta ni banco','Le vendés a quien el banco le dice que no. Ese es el mercado grande.']]
+        .map(function(x){ return '<div style="display:flex;gap:11px;align-items:flex-start;margin-bottom:11px">'
+          +'<span style="font-size:1.4rem">'+x[0]+'</span>'
+          +'<div><div style="font-size:.86rem;font-weight:800;color:var(--az)">'+x[1]+'</div>'
+          +'<div style="font-size:.76rem;color:var(--sub);line-height:1.45">'+x[2]+'</div></div></div>'; }).join('')
+    +'</div>'
+    +'<button onclick="window.open(\'https://wa.me/'+AMARANGO_WA+'?text='+encodeURIComponent(msg)+'\',\'_blank\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:14px;padding:16px;font-size:.98rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,.3)">💬 Quiero sumar las cuotas</button>'
+    +'<button onclick="abrirConfig()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
 }
 function toggleRuleta(){
   CONFIG.ruletaOn = !CONFIG.ruletaOn;
@@ -3575,6 +3697,9 @@ function abrirConfig(){
     +'<div style="display:grid;gap:8px;margin-bottom:14px">'
       +opcVenta('cuotas','💳','En cuotas','Como Amarango: el cliente paga de a poco')
       +opcVenta('contado','🏷️','Solo contado','Un solo pago, sin cuotas')
+      +((c.cuotasActivadas===true)
+        ? '<button onclick="ocultarCuotas()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">🔒 Volver a ocultar las cuotas</button>'
+        : '')
     +'</div>'
     + (c.modoVenta==='contado'
       ? '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:11px;padding:11px;margin-bottom:14px;font-size:.78rem;color:#059669;font-weight:700;text-align:center">✅ Tu tienda vende solo al contado. Las cuotas no se muestran.</div>'
@@ -3684,6 +3809,8 @@ function markupDeCosto(costo){
   return costo;
 }
 function abrirPlacas(){
+  // 🔒 protegida con el PIN de dueño
+  if(!herramientasDesbloqueadas()){ pedirClaveHerramienta('🎨 Armar placas', abrirPlacas); return; }
   document.getElementById('adminBody').innerHTML=
      '<div style="font-weight:900;color:var(--az);font-size:1rem;margin-bottom:10px">🎨 Armar placa</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:12px">'
@@ -4612,6 +4739,7 @@ function pctPlan(n){
 function valorCuota(venta,n){ return Math.round(venta*(1+pctPlan(n)/100)/n/1000)*1000; }
 function fmt(n){ return '$'+Math.round(n).toLocaleString('es-AR'); }
 function cuotasActivas(){
+  if(typeof tieneCuotas==='function' && !tieneCuotas()) return [];  // 🔒 plan Básico: solo contado
   if(CONFIG && CONFIG.modoVenta==='contado') return [];   // sin cuotas: solo contado
   return Object.keys(PLANES).map(Number).filter(function(n){ return PLANES[n] && PLANES[n].on; }).sort(function(a,b){return a-b;});
 }
