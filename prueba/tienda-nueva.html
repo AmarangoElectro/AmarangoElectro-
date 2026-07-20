@@ -130,14 +130,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .dest-card .dcn{font-size:.55rem;color:var(--gr);font-weight:700}
 
 /* TARJETA (sobria) */
-.card{background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .15s}
-.card:active{transform:scale(.985)}
-.card .ph{height:120px;background:#FAFBFC;display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;border-bottom:1px solid var(--line);cursor:pointer;background-size:cover;background-position:center}
+.card{background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .15s,box-shadow .2s;box-shadow:0 2px 12px rgba(11,45,107,.09)}
+.card:active{transform:scale(.985);box-shadow:0 1px 6px rgba(11,45,107,.12)}
+.card .ph{height:190px;background:#FAFBFC;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;cursor:pointer;background-size:cover;background-position:center}
 .card .fav{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:none;font-size:.9rem;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);line-height:1}
 .card .badge{position:absolute;top:6px;left:6px;background:var(--nar);color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:.2px}
 .card .body{padding:10px 12px 12px;display:flex;flex-direction:column;flex:1}
 .card .marca{font-size:.55rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
-.card .nom{font-size:.79rem;font-weight:700;color:var(--txt);line-height:1.3;margin:3px 0 7px;min-height:34px;cursor:pointer}
+.card .nom{font-size:.78rem;font-weight:800;color:var(--az);line-height:1.25;margin:4px 0 6px;min-height:auto;cursor:pointer}
 .card .cuota-v{font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.05}
 .card .cuota-n{font-size:.6rem;font-weight:700;color:var(--gr);margin-bottom:2px}
 .card .contado{font-size:.64rem;color:var(--sub);margin-bottom:8px}
@@ -4827,13 +4827,10 @@ function render(){
       if(soloWA){
         botones='<button onclick="whatsappProducto('+idx+',event)" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:inherit">💬 Consultar por WhatsApp</button>';
       }
-      // ── Tienda con carrito
+      // ── Tienda con carrito: UN SOLO BOTÓN (estilo Mercado Libre).
+      // "Ver cuotas", "Comprar" y "Consultar" quedan adentro del detalle.
       else {
-        botones = (hayCuotas
-            ? '<button onclick="verDetalle('+idx+')" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">📅 Ver cuotas</button>'
-            : '')
-          +'<button onclick="comprarProducto('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Comprar</button>'
-          +'<button onclick="consultarProducto('+idx+',event)" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Consultar</button>';
+        botones='<button onclick="verDetalle('+idx+')" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:10px;padding:11px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(255,122,0,.32)">Ver producto</button>';
       }
     }
     var oculto = p.visible===false;
