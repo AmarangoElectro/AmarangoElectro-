@@ -31,33 +31,40 @@
 <meta name="application-name" content="Tienda Amarango">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&display=swap');
-:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#FFFFFF;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
+:root{--az:#0B2D6B;--nar:#FF7A00;--bg:#F4F1EA;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
-body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;}
+body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
-.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;border-bottom:3px solid var(--nar);position:relative;overflow:hidden}
+.header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:11px 14px 12px;display:flex;flex-direction:column;align-items:stretch;gap:9px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:box-shadow .3s ease;}
+/* fila superior: logo + nombre juntos, a la izquierda; menú a la derecha */
+.hdr-marca{display:flex;align-items:center;gap:10px;padding-right:50px;}
+/* espaciador: ocupa el lugar del header fijo para que el contenido no quede tapado */
+#header-espacio{height:0;}
+/* Al bajar, solo una sombra sutil: da sensación de profundidad sin mover nada */
+.header.bajando{box-shadow:0 6px 22px rgba(3,10,35,.34);}
 .header::before{content:'';position:absolute;top:-40%;left:-10%;width:70%;height:120%;background:radial-gradient(ellipse at center,rgba(120,170,255,.35),transparent 70%);transform:rotate(20deg);pointer-events:none}
 .header::after{content:'';position:absolute;bottom:-50%;right:-10%;width:60%;height:120%;background:radial-gradient(ellipse at center,rgba(255,150,60,.15),transparent 70%);pointer-events:none}
-.header-logo{width:66px;height:66px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.15);position:relative;z-index:1}
-.header-info{text-align:center;position:relative;z-index:1}
-.header-info h1{color:#fff;font-size:1.15rem;font-weight:900;letter-spacing:.3px;text-shadow:0 0 1px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.45)}
+.header-logo{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.4),0 0 0 2px rgba(255,255,255,.18);position:relative;z-index:1;flex-shrink:0}
+.header-info{text-align:left;position:relative;z-index:1;min-width:0;flex:1}
+.header-info h1{color:#fff;font-size:1.06rem;font-weight:900;letter-spacing:.2px;line-height:1.15;text-shadow:0 0 1px rgba(0,0,0,.8),0 0 2px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.45)}
 .header-info h1 .pwr{display:inline-block;position:relative;width:.6em;height:.6em;vertical-align:baseline;margin:0 1px}
 .header-info h1 .pwr::before{content:'';position:absolute;inset:0;border:2.5px solid #fff;border-radius:50%;border-top-color:transparent;box-shadow:0 0 2px var(--nar),0 0 4px rgba(255,122,0,.6)}
 .header-info h1 .pwr::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:45%;background:#fff;border-radius:2px;box-shadow:0 0 2px var(--nar),0 0 4px rgba(255,122,0,.6)}
-.header-info p{color:rgba(255,255,255,.7);font-size:.66rem;margin-top:2px}
+.header-info p{color:var(--nar);font-size:.63rem;margin-top:1px;font-weight:700;font-style:italic;line-height:1.2}
 .header-badge{background:rgba(255,122,0,.25);border:1px solid var(--nar);border-radius:20px;padding:4px 14px;font-size:.62rem;font-weight:800;color:#ffb968;white-space:nowrap;position:relative;z-index:1;margin-top:2px}
 .tabs{display:flex;background:var(--wh);border-bottom:2px solid var(--bor);overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:1;padding:11px 8px;font-size:.68rem;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center;transition:all .2s;min-width:80px}
 .tab.on{color:var(--az);border-bottom-color:var(--nar);font-weight:800}
-.tab-content{display:none;padding:16px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
+.tab-content{display:none;padding:18px 16px 20px;animation:fadeUp .25s ease;overflow-x:hidden;max-width:100%;}
+
 
 /* ═══ Cajón lateral (menú deslizable) ═══ */
-.hdr-menu-btn{position:absolute;top:14px;right:14px;z-index:5;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
+.hdr-menu-btn{position:absolute;top:11px;right:14px;z-index:5;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;font-size:1.18rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.25);backdrop-filter:blur(4px)}
 .hdr-menu-btn:active{transform:scale(.92)}
 #cajon-overlay{position:fixed;inset:0;background:rgba(3,10,35,.55);z-index:2990;opacity:0;pointer-events:none;transition:opacity .28s;backdrop-filter:blur(2px)}
 #cajon-overlay.abierto{opacity:1;pointer-events:auto}
@@ -87,7 +94,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
 .tab-content.on{display:block}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:16px;padding:16px;margin-bottom:16px}
+.precio-input-wrap{background:linear-gradient(135deg,var(--az),#1a3a8a);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(11,45,107,.16);}
 .precio-label{color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .precio-input-row{display:flex;align-items:center;gap:8px}
 .precio-sign{color:var(--nar);font-size:1.8rem;font-weight:900}
@@ -99,12 +106,12 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .clear-btn{background:rgba(255,255,255,.1);border:none;border-radius:10px;padding:10px 14px;color:rgba(255,255,255,.7);font-weight:700;font-size:.75rem;cursor:pointer;font-family:inherit;margin-top:8px;width:100%}
 .pegar-area{width:100%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:12px;padding:12px;color:#fff;font-size:.9rem;font-family:inherit;outline:none;resize:vertical;min-height:90px;line-height:1.4}
 .pegar-area::placeholder{color:rgba(255,255,255,.4)}
-.result-contado{background:#CCFBF1;border-radius:14px;border:2px solid #14B8A6;padding:14px;margin-bottom:12px;text-align:center}
+.result-contado{background:#CCFBF1;border-radius:16px;border:2px solid #14B8A6;padding:16px;margin-bottom:12px;text-align:center;box-shadow:0 6px 18px rgba(20,184,166,.14);}
 .result-label{font-size:.6rem;font-weight:700;color:var(--sub);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
 .result-precio{font-size:2.2rem;font-weight:900;color:var(--az);letter-spacing:-1px}
 .result-sub{font-size:.65rem;color:var(--sub);margin-top:4px}
-.cuotas-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.cuota-card{border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;border:none}
+.cuotas-grid{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.cuota-card{border-radius:14px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;border:none;box-shadow:0 3px 10px rgba(11,45,107,.07);}
 .cuota-card.c2{background:#FEF9C3;border-left:4px solid #EAB308}
 .cuota-card.c3{background:#DBEAFE;border-left:4px solid #3B82F6}
 .cuota-card.c4{background:#FFF0E0;border-left:4px solid var(--nar)}
@@ -153,7 +160,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .share-btn:active{background:var(--az);color:#fff;border-color:var(--az)}
 .share-btn.wa{border-color:#25D366;color:#25D366}
 .share-btn.wa:active{background:#25D366;color:#fff}
-.msg-lindo{background:var(--wh);border:2px solid var(--bor);border-radius:14px;padding:16px;margin-bottom:10px;white-space:pre-wrap;font-size:.85rem;line-height:1.7;color:var(--txt);word-break:break-word}
+.msg-lindo{background:var(--wh);border:2px solid var(--bor);border-radius:16px;padding:18px;margin-bottom:10px;white-space:pre-wrap;font-size:.85rem;line-height:1.7;color:var(--txt);word-break:break-word;box-shadow:0 4px 14px rgba(11,45,107,.06);}
 .footer{text-align:center;padding:16px;font-size:.6rem;color:var(--sub)}
 .footer span{color:var(--nar);font-weight:700}
 .install-banner{background:linear-gradient(135deg,var(--nar),#ff9a3c);margin:12px 16px 0;border-radius:12px;padding:12px 14px;display:none;align-items:center;gap:10px}
@@ -181,7 +188,12 @@ img,video,canvas,svg,iframe{max-width:100%;}
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
 /* Efecto vidrio: las tarjetas dejan ver el fondo de colmena suavemente */
-.prod-card{background:#ffffff !important;border:1px solid var(--bor);border-top:3px solid var(--nar);border-bottom:3px solid var(--az);border-radius:14px;box-shadow:0 3px 14px rgba(11,45,107,.10);transition:box-shadow .2s,transform .2s;}
+.prod-card{background:#ffffff !important;border:1px solid var(--bor);border-radius:14px;box-shadow:0 2px 12px rgba(11,45,107,.09);transition:box-shadow .2s,transform .2s;overflow:hidden;padding:9px;}
+.prod-card:active{transform:scale(.985);box-shadow:0 1px 6px rgba(11,45,107,.12);}
+.pd-campo{margin-bottom:10px;}
+.pd-campo label{display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:4px;letter-spacing:.2px;}
+.pd-campo input{width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:600;outline:none;}
+.pd-campo input:focus{border-color:var(--nar);}
 .prod-card:active{box-shadow:0 5px 20px rgba(11,45,107,.16);}
 body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border-top:3px solid var(--nar);}
 /* Cajón lateral de Ayuda (drawer) */
@@ -189,8 +201,10 @@ body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border
 #ayuda-overlay.abierto{opacity:1;pointer-events:auto;}
 #ayuda-drawer{position:fixed;top:0;left:0;height:100%;width:88%;max-width:400px;background:var(--wh);z-index:2060;box-shadow:6px 0 24px rgba(0,0,0,.25);transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:18px;}
 #ayuda-drawer.abierto{transform:translateX(0);}
-/* Botón ayuda fijo esquina superior izquierda */
-#ayuda-btn{position:fixed;top:12px;left:12px;z-index:1380;background:rgba(11,45,107,.9);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:7px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(0,0,0,.25);display:flex;align-items:center;gap:4px;}
+/* Ayuda ahora vive en la barra inferior; este flotante queda oculto */
+#ayuda-btn{display:none !important;}
+#btn-atras{display:none;position:fixed;bottom:82px;left:12px;z-index:1385;background:rgba(11,45,107,.92);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:7px 14px 7px 11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 14px rgba(0,0,0,.32);align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;}
+#btn-atras:active{transform:scale(.96);}
 /* ═══ MODO LUJO ✨ ═══ */
 body.lujo h1,body.lujo .tienda-saludo,body.lujo #tienda-saludo-hora{font-family:'Playfair Display',serif !important;letter-spacing:.5px;}
 body.lujo .prod-nombre{font-family:'Playfair Display',serif !important;font-weight:700 !important;letter-spacing:.3px;}
@@ -208,11 +222,11 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 /* Vistas de tarjetas: chica (3 col), normal (2 col), grande (1 col) */
 #tienda-grid.vista-chica{grid-template-columns:1fr 1fr 1fr !important;gap:7px !important;}
 #tienda-grid.vista-chica .prod-card{padding:7px !important;}
-#tienda-grid.vista-chica .prod-foto{height:78px !important;}
+#tienda-grid.vista-chica .prod-foto{height:105px !important;}
 #tienda-grid.vista-chica .prod-nombre{font-size:.64rem !important;min-height:auto !important;}
 #tienda-grid.vista-chica .calc-btn{font-size:.58rem !important;padding:6px 2px !important;}
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
-#tienda-grid.vista-lista .prod-foto{height:200px !important;}
+#tienda-grid.vista-lista .prod-foto{height:240px !important;}
 /* 🎰 Ruleta de descuentos */
 #ruleta-fab{position:fixed;bottom:145px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
 @keyframes ruletaPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
@@ -228,8 +242,8 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 /* Fondo colmena AmarangoElectro (marca) */
 body{background:#f4f6fb;background-attachment:scroll;} /* fondo liviano por defecto (cliente) */
 /* Fondos por rol: celeste clarito para revendedores, naranja clarito para admin */
-body.rol-revendedor{background:#fff !important;}
-body.rol-admin{background:#fff !important;}
+body.rol-revendedor{background:#eaf3fc !important;}
+body.rol-admin{background:#fff4e8 !important;}
 body.oscuro.rol-revendedor{background:#0a1830 !important;}
 body.oscuro.rol-admin{background:#0a1830 !important;}
 body.oscuro{background:#0a1830;background-attachment:scroll;}
@@ -239,6 +253,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+
+<button id="btn-atras" onclick="volverAtras()">← Atrás</button>
+
 
 <div id="splash-screen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 55%,#1e5bc8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <img src="icon.png" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}" style="width:120px;height:120px;border-radius:50%;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:splashPulse 1.4s ease-in-out infinite;">
@@ -266,10 +283,12 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
 <div class="header">
   <button class="hdr-menu-btn" onclick="abrirCajon()" title="Menú" aria-label="Menú">☰</button>
-  <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
-  <div class="header-info">
-    <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
-    <p style="color:var(--nar);font-weight:700;font-style:italic;">Equipá tu casa, fácil y en cuotas</p>
+  <div class="hdr-marca">
+    <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
+    <div class="header-info">
+      <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
+      <p>Equipá tu casa, fácil y en cuotas</p>
+    </div>
   </div>
   <div class="hdr-buscar">
     <span class="hb-lupa">🔍</span>
@@ -278,6 +297,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
   </div>
 </div>
+<div id="header-espacio"></div>
 
 <!-- ═══ Cajón lateral deslizable ═══ -->
 <div id="cajon-overlay" onclick="cerrarCajon()"></div>
@@ -289,10 +309,10 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
   <div class="cajon-sep">Navegación</div>
   <button class="cajon-item" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
-  <button class="cajon-item cj-rev" id="cajon-placas" style="display:none;background:linear-gradient(135deg,rgba(225,29,72,.25),rgba(255,122,0,.25));" onclick="cerrarCajon();showTab('admin');showAdminSub('placas')"><span class="ci-ic">⭐</span> PLACAS ✨</button>
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
-  <button class="cajon-item cj-rev" id="cajon-cuotas" style="display:none;" onclick="cerrarCajon();showTab('cuotas')"><span class="ci-ic">📅</span> Cuotas</button>
-  <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Revendedores</button>
+  <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
+  <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🐝</span> Programa Colaborador</button>
+  <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Asesores de ventas</button>
 
   <div class="cajon-sep">Herramientas</div>
   <div style="padding:8px 16px 4px;display:flex;flex-direction:column;gap:8px;">
@@ -312,11 +332,15 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();tiendaToggleModoSelec()"><span class="ci-ic">📤</span> Compartir varios</button>
   <button class="cajon-item" onclick="cerrarCajon();mostrarQR()"><span class="ci-ic">📱</span> Código QR</button>
   <button class="cajon-item" onclick="cerrarCajon();compartirTienda()"><span class="ci-ic">🔗</span> Compartir tienda</button>
+  <button class="cajon-item cj-rev" id="cajon-pedido" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();abrirPedido()"><span class="ci-ic">🧾</span> Cargar pedido</button>
+  <button class="cajon-item cj-rev" id="cajon-color" style="display:none;" onclick="cerrarCajon();abrirTemasTienda()"><span class="ci-ic">🎨</span> Color de la tienda</button>
+  <button class="cajon-item cj-rev" id="cajon-sonido" style="display:none;" onclick="cerrarCajon();abrirSonidos()"><span class="ci-ic">🔊</span> <span id="cajon-sonido-txt">Sonido: Tecla</span></button>
   <button class="cajon-item" onclick="cerrarCajon();toggleModoOscuro()"><span class="ci-ic">🌙</span> Modo claro / oscuro</button>
 
   <div class="cajon-sep cj-admin" id="cajon-sep-admin" style="display:none;">Administrador</div>
   <button class="cajon-item cj-admin" id="cajon-marc-mostrar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('mostrar')"><span class="ci-ic">👁️</span> Mostrar marcados</button>
   <button class="cajon-item cj-admin" id="cajon-marc-ocultar" style="display:none;" onclick="cerrarCajon();tiendaMarcados('ocultar')"><span class="ci-ic">🙈</span> Ocultar marcados</button>
+  <button class="cajon-item cj-admin" id="cajon-capcomp" style="display:none;" onclick="cerrarCajon();abrirCapitalCompartido()"><span class="ci-ic">🧮</span> Calculadora Capital Compartido</button>
   <button class="cajon-item cj-admin" id="cajon-cargar-celu" style="display:none;" onclick="cerrarCajon();showTab('celulares')"><span class="ci-ic">📱</span> Cargar celulares</button>
   <button class="cajon-item cj-admin" id="cajon-ver-cliente" style="display:none;" onclick="cerrarCajon();toggleVistaCliente()"><span class="ci-ic">👁️</span> Ver como cliente</button>
   <button class="cajon-item cj-admin" id="cajon-ruleta" style="display:none;" onclick="toggleRuleta()"><span class="ci-ic">🎰</span> <span id="cajon-ruleta-txt">Ruleta: apagada</span></button>
@@ -336,14 +360,13 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <div class="tab on" id="tab-btn-tienda" onclick="showTab('tienda')">🛒 Tienda</div>
   <div class="tab" id="tab-btn-pegar" onclick="showTab('pegar')" style="display:none;">📋 Pegar precio</div>
   <div class="tab" id="tab-btn-celulares" onclick="showTab('celulares')" style="display:none;">📱 Celulares</div>
-  <div class="tab" id="tab-btn-cuotas" onclick="showTab('cuotas')" style="display:none;">📅 Cuotas</div>
-  <div class="tab" id="tab-btn-revend" onclick="accesoRevendedores()">👥 Revendedores</div>
+  <div class="tab" id="tab-btn-placas" onclick="showTab('placas')" style="display:none;">🎨 Placas</div>
+  <div class="tab" id="tab-btn-revend" onclick="accesoRevendedores()">👥 Asesores de ventas</div>
   <div class="tab" id="tab-btn-admin" onclick="showTab('admin')">🔒 Admin</div>
 </div>
 
 <!-- Sub-pestañas de Administradores (aparecen al entrar al cajón) -->
 <div id="admin-subtabs" style="display:none;background:#fff;border-bottom:1px solid var(--bor);padding:8px 12px;gap:6px;flex-wrap:wrap">
-  <button class="metodo-btn" onclick="showTab('tienda')" style="color:#fff;border:none;background:var(--az);font-weight:800;">← Volver a la tienda</button>
   <button class="metodo-btn on" id="sub-contado" onclick="showAdminSub('contado')" style="color:var(--az);border-color:var(--bor)">💰 Contado</button>
   <button class="metodo-btn" id="sub-comisiones" onclick="showAdminSub('comisiones')" style="color:var(--az);border-color:var(--bor)">🤝 Comisiones</button>
   <button class="metodo-btn" id="sub-inversion" onclick="showAdminSub('inversion')" style="color:var(--az);border-color:var(--bor)">📊 Inversión</button>
@@ -383,6 +406,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
         <div style="color:rgba(255,255,255,.6);font-size:.62rem;font-weight:700;margin-bottom:4px">💵 Valor del dólar (editable)</div>
         <input type="number" id="celu-cotiz" placeholder="Ej: 1520" value="1500" style="width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 10px;color:#fff;font-size:.95rem;font-weight:800;outline:none">
       </div>
+      <!-- Actualizar dólar sin volver a pegar la lista -->
+      <button class="calc-btn" onclick="actualizarDolarCelus()" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-weight:900;box-shadow:0 4px 12px rgba(16,185,129,.3)">💵 Actualizar dólar (sin pegar nada)</button>
       <textarea class="pegar-area" id="inp-celulista" placeholder="Pegá un celular por línea con su precio. Ej:&#10;Samsung A06 $167.000&#10;Moto G15 $235.500"></textarea>
       <div id="celu-admin-hint" style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">📋 Un celu por línea, con su precio de venta en pesos. Los repetidos se actualizan, los nuevos se agregan.</div>
       <div style="display:flex;gap:8px;margin-top:10px">
@@ -451,22 +476,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   </div>
 </div>
 
-<div class="tab-content" id="tab-cuotas">
-  <div class="precio-input-wrap">
-    <div class="precio-label">Precio de venta ($ARS) — editá acá</div>
-    <div class="precio-input-row">
-      <span class="precio-sign">$</span>
-      <input type="number" class="precio-input" id="inp-cuotas" placeholder="0" oninput="calcCuotas()">
-    </div>
-    <div style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px">✏️ Ingresá el precio de venta y mirá las cuotas al instante</div>
-    <button class="clear-btn" onclick="clearTab('cuotas')">Limpiar</button>
-  </div>
-  <div id="res-cuotas" class="empty-state">
-    <div class="empty-icon">📅</div>
-    <p>Ingresá el precio de venta para ver los planes de cuotas</p>
-  </div>
-</div>
-
 <div class="tab-content" id="tab-comisiones">
   <div class="precio-input-wrap">
     <div class="precio-label">Precio de venta al contado ($ARS)</div>
@@ -497,7 +506,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   </div>
   <div id="res-comisiones" class="empty-state">
     <div class="empty-icon">🤝</div>
-    <p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor</p>
+    <p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del asesor de ventas</p>
   </div>
 </div>
 
@@ -656,6 +665,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- ===== BARRA DE NAVEGACIÓN INFERIOR (estilo Mercado Libre) ===== -->
     <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
+      <button onclick="ayudaAbrir()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:22px;line-height:1;">❓</span><span style="font-size:.62rem;font-weight:700;">Ayuda</span>
+      </button>
       <button class="nav-item" onclick="navTienda('categorias')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--az);">
         <span style="font-size:22px;line-height:1;">📂</span><span style="font-size:.62rem;font-weight:700;">Categorías</span>
       </button>
@@ -904,14 +916,564 @@ function accesoRevendedores(){
   if(revUnlocked){ mostrarPestanasRev(); showTab('pegar'); return; }
   pedirClaveRevendedor('pegar');
 }
-// muestra las pestañas de cálculo para revendedores
+
+// Promo de colaborador de capital. OJO: es una INVITACIÓN A CONVERSAR, no una
+// oferta pública de inversión con % garantizado (eso está regulado en Argentina).
+// El objetivo es que gente de confianza con capital te escriba por WhatsApp.
+/* ═══ PROGRAMA COLABORADOR AMARANGO ═══
+   Enfoque: acceso por invitación, no oferta abierta. La curiosidad y la
+   exclusividad venden más que prometer un número. Se evita a propósito el
+   vocabulario financiero: esto es un programa privado, no una publicidad. */
+/* ⚠️ DESACTIVADA — era la puerta pública del Programa Colaborador, visible para
+   cualquier visitante. La sacamos del menú porque contradecía el "es por invitación"
+   y generaba consultas de clientes que no son revendedores.
+   Queda acá por si en algún momento querés volver a usarla. */
+function mostrarGanchoCapital(){
+  var waMaxi='5491168610532', waAnge='5491168746034';
+  var msg='Hola! Vi el Programa Colaborador Amarango 🐝 y me gustaría conocer de qué se trata.';
+  var lMaxi='https://wa.me/'+waMaxi+'?text='+encodeURIComponent(msg);
+  var lAnge='https://wa.me/'+waAnge+'?text='+encodeURIComponent(msg);
+  var html=''
+    +'<div style="text-align:center;padding:14px 4px 6px;">'
+    +'  <div style="font-size:2.9rem;line-height:1;">🔒</div>'
+    +'  <h2 style="color:var(--az);font-size:1.2rem;font-weight:900;margin:14px 0 6px;letter-spacing:-.02em;">Programa Colaborador<br>Amarango</h2>'
+    +'  <div style="display:inline-block;background:var(--az);color:#FFD166;font-size:.62rem;font-weight:900;letter-spacing:1.2px;padding:6px 14px;border-radius:20px;margin-top:4px;">ACCESO ÚNICAMENTE POR INVITACIÓN</div>'
+    +'</div>'
+    +'<div style="height:1px;background:var(--bor);margin:22px 0;"></div>'
+    +'<div style="font-size:.88rem;line-height:1.75;color:var(--txt);text-align:center;padding:0 6px;">'
+    +'  Este programa está pensado exclusivamente para personas que ya forman parte del ecosistema Amarango o que fueron invitadas por nosotros.'
+    +'</div>'
+    +'<div style="font-size:.88rem;line-height:1.75;color:var(--txt);text-align:center;padding:0 6px;margin-top:16px;">'
+    +'  Creemos que los mejores negocios empiezan con confianza. Por eso primero conocemos a las personas, trabajamos juntos y, cuando llega el momento, les presentamos cómo funciona nuestro Programa Colaborador.'
+    +'</div>'
+    +'<div style="text-align:center;margin:26px 0 22px;padding:0 10px;">'
+    +'  <div style="color:var(--az);font-size:1rem;font-weight:900;line-height:1.5;letter-spacing:-.01em;">Primero construimos confianza.<br>Después hacemos negocios.</div>'
+    +'  <div style="font-size:1.1rem;margin-top:10px;">🐝</div>'
+    +'</div>'
+    +'<div style="height:1px;background:var(--bor);margin:22px 0;"></div>'
+    +'<a href="'+lMaxi+'" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:100%;background:var(--az);color:#fff;border-radius:13px;padding:16px;font-size:.92rem;font-weight:900;text-decoration:none;margin-bottom:14px;box-shadow:0 4px 16px rgba(11,45,107,.22);">🐝 Quiero conocer el programa</a>'
+    +'<div style="text-align:center;color:var(--sub);font-size:.68rem;font-weight:800;letter-spacing:.5px;margin-bottom:9px;">CONSULTAR CON</div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'  <a href="'+lAnge+'" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--az);border:2px solid var(--az);border-radius:13px;padding:13px 6px;font-size:.82rem;font-weight:800;text-decoration:none;">Ángela</a>'
+    +'  <a href="'+lMaxi+'" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--az);border:2px solid var(--az);border-radius:13px;padding:13px 6px;font-size:.82rem;font-weight:800;text-decoration:none;">Maximiliano</a>'
+    +'</div>'
+    +'<div style="text-align:center;color:var(--sub);font-size:.7rem;margin-top:16px;line-height:1.5;">También podés consultarlo con cualquier integrante<br>del equipo AmarangoElectro.</div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:20px;background:transparent;color:var(--sub);border:none;font-weight:700;" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+/* Embudo del Programa Colaborador.
+   No explica el programa: despierta curiosidad. La persona avanza pantalla por
+   pantalla y decide sola que quiere saber más. La conversación real (y el PDF)
+   van después, por WhatsApp, cuando ya sabemos si cumple el perfil.
+   Sin números, sin porcentajes, sin la palabra "capital". */
+var colabPaso = 0;
+
+function mostrarColaborador(){
+  // 🔒 Solo asesores de ventas y administradores. El cliente comprador no la ve.
+  var okRev=false, okAdm=false;
+  try{
+    okRev = (typeof revUnlocked!=='undefined' && revUnlocked===true) || (localStorage.getItem('ae_sesion_rev')==='1');
+    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
+  }catch(e){}
+  var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
+  // Los invitados entran con ?colab=1 en el link que les mandamos por WhatsApp.
+  var invitado=false;
+  try{ invitado = (location.search.indexOf('colab=1')>-1); }catch(e){}
+  if(((!okRev && !okAdm) && !invitado) || enVistaCliente){
+    alert('🔒 Esta información es para el equipo de AmarangoElectro.');
+    return;
+  }
+  colabPaso = 0;
+  pintarColaborador();
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+function colabSiguiente(){ colabPaso++; pintarColaborador(); }
+function colabVolver(){ if(colabPaso>0){ colabPaso--; pintarColaborador(); } }
+function colabRevelar(){
+  var cta=document.getElementById('colab-cta');
+  var ct=document.getElementById('colab-contactos');
+  if(cta) cta.style.display='none';
+  if(ct) ct.style.display='block';
+}
+
+function pintarColaborador(){
+  // Cada paso es una sola idea. El visitante decide avanzar cinco veces:
+  // eso es lo que construye el deseo, no la información.
+  var pasos = [
+    { ic:'🐝', t:'Hay algo que no está en la tienda.', s:'' },
+    { ic:'🪜', t:'Existe un escalón más dentro de Amarango.', s:'No todos llegan.' },
+    { ic:'📈', t:'¿Y si pudieras ganar más con las mismas ventas que ya hacés?', s:'Aprovechando las ventas que ya generás.' },
+    { ic:'✉️', t:'No se puede pedir.', s:'Se recibe la invitación.' },
+    { ic:'🐝', t:'Si llegaste hasta acá, queremos conocerte.', s:'' }
+  ];
+  var p = pasos[colabPaso];
+  var ultimo = (colabPaso === pasos.length-1);
+
+  // puntitos de progreso
+  var dots='';
+  for(var i=0;i<pasos.length;i++){
+    dots += '<span style="display:inline-block;width:'+(i===colabPaso?'20px':'6px')+';height:6px;border-radius:3px;margin:0 3px;background:'+(i===colabPaso?'var(--nar)':(i<colabPaso?'#FDBA74':'var(--bor)'))+';transition:all .25s;"></span>';
+  }
+
+  var msg='Hola! Vi lo del Programa Colaborador 🐝 y quiero saber cómo funciona.';
+  var waMaxi='https://wa.me/5491168610532?text='+encodeURIComponent(msg);
+  var waAnge='https://wa.me/5491168746034?text='+encodeURIComponent(msg);
+
+  var html=''
+    +'<div style="text-align:center;padding:14px 0 6px;">'+dots+'</div>'
+
+    +'<div style="text-align:center;padding:26px 12px 22px;min-height:190px;display:flex;flex-direction:column;justify-content:center;">'
+    +'  <div style="font-size:3rem;margin-bottom:16px;">'+p.ic+'</div>'
+    +'  <div style="color:var(--az);font-size:1.22rem;font-weight:900;line-height:1.4;letter-spacing:-.2px;">'+p.t+'</div>'
+    + (p.s ? '  <div style="color:var(--sub);font-size:.92rem;font-weight:600;margin-top:10px;line-height:1.5;">'+p.s+'</div>' : '')
+    +'</div>';
+
+  if(!ultimo){
+    html += ''
+      +'<button class="calc-btn" style="width:100%;background:var(--az);color:#fff;font-weight:900;font-size:.95rem;padding:15px;" onclick="colabSiguiente()">Seguir</button>';
+  } else {
+    html += ''
+      +'<div style="font-size:.8rem;color:var(--sub);text-align:center;line-height:1.65;margin-bottom:16px;padding:0 6px;">'
+      +'  Escribinos y te contamos cómo funciona el Programa Colaborador.<br>'
+      +'  <span style="font-size:.74rem;">Si es para vos, te enviamos toda la información.</span>'
+      +'</div>'
+      // Un solo botón: la única decisión es avanzar. Recién después elige con quién habla.
+      +'<div id="colab-cta">'
+      +'  <button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;font-size:.95rem;padding:16px;box-shadow:0 4px 16px rgba(37,211,102,.32);" onclick="colabRevelar()">🐝 Quiero conocer el siguiente escalón</button>'
+      +'</div>'
+      +'<div id="colab-contactos" style="display:none;">'
+      +'  <div style="text-align:center;font-size:.74rem;color:var(--sub);font-weight:700;margin-bottom:9px;">Escribinos por WhatsApp</div>'
+      +'  <div style="display:flex;gap:9px;">'
+      +'    <a href="'+waMaxi+'" target="_blank" rel="noopener" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#25D366;color:#fff;border-radius:13px;padding:14px 8px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.3);">'
+      +'      <span style="font-size:1.3rem;">💬</span><span style="font-size:.88rem;font-weight:900;">Maxi</span>'
+      +'    </a>'
+      +'    <a href="'+waAnge+'" target="_blank" rel="noopener" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#25D366;color:#fff;border-radius:13px;padding:14px 8px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.3);">'
+      +'      <span style="font-size:1.3rem;">💬</span><span style="font-size:.88rem;font-weight:900;">Ángela</span>'
+      +'    </a>'
+      +'  </div>'
+      +'</div>';
+  }
+
+  html += ''
+    +'<div style="display:flex;gap:8px;margin-top:8px;">'
+    + (colabPaso>0 ? '<button class="calc-btn" style="flex:1;background:var(--bg);color:var(--sub);border:2px solid var(--bor);font-size:.82rem;padding:11px;" onclick="colabVolver()">← Volver</button>' : '')
+    +'  <button class="calc-btn" style="flex:1;background:var(--bg);color:var(--sub);border:2px solid var(--bor);font-size:.82rem;padding:11px;" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>'
+    +'</div>';
+
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+}
+
+/* ═══════════ MOTOR DE COLABORACIÓN AMARANGO (SOLO ADMIN) ═══════════
+   Escalera del ecosistema:  Cliente → Revendedor → Colaborador
+   El colaborador ES un revendedor que creció. En una operación puntual elige
+   poner capital EN VEZ de cobrar comisión (nunca las dos cosas).
+   Regla de oro: solo puede colaborar en operaciones que él mismo vendió.
+
+   No buscamos un porcentaje fijo: el motor decide por operación si conviene
+   ofrecer colaboración, y muestra el reparto entre las tres partes.
+   Todos los valores son configurables desde el panel ⚙️ (vuelven al recargar). */
+
+var CC_BASE = {
+  // Escalera de rendimiento: cuanto MENOS pone, MÁS porcentaje se lleva.
+  // En montos chicos hace falta un % alto para que la cifra en pesos valga la
+  // espera de 60 días. En montos grandes, un % menor ya da una cifra atractiva.
+  // El colaborador nunca ve el costo ni el %: sólo pesos y fechas.
+  t1: 50000,  p1: 62,   // hasta $50.000 → 62%
+  t2: 100000, p2: 56,   // hasta $100.000 → 56%
+  t3: 175000, p3: 50,   // hasta $175.000 → 50%
+  t4: 250000, p4: 45,   // hasta $250.000 → 45%
+  p5: 42,               // más de $250.000 → 42%
+  comContado: 10,    // comisión revendedor en venta de contado (%)
+  comFinanc: 15,     // comisión revendedor en venta financiada (%)
+  partesRev: 3,      // en cuántas partes se le paga al revendedor (máx.)
+  minParte: 10000,   // ninguna parte puede bajar de este monto
+  pisoMora: 10,      // si el cliente desaparece: capital + este % (para que no pierda
+                     // contra la inflación). No es el rendimiento pactado, es el piso.
+  aporte: 50,        // % del costo que pone el colaborador
+  r2: 15, r4: 55, r6: 78,   // recargos por plan de cuotas (%)
+  ratioMin: 2.0,     // por debajo de esto NO conviene (Amarango vs colaborador)
+  ratioBueno: 2.5,   // desde acá es "excelente elección"
+  ventajaMin: 12,    // el colaborador debe ganar al menos este % más que el revendedor
+  costoMin: 100000   // por debajo de esto la diferencia es muy chica, no vale la espera
+};
+var CC = JSON.parse(JSON.stringify(CC_BASE));
+var ccPlan = 4;
+var ccModo = 'costo';
+
+function ccResetParams(){ CC = JSON.parse(JSON.stringify(CC_BASE)); abrirCapitalCompartido(); }
+function ccSetParam(k,v){ var n=parseFloat(v); if(!isNaN(n)) CC[k]=n; calcCapitalCompartido(); }
+function ccModificado(){ for(var k in CC_BASE){ if(CC[k]!==CC_BASE[k]) return true; } return false; }
+function ccSetPlan(p){ ccPlan=p; abrirCapitalCompartido(); }
+function ccSetModo(m){ ccModo=m; abrirCapitalCompartido(); }
+
+/* Devuelve el % de rendimiento según cuánto pone el colaborador.
+   Escalera invertida: menos capital = más porcentaje. */
+function ccRendPorTramo(pone){
+  if(pone<=CC.t1) return CC.p1;
+  if(pone<=CC.t2) return CC.p2;
+  if(pone<=CC.t3) return CC.p3;
+  if(pone<=CC.t4) return CC.p4;
+  return CC.p5;
+}
+
+// costo estimado hacia atrás desde el precio de venta
+function ccCostoDesdeVenta(venta){
+  var c = venta/1.5;
+  for(var i=0;i<14;i++){
+    var m;
+    if(c<=50000)m=1.80; else if(c<=100000)m=1.60; else if(c<=250000)m=1.50;
+    else if(c<=350000)m=1.40; else m=1.30;
+    c = venta/m;
+  }
+  return Math.round(c);
+}
+
+/* Cálculo rápido sin sugerencias (se usa para comparar planes entre sí). */
+function ccSimple(costo, plan){
+  var venta = markupVentaCRM(costo);
+  var rec = (plan===2)?CC.r2:(plan===4)?CC.r4:CC.r6;
+  var cuota = Math.round(venta*(1+rec/100)/plan/1000)*1000;
+  var pone = Math.round(costo*CC.aporte/100);
+  var rend = Math.round(pone*ccRendPorTramo(pone)/100);
+  return { queda: cuota*plan - costo - rend, cuota:cuota, rend:rend };
+}
+
+/* ── EL MOTOR ──
+   Recibe costo y plan, devuelve el análisis completo de la operación. */
+function ccMotor(costo, plan){
+  var venta = markupVentaCRM(costo);
+  var rec = (plan===2)?CC.r2:(plan===4)?CC.r4:CC.r6;
+  var total = venta*(1+rec/100);
+  var cuota = Math.round(total/plan/1000)*1000;
+  var totalReal = cuota*plan;
+
+  // el revendedor cobra su comisión el día 0, al entrar la primera cuota
+  var comision = Math.round(venta*CC.comFinanc/100);
+  // El revendedor cobra en hasta 3 partes: día 0 (cuando paga el cliente),
+  // día 30 y día 60. Ninguna parte puede quedar por debajo del mínimo.
+  var partesRev = CC.partesRev;
+  while(partesRev>1 && (comision/partesRev)<CC.minParte) partesRev--;
+  var parteRev = Math.round(comision/partesRev);
+
+  var pone = Math.round(costo*CC.aporte/100);
+  var pctRend = ccRendPorTramo(pone);
+  var rend = Math.round(pone*pctRend/100);
+  var recupera = pone+rend;
+  var tramo = Math.round(recupera/2);
+  // Escenario de mora: si el cliente desaparece antes de que el colaborador cobre
+  // todo, le completamos hasta capital + piso. Si ya cobró los dos tramos, terminó.
+  var pisoTotal = Math.round(pone*(1+CC.pisoMora/100));
+  var faltaSiCae = Math.max(0, pisoTotal - tramo);   // lo que falta si cae tras el 1er tramo
+  var ahorroMora = recupera - pisoTotal;             // lo que te ahorrás vs pagar todo
+
+  // el colaborador NO cobra comisión: gana sólo el rendimiento
+  var ganaColab = rend;
+  var queda = totalReal - costo - rend;   // Amarango no paga comisión si hay colaborador
+  var ratio = ganaColab>0 ? queda/ganaColab : 99;
+  var ventaja = comision>0 ? ((ganaColab-comision)/comision*100) : 0;
+  var flujoOk = (pone===0) || (cuota>=tramo);
+
+  // ── decisión ──
+  var luz, titulo, motivo;
+  if(plan===2){
+    luz='rojo'; titulo='No conviene';
+    motivo='En 2 cuotas recuperás el capital enseguida con la primera cuota. No necesitás colaborador. Si igual lo hacés, no es la decisión más inteligente.';
+  } else if(!flujoOk){
+    luz='rojo'; titulo='No conviene';
+    motivo='La cuota del cliente ('+fmt(cuota)+') no cubre el tramo de '+fmt(tramo)+' que hay que pagarle. Te descalza la caja.';
+  } else if(ganaColab>queda){
+    luz='rojo'; titulo='No conviene';
+    motivo='El colaborador ganaría más que Amarango. Bajá el aporte o pasá a más cuotas.';
+  } else if(ratio<CC.ratioMin){
+    luz='rojo'; titulo='No conviene';
+    motivo='Amarango sólo gana '+ratio.toFixed(1)+'x que el colaborador. El piso es '+CC.ratioMin.toFixed(1)+'x.';
+  } else if(ventaja<CC.ventajaMin){
+    luz='amarillo'; titulo='Buena elección';
+    motivo='Para el colaborador la diferencia con cobrar comisión es de sólo '+Math.round(ventaja)+'%. Por 60 días de espera puede no valerle la pena.';
+  } else if(costo<CC.costoMin){
+    luz='amarillo'; titulo='Buena elección';
+    motivo='Producto de bajo costo: la colaboración funciona pero mueve poco capital. Amarango casi no lo necesita acá.';
+  } else if(ratio>=CC.ratioBueno){
+    luz='verde'; titulo='Excelente elección';
+    motivo='Amarango gana '+ratio.toFixed(1)+'x que el colaborador, y el colaborador gana '+Math.round(ventaja)+'% más que si cobrara comisión. Los tres escalones ordenados.';
+  } else {
+    luz='amarillo'; titulo='Buena elección';
+    motivo='Amarango gana '+ratio.toFixed(1)+'x que el colaborador. Funciona, pero a 6 cuotas mejora bastante.';
+  }
+
+  // ── sugerencia: qué haría mejorar esta operación ──
+  var sug='';
+  if(plan===4 && flujoOk && luz!=='rojo'){
+    var m6 = ccSimple(costo,6);
+    if(m6.queda>queda) sug='💡 A 6 cuotas Amarango ganaría '+fmt(m6.queda)+' ('+fmt(m6.queda-queda)+' más) y el colaborador cobra lo mismo.';
+  } else if(!flujoOk){
+    var falta = tramo-cuota;
+    var aporteOk = Math.floor((cuota*2/(1+pctRend/100))/costo*100/5)*5;
+    sug='💡 Bajá el aporte a '+aporteOk+'% para que la cuota alcance, o pasá a 4 cuotas.';
+  } else if(plan===2){
+    sug='💡 Pasá a 4 o 6 cuotas: ahí sí tiene sentido buscar un colaborador.';
+  } else if(ventaja<CC.ventajaMin && plan!==2){
+    sug='💡 Subí el rendimiento del tramo (hoy '+pctRend+'%) desde el panel ⚙️ si querés que le convenga más al colaborador.';
+  }
+
+  return { venta:venta, rec:rec, cuota:cuota, totalReal:totalReal, comision:comision, sug:sug,
+           partesRev:partesRev, parteRev:parteRev,
+           pisoTotal:pisoTotal, faltaSiCae:faltaSiCae, ahorroMora:ahorroMora,
+           pone:pone, rend:rend, pctRend:pctRend, recupera:recupera, tramo:tramo, ganaColab:ganaColab,
+           queda:queda, ratio:ratio, ventaja:ventaja, flujoOk:flujoOk,
+           luz:luz, titulo:titulo, motivo:motivo };
+}
+
+function abrirCapitalCompartido(){
+  // 🔒 CANDADO: solo administradores. Verificamos en memoria Y en el almacenamiento,
+  // y bloqueamos también si está activa la vista previa de cliente.
+  var okMem = (typeof adminUnlocked!=='undefined' && adminUnlocked===true);
+  var okLS  = false;
+  try{ okLS = (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okLS=false; }
+  var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
+  if(!okMem || !okLS || enVistaCliente){
+    alert('🔒 Herramienta exclusiva de administradores.\n\nEsta calculadora muestra costos y ganancias internas, por eso está protegida.');
+    return;
+  }
+  var valPrev='';
+  var prev=document.getElementById('cc-costo'); if(prev) valPrev=prev.value;
+
+  function btnPlan(n,rec){
+    var on=(ccPlan===n), rojo=(n===2);
+    var col = on ? (rojo?'#B91C1C':'var(--nar)') : 'var(--bor)';
+    var bg  = on ? (rojo?'#FDECEA':'#FFF5EB') : '#fff';
+    var tx  = on ? (rojo?'#B91C1C':'var(--nar)') : 'var(--sub)';
+    return '<button onclick="ccSetPlan('+n+')" style="flex:1;border:2px solid '+col+';background:'+bg+';color:'+tx+';border-radius:11px;padding:9px 3px;font-weight:900;font-size:.95rem;cursor:pointer;font-family:inherit;">'+n+'<span style="display:block;font-size:.55rem;font-weight:700;opacity:.8;">'+(rojo?'no conviene':'+'+rec+'%')+'</span></button>';
+  }
+  function btnModo(m,txt){
+    var on=(ccModo===m);
+    return '<button onclick="ccSetModo(\''+m+'\')" style="flex:1;border:0;background:'+(on?'var(--az)':'transparent')+';color:'+(on?'#fff':'var(--sub)')+';padding:9px 5px;border-radius:9px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:inherit;">'+txt+'</button>';
+  }
+
+  var html=''
+    +'<div style="text-align:center;margin-bottom:4px;">'
+    +'  <div style="font-size:2.2rem;">🐝</div>'
+    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:4px 0 2px;">Motor de Colaboración</h2>'
+    +'  <div style="color:var(--sub);font-size:.72rem;font-weight:700;">Cliente → Revendedor → Colaborador</div>'
+    +'</div>'
+
+    +'<div style="display:flex;background:#EEF2F8;border-radius:11px;padding:3px;margin:12px 0 8px;">'
+    + btnModo('costo','Costo') + btnModo('venta','Precio de venta')
+    +'</div>'
+
+    +'<div style="background:var(--az);border-radius:14px;padding:14px;margin-bottom:10px;">'
+    +'  <div style="color:rgba(255,255,255,.7);font-size:.62rem;font-weight:800;letter-spacing:.5px;margin-bottom:6px;">'+(ccModo==='costo'?'COSTO DEL PRODUCTO ($ARS)':'PRECIO DE VENTA CONTADO ($ARS)')+'</div>'
+    +'  <input type="number" id="cc-costo" inputmode="numeric" value="'+valPrev+'" placeholder="Ej: 350000" oninput="calcCapitalCompartido()" style="width:100%;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:10px;padding:12px;color:#fff;font-size:1.35rem;font-weight:900;outline:none;">'
+    +'  <div id="cc-hint" style="color:rgba(255,255,255,.5);font-size:.6rem;margin-top:6px;">'+(ccModo==='costo'?'Lo que te sale a vos el producto.':'Pegás la venta y te estimo el costo.')+'</div>'
+    +'</div>'
+
+    +'<div style="margin-bottom:10px;">'
+    +'  <div style="font-size:.6rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:6px;">PLAN DE CUOTAS</div>'
+    +'  <div style="display:flex;gap:7px;">'+btnPlan(2,CC.r2)+btnPlan(4,CC.r4)+btnPlan(6,CC.r6)+'</div>'
+    +'</div>'
+
+    +'<div id="cc-res"></div>'
+
+    +'<details style="margin-top:12px;border:1px solid var(--bor);border-radius:12px;padding:10px;background:#fff;">'
+    +'  <summary style="font-size:.68rem;font-weight:800;color:var(--sub);cursor:pointer;letter-spacing:.5px;">⚙️ PANEL ESTRATÉGICO</summary>'
+    +'  <div style="font-size:.6rem;color:var(--sub);margin:8px 0 10px;line-height:1.4;">Todo es configurable. Al recargar la página vuelve a los valores originales.</div>'
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--az);letter-spacing:.5px;margin:10px 0 4px;">ESCALERA DE RENDIMIENTO</div>'
+    +'  <div style="font-size:.58rem;color:var(--sub);margin-bottom:6px;line-height:1.4;">Menos capital = más porcentaje. El colaborador nunca ve estos números.</div>'
+    + ccInputParam('t1','Tramo 1 · hasta ($)') + ccInputParam('p1','→ rendimiento (%)')
+    + ccInputParam('t2','Tramo 2 · hasta ($)') + ccInputParam('p2','→ rendimiento (%)')
+    + ccInputParam('t3','Tramo 3 · hasta ($)') + ccInputParam('p3','→ rendimiento (%)')
+    + ccInputParam('t4','Tramo 4 · hasta ($)') + ccInputParam('p4','→ rendimiento (%)')
+    + ccInputParam('p5','Tramo 5 · más arriba (%)')
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--az);letter-spacing:.5px;margin:12px 0 4px;">RESTO DE PARÁMETROS</div>'
+    + ccInputParam('aporte','Aporte del colaborador (% del costo)')
+    + ccInputParam('comFinanc','Comisión revendedor financiado (%)')
+    + ccInputParam('comContado','Comisión revendedor contado (%)')
+    + ccInputParam('partesRev','Partes de pago al revendedor')
+    + ccInputParam('minParte','Mínimo por parte ($)')
+    + ccInputParam('pisoMora','Piso si el cliente desaparece (%)')
+    + ccInputParam('r4','Recargo 4 cuotas (%)')
+    + ccInputParam('r6','Recargo 6 cuotas (%)')
+    + ccInputParam('ratioMin','Ratio mínimo Amarango/colab.')
+    + ccInputParam('ratioBueno','Ratio para "excelente"')
+    + ccInputParam('ventajaMin','Ventaja mínima sobre revendedor (%)')
+    + ccInputParam('costoMin','Costo mínimo recomendable ($)')
+    +'  <button onclick="ccResetParams()" style="width:100%;margin-top:8px;background:var(--bg);border:2px solid var(--bor);border-radius:10px;padding:9px;font-size:.72rem;font-weight:800;color:var(--sub);cursor:pointer;font-family:inherit;">↩️ Restaurar valores originales</button>'
+    +'</details>'
+
+    +'<button class="calc-btn" style="width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+  calcCapitalCompartido();
+  if(!valPrev) setTimeout(function(){ var i=document.getElementById('cc-costo'); if(i) i.focus(); },250);
+}
+
+function ccInputParam(k,label){
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.7rem;">'
+    +'<span style="color:var(--sub);flex:1;">'+label+'</span>'
+    +'<input type="number" step="any" value="'+CC[k]+'" oninput="ccSetParam(\''+k+'\',this.value)" style="width:88px;border:1px solid var(--bor);border-radius:8px;padding:6px;text-align:right;font-weight:800;color:var(--az);font-family:inherit;font-size:.78rem;">'
+    +'</div>';
+}
+
+function calcCapitalCompartido(){
+  // 🔒 Segundo candado: aunque alguien llame esta función directo, sin admin no calcula.
+  var okAdm=false;
+  try{ okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) && (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okAdm=false; }
+  if(!okAdm){ var o=document.getElementById('cc-res'); if(o) o.innerHTML=''; return; }
+
+  var val=parseFloat((document.getElementById('cc-costo').value||'').toString().replace(/\./g,'').replace(/,/g,'.'))||0;
+  var out=document.getElementById('cc-res');
+  if(!out) return;
+  if(val<=0){ out.innerHTML='<div style="text-align:center;color:var(--sub);font-size:.8rem;padding:18px;">Poné el monto y el motor analiza la operación 🐝</div>'; return; }
+
+  var costo = (ccModo==='costo') ? val : ccCostoDesdeVenta(val);
+  var m = ccMotor(costo, ccPlan);
+
+  var hint=document.getElementById('cc-hint');
+  if(hint) hint.textContent = (ccModo==='costo') ? 'Venta contado '+fmt(m.venta) : 'Costo estimado '+fmt(costo);
+
+  var col = (m.luz==='verde') ? {c:'#047857',b:'#10B981',bg:'#ECFDF5',i:'🟢'}
+          : (m.luz==='amarillo') ? {c:'#8A6D00',b:'#E0AA00',bg:'#FFF8E1',i:'🟡'}
+          : {c:'#B91C1C',b:'#B91C1C',bg:'#FDECEA',i:'🔴'};
+
+  function fila(l,v,c){
+    return '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:.78rem;"><span style="color:var(--sub);font-weight:600;">'+l+'</span><b style="color:'+(c||'var(--az)')+';">'+v+'</b></div>';
+  }
+
+  // mensaje simple para el colaborador: sólo pesos y fechas, sin porcentajes
+  var msg='🐝 *Colaboración Amarango*\n\n'
+    +'Ponés *'+fmt(m.pone)+'*\n'
+    +'Recuperás *'+fmt(m.recupera)+'*\n\n'
+    +'📅 A los 30 días: '+fmt(m.tramo)+'\n'
+    +'📅 A los 60 días: '+fmt(m.tramo)+'\n\n'
+    +'💚 Ganás *'+fmt(m.rend)+'* en 2 meses\n\n'
+    +'🛡️ Si el cliente cumple, cobrás lo pactado.\n'
+    +'Si el cliente desaparece, te devolvemos tu plata con un ajuste para que no pierdas contra la inflación.\n\n'
+    +'¿Te sumás?';
+
+  out.innerHTML=''
+    // ── SEMÁFORO (primero, es la respuesta del motor) ──
+    +'<div style="background:'+col.bg+';border:2px solid '+col.b+';border-radius:14px;padding:14px;text-align:center;margin-bottom:10px;">'
+    +'  <div style="font-size:1.08rem;font-weight:900;color:'+col.c+';margin-bottom:4px;">'+col.i+' '+m.titulo+'</div>'
+    +'  <div style="font-size:.68rem;font-weight:600;color:'+col.c+';line-height:1.5;opacity:.92;">'+m.motivo+'</div>'
+    +'</div>'
+
+    // ── LA ESCALERA: los tres escalones ──
+    +'<div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:13px;margin-bottom:10px;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:9px;">LA ESCALERA · QUIÉN GANA CUÁNTO</div>'
+    +'  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed #EEF2F8;">'
+    +'    <div><div style="font-weight:800;font-size:.8rem;color:var(--az);">🐝 Amarango</div><div style="font-size:.58rem;color:var(--sub);">sistema, marca, riesgo y garantía</div></div>'
+    +'    <b style="color:var(--nar);font-size:1.05rem;">'+fmt(m.queda)+'</b>'
+    +'  </div>'
+    +'  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px dashed #EEF2F8;">'
+    +'    <div><div style="font-weight:800;font-size:.8rem;color:var(--az);">🤝 Colaborador</div><div style="font-size:.58rem;color:var(--sub);">pone '+fmt(m.pone)+' al '+m.pctRend+'% · cobra a 60 días</div></div>'
+    +'    <b style="color:#047857;font-size:1.05rem;">'+fmt(m.ganaColab)+'</b>'
+    +'  </div>'
+    +'  <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;">'
+    +'    <div><div style="font-weight:800;font-size:.8rem;color:var(--az);">🛒 Revendedor</div><div style="font-size:.58rem;color:var(--sub);">sólo vende · '+m.partesRev+(m.partesRev>1?' partes de ':' pago de ')+fmt(m.parteRev)+'</div></div>'
+    +'    <b style="color:var(--sub);font-size:1.05rem;">'+fmt(m.comision)+'</b>'
+    +'  </div>'
+    +'  <div style="background:'+(m.ventaja>=CC.ventajaMin?'#ECFDF5':'#FFF8E1')+';border-radius:9px;padding:8px;margin-top:9px;text-align:center;font-size:.63rem;font-weight:700;color:'+(m.ventaja>=CC.ventajaMin?'#047857':'#8A6D00')+';">'
+    +'    El colaborador gana '+Math.round(m.ventaja)+'% más que si cobrara comisión'
+    +'  </div>'
+    +'</div>'
+
+    // ── DETALLE PRIVADO ──
+    +'<div style="background:#FFF7ED;border:2px solid var(--nar);border-radius:14px;padding:14px;margin-bottom:10px;">'
+    +'  <div style="font-size:.6rem;font-weight:800;color:#9A3412;letter-spacing:.8px;margin-bottom:8px;">🔒 PRIVADO · SOLO VOS</div>'
+    + fila('Venta contado', fmt(m.venta))
+    + fila(ccPlan+' cuotas de', fmt(m.cuota))
+    + fila('Cliente paga total', fmt(m.totalReal))
+    + fila('Costo del producto', '− '+fmt(costo))
+    + fila('Rendimiento al colaborador', '− '+fmt(m.rend))
+    +'  <div style="border-top:1px dashed #FDBA74;margin-top:6px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;"><span style="font-weight:800;color:#9A3412;font-size:.8rem;">Te queda a vos</span><b style="color:var(--nar);font-size:1.25rem;">'+fmt(m.queda)+'</b></div>'
+    +'  <div style="text-align:center;color:#9A3412;font-size:.6rem;font-weight:700;margin-top:6px;">Amarango puso '+fmt(costo-m.pone)+' · el colaborador '+fmt(m.pone)+'</div>'
+    +'</div>'
+
+    // ── FLUJO DE CAJA ──
+    +'<div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:12px;margin-bottom:10px;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:7px;">FLUJO · LO QUE PAGÁS VS LO QUE ENTRA</div>'
+    + fila('📅 Día 30 · le pagás', fmt(m.tramo))
+    + fila('📅 Día 60 · le pagás', fmt(m.tramo))
+    + fila('Entra por cuota', fmt(m.cuota), m.flujoOk?'#047857':'#B91C1C')
+    + fila(m.flujoOk?'Te sobra por cuota':'Te falta por cuota', fmt(Math.abs(m.cuota-m.tramo)), m.flujoOk?'#047857':'#B91C1C')
+    +'</div>'
+
+    // ── CUÁNDO COBRA CADA UNO ──
+    +'<div style="background:#fff;border:1px solid var(--bor);border-radius:14px;padding:12px;margin-bottom:10px;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:var(--sub);letter-spacing:.7px;margin-bottom:8px;">CUÁNDO COBRA CADA UNO · LOS DOS EN 2 MESES</div>'
+    +'  <div style="display:flex;gap:8px;">'
+    +'    <div style="flex:1;background:#F0FDF4;border-radius:10px;padding:9px;">'
+    +'      <div style="font-size:.62rem;font-weight:800;color:#047857;margin-bottom:5px;">🤝 Colaborador</div>'
+    +'      <div style="font-size:.6rem;color:var(--sub);line-height:1.7;">'
+    +'        Día 0: <b style="color:#B91C1C;">−'+fmt(m.pone)+'</b><br>'
+    +'        Día 30: <b style="color:#047857;">'+fmt(m.tramo)+'</b><br>'
+    +'        Día 60: <b style="color:#047857;">'+fmt(m.tramo)+'</b>'
+    +'      </div>'
+    +'      <div style="border-top:1px dashed #86EFAC;margin-top:6px;padding-top:5px;font-size:.62rem;font-weight:800;color:#047857;">Gana '+fmt(m.rend)+'</div>'
+    +'    </div>'
+    +'    <div style="flex:1;background:#F8FAFC;border-radius:10px;padding:9px;">'
+    +'      <div style="font-size:.62rem;font-weight:800;color:var(--sub);margin-bottom:5px;">🛒 Revendedor</div>'
+    +'      <div style="font-size:.6rem;color:var(--sub);line-height:1.7;">'
+    +'        Día 0: <b style="color:var(--az);">'+fmt(m.parteRev)+'</b><br>'
+    + (m.partesRev>1 ? '        Día 30: <b style="color:var(--az);">'+fmt(m.parteRev)+'</b><br>' : '        Día 30: —<br>')
+    + (m.partesRev>2 ? '        Día 60: <b style="color:var(--az);">'+fmt(m.parteRev)+'</b>' : '        Día 60: —')
+    +'      </div>'
+    +'      <div style="border-top:1px dashed #E2E8F0;margin-top:6px;padding-top:5px;font-size:.62rem;font-weight:800;color:var(--sub);">Gana '+fmt(m.comision)+'</div>'
+    +'    </div>'
+    +'  </div>'
+    +'  <div style="text-align:center;font-size:.58rem;color:var(--sub);margin-top:8px;line-height:1.4;">El revendedor no pone capital. El colaborador pone '+fmt(m.pone)+' y gana '+fmt(m.rend-m.comision)+' más.</div>'
+    +'</div>'
+
+    // ── SI EL CLIENTE DESAPARECE ──
+    +'<div style="background:#FEF7ED;border:1px solid #FDBA74;border-radius:14px;padding:12px;margin-bottom:10px;">'
+    +'  <div style="font-size:.58rem;font-weight:800;color:#9A3412;letter-spacing:.7px;margin-bottom:8px;">🛡️ SI EL CLIENTE DESAPARECE</div>'
+    +'  <div style="font-size:.68rem;color:var(--sub);line-height:1.55;margin-bottom:9px;">'
+    +'    Le devolvés su capital más '+CC.pisoMora+'% para que no pierda contra la inflación. No el rendimiento pactado.'
+    +'  </div>'
+    + fila('Le corresponde', fmt(m.pisoTotal))
+    + fila('Si ya cobró el 1er tramo, le falta', fmt(m.faltaSiCae))
+    + fila('Te ahorrás vs pagar todo', fmt(m.ahorroMora), '#047857')
+    +'  <div style="background:#fff;border-radius:9px;padding:8px;margin-top:8px;font-size:.62rem;color:var(--sub);line-height:1.5;text-align:center;">'
+    +'    Si ya cobró los dos tramos, la operación terminó para él. El riesgo de ahí en más es tuyo.'
+    +'  </div>'
+    +'</div>'
+
+    // ── SUGERENCIA DEL MOTOR ──
+    + (m.sug ? '<div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:12px;padding:11px;margin-bottom:10px;font-size:.68rem;color:#1E40AF;font-weight:700;line-height:1.5;">'+m.sug+'</div>' : '')
+
+    + (ccModificado() ? '<div style="background:#FFF4E0;border:1px solid var(--nar);border-radius:10px;padding:9px;font-size:.65rem;color:#9A3412;font-weight:700;text-align:center;margin-bottom:10px;">⚠️ Estás usando valores modificados. Al recargar vuelven a los originales.</div>' : '')
+
+    // ── MENSAJE AL COLABORADOR ──
+    + (m.luz==='rojo' ? ''
+      : '<div style="background:#F0FDF4;border:1px dashed #10B981;border-radius:12px;padding:12px;margin-bottom:9px;">'
+        +'<div style="font-size:.58rem;font-weight:800;color:#047857;letter-spacing:.7px;margin-bottom:7px;">ESTO LE LLEGA AL COLABORADOR</div>'
+        +'<div style="font-size:.76rem;line-height:1.7;color:var(--az);">'
+        +'  <b>🐝 Colaboración Amarango</b><br><br>'
+        +'  Ponés <b>'+fmt(m.pone)+'</b><br>'
+        +'  Recuperás <b>'+fmt(m.recupera)+'</b><br><br>'
+        +'  📅 A los 30 días: '+fmt(m.tramo)+'<br>'
+        +'  📅 A los 60 días: '+fmt(m.tramo)+'<br><br>'
+        +'  💚 Ganás <b style="color:#047857;font-size:.92rem;">'+fmt(m.rend)+'</b> en 2 meses<br><br>'
+        +'  <span style="font-size:.66rem;color:var(--sub);">🛡️ Si el cliente cumple, cobrás lo pactado. Si el cliente desaparece, te devolvemos tu plata con un ajuste para que no pierdas contra la inflación.</span>'
+        +'</div></div>'
+        +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(document.getElementById(\'cc-msg\').value),\'_blank\')">📲 Invitar al colaborador</button>'
+        +'<textarea id="cc-msg" style="display:none;">'+msg+'</textarea>');
+}
+// muestra las pestañas de cálculo para asesores de ventas (solo Pegar precio)
 function mostrarPestanasRev(){
   document.getElementById('tab-btn-pegar').style.display='';
-  document.getElementById('tab-btn-cuotas').style.display='';
+  // Placas es solo para admin; si NO es admin, se mantiene oculta
+  var esAdmin=(typeof adminUnlocked!=='undefined' && adminUnlocked);
+  var tp=document.getElementById('tab-btn-placas'); if(tp) tp.style.display=esAdmin?'':'none';
 }
-// muestra TODO (para admin): pestañas de cálculo + celulares
+// muestra TODO (para admin): pestañas de cálculo + Placas
 function mostrarPestanasAdmin(){
-  mostrarPestanasRev();
+  document.getElementById('tab-btn-pegar').style.display='';
+  document.getElementById('tab-btn-placas').style.display='';
 }
 function pedirClaveRevendedor(destino){
   window._revDestino=destino;
@@ -922,7 +1484,7 @@ function pedirClaveRevendedor(destino){
     ov.style.cssText='position:fixed;inset:0;background:rgba(2,12,46,.92);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;';
     ov.innerHTML='<div style="background:#fff;border-radius:18px;padding:24px;max-width:340px;width:100%;text-align:center;">'
       +'<div style="font-size:2rem;">🐝</div>'
-      +'<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;margin:6px 0;">Acceso revendedores</h3>'
+      +'<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;margin:6px 0;">Acceso asesores de ventas</h3>'
       +'<p style="font-size:.75rem;color:var(--sub);margin-bottom:14px;">Ingresá la clave para usar las herramientas de precios</p>'
       +'<input type="password" id="rev-pass" placeholder="Clave" style="width:100%;text-align:center;font-size:1.1rem;letter-spacing:3px;padding:12px;border:2px solid var(--bor);border-radius:12px;box-sizing:border-box;" onkeydown="if(event.key===\'Enter\')validarRevendedor()">'
       +'<div id="rev-err" style="color:var(--red);font-size:.75rem;font-weight:700;margin-top:8px;display:none;">Clave incorrecta</div>'
@@ -950,10 +1512,44 @@ function validarRevendedor(){
 }
 function cerrarRevOverlay(){ var ov=document.getElementById('rev-overlay'); if(ov)ov.style.display='none'; }
 
-function showTab(t){
-  // Pestañas de cálculo (Pegar precio, Cuotas) protegidas con clave de revendedor
-  if((t==='pegar' || t==='cuotas') && !revUnlocked){
+// Pila de navegación para el botón "Atrás" (un paso para atrás, no directo al inicio)
+var _navHist=[];
+var _navActual='tienda';
+function registrarNav(destino){
+  // no apilar si es el mismo lugar
+  if(destino===_navActual) return;
+  if(_navActual) _navHist.push(_navActual);
+  if(_navHist.length>25) _navHist.shift(); // no crecer infinito
+  _navActual=destino;
+}
+// Vuelve un paso atrás. Si no hay historial, va a la Tienda.
+function volverAtras(){
+  var prev=_navHist.pop();
+  if(!prev){ prev='tienda'; }
+  _navActual=null; // evitar que showTab lo re-apile como actual
+  showTab(prev, true);
+}
+// Muestra u oculta el botón "Atrás" según dónde estemos (en la Tienda/inicio no se muestra)
+function actualizarBotonAtras(t){
+  var b=document.getElementById('btn-atras');
+  if(!b) return;
+  // en la tienda (inicio) no hace falta atrás
+  b.style.display=(t==='tienda')?'none':'flex';
+}
+function showTab(t, esAtras){
+  // "Pegar precio" es para asesores de ventas (pide clave de asesor)
+  if(t==='pegar' && !revUnlocked){
     pedirClaveRevendedor(t);
+    return;
+  }
+  // "Placas" es SOLO para admin (pide clave de admin)
+  if(t==='placas' && !adminUnlocked){
+    pendingTab='placas';
+    document.getElementById("admin-pass").value="";
+    document.getElementById("pass-err").classList.remove("show");
+    document.getElementById("admin-pass").classList.remove("error");
+    document.getElementById("login-overlay").style.display="flex";
+    setTimeout(function(){document.getElementById("admin-pass").focus();},200);
     return;
   }
   // El cajón "admin" pide clave una vez y muestra sub-pestañas
@@ -971,6 +1567,8 @@ function showTab(t){
     document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
     document.getElementById("tab-btn-admin").classList.add("on");
     document.getElementById("admin-subtabs").style.display="flex";
+    if(!esAtras) registrarNav('admin');
+    actualizarBotonAtras('admin');
     showAdminSub('contado');
     return;
   }
@@ -987,7 +1585,11 @@ function showTab(t){
     });
   }
   if(t==='celulares'){renderListaCelus();bajarCelusNube();}
+  if(t==='placas'){renderPlacaCuotas();calcPlaca();}
   if(t==='tienda')tiendaInit();
+  // registrar en el historial (salvo cuando venimos del propio botón Atrás)
+  if(!esAtras) registrarNav(t);
+  actualizarBotonAtras(t);
 }
 
 // Sub-pestañas dentro del cajón Administradores
@@ -1029,6 +1631,7 @@ function cancelAdminLogin(){
   document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
   document.getElementById("tab-pegar").classList.add("on");
   document.getElementById("tab-btn-pegar").classList.add("on");
+  if(typeof actualizarBotonAtras==='function') actualizarBotonAtras('pegar');
 }
 
 function clearTab(t){
@@ -1044,7 +1647,7 @@ function clearTab(t){
     planInversion='contado';renderPlanesInversion();
     inversores=[{nombre:'Inversor 1',pct:100}];renderInversores();
   }
-  var labels={contado:'💰 Ingresá el precio de costo en $ARS para ver el precio de venta y las cuotas',cuotas:'📅 Ingresá el precio de venta para ver los planes de cuotas',comisiones:'🤝 Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor',inversion:'📊 Ingresá el precio de costo en $ARS para ver el análisis de inversión'};
+  var labels={contado:'💰 Ingresá el precio de costo en $ARS para ver el precio de venta y las cuotas',cuotas:'📅 Ingresá el precio de venta para ver los planes de cuotas',comisiones:'🤝 Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del asesor de ventas',inversion:'📊 Ingresá el precio de costo en $ARS para ver el análisis de inversión'};
   var icons={contado:'💰',cuotas:'📅',comisiones:'🤝',inversion:'📊'};
   document.getElementById('res-'+t).innerHTML='<div class="empty-icon">'+icons[t]+'</div><p>'+labels[t]+'</p>';
   document.getElementById('res-'+t).className='empty-state';
@@ -1057,7 +1660,6 @@ function toggleOff(tab){
   if(offState[tab]){btn.style.background='var(--gr)';btn.innerHTML='✅ 10% Off aplicado';}
   else{btn.style.background='rgba(255,255,255,.15)';btn.innerHTML='🏷️ Aplicar 10% Off';}
   if(tab==='contado')calcContado();
-  if(tab==='cuotas')calcCuotas();
 }
 
 var planesDefault={2:{activo:true,pct:15},3:{activo:false,pct:36},4:{activo:true,pct:55},5:{activo:false,pct:66},6:{activo:true,pct:78},7:{activo:false,pct:87},8:{activo:false,pct:93},9:{activo:false,pct:99},10:{activo:false,pct:105},11:{activo:false,pct:111},12:{activo:false,pct:117}};
@@ -1102,7 +1704,7 @@ function renderPlanesConfig(){
 }
 function refrescarPlanesEnTodaLaApp(){
   guardarPlanesConfig();calcContado();
-  var inpCuotas=document.getElementById('inp-cuotas');if(inpCuotas && inpCuotas.value)calcCuotas();
+  var inpPlaca=document.getElementById('inp-placa');if(inpPlaca && inpPlaca.value){renderPlacaCuotas();calcPlaca();}
   var inpPegar=document.getElementById('inp-pegar');if(inpPegar && inpPegar.value)calcPegar();
   var metPagoList=document.getElementById('met-pago-list');if(metPagoList){renderMetodosPago();calcComisiones();}
   var planInvList=document.getElementById('plan-inv-list');if(planInvList){renderPlanesInversion();calcInversion();}
@@ -1619,7 +2221,7 @@ function cerrarSesion(){
   try{ localStorage.removeItem('ae_sesion_admin'); localStorage.removeItem('ae_sesion_rev'); }catch(e){}
   // ocultar pestañas de cálculo
   document.getElementById('tab-btn-pegar').style.display='none';
-  document.getElementById('tab-btn-cuotas').style.display='none';
+  var tpl=document.getElementById('tab-btn-placas'); if(tpl)tpl.style.display='none';
   var tc=document.getElementById('tab-btn-celulares'); if(tc)tc.style.display='none';
   tiendaAplicarModo();
   showTab('tienda');
@@ -1631,7 +2233,9 @@ function tiendaAplicarModo(){
   // cliente = blanco, vendedor = miel clarito, admin = miel más fuerte
   var cont=document.getElementById('tab-tienda');
   if(cont){
-    cont.style.background='#fff';   // blanco para todos
+    if(tiendaEsAdmin || adminUnlocked)      cont.style.background='#fdf0d5';   // miel más fuerte
+    else if(revUnlocked)                    cont.style.background='#fef8ec';   // miel clarito
+    else                                    cont.style.background='';          // blanco (cliente)
   }
   // fondo de pantalla según rol: admin naranja clarito, revendedor celeste clarito, cliente normal
   document.body.classList.remove('rol-admin','rol-revendedor');
@@ -1837,29 +2441,6 @@ function tiendaCategoria(nombre){
 // lista de categorías disponibles para elegir
 var TIENDA_CATEGORIAS=['📱 Celulares','❄️ Heladeras','🍳 Cocina','📺 TV','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
 // categoría efectiva de un producto: la manual si tiene, sino la automática
-/* 🚦 SEMÁFORO DEL PRECIO — cuánto hace que no se actualiza (solo lo ve el admin)
-   Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
-function badgePrecioFecha(p){
-  if(!tiendaEsAdmin) return '';
-  var ts = p.precioActualizado || p.fechaPrecio || 0;
-  if(!ts){
-    return '<div style="background:#F7F8FA;border-radius:6px;padding:4px 7px;font-size:.58rem;color:var(--sub);font-weight:700;text-align:center;margin-bottom:5px;">🕐 Sin fecha</div>';
-  }
-  var dias = Math.floor((Date.now()-ts)/86400000);
-  var col,bg,ico,txt;
-  if(dias>=28){ col='#DC2626'; bg='#FEF2F2'; ico='🔴'; txt='REVISAR'; }
-  else if(dias>=14){ col='#D97706'; bg='#FFFBEB'; ico='🟡'; txt=''; }
-  else { col='#059669'; bg='#F0FDF4'; ico='🟢'; txt=''; }
-  var cuando = dias===0 ? 'hoy' : (dias===1 ? 'ayer' : 'hace '+dias+'d');
-  return '<div style="background:'+bg+';border-radius:6px;padding:4px 7px;font-size:.58rem;color:'+col+';font-weight:800;text-align:center;margin-bottom:5px;">'
-    +ico+' Precio '+cuando+(txt?' · '+txt:'')+'</div>';
-}
-/* ⚙️ Opciones rápidas del producto — abre el cajón de opciones que ya existe */
-function tiendaAbrirOpciones(id){
-  var det = document.getElementById('opts-'+id);
-  if(det){ det.open = !det.open; det.scrollIntoView({behavior:'smooth', block:'nearest'}); }
-  else { tiendaVerDetalle(id); }
-}
 function catProd(p){ return (p && p.categoria) ? p.categoria : tiendaCategoria(p.nombre); }
 // ===== BÚSQUEDA INTELIGENTE (tolera acentos y errores de tipeo) =====
 // quita acentos, pasa a minúscula, deja solo letras y números
@@ -1927,13 +2508,19 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar','cajon-cuotas'].forEach(function(id){
+  ['cajon-pegar','cajon-color','cajon-sonido','cajon-pedido'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
+  // El Programa Colaborador lo ven revendedores, admins, y los invitados que
+  // abren el link con ?colab=1 que les mandamos personalmente por WhatsApp.
+  var invitadoColab=false;
+  try{ invitadoColab = (location.search.indexOf('colab=1')>-1); }catch(e){}
+  var ec=document.getElementById('cajon-colab');
+  if(ec) ec.style.display=(esAdmin||esRev||invitadoColab)?'':'none';
   if(c)c.classList.add('abierto');
   if(o)o.classList.add('abierto');
 }
@@ -2005,6 +2592,410 @@ function tiendaLimpiarBusqueda(){
   if(typeof marcarNavActiva==='function') marcarNavActiva('');
   tiendaToggleLimpiar();
   tiendaRender();
+}
+
+/* ═══ TEMAS DE COLOR DE LA TIENDA ═══
+   Cambian fondo, paneles y letras pisando las variables CSS. Se guarda la elección. */
+var TEMAS_TIENDA = {
+  amarango: {n:'Amarango', ic:'🐝', az:'#0B2D6B', nar:'#FF7A00', bg:'#F4F1EA', bor:'#EBD9B4', txt:'#1A1A2E', sub:'#6B7280', wh:'#ffffff'},
+  nocturno: {n:'Nocturno', ic:'🌙', az:'#7fa8e0', nar:'#FF9838', bg:'#0a1830', bor:'#1e3a5f', txt:'#e8eef7', sub:'#9bb3d4', wh:'#122442'},
+  esmeralda:{n:'Esmeralda',ic:'💚', az:'#065F46', nar:'#F59E0B', bg:'#F0FAF5', bor:'#C6E9D9', txt:'#10241C', sub:'#5C7A70', wh:'#ffffff'},
+  vino:     {n:'Vino',     ic:'🍷', az:'#7B1E3A', nar:'#E8A33D', bg:'#FBF3F5', bor:'#EBD3DA', txt:'#2A1119', sub:'#8A6A73', wh:'#ffffff'},
+  oceano:   {n:'Océano',   ic:'🌊', az:'#0E4C6E', nar:'#00B4D8', bg:'#EFF8FC', bor:'#CBE6F0', txt:'#0C1F2B', sub:'#5D7C8A', wh:'#ffffff'},
+  grafito:  {n:'Grafito',  ic:'⚫', az:'#1F2937', nar:'#F97316', bg:'#F5F6F8', bor:'#DDE1E7', txt:'#111827', sub:'#6B7280', wh:'#ffffff'},
+  lavanda:  {n:'Lavanda',  ic:'💜', az:'#4C2A85', nar:'#EC4899', bg:'#F7F4FD', bor:'#DDD2F0', txt:'#20143A', sub:'#75699A', wh:'#ffffff'}
+};
+var temaTiendaActual=(function(){ try{ return localStorage.getItem('ae_tema_tienda')||'amarango'; }catch(e){ return 'amarango'; } })();
+
+function aplicarTemaTienda(id, guardar){
+  var t=TEMAS_TIENDA[id]; if(!t) return;
+  var r=document.documentElement;
+  r.style.setProperty('--az', t.az);
+  r.style.setProperty('--nar', t.nar);
+  r.style.setProperty('--bg', t.bg);
+  r.style.setProperty('--bor', t.bor);
+  r.style.setProperty('--txt', t.txt);
+  r.style.setProperty('--sub', t.sub);
+  r.style.setProperty('--wh', t.wh);
+  document.body.style.background=t.bg;
+  // las tarjetas tienen fondo fijo por CSS: lo acompañamos al tema
+  var st=document.getElementById('tema-extra');
+  if(!st){ st=document.createElement('style'); st.id='tema-extra'; document.head.appendChild(st); }
+  st.textContent='.prod-card{background:'+t.wh+' !important;border-color:'+t.bor+' !important;}'
+    ;
+  temaTiendaActual=id;
+  if(guardar!==false){ try{ localStorage.setItem('ae_tema_tienda', id); }catch(e){} }
+}
+
+/* ═══════════ PEDIDOS DEL ASESOR DE VENTAS ═══════════
+   El asesor carga el pedido acá y le llega a Maxi por WhatsApp en un formato
+   ordenado, listo para pegar en el CRM. Los datos del cliente quedan guardados
+   en su teléfono: la segunda vez solo elige el cliente y carga el producto. */
+var WA_PEDIDOS='5491168610532'; // adonde llegan los pedidos
+
+function agendaClientes(){
+  try{ return JSON.parse(localStorage.getItem('ae_agenda_clientes')||'[]'); }catch(e){ return []; }
+}
+function guardarAgenda(a){
+  try{ localStorage.setItem('ae_agenda_clientes', JSON.stringify(a)); }catch(e){}
+}
+function guardarClienteAgenda(cli){
+  var a=agendaClientes();
+  var i=a.findIndex(function(x){ return (x.dni&&cli.dni&&x.dni===cli.dni) || (x.nombre||'').toLowerCase()===(cli.nombre||'').toLowerCase(); });
+  if(i>=0) a[i]=cli; else a.push(cli);
+  guardarAgenda(a);
+}
+function borrarClienteAgenda(i){
+  var a=agendaClientes();
+  if(!confirm('¿Borrar a "'+(a[i]?a[i].nombre:'')+'" de tu agenda?')) return;
+  a.splice(i,1); guardarAgenda(a); abrirPedido();
+}
+
+function abrirPedido(){
+  if(!esEquipo()){ alert('🔒 Herramienta para el equipo de AmarangoElectro.'); return; }
+  var ag=agendaClientes();
+  var opts='<option value="">— Cliente nuevo —</option>';
+  ag.forEach(function(c,i){ opts+='<option value="'+i+'">'+(c.nombre||'')+(c.dni?' · '+c.dni:'')+'</option>'; });
+
+  var html=''
+    +'<div style="text-align:center;margin-bottom:14px;">'
+    +'  <div style="font-size:2.2rem;">🧾</div>'
+    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Cargar pedido</h2>'
+    +'  <div style="color:var(--sub);font-size:.74rem;font-weight:600;">Se envía por WhatsApp listo para el sistema</div>'
+    +'</div>'
+
+    +'<div style="background:#EEF4FF;border-radius:12px;padding:12px;margin-bottom:14px;">'
+    +'  <div style="font-size:.64rem;font-weight:800;color:var(--az);letter-spacing:.4px;margin-bottom:6px;">👤 CLIENTE</div>'
+    +'  <select id="pd-cli" onchange="cargarClienteEnPedido()" style="width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:700;">'+opts+'</select>'
+    +(ag.length?'<div style="font-size:.62rem;color:var(--sub);margin-top:5px;">Tenés '+ag.length+' cliente(s) guardados. Elegí uno y saltás al producto 👇</div>':'')
+    +'</div>'
+
+    +'<div id="pd-datos-cli">'
+    +'  <div class="pd-campo"><label>Nombre y apellido *</label><input id="pd-nombre" placeholder="Ej: Juan Pérez"></div>'
+    +'  <div style="display:flex;gap:8px;">'
+    +'    <div class="pd-campo" style="flex:1;"><label>DNI</label><input id="pd-dni" inputmode="numeric" placeholder="30111222"></div>'
+    +'    <div class="pd-campo" style="flex:1;"><label>Teléfono *</label><input id="pd-tel" inputmode="tel" placeholder="11 5555-5555"></div>'
+    +'  </div>'
+    +'  <div class="pd-campo"><label>Dirección de entrega</label><input id="pd-dir" placeholder="Calle, número, localidad"></div>'
+    +'</div>'
+
+    +'<div style="height:1px;background:var(--bor);margin:16px 0;"></div>'
+    +'<div style="font-size:.64rem;font-weight:800;color:var(--az);letter-spacing:.4px;margin-bottom:8px;">📦 PRODUCTO</div>'
+    +'<div class="pd-campo"><label>Producto *</label><input id="pd-prod" placeholder="Ej: Samsung A15 128GB"></div>'
+    +'<div style="display:flex;gap:8px;">'
+    +'  <div class="pd-campo" style="flex:1;"><label>Precio de venta *</label><input id="pd-precio" inputmode="numeric" placeholder="$" oninput="pdCalcular()"></div>'
+    +'  <div class="pd-campo" style="flex:1;"><label>Cuotas</label><select id="pd-cuotas" onchange="pdCalcular()" style="width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:700;"><option value="0">Contado</option><option value="2">2 cuotas</option><option value="3">3 cuotas</option><option value="4">4 cuotas</option><option value="6" selected>6 cuotas</option></select></div>'
+    +'</div>'
+    +'<div class="pd-campo"><label>Seña o entrega <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-senia" inputmode="numeric" placeholder="$ que dejó"></div>'
+    +'<div class="pd-campo"><label>Notas <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-notas" placeholder="Ej: entregar el sábado"></div>'
+    +'<div id="pd-resumen" style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:11px;padding:12px;margin:12px 0;display:none;"></div>'
+
+    +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;padding:15px;" onclick="enviarPedido()">📲 Enviar pedido por WhatsApp</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
+
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+function cargarClienteEnPedido(){
+  var i=document.getElementById('pd-cli').value;
+  var box=document.getElementById('pd-datos-cli');
+  if(i===''){
+    box.style.display='';
+    ['pd-nombre','pd-dni','pd-tel','pd-dir'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+    return;
+  }
+  var c=agendaClientes()[parseInt(i,10)];
+  if(!c) return;
+  document.getElementById('pd-nombre').value=c.nombre||'';
+  document.getElementById('pd-dni').value=c.dni||'';
+  document.getElementById('pd-tel').value=c.tel||'';
+  document.getElementById('pd-dir').value=c.dir||'';
+  // ya tenemos sus datos: los mostramos plegados para que vaya directo al producto
+  box.style.display='none';
+  var r=document.getElementById('pd-resumen');
+  r.style.display='block';
+  r.innerHTML='<div style="font-size:.72rem;font-weight:800;color:#047857;">✅ '+(c.nombre||'')+'</div>'
+    +'<div style="font-size:.66rem;color:var(--sub);margin-top:3px;">'+(c.tel||'')+(c.dir?' · '+c.dir:'')+'</div>'
+    +'<button onclick="document.getElementById(\'pd-datos-cli\').style.display=\'\';this.parentNode.style.display=\'none\';" style="margin-top:7px;background:none;border:none;color:var(--az);font-size:.66rem;font-weight:800;text-decoration:underline;cursor:pointer;padding:0;">✏️ Editar datos</button>';
+}
+
+function pdCalcular(){
+  var precio=parseFloat((document.getElementById('pd-precio').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
+  var n=parseInt(document.getElementById('pd-cuotas').value,10)||0;
+  var r=document.getElementById('pd-resumen');
+  if(!precio || !n){ if(r && document.getElementById('pd-cli').value==='') r.style.display='none'; return; }
+  var total=calcularTotalPlan(precio,n);
+  var cuota=Math.round(total/n/1000)*1000;
+  r.style.display='block';
+  r.innerHTML='<div style="display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;"><span style="color:var(--sub);font-weight:600;">Contado</span><b style="color:var(--az);">'+fmt(precio)+'</b></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.76rem;padding:3px 0;"><span style="color:var(--sub);font-weight:600;">'+n+' cuotas de</span><b style="color:#047857;font-size:1rem;">'+fmt(cuota)+'</b></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:3px 0;border-top:1px dashed #86EFAC;margin-top:4px;padding-top:6px;"><span style="color:var(--sub);font-weight:600;">Total financiado</span><b style="color:var(--az);">'+fmt(cuota*n)+'</b></div>';
+}
+
+function enviarPedido(){
+  var nombre=(document.getElementById('pd-nombre').value||'').trim();
+  var dni=(document.getElementById('pd-dni').value||'').trim();
+  var tel=(document.getElementById('pd-tel').value||'').trim();
+  var dir=(document.getElementById('pd-dir').value||'').trim();
+  var prod=(document.getElementById('pd-prod').value||'').trim();
+  var precio=parseFloat((document.getElementById('pd-precio').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
+  var n=parseInt(document.getElementById('pd-cuotas').value,10)||0;
+  var senia=(document.getElementById('pd-senia').value||'').trim();
+  var notas=(document.getElementById('pd-notas').value||'').trim();
+
+  if(!nombre){ alert('Falta el nombre del cliente.'); return; }
+  if(!tel){ alert('Falta el teléfono del cliente.'); return; }
+  if(!prod){ alert('Falta el producto.'); return; }
+  if(!precio){ alert('Falta el precio de venta.'); return; }
+
+  // guardamos al cliente en la agenda del asesor para la próxima vez
+  guardarClienteAgenda({nombre:nombre, dni:dni, tel:tel, dir:dir});
+
+  var quien='';
+  try{ quien=localStorage.getItem('ae_nombre_asesor')||''; }catch(e){}
+  if(!quien){
+    quien=(prompt('¿Cómo te llamás? (queda guardado para los próximos pedidos)')||'').trim();
+    if(quien){ try{ localStorage.setItem('ae_nombre_asesor', quien); }catch(e){} }
+  }
+
+  var cuota=0, total=0;
+  if(n>0){ total=calcularTotalPlan(precio,n); cuota=Math.round(total/n/1000)*1000; }
+
+  // Formato pensado para copiar campo por campo al CRM
+  var m='🧾 *PEDIDO NUEVO* 🐝\n';
+  m+='━━━━━━━━━━━━━━\n';
+  m+='*CLIENTE*\n';
+  m+='Nombre: '+nombre+'\n';
+  m+='DNI: '+(dni||'-')+'\n';
+  m+='Teléfono: '+tel+'\n';
+  m+='Dirección: '+(dir||'-')+'\n';
+  m+='━━━━━━━━━━━━━━\n';
+  m+='*VENTA*\n';
+  m+='Producto: '+prod+'\n';
+  m+='Precio: '+fmt(precio)+'\n';
+  if(n>0){
+    m+='Cuotas: '+n+'\n';
+    m+='Valor cuota: '+fmt(cuota)+'\n';
+    m+='Total: '+fmt(cuota*n)+'\n';
+  } else {
+    m+='Cuotas: contado\n';
+  }
+  if(senia) m+='Seña: '+senia+'\n';
+  m+='━━━━━━━━━━━━━━\n';
+  if(notas) m+='Notas: '+notas+'\n';
+  m+='Vendió: '+(quien||'—')+'\n';
+  m+='Fecha: '+new Date().toLocaleDateString('es-AR')+'\n';
+
+  window.open('https://wa.me/'+WA_PEDIDOS+'?text='+encodeURIComponent(m),'_blank');
+  document.getElementById('modal-cuotas').style.display='none';
+  setTimeout(function(){ alert('✅ Pedido enviado.\n\nEl cliente quedó guardado en tu agenda: la próxima vez solo cargás el producto. 🐝'); },400);
+}
+
+/* ═══ HEADER FIJO ═══
+   Queda quieto arriba, sin achicarse (simple y sin fallas).
+   Usamos position:fixed porque el body tiene overflow-x:hidden y eso rompe
+   position:sticky. El espaciador ocupa su lugar para que nada quede tapado.
+   Único efecto: una sombra sutil al bajar, que da profundidad sin mover nada. */
+(function(){
+  var ticking=false, conSombra=false;
+  function medir(){
+    var h=document.querySelector('.header');
+    var e=document.getElementById('header-espacio');
+    if(!h||!e) return;
+    e.style.height = h.offsetHeight + 'px';
+  }
+  window._medirHeader=medir;
+  function alScroll(){
+    ticking=false;
+    var h=document.querySelector('.header');
+    if(!h) return;
+    var y=window.pageYOffset||document.documentElement.scrollTop||0;
+    if(y>12 && !conSombra){ conSombra=true; h.classList.add('bajando'); }
+    else if(y<=12 && conSombra){ conSombra=false; h.classList.remove('bajando'); }
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ window.requestAnimationFrame(alScroll); ticking=true; }
+  }, {passive:true});
+  window.addEventListener('resize', medir, {passive:true});
+  window.addEventListener('load', medir);
+  document.addEventListener('DOMContentLoaded', function(){ medir(); setTimeout(medir,200); setTimeout(medir,600); });
+  setTimeout(medir, 1200);
+})();
+
+/* Quién puede tocar apariencia (color / sonido): el equipo, no el cliente comprador. */
+function esEquipo(){
+  var okAdm=false, okRev=false;
+  try{
+    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
+    okRev = (typeof revUnlocked!=='undefined' && revUnlocked===true) || (localStorage.getItem('ae_sesion_rev')==='1');
+  }catch(e){}
+  var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
+  return (okAdm||okRev) && !enVistaCliente;
+}
+
+function abrirTemasTienda(){
+  if(!esEquipo()){ alert('🔒 Opción para el equipo de AmarangoElectro.'); return; }
+  var html='<div style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:2.2rem;">🎨</div>'
+    +'<h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Color de la tienda</h2>'
+    +'<div style="color:var(--sub);font-size:.75rem;font-weight:600;">Elegí una combinación y se aplica al instante</div>'
+    +'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">';
+  for(var k in TEMAS_TIENDA){
+    var t=TEMAS_TIENDA[k];
+    var sel=(k===temaTiendaActual);
+    html+='<div onclick="aplicarTemaTienda(\''+k+'\');abrirTemasTienda();" style="cursor:pointer;border:2.5px solid '+(sel?t.nar:'transparent')+';border-radius:14px;padding:10px;background:'+t.bg+';box-shadow:0 2px 10px rgba(0,0,0,.07);">'
+      +'<div style="display:flex;gap:4px;margin-bottom:7px;">'
+        +'<span style="flex:1;height:22px;border-radius:6px;background:'+t.az+';"></span>'
+        +'<span style="flex:1;height:22px;border-radius:6px;background:'+t.nar+';"></span>'
+        +'<span style="flex:1;height:22px;border-radius:6px;background:'+t.wh+';border:1px solid '+t.bor+';"></span>'
+      +'</div>'
+      +'<div style="font-size:.76rem;font-weight:900;color:'+t.az+';">'+t.ic+' '+t.n+(sel?' ✓':'')+'</div>'
+      +'</div>';
+  }
+  html+='</div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Listo</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+
+/* ═══ SONIDO DE TECLA (estilo teclado moderno) ═══
+   Se genera con Web Audio, sin archivos externos. Se puede apagar desde el menú. */
+var _audioCtx=null;
+var sonidoTeclaOn=(function(){ try{ return localStorage.getItem('ae_sonido_tecla')!=='0'; }catch(e){ return true; } })();
+var sonidoTipo=(function(){ try{ return localStorage.getItem('ae_sonido_tipo')||'tecla'; }catch(e){ return 'tecla'; } })();
+
+var SONIDOS = {
+  tecla:   {n:'Tecla',    ic:'⌨️', d:'Click seco de teclado'},
+  suave:   {n:'Suave',    ic:'💧', d:'Gota corta y redondeada'},
+  mercado: {n:'Campanita',ic:'🔔', d:'Dos notas alegres, estilo tienda'},
+  burbuja: {n:'Burbuja',  ic:'🫧', d:'Pop grave y simpático'}
+};
+
+function _ctx(){
+  if(!_audioCtx){
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC) return null;
+    _audioCtx=new AC();
+  }
+  if(_audioCtx.state==='suspended'){ try{ _audioCtx.resume(); }catch(e){} }
+  return _audioCtx;
+}
+// Reproduce una nota simple con caída de volumen
+function _nota(ctx, t0, f1, f2, tipo, vol, dur){
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=tipo;
+  o.frequency.setValueAtTime(f1, t0);
+  if(f2 && f2!==f1){ o.frequency.exponentialRampToValueAtTime(f2, t0+dur*0.7); }
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0004, t0+dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0+dur+0.01);
+}
+function tickTecla(forzarTipo){
+  if(!sonidoTeclaOn && !forzarTipo) return;
+  var ctx=_ctx(); if(!ctx) return;
+  var t=ctx.currentTime;
+  var tipo=forzarTipo||sonidoTipo;
+  try{
+    if(tipo==='tecla'){
+      _nota(ctx, t, 1750, 620, 'square', 0.055, 0.045);
+    }
+    else if(tipo==='suave'){
+      _nota(ctx, t, 880, 520, 'sine', 0.10, 0.11);
+    }
+    else if(tipo==='mercado'){
+      // dos notas ascendentes, tipo confirmación de tienda
+      _nota(ctx, t,        784, 784, 'sine', 0.075, 0.10);
+      _nota(ctx, t+0.075, 1175,1175, 'sine', 0.070, 0.14);
+    }
+    else if(tipo==='burbuja'){
+      _nota(ctx, t, 420, 200, 'sine', 0.11, 0.13);
+    }
+  }catch(e){}
+}
+function toggleSonidoTecla(){
+  sonidoTeclaOn=!sonidoTeclaOn;
+  try{ localStorage.setItem('ae_sonido_tecla', sonidoTeclaOn?'1':'0'); }catch(e){}
+  actualizarTextoSonido();
+  if(sonidoTeclaOn) tickTecla();
+}
+function actualizarTextoSonido(){
+  var t=document.getElementById('cajon-sonido-txt');
+  if(t) t.textContent = sonidoTeclaOn ? ('Sonido: '+(SONIDOS[sonidoTipo]?SONIDOS[sonidoTipo].n:'activado')) : 'Sonido: apagado';
+}
+function elegirSonido(tipo){
+  sonidoTipo=tipo;
+  try{ localStorage.setItem('ae_sonido_tipo', tipo); }catch(e){}
+  if(!sonidoTeclaOn){ sonidoTeclaOn=true; try{ localStorage.setItem('ae_sonido_tecla','1'); }catch(e){} }
+  tickTecla(tipo);
+  actualizarTextoSonido();
+  abrirSonidos();
+}
+function abrirSonidos(){
+  if(!esEquipo()){ alert('🔒 Opción para el equipo de AmarangoElectro.'); return; }
+  var html='<div style="text-align:center;margin-bottom:14px;">'
+    +'<div style="font-size:2.2rem;">🔊</div>'
+    +'<h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Sonido al tocar</h2>'
+    +'<div style="color:var(--sub);font-size:.75rem;font-weight:600;">Tocá uno para escucharlo y elegirlo</div>'
+    +'</div>';
+  for(var k in SONIDOS){
+    var s=SONIDOS[k];
+    var sel=(k===sonidoTipo && sonidoTeclaOn);
+    html+='<div onclick="elegirSonido(\''+k+'\')" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:'+(sel?'#EEF4FF':'var(--wh)')+';border:2px solid '+(sel?'var(--nar)':'var(--bor)')+';border-radius:13px;padding:13px;margin-bottom:9px;">'
+      +'<div style="font-size:1.5rem;">'+s.ic+'</div>'
+      +'<div style="flex:1;"><div style="font-size:.88rem;font-weight:900;color:var(--az);">'+s.n+(sel?' ✓':'')+'</div>'
+      +'<div style="font-size:.7rem;color:var(--sub);">'+s.d+'</div></div>'
+      +'<div style="font-size:1rem;color:var(--sub);">▶</div>'
+      +'</div>';
+  }
+  html+='<button class="calc-btn" style="width:100%;margin-top:4px;background:'+(sonidoTeclaOn?'var(--bg)':'var(--nar)')+';color:'+(sonidoTeclaOn?'var(--sub)':'#fff')+';border:2px solid var(--bor);" onclick="toggleSonidoTecla();abrirSonidos();">'+(sonidoTeclaOn?'🔇 Apagar sonido':'🔊 Activar sonido')+'</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Listo</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+// Enganchamos el sonido a los toques de botones y campos de la app
+document.addEventListener('click', function(e){
+  var el=e.target;
+  if(!el) return;
+  var t=(el.tagName||'').toLowerCase();
+  if(t==='button' || t==='a' || el.classList.contains('calc-btn') ||
+     el.classList.contains('cajon-item') || el.classList.contains('tab') ||
+     el.classList.contains('cat-tile') || el.classList.contains('metodo-btn')){
+    tickTecla();
+  }
+}, true);
+document.addEventListener('keydown', function(e){
+  var el=document.activeElement;
+  if(!el) return;
+  var t=(el.tagName||'').toLowerCase();
+  if(t==='input' || t==='textarea'){ tickTecla(); }
+}, true);
+
+/* ═══ VISOR DE FOTO: abre la imagen grande, con zoom al tocar ═══ */
+function abrirFotoGrande(src, nombre){
+  if(!src) return;
+  var ov=document.getElementById('foto-visor');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='foto-visor';
+    ov.style.cssText='display:none;position:fixed;inset:0;z-index:6000;background:rgba(8,16,38,.94);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;padding:16px;';
+    ov.innerHTML=''
+      +'<button onclick="cerrarFotoGrande()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;line-height:1;">✕</button>'
+      +'<img id="foto-visor-img" src="" alt="" style="max-width:100%;max-height:78vh;border-radius:14px;box-shadow:0 12px 44px rgba(0,0,0,.5);object-fit:contain;background:#fff;">'
+      +'<div id="foto-visor-tit" style="color:#fff;font-size:.9rem;font-weight:800;text-align:center;margin-top:16px;max-width:90%;line-height:1.35;"></div>'
+      +'<div style="color:rgba(255,255,255,.55);font-size:.68rem;margin-top:8px;">Tocá afuera para cerrar</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov) cerrarFotoGrande(); });
+  }
+  var img=document.getElementById('foto-visor-img');
+  img.src=src;
+  document.getElementById('foto-visor-tit').textContent=nombre||'';
+  ov.style.display='flex';
+}
+function cerrarFotoGrande(){
+  var ov=document.getElementById('foto-visor');
+  if(ov) ov.style.display='none';
 }
 
 function tiendaRender(){
@@ -2178,51 +3169,50 @@ function tiendaRender(){
         +(selMarcado?'✅ Seleccionado':'Seleccionar')+'</label>';
     }
 
-    // en modo admin: checkbox para tanda (solo productos propios, no celulares)
-    if(tiendaEsAdmin && !p.esCelu){
-      var checked=tiendaMarcadosSet[p.id]?'checked':'';
-      card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-bottom:4px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
-        +'<input type="checkbox" '+checked+' onchange="tiendaToggleMarcado('+pid+')"> '
-        +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
-    }
-    // etiqueta de que es celular (en modo admin)
-    if(tiendaEsAdmin && p.esCelu){
-      card+='<div style="font-size:.6rem;font-weight:700;margin-bottom:4px;color:var(--az);">📱 Desde "Celulares"</div>';
-    }
-    // etiqueta "SIN STOCK" en ROJO (visible para todos)
+    // ═══ ESTILO MERCADO LIBRE: la foto va PRIMERO y grande; las etiquetas se
+    // superponen sobre ella para no empujarla hacia abajo. ═══
+    var etiquetas='';
     if(p.sinStock){
-      card+='<div style="display:inline-block;background:#dc2626;color:#fff;font-size:.66rem;font-weight:900;padding:3px 10px;border-radius:6px;margin-bottom:5px;letter-spacing:.5px;">⛔ SIN STOCK</div>';
+      etiquetas+='<div style="background:#dc2626;color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.4px;box-shadow:0 2px 6px rgba(0,0,0,.2);">SIN STOCK</div>';
     }
-    // etiqueta "últimas unidades" (visible para todos)
-    if(p.pocoStock){
-      card+='<div style="display:inline-block;background:var(--red);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">🔥 ¡Últimas unidades!</div>';
-    }
-    // etiqueta PREMIUM dorada (solo en modo lujo, para destacados)
-    if(document.body.classList.contains('lujo') && p.destacado){
-      card+='<div class="lujo-badge">✦ PREMIUM</div>';
-    }
-    // etiqueta "nuevo" (visible para todos)
-    if(esNuevo(p)){
-      card+='<div style="display:inline-block;background:var(--gr);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;">✨ NUEVO</div>';
-    }
-    // etiqueta "OFERTA" (si tiene precio anterior mayor)
     if(p.precioAntes && parseFloat(p.precioAntes)>p.venta){
       var offEt=Math.round((1-p.venta/parseFloat(p.precioAntes))*100);
-      card+='<div style="display:inline-block;background:#e11d48;color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;box-shadow:0 1px 4px rgba(225,29,72,.4);">🔥 OFERTA -'+offEt+'%</div>';
+      etiquetas+='<div style="background:#e11d48;color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(225,29,72,.35);">-'+offEt+'%</div>';
     }
-
-    // etiqueta "SIN INTERÉS" (visible para todos)
     if(p.sinInteres){
-      card+='<div style="display:inline-block;background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px;margin-bottom:4px;align-self:flex-start;box-shadow:0 1px 4px rgba(255,122,0,.4);">✨ '+parseInt(p.sinInteres,10)+' CUOTAS SIN INTERÉS</div>';
+      etiquetas+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;font-size:.58rem;font-weight:900;padding:3px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(255,122,0,.35);">'+parseInt(p.sinInteres,10)+' S/INTERÉS</div>';
+    }
+    if(esNuevo(p)){
+      etiquetas+='<div style="background:var(--gr);color:#fff;font-size:.58rem;font-weight:900;padding:3px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(16,185,129,.3);">NUEVO</div>';
+    }
+    if(p.pocoStock){
+      etiquetas+='<div style="background:var(--red);color:#fff;font-size:.58rem;font-weight:900;padding:3px 8px;border-radius:6px;">ÚLTIMAS</div>';
+    }
+    if(document.body.classList.contains('lujo') && p.destacado){
+      etiquetas+='<div class="lujo-badge" style="margin:0;">✦ PREMIUM</div>';
     }
 
-    card+='<div style="position:relative;">'
+    card+='<div style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:110px;border-radius:10px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:2px;cursor:pointer;"></div>'
-        : '<div onclick="tiendaVerDetalle('+pid+')" style="font-size:1.8rem;text-align:center;cursor:pointer;">'+catProd(p).split(' ')[0]+'</div>')
-      +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:30px;height:30px;font-size:.95rem;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15);line-height:1;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
-      +'</div>'
-      +badgePrecioFecha(p)
+        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:190px;border-radius:13px 13px 0 0;background:#fff url(\''+p.foto+'\') center/cover no-repeat;cursor:pointer;"></div>'
+          +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
+        : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
+      +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
+      +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="position:absolute;top:7px;right:7px;background:rgba(255,255,255,.94);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);line-height:1;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
+      +'</div>';
+
+    // controles de admin (debajo de la foto, no la empujan)
+    if(tiendaEsAdmin && !p.esCelu){
+      var checked2=tiendaMarcadosSet[p.id]?'checked':'';
+      card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
+        +'<input type="checkbox" '+checked2+' onchange="tiendaToggleMarcado('+pid+')"> '
+        +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
+    }
+    if(tiendaEsAdmin && p.esCelu){
+      card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
+    }
+
+    card+=''
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
@@ -2279,8 +3269,7 @@ function tiendaRender(){
           return '<div style="font-size:1.2rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
             +'<div style="margin-bottom:6px;">'+bloquePrecioAntes(p)+'</div>';
         }
-      })()
-      +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:var(--az);margin-bottom:6px;" onclick="tiendaVerCuotas('+pid+')">📅 Ver cuotas</button>';
+      })();
 
     if(tiendaEsAdmin){
       // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
@@ -2289,7 +3278,7 @@ function tiendaRender(){
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
-      card+='<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;">⚙️ Opciones del producto ▾</summary><div style="padding-top:6px;">';
+      card+='<details style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;">⚙️ Opciones del producto ▾</summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
@@ -2303,24 +3292,19 @@ function tiendaRender(){
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
       card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')">📤 Compartir</button>';
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
-      card+='<div style="display:flex;gap:5px;margin-bottom:5px;">'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
-        +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
-      +'</div>'
-      +'<div style="display:flex;gap:5px;">'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#fff;color:var(--nar);border:1.5px solid var(--nar);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaAbrirOpciones('+pid+')">⚙️ Opciones</button>'
+      card+='<div style="display:flex;gap:6px;">'
+        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar</button>'
+        +'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
+        +(p.esCelu?'':'<button style="flex:1;font-size:.68rem;padding:7px 4px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
       +'</div>';
     }else{
-      // botones públicos: COMPRAR (deja la venta casi hecha) + Consultar
-      card+='<button class="calc-btn" style="font-size:.78rem;padding:10px;background:var(--nar);margin-bottom:6px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar</button>'
-        +'<button class="calc-btn" style="font-size:.72rem;padding:8px;background:#25D366;margin-bottom:4px;" onclick="tiendaPedirWA('+pid+')">📲 '+(((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)?'Pedir / Consultar':'Consultar')+'</button>';
+      // Un solo botón: la foto y el precio son los protagonistas.
+      // "Ver cuotas" y "Consultar" quedan adentro del detalle del producto.
+      card+='<button class="calc-btn" style="font-size:.8rem;padding:11px;background:var(--nar);margin-top:2px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.32);" onclick="tiendaVerDetalle('+pid+')">Ver producto</button>';
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
-        card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')">📤 Compartir</button>';
+        card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')">📤 Compartir</button>';
       }
-      card+='<div style="font-size:.6rem;color:var(--sub);text-align:center;">Tocá para ver precio y cuotas</div>';
     }
     card+='</div>';
     return card;
@@ -2945,43 +3929,70 @@ function tiendaVerDetalle(id){
   window._tiendaPedirId=id;
   var html='';
   if(p.foto){
-    html+='<img src="'+p.foto+'" style="width:100%;border-radius:12px;margin-bottom:10px;display:block;">';
+    html+='<img src="'+p.foto+'" onclick="abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="width:100%;border-radius:14px;margin-bottom:14px;display:block;cursor:pointer;box-shadow:0 4px 16px rgba(11,45,107,.12);">';
   }else{
     html+='<div style="font-size:3rem;text-align:center;margin-bottom:8px;">'+catProd(p).split(' ')[0]+'</div>';
   }
-  html+='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">'+p.nombre+'</h3>'
-    +'<div style="display:flex;align-items:center;gap:5px;margin:4px 0 2px;font-size:.68rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>'
-    +'<div style="font-size:1.4rem;font-weight:900;color:var(--nar);margin:2px 0 4px;">Contado: '+fmt(p.venta)+'</div>'
-    +(bloquePrecioAntes(p,'.8rem')?'<div style="margin:0 0 10px;">'+bloquePrecioAntes(p,'.8rem')+'</div>':'<div style="margin-bottom:6px;"></div>');
+  html+='<h3 style="color:var(--az);font-weight:900;font-size:1.08rem;line-height:1.25;">'+p.nombre+'</h3>'
+    +'<div style="display:flex;align-items:center;gap:5px;margin:5px 0 12px;font-size:.66rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>';
+
+  // ═══ BLOQUE DE PRECIO PRO: la cuota manda, el contado va de referencia ═══
+  var _mejor=mejorCuotaDatos(p.venta, p);
+  if(_mejor){
+    html+='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 6px 20px rgba(11,45,107,.22);">'
+      +'<div style="color:rgba(255,255,255,.62);font-size:.6rem;font-weight:800;letter-spacing:1.2px;">PAGÁ EN CUOTAS FIJAS</div>'
+      +'<div style="display:flex;align-items:baseline;gap:7px;margin-top:5px;">'
+        +'<span style="color:#fff;font-size:.95rem;font-weight:800;">'+_mejor.n+' x</span>'
+        +'<span style="color:var(--nar);font-size:2.15rem;font-weight:900;letter-spacing:-1px;line-height:1;">'+fmt(_mejor.valor)+'</span>'
+      +'</div>'
+      +(_mejor.sinInteres
+        ? '<div style="display:inline-block;background:var(--nar);color:#fff;font-size:.62rem;font-weight:900;padding:3px 10px;border-radius:20px;margin-top:8px;">✨ SIN INTERÉS</div>'
+        : '<div style="color:rgba(255,255,255,.7);font-size:.68rem;font-weight:600;margin-top:6px;">Sin tarjeta ni banco · Retirás con la 1ª cuota</div>')
+      +'<div style="height:1px;background:rgba(255,255,255,.15);margin:12px 0 10px;"></div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;">'
+        +'<span style="color:rgba(255,255,255,.6);font-size:.72rem;font-weight:700;">Precio de contado</span>'
+        +'<span style="color:#fff;font-size:1.05rem;font-weight:900;">'+fmt(p.venta)+'</span>'
+      +'</div>'
+      +'</div>';
+  } else {
+    html+='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 6px 20px rgba(11,45,107,.22);">'
+      +'<div style="color:rgba(255,255,255,.62);font-size:.6rem;font-weight:800;letter-spacing:1.2px;">PRECIO DE CONTADO</div>'
+      +'<div style="color:var(--nar);font-size:2.1rem;font-weight:900;letter-spacing:-1px;margin-top:4px;">'+fmt(p.venta)+'</div>'
+      +'</div>';
+  }
+  if(bloquePrecioAntes(p,'.8rem')){
+    html+='<div style="margin:-4px 0 12px;text-align:center;">'+bloquePrecioAntes(p,'.8rem')+'</div>';
+  }
   // características (si tiene)
   if(p.caracteristicas){
-    html+='<div style="background:var(--bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.8rem;color:var(--az);white-space:pre-line;line-height:1.5;">'+p.caracteristicas.replace(/</g,'&lt;')+'</div>';
+    html+='<div style="background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:.8rem;color:var(--az);white-space:pre-line;line-height:1.55;border:1px solid var(--bor);">'+p.caracteristicas.replace(/</g,'&lt;')+'</div>';
   }
-  // cuotas
-  html+='<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:6px;">Planes de cuotas</div>';
+  // ═══ PLANES DE CUOTAS ═══
+  html+='<div style="font-size:.66rem;font-weight:800;color:var(--sub);letter-spacing:1px;margin-bottom:8px;">ELEGÍ TU PLAN</div>';
   // plan SIN INTERÉS destacado (si el producto lo tiene)
   if(p.sinInteres){
     var nsiD=parseInt(p.sinInteres,10);
     var vsiD=Math.round(p.venta/nsiD/1000)*1000;
-    html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 2px 8px rgba(255,122,0,.3);">'
-      +'<div style="font-size:.7rem;font-weight:800;opacity:.9;">✨ OFERTA ESPECIAL</div>'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">'
-      +'<span style="font-weight:800;">'+nsiD+' cuotas SIN INTERÉS</span>'
-      +'<span style="font-weight:900;font-size:1.15rem;">'+nsiD+' x '+fmt(vsiD)+'</span></div></div>';
+    html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 3px 10px rgba(255,122,0,.3);">'
+      +'<div style="font-size:.62rem;font-weight:900;opacity:.92;letter-spacing:.5px;">✨ OFERTA ESPECIAL</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;">'
+      +'<span style="font-weight:800;font-size:.85rem;">'+nsiD+' cuotas SIN INTERÉS</span>'
+      +'<span style="font-weight:900;font-size:1.1rem;">'+fmt(vsiD)+'</span></div></div>';
   }
   for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
       var vc=Math.round(calcularTotalPlan(p.venta,n)/n/1000)*1000;
-      html+='<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bor);">'
-        +'<span style="font-weight:700;color:var(--az);">'+n+' cuotas</span>'
-        +'<span style="font-weight:900;color:var(--nar);">'+n+' x '+fmt(vc)+'</span></div>';
+      var esLaMejor=(_mejor && _mejor.n===n && !_mejor.sinInteres);
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px;margin-bottom:6px;border-radius:11px;background:'+(esLaMejor?'#FFF4E8':'var(--wh)')+';border:1.5px solid '+(esLaMejor?'var(--nar)':'var(--bor)')+';">'
+        +'<span style="font-weight:800;color:var(--az);font-size:.82rem;">'+n+' cuotas'+(esLaMejor?' <span style="color:var(--nar);font-size:.62rem;font-weight:900;">★ RECOMENDADO</span>':'')+'</span>'
+        +'<span style="font-weight:900;color:var(--nar);font-size:.98rem;">'+fmt(vc)+'</span></div>';
     }
   }
   var pid="'"+p.id+"'";
   var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
   // acciones
   if(!esVend){
-    html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar ahora</button>';
+    html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);font-weight:900;padding:15px;font-size:.92rem;box-shadow:0 4px 14px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar ahora</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--bor);" onclick="agregarAlCarrito('+pid+')">➕ Agregar al carrito</button>';
   }else{
     html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);" onclick="agregarAlCarrito('+pid+')">🛒 Agregar al carrito</button>';
@@ -3763,10 +4774,9 @@ function ayudaAbrir(){
       {ic:'☁️',t:'Todo se guarda solo',d:'Los cambios se sincronizan en la nube. Angela y los demás ven lo mismo que vos.'}
     ];
   } else if(esRev){
-    icono='🤝'; titulo='Instrucciones para Revendedores'; subtitulo='Cómo trabajar con la tienda:';
+    icono='🤝'; titulo='Instrucciones para Asesores de ventas'; subtitulo='Cómo trabajar con la tienda:';
     pasos=[
       {ic:'📋',t:'Pegar precio',d:'En la pestaña "Pegar precio", pegá el mensaje con el precio y te arma las cuotas y un texto listo para responder.'},
-      {ic:'💳',t:'Ver cuotas',d:'En "Cuotas" calculás rápido cuánto sale cualquier producto en cuotas para pasarle al cliente.'},
       {ic:'🔍',t:'Buscar productos',d:'Buscá en el catálogo lo que el cliente necesita y compartí con el botón "Compartir".'},
       {ic:'💰',t:'Tu ganancia',d:'Vos vendés al precio de la tienda. Consultá con el admin tu comisión por cada venta.'},
       {ic:'📤',t:'Compartir',d:'Cada producto tiene "Compartir" con foto y precio, listo para mandar por WhatsApp.'}
@@ -5249,6 +6259,44 @@ function ordenarPorMarca(lista){
   });
   return resultado;
 }
+// ═══ ACTUALIZAR DÓLAR: recalcula todos los celulares cargados en USD ═══
+// Evita tener que volver a pegar la lista cuando el mayorista sube el dólar.
+function actualizarDolarCelus(){
+  var celus=cargarListaCelus();
+  var enUsd=celus.filter(function(c){ return c.usd>0; });
+  if(!celus.length){ alert('Primero cargá la lista de celulares.'); return; }
+  if(!enUsd.length){
+    alert('Ningún celular está guardado en dólares.\n\nPara usar esta función, cargá la lista con la opción "💵 Precio en USD". A partir de ahí vas a poder cambiar el dólar sin volver a pegar nada.');
+    return;
+  }
+  // cotización anterior (la del último celular que la tenga guardada)
+  var cotizAnt=0;
+  for(var i=enUsd.length-1;i>=0;i--){ if(enUsd[i].cotizUsada>0){ cotizAnt=enUsd[i].cotizUsada; break; } }
+  var txt='💵 ACTUALIZAR DÓLAR\n\n'
+    +'Tenés '+enUsd.length+' celular(es) guardados en dólares.'
+    +(cotizAnt?('\n\nDólar actual: $'+cotizAnt):'')
+    +'\n\nEscribí el nuevo valor del dólar y recalculo todos los precios solo.';
+  var nuevo=prompt(txt, cotizAnt||'');
+  if(nuevo===null) return;
+  var cotiz=parseFloat(String(nuevo).replace(/\./g,'').replace(/,/g,'.'))||0;
+  if(cotiz<=0){ alert('Poné un valor de dólar válido.'); return; }
+
+  var cambiados=0;
+  celus.forEach(function(c){
+    if(c.usd>0){
+      var costo=c.usd*cotiz;
+      c.precio=markupVentaCRM(costo);
+      c.cotizUsada=cotiz;
+      cambiados++;
+    }
+  });
+  try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
+  subirCelusNube(celus);
+  if(typeof renderListaCelus==='function') renderListaCelus();
+  if(typeof tiendaInit==='function' && document.getElementById('tab-tienda') && document.getElementById('tab-tienda').classList.contains('on')) tiendaInit();
+  alert('✅ Listo!\n\nActualicé '+cambiados+' celular(es) con el dólar a $'+cotiz.toLocaleString('es-AR')+'.\n\nLos precios ya están al día. No hace falta pegar nada. 🐝');
+}
+
 function guardarListaCelus(){
   var txt=document.getElementById('inp-celulista').value||'';
   var lineas=preprocesarLineasCelus(txt);
@@ -5260,7 +6308,13 @@ function guardarListaCelus(){
   lineas.forEach(function(l){
     var c=parsearCeluLinea(l, esUSD);
     if(!c){ descartadas.push(l); return; }
-    if(esUSD){var costo=c.precio*cotiz;c.precio=markupVentaCRM(costo);}
+    if(esUSD){
+      // Guardamos el precio en dólares para poder recalcular después sin volver a pegar
+      c.usd = c.precio;
+      c.cotizUsada = cotiz;
+      var costo=c.precio*cotiz;
+      c.precio=markupVentaCRM(costo);
+    }
     nuevos.push(c);
   });
   // aviso de diagnóstico si se descartaron líneas
@@ -5788,26 +6842,6 @@ function calcContado(){
   var el=document.getElementById('res-contado');el.innerHTML=html;el.className='tab-results';
 }
 
-function calcCuotas(){
-  var precio=parseFloat(document.getElementById('inp-cuotas').value)||0;
-  if(!precio){document.getElementById('res-cuotas').innerHTML='<div class="empty-icon">📅</div><p>Ingresá el precio de venta para ver los planes de cuotas</p>';document.getElementById('res-cuotas').className='empty-state';return;}
-  var html='<div class="result-contado"><div class="result-label">Precio de venta</div><div class="result-precio">'+fmt(precio)+'</div></div>';
-  html+='<div class="cuotas-grid"><div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Planes de financiamiento</div>';
-  var hayPlanes=false;
-  for(var n=2;n<=12;n++){
-    if(planesConfig[n].activo){
-      hayPlanes=true;var totalPlan=calcularTotalPlan(precio,n);var valorCuota=Math.round(totalPlan/n/1000)*1000;
-      html+='<div class="cuota-card c'+n+'"><div class="cuota-info"><div class="cuota-n">'+n+' cuotas fijas</div></div><div><div class="cuota-val">'+fmt(valorCuota)+'</div></div></div>';
-    }
-  }
-  if(!hayPlanes)html+='<div style="text-align:center;color:var(--sub);font-size:.75rem;padding:14px">No hay planes de cuotas activados. Activalos desde la pestaña Contado (admin).</div>';
-  html+='</div>';
-  html+='<div style="background:#EEF2FF;border-radius:10px;padding:10px 12px;font-size:.65rem;color:var(--az);font-weight:600">⭐ El cliente retira pagando solo la 1ra cuota ese mismo día</div>';
-  var msg=armarMensajeAmarango('Producto', precio, armarCuotasLines(precio));
-  html+='<div class="share-row"><button class="share-btn wa" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\')">💬 Compartir por WhatsApp</button></div>';
-  var el=document.getElementById('res-cuotas');el.innerHTML=html;el.className='tab-results';
-}
-
 var metodoPago='contado';
 function renderMetodosPago(){
   var el=document.getElementById('met-pago-list');if(!el)return;
@@ -5820,7 +6854,7 @@ function renderMetodosPago(){
 function setMetodoPago(m){metodoPago=m;renderMetodosPago();calcComisiones();}
 function calcComisiones(){
   var precio=parseFloat(document.getElementById('inp-comisiones').value)||0;
-  if(!precio){document.getElementById('res-comisiones').innerHTML='<div class="empty-icon">🤝</div><p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del revendedor</p>';document.getElementById('res-comisiones').className='empty-state';return;}
+  if(!precio){document.getElementById('res-comisiones').innerHTML='<div class="empty-icon">🤝</div><p>Ingresá el precio contado y elegí el método de pago del cliente para calcular la comisión del asesor de ventas</p>';document.getElementById('res-comisiones').className='empty-state';return;}
   var pctComContado=parseFloat(document.getElementById('pct-com-contado').value)||10;
   var pctComCuotas=parseFloat(document.getElementById('pct-com-cuotas').value)||15;
   var limiteExcepcion=parseFloat(document.getElementById('limite-excepcion').value)||10000;
@@ -5835,7 +6869,7 @@ function calcComisiones(){
   var montoPorPago=Math.round(comisionTotal/partesPago/500)*500;
   var html='';
   html+='<div class="result-contado"><div class="result-label">Precio de venta al contado</div><div class="result-precio">'+fmt(precio)+'</div></div>';
-  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🤝 Comisión del revendedor</div>';
+  html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🤝 Comisión del asesor de ventas</div>';
   html+='<div class="comision-card" style="border-left:4px solid var(--gr)"><div class="com-info"><div class="com-n">Comisión total ('+pctComision+'%)</div><div class="com-desc">'+(metodoPago==='contado'?'Venta al contado':'Venta financiada en cuotas')+'</div></div><div class="com-val">'+fmt(comisionTotal)+'</div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;margin-top:14px">💵 Distribución del pago</div>';
   for(var i=1;i<=partesPago;i++){
@@ -5923,7 +6957,7 @@ function calcInversion(){
   html+='<div class="inv-row"><span class="inv-label">Recargo aplicado</span><span class="inv-val white">'+pct+'%</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Precio de venta (contado)</span><span class="inv-val">'+fmt(precio)+'</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Total cobrado ('+(planInversion==='contado'?'contado':planInversion+' cuotas')+')</span><span class="inv-val">'+fmt(totalPlan)+'</span></div>';
-  html+='<div class="inv-row"><span class="inv-label">Comisión revendedor ('+(esCuotas?'15':'10')+'%)</span><span class="inv-val white">'+fmt(comisionTotal)+'</span></div>';
+  html+='<div class="inv-row"><span class="inv-label">Comisión asesor de ventas ('+(esCuotas?'15':'10')+'%)</span><span class="inv-val white">'+fmt(comisionTotal)+'</span></div>';
   html+='<div class="inv-row"><span class="inv-label">Ganancia neta del plan</span><span class="inv-val">'+fmt(ganancia)+'</span></div></div>';
   html+='<div style="font-size:.65rem;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💰 Cálculo de inversión real (fórmula AmarangoElectro)</div>';
   html+='<div class="comision-card"><div class="com-info"><div class="com-n">Precio de costo</div></div><div class="com-val" style="color:var(--az)">'+fmt(costo)+'</div></div>';
@@ -5986,6 +7020,8 @@ function cerrarBannerInstall(){
 })();
 
 // La tienda es la pestaña de inicio (pública): inicializarla al cargar
+try{ aplicarTemaTienda(temaTiendaActual, false); }catch(e){}
+try{ actualizarTextoSonido(); }catch(e){}
 try{ tiendaInit(); }catch(e){}
 
 // Ocultar la pantalla de bienvenida a los ~1.8 segundos
