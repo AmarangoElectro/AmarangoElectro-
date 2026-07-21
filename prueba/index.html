@@ -2815,7 +2815,8 @@ function abrirPanelDueno(){
     +botonPanel('📊','Control de stock','Qué falta y qué te están pidiendo','controlstock')
 
     +seccionPanel('Tus productos')
-    +botonPanel('⚙️','Cargar catálogo','Pegá tu lista o subí un PDF','cargar')
+    +botonPanel('➕','Agregar producto','Uno solo, con su foto y precio','cargaruno')
+    +botonPanel('📥','Cargar lista completa','Pegá la lista del proveedor o subí un PDF','cargar')
     +botonPanel('✏️','Editar precios','Cambiá todos de una, o subilos un %','editarprecios')
     +botonPanel('📦','Stock','Marcá qué hay y qué no','stock')
     +botonPanel('🗑️','Borrar productos','Elegí varios y borralos de una vez','borrarvarios')
@@ -2871,6 +2872,7 @@ function abrirModuloDueno(destino){
   if(destino==='porcategoria'){ abrirPorCategoria(); return; }
   if(destino==='editarprecios'){ abrirEditarPrecios(); return; }
   if(destino==='listaprecios'){ abrirListaPrecios(); return; }
+  if(destino==='cargaruno'){ abrirCargarUno(); return; }
   if(destino==='cargar'){ abrirCargar(); return; }
   if(destino==='stock'){ abrirGestionStock(); return; }
   if(destino==='calcganancia'){ abrirCalcGanancia(); return; }
@@ -7160,6 +7162,7 @@ function renderBotonesDetalle(idx){
     html+='<div style="display:flex;gap:8px;margin-top:10px">'
       +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">✏️ Editar</button>'
       +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🖼️ Foto</button>'
+      +'<button onclick="duplicarProducto('+idx+')" style="background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.84rem;width:100%;margin-bottom:8px">📑 Duplicar producto</button>'
       +'<button onclick="borrarProducto('+idx+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:11px;padding:12px 15px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem">🗑️</button>'
       +'</div>';
   }
@@ -7509,6 +7512,23 @@ function confirmarBorrarVarios(){
   toastCarrito('🗑️ '+n+' producto'+(n>1?'s':'')+' borrado'+(n>1?'s':''));
   _selBorrar = [];
   pintarBorrarVarios();
+}
+
+/* 📑 Duplicar un producto — para cargar variantes rápido
+   (mismo producto en otro color, otra medida, otro sabor) */
+function duplicarProducto(idx){
+  var p = PRODUCTOS[idx]; if(!p) return;
+  var copia = JSON.parse(JSON.stringify(p));
+  copia.id = 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  copia.nombre = p.nombre + ' (copia)';
+  copia.fechaPrecio = Date.now();
+  delete copia.delDia;      // que no queden dos productos del día
+  PRODUCTOS.splice(idx+1, 0, copia);
+  guardarCatalogo();
+  try{ render(); }catch(e){}
+  try{ sonar('agregar'); }catch(e){}
+  toastCarrito('📑 Duplicado — editalo y cambiale el nombre');
+  setTimeout(function(){ try{ editarProducto(idx+1); }catch(e){} }, 400);
 }
 
 function borrarProducto(idx){
