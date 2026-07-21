@@ -1699,25 +1699,33 @@ function abrirAyuda(){
   var html='';
   function tarjeta(ico,t,s){ return '<div style="background:#F7F8FA;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px;display:flex;gap:11px"><span style="font-size:1.4rem">'+ico+'</span><div><div style="font-weight:900;color:var(--az);font-size:.86rem">'+t+'</div><div style="font-size:.74rem;color:var(--sub);line-height:1.4;margin-top:2px">'+s+'</div></div></div>'; }
 
+  var may = (typeof esMayorista==='function' && esMayorista());
+
   if(rol==='admin'){
-    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">👑</div><div style="font-weight:900;color:var(--az);font-size:1rem">Instrucciones para Administradores</div></div>'
-      +tarjeta('➕','Cargar productos','Entrá al panel → «Cargar producto». Podés cargar uno o pegar una lista completa de golpe.')
-      +tarjeta('📋','Pegar lista','Pegá la lista del mayorista tal cual te la mandan. Entiendo USD y pesos, y aplico tu markup solo.')
-      +tarjeta('🎨','Armar placas','Sacá precios y armá placas para compartir por WhatsApp, desde costo, venta o dólar.')
-      +tarjeta('⚙️','Configuración','Cambiá tu logo, nombre, colores, cuotas y las claves. Se aplica a toda la tienda.')
-      +tarjeta('☁️','Se guarda solo','Todo se sincroniza en la nube. Tu equipo ve lo mismo que vos.');
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">👑</div><div style="font-weight:900;color:var(--az);font-size:1.05rem">Sos el dueño</div><div style="font-size:.78rem;color:var(--sub)">Todo lo que podés hacer</div></div>'
+      +tarjeta('⚙️','Cargá tus productos','Panel → Cargar catálogo. Pegá la lista del proveedor o subí el PDF: yo saco los productos y aplico tu markup.')
+      +tarjeta('✏️','Cambiá precios rápido','Panel → Editar precios. Cambiás todos en una pantalla, o subís todo un % de golpe cuando aumenta el proveedor.')
+      +tarjeta('📊','Mirá qué falta','Panel → Control de stock. Te dice qué está sin stock Y te están pidiendo. Con un botón le mandás la lista al proveedor.')
+      +(may?tarjeta('🗓️','Organizá las visitas','Panel → Visitas de hoy. Asignás días a cada cliente y sabés a quién visitar, con su dirección y último pedido.'):'')
+      +tarjeta('👥','Tus clientes','Panel → Clientes. Editás, borrás, ves cuánto compró cada uno y le asignás días de visita.')
+      +tarjeta('🎨','Tu marca','Panel → Configuración. Cambiás nombre, colores, logo, frase y las claves. Se aplica a toda la tienda.')
+      +tarjeta('💾','Respaldá seguido','Panel → Copia de seguridad. Bajate el archivo una vez por semana y guardalo. Es tu red de seguridad.');
   } else if(rol==='revendedor'){
-    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🤝</div><div style="font-weight:900;color:var(--az);font-size:1rem">Instrucciones para Revendedores</div></div>'
-      +tarjeta('🧮','Calculadora','Poné el precio de venta y te saco las cuotas al toque.')
-      +tarjeta('💬','Compartir','Con un botón mandás el producto y las cuotas por WhatsApp.')
-      +tarjeta('🏪','La tienda','Navegá el catálogo y compartí cualquier producto con tus clientes.');
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🤝</div><div style="font-weight:900;color:var(--az);font-size:1.05rem">Sos asesor</div><div style="font-size:.78rem;color:var(--sub)">Cómo armar pedidos</div></div>'
+      +(may?tarjeta('👥','Elegí tu cliente','Tocá el botón redondo de abajo a la derecha y elegí a quién estás atendiendo. Vas a ver siempre su nombre mientras armás el pedido.'):'')
+      +tarjeta('🛒','Sumá al pedido','En cada producto tenés − 1 + para poner la cantidad y el botón «Sumar al pedido». Recorré el catálogo cargando todo.')
+      +tarjeta('⚡','Pedido rápido','Menú Más → Pedido rápido. Escribís «10 barritas, 5 mentitas» y te arma el pedido solo.')
+      +tarjeta('🔁','Repetí lo de siempre','Si el cliente ya compró, con un toque le repetís su último pedido completo.')
+      +tarjeta('📤','Mandá el pedido','Cuando terminás, tocás el carrito y elegís a quién mandárselo. Queda guardado en la app y llega por WhatsApp.')
+      +(may?tarjeta('🗓️','Tus visitas','Panel → Visitas de hoy: quiénes te tocan hoy, su dirección en el mapa y hace cuánto no compran.'):'');
   } else {
-    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🛒</div><div style="font-weight:900;color:var(--az);font-size:1rem">¿Cómo comprar?</div></div>'
-      +tarjeta('🔍','Buscá lo tuyo','Usá el buscador o tocá una categoría para ver los productos.')
-      +tarjeta('💳','Mirá las cuotas','Tocá un producto y vas a ver el precio contado y todas las cuotas fijas.')
-      +tarjeta('❤️','Guardá favoritos','Tocá el corazón para guardar lo que te gusta y encontrarlo después.')
-      +tarjeta('💬','Consultanos','Tocá «Consultar» y hablás con nosotros directo por WhatsApp.')
-      +'<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);border-radius:12px;padding:14px;text-align:center;color:#fff;margin-top:6px"><div style="font-weight:900;font-size:.9rem">¿Dudas? Escribinos 🐝</div><div style="font-size:.74rem;margin-top:2px">Estamos para ayudarte</div></div>';
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🛒</div><div style="font-weight:900;color:var(--az);font-size:1.05rem">¿Cómo comprar?</div><div style="font-size:.78rem;color:var(--sub)">Es fácil, mirá</div></div>'
+      +tarjeta('🔍','Buscá lo que necesitás','Usá el buscador de arriba o tocá una categoría. También podés filtrar por marca.')
+      +tarjeta('🔢','Elegí la cantidad','En cada producto tenés − 1 + para poner cuánto querés, y después «Agregar al carrito».')
+      +(may?tarjeta('💰','Mirá el precio por unidad','Debajo del precio del bulto te digo cuánto te sale cada unidad. Así sacás tu cuenta al toque.'):'')
+      +tarjeta('⚡','Pedido rápido','Menú Más → Pedido rápido. Escribí tu lista como te salga («10 barritas, 5 mentitas») y te armo el pedido.')
+      +tarjeta('🛒','Revisá y enviá','Tocá el carrito, mirá el total y enviá. Te pedimos tus datos una sola vez.')
+      +tarjeta('🔁','La próxima, más fácil','Después del primer pedido, con un toque repetís lo mismo.');
   }
 
   // ===== acceso discreto, abajo de todo =====
@@ -2800,16 +2808,37 @@ function abrirPanelDueno(){
         +'</button>'
       : '')
     +'<div style="display:grid;gap:10px">'
-    +botonPanel('🎨','Armar placas','Sacá precios y armá placas para compartir','placas')
-    +botonPanel('🆕','Crear tienda para un amigo','Armá una tienda vacía y mandale el link','tiendanueva')
-    +botonPanel('🏷️','Ajustes por categoría','Markup y cantidades de cada categoría','porcategoria')
-    +botonPanel('✏️','Editar precios','Cambiá todos los precios de una, o subilos un %','editarprecios')
+    +seccionPanel('Día a día')
+    +botonPanel('🗓️','Visitas de hoy','A quién visitar y su último pedido','visitas')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')
+    +botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')
+    +botonPanel('📊','Control de stock','Qué falta y qué te están pidiendo','controlstock')
+
+    +seccionPanel('Tus productos')
+    +botonPanel('⚙️','Cargar catálogo','Pegá tu lista o subí un PDF','cargar')
+    +botonPanel('✏️','Editar precios','Cambiá todos de una, o subilos un %','editarprecios')
+    +botonPanel('📦','Stock','Marcá qué hay y qué no','stock')
+    +botonPanel('🗑️','Borrar productos','Elegí varios y borralos de una vez','borrarvarios')
+    +botonPanel('🏷️','Ajustes por categoría','Markup y cantidades de cada una','porcategoria')
+
+    +seccionPanel('Para vender')
     +botonPanel('📋','Lista de precios','Mandá tu lista completa por WhatsApp','listaprecios')
-    +botonPanel('⚙️','Cargar catálogo','Pegá tus productos y suben a la tienda','cargar')
-    +botonPanel('📦','Stock','Marcá qué hay y qué se agotó, de a uno o todos','stock')
-    +botonPanel('🧮','Calculadora de ganancia','Pegá el costo, poné tu % y te da el precio','calcganancia')
-    +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')+botonPanel('🗓️','Visitas de hoy','A quién visitar y su último pedido','visitas')+botonPanel('📊','Control de stock','Qué falta y qué te están pidiendo','controlstock')+botonPanel('🗑️','Borrar productos','Elegí varios y borralos de una vez','borrarvarios')
+    +botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo','pdf')
+    +botonPanel('🎨','Armar placas','Sacá precios y armá placas','placas')
+    +botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')
+
+    +seccionPanel('Tu negocio')
+    +botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')
+    +botonPanel('🧮','Calculadora de ganancia','Cuánto ganás por venta','calcganancia')
+    +botonPanel('💰','Comisiones','Cuánto gana tu equipo','comisiones')
+    +botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')
+
+    +seccionPanel('Ajustes')
+    +botonPanel('❓','Cómo usar la app','Guía rápida de todo lo que podés hacer','ayuda')
+    +botonPanel('⚙️','Configuración','Tu marca, colores y datos','config')
+    +botonPanel('💾','Copia de seguridad','Guardá todo por si algo pasa','backup')
+    +botonPanel('🆕','Crear tienda para un amigo','Armá una tienda vacía','tiendanueva')
+    +botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -2819,6 +2848,9 @@ function abrirPanelDueno(){
     +'<button onclick="toggleVerComoCliente()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:12px">👁️ Ver como cliente</button>'+'<button onclick="cerrarSesion()" style="width:100%;background:#FEF2F2;color:#DC2626;border:1.5px solid #FECACA;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:8px">🔒 Cerrar sesión</button>'
     +'<div style="text-align:center;font-size:.66rem;color:var(--sub);margin-top:10px">🐝 Panel privado</div>';
   document.getElementById('adminOverlay').classList.add('on'); empujarPantalla('admin', cerrarAdmin);
+}
+function seccionPanel(txt){
+  return '<div style="font-size:.66rem;font-weight:900;color:var(--sub);text-transform:uppercase;letter-spacing:1px;margin:16px 2px 7px">'+txt+'</div>';
 }
 function botonPanel(ico, titulo, sub, destino){
   return '<button onclick="abrirModuloDueno(\''+destino+'\')" style="width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:13px">'
@@ -2831,6 +2863,7 @@ function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
+  if(destino==='ayuda'){ try{cerrarAdmin()}catch(e){}; abrirAyuda(); return; }
   if(destino==='visitas'){ abrirVisitasHoy(); return; }
   if(destino==='controlstock'){ abrirControlStock(); return; }
   if(destino==='borrarvarios'){ abrirBorrarVarios(); return; }
@@ -6577,11 +6610,14 @@ function renderSaludo(mostrar){
   if(!mostrar){ wrap.innerHTML=''; return; }
   var h=new Date().getHours();
   var emo, hola, sub;
-  if(h>=6 && h<13){ emo='🌅'; hola='¡Buenos días!'; sub='Arrancá el día equipando tu casa en cuotas fijas'; }
-  else if(h>=13 && h<20){ emo='☀️'; hola='¡Buenas tardes!'; sub='Mirá lo nuevo y calculá tus cuotas al toque'; }
-  else { emo='🌙'; hola='¡Buenas noches!'; sub='Tranqui, elegí lo tuyo y te lo llevás en cuotas'; }
+  if(h>=6 && h<13){ emo='🌅'; hola='¡Buenos días!'; }
+  else if(h>=13 && h<20){ emo='☀️'; hola='¡Buenas tardes!'; }
+  else { emo='🌙'; hola='¡Buenas noches!'; }
+  // la frase de abajo la pone cada dueño en Configuración (o no pone nada)
+  sub = (CONFIG && CONFIG.eslogan) ? CONFIG.eslogan : '';
   wrap.innerHTML='<div class="saludo"><span class="emo">'+emo+'</span>'
-    +'<div class="txt"><div class="hola">'+hola+'</div><div class="sub">'+sub+'</div></div></div>';
+    +'<div class="txt"><div class="hola">'+hola+'</div>'
+    +(sub?'<div class="sub">'+sub+'</div>':'')+'</div></div>';
 }
 
 /* Producto del día (marcado con delDia) + Destacados (marcado con destacado) */
