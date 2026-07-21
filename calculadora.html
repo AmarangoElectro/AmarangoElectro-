@@ -2249,7 +2249,31 @@ function tiendaAplicarModo(){
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
-  var cargarFab=document.getElementById('cargar-fab'); if(cargarFab) cargarFab.style.display = tiendaEsAdmin?'flex':'none';
+  // 🧾 El botón flotante cambia según quién sea:
+  //    Asesor → agregar pedido (cliente + productos) · Admin → cargar producto
+  var cargarFab=document.getElementById('cargar-fab');
+  if(cargarFab){
+    var esAsesor = (typeof revUnlocked!=='undefined' && revUnlocked===true) && !tiendaEsAdmin;
+    if(esAsesor){
+      cargarFab.style.display='flex';
+      cargarFab.textContent='🧾';
+      cargarFab.title='Agregar pedido';
+      cargarFab.onclick=function(){ abrirPedido(); };
+      cargarFab.style.background='#0B2D6B';
+      cargarFab.style.color='#fff';
+      cargarFab.style.borderColor='#FF7A00';
+    } else if(tiendaEsAdmin){
+      cargarFab.style.display='flex';
+      cargarFab.textContent='🐝';
+      cargarFab.title='Cargar producto';
+      cargarFab.onclick=function(){ tiendaAbrirCarga(); };
+      cargarFab.style.background='#ffffff';
+      cargarFab.style.color='';
+      cargarFab.style.borderColor='#0B2D6B';
+    } else {
+      cargarFab.style.display='none';
+    }
+  }
   var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab){ var ruOn=(localStorage.getItem('ae_ruleta_on')==='1'); ruletaFab.style.display=(ruOn && !tiendaEsAdmin)?'flex':'none'; }
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
@@ -2904,8 +2928,8 @@ function abrirPedido(){
   var html=''
     +'<div style="text-align:center;margin-bottom:14px;">'
     +'  <div style="font-size:2.2rem;">🧾</div>'
-    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Cargar pedido</h2>'
-    +'  <div style="color:var(--sub);font-size:.74rem;font-weight:600;">Se envía por WhatsApp listo para el sistema</div>'
+    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Agregar pedido</h2>'
+    +'  <div style="color:var(--sub);font-size:.74rem;font-weight:600;">Cargá el cliente y su pedido. Se envía listo para el sistema.</div>'
     +'</div>'
 
     +'<div style="background:#EEF4FF;border-radius:12px;padding:12px;margin-bottom:14px;">'
