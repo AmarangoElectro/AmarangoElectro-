@@ -1220,17 +1220,75 @@ function cerrarCarrito(){ document.getElementById('carritoOverlay').classList.re
 function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]); abrirCarrito(); } }
 
 /* Pedir: manda TODO junto por WhatsApp, eligiendo vendedor */
-function pedirCarrito(){ sonar('exito');
+/* ═══════ 📋 DATOS DEL CLIENTE antes de mandar el pedido ═══════
+   Se piden una sola vez: después quedan guardados y el pedido sale directo. */
+function datosCliente(){
+  try{ return JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){ return null; }
+}
+function guardarDatosCliente(d){
+  try{ localStorage.setItem(lsKey('ae_cliente'), JSON.stringify(d)); }catch(e){}
+  // además lo sumo a la lista de clientes de la tienda (para que el dueño lo vea)
+  try{
+    cargarClientes(function(){
+      var ya = (CLIENTES||[]).find(function(x){ return (x.wa||'')===d.wa && d.wa; });
+      if(ya){ Object.assign(ya, d); }
+      else { CLIENTES.unshift(Object.assign({id:'cli'+Date.now().toString(36)}, d)); }
+      guardarClientes();
+    });
+  }catch(e){}
+}
+function pedirDatosYEnviar(){
+  var d = datosCliente() || {};
+  var campo = function(id,lbl,val,ph,tipo){
+    return '<div style="margin-bottom:10px"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">'+lbl+'</label>'
+      +'<input id="'+id+'" type="'+(tipo||'text')+'" value="'+(val||'')+'" placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px;font-family:inherit;font-size:.9rem;outline:none"></div>';
+  };
+  var tot = totalCarrito();
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📋 Tus datos</div>'
+    +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Los pedimos una sola vez. La próxima ya salen solos.</div>'
+    +campo('dc_nombre','Tu nombre *', d.nombre, 'Ej: Juan Pérez')
+    +campo('dc_local','Nombre del local', d.loc, 'Ej: Kiosco La Esquina')
+    +campo('dc_dir','Dirección de entrega', d.dir, 'Calle, número, localidad')
+    +campo('dc_wa','WhatsApp *', d.wa, '11 2345 6789', 'tel')
+    +'<div style="background:#F5F8FF;border-radius:11px;padding:12px;margin:6px 0 14px;display:flex;justify-content:space-between;align-items:center">'
+      +'<span style="font-size:.82rem;font-weight:700;color:var(--sub)">Total del pedido</span>'
+      +'<b style="font-size:1.1rem;color:var(--az)">'+fmt(tot+costoEnvio(tot))+'</b></div>'
+    +'<button onclick="confirmarPedidoCliente()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:16px;font-size:.98rem;font-weight:900;cursor:pointer;font-family:inherit">✅ Confirmar pedido</button>'
+    +'<button onclick="abrirCarrito()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver al carrito</button>';
+}
+function confirmarPedidoCliente(){
+  var g = function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  var d = { nombre:g('dc_nombre'), loc:g('dc_local'), dir:g('dc_dir'), wa:g('dc_wa') };
+  if(!d.nombre){ alert('Poné tu nombre.'); return; }
+  if(!d.wa){ alert('Poné tu WhatsApp para que te podamos contestar.'); return; }
+  guardarDatosCliente(d);
+  pedirCarrito(true);
+}
+
+function pedirCarrito(yaTengoDatos){ sonar('exito');
   var c=cargarCarrito(); if(!c.length)return;
   var tot=totalCarrito();
   var falta=faltaParaMinimo(tot);
   if(falta>0){ alert('El pedido mínimo es '+fmt(CONFIG.envio.minimo)+'. Te faltan '+fmt(falta)+'.'); return; }
+  // 📋 si todavía no tenemos sus datos, los pedimos primero
+  if(!yaTengoDatos && !datosCliente()){ pedirDatosYEnviar(); return; }
   var env=costoEnvio(tot);
   var lineas=c.map(function(it){ return '• '+it.nombre+(it.cant>1?' x'+it.cant:'')+' — '+fmt(it.venta*(it.cant||1)); });
   if(env>0) lineas.push('🚚 Envío — '+fmt(env));
   tot = tot + env;
   var cuotasL=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(tot,n)); });
-  var msg='Hola! Quiero pedir esto 🛒\n\n'+lineas.join('\n')+'\n\n*TOTAL CONTADO: '+fmt(tot)+'*\n\n'+cuotasL.join('\n')+'\n\n¿Me confirmás disponibilidad? 🐝';
+  // 📋 datos del cliente en el mensaje (para saber de quién es el pedido)
+  var dc = datosCliente();
+  var encabezado = '';
+  if(dc){
+    encabezado = '*PEDIDO DE:*\n'
+      + '👤 ' + dc.nombre + '\n'
+      + (dc.loc ? '🏪 ' + dc.loc + '\n' : '')
+      + (dc.dir ? '📍 ' + dc.dir + '\n' : '')
+      + '\n';
+  }
+  var msg='Hola! Quiero pedir esto 🛒\n\n'+encabezado+lineas.join('\n')+'\n\n*TOTAL CONTADO: '+fmt(tot)+'*\n\n'+cuotasL.join('\n')+'\n\n¿Me confirmás disponibilidad? 🐝';
 
   // guarda el pedido del carrito en el historial
   window._pedidoPendiente={ items:c.map(function(it){return {nombre:it.nombre, venta:it.venta, cant:it.cant||1};}), total:tot };
@@ -3506,13 +3564,15 @@ var PEDIDOS=[];
 
 function guardarPedido(items, total, contacto){
   var cli=null;
-  try{ cli=JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){}
+  // 👔 si un asesor está armando el pedido, va a nombre de SU cliente
+  if(typeof _clienteDelPedido!=='undefined' && _clienteDelPedido){ cli=_clienteDelPedido; }
+  else { try{ cli=JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){} }
   var ped={
     id:'ped'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
     fecha: Date.now(),
     items: items,                          // [{nombre, venta, cant}]
     total: total,
-    cliente: cli ? {nombre:cli.nombre, wa:cli.wa, loc:cli.loc} : null,
+    cliente: cli ? {nombre:cli.nombre, wa:cli.wa, loc:cli.loc, dir:cli.dir} : null,
     atendio: contacto || '',               // con quién habló
     estado: 'nuevo'                        // nuevo · vendido · perdido
   };
@@ -3535,13 +3595,95 @@ function guardarPedidos(){
   if(sb){ sb.from('tienda_catalogo').upsert({id:keyPedidos(), datos:PEDIDOS}).then(function(){}).catch(function(){}); }
 }
 
+/* ═══════ 👔 EL ASESOR ARMA EL PEDIDO POR EL CLIENTE ═══════ */
+var _clienteDelPedido = null;
+function armarPedidoParaCliente(){
+  cargarClientes(function(){
+    var lista = (CLIENTES||[]).map(function(c,i){
+      return '<div onclick="elegirClientePedido('+i+')" style="display:flex;align-items:center;gap:10px;padding:12px;border-bottom:1px solid var(--line);cursor:pointer">'
+        +'<div style="width:36px;height:36px;border-radius:50%;background:#F5F8FF;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--az);flex:0 0 auto">'+(c.nombre||'?').charAt(0).toUpperCase()+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:.86rem;font-weight:800;color:var(--txt)">'+(c.nombre||'Sin nombre')+'</div>'
+        +'<div style="font-size:.72rem;color:var(--sub)">'+(c.loc||c.dir||c.wa||'')+'</div></div>'
+        +'<span style="color:var(--az);font-size:1.2rem">›</span></div>';
+    }).join('');
+    document.getElementById('adminBody').innerHTML =
+       '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">👔 ¿Para qué cliente?</div>'
+      +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:12px">Elegí el cliente y después cargá los productos. El pedido queda a su nombre.</div>'
+      +'<button onclick="nuevoClienteRapido()" style="width:100%;background:#F5F8FF;border:1.5px dashed var(--az);color:var(--az);border-radius:11px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px">➕ Cliente nuevo</button>'
+      +(lista ? '<div style="background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;max-height:340px;overflow-y:auto">'+lista+'</div>'
+              : '<div style="text-align:center;color:var(--sub);font-size:.82rem;padding:18px">Todavía no hay clientes cargados.</div>')
+      +'<button onclick="abrirPedidos()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+  });
+}
+function nuevoClienteRapido(){
+  var campo = function(id,lbl,ph){
+    return '<div style="margin-bottom:10px"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px">'+lbl+'</label>'
+      +'<input id="'+id+'" placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px;font-family:inherit;font-size:.9rem;outline:none"></div>';
+  };
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:12px">➕ Cliente nuevo</div>'
+    +campo('nc_nombre','Nombre *','Ej: Juan Pérez')
+    +campo('nc_local','Nombre del local','Ej: Kiosco La Esquina')
+    +campo('nc_dir','Dirección','Calle, número, localidad')
+    +campo('nc_wa','WhatsApp','11 2345 6789')
+    +'<button onclick="guardarClienteRapido()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:15px;font-weight:900;cursor:pointer;font-family:inherit">💾 Guardar y armar pedido</button>'
+    +'<button onclick="armarPedidoParaCliente()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+}
+function guardarClienteRapido(){
+  var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
+  var nom=g('nc_nombre');
+  if(!nom){ alert('Poné el nombre del cliente.'); return; }
+  var nuevo={ id:'cli'+Date.now().toString(36), nombre:nom, loc:g('nc_local'), dir:g('nc_dir'), wa:g('nc_wa') };
+  cargarClientes(function(){
+    CLIENTES.unshift(nuevo); guardarClientes();
+    _clienteDelPedido = nuevo;
+    try{ sonar('exito'); }catch(e){}
+    irACargarPedido();
+  });
+}
+function elegirClientePedido(i){
+  _clienteDelPedido = CLIENTES[i];
+  try{ sonar('tap'); }catch(e){}
+  irACargarPedido();
+}
+function irACargarPedido(){
+  var c=_clienteDelPedido;
+  guardarCarrito([]);   // carrito limpio para este pedido
+  try{ cerrarAdmin(); }catch(e){}
+  toastCarrito('🛒 Armando pedido de '+(c.nombre||'cliente'));
+  try{ tabIr('inicio'); }catch(e){}
+  mostrarBarraPedido();
+}
+/* Barra fija que recuerda para quién se está armando el pedido */
+function mostrarBarraPedido(){
+  var c=_clienteDelPedido; if(!c) return;
+  var b=document.getElementById('barraPedido');
+  if(!b){
+    b=document.createElement('div'); b.id='barraPedido';
+    b.style.cssText='position:fixed;bottom:62px;left:0;right:0;z-index:9990;background:var(--az);color:#fff;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.2)';
+    document.body.appendChild(b);
+  }
+  b.innerHTML='<span style="font-size:1.2rem">👔</span>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:.8rem;font-weight:900">Pedido de '+(c.nombre||'')+'</div>'
+    +'<div style="font-size:.68rem;opacity:.8">'+(c.loc||c.dir||'')+'</div></div>'
+    +'<button onclick="abrirCarrito()" style="background:#fff;color:var(--az);border:none;border-radius:9px;padding:8px 13px;font-weight:900;cursor:pointer;font-family:inherit;font-size:.78rem">Ver carrito</button>'
+    +'<button onclick="cancelarPedidoAsesor()" style="background:transparent;border:none;color:rgba(255,255,255,.75);font-size:1.2rem;cursor:pointer;padding:0 3px">✕</button>';
+}
+function cancelarPedidoAsesor(){
+  _clienteDelPedido=null;
+  var b=document.getElementById('barraPedido'); if(b) b.remove();
+  toastCarrito('Pedido cancelado');
+}
+
 function abrirPedidos(){ cargarPedidos(renderPedidos); }
 function renderPedidos(){
   var nuevos=PEDIDOS.filter(function(p){return p.estado==='nuevo';}).length;
   var vendidos=PEDIDOS.filter(function(p){return p.estado==='vendido';});
   var facturado=vendidos.reduce(function(s,p){return s+p.total;},0);
 
-  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:12px">📋 Historial de pedidos</div>';
+  var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:10px">📋 Pedidos</div>';
+  // ➕ el asesor puede armar un pedido a nombre de un cliente
+  html+='<button onclick="armarPedidoParaCliente()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:12px">➕ Armar pedido para un cliente</button>';
   // resumen arriba
   html+='<div style="display:flex;gap:7px;margin-bottom:14px">'
     +'<div style="flex:1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:11px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:#EA580C">'+nuevos+'</div><div style="font-size:.58rem;color:#EA580C;font-weight:800">NUEVOS</div></div>'
