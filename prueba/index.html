@@ -1222,6 +1222,126 @@ function toastCarrito(msg){
   window._toastT=setTimeout(function(){ t.style.opacity='0'; }, 1600);
 }
 
+/* ═══════ ⚡ PEDIDO RÁPIDO — pensado para el que compra siempre lo mismo ═══════
+   El cliente pega su lista tal cual la escribe ("10 barritas, 5 mentitas")
+   y el sistema le arma el carrito solo. Sin buscar, sin escribir precios. */
+function abrirPedidoRapido(){
+  var ultimo = ultimoPedidoDelCliente();
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1.1rem;margin-bottom:4px">⚡ Pedido rápido</div>'
+    +'<div style="font-size:.8rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Escribí lo que necesitás como te salga. Yo busco los productos y armo el pedido.</div>'
+    +(ultimo
+      ? '<button onclick="repetirUltimoPedido()" style="width:100%;background:linear-gradient(135deg,#16A34A,#059669);color:#fff;border:none;border-radius:14px;padding:16px;font-size:.95rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:12px;box-shadow:0 4px 14px rgba(5,150,105,.3)">'
+        +'🔁 Repetir lo de siempre<br><span style="font-size:.72rem;font-weight:700;opacity:.9">'+ultimo.items.length+' productos · '+fmt(ultimo.total)+'</span></button>'
+      : '')
+    +'<textarea id="prTxt" placeholder="Ej:&#10;10 barrita aguila&#10;5 mentitas&#10;3 pipas&#10;2 mantecol" style="width:100%;border:2px solid var(--az);border-radius:14px;padding:14px;font-family:inherit;font-size:.95rem;min-height:150px;outline:none;resize:vertical;line-height:1.7"></textarea>'
+    +'<div style="font-size:.72rem;color:var(--sub);margin:6px 0 12px">💡 Poné la cantidad y el producto. Uno por línea.</div>'
+    +'<button onclick="procesarPedidoRapido()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:14px;padding:16px;font-size:.98rem;font-weight:900;cursor:pointer;font-family:inherit">🔍 Armar mi pedido</button>'
+    +'<div id="prResultado" style="margin-top:14px"></div>'
+    +'<button onclick="try{cerrarAdmin()}catch(e){}" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">Cerrar</button>';
+}
+/* Busca el producto más parecido a lo que escribió */
+function buscarParecido(texto){
+  var t = normTxt(texto);
+  if(!t) return null;
+  var mejor=null, mejorPunta=0;
+  (PRODUCTOS||[]).forEach(function(p, idx){
+    if(p.visible===false || p.sinStock) return;
+    var n = normTxt(p.nombre);
+    var punta = 0;
+    if(n === t) punta = 100;
+    else if(n.indexOf(t) >= 0) punta = 80 - Math.abs(n.length - t.length)*0.1;
+    else {
+      // cuántas palabras del pedido están en el nombre
+      var pal = t.split(' ').filter(function(w){ return w.length>2; });
+      if(!pal.length) return;
+      var hit = pal.filter(function(w){ return n.indexOf(w)>=0; }).length;
+      if(hit) punta = (hit/pal.length)*70;
+    }
+    if(punta > mejorPunta){ mejorPunta=punta; mejor={p:p, idx:idx, punta:punta}; }
+  });
+  return (mejor && mejor.punta >= 35) ? mejor : null;
+}
+function procesarPedidoRapido(){
+  var txt=(document.getElementById('prTxt').value||'').trim();
+  if(!txt){ alert('Escribí lo que necesitás.'); return; }
+  var lineas = txt.split(/[\n,;]+/).map(function(l){ return l.trim(); }).filter(Boolean);
+  var encontrados=[], noEncontrados=[];
+  lineas.forEach(function(l){
+    // "10 barrita aguila" → cantidad 10, texto "barrita aguila"
+    var m = l.match(/^(\d+)\s*[xX]?\s*(.+)$/) || l.match(/^(.+?)\s*[xX]\s*(\d+)$/);
+    var cant=1, nombre=l;
+    if(m){
+      if(/^\d+$/.test(m[1])){ cant=parseInt(m[1]); nombre=m[2]; }
+      else { nombre=m[1]; cant=parseInt(m[2]); }
+    }
+    var hit = buscarParecido(nombre);
+    if(hit) encontrados.push({idx:hit.idx, p:hit.p, cant:cant});
+    else noEncontrados.push(l);
+  });
+  var out=document.getElementById('prResultado');
+  if(!encontrados.length){
+    out.innerHTML='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:12px;padding:14px;text-align:center"><div style="font-size:1.6rem">🤔</div><div style="font-size:.85rem;font-weight:800;color:#DC2626;margin-top:4px">No encontré ninguno</div><div style="font-size:.75rem;color:#DC2626;margin-top:3px">Probá con el nombre como figura en el catálogo.</div></div>';
+    return;
+  }
+  var total = encontrados.reduce(function(s,e){ return s + (e.p.venta*e.cant); }, 0);
+  out.innerHTML =
+     '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:13px;margin-bottom:10px">'
+      +'<div style="font-size:.75rem;font-weight:900;color:#059669;margin-bottom:8px">✅ ENCONTRÉ '+encontrados.length+' PRODUCTO'+(encontrados.length>1?'S':'')+'</div>'
+      +encontrados.map(function(e){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #D1FAE5">'
+          +'<span style="font-size:.8rem;color:var(--txt);flex:1;min-width:0"><b>'+e.cant+'x</b> '+e.p.nombre+'</span>'
+          +'<b style="font-size:.8rem;color:#059669;white-space:nowrap;margin-left:8px">'+fmt(e.p.venta*e.cant)+'</b></div>';
+      }).join('')
+      +'<div style="display:flex;justify-content:space-between;padding:9px 0 2px"><b style="color:var(--txt)">TOTAL</b><b style="font-size:1.05rem;color:#059669">'+fmt(total)+'</b></div>'
+    +'</div>'
+    +(noEncontrados.length
+      ? '<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:12px;padding:11px;margin-bottom:10px">'
+        +'<div style="font-size:.72rem;font-weight:900;color:#D97706;margin-bottom:4px">⚠️ NO ENCONTRÉ ESTOS</div>'
+        +noEncontrados.map(function(l){ return '<div style="font-size:.76rem;color:#92400E">• '+l+'</div>'; }).join('')
+        +'<div style="font-size:.7rem;color:#92400E;margin-top:5px">Los podés buscar a mano o consultarnos.</div></div>'
+      : '')
+    +'<button onclick="confirmarPedidoRapido()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit">🛒 Poner todo en el carrito</button>';
+  window._prEncontrados = encontrados;
+  try{ sonar('exito'); }catch(e){}
+}
+function confirmarPedidoRapido(){
+  var e=window._prEncontrados||[];
+  if(!e.length) return;
+  e.forEach(function(x){ for(var k=0;k<x.cant;k++){ agregarAlCarritoSilencioso(x.idx); } });
+  actualizarBadgeCarrito();
+  try{ sonar('agregar'); }catch(e){}
+  try{ cerrarAdmin(); }catch(e){}
+  toastCarrito('✅ Pedido armado');
+  setTimeout(abrirCarrito, 350);
+}
+/* 🔁 El último pedido de este cliente (para repetirlo) */
+function ultimoPedidoDelCliente(){
+  var d = (typeof datosCliente==='function') ? datosCliente() : null;
+  if(!d || !d.wa) return null;
+  var w = String(d.wa).replace(/[^0-9]/g,'');
+  var mio = (PEDIDOS||[]).filter(function(p){
+    return p.cliente && String(p.cliente.wa||'').replace(/[^0-9]/g,'')===w && p.items && p.items.length;
+  });
+  return mio.length ? mio[0] : null;
+}
+function repetirUltimoPedido(){
+  var u = ultimoPedidoDelCliente();
+  if(!u){ alert('Todavía no tenés pedidos anteriores.'); return; }
+  var puestos=0, faltan=[];
+  u.items.forEach(function(it){
+    var hit = buscarParecido(it.nombre);
+    if(hit){ for(var k=0;k<(it.cant||1);k++){ agregarAlCarritoSilencioso(hit.idx); } puestos++; }
+    else faltan.push(it.nombre);
+  });
+  actualizarBadgeCarrito();
+  try{ sonar('agregar'); }catch(e){}
+  try{ cerrarAdmin(); }catch(e){}
+  if(faltan.length) toastCarrito('✅ '+puestos+' productos · '+faltan.length+' ya no están');
+  else toastCarrito('🔁 Tu pedido de siempre, listo');
+  setTimeout(abrirCarrito, 350);
+}
+
 function abrirCarrito(){
   var c=cargarCarrito();
   var html='';
@@ -1387,6 +1507,11 @@ function abrirMas(){ sonar('tap');
     +'<span style="color:#fff;font-size:1.2rem">›</span></div>';
   html+=fila('🔗','Copiar link de mi tienda','cerrarMas();copiarLinkTienda()');
   html+=fila('🧮','¿Cuánto puedo pagar por mes?','cerrarMas();abrirSimulador()');
+  html+='<div onclick="cerrarMas();abrirPedidoRapido()" style="background:linear-gradient(135deg,#16A34A,#059669);border-radius:12px;padding:14px;display:flex;align-items:center;gap:11px;cursor:pointer;margin-bottom:8px;box-shadow:0 4px 14px rgba(5,150,105,.3)">'
+    +'<span style="font-size:1.6rem">⚡</span>'
+    +'<div style="flex:1"><div style="color:#fff;font-size:.9rem;font-weight:900">Pedido rápido</div>'
+    +'<div style="color:rgba(255,255,255,.85);font-size:.72rem;margin-top:1px">Escribí tu lista y armo el pedido solo</div></div>'
+    +'<span style="color:#fff;font-size:1.2rem">›</span></div>';
   html+=fila('❤️','Mis favoritos','cerrarMas();tabIr(\'favs\')');
   html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
   html+=fila(sonidoActivo()?'🔊':'🔇', sonidoActivo()?'Sonidos: activados':'Sonidos: apagados','toggleSonido();cerrarMas();abrirMas()');
