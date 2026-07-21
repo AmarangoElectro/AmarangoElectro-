@@ -79,14 +79,14 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .cajon-item.admin{color:#ffb968}
 .cajon-sep{font-size:.62rem;font-weight:800;color:rgba(255,255,255,.4);padding:14px 18px 6px;letter-spacing:1px;text-transform:uppercase}
 /* Grilla de categorías estilo app (cuadros grandes) */
-.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:4px 2px 2px;}
-.cat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:12px 4px;border-radius:16px;background:var(--wh);border:1.5px solid var(--bor);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:78px;}
+.cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:4px 2px 2px;}
+.cat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 2px;border-radius:12px;background:var(--wh);border:1.5px solid var(--bor);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:60px;}
 .cat-tile:active{transform:scale(.95);}
 .cat-tile.on{background:linear-gradient(160deg,var(--nar),#ff9a3d);border-color:var(--nar);box-shadow:0 3px 10px rgba(255,122,0,.3);}
 .cat-tile.on .cat-tile-txt{color:#fff;}
-.cat-tile-ic{font-size:1.7rem;line-height:1;}
-.cat-tile-txt{font-size:.62rem;font-weight:800;color:var(--az);text-align:center;line-height:1.1;}
-@media(max-width:360px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
+.cat-tile-ic{font-size:1.25rem;line-height:1;}
+.cat-tile-txt{font-size:.54rem;font-weight:800;color:var(--az);text-align:center;line-height:1.05;}
+@media(max-width:360px){.cat-grid{grid-template-columns:repeat(4,1fr);}}
 /* Buscador dentro del header azul */
 .hdr-buscar{width:100%;position:relative;z-index:1;margin-top:6px;padding:0 2px}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
@@ -2427,17 +2427,27 @@ function tiendaPapeleraVaciar(){
 // detecta una categoría simple por palabras clave del nombre
 function tiendaCategoria(nombre){
   var n=(nombre||'').toLowerCase();
-  if(/samsung|motorola|xiaomi|iphone|celular|smartphone/.test(n))return '📱 Celulares';
-  if(/heladera|freezer|frio/.test(n))return '❄️ Heladeras';
-  if(/cocina|anafe|horno|microonda/.test(n))return '🍳 Cocina';
-  if(/tv|televis|smart tv|tcl|led/.test(n))return '📺 TV';
-  if(/ventilador|turbo|aire|calefact|estufa|caloventor/.test(n))return '🌀 Climatización';
-  if(/lavarrop|secarrop|lavavaj/.test(n))return '🧺 Lavado';
-  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich/.test(n))return '☕ Electro hogar';
+  if(/samsung|motorola|xiaomi|iphone|celular|smartphone|tablet/.test(n))return '📱 Celulares';
+  if(/heladera|freezer|frio|cervecer/.test(n))return '❄️ Heladeras';
+  if(/cocina|anafe|horno|microonda|campana/.test(n))return '🍳 Cocina';
+  if(/\btv\b|televis|smart ?tv|tcl|monitor|proyector/.test(n))return '📺 TV';
+  if(/parlante|bafle|torre de sonido|soundbar|sound bar|barra de sonido|auricular|audio|equipo de m[uú]sica|karaoke|aiwa|jbl/.test(n))return '🔊 Audio';
+  if(/aire acond|split|portatil frio|frio.?calor/.test(n))return '🌬️ Aire acondicionado';
+  if(/estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|hervidor/.test(n))return '🔥 Calefacción';
+  if(/ventilador|turbo|circulador|extractor/.test(n))return '🌀 Ventilación';
+  if(/lavarrop|secarrop|lavavaj|centrifug/.test(n))return '🧺 Lavado';
+  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich|multiproces|jugueta|exprimidor|waflera|plancha|aspirador|hidrolav|enceradora/.test(n))return '☕ Electro hogar';
+  if(/colch[oó]n|sommier|almohada|s[aá]bana|acolchad|frazada|manta|cubrecama|juego de cama/.test(n))return '🛏️ Descanso';
+  if(/mueble|ropero|placard|c[oó]moda|mesa|silla|sill[oó]n|estanter|biblioteca|escritorio|rack|modular|respaldo/.test(n))return '🪑 Muebles';
+  if(/carpa|reposera|pileta|camping|conservadora|bolso t[eé]rmico|gazebo|sombrilla|inflable/.test(n))return '⛺ Camping y aire libre';
+  if(/bicicleta|monopat[ií]n|patineta|cinta de correr|bicicleta fija|pesas|mancuerna/.test(n))return '🚲 Deportes';
+  if(/notebook|computad|impresora|pc |teclado|mouse|pendrive|disco/.test(n))return '💻 Informática';
+  if(/herramienta|taladro|amoladora|soldador|compresor|motosierra|bordeadora|hidro/.test(n))return '🔧 Herramientas';
+  if(/juguete|mu[nñ]eca|auto a bater|triciclo|pelotero/.test(n))return '🧸 Juguetes';
   return '📦 Otros';
 }
 // lista de categorías disponibles para elegir
-var TIENDA_CATEGORIAS=['📱 Celulares','❄️ Heladeras','🍳 Cocina','📺 TV','🌀 Climatización','🧺 Lavado','☕ Electro hogar','📦 Otros'];
+var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV','🔊 Audio','❄️ Heladeras','🍳 Cocina','🌬️ Aire acondicionado','🔥 Calefacción','🌀 Ventilación','🧺 Lavado','☕ Electro hogar','🛏️ Descanso','🪑 Muebles','⛺ Camping y aire libre','🚲 Deportes','💻 Informática','🔧 Herramientas','🧸 Juguetes','📦 Otros'];
 // categoría efectiva de un producto: la manual si tiene, sino la automática
 /* 🚦 SEMÁFORO DEL PRECIO — cuánto hace que no se actualiza (solo lo ve el admin)
    Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
@@ -2732,18 +2742,8 @@ function borrarClienteAgenda(i){
 
 function abrirPedido(){
   if(!esEquipo()){ alert('🔒 Herramienta para el equipo de AmarangoElectro.'); return; }
-  // 🔗 los clientes salen del CRM (y refresca en segundo plano)
-  var crm = clientesCRMLocal();
-  var ag = agendaClientes();
-  // junto: primero los del CRM, después los que cargó el revendedor y no están allá
-  var lista = crm.slice();
-  ag.forEach(function(c){
-    var ya = lista.some(function(x){
-      return (x.dni && c.dni && String(x.dni)===String(c.dni)) ||
-             ((x.nombre||'').toLowerCase()===(c.nombre||'').toLowerCase());
-    });
-    if(!ya) lista.push(c);
-  });
+  // 📇 solo los clientes que cargó el equipo en esta tienda (rápido, sin descargas)
+  var lista = agendaClientes();
   window._listaClientes = lista;
   var opts='<option value="">— Cliente nuevo —</option>';
   lista.forEach(function(c,i){
@@ -2751,8 +2751,7 @@ function abrirPedido(){
     var ico = s ? s.ico+' ' : '';
     opts+='<option value="'+i+'">'+ico+(c.nombre||'')+(c.localidad?' · '+c.localidad:(c.loc?' · '+c.loc:''))+'</option>';
   });
-  // refrescar del CRM en segundo plano
-  bajarClientesCRM(function(ok){ if(ok){ try{ var sel=document.getElementById('pd-cli'); if(sel && sel.value==='') abrirPedido(); }catch(e){} } });
+
 
   var html=''
     +'<div style="text-align:center;margin-bottom:14px;">'
@@ -2857,8 +2856,49 @@ function guardarSoloCliente(){
   if(!nombre){ alert('Poné al menos el nombre del cliente.'); return; }
   var cli={ nombre:nombre, dni:g('pd-dni'), tel:g('pd-tel'), dir:g('pd-dir'), mail:g('pd-mail'), loc:g('pd-loc') };
   guardarClienteAgenda(cli);
-  alert('✅ Cliente guardado: '+nombre);
-  abrirPedido();
+  mostrarClienteParaCRM(cli);
+}
+/* 📤 Arma el texto del cliente listo para pegar en el CRM o mandar por WhatsApp */
+function textoClienteCRM(c){
+  var t = '👤 CLIENTE NUEVO\n';
+  t += 'Nombre: '+(c.nombre||'')+'\n';
+  if(c.dni) t += 'DNI: '+c.dni+'\n';
+  if(c.tel) t += 'Teléfono: '+c.tel+'\n';
+  if(c.dir) t += 'Dirección: '+c.dir+'\n';
+  if(c.loc) t += 'Localidad: '+c.loc+'\n';
+  if(c.mail) t += 'Email: '+c.mail+'\n';
+  var quien=''; try{ quien=localStorage.getItem('ae_nombre_asesor')||''; }catch(e){}
+  if(quien) t += 'Cargado por: '+quien+'\n';
+  return t;
+}
+function mostrarClienteParaCRM(cli){
+  var txt = textoClienteCRM(cli);
+  var html = ''
+    +'<div style="text-align:center;margin-bottom:12px;">'
+    +'  <div style="font-size:2.2rem;">✅</div>'
+    +'  <h2 style="color:var(--az);font-size:1.1rem;font-weight:900;margin:6px 0 2px;">Cliente guardado</h2>'
+    +'  <div style="color:var(--sub);font-size:.76rem;">Mandáselo al equipo para que lo carguen en el sistema</div>'
+    +'</div>'
+    +'<pre style="background:#F7F8FA;border:1px solid var(--bor);border-radius:11px;padding:12px;font-size:.76rem;line-height:1.6;white-space:pre-wrap;font-family:ui-monospace,monospace;color:var(--txt);margin-bottom:12px;">'+txt.replace(/</g,'&lt;')+'</pre>'
+    +'<button onclick="copiarClienteCRM()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:11px;padding:14px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px;">📋 Copiar datos</button>'
+    +'<button onclick="mandarClienteWa()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:11px;padding:14px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px;">💬 Mandar por WhatsApp</button>'
+    +'<button onclick="abrirPedido()" style="width:100%;background:none;border:1.5px solid var(--bor);color:var(--sub);border-radius:11px;padding:12px;font-weight:700;cursor:pointer;font-family:inherit;">← Volver</button>';
+  window._clienteCRMtxt = txt;
+  try{
+    var cont=document.getElementById('modal-cuotas-body');
+    if(cont){ cont.innerHTML=html; document.getElementById('modal-cuotas').style.display='block'; return; }
+  }catch(e){}
+  alert('✅ Cliente guardado.\n\n'+txt);
+}
+function copiarClienteCRM(){
+  var t=window._clienteCRMtxt||'';
+  if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ alert('📋 Copiado. Pegalo en el CRM.'); }).catch(function(){ prompt('Copiá los datos:', t); }); }
+  else prompt('Copiá los datos:', t);
+}
+function mandarClienteWa(){
+  var t=window._clienteCRMtxt||'';
+  var wa=(typeof AMARANGO_WA!=='undefined'&&AMARANGO_WA)?AMARANGO_WA:'';
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(t),'_blank');
 }
 /* 🗑️ Borrar el cliente que está seleccionado en el formulario */
 function borrarClienteSeleccionado(){
