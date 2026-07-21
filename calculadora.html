@@ -1853,14 +1853,17 @@ function tiendaInit(){
   tiendaRender();
   tiendaBajarNube();       // baja el catálogo de la nube
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
-  bajarPremiosRuletaNube(); // baja los premios de la ruleta editados por el admin
-  if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','formatocuota').maybeSingle().then(function(r){ if(r&&r.data&&r.data.datos){ tiendaFormatoCuota=r.data.datos; try{localStorage.setItem('ae_formato_cuota',r.data.datos);}catch(e){} tiendaRender(); } }).catch(function(){}); }
-  if(false && NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','modolujo').maybeSingle().then(function(r){ if(r&&r.data){ if(r.data.datos==='1')document.body.classList.add('lujo'); else document.body.classList.remove('lujo'); try{localStorage.setItem('ae_lujo',r.data.datos);}catch(e){} tiendaRender(); } }).catch(function(){}); }
-  bajarBannerNube();       // baja los mensajes del banner de la nube
-  bajarCuponesNube();      // baja los cupones de la nube
-  bajarHistorialNube();    // baja el historial de pedidos de la nube
-  bajarClientesNube();     // baja la lista de clientes de la tienda de la nube
-  bajarBancoFotosNube();   // baja el banco de fotos de celulares de la nube
+  // ⚡ ARRANQUE RÁPIDO: solo el catálogo ahora. El resto, 1,5s después.
+  //    Antes se disparaban 9 descargas juntas y la app se trababa al abrir.
+  setTimeout(function(){
+    try{ bajarPremiosRuletaNube(); }catch(e){}
+    try{ bajarBannerNube(); }catch(e){}
+    try{ bajarCuponesNube(); }catch(e){}
+    try{ bajarHistorialNube(); }catch(e){}
+    try{ bajarClientesNube(); }catch(e){}
+    try{ bajarBancoFotosNube(); }catch(e){}
+    try{ if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','formatocuota').maybeSingle().then(function(r){ if(r&&r.data&&r.data.datos){ try{ localStorage.setItem('ae_formato_cuota', r.data.datos); }catch(e){} tiendaRender(); } }).catch(function(){}); } }catch(e){}
+  }, 1500);
   iniciarBannerRotativo();
   mostrarSaludoHora();     // saludo según la hora del día
   mailSuscribirMostrar();  // cartelito suave de suscripción por mail (opcional)
@@ -2829,20 +2832,6 @@ var WA_PEDIDOS='5491168610532'; // adonde llegan los pedidos
 var CLIENTES_CRM = [];
 var _crmCargando = false;
 
-function bajarClientesCRM(cb){
-  if(!sbCalc){ if(cb) cb(false); return; }
-  _crmCargando = true;
-  sbCalc.from('clientes').select('*').order('num',{ascending:false}).limit(5000)
-    .then(function(r){
-      _crmCargando = false;
-      if(r && r.data){
-        CLIENTES_CRM = r.data;
-        try{ localStorage.setItem('ae_clientes_crm', JSON.stringify(r.data)); }catch(e){}
-        if(cb) cb(true);
-      } else { if(cb) cb(false); }
-    })
-    .catch(function(e){ _crmCargando=false; console.warn('CRM clientes:', e); if(cb) cb(false); });
-}
 /* lo último que se bajó (para que funcione aunque no haya señal) */
 function clientesCRMLocal(){
   if(CLIENTES_CRM.length) return CLIENTES_CRM;
