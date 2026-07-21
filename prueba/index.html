@@ -173,6 +173,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .cuota-card .c-v{font-size:1.12rem;font-weight:900;color:var(--az)}
 .retira{background:#EEF2FF;border-radius:11px;padding:11px 13px;font-size:.68rem;color:var(--az);font-weight:700;margin-top:6px;display:flex;gap:7px;align-items:flex-start}
 .wa-btn{width:100%;margin-top:14px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+@keyframes latir{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 </style>
 </head>
 <body>
@@ -817,8 +818,51 @@ try{ localStorage.removeItem('ae_sb_key'); }catch(e){}
 /* La abeja flotante SOLO la ve el admin. Atajo directo a cargar productos. */
 function actualizarBeeFab(){
   var b=document.getElementById('beeFab'); if(!b)return;
-  b.style.display = (rolEfectivo()==='admin') ? 'block' : 'none';
-  // si el usuario tiene logo propio, la abeja se reemplaza por su logo
+  var esAsesor = (rolEfectivo()==='admin' || rolEfectivo()==='revendedor');
+  b.style.display = esAsesor ? 'block' : 'none';
+  if(!esAsesor) return;
+
+  // 📦 EN MODO MAYORISTA: la abeja pasa a ser el BOTÓN DE CLIENTE ACTIVO.
+  //    El asesor visita muchos comercios por día: esto le dice siempre
+  //    con quién está trabajando y le da el pedido a mano.
+  if(typeof esMayorista==='function' && esMayorista()){
+    b.onclick = abrirClienteActivo;
+    var cli = (typeof _clienteDelPedido!=='undefined') ? _clienteDelPedido : null;
+    var n = (typeof cantCarrito==='function') ? cantCarrito() : 0;
+    if(cli){
+      var ini = String(cli.nombre||'?').trim().charAt(0).toUpperCase();
+      b.textContent = ini;
+      b.style.background = 'var(--az)';
+      b.style.color = '#fff';
+      b.style.fontSize = '1.5rem';
+      b.style.fontWeight = '900';
+      b.style.borderColor = 'var(--nar)';
+      b.style.animation = '';
+      // burbujita con la cantidad de items del pedido
+      var bd = document.getElementById('beeBadge');
+      if(!bd){
+        bd = document.createElement('span'); bd.id='beeBadge';
+        bd.style.cssText='position:fixed;bottom:132px;right:14px;z-index:341;background:var(--nar);color:#fff;min-width:22px;height:22px;border-radius:11px;font-size:.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 2px 6px rgba(0,0,0,.3);pointer-events:none';
+        document.body.appendChild(bd);
+      }
+      bd.textContent = n;
+      bd.style.display = n ? 'flex' : 'none';
+    } else {
+      b.textContent = '👥';
+      b.style.background = '#fff';
+      b.style.color = '';
+      b.style.fontSize = '1.7rem';
+      b.style.borderColor = 'var(--nar)';
+      b.style.animation = 'latir 2s ease-in-out infinite';
+      var bd2 = document.getElementById('beeBadge'); if(bd2) bd2.style.display='none';
+    }
+    return;
+  }
+
+  // modo normal: la abeja abre la carga de productos
+  b.onclick = abrirCargarDirecto;
+  b.style.color=''; b.style.fontSize='1.9rem'; b.style.animation='';
+  var bd3 = document.getElementById('beeBadge'); if(bd3) bd3.style.display='none';
   if(CONFIG && CONFIG.logo && rolActual()==='admin'){
     b.textContent='';
     b.style.background='#fff url('+CONFIG.logo+') center/cover no-repeat';
@@ -826,6 +870,42 @@ function actualizarBeeFab(){
     b.textContent='🐝';
     b.style.background='#fff';
   }
+}
+/* 👥 Panel del cliente activo — todo lo que el asesor necesita a mano */
+function abrirClienteActivo(){
+  var cli = (typeof _clienteDelPedido!=='undefined') ? _clienteDelPedido : null;
+  var n = cantCarrito();
+  var tot = totalCarrito();
+  var html;
+  if(cli){
+    html = '<div style="background:linear-gradient(135deg,var(--az),'+(typeof aclararColor==='function'?aclararColor(CONFIG.colorPrincipal||'#0B2D6B',25):'#1e5bc8')+');border-radius:16px;padding:16px;color:#fff;margin-bottom:12px">'
+        +'<div style="font-size:.62rem;font-weight:800;opacity:.75;text-transform:uppercase;letter-spacing:1px">Atendiendo a</div>'
+        +'<div style="font-size:1.15rem;font-weight:900;margin-top:2px">'+(cli.nombre||'')+'</div>'
+        +(cli.loc?'<div style="font-size:.8rem;opacity:.9">🏪 '+cli.loc+'</div>':'')
+        +(cli.dir?'<div style="font-size:.78rem;opacity:.8">📍 '+cli.dir+'</div>':'')
+      +'</div>'
+      +'<div style="background:#F5F8FF;border-radius:12px;padding:13px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">'
+        +'<div><div style="font-size:.68rem;color:var(--sub);font-weight:800">PEDIDO EN CURSO</div>'
+        +'<div style="font-size:.86rem;font-weight:800;color:var(--az)">'+n+' producto'+(n===1?'':'s')+'</div></div>'
+        +'<b style="font-size:1.15rem;color:var(--az)">'+fmt(tot)+'</b>'
+      +'</div>'
+      +(n?'<button onclick="try{cerrarAdmin()}catch(e){};abrirCarrito()" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🛒 Ver y enviar el pedido</button>':'')
+      +'<button onclick="try{cerrarAdmin()}catch(e){};repetirUltimoPedido()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">🔁 Repetir lo de siempre</button>'
+      +'<button onclick="armarPedidoParaCliente()" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-size:.86rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">👥 Cambiar de cliente</button>'
+      +'<button onclick="cancelarPedidoAsesor();try{cerrarAdmin()}catch(e){}" style="width:100%;background:none;border:1.5px solid #FECACA;color:#DC2626;border-radius:12px;padding:12px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:inherit">✕ Cerrar este pedido</button>';
+  } else {
+    html = '<div style="text-align:center;padding:20px 10px 16px">'
+        +'<div style="font-size:3rem;margin-bottom:8px">👥</div>'
+        +'<div style="font-weight:900;color:var(--az);font-size:1.05rem">¿A quién estás atendiendo?</div>'
+        +'<div style="font-size:.82rem;color:var(--sub);line-height:1.5;margin-top:5px">Elegí el cliente y armá su pedido recorriendo el catálogo.</div>'
+      +'</div>'
+      +'<button onclick="armarPedidoParaCliente()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">👥 Elegir cliente</button>'
+      +'<button onclick="try{cerrarAdmin()}catch(e){};abrirPedidoRapido()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit">⚡ Pedido rápido</button>';
+  }
+  document.getElementById('adminBody').innerHTML = html
+    + '<button onclick="try{cerrarAdmin()}catch(e){}" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">Cerrar</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+  try{ empujarPantalla('admin', cerrarAdmin); }catch(e){}
 }
 /* Abre la carga de productos directo, sin pasar por el panel */
 function abrirCargarDirecto(){
@@ -1208,6 +1288,7 @@ function faltaParaMinimo(subtotal){
 }
 function cantCarrito(){ return cargarCarrito().reduce(function(s,x){ return s + (x.cant||1); },0); }
 function actualizarBadgeCarrito(){
+  try{ if(typeof esMayorista==='function' && esMayorista()) actualizarBeeFab(); }catch(e){}
   var b=document.getElementById('cartBadge'); if(!b)return;
   var n=cantCarrito();
   b.textContent=n; b.style.display = n ? 'flex' : 'none';
@@ -3859,6 +3940,7 @@ function irACargarPedido(){
   toastCarrito('🛒 Armando pedido de '+(c.nombre||'cliente'));
   try{ tabIr('inicio'); }catch(e){}
   mostrarBarraPedido();
+  try{ actualizarBeeFab(); }catch(e){}
 }
 /* Barra fija que recuerda para quién se está armando el pedido */
 function mostrarBarraPedido(){
@@ -3879,6 +3961,7 @@ function cancelarPedidoAsesor(){
   _clienteDelPedido=null;
   var b=document.getElementById('barraPedido'); if(b) b.remove();
   toastCarrito('Pedido cancelado');
+  try{ actualizarBeeFab(); }catch(e){}
 }
 
 function abrirPedidos(){ cargarPedidos(renderPedidos); }
@@ -6859,6 +6942,7 @@ function cerrarPedidoAsesor(){
     }
     guardarCarrito([]);
     actualizarBadgeCarrito();
+    actualizarBeeFab();
   }catch(e){}
 }
 function registrarPedidoPendiente(atendio){
