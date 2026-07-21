@@ -1431,15 +1431,48 @@ function confirmarPedidoCliente(){
   pedirCarrito(true);
 }
 
+/* 📦 Arma las líneas del pedido agrupadas por categoría (para el depósito) */
+function lineasPorCategoria(carrito){
+  // buscar la categoría de cada ítem del carrito
+  var grupos = {};
+  carrito.forEach(function(it){
+    var cat = 'Otros';
+    var base = String(it.nombre||'').replace(/\s*\([^)]*\)\s*$/,'').trim();  // saco la variante
+    var prod = (PRODUCTOS||[]).find(function(p){ return p.nombre===base || p.nombre===it.nombre; });
+    if(prod){ cat = catProd(prod) || 'Otros'; }
+    (grupos[cat] = grupos[cat] || []).push(it);
+  });
+  var out = [];
+  var cats = Object.keys(grupos).sort();
+  var totalUnidades = 0;
+  cats.forEach(function(cat){
+    out.push('');
+    out.push('▍*' + cat.toUpperCase() + '*');
+    grupos[cat].forEach(function(it){
+      var n = it.cant || 1;
+      totalUnidades += n;
+      var precio = (it.precioAplicado || it.venta) * n;
+      out.push('  ☐ ' + n + ' x ' + it.nombre + ' — ' + fmt(precio));
+    });
+  });
+  out.push('');
+  out.push('📦 *Total de bultos/unidades: ' + totalUnidades + '*');
+  return out;
+}
+
 function pedirCarrito(yaTengoDatos){ sonar('exito');
   var c=cargarCarrito(); if(!c.length)return;
   var tot=totalCarrito();
   var falta=faltaParaMinimo(tot);
   if(falta>0){ alert('El pedido mínimo es '+fmt(CONFIG.envio.minimo)+'. Te faltan '+fmt(falta)+'.'); return; }
   // 📋 si todavía no tenemos sus datos, los pedimos primero
-  if(!yaTengoDatos && !datosCliente()){ pedirDatosYEnviar(); return; }
+  //    (el asesor no necesita: él ya eligió el cliente)
+  var esAsesor = (rolEfectivo()==='admin' || rolEfectivo()==='revendedor');
+  if(!yaTengoDatos && !esAsesor && !datosCliente()){ pedirDatosYEnviar(); return; }
   var env=costoEnvio(tot);
-  var lineas=c.map(function(it){ return '• '+it.nombre+(it.cant>1?' x'+it.cant:'')+' — '+fmt(it.venta*(it.cant||1)); });
+  // 📦 Agrupado POR CATEGORÍA: así quien arma el pedido en el depósito
+  //    recorre una sola vez cada sector, sin ir y volver.
+  var lineas = lineasPorCategoria(c);
   if(env>0) lineas.push('🚚 Envío — '+fmt(env));
   tot = tot + env;
   var cuotasL=cuotasActivas().map(function(n){ return '💳 '+n+' cuotas fijas de '+fmt(valorCuota(tot,n)); });
@@ -1465,9 +1498,11 @@ function pedirCarrito(yaTengoDatos){ sonar('exito');
     window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
     return;
   }
-  var html='<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">💬 Enviá tu pedido</div>'
-    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+cantCarrito()+' producto'+(cantCarrito()===1?'':'s')+' · '+fmt(tot)+'</div>'
-    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Elegí con quién</div>';
+  var _cli = (typeof _clienteDelPedido!=='undefined' && _clienteDelPedido) ? _clienteDelPedido : null;
+  var html='<div style="font-weight:900;color:var(--az);font-size:.95rem;margin-bottom:4px">📤 Enviar el pedido</div>'
+    +(_cli ? '<div style="background:#F5F8FF;border-radius:10px;padding:10px;margin-bottom:10px"><div style="font-size:.7rem;color:var(--sub);font-weight:800">PEDIDO DE</div><div style="font-size:.88rem;font-weight:900;color:var(--az)">'+(_cli.nombre||'')+(_cli.loc?' · '+_cli.loc:'')+'</div></div>' : '')
+    +'<div style="font-size:.8rem;color:var(--sub);margin-bottom:14px">'+cantCarrito()+' producto'+(cantCarrito()===1?'':'s')+' · <b style="color:var(--az)">'+fmt(tot)+'</b></div>'
+    +'<div style="font-size:.66rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">¿A quién se lo mandamos?</div>';
   vends.forEach(function(v){
     html+='<button onclick="registrarPedidoPendiente(\''+v.nombre.replace(/'/g,"\\'")+'\');window.open(\'https://wa.me/'+String(v.wa).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg)+'\',\'_blank\');cerrarConsulta()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 '+v.nombre+'</button>';
   });
@@ -6007,7 +6042,13 @@ function render(){
     var botones;
     if(rolT==='admin'){
       // ADMIN: acciones directo en la tarjeta (sin tener que abrir el producto)
-      botones='<button onclick="compartir('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">📤 Compartir</button>'
+      // 🛒 el asesor SUMA AL PEDIDO (no comparte): cantidad + agregar
+      botones='<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">'
+          +'<button onclick="cantTarjeta('+idx+',-1,event)" style="width:30px;height:32px;background:#F1F3F7;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-weight:900;color:var(--az);cursor:pointer;font-family:inherit;flex:0 0 auto">−</button>'
+          +'<input id="qt'+idx+'" value="'+(minimoProducto(p)||1)+'" inputmode="numeric" onclick="event.stopPropagation()" style="flex:1;min-width:0;text-align:center;border:1px solid var(--line);border-radius:8px;padding:7px 2px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--az);outline:none">'
+          +'<button onclick="cantTarjeta('+idx+',1,event)" style="width:30px;height:32px;background:#F1F3F7;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-weight:900;color:var(--az);cursor:pointer;font-family:inherit;flex:0 0 auto">+</button>'
+        +'</div>'
+        +'<button onclick="agregarConCantidad('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Sumar al pedido</button>'
         +'<div style="display:flex;gap:5px;margin-bottom:5px">'
           +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">✏️ Editar</button>'
           +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">🖼️ Foto</button>'
@@ -6809,6 +6850,17 @@ function elegirContacto(lista, msg, titulo, subtitulo, etiqueta){
   document.getElementById('ayudaOverlay').classList.add('on'); empujarPantalla('ayuda', cerrarConsulta);
 }
 /* registra el pedido en el historial (si hay uno pendiente) */
+/* Al enviar el pedido, el asesor queda libre para el siguiente cliente */
+function cerrarPedidoAsesor(){
+  try{
+    if(typeof _clienteDelPedido!=='undefined' && _clienteDelPedido){
+      _clienteDelPedido = null;
+      var b=document.getElementById('barraPedido'); if(b) b.remove();
+    }
+    guardarCarrito([]);
+    actualizarBadgeCarrito();
+  }catch(e){}
+}
 function registrarPedidoPendiente(atendio){
   var pp=window._pedidoPendiente;
   if(!pp) return;
