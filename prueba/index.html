@@ -3159,6 +3159,26 @@ function oscurecerColor(hex, pct){
    · cuota     → la cuota bien grande (para vender en cuotas)
    ═══════════════════════════════════════════════════════════ */
 function precioTarjeta(p){
+  // 📦 MODO MAYORISTA: el precio del bulto grande + cuánto sale la unidad.
+  //    Así el comerciante calcula su ganancia de un vistazo, sin sacar cuentas.
+  if(typeof esMayorista==='function' && esMayorista()){
+    var enOf = p.precioAntes && parseFloat(p.precioAntes) > parseFloat(p.venta);
+    var off = enOf ? Math.round((1 - p.venta/parseFloat(p.precioAntes))*100) : 0;
+    var u = unidadesBulto(p);
+    var porUnidad = u>1 ? Math.round(p.venta/u) : 0;
+    return (enOf
+        ? '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
+          +'<span style="font-size:.68rem;color:#9CA3AF;text-decoration:line-through">'+fmt(p.precioAntes)+'</span>'
+          +'<span style="background:#DCFCE7;color:#059669;font-size:.58rem;font-weight:900;padding:2px 5px;border-radius:4px">'+off+'% OFF</span>'
+          +'</div>' : '')
+      +'<div style="font-size:1.18rem;font-weight:900;color:var(--az);line-height:1.1">'+fmt(p.venta)+'</div>'
+      +(u>1
+        ? '<div style="font-size:.68rem;color:var(--sub);font-weight:700;margin-top:1px">'+u+' u. · <b style="color:#059669">'+fmt(porUnidad)+'</b> c/u</div>'
+        : '<div style="font-size:.66rem;color:var(--sub);font-weight:700;margin-top:1px">por unidad</div>')
+      +(p.escala && p.escala.length
+        ? '<div style="font-size:.62rem;color:var(--nar);font-weight:800;margin-top:2px">📉 desde '+p.escala[0].desde+' u. a '+fmt(p.escala[0].precio)+'</div>'
+        : '');
+  }
   var f = (CONFIG && CONFIG.formatoCuota) || 'limpio';
   var mc = mejorCuota(p.venta);
   var enOferta = p.precioAntes && parseFloat(p.precioAntes) > parseFloat(p.venta);
@@ -3298,6 +3318,10 @@ function renderClientes(){
     html+='<div style="text-align:center;color:var(--sub);padding:34px 20px;font-size:.85rem"><div style="font-size:2.6rem;margin-bottom:8px">👥</div>Todavía no hay clientes.<br><span style="font-size:.75rem">Cuando alguien se registre en tu tienda, aparece acá. También los podés cargar a mano. 🐝</span></div>';
   } else {
     // los ordena por lo que más gastaron
+    // asegurar que todos tengan id (los viejos pueden no tenerlo)
+    var _fix=false;
+    CLIENTES.forEach(function(c,i){ if(!c.id){ c.id='cli'+i+'_'+Date.now().toString(36); _fix=true; } });
+    if(_fix) guardarClientes();
     var conDatos=CLIENTES.map(function(c,i){
       var peds=pedidosDe(c.wa);
       var vendidos=peds.filter(function(p){return p.estado==='vendido';});
@@ -3323,7 +3347,7 @@ function renderClientes(){
         +'<div style="display:flex;gap:6px;margin-top:9px">'
           +'<button onclick="verFichaCliente('+d.i+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:9px;padding:9px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit">👁️ Ver ficha</button>'
           +(c.wa?'<button onclick="window.open(\'https://wa.me/'+String(c.wa).replace(/[^0-9]/g,'')+'\',\'_blank\')" style="background:#25D366;border:none;color:#fff;border-radius:9px;padding:9px 12px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit">💬</button>':'')
-          +'<button onclick="editarCliente('+d.i+')" style="background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:9px;padding:9px 11px;font-size:.7rem;cursor:pointer;font-family:inherit">✏️</button>'
+          +'<button onclick="editarCliente(\''+(c.id||('cli'+d.i))+'\')" style="background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:9px;padding:9px 11px;font-size:.7rem;cursor:pointer;font-family:inherit">✏️</button>'
         +'</div></div>';
     });
   }
@@ -3904,6 +3928,47 @@ function armarPedidoParaCliente(){
       +'<button onclick="abrirPedidos()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
   });
 }
+/* ✏️ Editar y 🗑️ borrar clientes */
+function editarCliente(id){
+  var c=(CLIENTES||[]).find(function(x){ return x.id===id; });
+  if(!c) return;
+  var campo=function(cid,lbl,val,ph){
+    return '<div style="margin-bottom:10px"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px">'+lbl+'</label>'
+      +'<input id="'+cid+'" value="'+(val||'')+'" placeholder="'+ph+'" style="width:100%;border:1.5px solid var(--line);border-radius:11px;padding:13px;font-family:inherit;font-size:.9rem;outline:none"></div>';
+  };
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:12px">✏️ Editar cliente</div>'
+    +campo('ec_nombre','Nombre *', c.nombre,'Ej: Supermercado Lin')
+    +campo('ec_local','Nombre del local', c.loc,'Ej: Autoservicio')
+    +campo('ec_dir','Dirección', c.dir,'Calle, número, localidad')
+    +campo('ec_wa','WhatsApp', c.wa,'11 2345 6789')
+    +'<button onclick="guardarEdicionCliente(\''+id+'\')" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:15px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">💾 Guardar cambios</button>'
+    +'<button onclick="asignarDias(\''+id+'\')" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">🗓️ Días de visita</button>'
+    +'<button onclick="borrarCliente(\''+id+'\')" style="width:100%;background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:12px;padding:13px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">🗑️ Borrar cliente</button>'
+    +'<button onclick="abrirClientes()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit">‹ Volver</button>';
+}
+function guardarEdicionCliente(id){
+  var g=function(cid){ var e=document.getElementById(cid); return e?e.value.trim():''; };
+  var c=(CLIENTES||[]).find(function(x){ return x.id===id; });
+  if(!c) return;
+  if(!g('ec_nombre')){ alert('Poné el nombre.'); return; }
+  c.nombre=g('ec_nombre'); c.loc=g('ec_local'); c.dir=g('ec_dir'); c.wa=g('ec_wa');
+  guardarClientes();
+  try{ sonar('exito'); }catch(e){}
+  toastCarrito('✅ Cliente actualizado');
+  abrirClientes();
+}
+function borrarCliente(id){
+  var c=(CLIENTES||[]).find(function(x){ return x.id===id; });
+  if(!c) return;
+  if(!confirm('¿Borrar a "'+(c.nombre||'')+'"?\n\nSus pedidos anteriores quedan guardados.')) return;
+  CLIENTES = CLIENTES.filter(function(x){ return x.id!==id; });
+  guardarClientes();
+  try{ sonar('error'); }catch(e){}
+  toastCarrito('🗑️ Cliente borrado');
+  abrirClientes();
+}
+
 function nuevoClienteRapido(){
   var campo = function(id,lbl,ph){
     return '<div style="margin-bottom:10px"><label style="display:block;font-size:.68rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:4px">'+lbl+'</label>'
