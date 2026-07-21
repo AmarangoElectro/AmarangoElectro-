@@ -1031,18 +1031,34 @@ function generarLinkTiendaNueva(){
   if(!cod){ alert('Poné el código de la tienda.'); return; }
   var rubro=document.getElementById('tn_rubro').value||'';
   var base=window.location.origin+window.location.pathname;
-  var link=base+'?t='+cod+(rubro?'&r='+rubro:'');
+  // 🔐 PIN propios para esta tienda (nadie más los conoce)
+  var pinD = String(Math.floor(1000 + Math.random()*9000));
+  var pinR = String(Math.floor(1000 + Math.random()*9000));
+  var link=base+'?t='+cod+(rubro?'&r='+rubro:'')+'&p='+pinD+'&pr='+pinR;
+  window._ultimoPin = {d:pinD, r:pinR};
   var msg='🐝 Te armé tu tienda!\n\n'
-    +'Entrá con este link y ya podés empezar a cargar tus productos:\n'+link+'\n\n'
+    +'Entrá con este link:\n'+link+'\n\n'
+    +'*Tus claves* (guardalas):\n'
+    +'🔑 Dueño: '+pinD+'\n'
+    +'🔑 Vendedores: '+pinR+'\n\n'
     +'Cuando entres:\n'
-    +'1️⃣ Tocá la abeja 🐝 y poné la clave 2580\n'
-    +'2️⃣ Andá a Configuración y ponele tu nombre y tu rubro\n'
-    +'3️⃣ Cargá tus productos y listo\n\n'
+    +'1️⃣ Tocá la abeja 🐝 y poné tu clave de dueño\n'
+    +'2️⃣ Andá a Configuración: ponele tu nombre, tu color y tu rubro\n'
+    +'3️⃣ Cargá tus productos\n'
+    +'4️⃣ Tres puntitos ⋮ → "Agregar a pantalla de inicio" para tenerla como app\n\n'
     +'Cualquier cosa me escribís 💬';
   document.getElementById('tn_resultado').innerHTML=
      '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:13px;margin-bottom:10px">'
       +'<div style="font-size:.72rem;font-weight:900;color:#0a7a3f;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">✅ Tienda lista</div>'
       +'<div style="font-size:.76rem;color:var(--txt);word-break:break-all;background:#fff;border-radius:8px;padding:9px;font-family:ui-monospace,monospace">'+link+'</div>'
+    +'</div>'
+    +'<div style="background:#FFF7ED;border:1.5px solid var(--nar);border-radius:12px;padding:13px;margin-bottom:10px">'
+      +'<div style="font-size:.72rem;font-weight:900;color:var(--nar);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">🔐 Claves de esta tienda</div>'
+      +'<div style="display:flex;gap:8px">'
+        +'<div style="flex:1;background:#fff;border-radius:9px;padding:10px;text-align:center"><div style="font-size:.62rem;color:var(--sub);font-weight:800">DUEÑO</div><div style="font-size:1.3rem;font-weight:900;color:var(--az);letter-spacing:3px">'+pinD+'</div></div>'
+        +'<div style="flex:1;background:#fff;border-radius:9px;padding:10px;text-align:center"><div style="font-size:.62rem;color:var(--sub);font-weight:800">VENDEDORES</div><div style="font-size:1.3rem;font-weight:900;color:var(--az);letter-spacing:3px">'+pinR+'</div></div>'
+      +'</div>'
+      +'<div style="font-size:.68rem;color:var(--sub);margin-top:7px;line-height:1.4">Anotalas. Van en el mensaje de WhatsApp.</div>'
     +'</div>'
     +'<button onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 Mandársela por WhatsApp</button>'
     +'<button onclick="copiarTextoSimple(\''+link.replace(/'/g,"\\'")+'\')" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:inherit">🔗 Copiar link</button>';
@@ -3069,6 +3085,14 @@ function cargarConfig(cb){
       CONFIG.admins=[];
       CONFIG.vendedores=[];
       CONFIG.duenoPlataforma=false;   // no ve Suscripciones (eso es de Max)
+      // 🔐 cada tienda nace con SUS PROPIOS PIN (no los de fábrica)
+      //    Si vienen en el link (?p= y ?pr=), usamos esos; si no, se generan.
+      var _qp=null;
+      try{ _qp=new URLSearchParams(window.location.search); }catch(e){}
+      var _pl = _qp ? (_qp.get('p')||'') : '';
+      var _pr = _qp ? (_qp.get('pr')||'') : '';
+      CONFIG.pin    = /^\d{4}$/.test(_pl) ? _pl : String(Math.floor(1000 + Math.random()*9000));
+      CONFIG.pinRev = /^\d{4}$/.test(_pr) ? _pr : String(Math.floor(1000 + Math.random()*9000));
       // 🆕 si el link traía ?r=rubro, le dejo las categorías listas
       if(_rubroLink && PRESETS_RUBRO[_rubroLink]){
         var pr=PRESETS_RUBRO[_rubroLink];
@@ -3119,6 +3143,21 @@ function aplicarConfig(){
     });
   }
   var h=document.querySelector('.brand h1'); if(h) h.textContent=CONFIG.negocio;
+  // ✍️ frase de la tienda (editable) debajo del nombre
+  try{
+    if(h){
+      var sl=document.getElementById('esloganTienda');
+      if(CONFIG.eslogan && String(CONFIG.eslogan).trim()){
+        if(!sl){
+          sl=document.createElement('div'); sl.id='esloganTienda';
+          sl.style.cssText='font-size:.68rem;font-weight:800;color:var(--nar);line-height:1.1;margin-top:1px';
+          h.parentNode.appendChild(sl);
+        }
+        sl.textContent=CONFIG.eslogan;
+        sl.style.display='block';
+      } else if(sl){ sl.style.display='none'; }
+    }
+  }catch(e){}
   // logo: imagen si hay, abeja si no (el gesto secreto funciona igual)
   var bee=document.getElementById('beeLogo');
   if(bee){
@@ -4847,8 +4886,15 @@ function abrirConfig(){
       +'</div>'
       : '')
     +sec('📈 Tu markup general')
-    +'<div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Cuánto le sumás al costo para sacar el precio de venta, según lo que sale el producto. Se usa cuando la categoría no tiene su propio markup.</div>'
-    +(function(){
+    +'<div style="font-size:.72rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Cuánto le sumás al costo para sacar el precio de venta. Se usa cuando la categoría no tiene su propio markup.</div>'
+    +((c.markupAmarango===true && !markupDesbloqueado())
+      ? '<div style="background:linear-gradient(135deg,#FFF9F0,#FFF3E0);border:2px dashed var(--nar);border-radius:12px;padding:14px;margin-bottom:12px;text-align:center;cursor:pointer" onclick="desbloquearMarkup()">'
+        +'<div style="font-size:1.8rem;margin-bottom:4px">🔒</div>'
+        +'<div style="font-weight:900;color:var(--nar);font-size:.9rem">Markup Amarango</div>'
+        +'<div style="font-size:.74rem;color:var(--sub);line-height:1.4;margin-top:3px">Este negocio usa el sistema de márgenes de Amarango.<br>Tocá para desbloquear.</div>'
+      +'</div>'
+      : '')
+    +((c.markupAmarango===true && !markupDesbloqueado()) ? '' : (function(){
         var mk=(c.markup&&c.markup.length)?c.markup:CONFIG_DEFAULT.markup;
         var etq=['Hasta $50.000','$50.000 a $100.000','$100.000 a $250.000','$250.000 a $350.000','Más de $350.000'];
         return mk.map(function(t,i){
@@ -4857,8 +4903,8 @@ function abrirConfig(){
             +'<input id="cf_mk_'+i+'" type="number" inputmode="numeric" value="'+t.pct+'" style="width:82px;border:1.5px solid var(--line);border-radius:9px;padding:9px;font-family:inherit;font-size:.88rem;text-align:center;font-weight:900;outline:none;color:#16A34A">'
             +'<span style="font-weight:900;color:#16A34A">%</span></div>';
         }).join('');
-      })()
-    +'<div style="font-size:.7rem;color:var(--sub);margin-bottom:12px">💡 Tocá cada número y poné el tuyo. Cuanto más caro el producto, menos margen se suele usar.</div>'
+      })())
+    +((c.markupAmarango===true && !markupDesbloqueado()) ? '' : '<div style="font-size:.7rem;color:var(--sub);margin-bottom:12px">💡 Tocá cada número y poné el tuyo. Cuanto más caro el producto, menos margen se suele usar.</div>')
     +sec('🚚 Envíos y pedido mínimo')
     +'<div style="font-size:.72rem;color:var(--sub);margin-bottom:8px">Opcional. Si lo dejás en 0, no se cobra ni se muestra.</div>'
     +'<div style="display:flex;gap:8px;margin-bottom:8px">'
@@ -4987,6 +5033,18 @@ function aplicarPresetRubro(k){
   try{ toastCarrito('Categorías de '+preset.nombre+' cargadas'); }catch(e){}
 }
 
+/* 🔒 CANDADO DEL MARKUP AMARANGO
+   Si la tienda usa el sistema de márgenes de Amarango, queda protegido:
+   solo se ve/edita con el PIN de dueño. Se activa poniendo markupAmarango:true. */
+var _markupOk = false;
+function markupDesbloqueado(){ return _markupOk===true; }
+function desbloquearMarkup(){
+  pedirClaveHerramienta('📈 Markup Amarango', function(){
+    _markupOk = true;
+    abrirConfig();
+  });
+}
+
 function guardarConfigDesdeForm(){
   var g=function(id){ var e=document.getElementById(id); return e?e.value.trim():''; };
   CONFIG.negocio = g('cf_negocio')||'Mi Tienda';
@@ -5002,7 +5060,8 @@ function guardarConfigDesdeForm(){
     var e=document.getElementById('cf_mk_'+i);
     mkNuevo.push({ hasta:t.hasta, pct: e?(parseFloat(e.value)||t.pct):t.pct });
   });
-  CONFIG.markup = mkNuevo;
+  // 🔒 si el markup Amarango está bloqueado, no lo tocamos
+  if(!(CONFIG.markupAmarango===true && !markupDesbloqueado())) CONFIG.markup = mkNuevo;
   // 📦 mayorista
   if(!CONFIG.mayorista) CONFIG.mayorista={on:false};
   var mp=document.getElementById('cf_mayPalabra'); if(mp) CONFIG.mayorista.palabraBulto = mp.value.trim()||'Bulto';
@@ -5044,8 +5103,12 @@ function guardarConfigDesdeForm(){
   CONFIG.admins = parseLista(g('cf_admins'));
   CONFIG.vendedores = parseLista(g('cf_vendedores'));
   guardarConfig();
+  // 🎨 aplicar YA los colores, logo y textos (antes había que guardar dos veces)
+  try{ aplicarConfig(); }catch(e){}
+  try{ actualizarBeeFab(); }catch(e){}
   render();
-  alert('✅ Guardado. Tu tienda se actualizó.');
+  try{ sonar('exito'); }catch(e){}
+  toastCarrito('✅ Guardado, tu tienda se actualizó');
   abrirPanelDueno();
 }
 
