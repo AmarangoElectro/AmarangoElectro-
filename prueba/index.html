@@ -117,12 +117,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 /* TARJETA (sobria) */
 .card{background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);transition:transform .15s}
 .card:active{transform:scale(.985)}
-.card .ph{height:120px;background:#FAFBFC;display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;border-bottom:1px solid var(--line);cursor:pointer;background-size:cover;background-position:center}
+.card .ph{aspect-ratio:1/1;background:#fff;display:flex;align-items:center;justify-content:center;font-size:3.2rem;position:relative;border-bottom:1px solid var(--line);cursor:pointer;background-size:contain;background-repeat:no-repeat;background-position:center}
 .card .fav{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:none;font-size:.9rem;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);line-height:1}
 .card .badge{position:absolute;top:6px;left:6px;background:var(--nar);color:#fff;font-size:.52rem;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:.2px}
 .card .body{padding:10px 12px 12px;display:flex;flex-direction:column;flex:1}
 .card .marca{font-size:.55rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.5px}
-.card .nom{font-size:.79rem;font-weight:700;color:var(--txt);line-height:1.3;margin:3px 0 7px;min-height:34px;cursor:pointer}
+.card .nom{font-size:.76rem;font-weight:700;color:var(--txt);line-height:1.25;margin:2px 0 6px;min-height:30px;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .cuota-v{font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.05}
 .card .cuota-n{font-size:.6rem;font-weight:700;color:var(--gr);margin-bottom:2px}
 .card .contado{font-size:.64rem;color:var(--sub);margin-bottom:8px}
@@ -651,6 +651,8 @@ var TIENDA_BLOQUEADA = false;
    Solo se muestran si alguien las activó con el PIN de dueño. */
 var PLAN_TIENDA = 'full';
 function tieneCuotas(){
+  // 📦 en modo MAYORISTA no hay cuotas: se vende al contado
+  if(typeof esMayorista==='function' && esMayorista()) return false;
   // el plan tiene que permitirlo...
   var planOk = (TIENDA==='amarango') || (CONFIG && CONFIG.duenoPlataforma===true) || (PLAN_TIENDA==='full');
   if(!planOk) return false;
@@ -836,6 +838,49 @@ function abrirCargarDirecto(){
    cuotas del total calculadas. Sin pedirle datos antes (menos fricción = más ventas). */
 function cargarCarrito(){ try{ return JSON.parse(localStorage.getItem(lsKey('ae_carrito'))||'[]'); }catch(e){ return []; } }
 function guardarCarrito(a){ try{ localStorage.setItem(lsKey('ae_carrito'), JSON.stringify(a)); }catch(e){} actualizarBadgeCarrito(); }
+/* 🔢 Cantidad desde la tarjeta (para llevar varios de una) */
+function cantTarjeta(idx, delta, ev){
+  if(ev) ev.stopPropagation();
+  var i=document.getElementById('qt'+idx); if(!i) return;
+  var p=PRODUCTOS[idx];
+  var paso = (p && p.porBulto>1) ? 1 : 1;
+  var min = (p ? minimoProducto(p) : 1) || 1;
+  var v = (parseInt(i.value)||min) + (delta*paso);
+  if(v < min) v = min;
+  i.value = v;
+  try{ sonar('tap'); }catch(e){}
+}
+function agregarConCantidad(idx, ev){
+  if(ev) ev.stopPropagation();
+  var i=document.getElementById('qt'+idx);
+  var n=parseInt(i?i.value:1)||1;
+  var p=PRODUCTOS[idx];
+  var min=minimoProducto(p)||1;
+  if(n<min) n=min;
+  for(var k=0;k<n;k++){ agregarAlCarritoSilencioso(idx); }
+  try{ sonar('agregar'); }catch(e){}
+  toastCarrito('✅ '+n+' x '+p.nombre+' al carrito');
+  actualizarBadgeCarrito();
+}
+/* agrega sin toast ni sonido (para sumar de a varios) */
+function agregarAlCarritoSilencioso(idx){
+  var p=PRODUCTOS[idx]; if(!p)return;
+  var c=cargarCarrito();
+  var vr=(p.variantes && p.variantes.length)?(_varElegida||p.variantes[0]):'';
+  var id=idProd(p)+(vr?'::'+vr:'');
+  var ya=c.find(function(x){return x.id===id;});
+  if(ya){ ya.cant=(ya.cant||1)+1; }
+  else { c.push({id:id, nombre:p.nombre+(vr?' ('+vr+')':''), venta:p.venta, foto:p.foto||'', cant:1, variante:vr, escala:p.escala||null, porBulto:p.porBulto||0}); }
+  c.forEach(function(x){
+    if(x.escala && x.escala.length){
+      var pr=x.venta;
+      for(var j=0;j<x.escala.length;j++){ if((x.cant||1)>=x.escala[j].desde) pr=x.escala[j].precio; }
+      x.precioAplicado=pr;
+    }
+  });
+  guardarCarrito(c);
+}
+
 function agregarAlCarrito(idx){
   var p=PRODUCTOS[idx]; if(!p)return;
   var c=cargarCarrito();
@@ -3002,7 +3047,8 @@ function renderClientes(){
     });
   }
   var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">👥 Clientes</div>'
-    +'<div style="font-size:.76rem;color:var(--sub);margin-bottom:12px">Cada persona, con lo que compró. 🐝</div>'
+    +'<div style="font-size:.76rem;color:var(--sub);margin-bottom:10px">Cada persona, con lo que compró. 🐝</div>'
+    +'<button onclick="nuevoClienteRapido()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:12px;padding:13px;font-size:.88rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:12px">➕ Guardar cliente nuevo</button>'
     +'<button onclick="editarCliente(-1)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:12px;padding:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px">➕ Agregar cliente a mano</button>';
 
   if(!CLIENTES.length){
@@ -4248,7 +4294,7 @@ function abrirConfig(){
       +'<input type="file" id="logoFile" accept="image/*" style="display:none" onchange="subirLogo(event)">'
     +'</div>'
     +campo('Nombre del negocio','cf_negocio',c.negocio,'Ej: Marcelo Hogar')
-    +campo('Eslogan','cf_eslogan',c.eslogan,'Ej: Equipá tu casa en cuotas')
+    +campo('Frase de tu tienda','cf_eslogan',c.eslogan,'Ej: Elegí lo tuyo y llevátelo hoy')
     +sec('🏷️ Tus categorías')    +'<div style="font-size:.74rem;color:var(--sub);line-height:1.5;margin-bottom:8px">Elegí tu rubro y te cargamos las categorías. Después las podés editar como quieras.</div>'
     +'<select id="cf_rubro" onchange="aplicarPresetRubro(this.value)" style="width:100%;border:1.5px solid var(--az);border-radius:11px;padding:12px;font-family:inherit;font-size:.88rem;outline:none;background:#fff;font-weight:800;color:var(--az);margin-bottom:10px">'
       +'<option value="">— Elegí tu rubro —</option>'
@@ -5580,6 +5626,29 @@ var CATS_ELECTRO = [
   {k:'📦 Otros',       ico:'📦', txt:'Otros'}
 ];
 /* Devuelve las categorías a mostrar: las del dueño (cualquier rubro) o las de electro */
+/* 🏭 MARCAS — se detectan solas de la primera palabra del producto */
+var marcaActiva='';
+function marcaDe(p){
+  var n=(p && p.nombre ? p.nombre : '').trim();
+  if(!n) return '';
+  // saco emojis y símbolos del principio
+  n=n.replace(/^[^\p{L}\p{N}]+/u,'').trim();
+  var prim=n.split(/[\s\-|]/)[0] || '';
+  if(prim.length<3) return '';
+  return prim.charAt(0).toUpperCase()+prim.slice(1).toLowerCase();
+}
+function marcasTienda(){
+  var cuenta={};
+  (PRODUCTOS||[]).forEach(function(p){
+    if(p.visible===false) return;
+    var m=marcaDe(p); if(!m) return;
+    cuenta[m]=(cuenta[m]||0)+1;
+  });
+  // solo marcas con 2 o más productos (si no, se llena de ruido)
+  return Object.keys(cuenta).filter(function(m){ return cuenta[m]>=2; })
+    .sort(function(a,b){ return cuenta[b]-cuenta[a]; }).slice(0,14);
+}
+function setMarca(m){ sonar('tap'); marcaActiva=(marcaActiva===m?'':m); render(); }
 function catsActuales(){
   var propias = (typeof CONFIG!=='undefined' && CONFIG && Array.isArray(CONFIG.categorias)) ? CONFIG.categorias.filter(Boolean) : [];
   if(!propias.length) return CATS_ELECTRO;
@@ -5633,6 +5702,20 @@ function categoriaDe(nombre){
    1) la que el dueño le puso a mano (siempre manda)
    2) si el dueño definió SUS categorías, no adivinamos → "Sin categoría"
    3) si no definió ninguna (ej: Amarango), usamos la detección automática de electro */
+/* 🚦 SEMÁFORO DEL PRECIO — solo lo ve el admin
+   Verde: hasta 2 semanas · Amarillo: 2 a 4 · Rojo: 4+ (revisar) */
+function badgePrecioFecha(p){
+  if(rolEfectivo()!=='admin') return '';
+  var ts = p.fechaPrecio || p.precioActualizado || 0;
+  if(!ts) return '<div style="background:#F7F8FA;border-radius:5px;padding:3px 6px;font-size:.55rem;color:var(--sub);font-weight:700;text-align:center;margin-bottom:4px">🕐 Sin fecha</div>';
+  var dias = Math.floor((Date.now()-ts)/86400000);
+  var col,bg,ico,txt;
+  if(dias>=28){ col='#DC2626'; bg='#FEF2F2'; ico='🔴'; txt=' · REVISAR'; }
+  else if(dias>=14){ col='#D97706'; bg='#FFFBEB'; ico='🟡'; txt=''; }
+  else { col='#059669'; bg='#F0FDF4'; ico='🟢'; txt=''; }
+  var cuando = dias===0?'hoy':(dias===1?'ayer':'hace '+dias+'d');
+  return '<div style="background:'+bg+';border-radius:5px;padding:3px 6px;font-size:.55rem;color:'+col+';font-weight:800;text-align:center;margin-bottom:4px">'+ico+' '+cuando+txt+'</div>';
+}
 function catProd(p){
   if(p.categoria) return p.categoria;
   var propias = (CONFIG && Array.isArray(CONFIG.categorias)) ? CONFIG.categorias : [];
@@ -5719,6 +5802,24 @@ function render(){
     return '<div class="cat'+(catActiva===c.k?' on':'')+'" onclick="setCat(\''+c.k.replace(/'/g,"\\'")+'\')">'
       +'<div class="ico">'+c.ico+'</div><span>'+c.txt+'</span></div>';
   }).join('');
+  // 🏭 chips de marcas debajo de las categorías
+  try{
+    var ms = marcasTienda();
+    var cm = document.getElementById('marcasBar');
+    if(!cm && ms.length){
+      cm = document.createElement('div'); cm.id='marcasBar';
+      cm.style.cssText='display:flex;gap:6px;overflow-x:auto;padding:0 14px 8px;-webkit-overflow-scrolling:touch';
+      var cats = document.getElementById('cats');
+      if(cats && cats.parentNode) cats.parentNode.insertBefore(cm, cats.nextSibling);
+    }
+    if(cm){
+      cm.innerHTML = ms.length ? ms.map(function(m){
+        var on = (marcaActiva===m);
+        return '<button onclick="setMarca(\''+m.replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;background:'+(on?'var(--az)':'#fff')+';color:'+(on?'#fff':'var(--az)')+';border:1.5px solid var(--az);border-radius:20px;padding:6px 13px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap">'+m+'</button>';
+      }).join('') : '';
+    }
+  }catch(e){}
+
 
   var q=normTxt(document.getElementById('buscador').value);
   var soloOfertas = window._soloOfertas || false;
@@ -5729,7 +5830,10 @@ function render(){
   function cuotaRef(p){ var mc=mejorCuota(p.venta); return mc?mc.valor:p.venta; }
 
   var lista=PRODUCTOS.filter(function(p){
-    var okCat=!catActiva || catProd(p)===catActiva;
+    // ⛔ los sin stock no se muestran al cliente (el admin sí los ve)
+  if(p.sinStock && rolEfectivo()!=='admin') return false;
+  var okCat=!catActiva || catProd(p)===catActiva;
+  if(marcaActiva && marcaDe(p)!==marcaActiva) return false;
     var okQ=!q || normTxt(p.nombre).indexOf(q)>=0;
     var okOferta=!soloOfertas || enOferta(p);
     var okTope=!tope || cuotaRef(p)<=tope;
@@ -5806,8 +5910,13 @@ function render(){
         botones = (hayCuotas
             ? '<button onclick="verDetalle('+idx+')" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">📅 Ver cuotas</button>'
             : '')
-          +'<button onclick="comprarProducto('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Comprar</button>'
-          +'<button onclick="consultarProducto('+idx+',event)" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:9px;padding:9px;font-size:.71rem;font-weight:800;cursor:pointer;font-family:inherit">💬 Consultar</button>';
+          // 🛒 cantidad + agregar (sin "Consultar": todo va por el carrito)
+          +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:5px">'
+            +'<button onclick="cantTarjeta('+idx+',-1,event)" style="width:30px;height:32px;background:#F1F3F7;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-weight:900;color:var(--az);cursor:pointer;font-family:inherit;flex:0 0 auto">−</button>'
+            +'<input id="qt'+idx+'" value="'+(minimoProducto(p)||1)+'" inputmode="numeric" onclick="event.stopPropagation()" style="flex:1;min-width:0;text-align:center;border:1px solid var(--line);border-radius:8px;padding:7px 2px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--az);outline:none">'
+            +'<button onclick="cantTarjeta('+idx+',1,event)" style="width:30px;height:32px;background:#F1F3F7;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-weight:900;color:var(--az);cursor:pointer;font-family:inherit;flex:0 0 auto">+</button>'
+          +'</div>'
+          +'<button onclick="agregarConCantidad('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit">🛒 Agregar al carrito</button>';
       }
     }
     var oculto = p.visible===false;
@@ -5835,6 +5944,7 @@ function render(){
         +'<button class="fav" onclick="toggleFav('+idx+',event)">'+(esFav(p)?'❤️':'🤍')+'</button>'
       +'</div>'
       +'<div class="body">'
+        +badgePrecioFecha(p)
         +fechaHtml
         +'<div class="nom" onclick="verDetalle('+idx+')">'+p.nombre+'</div>'
         +(p.ultimas?'<div style="font-size:.6rem;color:#DC2626;font-weight:800;margin-bottom:3px">📦 ¡Últimas unidades!</div>':'')
