@@ -2654,6 +2654,64 @@ function aplicarTemaTienda(id, guardar){
    en su teléfono: la segunda vez solo elige el cliente y carga el producto. */
 var WA_PEDIDOS='5491168610532'; // adonde llegan los pedidos
 
+/* ═══════ 🔗 PUENTE CON EL CRM ═══════
+   Los clientes salen del CRM (misma tabla de Supabase). El revendedor los ve
+   con su semáforo, y las ventas que carga vuelven al CRM. Sin copiar y pegar. */
+var CLIENTES_CRM = [];
+var _crmCargando = false;
+
+function bajarClientesCRM(cb){
+  if(!sbCalc){ if(cb) cb(false); return; }
+  _crmCargando = true;
+  sbCalc.from('clientes').select('*').order('num',{ascending:false}).limit(5000)
+    .then(function(r){
+      _crmCargando = false;
+      if(r && r.data){
+        CLIENTES_CRM = r.data;
+        try{ localStorage.setItem('ae_clientes_crm', JSON.stringify(r.data)); }catch(e){}
+        if(cb) cb(true);
+      } else { if(cb) cb(false); }
+    })
+    .catch(function(e){ _crmCargando=false; console.warn('CRM clientes:', e); if(cb) cb(false); });
+}
+/* lo último que se bajó (para que funcione aunque no haya señal) */
+function clientesCRMLocal(){
+  if(CLIENTES_CRM.length) return CLIENTES_CRM;
+  try{ var g=localStorage.getItem('ae_clientes_crm'); if(g){ CLIENTES_CRM=JSON.parse(g); return CLIENTES_CRM; } }catch(e){}
+  return [];
+}
+/* 🚦 SEMÁFORO DEL CLIENTE — mismo criterio que el CRM */
+function semaforoCliente(c){
+  if(!c) return null;
+  var atrasos = c.atrasos || 0;
+  var cumplio = (c.cumplimiento!=null) ? c.cumplimiento : null;
+  var deuda = c.deuda || 0;
+  // sin historial todavía
+  if(!c.ventas && !atrasos && cumplio===null){
+    return { nivel:'nuevo', color:'#6B7280', bg:'#F7F8FA', ico:'⚪', txt:'Cliente nuevo', consejo:'Sin historial. Pedile una seña por las dudas.' };
+  }
+  if(atrasos>=3 || (cumplio!==null && cumplio<40)){
+    return { nivel:'alto', color:'#DC2626', bg:'#FEF2F2', ico:'🔴', txt:'RIESGO ALTO', consejo:'Se atrasó varias veces. Pedile 2 cuotas de entrada o vendé al contado.' };
+  }
+  if(atrasos>=1 || (cumplio!==null && cumplio<75)){
+    return { nivel:'medio', color:'#D97706', bg:'#FFFBEB', ico:'🟡', txt:'RIESGO MEDIO', consejo:'Pedile más enganche y recordale antes de cada vencimiento.' };
+  }
+  return { nivel:'bajo', color:'#059669', bg:'#F0FDF4', ico:'🟢', txt:'BUEN CLIENTE', consejo:'Paga bien. Podés ofrecerle más plazo tranquilo.' };
+}
+function badgeSemaforo(c){
+  var s = semaforoCliente(c);
+  if(!s) return '';
+  return '<div style="background:'+s.bg+';border-radius:9px;padding:9px 11px;margin-top:8px">'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+      +'<span>'+s.ico+'</span>'
+      +'<b style="color:'+s.color+';font-size:.74rem;letter-spacing:.3px">'+s.txt+'</b>'
+      +((c.deuda>0)?'<span style="margin-left:auto;font-size:.72rem;font-weight:800;color:'+s.color+'">Debe '+fmtNum(c.deuda)+'</span>':'')
+    +'</div>'
+    +'<div style="font-size:.68rem;color:'+s.color+';line-height:1.4;margin-top:4px">'+s.consejo+'</div>'
+  +'</div>';
+}
+function fmtNum(n){ try{ return '$'+Math.round(n).toLocaleString('es-AR'); }catch(e){ return '$'+n; } }
+
 function agendaClientes(){
   try{ return JSON.parse(localStorage.getItem('ae_agenda_clientes')||'[]'); }catch(e){ return []; }
 }
@@ -2674,9 +2732,27 @@ function borrarClienteAgenda(i){
 
 function abrirPedido(){
   if(!esEquipo()){ alert('🔒 Herramienta para el equipo de AmarangoElectro.'); return; }
-  var ag=agendaClientes();
+  // 🔗 los clientes salen del CRM (y refresca en segundo plano)
+  var crm = clientesCRMLocal();
+  var ag = agendaClientes();
+  // junto: primero los del CRM, después los que cargó el revendedor y no están allá
+  var lista = crm.slice();
+  ag.forEach(function(c){
+    var ya = lista.some(function(x){
+      return (x.dni && c.dni && String(x.dni)===String(c.dni)) ||
+             ((x.nombre||'').toLowerCase()===(c.nombre||'').toLowerCase());
+    });
+    if(!ya) lista.push(c);
+  });
+  window._listaClientes = lista;
   var opts='<option value="">— Cliente nuevo —</option>';
-  ag.forEach(function(c,i){ opts+='<option value="'+i+'">'+(c.nombre||'')+(c.dni?' · '+c.dni:'')+'</option>'; });
+  lista.forEach(function(c,i){
+    var s = semaforoCliente(c);
+    var ico = s ? s.ico+' ' : '';
+    opts+='<option value="'+i+'">'+ico+(c.nombre||'')+(c.localidad?' · '+c.localidad:(c.loc?' · '+c.loc:''))+'</option>';
+  });
+  // refrescar del CRM en segundo plano
+  bajarClientesCRM(function(ok){ if(ok){ try{ var sel=document.getElementById('pd-cli'); if(sel && sel.value==='') abrirPedido(); }catch(e){} } });
 
   var html=''
     +'<div style="text-align:center;margin-bottom:14px;">'
@@ -2692,12 +2768,19 @@ function abrirPedido(){
     +'</div>'
 
     +'<div id="pd-datos-cli">'
-    +'  <div class="pd-campo"><label>Nombre y apellido *</label><input id="pd-nombre" placeholder="Ej: Juan Pérez"></div>'
+    +'  <div class="pd-campo"><label>Nombre y apellido <span style="color:var(--red)">*</span></label><input id="pd-nombre" placeholder="Ej: Juan Pérez"></div>'
+    +'  <div class="pd-campo"><label>Teléfono <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-tel" inputmode="tel" placeholder="11 5555-5555"></div>'
+    +'  <div class="pd-campo"><label>Dirección <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-dir" placeholder="Calle y número"></div>'
     +'  <div style="display:flex;gap:8px;">'
-    +'    <div class="pd-campo" style="flex:1;"><label>DNI</label><input id="pd-dni" inputmode="numeric" placeholder="30111222"></div>'
-    +'    <div class="pd-campo" style="flex:1;"><label>Teléfono *</label><input id="pd-tel" inputmode="tel" placeholder="11 5555-5555"></div>'
+    +'    <div class="pd-campo" style="flex:1;"><label>Localidad <span style="color:var(--sub);font-weight:400;">(opc.)</span></label><input id="pd-loc" placeholder="Lanús"></div>'
+    +'    <div class="pd-campo" style="flex:1;"><label>DNI <span style="color:var(--sub);font-weight:400;">(opc.)</span></label><input id="pd-dni" inputmode="numeric" placeholder="30111222"></div>'
     +'  </div>'
-    +'  <div class="pd-campo"><label>Dirección de entrega</label><input id="pd-dir" placeholder="Calle, número, localidad"></div>'
+    +'  <div class="pd-campo"><label>Email <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-mail" inputmode="email" placeholder="juan@mail.com"></div>'
+    +'  <div style="display:flex;gap:7px;margin-top:10px;">'
+    +'    <button onclick="guardarSoloCliente()" style="flex:2;background:#16A34A;color:#fff;border:none;border-radius:10px;padding:12px;font-size:.8rem;font-weight:900;cursor:pointer;font-family:inherit;">💾 Guardar cliente</button>'
+    +'    <button onclick="borrarClienteSeleccionado()" style="flex:1;background:#FEF2F2;color:var(--red);border:1.5px solid #FECACA;border-radius:10px;padding:12px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;">🗑️</button>'
+    +'  </div>'
+    +'  <div style="font-size:.66rem;color:var(--sub);margin-top:7px;line-height:1.4;">Solo el nombre es obligatorio. El resto lo podés completar después.</div>'
     +'</div>'
 
     +'<div style="height:1px;background:var(--bor);margin:16px 0;"></div>'
@@ -2711,7 +2794,7 @@ function abrirPedido(){
     +'<div class="pd-campo"><label>Notas <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-notas" placeholder="Ej: entregar el sábado"></div>'
     +'<div id="pd-resumen" style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:11px;padding:12px;margin:12px 0;display:none;"></div>'
 
-    +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;padding:15px;" onclick="enviarPedido()">📲 Enviar pedido por WhatsApp</button>'
+    +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;padding:15px;" onclick="guardarYEnviarPedidoCliente()">📲 Enviar pedido por WhatsApp</button>'
     +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
 
   document.getElementById('modal-cuotas-body').innerHTML=html;
@@ -2723,14 +2806,27 @@ function cargarClienteEnPedido(){
   var box=document.getElementById('pd-datos-cli');
   if(i===''){
     box.style.display='';
-    ['pd-nombre','pd-dni','pd-tel','pd-dir'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+    ['pd-nombre','pd-dni','pd-tel','pd-dir','pd-mail','pd-loc'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+    var _s=document.getElementById('pd-semaforo'); if(_s) _s.innerHTML='';
     return;
   }
-  var c=agendaClientes()[parseInt(i,10)];
+  var c=(window._listaClientes||agendaClientes())[parseInt(i,10)];
   if(!c) return;
   document.getElementById('pd-nombre').value=c.nombre||'';
   document.getElementById('pd-dni').value=c.dni||'';
-  document.getElementById('pd-tel').value=c.tel||'';
+  var _ml=document.getElementById('pd-mail'); if(_ml) _ml.value=c.mail||c.email||'';
+  var _lc=document.getElementById('pd-loc'); if(_lc) _lc.value=c.loc||c.localidad||'';
+  document.getElementById('pd-tel').value=c.tel||c.telefono||'';
+  // 🚦 mostrar el semáforo del cliente (viene del CRM)
+  try{
+    var sem=document.getElementById('pd-semaforo');
+    if(!sem){
+      sem=document.createElement('div'); sem.id='pd-semaforo';
+      var cont=document.getElementById('pd-datos-cli');
+      if(cont && cont.parentNode) cont.parentNode.insertBefore(sem, cont);
+    }
+    sem.innerHTML = badgeSemaforo(c);
+  }catch(e){}
   document.getElementById('pd-dir').value=c.dir||'';
   // ya tenemos sus datos: los mostramos plegados para que vaya directo al producto
   box.style.display='none';
@@ -2754,7 +2850,24 @@ function pdCalcular(){
     +'<div style="display:flex;justify-content:space-between;font-size:.72rem;padding:3px 0;border-top:1px dashed #86EFAC;margin-top:4px;padding-top:6px;"><span style="color:var(--sub);font-weight:600;">Total financiado</span><b style="color:var(--az);">'+fmt(cuota*n)+'</b></div>';
 }
 
-function enviarPedido(){
+/* 💾 Guardar SOLO el cliente (sin pedido). Únicamente el nombre es obligatorio. */
+function guardarSoloCliente(){
+  var g=function(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; };
+  var nombre=g('pd-nombre');
+  if(!nombre){ alert('Poné al menos el nombre del cliente.'); return; }
+  var cli={ nombre:nombre, dni:g('pd-dni'), tel:g('pd-tel'), dir:g('pd-dir'), mail:g('pd-mail'), loc:g('pd-loc') };
+  guardarClienteAgenda(cli);
+  alert('✅ Cliente guardado: '+nombre);
+  abrirPedido();
+}
+/* 🗑️ Borrar el cliente que está seleccionado en el formulario */
+function borrarClienteSeleccionado(){
+  var sel=document.getElementById('pd-cli');
+  if(!sel || sel.value===''){ alert('Elegí primero un cliente de la lista.'); return; }
+  borrarClienteAgenda(parseInt(sel.value,10));
+}
+
+function guardarYEnviarPedidoCliente(){
   var nombre=(document.getElementById('pd-nombre').value||'').trim();
   var dni=(document.getElementById('pd-dni').value||'').trim();
   var tel=(document.getElementById('pd-tel').value||'').trim();
@@ -2765,13 +2878,14 @@ function enviarPedido(){
   var senia=(document.getElementById('pd-senia').value||'').trim();
   var notas=(document.getElementById('pd-notas').value||'').trim();
 
-  if(!nombre){ alert('Falta el nombre del cliente.'); return; }
-  if(!tel){ alert('Falta el teléfono del cliente.'); return; }
-  if(!prod){ alert('Falta el producto.'); return; }
+  // Solo el nombre es obligatorio. El resto es opcional.
+  if(!nombre){ alert('Poné al menos el nombre del cliente.'); return; }
+  if(!prod){ alert('Falta el producto del pedido.\n\nSi solo querés guardar el cliente, usá el botón «Guardar cliente».'); return; }
   if(!precio){ alert('Falta el precio de venta.'); return; }
 
   // guardamos al cliente en la agenda del asesor para la próxima vez
-  guardarClienteAgenda({nombre:nombre, dni:dni, tel:tel, dir:dir});
+  var _g=function(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; };
+  guardarClienteAgenda({nombre:nombre, dni:dni, tel:tel, dir:dir, mail:_g('pd-mail'), loc:_g('pd-loc')});
 
   var quien='';
   try{ quien=localStorage.getItem('ae_nombre_asesor')||''; }catch(e){}
