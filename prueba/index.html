@@ -2793,7 +2793,7 @@ function abrirPanelDueno(){
     +botonPanel('📦','Stock','Marcá qué hay y qué se agotó, de a uno o todos','stock')
     +botonPanel('🧮','Calculadora de ganancia','Pegá el costo, poné tu % y te da el precio','calcganancia')
     +botonPanel('⚙️','Configuración','Tu marca, colores, cuotas y markup','config')
-    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')+botonPanel('🗑️','Borrar productos','Elegí varios y borralos de una vez','borrarvarios')
+    +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')+botonPanel('📊','Estadísticas','Cómo anda tu negocio','stats')+botonPanel('📄','Catálogo PDF','Mandá todo tu catálogo por WhatsApp','pdf')+botonPanel('💾','Copia de seguridad','Guardá todo por si algo sale mal','backup')+botonPanel('🆘','Soporte','¿Algo no anda? Escribinos','soporte')+botonPanel('👥','Clientes','Quién te compra y cuánto gastó','clientes')+botonPanel('⭐','Reseñas','Lo que dicen tus clientes','resenas')+botonPanel('💰','Comisiones','Cuánto gana tu equipo por venta','comisiones')+botonPanel('📱','QR de tu tienda','Para el local o volantes','qr')+botonPanel('🗓️','Visitas de hoy','A quién visitar y su último pedido','visitas')+botonPanel('📊','Control de stock','Qué falta y qué te están pidiendo','controlstock')+botonPanel('🗑️','Borrar productos','Elegí varios y borralos de una vez','borrarvarios')
     +'</div>'
     // control de suscripciones: SOLO en la tienda de Amarango, discreto abajo
     +(esDuenoAmarango
@@ -2815,6 +2815,8 @@ function abrirModuloDueno(destino){
   if(destino==='subs'){ abrirSuscriptores(); return; }
   if(destino==='config'){ abrirConfig(); return; }
   if(destino==='placas'){ abrirPlacas(); return; }
+  if(destino==='visitas'){ abrirVisitasHoy(); return; }
+  if(destino==='controlstock'){ abrirControlStock(); return; }
   if(destino==='borrarvarios'){ abrirBorrarVarios(); return; }
   if(destino==='tiendanueva'){ abrirTiendaNueva(); return; }
   if(destino==='porcategoria'){ abrirPorCategoria(); return; }
@@ -4236,6 +4238,210 @@ function toggleStockRapido(idx){
 }
 
 /* Panel de gestión de STOCK: de a uno o todos a la vez */
+/* ═══════ 📊 CONTROL DE STOCK CON ALERTAS ═══════
+   Para el dueño y quien arma los pedidos: qué falta, qué está por faltar,
+   y qué se está pidiendo mucho. */
+function analizarStock(){
+  var sinStock=[], pedidosPorProd={}, mes=30*86400000, ahora=Date.now();
+  // cuánto se pidió de cada producto en el último mes
+  (PEDIDOS||[]).forEach(function(ped){
+    if(ahora - ped.fecha > mes) return;
+    (ped.items||[]).forEach(function(it){
+      var n = String(it.nombre||'').replace(/\s*\([^)]*\)\s*$/,'').trim();
+      pedidosPorProd[n] = (pedidosPorProd[n]||0) + (it.cant||1);
+    });
+  });
+  (PRODUCTOS||[]).forEach(function(p){
+    if(p.visible===false) return;
+    var pedido = pedidosPorProd[p.nombre] || 0;
+    if(p.sinStock) sinStock.push({p:p, pedido:pedido});
+  });
+  // los más pedidos (para saber qué NO puede faltar)
+  var top = Object.keys(pedidosPorProd)
+    .map(function(n){ return {nombre:n, cant:pedidosPorProd[n]}; })
+    .sort(function(a,b){ return b.cant-a.cant; }).slice(0,10);
+  // sin stock ordenados por demanda (los que más duelen primero)
+  sinStock.sort(function(a,b){ return b.pedido-a.pedido; });
+  return { sinStock:sinStock, top:top };
+}
+/* ═══════ 🗓️ VISITAS — a quién visitar hoy ═══════
+   Cada cliente tiene sus días. El asesor abre la app y sabe su recorrido. */
+var DIAS_SEM = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function diasDeCliente(c){ return (c && Array.isArray(c.dias)) ? c.dias : []; }
+function abrirVisitasHoy(){
+  cargarClientes(function(){
+    cargarPedidos(function(){
+      var hoy = new Date().getDay();
+      var deHoy = (CLIENTES||[]).filter(function(c){ return diasDeCliente(c).indexOf(hoy)>=0; });
+      var sinDias = (CLIENTES||[]).filter(function(c){ return !diasDeCliente(c).length; });
+      // último pedido de cada uno (para saber hace cuánto no compra)
+      var ultimoDe = function(c){
+        var w=String(c.wa||'').replace(/[^0-9]/g,'');
+        if(!w) return null;
+        var m=(PEDIDOS||[]).filter(function(p){ return p.cliente && String(p.cliente.wa||'').replace(/[^0-9]/g,'')===w; });
+        return m.length ? m[0] : null;
+      };
+      var tarjeta = function(c){
+        var u = ultimoDe(c);
+        var dias = u ? Math.floor((Date.now()-u.fecha)/86400000) : null;
+        var alerta = (dias!==null && dias>21);
+        return '<div style="background:#fff;border:1px solid '+(alerta?'#FECACA':'var(--line)')+';border-radius:12px;padding:12px;margin-bottom:8px">'
+          +'<div style="display:flex;align-items:center;gap:10px">'
+            +'<div style="width:38px;height:38px;border-radius:50%;background:'+(alerta?'#FEF2F2':'#F5F8FF')+';display:flex;align-items:center;justify-content:center;font-weight:900;color:'+(alerta?'#DC2626':'var(--az)')+';flex:0 0 auto">'+(c.nombre||'?').charAt(0).toUpperCase()+'</div>'
+            +'<div style="flex:1;min-width:0">'
+              +'<div style="font-size:.88rem;font-weight:800;color:var(--txt)">'+(c.nombre||'')+'</div>'
+              +'<div style="font-size:.72rem;color:var(--sub)">'+(c.loc||c.dir||'')+'</div>'
+              +(dias!==null
+                ? '<div style="font-size:.7rem;font-weight:800;color:'+(alerta?'#DC2626':'#059669')+';margin-top:2px">'+(alerta?'⚠️ ':'')+'Último pedido hace '+dias+' días</div>'
+                : '<div style="font-size:.7rem;color:var(--sub);margin-top:2px">Sin pedidos aún</div>')
+            +'</div>'
+          +'</div>'
+          +'<div style="display:flex;gap:6px;margin-top:9px">'
+            +'<button onclick="visitarCliente(\''+(c.id||'')+'\')" style="flex:1;background:var(--az);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.76rem;font-weight:800;cursor:pointer;font-family:inherit">🛒 Armar pedido</button>'
+            +(c.dir?'<button onclick="window.open(\'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(c.dir)+'\',\'_blank\')" style="background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:9px;padding:9px 12px;font-size:.76rem;font-weight:800;cursor:pointer;font-family:inherit">📍</button>':'')
+            +(c.wa?'<button onclick="window.open(\'https://wa.me/'+String(c.wa).replace(/[^0-9]/g,'')+'\',\'_blank\')" style="background:#25D366;border:none;color:#fff;border-radius:9px;padding:9px 12px;font-size:.76rem;font-weight:800;cursor:pointer;font-family:inherit">💬</button>':'')
+          +'</div></div>';
+      };
+      var html =
+         '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:2px">🗓️ Visitas de hoy</div>'
+        +'<div style="font-size:.8rem;color:var(--nar);font-weight:800;margin-bottom:12px">'+DIAS_SEM[hoy]+'</div>';
+      if(deHoy.length){
+        html += '<div style="background:#F5F8FF;border-radius:11px;padding:11px;margin-bottom:12px;text-align:center">'
+          +'<div style="font-size:1.4rem;font-weight:900;color:var(--az)">'+deHoy.length+'</div>'
+          +'<div style="font-size:.7rem;color:var(--sub);font-weight:800">CLIENTES PARA VISITAR</div></div>'
+          + deHoy.map(tarjeta).join('');
+      } else {
+        html += '<div style="background:#F7F8FA;border-radius:12px;padding:22px;text-align:center;margin-bottom:12px">'
+          +'<div style="font-size:2rem">📅</div>'
+          +'<div style="font-weight:800;color:var(--sub);font-size:.86rem;margin-top:6px">No hay visitas para hoy</div>'
+          +'<div style="font-size:.76rem;color:var(--sub);margin-top:3px">Asigná días a tus clientes para armar el recorrido.</div></div>';
+      }
+      if(sinDias.length){
+        html += '<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin:14px 0 7px">Sin días asignados ('+sinDias.length+')</div>'
+          + sinDias.slice(0,6).map(function(c){
+              return '<div onclick="asignarDias(\''+(c.id||'')+'\')" style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px dashed var(--line);border-radius:10px;padding:10px;margin-bottom:6px;cursor:pointer">'
+                +'<span style="font-size:.82rem;color:var(--txt)">'+(c.nombre||'')+'</span>'
+                +'<span style="font-size:.72rem;color:var(--az);font-weight:800">Asignar días ›</span></div>';
+            }).join('');
+      }
+      html += '<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px">‹ Volver</button>';
+      document.getElementById('adminBody').innerHTML = html;
+    });
+  });
+}
+function visitarCliente(id){
+  var c=(CLIENTES||[]).find(function(x){ return x.id===id; });
+  if(!c) return;
+  _clienteDelPedido=c;
+  guardarCarrito([]);
+  try{ cerrarAdmin(); }catch(e){}
+  try{ tabIr('inicio'); }catch(e){}
+  mostrarBarraPedido();
+  try{ actualizarBeeFab(); }catch(e){}
+  toastCarrito('🛒 Armando pedido de '+(c.nombre||''));
+}
+function asignarDias(id){
+  var c=(CLIENTES||[]).find(function(x){ return x.id===id; });
+  if(!c) return;
+  var actuales = diasDeCliente(c);
+  document.getElementById('adminBody').innerHTML =
+     '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">🗓️ ¿Qué días lo visitás?</div>'
+    +'<div style="font-size:.82rem;color:var(--sub);margin-bottom:14px">'+(c.nombre||'')+(c.loc?' · '+c.loc:'')+'</div>'
+    + DIAS_SEM.map(function(d,i){
+        var on = actuales.indexOf(i)>=0;
+        return '<button onclick="toggleDiaCliente(\''+id+'\','+i+')" style="width:100%;text-align:left;background:'+(on?'#F5F8FF':'#fff')+';border:2px solid '+(on?'var(--az)':'var(--line)')+';border-radius:11px;padding:13px;font-size:.88rem;font-weight:'+(on?'900':'700')+';color:'+(on?'var(--az)':'var(--txt)')+';cursor:pointer;font-family:inherit;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center">'
+          +'<span>'+d+'</span><span style="font-size:1.1rem">'+(on?'✅':'⬜')+'</span></button>';
+      }).join('')
+    +'<button onclick="abrirVisitasHoy()" style="width:100%;background:#16A34A;color:#fff;border:none;border-radius:13px;padding:15px;font-weight:900;cursor:pointer;font-family:inherit;margin-top:6px">💾 Listo</button>';
+}
+function toggleDiaCliente(id, dia){
+  var c=(CLIENTES||[]).find(function(x){ return x.id===id; });
+  if(!c) return;
+  if(!Array.isArray(c.dias)) c.dias=[];
+  var k=c.dias.indexOf(dia);
+  if(k>=0) c.dias.splice(k,1); else c.dias.push(dia);
+  guardarClientes();
+  try{ sonar('tap'); }catch(e){}
+  asignarDias(id);
+}
+
+function abrirControlStock(){
+  cargarPedidos(function(){
+    var d = analizarStock();
+    var criticos = d.sinStock.filter(function(x){ return x.pedido>0; });
+    var html =
+       '<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:4px">📊 Control de stock</div>'
+      +'<div style="font-size:.78rem;color:var(--sub);line-height:1.5;margin-bottom:14px">Qué falta, qué duele que falte, y qué no puede faltar nunca.</div>';
+
+    // 🚨 CRÍTICOS: sin stock Y con pedidos
+    if(criticos.length){
+      html += '<div style="background:#FEF2F2;border:2px solid #FECACA;border-radius:14px;padding:14px;margin-bottom:12px">'
+        +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">'
+          +'<span style="font-size:1.5rem">🚨</span>'
+          +'<div><div style="font-weight:900;color:#DC2626;font-size:.95rem">'+criticos.length+' producto'+(criticos.length>1?'s':'')+' que te están pidiendo</div>'
+          +'<div style="font-size:.72rem;color:#DC2626">Sin stock, pero con demanda. Reponé estos primero.</div></div>'
+        +'</div>'
+        + criticos.map(function(x){
+            return '<div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:9px;padding:9px 11px;margin-bottom:6px">'
+              +'<span style="font-size:.82rem;font-weight:700;color:var(--txt);flex:1;min-width:0">'+x.p.nombre+'</span>'
+              +'<span style="font-size:.74rem;font-weight:900;color:#DC2626;white-space:nowrap;margin-left:8px">'+x.pedido+' pedidos</span></div>';
+          }).join('')
+        +'</div>';
+    }
+
+    // ⛔ resto sin stock
+    var otros = d.sinStock.filter(function(x){ return x.pedido===0; });
+    if(otros.length){
+      html += '<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:12px;padding:13px;margin-bottom:12px">'
+        +'<div style="font-weight:900;color:#D97706;font-size:.85rem;margin-bottom:7px">⛔ '+otros.length+' sin stock (sin pedidos aún)</div>'
+        + otros.slice(0,12).map(function(x){ return '<div style="font-size:.78rem;color:#92400E;padding:3px 0">• '+x.p.nombre+'</div>'; }).join('')
+        + (otros.length>12 ? '<div style="font-size:.72rem;color:#92400E;margin-top:4px">…y '+(otros.length-12)+' más</div>' : '')
+        +'</div>';
+    }
+
+    // 🔥 LOS MÁS PEDIDOS
+    if(d.top.length){
+      html += '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:13px;margin-bottom:12px">'
+        +'<div style="font-weight:900;color:#059669;font-size:.85rem;margin-bottom:3px">🔥 Los más pedidos del mes</div>'
+        +'<div style="font-size:.72rem;color:#059669;margin-bottom:8px">Estos nunca pueden faltar.</div>'
+        + d.top.map(function(t,i){
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #D1FAE5">'
+              +'<span style="font-size:.8rem;color:var(--txt)"><b style="color:#059669">'+(i+1)+'.</b> '+t.nombre+'</span>'
+              +'<b style="font-size:.78rem;color:#059669;white-space:nowrap">'+t.cant+'</b></div>';
+          }).join('')
+        +'</div>';
+    }
+
+    if(!criticos.length && !otros.length){
+      html += '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:20px;text-align:center;margin-bottom:12px">'
+        +'<div style="font-size:2rem">✅</div><div style="font-weight:900;color:#059669;margin-top:5px">Todo con stock</div></div>';
+    }
+
+    html += '<button onclick="mandarFaltantesWa()" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:15px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">💬 Mandar lista de faltantes</button>'
+      +'<button onclick="abrirGestionStock()" style="width:100%;background:#fff;border:1.5px solid var(--az);color:var(--az);border-radius:12px;padding:13px;font-size:.86rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px">📦 Marcar stock producto por producto</button>'
+      +'<button onclick="abrirPanelSegunRol()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit">‹ Volver</button>';
+    document.getElementById('adminBody').innerHTML = html;
+  });
+}
+function mandarFaltantesWa(){
+  var d = analizarStock();
+  if(!d.sinStock.length){ alert('No hay productos sin stock.'); return; }
+  var msg = '📦 *FALTANTES — '+(CONFIG.negocio||'')+'*\n'
+    + new Date().toLocaleDateString('es-AR') + '\n\n';
+  var criticos = d.sinStock.filter(function(x){ return x.pedido>0; });
+  var otros = d.sinStock.filter(function(x){ return x.pedido===0; });
+  if(criticos.length){
+    msg += '🚨 *URGENTE (los están pidiendo)*\n';
+    criticos.forEach(function(x){ msg += '  ☐ '+x.p.nombre+' ('+x.pedido+' pedidos)\n'; });
+    msg += '\n';
+  }
+  if(otros.length){
+    msg += '⛔ *Sin stock*\n';
+    otros.forEach(function(x){ msg += '  ☐ '+x.p.nombre+'\n'; });
+  }
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
 function abrirGestionStock(){
   var conStock=PRODUCTOS.filter(function(p){return !p.sinStock;}).length;
   var sinStk=PRODUCTOS.length-conStock;
