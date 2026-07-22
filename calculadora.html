@@ -761,8 +761,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 </div>
 
 <!-- Modal: cargar catálogo por pegado -->
-<div id="modal-carga" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;padding:20px;overflow-y:auto;">
-  <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:20px auto;">
+<div id="modal-carga" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1500;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:12px auto 80px;">
     <h3 style="color:var(--az);font-weight:900;font-size:1rem;margin-bottom:4px;">⚙️ Cargar catálogo</h3>
     <p style="font-size:.72rem;color:var(--sub);margin-bottom:12px;">
       Una línea por producto: <b>Nombre | Precio</b><br>
@@ -801,8 +801,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 </div>
 
 <!-- Modal: calcular cuotas de un producto -->
-<div id="modal-cuotas" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;padding:20px;overflow-y:auto;">
-  <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:30px auto;" id="modal-cuotas-body"></div>
+<div id="modal-cuotas" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1500;padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+  <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:12px auto 80px;" id="modal-cuotas-body"></div>
 </div>
 
 <div class="footer">
@@ -3151,7 +3151,8 @@ function guardarYEnviarPedidoCliente(){
     var h=document.querySelector('.header');
     var e=document.getElementById('header-espacio');
     if(!h||!e) return;
-    e.style.height = h.offsetHeight + 'px';
+    // +6px de margen: si el header crece (nombre largo, eslogan), no tapa el contenido
+    e.style.height = (h.offsetHeight + 6) + 'px';
   }
   window._medirHeader=medir;
   function alScroll(){
