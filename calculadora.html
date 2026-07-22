@@ -311,6 +311,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-algoritmo" style="display:none;" onclick="cerrarCajon();abrirQueBuscan()"><span class="ci-ic">🧠</span> Qué busca tu gente</button>
+  <button class="cajon-item cj-admin" id="cajon-limpiar" style="display:none;" onclick="cerrarCajon();limpiarProductosFantasma()"><span class="ci-ic">🧹</span> Limpiar productos raros</button>
   <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
   <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🐝</span> Programa Colaborador</button>
   <button class="cajon-item" onclick="cerrarCajon();accesoRevendedores()"><span class="ci-ic">👥</span> Asesores de ventas</button>
@@ -2725,7 +2726,7 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo','cajon-limpiar'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
@@ -3721,14 +3722,16 @@ function tiendaProcesarFoto(e){
   reader.onload=function(ev){
     var img=new Image();
     img.onload=function(){
-      var maxW=600;
+      var maxW=1000;   // más nítido en celulares modernos (antes 600)
       var escala=Math.min(1, maxW/img.width);
       var w=Math.round(img.width*escala), h=Math.round(img.height*escala);
       var canvas=document.createElement('canvas');
       canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      var _ctx=canvas.getContext('2d');
+      _ctx.imageSmoothingEnabled=true; _ctx.imageSmoothingQuality='high';
+      _ctx.drawImage(img,0,0,w,h);
       // convertir a dataURL y de ahí a blob (más confiable en Android que toBlob directo)
-      var dataUrl=canvas.toDataURL('image/jpeg', 0.8);
+      var dataUrl=canvas.toDataURL('image/jpeg', 0.88);
       var blob=dataURLaBlob(dataUrl);
       if(!blob || blob.size<100){ alert('⚠️ La foto quedó vacía al procesar. Probá con otra imagen.'); return; }
       subirFotoStorage(blob, window._tiendaFotoId);
@@ -4713,7 +4716,7 @@ function tiendaCatalogoPDF(){
     +'cat-titulo{background:#FF7A00;color:#fff;font-size:15px;font-weight:800;padding:8px 16px;margin:14px 12px 10px;border-radius:8px;letter-spacing:.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
     +'.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 12px;}'
     +'.tarjeta{border:1.5px solid #0B2D6B;border-radius:10px;overflow:hidden;page-break-inside:avoid;background:#fff;display:flex;flex-direction:column;}'
-    +'.tarjeta .foto{width:100%;height:120px;object-fit:cover;background:#f4f4f4;}'
+    +'.tarjeta .foto{width:100%;height:120px;object-fit:cover;background:#f4f4f4;image-rendering:auto;-webkit-backface-visibility:hidden;transform:translateZ(0);}'
     +'.tarjeta .noimg{width:100%;height:120px;background:#f0f4ff;display:flex;align-items:center;justify-content:center;font-size:34px;}'
     +'.tarjeta .cuerpo{padding:8px;text-align:center;flex:1;display:flex;flex-direction:column;justify-content:space-between;}'
     +'.tarjeta .nom{font-size:11px;font-weight:800;color:#0B2D6B;line-height:1.2;margin-bottom:4px;min-height:26px;}'
@@ -5847,8 +5850,10 @@ function cargaFotoElegida(e){
       var w=Math.round(img.width*escala), h=Math.round(img.height*escala);
       var canvas=document.createElement('canvas');
       canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      window._cargaFotoData = canvas.toDataURL('image/jpeg', 0.8);
+      var _ctx=canvas.getContext('2d');
+      _ctx.imageSmoothingEnabled=true; _ctx.imageSmoothingQuality='high';
+      _ctx.drawImage(img,0,0,w,h);
+      window._cargaFotoData = canvas.toDataURL('image/jpeg', 0.88);
       var prev=document.getElementById('carga-foto-preview');
       if(prev) prev.innerHTML='<img src="'+window._cargaFotoData+'" style="max-width:120px;max-height:120px;border-radius:8px;border:2px solid var(--az);"><div style="font-size:.62rem;color:var(--gr);font-weight:700;margin-top:4px;">✅ Foto lista</div>';
     };
@@ -6041,12 +6046,44 @@ function detectarPrecioTexto(txt){
   }
   return precios.length?Math.max.apply(null,precios):0;
 }
+/* 🧹 Limpiar los productos fantasma que quedaron cargados
+   (los que se llaman "2 cuotas de", "4 cuotas de", etc.) */
+function limpiarProductosFantasma(){
+  var basura = /^\s*(💳\s*)?(\d+\s*)?(cuotas?|cuota)\b|^\s*(en|de|con)\s+\d+\s*cuotas?|^\s*contado\s*:?\s*$|^\s*[\d.,\s$%x+-]+\s*$/i;
+  var antes = tiendaProductos.length;
+  var fantasma = tiendaProductos.filter(function(p){
+    var n=(p.nombre||'').trim();
+    return !n || basura.test(n) || n.replace(/[^a-zA-Z]/g,'').length < 3;
+  });
+  if(!fantasma.length){ alert('✅ No hay productos con nombre raro. Todo en orden.'); return; }
+  var lista = fantasma.slice(0,10).map(function(p){ return '• '+(p.nombre||'(sin nombre)'); }).join('\n');
+  if(fantasma.length>10) lista += '\n…y '+(fantasma.length-10)+' más';
+  if(!confirm('Encontré '+fantasma.length+' producto'+(fantasma.length>1?'s':'')+' con nombre raro:\n\n'+lista+'\n\n¿Los borro?')) return;
+  tiendaProductos = tiendaProductos.filter(function(p){
+    var n=(p.nombre||'').trim();
+    return n && !basura.test(n) && n.replace(/[^a-zA-Z]/g,'').length >= 3;
+  });
+  try{ tiendaGuardar(); }catch(e){}
+  try{ tiendaSubirNube(); }catch(e){}
+  try{ tiendaRender(); }catch(e){}
+  alert('🧹 Listo. Borré '+(antes-tiendaProductos.length)+' productos.');
+}
+
 function nombreProductoTexto(txt){
   if(!txt)return '';
+  // ❌ líneas que NO son el nombre del producto (son parte del precio o del mensaje)
+  var basura = /^\s*(\d+\s*)?(cuotas?|cuota)\b|^\s*(en|de|con)\s+\d+\s*cuotas?|contado|precio|total|entrega|env[ií]o|financiaci[oó]n|sin inter[eé]s|promo|oferta v[aá]lida|transferencia|efectivo|d[eé]bito|cr[eé]dito|consult[aá]|whatsapp|stock|disponible|^\s*[\d.,\s$%x+-]+\s*$/i;
   var lineas=txt.split('\n');
   for(var i=0;i<lineas.length;i++){
     var l=limpiarNombreProd(lineas[i]);
-    if(l && /[a-zA-Z]{3,}/.test(l) && l.length>=3)return l.substring(0,60);
+    if(!l) continue;
+    if(basura.test(l)) continue;              // saltea "2 cuotas de", "Contado:", etc.
+    if(!/[a-zA-Z]{3,}/.test(l)) continue;     // tiene que tener letras de verdad
+    if(l.length<3) continue;
+    // que tenga al menos 2 letras seguidas que no sean solo números
+    var soloNum = l.replace(/[^a-zA-Z]/g,'').length < 3;
+    if(soloNum) continue;
+    return l.substring(0,60);
   }
   return '';
 }
