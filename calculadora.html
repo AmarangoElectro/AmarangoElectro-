@@ -790,6 +790,15 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <button type="button" class="calc-btn" style="width:100%;background:#eef4ff;color:var(--az);border:1.5px solid var(--az);font-size:.72rem;padding:8px;" onclick="document.getElementById('carga-foto-input').click()">🖼️ Elegir foto</button>
       <div id="carga-foto-preview" style="margin-top:8px;text-align:center;"></div>
     </div>
+    <div style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
+      <div style="font-size:.7rem;color:var(--az);font-weight:800;margin-bottom:6px;">🏷️ Categoría y detalles (opcional)</div>
+      <div style="font-size:.64rem;color:var(--sub);margin-bottom:8px;">Se aplica a todos los productos de esta carga. Si dejás la categoría en automático, la detecto por el nombre.</div>
+      <select id="carga-categoria" style="width:100%;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.78rem;background:#fff;margin-bottom:8px;">
+        <option value="">🤖 Detectar automáticamente</option>
+      </select>
+      <textarea id="carga-caracteristicas" placeholder="Características (ej: 6 kg · Carga superior · Blanco)" rows="2"
+        style="width:100%;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.78rem;resize:vertical;"></textarea>
+    </div>
     <input id="carga-dolar" placeholder="Cotización dólar (si es USD)" inputmode="numeric"
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
     <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--sub);margin-bottom:12px;">
@@ -5836,6 +5845,15 @@ function tiendaVerCuotas(id){
 function tiendaAbrirCarga(){
   document.getElementById('modal-carga').style.display='block';
   setCargaModo('costo');  // arranca en modo Costo por defecto
+  // 🏷️ llenar el selector con todas las categorías
+  try{
+    var sel=document.getElementById('carga-categoria');
+    if(sel && sel.options.length<=1){
+      TIENDA_CATEGORIAS.forEach(function(c){
+        var o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+      });
+    }
+  }catch(e){}
 }
 
 // Guarda la foto elegida en la carga (comprimida) para asignarla al primer producto
@@ -5888,6 +5906,12 @@ function tiendaProcesarCarga(){
   var esUSD=(cargaModo==='usd');
   var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
   var reemplazar=document.getElementById('carga-reemplazar').checked;
+  // 🏷️ categoría y características (opcionales, se aplican a todos)
+  var _cargaCat='', _cargaCarac='';
+  try{
+    var _sc=document.getElementById('carga-categoria'); if(_sc) _cargaCat=_sc.value||'';
+    var _cc=document.getElementById('carga-caracteristicas'); if(_cc) _cargaCarac=(_cc.value||'').trim();
+  }catch(e){}
 
   if(esUSD && dolar<=0){ alert('Elegiste USD. Cargá la cotización del dólar para convertir los precios.'); return; }
 
@@ -5920,7 +5944,11 @@ function tiendaProcesarCarga(){
       costo = num;                // costo directo
       venta = markupVentaCRM(costo); // fórmula Amarango
     }
-    nuevos.push({ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), precioActualizado:Date.now(), visible:false });
+    var _prod={ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), precioActualizado:Date.now(), visible:false };
+    // 🏷️ categoría y características elegidas en el formulario
+    if(_cargaCat) _prod.categoria=_cargaCat;
+    if(_cargaCarac) _prod.caracteristicas=_cargaCarac;
+    nuevos.push(_prod);
   });
 
   if(!nuevos.length){
