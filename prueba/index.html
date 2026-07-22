@@ -269,6 +269,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </div>
 
 <!-- BOTÓN FLOTANTE 🐝 — atajo a cargar productos. SOLO lo ve el admin. -->
+<button id="ayudaFab" onclick="abrirAyuda()" title="Ayuda" style="position:fixed;bottom:88px;right:16px;z-index:335;width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--az);font-size:1.15rem;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.18);padding:0;line-height:1;display:flex;align-items:center;justify-content:center;">❓</button>
 <button id="beeFab" onclick="abrirCargarDirecto()" style="display:none;position:fixed;bottom:88px;right:16px;z-index:340;width:60px;height:60px;border-radius:50%;background:#fff;border:3px solid var(--nar);font-size:1.9rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);padding:0;line-height:1">🐝</button>
 
 <!-- VISOR DE FOTO a pantalla completa (tocás la foto y se ve entera) -->
@@ -912,6 +913,12 @@ function actualizarBeeFab(){
   var b=document.getElementById('beeFab'); if(!b)return;
   var esAsesor = (rolEfectivo()==='admin' || rolEfectivo()==='revendedor');
   b.style.display = esAsesor ? 'block' : 'none';
+  // ❓ el botón de ayuda flotante es SOLO para el cliente (el equipo la tiene en el panel).
+  //    Así no se apilan dos botones y la pantalla queda limpia.
+  try{
+    var a=document.getElementById('ayudaFab');
+    if(a) a.style.display = esAsesor ? 'none' : 'flex';
+  }catch(e){}
   if(!esAsesor) return;
 
   // 📦 EN MODO MAYORISTA: la abeja pasa a ser el BOTÓN DE CLIENTE ACTIVO.
@@ -1415,6 +1422,7 @@ function toastCarrito(msg){
    El cliente pega su lista tal cual la escribe ("10 barritas, 5 mentitas")
    y el sistema le arma el carrito solo. Sin buscar, sin escribir precios. */
 function abrirPedidoRapido(){
+  try{ empujarPantalla('abrirPedidoRapido', function(){ try{cerrarAdmin()}catch(e){} }); }catch(e){}
   var ultimo = ultimoPedidoDelCliente();
   document.getElementById('adminBody').innerHTML =
      '<div style="font-weight:900;color:var(--az);font-size:1.1rem;margin-bottom:4px">⚡ Pedido rápido</div>'
@@ -1532,6 +1540,7 @@ function repetirUltimoPedido(){
 }
 
 function abrirCarrito(){
+  try{ empujarPantalla('carrito', cerrarCarrito); }catch(e){}
   var c=cargarCarrito();
   var html='';
   if(!c.length){
@@ -1576,6 +1585,48 @@ function vaciarCarrito(){ if(confirm('¿Vaciar el carrito?')){ guardarCarrito([]
 /* Pedir: manda TODO junto por WhatsApp, eligiendo vendedor */
 /* ═══════ 📋 DATOS DEL CLIENTE antes de mandar el pedido ═══════
    Se piden una sola vez: después quedan guardados y el pedido sale directo. */
+/* 👋 REGISTRO SIMPLE — la primera vez que entra un cliente.
+   Solo nombre y dirección. Nada más. Se puede saltear. */
+function mostrarBienvenida(){
+  // no molestar al equipo ni si ya se registró
+  try{
+    if(rolEfectivo()==='admin' || rolEfectivo()==='revendedor') return;
+    if(datosCliente()) return;
+    if(localStorage.getItem(lsKey('ae_bienvenida'))==='visto') return;
+  }catch(e){ return; }
+  var d=document.createElement('div');
+  d.id='bienvenidaBox';
+  d.style.cssText='position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;padding:0';
+  var esZh = (typeof IDIOMA!=='undefined' && IDIOMA==='zh');
+  d.innerHTML='<div style="background:#fff;border-radius:22px 22px 0 0;padding:22px 20px 26px;width:100%;max-width:480px;box-shadow:0 -6px 30px rgba(0,0,0,.25)">'
+    +'<div style="text-align:center;margin-bottom:16px">'
+      +'<div style="font-size:2.2rem">👋</div>'
+      +'<div style="font-weight:900;color:var(--az);font-size:1.15rem;margin-top:4px">'+(esZh?'欢迎！':'¡Bienvenido!')+'</div>'
+      +'<div style="font-size:.82rem;color:var(--sub);line-height:1.5;margin-top:3px">'+(esZh?'留下您的信息，下单更快':'Dejanos tus datos y comprás más rápido')+'</div>'
+    +'</div>'
+    +'<input id="bv_nombre" placeholder="'+(esZh?'姓名':'Tu nombre')+'" style="width:100%;border:2px solid var(--line);border-radius:13px;padding:15px;font-family:inherit;font-size:1rem;outline:none;margin-bottom:10px">'
+    +'<input id="bv_dir" placeholder="'+(esZh?'地址':'Dirección')+'" style="width:100%;border:2px solid var(--line);border-radius:13px;padding:15px;font-family:inherit;font-size:1rem;outline:none;margin-bottom:14px">'
+    +'<button onclick="guardarBienvenida()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:14px;padding:16px;font-size:1rem;font-weight:900;cursor:pointer;font-family:inherit">'+(esZh?'开始购物':'Empezar a comprar')+'</button>'
+    +'<button onclick="saltearBienvenida()" style="width:100%;background:none;border:none;color:var(--sub);padding:12px;font-size:.84rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">'+(esZh?'跳过':'Ahora no')+'</button>'
+  +'</div>';
+  document.body.appendChild(d);
+  setTimeout(function(){ try{ document.getElementById('bv_nombre').focus(); }catch(e){} }, 300);
+}
+function guardarBienvenida(){
+  var n=(document.getElementById('bv_nombre').value||'').trim();
+  var dir=(document.getElementById('bv_dir').value||'').trim();
+  if(!n){ alert(typeof IDIOMA!=='undefined'&&IDIOMA==='zh'?'请填写姓名':'Poné tu nombre'); return; }
+  try{ guardarDatosCliente({nombre:n, dir:dir, loc:'', wa:''}); }catch(e){}
+  try{ localStorage.setItem(lsKey('ae_bienvenida'),'visto'); }catch(e){}
+  var b=document.getElementById('bienvenidaBox'); if(b) b.remove();
+  try{ sonar('exito'); }catch(e){}
+  try{ toastCarrito((typeof IDIOMA!=='undefined'&&IDIOMA==='zh')?'欢迎 '+n+'！':'¡Hola '+n+'! 🐝'); }catch(e){}
+}
+function saltearBienvenida(){
+  try{ localStorage.setItem(lsKey('ae_bienvenida'),'visto'); }catch(e){}
+  var b=document.getElementById('bienvenidaBox'); if(b) b.remove();
+}
+
 function datosCliente(){
   try{ return JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){ return null; }
 }
@@ -1815,6 +1866,19 @@ function abrirAyuda(){
       +tarjeta('🔁','Repetí lo de siempre','Si el cliente ya compró, con un toque le repetís su último pedido completo.')
       +tarjeta('📤','Mandá el pedido','Cuando terminás, tocás el carrito y elegís a quién mandárselo. Queda guardado en la app y llega por WhatsApp.')
       +(may?tarjeta('🗓️','Tus visitas','Panel → Visitas de hoy: quiénes te tocan hoy, su dirección en el mapa y hace cuánto no compran.'):'');
+  } else if(typeof IDIOMA!=='undefined' && IDIOMA==='zh'){
+    // 🇨🇳 AYUDA EN CHINO — corta y directa, paso a paso
+    html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🛒</div>'
+      +'<div style="font-weight:900;color:var(--az);font-size:1.15rem">怎么买？</div>'
+      +'<div style="font-size:.82rem;color:var(--sub)">四步就好</div></div>'
+      +tarjeta('1️⃣','找产品','用上面的搜索框，或点击分类。也可以按品牌筛选。')
+      +tarjeta('2️⃣','选数量','在产品上用 − 和 + 选择数量，然后点「加入购物车」。')
+      +tarjeta('3️⃣','看价格','大字是整箱价格，下面小字是单价。方便您算利润。')
+      +tarjeta('4️⃣','提交订单','点购物车 🛒，查看总计，然后提交。第一次会问您的信息，以后就不用了。')
+      +tarjeta('⚡','快速下单','在「更多」里点「快速下单」。直接写：10 巧克力、5 薄荷糖，系统自动帮您下单。')
+      +tarjeta('🔁','重复上次订单','第一次下单后，一键重复同样的订单。')
+      +'<div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:11px;padding:12px;margin-top:10px;text-align:center">'
+      +'<div style="font-size:.84rem;font-weight:800;color:#059669">有问题？给我们发消息 💬</div></div>';
   } else {
     html='<div style="text-align:center;margin-bottom:14px"><div style="font-size:2rem">🛒</div><div style="font-weight:900;color:var(--az);font-size:1.05rem">¿Cómo comprar?</div><div style="font-size:.78rem;color:var(--sub)">Es fácil, mirá</div></div>'
       +tarjeta('🔍','Buscá lo que necesitás','Usá el buscador de arriba o tocá una categoría. También podés filtrar por marca.')
@@ -2893,6 +2957,12 @@ function calcVistaComision(){
 function abrirPanelDueno(){
   // ¿Es el dueño de la PLATAFORMA (Max) o el dueño de SU tienda (Marcelo)?
   var esDuenoAmarango = (CONFIG && CONFIG.duenoPlataforma === true);
+  // 📱 QR chiquito arriba: se escanea directo, sin entrar a ningún lado
+  var _qrMini = '<div onclick="abrirQR()" style="display:flex;align-items:center;gap:11px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:11px;margin-bottom:12px;cursor:pointer">'
+    +'<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='+encodeURIComponent(linkTienda())+'" style="width:54px;height:54px;border-radius:8px;flex:0 0 auto" alt="QR">'
+    +'<div style="flex:1;min-width:0"><div style="font-size:.84rem;font-weight:900;color:var(--az)">Tu QR</div>'
+    +'<div style="font-size:.7rem;color:var(--sub);line-height:1.3">Que lo escaneen y entran a tu tienda</div></div>'
+    +'<span style="color:var(--az);font-size:1.2rem">›</span></div>';
   document.getElementById('adminBody').innerHTML =
      // 🐝 Oferta Sistema Amarango — solo para el dueño de SU tienda (no para Max)
      (!esDuenoAmarango
@@ -2905,6 +2975,7 @@ function abrirPanelDueno(){
         +'</button>'
       : '')
     +'<div style="display:grid;gap:10px">'
+    +_qrMini
     +seccionPanel('Día a día')
     +botonPanel('🗓️','Visitas de hoy','A quién visitar y su último pedido','visitas')
     +botonPanel('📋','Pedidos','Los pedidos que te hicieron','pedidos')
@@ -3322,6 +3393,7 @@ function aplicarConfig(){
   document.documentElement.style.setProperty('--az-osc', oscurecerColor(CONFIG.colorPrincipal, 45));
   try{ armarManifest(); }catch(e){}   // el ícono de la app toma el logo de la tienda
   try{ aplicarIdioma(); }catch(e){}   // 🌐 aplicar el idioma elegido
+  setTimeout(function(){ try{ mostrarBienvenida(); }catch(e){} }, 2500);   // 👋 registro simple
 }
 /* 🎨 Tonos derivados del color principal (para degradés y fondos) */
 function _hex2rgb(h){
@@ -3362,10 +3434,15 @@ function precioTarjeta(p){
           +'<span style="font-size:.68rem;color:#9CA3AF;text-decoration:line-through">'+fmt(p.precioAntes)+'</span>'
           +'<span style="background:#DCFCE7;color:#059669;font-size:.58rem;font-weight:900;padding:2px 5px;border-radius:4px">'+off+'% OFF</span>'
           +'</div>' : '')
-      +'<div style="font-size:1.18rem;font-weight:900;color:var(--az);line-height:1.1">'+fmt(p.venta)+'</div>'
+      // 💰 NEUROVENTA: el precio de la CAJA grande (es lo que compra el mayorista),
+      //    y el precio por unidad en verde abajo (es lo que le deja calcular su ganancia)
+      +'<div style="font-size:1.24rem;font-weight:900;color:var(--az);line-height:1.05">'+fmt(p.venta)+'</div>'
       +(u>1
-        ? '<div style="font-size:.68rem;color:var(--sub);font-weight:700;margin-top:1px">'+u+' u. · <b style="color:#059669">'+fmt(porUnidad)+'</b> c/u</div>'
-        : '<div style="font-size:.66rem;color:var(--sub);font-weight:700;margin-top:1px">por unidad</div>')
+        ? '<div style="font-size:.62rem;color:var(--sub);font-weight:700;margin-top:0">'+t('porCaja')+' '+u+' '+t('unidades')+'</div>'
+          +'<div style="display:inline-block;background:#F0FDF4;border-radius:6px;padding:2px 7px;margin-top:3px">'
+          +'<span style="font-size:.74rem;font-weight:900;color:#059669">'+fmt(porUnidad)+'</span>'
+          +'<span style="font-size:.6rem;color:#059669;font-weight:700"> '+t('porUnidad')+'</span></div>'
+        : '<div style="font-size:.62rem;color:var(--sub);font-weight:700;margin-top:1px">'+t('porUnidad')+'</div>')
       +(p.escala && p.escala.length
         ? '<div style="font-size:.62rem;color:var(--nar);font-weight:800;margin-top:2px">📉 desde '+p.escala[0].desde+' u. a '+fmt(p.escala[0].precio)+'</div>'
         : '');
@@ -4066,8 +4143,120 @@ function generarRemito(i){
 function keyPedidos(){ return TIENDA==='amarango' ? 'pedidos' : 'pedidos_'+TIENDA; }
 var PEDIDOS=[];
 
+/* ═══════ 🧾 RECIBO DE COMPRA ═══════
+   Comprobante simple para el cliente. No es factura fiscal, es un control. */
+function asesorActual(){
+  try{ return localStorage.getItem(lsKey('ae_asesor'))||''; }catch(e){ return ''; }
+}
+function ponerNombreAsesor(){
+  var actual=asesorActual();
+  var n=prompt('¿Cómo te llamás? (aparece en los recibos)', actual);
+  if(n===null) return;
+  try{ localStorage.setItem(lsKey('ae_asesor'), n.trim()); }catch(e){}
+  toastCarrito(n.trim()? ('✅ Hola '+n.trim()) : 'Nombre borrado');
+}
+function reciboHTML(ped){
+  var neg=(CONFIG&&CONFIG.negocio)||'Mi Tienda';
+  var col=(CONFIG&&CONFIG.colorPrincipal)||'#0B2D6B';
+  var cli=ped.cliente||{};
+  var f=new Date(ped.fecha||Date.now());
+  var fecha=f.toLocaleDateString('es-AR')+' '+f.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+  var nro=String(ped.fecha||Date.now()).slice(-6);
+  var vend=ped.vendedor||asesorActual()||'';
+  var filas=(ped.items||[]).map(function(it){
+    var cant=it.cant||1;
+    var sub=(it.precioAplicado||it.venta||0)*cant;
+    return '<tr>'
+      +'<td style="border:1px solid #dde3ec;padding:6px 8px;text-align:center;font-weight:800;color:'+col+'">'+cant+'</td>'
+      +'<td style="border:1px solid #dde3ec;padding:6px 8px;font-size:12px">'+(it.nombre||'')+'</td>'
+      +'<td style="border:1px solid #dde3ec;padding:6px 8px;text-align:right;font-weight:800;white-space:nowrap">'+fmt(sub)+'</td>'
+    +'</tr>';
+  }).join('');
+  var totalUnid=(ped.items||[]).reduce(function(a,it){ return a+(it.cant||1); },0);
+  return '<div id="reciboPrint" style="background:#fff;max-width:420px;margin:0 auto;font-family:inherit;color:#141824;border:1px solid #dde3ec;border-radius:10px;overflow:hidden">'
+    +'<div style="background:'+col+';padding:14px 16px;color:#fff">'
+      +'<div style="font-size:1.05rem;font-weight:900;line-height:1.2">'+neg+'</div>'
+      +'<div style="font-size:.72rem;opacity:.85;margin-top:2px">Comprobante de pedido</div>'
+    +'</div>'
+    +'<div style="padding:14px 16px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:.72rem;color:#6B7280;margin-bottom:10px">'
+        +'<span>N° '+nro+'</span><span>'+fecha+'</span></div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:.76rem;margin-bottom:10px">'
+        +'<tr><td style="padding:4px 0;color:#6B7280;width:78px">Cliente</td><td style="padding:4px 0;font-weight:800">'+(cli.nombre||'—')+'</td></tr>'
+        +(cli.loc?'<tr><td style="padding:4px 0;color:#6B7280">Local</td><td style="padding:4px 0;font-weight:700">'+cli.loc+'</td></tr>':'')
+        +(cli.dir?'<tr><td style="padding:4px 0;color:#6B7280">Dirección</td><td style="padding:4px 0">'+cli.dir+'</td></tr>':'')
+        +(vend?'<tr><td style="padding:4px 0;color:#6B7280">Te atendió</td><td style="padding:4px 0;font-weight:800;color:'+col+'">'+vend+'</td></tr>':'')
+      +'</table>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:.76rem">'
+        +'<tr style="background:#F5F8FF">'
+          +'<th style="border:1px solid #dde3ec;padding:6px;width:38px;font-size:.68rem">Cant</th>'
+          +'<th style="border:1px solid #dde3ec;padding:6px;text-align:left;font-size:.68rem">Producto</th>'
+          +'<th style="border:1px solid #dde3ec;padding:6px;text-align:right;font-size:.68rem">Importe</th></tr>'
+        +filas
+      +'</table>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:2px solid '+col+'">'
+        +'<div><div style="font-size:.68rem;color:#6B7280">'+totalUnid+' unidades</div>'
+        +'<div style="font-size:.8rem;font-weight:900;color:#141824">TOTAL</div></div>'
+        +'<div style="font-size:1.3rem;font-weight:900;color:'+col+'">'+fmt(ped.total||0)+'</div>'
+      +'</div>'
+      +'<div style="font-size:.62rem;color:#9CA3AF;text-align:center;margin-top:12px;line-height:1.4">Comprobante sin valor fiscal · Solo para control interno</div>'
+    +'</div>'
+  +'</div>';
+}
+function verRecibo(idx){
+  var ped=(PEDIDOS||[])[idx]; if(!ped) return;
+  document.getElementById('adminBody').innerHTML =
+     reciboHTML(ped)
+    +'<button onclick="descargarReciboPDF()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:13px;padding:15px;font-size:.92rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:14px">📥 Descargar PDF</button>'
+    +'<button onclick="mandarReciboWa('+idx+')" style="width:100%;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-top:8px">💬 Mandar por WhatsApp</button>'
+    +'<button onclick="abrirPedidos()" style="width:100%;background:none;border:1.5px solid var(--line);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px">‹ Volver</button>';
+  document.getElementById('adminOverlay').classList.add('on');
+}
+function mandarReciboWa(idx){
+  var ped=(PEDIDOS||[])[idx]; if(!ped) return;
+  var neg=(CONFIG&&CONFIG.negocio)||'';
+  var cli=ped.cliente||{};
+  var vend=ped.vendedor||asesorActual()||'';
+  var f=new Date(ped.fecha||Date.now());
+  var t='🧾 *'+neg+'*\nComprobante de pedido\n'
+    +'N° '+String(ped.fecha||Date.now()).slice(-6)+' · '+f.toLocaleDateString('es-AR')+'\n\n'
+    +(cli.nombre?'👤 '+cli.nombre+'\n':'')
+    +(cli.loc?'🏪 '+cli.loc+'\n':'')
+    +(vend?'🤝 Te atendió: '+vend+'\n':'')
+    +'\n';
+  (ped.items||[]).forEach(function(it){
+    t+='• '+(it.cant||1)+' x '+(it.nombre||'')+' — '+fmt((it.precioAplicado||it.venta||0)*(it.cant||1))+'\n';
+  });
+  t+='\n*TOTAL: '+fmt(ped.total||0)+'*\n\n_Comprobante sin valor fiscal_';
+  var wa=cli.wa?String(cli.wa).replace(/[^0-9]/g,''):'';
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(t),'_blank');
+}
+async function descargarReciboPDF(){
+  var el=document.getElementById('reciboPrint');
+  if(!el){ toastCarrito('No se encontró el recibo'); return; }
+  toastCarrito('📄 Generando PDF…');
+  var padre=el.parentElement;
+  var est={mh:padre?padre.style.maxHeight:'', ov:padre?padre.style.overflow:''};
+  if(padre){ padre.style.maxHeight='none'; padre.style.overflow='visible'; }
+  try{
+    if(typeof html2canvas==='undefined') await cargarScriptPDF('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    if(!window.jspdf) await cargarScriptPDF('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    var canvas=await html2canvas(el,{scale:2, backgroundColor:'#fff', width:el.scrollWidth, height:el.scrollHeight, windowWidth:el.scrollWidth, windowHeight:el.scrollHeight, useCORS:true});
+    var img=canvas.toDataURL('image/jpeg',0.95);
+    var JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+    var pdf=new JsPDF({orientation:'p',unit:'mm',format:'a4'});
+    var aP=210, mg=10, aI=aP-mg*2;
+    var hI=(canvas.height*aI)/canvas.width;
+    pdf.addImage(img,'JPEG',mg,mg,aI,hI);
+    pdf.save('recibo.pdf');
+    toastCarrito('✅ PDF descargado');
+  }catch(e){ console.warn(e); toastCarrito('⚠️ Sin internet no se puede armar el PDF'); }
+  if(padre){ padre.style.maxHeight=est.mh; padre.style.overflow=est.ov; }
+}
+
 function guardarPedido(items, total, contacto){
   var cli=null;
+  var _vend = asesorActual();
   // 👔 si un asesor está armando el pedido, va a nombre de SU cliente
   if(typeof _clienteDelPedido!=='undefined' && _clienteDelPedido){ cli=_clienteDelPedido; }
   else { try{ cli=JSON.parse(localStorage.getItem(lsKey('ae_cliente'))||'null'); }catch(e){} }
@@ -4077,6 +4266,7 @@ function guardarPedido(items, total, contacto){
     items: items,                          // [{nombre, venta, cant}]
     total: total,
     cliente: cli ? {nombre:cli.nombre, wa:cli.wa, loc:cli.loc, dir:cli.dir} : null,
+    vendedor: _vend,
     atendio: contacto || '',               // con quién habló
     estado: 'nuevo'                        // nuevo · vendido · perdido
   };
@@ -4230,7 +4420,8 @@ function renderPedidos(){
 
   var html='<div style="font-weight:900;color:var(--az);font-size:1.05rem;margin-bottom:10px">📋 Pedidos</div>';
   // ➕ el asesor puede armar un pedido a nombre de un cliente
-  html+='<button onclick="armarPedidoParaCliente()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:12px">➕ Armar pedido para un cliente</button>';
+  html+='<button onclick="armarPedidoParaCliente()" style="width:100%;background:var(--az);color:#fff;border:none;border-radius:12px;padding:14px;font-size:.9rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:8px">➕ Armar pedido para un cliente</button>';
+  html+='<button onclick="ponerNombreAsesor()" style="width:100%;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:11px;padding:11px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:12px">🤝 '+(asesorActual()? ('Atiende: '+asesorActual()) : 'Poné tu nombre para los recibos')+'</button>';
   // resumen arriba
   html+='<div style="display:flex;gap:7px;margin-bottom:14px">'
     +'<div style="flex:1;background:#FFF7ED;border:1px solid #FED7AA;border-radius:11px;padding:10px;text-align:center"><div style="font-size:1.3rem;font-weight:900;color:#EA580C">'+nuevos+'</div><div style="font-size:.58rem;color:#EA580C;font-weight:800">NUEVOS</div></div>'
@@ -4263,7 +4454,7 @@ function renderPedidos(){
           +(ped.cliente&&ped.cliente.wa?'<button onclick="window.open(\'https://wa.me/'+String(ped.cliente.wa).replace(/[^0-9]/g,'')+'\',\'_blank\')" style="background:#25D366;border:none;color:#fff;border-radius:9px;padding:9px 12px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:inherit">💬</button>':'')
           +'<button onclick="borrarPedido('+i+')" style="background:#FEF2F2;border:1.5px solid #FECACA;color:#DC2626;border-radius:9px;padding:9px 11px;font-size:.7rem;cursor:pointer;font-family:inherit">🗑️</button>'
         +'</div>'
-        +'<button onclick="generarRemito('+i+')" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:9px;padding:9px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;margin-top:6px">🧾 Comprobante'+(ped.remito?' ('+ped.remito+')':'')+'</button>'
+        +'<button onclick="verRecibo('+i+')" style="width:100%;background:#F5F8FF;border:1.5px solid var(--az);color:var(--az);border-radius:9px;padding:9px;font-size:.72rem;font-weight:800;cursor:pointer;font-family:inherit;margin-top:6px">🧾 Ver recibo</button>'
         +'</div>';
     });
   }
@@ -4525,6 +4716,7 @@ function analizarStock(){
 var DIAS_SEM = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 function diasDeCliente(c){ return (c && Array.isArray(c.dias)) ? c.dias : []; }
 function abrirVisitasHoy(){
+  try{ empujarPantalla('abrirVisitasHoy', function(){ try{cerrarAdmin()}catch(e){} }); }catch(e){}
   cargarClientes(function(){
     cargarPedidos(function(){
       var hoy = new Date().getDay();
@@ -4622,6 +4814,7 @@ function toggleDiaCliente(id, dia){
 }
 
 function abrirControlStock(){
+  try{ empujarPantalla('abrirControlStock', function(){ try{cerrarAdmin()}catch(e){} }); }catch(e){}
   cargarPedidos(function(){
     var d = analizarStock();
     var criticos = d.sinStock.filter(function(x){ return x.pedido>0; });
@@ -6357,11 +6550,19 @@ var CATS_ELECTRO = [
 /* Devuelve las categorías a mostrar: las del dueño (cualquier rubro) o las de electro */
 /* 🏭 MARCAS — se detectan solas de la primera palabra del producto */
 var marcaActiva='';
+/* Marcas de dos palabras que hay que reconocer juntas */
+var MARCAS_COMPUESTAS = ['ferrero rocher','kinder bueno','tio tito','black decker','new look','dos corazones','coca cola','la campagnola'];
 function marcaDe(p){
   var n=(p && p.nombre ? p.nombre : '').trim();
   if(!n) return '';
-  // saco emojis y símbolos del principio
   n=n.replace(/^[^\p{L}\p{N}]+/u,'').trim();
+  var bajo=n.toLowerCase();
+  // ¿empieza con una marca de dos palabras?
+  for(var i=0;i<MARCAS_COMPUESTAS.length;i++){
+    if(bajo.indexOf(MARCAS_COMPUESTAS[i])===0){
+      return MARCAS_COMPUESTAS[i].split(' ').map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
+    }
+  }
   var prim=n.split(/[\s\-|]/)[0] || '';
   if(prim.length<3) return '';
   return prim.charAt(0).toUpperCase()+prim.slice(1).toLowerCase();
@@ -7573,6 +7774,7 @@ function guardarEdicion(idx){
    Seleccionás de a uno, varios o todos, y borrás de una vez. */
 var _selBorrar = [];
 function abrirBorrarVarios(){
+  try{ empujarPantalla('abrirBorrarVarios', function(){ try{cerrarAdmin()}catch(e){} }); }catch(e){}
   _selBorrar = [];
   pintarBorrarVarios();
 }
