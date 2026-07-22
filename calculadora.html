@@ -825,7 +825,19 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 </div>
 
 <script>
-var fmt=function(n){return"$"+Math.round(n).toLocaleString("es-AR");};
+/* 💰 PRECIO PSICOLÓGICO — solo VISUAL, no toca el markup ni los cálculos.
+   Si el precio termina en 000 (redondo), se muestra 1 peso menos:
+   $100.000 → $99.999 · $7.000 → $6.999
+   Los cálculos internos (markup, cuotas, ganancia) siguen usando el número real. */
+var PRECIO_PSICOLOGICO = true;
+function precioVisual(n){
+  n = Math.round(n);
+  if(!PRECIO_PSICOLOGICO) return n;
+  if(n < 1000) return n;          // precios chicos quedan igual
+  if(n % 1000 === 0) return n-1;  // solo los redondos
+  return n;
+}
+var fmt=function(n){return"$"+precioVisual(n).toLocaleString("es-AR");};
 
 /* ===== CONEXIÓN A LA NUBE (Supabase) — misma cuenta del CRM ===== */
 var SB_URL="https://zctaukyrhsmpjkcddcqq.supabase.co";
