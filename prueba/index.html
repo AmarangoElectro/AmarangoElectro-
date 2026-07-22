@@ -735,6 +735,98 @@ function tiendaID(){
 }
 var TIENDA = tiendaID();
 
+/* ═══════════════════════════════════════════════════════
+   🌐 IDIOMAS — español / 中文 (chino simplificado)
+   Traduce los textos del sistema (botones, menús, avisos).
+   Los nombres de productos quedan como los cargó el dueño.
+   ═══════════════════════════════════════════════════════ */
+var TEXTOS = {
+  es: {
+    inicio:'Inicio', categorias:'Categorías', carrito:'Carrito', favoritos:'Favoritos',
+    ofertas:'Ofertas', mas:'Más', ayuda:'Ayuda',
+    buscar:'Buscar productos...', todos:'Todos',
+    agregar:'Agregar al carrito', sumarPedido:'Sumar al pedido', verProducto:'Ver producto',
+    comprar:'Comprar ahora', consultar:'Consultar', enviarPedido:'Enviar el pedido',
+    total:'Total', subtotal:'Subtotal', envio:'Envío', gratis:'Gratis',
+    cantidad:'Cantidad', unidades:'unidades', porUnidad:'c/u',
+    carritoVacio:'Tu carrito está vacío', seguirComprando:'Seguir comprando',
+    vaciar:'Vaciar carrito', quitar:'Quitar', cerrar:'Cerrar', volver:'Volver',
+    tusDatos:'Tus datos', nombre:'Nombre', local:'Nombre del local',
+    direccion:'Dirección de entrega', whatsapp:'WhatsApp', confirmar:'Confirmar pedido',
+    pedidoRapido:'Pedido rápido', repetir:'Repetir lo de siempre',
+    sinStock:'Sin stock', conStock:'Con stock', nuevo:'NUEVO', oferta:'OFERTA',
+    pedidoMinimo:'Pedido mínimo', teFaltan:'Te faltan',
+    agregado:'Agregado al carrito', gracias:'¡Gracias por tu pedido!',
+    idioma:'Idioma'
+  },
+  zh: {
+    inicio:'首页', categorias:'分类', carrito:'购物车', favoritos:'收藏',
+    ofertas:'优惠', mas:'更多', ayuda:'帮助',
+    buscar:'搜索产品...', todos:'全部',
+    agregar:'加入购物车', sumarPedido:'添加到订单', verProducto:'查看产品',
+    comprar:'立即购买', consultar:'咨询', enviarPedido:'提交订单',
+    total:'总计', subtotal:'小计', envio:'运费', gratis:'免费',
+    cantidad:'数量', unidades:'件', porUnidad:'单价',
+    carritoVacio:'购物车是空的', seguirComprando:'继续购物',
+    vaciar:'清空购物车', quitar:'删除', cerrar:'关闭', volver:'返回',
+    tusDatos:'您的信息', nombre:'姓名', local:'店铺名称',
+    direccion:'送货地址', whatsapp:'微信/WhatsApp', confirmar:'确认订单',
+    pedidoRapido:'快速下单', repetir:'重复上次订单',
+    sinStock:'缺货', conStock:'有货', nuevo:'新品', oferta:'优惠',
+    pedidoMinimo:'最低订单', teFaltan:'还差',
+    agregado:'已加入购物车', gracias:'感谢您的订单！',
+    idioma:'语言'
+  }
+};
+/* idioma actual: guardado > idioma del celular > español */
+var IDIOMA = (function(){
+  try{
+    var g = localStorage.getItem(lsKey('ae_idioma'));
+    if(g && TEXTOS[g]) return g;
+  }catch(e){}
+  try{
+    var nav = (navigator.language||navigator.userLanguage||'').toLowerCase();
+    if(nav.indexOf('zh')===0) return 'zh';   // celular en chino → arranca en chino
+  }catch(e){}
+  return 'es';
+})();
+/* t('carrito') → "Carrito" o "购物车" según el idioma */
+function t(clave){
+  var d = TEXTOS[IDIOMA] || TEXTOS.es;
+  return d[clave] || TEXTOS.es[clave] || clave;
+}
+function cambiarIdioma(cod){
+  if(!TEXTOS[cod]) return;
+  IDIOMA = cod;
+  try{ localStorage.setItem(lsKey('ae_idioma'), cod); }catch(e){}
+  try{ sonar('tap'); }catch(e){}
+  aplicarIdioma();
+  try{ render(); }catch(e){}
+  try{ cerrarMas(); }catch(e){}
+}
+/* Aplica el idioma a los textos fijos del HTML */
+function aplicarIdioma(){
+  try{
+    // barra de abajo
+    var tabs = document.querySelectorAll('.tabs button');
+    var nombres = ['inicio','categorias','carrito','favoritos','mas'];
+    tabs.forEach(function(b, i){
+      var span = b.querySelector('.i');
+      if(!span || !nombres[i]) return;
+      // reemplazar solo el texto, dejando el ícono y el badge
+      b.childNodes.forEach(function(n){
+        if(n.nodeType===3 && n.textContent.trim()) n.textContent = t(nombres[i]);
+      });
+    });
+    // buscador
+    var b = document.getElementById('q');
+    if(b) b.placeholder = t('buscar');
+    // marcar el idioma en el html (por si algún día se usa para estilos)
+    document.documentElement.setAttribute('lang', IDIOMA==='zh'?'zh-CN':'es');
+  }catch(e){}
+}
+
+
 /* ═══════ 🔊 SONIDOS DE LA TIENDA ═══════
    4 sonidos generados al vuelo (no pesan nada, no necesitan internet).
    El cliente los puede apagar. */
@@ -1644,6 +1736,11 @@ function abrirMas(){ sonar('tap');
     +'<div style="flex:1"><div style="color:#fff;font-size:.9rem;font-weight:900">Pedido rápido</div>'
     +'<div style="color:rgba(255,255,255,.85);font-size:.72rem;margin-top:1px">Escribí tu lista y armo el pedido solo</div></div>'
     +'<span style="color:#fff;font-size:1.2rem">›</span></div>';
+  // 🌐 selector de idioma
+  html+='<div style="display:flex;gap:7px;margin-bottom:8px">'
+    +'<button onclick="cambiarIdioma(\'es\')" style="flex:1;background:'+(IDIOMA==='es'?'var(--az)':'#fff')+';color:'+(IDIOMA==='es'?'#fff':'var(--az)')+';border:1.5px solid var(--az);border-radius:11px;padding:11px;font-size:.84rem;font-weight:800;cursor:pointer;font-family:inherit">🇦🇷 Español</button>'
+    +'<button onclick="cambiarIdioma(\'zh\')" style="flex:1;background:'+(IDIOMA==='zh'?'var(--az)':'#fff')+';color:'+(IDIOMA==='zh'?'#fff':'var(--az)')+';border:1.5px solid var(--az);border-radius:11px;padding:11px;font-size:.84rem;font-weight:800;cursor:pointer;font-family:inherit">🇨🇳 中文</button>'
+  +'</div>';
   html+=fila('❤️','Mis favoritos','cerrarMas();tabIr(\'favs\')');
   html+=fila('🔥','Ofertas','cerrarMas();tabIr(\'ofertas\')');
   html+=fila(sonidoActivo()?'🔊':'🔇', sonidoActivo()?'Sonidos: activados':'Sonidos: apagados','toggleSonido();cerrarMas();abrirMas()');
@@ -3224,6 +3321,7 @@ function aplicarConfig(){
   document.documentElement.style.setProperty('--az2', aclararColor(CONFIG.colorPrincipal, 35));
   document.documentElement.style.setProperty('--az-osc', oscurecerColor(CONFIG.colorPrincipal, 45));
   try{ armarManifest(); }catch(e){}   // el ícono de la app toma el logo de la tienda
+  try{ aplicarIdioma(); }catch(e){}   // 🌐 aplicar el idioma elegido
 }
 /* 🎨 Tonos derivados del color principal (para degradés y fondos) */
 function _hex2rgb(h){
@@ -6519,7 +6617,7 @@ function render(){
           +'<input id="qt'+idx+'" value="'+(minimoProducto(p)||1)+'" inputmode="numeric" onclick="event.stopPropagation()" style="flex:1;min-width:0;text-align:center;border:1px solid var(--line);border-radius:8px;padding:7px 2px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--az);outline:none">'
           +'<button onclick="cantTarjeta('+idx+',1,event)" style="width:30px;height:32px;background:#F1F3F7;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-weight:900;color:var(--az);cursor:pointer;font-family:inherit;flex:0 0 auto">+</button>'
         +'</div>'
-        +'<button onclick="agregarConCantidad('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 Sumar al pedido</button>'
+        +'<button onclick="agregarConCantidad('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:5px">🛒 '+t('sumarPedido')+'</button>'
         +'<div style="display:flex;gap:5px;margin-bottom:5px">'
           +'<button onclick="editarProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">✏️ Editar</button>'
           +'<button onclick="cambiarFotoProducto('+idx+')" style="flex:1;background:#F5F8FF;border:1.5px solid var(--line);color:var(--az);border-radius:8px;padding:8px 4px;font-size:.66rem;font-weight:800;cursor:pointer;font-family:inherit">🖼️ Foto</button>'
@@ -6553,7 +6651,7 @@ function render(){
             +'<input id="qt'+idx+'" value="'+(minimoProducto(p)||1)+'" inputmode="numeric" onclick="event.stopPropagation()" style="flex:1;min-width:0;text-align:center;border:1px solid var(--line);border-radius:8px;padding:7px 2px;font-family:inherit;font-size:.82rem;font-weight:800;color:var(--az);outline:none">'
             +'<button onclick="cantTarjeta('+idx+',1,event)" style="width:30px;height:32px;background:#F1F3F7;border:1px solid var(--line);border-radius:8px;font-size:1rem;font-weight:900;color:var(--az);cursor:pointer;font-family:inherit;flex:0 0 auto">+</button>'
           +'</div>'
-          +'<button onclick="agregarConCantidad('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit">🛒 Agregar al carrito</button>';
+          +'<button onclick="agregarConCantidad('+idx+',event)" style="width:100%;background:var(--nar);color:#fff;border:none;border-radius:9px;padding:10px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit">🛒 '+t('agregar')+'</button>';
       }
     }
     var oculto = p.visible===false;
