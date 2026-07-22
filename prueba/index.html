@@ -2920,6 +2920,19 @@ function subsGuardar(){
 }
 function abrirSuscriptores(){ subsCargar(renderSubs); }
 
+/* ⭐ Prender/apagar las cuotas de una tienda con un toque */
+function cambiarPlanRapido(i){
+  var s=SUBS[i]; if(!s) return;
+  var aFull = (s.plan!=='full');
+  var msg = aFull
+    ? '¿Darle el sistema de cuotas a "'+(s.nombre||s.tienda)+'"?\n\nVa a poder vender en cuotas Amarango.'
+    : '¿Quitarle las cuotas a "'+(s.nombre||s.tienda)+'"?\n\nSu tienda queda solo en contado.';
+  if(!confirm(msg)) return;
+  s.plan = aFull ? 'full' : 'basico';
+  subsGuardar(); renderSubs();
+  try{ sonar(aFull?'exito':'error'); }catch(e){}
+}
+
 function renderSubs(){
   var alDia = SUBS.filter(function(s){return s.estado==='ok';}).length;
   var venc = SUBS.filter(function(s){return s.estado!=='ok';}).length;
@@ -2940,6 +2953,12 @@ function renderSubs(){
         +'<span style="font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:20px;background:'+(ok?'#ECFDF5':'#FEF2F2')+';color:'+(ok?'#059669':'#DC2626')+'">'+(ok?'AL DÍA':'VENCIDO')+'</span></div>'
         +(s.negocio?'<div style="font-size:.72rem;color:var(--sub)">🏪 '+s.negocio+(s.vende?' · '+s.vende:'')+'</div>':'')
         +(s.whatsapp?'<div style="font-size:.72rem;color:var(--sub)">📱 '+s.whatsapp+'</div>':'')
+        +'<div style="display:inline-flex;align-items:center;gap:5px;background:'+((s.plan==='full')?'#FFF7ED':'#F1F3F7')+';border:1px solid '+((s.plan==='full')?'var(--nar)':'var(--line)')+';border-radius:20px;padding:3px 10px;margin-top:5px">'
+          +'<span style="font-size:.72rem">'+((s.plan==='full')?'⭐':'🔵')+'</span>'
+          +'<span style="font-size:.66rem;font-weight:900;color:'+((s.plan==='full')?'var(--nar)':'var(--sub)')+'">'+((s.plan==='full')?'PLAN FULL · con cuotas':'PLAN BÁSICO · solo contado')+'</span>'
+        +'</div>'
+        +'<button onclick="event.stopPropagation();cambiarPlanRapido('+i+')" style="width:100%;margin-top:8px;background:'+((s.plan==='full')?'#FEF2F2':'#FFF7ED')+';border:1.5px solid '+((s.plan==='full')?'#FECACA':'var(--nar)')+';color:'+((s.plan==='full')?'#DC2626':'var(--nar)')+';border-radius:9px;padding:9px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit">'
+          +((s.plan==='full')?'🔒 Quitarle las cuotas':'⭐ Darle las cuotas')+'</button>'
         +(s.pagaHasta?'<div style="font-size:.72rem;color:var(--sub)">📅 Pagó hasta: '+s.pagaHasta+'</div>':'')
         +(s.monto?'<div style="font-size:.72rem;color:var(--sub)">💵 $'+s.monto+'/mes</div>':'')
         +'<div style="display:flex;gap:7px;margin-top:9px">'
