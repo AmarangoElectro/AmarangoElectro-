@@ -82,7 +82,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:4px 2px 2px;}
 .cat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 2px;border-radius:12px;background:var(--wh);border:1.5px solid var(--bor);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;min-height:60px;}
 .cat-tile:active{transform:scale(.95);}
-.cat-tile.on{background:linear-gradient(160deg,var(--nar),#ff9a3d);border-color:var(--nar);box-shadow:0 3px 10px rgba(255,122,0,.3);}
+.cat-tile.on{background:var(--nar);border-color:var(--nar);box-shadow:none;}
 .cat-tile.on .cat-tile-txt{color:#fff;}
 .cat-tile-ic{font-size:1.25rem;line-height:1;}
 .cat-tile-txt{font-size:.54rem;font-weight:800;color:var(--az);text-align:center;line-height:1.05;}
@@ -188,7 +188,7 @@ img,video,canvas,svg,iframe{max-width:100%;}
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
 /* Efecto vidrio: las tarjetas dejan ver el fondo de colmena suavemente */
-.prod-card{background:#ffffff !important;border:1px solid var(--bor);border-radius:14px;box-shadow:0 2px 12px rgba(11,45,107,.09);transition:box-shadow .2s,transform .2s;overflow:hidden;padding:9px;}
+.prod-card{background:var(--wh);border:1px solid #EFF1F5;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:box-shadow .2s;}
 .prod-card:active{transform:scale(.985);box-shadow:0 1px 6px rgba(11,45,107,.12);}
 .pd-campo{margin-bottom:10px;}
 .pd-campo label{display:block;font-size:.66rem;font-weight:800;color:var(--sub);margin-bottom:4px;letter-spacing:.2px;}
@@ -233,7 +233,7 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 #ruleta-overlay{display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.75);align-items:center;justify-content:center;padding:20px;}
 #ruleta-modal{background:var(--wh);border-radius:20px;padding:24px 20px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.4);}
 .ruleta-wrap{position:relative;width:240px;height:240px;margin:16px auto;}
-.ruleta-disco{width:240px;height:240px;border-radius:50%;border:6px solid var(--az);transition:transform 4.5s cubic-bezier(.17,.67,.2,1);box-shadow:0 4px 16px rgba(0,0,0,.25);}
+.ruleta-disco{width:240px;height:240px;border-radius:50%;border:6px solid var(--az);transition:transform 4.5s cubic-bezier(.17,.67,.2,1);box-shadow:0 2px 8px rgba(0,0,0,.12);}
 .ruleta-flecha{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-size:2rem;z-index:5;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4));}
 .ruleta-centro{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:var(--wh);border:4px solid var(--az);display:flex;align-items:center;justify-content:center;font-size:1.2rem;z-index:4;}
 @keyframes confetiCae{to{transform:translateY(105vh) rotate(720deg);opacity:0;}}
@@ -311,6 +311,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-algoritmo" style="display:none;" onclick="cerrarCajon();abrirQueBuscan()"><span class="ci-ic">🧠</span> Qué busca tu gente</button>
+  <button class="cajon-item cj-admin" id="cajon-semaforo" style="display:none;" onclick="cerrarCajon();abrirSemaforoProductos()"><span class="ci-ic">🚦</span> Qué promocionar</button>
   <button class="cajon-item cj-admin" id="cajon-limpiar" style="display:none;" onclick="cerrarCajon();limpiarProductosFantasma()"><span class="ci-ic">🧹</span> Limpiar productos raros</button>
   <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
   <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🐝</span> Programa Colaborador</button>
@@ -2572,6 +2573,81 @@ function tambienVieron(id, todos, max){
     .filter(Boolean);
 }
 /* 📊 Panel para el dueño: qué busca la gente */
+/* ═══════ 🚦 SEMÁFORO DE PRODUCTOS ═══════
+   Combina DOS cosas, y te digo cuál es cuál:
+   1) TUS DATOS reales (vistas y búsquedas de tu propia tienda)
+   2) Una referencia general del rubro electro — es criterio, NO dato medido.
+      Sirve como punto de partida cuando todavía no hay historial. */
+var REFERENCIA_RUBRO = {
+  alta:  /celular|smartphone|samsung|motorola|iphone|xiaomi|tv|smart ?tv|televis|heladera|lavarrop|aire acond|split|estufa|calefact|caloventor|ventilador|microonda|cocina|termotanque|colch[oó]n/i,
+  media: /freezer|anafe|horno|licuad|batidor|cafeter|pava|tostad|sandwich|aspirador|plancha|secarrop|parlante|bafle|audio|notebook|monitor|s[aá]bana|acolchad/i
+};
+function nivelProducto(p){
+  var d=_algData();
+  var vistas = (d.vistas && d.vistas[p.id]) || 0;
+  var nom = p.nombre||'';
+  // ¿lo buscaron por nombre?
+  var busq = 0;
+  if(d.busquedas){
+    var n = normTxt(nom);
+    Object.keys(d.busquedas).forEach(function(q){
+      if(n.indexOf(normTxt(q))>=0) busq += d.busquedas[q].n;
+    });
+  }
+  var puntos = vistas*2 + busq*3;
+  // referencia del rubro (solo si no hay datos propios todavía)
+  var refAlta = REFERENCIA_RUBRO.alta.test(nom);
+  var refMedia = REFERENCIA_RUBRO.media.test(nom);
+  var hayDatos = puntos>0;
+  if(hayDatos){
+    if(puntos>=15) return {n:'alto', ico:'🟢', txt:'SE BUSCA MUCHO', det:vistas+' vistas · '+busq+' búsquedas', fuente:'tus datos'};
+    if(puntos>=4)  return {n:'medio', ico:'🟡', txt:'INTERÉS MEDIO', det:vistas+' vistas · '+busq+' búsquedas', fuente:'tus datos'};
+    return {n:'bajo', ico:'🔴', txt:'POCO INTERÉS', det:vistas+' vistas', fuente:'tus datos'};
+  }
+  // sin datos propios → referencia general (lo aclaro siempre)
+  if(refAlta)  return {n:'alto', ico:'🟢', txt:'SUELE SALIR', det:'Referencia del rubro', fuente:'estimación'};
+  if(refMedia) return {n:'medio', ico:'🟡', txt:'SALIDA MEDIA', det:'Referencia del rubro', fuente:'estimación'};
+  return {n:'nuevo', ico:'⚪', txt:'SIN DATOS', det:'Todavía nadie lo miró', fuente:'—'};
+}
+function abrirSemaforoProductos(){
+  var lista = tiendaProductos.filter(function(p){ return p.visible!==false; })
+    .map(function(p){ return {p:p, s:nivelProducto(p)}; });
+  var orden={alto:0, medio:1, nuevo:2, bajo:3};
+  lista.sort(function(a,b){ return orden[a.s.n]-orden[b.s.n]; });
+  var conDatos = lista.filter(function(x){ return x.s.fuente==='tus datos'; }).length;
+  var html=''
+    +'<div style="text-align:center;margin-bottom:12px;">'
+    +'  <div style="font-size:2.2rem;">🚦</div>'
+    +'  <h2 style="color:var(--az);font-size:1.1rem;font-weight:900;margin:6px 0 2px;">Qué promocionar</h2>'
+    +'  <div style="color:var(--sub);font-size:.74rem;">Los de arriba son los que conviene destacar</div>'
+    +'</div>'
+    +'<div style="background:#EEF4FF;border:1px solid #CFE3FF;border-radius:10px;padding:10px;font-size:.7rem;color:var(--az);line-height:1.5;margin-bottom:12px;">'
+    +'  <b>📊 '+conDatos+' con datos tuyos</b> (vistas y búsquedas reales de tu tienda).<br>'
+    +'  <b>💡 El resto es una referencia general</b> del rubro, no un dato medido. A medida que la gente use la tienda, se reemplaza por datos reales.'
+    +'</div>';
+  if(!lista.length){
+    html+='<div style="text-align:center;padding:24px;color:var(--sub);font-size:.85rem;">No hay productos visibles.</div>';
+  } else {
+    html+=lista.slice(0,40).map(function(x){
+      var col = x.s.n==='alto'?'#059669':(x.s.n==='medio'?'#D97706':(x.s.n==='bajo'?'#DC2626':'#6B7280'));
+      var bg  = x.s.n==='alto'?'#F0FDF4':(x.s.n==='medio'?'#FFFBEB':(x.s.n==='bajo'?'#FEF2F2':'#F7F8FA'));
+      return '<div style="background:'+bg+';border-radius:10px;padding:10px 12px;margin-bottom:6px;">'
+        +'<div style="display:flex;align-items:center;gap:7px;">'
+          +'<span>'+x.s.ico+'</span>'
+          +'<span style="flex:1;min-width:0;font-size:.8rem;font-weight:700;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+x.p.nombre+'</span>'
+          +'<b style="font-size:.62rem;color:'+col+';white-space:nowrap;">'+x.s.txt+'</b>'
+        +'</div>'
+        +'<div style="font-size:.64rem;color:var(--sub);margin-top:2px;padding-left:22px;">'+x.s.det+(x.s.fuente==='estimación'?' · <i>estimado</i>':'')+'</div>'
+      +'</div>';
+    }).join('');
+  }
+  html+='<button onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'" style="width:100%;background:none;border:1.5px solid var(--bor);color:var(--sub);border-radius:11px;padding:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px;">Cerrar</button>';
+  try{
+    var cont=document.getElementById('modal-cuotas-body');
+    if(cont){ cont.innerHTML=html; document.getElementById('modal-cuotas').style.display='block'; }
+  }catch(e){}
+}
+
 function abrirQueBuscan(){
   var d=_algData();
   var b=d.busquedas||{};
@@ -2735,7 +2811,7 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo','cajon-limpiar'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo','cajon-limpiar','cajon-semaforo'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
@@ -3356,6 +3432,25 @@ function cerrarFotoGrande(){
   if(ov) ov.style.display='none';
 }
 
+/* ✕ Quitar el producto del día (rápido, desde la misma tarjeta) */
+function quitarDelDia(id){
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p) return;
+  if(!confirm('¿Sacar "'+(p.nombre||'')+'" de Producto del día?')) return;
+  p.delDia=false;
+  try{ tiendaGuardar(); tiendaSubirNube(); }catch(e){}
+  tiendaRender();
+}
+/* ✕ Quitar un producto de Destacados */
+function quitarDestacado(id){
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p) return;
+  if(!confirm('¿Sacar "'+(p.nombre||'')+'" de Destacados?')) return;
+  p.destacado=false;
+  try{ tiendaGuardar(); tiendaSubirNube(); }catch(e){}
+  tiendaRender();
+}
+
 function tiendaRender(){
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
@@ -3410,8 +3505,9 @@ function tiendaRender(){
   if(pDia && !tiendaCategoriaActiva && !qDia){
     var pidDia="'"+pDia.id+"'";
     var cdDia=mejorCuotaDatos(pDia.venta, pDia);
-    diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);border:2px solid #f0c040;position:relative;overflow:hidden;">'
+    diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);border:2px solid #f0c040;position:relative;overflow:hidden;">'
       +'<div style="position:absolute;top:0;right:0;background:#f0c040;color:#1a1a2e;font-size:.6rem;font-weight:900;padding:3px 12px;border-radius:0 14px 0 12px;">🌟 PRODUCTO DEL DÍA</div>'
+      +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDelDia('+pidDia+')" title="Quitar de producto del día" style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,.9);border:none;width:26px;height:26px;border-radius:50%;font-size:.85rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
       +(pDia.foto?'<div style="width:90px;height:90px;border-radius:12px;background:#fff url(\''+pDia.foto+'\') center/cover no-repeat;flex-shrink:0;"></div>':'<div style="font-size:3rem;flex-shrink:0;">'+catProd(pDia).split(' ')[0]+'</div>')
       +'<div style="flex:1;min-width:0;">'
         +'<div style="color:#fff;font-size:.85rem;font-weight:800;line-height:1.2;margin-top:8px;">'+pDia.nombre+'</div>'
@@ -3438,6 +3534,7 @@ function tiendaRender(){
       var cuota=mejorCuotaTexto(p.venta);
       dh+='<div onclick="tiendaVerDetalle('+pid+')" style="flex:0 0 auto;width:150px;background:var(--wh);border:2px solid var(--nar);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 2px 8px rgba(255,122,0,.15);position:relative;">'
         +'<div style="position:absolute;top:-1px;left:-1px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px 0 12px 0;">⭐ DESTACADO</div>'
+        +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDestacado('+pid+')" title="Quitar de destacados" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.95);border:1px solid #FECACA;width:24px;height:24px;border-radius:50%;font-size:.75rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
         +(p.foto?'<div style="width:100%;height:90px;border-radius:8px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin:14px 0 6px;"></div>':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
         +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
         +(function(){
