@@ -7594,48 +7594,5 @@ setTimeout(function(){
   if(sp){ sp.classList.add('oculto'); setTimeout(function(){ sp.style.display='none'; },500); }
 }, 1800);
 </script>
-<!-- === CHAT DE AMARA 🐝 (v2 tarjeta fija) === -->
-<button id="amara-fab" onclick="amaraAbrir()" aria-label="Chatear con Amara"
-  style="position:fixed;bottom:150px;left:18px;z-index:1420;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#0B2D6B,#1e5bc8);border:3px solid #FF7A00;cursor:pointer;box-shadow:0 5px 18px rgba(11,45,107,.45);display:flex;align-items:center;justify-content:center;line-height:1;-webkit-tap-highlight-color:transparent;animation:amaraPulse 2.6s ease-in-out infinite;overflow:hidden;padding:0;">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:100%;height:100%;"><defs><clipPath id="cf"><circle cx="50" cy="50" r="50"/></clipPath></defs><g clip-path="url(#cf)"><rect width="100" height="100" fill="#FFF3E0"/><path d="M20 55 Q18 22 50 20 Q82 22 80 55 L80 100 L20 100 Z" fill="#3a2b1a"/><path d="M25 100 L25 82 Q50 70 75 82 L75 100 Z" fill="#0B2D6B"/><path d="M42 78 L50 92 L58 78 L54 74 L46 74 Z" fill="#fff"/><ellipse cx="50" cy="52" rx="22" ry="24" fill="#f2c9a0"/><path d="M28 45 Q30 26 50 25 Q70 26 72 45 Q60 34 50 35 Q40 34 28 45 Z" fill="#3a2b1a"/><rect x="33" y="46" width="15" height="12" rx="4" fill="none" stroke="#222" stroke-width="2"/><rect x="52" y="46" width="15" height="12" rx="4" fill="none" stroke="#222" stroke-width="2"/><line x1="48" y1="51" x2="52" y2="51" stroke="#222" stroke-width="2"/><circle cx="40.5" cy="52" r="2.4" fill="#3a2b1a"/><circle cx="59.5" cy="52" r="2.4" fill="#3a2b1a"/><path d="M42 65 Q50 72 58 65" fill="none" stroke="#c0705a" stroke-width="2.2" stroke-linecap="round"/></g></svg>
-</button>
-<div id="amara-overlay" onclick="if(event.target===this)amaraCerrar()"
-  style="display:none;position:fixed;inset:0;background:rgba(2,12,46,.55);z-index:3100;backdrop-filter:blur(2px);">
-  <div id="amara-card" style="position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:440px;height:75vh;max-height:640px;background:#ECE5DD;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 30px rgba(0,0,0,.35);">
-    <div style="flex:0 0 auto;background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;padding:13px 16px;display:flex;align-items:center;gap:11px;border-bottom:3px solid #FF7A00;">
-      <div style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex:0 0 auto;background:#fff;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:100%;height:100%;"><defs><clipPath id="ch"><circle cx="50" cy="50" r="50"/></clipPath></defs><g clip-path="url(#ch)"><rect width="100" height="100" fill="#FFF3E0"/><path d="M20 55 Q18 22 50 20 Q82 22 80 55 L80 100 L20 100 Z" fill="#3a2b1a"/><path d="M25 100 L25 82 Q50 70 75 82 L75 100 Z" fill="#0B2D6B"/><path d="M42 78 L50 92 L58 78 L54 74 L46 74 Z" fill="#fff"/><ellipse cx="50" cy="52" rx="22" ry="24" fill="#f2c9a0"/><path d="M28 45 Q30 26 50 25 Q70 26 72 45 Q60 34 50 35 Q40 34 28 45 Z" fill="#3a2b1a"/><rect x="33" y="46" width="15" height="12" rx="4" fill="none" stroke="#222" stroke-width="2"/><rect x="52" y="46" width="15" height="12" rx="4" fill="none" stroke="#222" stroke-width="2"/><line x1="48" y1="51" x2="52" y2="51" stroke="#222" stroke-width="2"/><circle cx="40.5" cy="52" r="2.4" fill="#3a2b1a"/><circle cx="59.5" cy="52" r="2.4" fill="#3a2b1a"/><path d="M42 65 Q50 72 58 65" fill="none" stroke="#c0705a" stroke-width="2.2" stroke-linecap="round"/></g></svg></div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:900;font-size:1rem;line-height:1.1;">Amara</div>
-        <div style="font-size:.68rem;opacity:.85;">Asistente de AmarangoElectro · en línea</div>
-      </div>
-      <button onclick="amaraCerrar()" aria-label="Cerrar" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">✕</button>
-    </div>
-    <div id="amara-msgs" style="flex:1 1 auto;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;"></div>
-    <div style="flex:0 0 auto;background:#F0F0F0;padding:9px 10px;display:flex;gap:8px;align-items:center;border-top:1px solid #ddd;">
-      <input id="amara-input" type="text" placeholder="Escribí tu consulta..." autocomplete="off" onkeydown="if(event.key==='Enter')amaraEnviar()"
-        style="flex:1;border:none;border-radius:22px;padding:12px 16px;font-size:16px;font-family:inherit;outline:none;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);">
-      <button onclick="amaraEnviar()" style="width:46px;height:46px;border-radius:50%;background:#FF7A00;border:none;color:#fff;font-size:1.2rem;cursor:pointer;flex:0 0 auto;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,122,0,.4);">➤</button>
-    </div>
-  </div>
-</div>
-<style>
-@keyframes amaraPulse{0%,100%{box-shadow:0 5px 18px rgba(11,45,107,.45)}50%{box-shadow:0 5px 24px rgba(255,122,0,.6)}}
-.amara-burb{max-width:80%;padding:9px 13px;border-radius:14px;font-size:.9rem;line-height:1.4;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.12);}
-.amara-cli{align-self:flex-end;background:#DCF8C6;color:#111;border-bottom-right-radius:4px;}
-.amara-bot{align-self:flex-start;background:#fff;color:#111;border-bottom-left-radius:4px;}
-.amara-bot a{color:#0B2D6B;font-weight:800;}
-.amara-esc{align-self:flex-start;background:#fff;color:#888;font-size:.8rem;padding:10px 14px;border-radius:14px;border-bottom-left-radius:4px;}
-</style>
-<script>
-var _amaraHist=[];var _amaraCargando=false;
-function amaraAjustar(){var card=document.getElementById('amara-card');if(!card)return;if(window.visualViewport){var h=window.visualViewport.height;card.style.height=Math.min(h*0.92,640)+'px';}}
-if(window.visualViewport){window.visualViewport.addEventListener('resize',amaraAjustar);window.visualViewport.addEventListener('scroll',amaraAjustar);}
-function amaraAbrir(){document.getElementById('amara-overlay').style.display='block';amaraAjustar();if(_amaraHist.length===0){amaraPintar('amara','¡Hola! Soy Amara 🐝 la asistente de AmarangoElectro. ¿En qué te puedo servir hoy? 😊');}setTimeout(function(){try{document.getElementById('amara-input').focus();}catch(e){}},350);}
-function amaraCerrar(){document.getElementById('amara-overlay').style.display='none';try{document.getElementById('amara-input').blur();}catch(e){}}
-function amaraPintar(quien,texto){var cont=document.getElementById('amara-msgs');var div=document.createElement('div');div.className='amara-burb '+(quien==='cliente'?'amara-cli':'amara-bot');var html=texto.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');div.innerHTML=html;cont.appendChild(div);cont.scrollTop=cont.scrollHeight;}
-function amaraEscribiendo(m){var cont=document.getElementById('amara-msgs');var ya=document.getElementById('amara-escribiendo');if(m&&!ya){var d=document.createElement('div');d.id='amara-escribiendo';d.className='amara-esc';d.textContent='Amara está escribiendo...';cont.appendChild(d);cont.scrollTop=cont.scrollHeight;}else if(!m&&ya){ya.remove();}}
-function amaraEnviar(){if(_amaraCargando)return;var inp=document.getElementById('amara-input');var texto=(inp.value||'').trim();if(!texto)return;amaraPintar('cliente',texto);_amaraHist.push({rol:'usuario',texto:texto});inp.value='';_amaraCargando=true;amaraEscribiendo(true);fetch('/.netlify/functions/amara',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mensajes:_amaraHist})}).then(function(r){return r.json();}).then(function(data){amaraEscribiendo(false);var resp=data.respuesta||'Uy, se me trabó algo 🐝 Escribinos por WhatsApp: https://wa.me/5491168610532';amaraPintar('amara',resp);_amaraHist.push({rol:'amara',texto:resp});_amaraCargando=false;}).catch(function(){amaraEscribiendo(false);amaraPintar('amara','No pude conectarme 🐝 Probá de nuevo o escribinos por WhatsApp: https://wa.me/5491168610532');_amaraCargando=false;});}
-</script>
-<!-- === FIN CHAT DE AMARA === -->  
 </body>
 </html>
