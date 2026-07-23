@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Prueba de Amara 🐝</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:linear-gradient(160deg,#020c2e,#0B2D6B,#1e5bc8);color:#fff;margin:0;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;}
+  .caja{max-width:340px;}
+  .bee{font-size:3.5rem;margin-bottom:14px;}
+  h1{font-size:1.3rem;margin:0 0 8px;}
+  p{font-size:.9rem;opacity:.85;line-height:1.5;margin:0 0 20px;}
+  .flecha{font-size:2rem;animation:baja 1.5s ease-in-out infinite;}
+  @keyframes baja{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+</style>
+</head>
+<body>
+  <div class="caja">
+    <div class="bee">🐝</div>
+    <h1>Página de prueba de Amara</h1>
+    <p>Esta es una página solo para probar el chat.<br>
+    Tocá el botón 💬 de abajo a la izquierda y escribile a Amara.<br><br>
+    Cuando funcione bien, pasamos el chat a la tienda real.</p>
+    <div class="flecha">↙️</div>
+  </div>
+
+<!-- ═══ CHAT DE AMARA 🐝 ═══ -->
+<button id="amara-fab" onclick="amaraAbrir()" aria-label="Chatear con Amara"
+  style="position:fixed;bottom:22px;left:18px;z-index:1420;width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,#0B2D6B,#1e5bc8);border:3px solid #FF7A00;color:#fff;font-size:28px;
+  cursor:pointer;box-shadow:0 5px 18px rgba(11,45,107,.45);display:flex;align-items:center;justify-content:center;
+  line-height:1;-webkit-tap-highlight-color:transparent;animation:amaraPulse 2.6s ease-in-out infinite;">
+  💬
+  <span style="position:absolute;top:-3px;right:-3px;background:#FF7A00;color:#fff;
+    font-size:.6rem;font-weight:900;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;border:2px solid #fff;">🐝</span>
+</button>
+
+<div id="amara-overlay" onclick="if(event.target===this)amaraCerrar()"
+  style="display:none;position:fixed;inset:0;background:rgba(2,12,46,.55);z-index:3100;
+  align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);">
+  <div style="width:100%;max-width:480px;height:82vh;background:#ECE5DD;border-radius:20px 20px 0 0;
+    display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 30px rgba(0,0,0,.35);">
+
+    <div style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;padding:13px 16px;
+      display:flex;align-items:center;gap:11px;border-bottom:3px solid #FF7A00;">
+      <div style="width:42px;height:42px;border-radius:50%;background:#fff;display:flex;align-items:center;
+        justify-content:center;font-size:1.5rem;flex:0 0 auto;">🐝</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:900;font-size:1rem;line-height:1.1;">Amara</div>
+        <div style="font-size:.68rem;opacity:.85;">Asistente de AmarangoElectro · en línea</div>
+      </div>
+      <button onclick="amaraCerrar()" style="background:none;border:none;color:#fff;font-size:1.6rem;
+        cursor:pointer;line-height:1;padding:4px;">×</button>
+    </div>
+
+    <div id="amara-msgs" style="flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;
+      gap:8px;-webkit-overflow-scrolling:touch;"></div>
+
+    <div style="background:#F0F0F0;padding:9px 10px calc(9px + env(safe-area-inset-bottom));display:flex;
+      gap:8px;align-items:center;border-top:1px solid #ddd;">
+      <input id="amara-input" type="text" placeholder="Escribí tu consulta…" autocomplete="off"
+        onkeydown="if(event.key==='Enter')amaraEnviar()"
+        style="flex:1;border:none;border-radius:22px;padding:12px 16px;font-size:.9rem;font-family:inherit;
+        outline:none;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);">
+      <button onclick="amaraEnviar()" id="amara-send" style="width:46px;height:46px;border-radius:50%;
+        background:#FF7A00;border:none;color:#fff;font-size:1.2rem;cursor:pointer;flex:0 0 auto;
+        display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,122,0,.4);">➤</button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes amaraPulse{0%,100%{box-shadow:0 5px 18px rgba(11,45,107,.45)}50%{box-shadow:0 5px 24px rgba(255,122,0,.6)}}
+.amara-burb{max-width:80%;padding:9px 13px;border-radius:14px;font-size:.88rem;line-height:1.4;
+  word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.12);}
+.amara-cli{align-self:flex-end;background:#DCF8C6;color:#111;border-bottom-right-radius:4px;}
+.amara-bot{align-self:flex-start;background:#fff;color:#111;border-bottom-left-radius:4px;}
+.amara-bot a{color:#0B2D6B;font-weight:800;}
+.amara-esc{align-self:flex-start;background:#fff;color:#888;font-size:.8rem;padding:10px 14px;
+  border-radius:14px;border-bottom-left-radius:4px;}
+</style>
+
+<script>
+var _amaraHist = [];
+var _amaraCargando = false;
+
+function amaraAbrir(){
+  document.getElementById('amara-overlay').style.display = 'flex';
+  if(_amaraHist.length === 0){
+    amaraPintar('amara', '¡Hola! Soy Amara 🐝 la asistente de AmarangoElectro. ¿Qué estás buscando para tu casa? Te ayudo a encontrarlo y te cuento cómo lo pagás en cuotas fijas 😊');
+  }
+  setTimeout(function(){ try{ document.getElementById('amara-input').focus(); }catch(e){} }, 300);
+}
+function amaraCerrar(){
+  document.getElementById('amara-overlay').style.display = 'none';
+}
+function amaraPintar(quien, texto){
+  var cont = document.getElementById('amara-msgs');
+  var div = document.createElement('div');
+  div.className = 'amara-burb ' + (quien === 'cliente' ? 'amara-cli' : 'amara-bot');
+  var html = texto.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  div.innerHTML = html;
+  cont.appendChild(div);
+  cont.scrollTop = cont.scrollHeight;
+}
+function amaraEscribiendo(mostrar){
+  var cont = document.getElementById('amara-msgs');
+  var ya = document.getElementById('amara-escribiendo');
+  if(mostrar && !ya){
+    var d = document.createElement('div');
+    d.id = 'amara-escribiendo';
+    d.className = 'amara-esc';
+    d.textContent = 'Amara está escribiendo…';
+    cont.appendChild(d);
+    cont.scrollTop = cont.scrollHeight;
+  } else if(!mostrar && ya){
+    ya.remove();
+  }
+}
+function amaraEnviar(){
+  if(_amaraCargando) return;
+  var inp = document.getElementById('amara-input');
+  var texto = (inp.value || '').trim();
+  if(!texto) return;
+
+  amaraPintar('cliente', texto);
+  _amaraHist.push({ rol:'usuario', texto:texto });
+  inp.value = '';
+  _amaraCargando = true;
+  amaraEscribiendo(true);
+
+  fetch('/.netlify/functions/amara', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mensajes: _amaraHist })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    amaraEscribiendo(false);
+    var resp = data.respuesta || 'Uy, se me trabó algo 🐝 ¿Me lo repetís? Si querés, escribinos por WhatsApp: https://wa.me/5491168610532';
+    amaraPintar('amara', resp);
+    _amaraHist.push({ rol:'amara', texto:resp });
+    _amaraCargando = false;
+  })
+  .catch(function(){
+    amaraEscribiendo(false);
+    amaraPintar('amara', 'No pude conectarme 🐝 Probá de nuevo en un ratito, o escribinos directo por WhatsApp: https://wa.me/5491168610532');
+    _amaraCargando = false;
+  });
+}
+</script>
+</body>
+</html>
