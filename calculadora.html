@@ -3033,7 +3033,7 @@ function abrirPedido(){
     +'<div style="background:#EEF4FF;border-radius:12px;padding:12px;margin-bottom:14px;">'
     +'  <div style="font-size:.64rem;font-weight:800;color:var(--az);letter-spacing:.4px;margin-bottom:6px;">👤 CLIENTE</div>'
     +'  <select id="pd-cli" onchange="cargarClienteEnPedido()" style="width:100%;padding:11px;border-radius:9px;border:1.5px solid var(--bor);font-size:.86rem;font-family:inherit;background:#fff;color:var(--txt);font-weight:700;">'+opts+'</select>'
-    +(ag.length?'<div style="font-size:.62rem;color:var(--sub);margin-top:5px;">Tenés '+ag.length+' cliente(s) guardados. Elegí uno y saltás al producto 👇</div>':'')
+    +(lista.length?'<div style="font-size:.62rem;color:var(--sub);margin-top:5px;">Tenés '+lista.length+' cliente(s) guardados. Elegí uno y saltás al producto 👇</div>':'')
     +'</div>'
 
     +'<div id="pd-datos-cli">'
@@ -6068,70 +6068,29 @@ function tiendaProcesarCarga(){
   if(reemplazar){
     tiendaProductos=nuevos;
   }else{
-    // CARGA INTELIGENTE v2: emparejar por nombre reconociendo PARECIDOS.
-    // Si es el mismo producto (o muy parecido), actualiza SOLO precio/costo y
-    // CONSERVA foto, características, categoría y visibilidad. Si duda, AVISA.
-    // Nunca borra una foto: si no está seguro, deja el producto viejo intacto.
-
-    // clave normalizada para electrodomésticos y productos en general:
-    // unifica litros (L/LTS/LITROS), medidas (x/×), acentos, mayúsculas y espacios.
-    function claveProd(nom){
-      var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');   // 375 lts / 375 litros -> 375l
-      s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');    // 8 kg -> 8kg
-      s=s.replace(/(\d)\s*(cm|centimetros)\b/g,'$1cm');
-      s=s.replace(/(\d)\s*(w|watts|watt)\b/g,'$1w');
-      s=s.replace(/[x×·*]/g,'x');                               // medidas 2x3
-      s=s.replace(/[^a-z0-9]/g,'');                             // dejar solo letras y números
-      return s;
-    }
+    // CARGA INTELIGENTE: emparejar por nombre. Si ya existe, actualiza SOLO precio/costo
+    // y respeta foto, características, categoría y visibilidad. Si no existe, lo agrega.
     var actualizados=0, agregados=0;
-    var dudas=[]; // productos donde el emparejado no fue 100% seguro (para avisar)
-
     nuevos.forEach(function(n){
-      var kn=claveProd(n.nombre);
-      // 1) match EXACTO por nombre normalizado suave (como antes)
-      var normSuave=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
+      var norm=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
       var existe=tiendaProductos.find(function(p){
-        return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
+        return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===norm;
       });
-      // 2) si no hay exacto, buscar por clave normalizada fuerte (375L == 375 LTS)
-      var esParecido=false;
-      if(!existe){
-        existe=tiendaProductos.find(function(p){ return claveProd(p.nombre)===kn && kn.length>=4; });
-      }
-      // 3) si sigue sin match, buscar un PARECIDO (uno contenido en el otro) → lo trato como duda
-      if(!existe && kn.length>=6){
-        var mejor=null, mejorLen=0;
-        tiendaProductos.forEach(function(p){
-          var kp=claveProd(p.nombre);
-          if(!kp || kp.length<6) return;
-          if(kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1){
-            var largo=Math.min(kn.length,kp.length);
-            if(largo>mejorLen){ mejorLen=largo; mejor=p; }
-          }
-        });
-        if(mejor){ existe=mejor; esParecido=true; }
-      }
-
       if(existe){
+        // sellar fecha solo si el precio realmente cambió
         if(Math.round(existe.venta)!==Math.round(n.venta) || Math.round(existe.costo||0)!==Math.round(n.costo||0)){
           existe.precioActualizado=Date.now();
         }
-        existe.costo=n.costo; existe.venta=n.venta;  // SOLO precio/costo
+        existe.costo=n.costo; existe.venta=n.venta;  // solo precio/costo
         actualizados++;
-        // foto, caracteristicas, categoria, visible → NO se tocan (se conservan)
-        if(esParecido){
-          // fue un emparejado por parecido, no idéntico → avisar para que Max revise
-          dudas.push({nuevo:n.nombre, viejo:existe.nombre});
-        }
+        // foto, caracteristicas, categoria, visible → NO se tocan
       }else{
         n.visible=true;
         tiendaProductos.push(n);
         agregados++;
       }
     });
-    window._cargaResumen={actualizados:actualizados, agregados:agregados, dudas:dudas};
+    window._cargaResumen={actualizados:actualizados, agregados:agregados};
   }
 
   tiendaGuardarLocal();
@@ -6153,12 +6112,6 @@ function tiendaProcesarCarga(){
     var r=window._cargaResumen;
     msg='✅ Listo:\n\n• '+r.actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+r.agregados+' producto(s) nuevo(s)';
     if(r.agregados>0)msg+='\n\n🙈 Los nuevos quedaron OCULTOS. Cuando quieras publicarlos, tocá "👁️ Oculto" en cada uno (o usá "Mostrar marcados").';
-    if(r.dudas && r.dudas.length){
-      msg+='\n\n⚠️ REVISÁ ESTOS '+r.dudas.length+' (los emparejé por parecido, no idéntico):\n';
-      msg+=r.dudas.slice(0,12).map(function(d){return '• "'+d.nuevo+'" → lo tomé como "'+d.viejo+'"';}).join('\n');
-      if(r.dudas.length>12) msg+='\n...y '+(r.dudas.length-12)+' más.';
-      msg+='\n\n👉 Si alguno NO era el mismo, editá ese producto a mano. Las fotos NO se movieron.';
-    }
     window._cargaResumen=null;
   }else{
     msg='✅ Se cargaron '+nuevos.length+' productos (reemplazó todo el catálogo).';
