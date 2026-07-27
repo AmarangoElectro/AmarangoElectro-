@@ -574,6 +574,14 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="placa-cuotas-list"></div>
     </div>
 
+    <div style="margin-top:12px;">
+      <div style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;margin-bottom:6px">💸 Descuento sobre la venta (se recalcula todo desde el precio con descuento)</div>
+      <div style="display:flex;gap:8px;">
+        <button id="placa-off10" onclick="setPlacaOff(10)" style="flex:1;background:#fff;color:#e11d48;border:2px solid #e11d48;border-radius:12px;padding:11px;font-weight:900;font-size:.9rem;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;">10% OFF</button>
+        <button id="placa-off15" onclick="setPlacaOff(15)" style="flex:1;background:#fff;color:#e11d48;border:2px solid #e11d48;border-radius:12px;padding:11px;font-weight:900;font-size:.9rem;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent;">15% OFF</button>
+      </div>
+    </div>
+
     <button class="clear-btn" onclick="clearPlaca()">Vaciar</button>
   </div>
   <div id="res-placa" class="empty-state">
@@ -7190,6 +7198,20 @@ function abrirWA(idx){
 
 // ═══ PLACAS (admin): pegado inteligente igual que el CRM ═══
 var placaTipo='costo'; // 'costo' | 'venta' | 'dolar'
+var placaOff=0; // descuento OFF activo: 0, 10 o 15
+function setPlacaOff(v){
+  placaOff=(placaOff===v)?0:v; // tocar de nuevo el mismo lo apaga
+  try{
+    ['placa-off10','placa-off15'].forEach(function(id){
+      var b=document.getElementById(id); if(!b)return;
+      var activo=(id==='placa-off10'&&placaOff===10)||(id==='placa-off15'&&placaOff===15);
+      b.style.background=activo?'#e11d48':'#fff';
+      b.style.color=activo?'#fff':'#e11d48';
+      b.style.borderColor='#e11d48';
+    });
+  }catch(e){}
+  calcPlaca();
+}
 var placaCuotas={2:true,3:false,4:true,6:true,12:false};
 function setPlacaTipo(t){
   placaTipo=t;
@@ -7282,6 +7304,12 @@ function calcPlaca(){
     costo=precioDetectado;
     precio=markupVentaCRM(costo);
   }
+  // ═══ DESCUENTO OFF (10% / 15%) sobre el precio de VENTA final ═══
+  // Se aplica al precio de venta y TODO (ganancia, cuotas) se recalcula desde el precio ya rebajado.
+  var precioSinOff=precio;
+  if(placaOff>0){
+    precio=Math.round(precio*(1-placaOff/100)/1000)*1000;
+  }
   var ganancia=precio-costo;
   // nombre del producto (primera línea con letras)
   var nombre=nombreProductoTexto(txt);
@@ -7298,7 +7326,7 @@ function calcPlaca(){
     html+='<div class="result-label" style="color:var(--nar)">📥 COSTO</div>';
     html+='<div style="font-size:1.2rem;color:var(--az);font-weight:900;margin-bottom:6px">'+fmt(costo)+'</div>';
   }
-  html+='<div class="result-label" style="color:var(--az)">💰 PRECIO DE VENTA</div>';
+  html+='<div class="result-label" style="color:var(--az)">💰 PRECIO DE VENTA'+(placaOff>0?' · '+placaOff+'% OFF (antes '+fmt(precioSinOff)+')':'')+'</div>';
   html+='<div class="result-precio">'+fmt(precio)+'</div>';
   html+='<div class="result-sub">📈 Ganancia: '+fmt(ganancia)+'</div></div>';
 
@@ -7344,6 +7372,12 @@ function enviarPlacaWhatsApp(){
 }
 function clearPlaca(){
   document.getElementById('inp-placa').value='';
+  placaOff=0;
+  try{
+    ['placa-off10','placa-off15'].forEach(function(id){
+      var b=document.getElementById(id); if(b){ b.style.background='#fff'; b.style.color='#e11d48'; }
+    });
+  }catch(e){}
   var res=document.getElementById('res-placa');
   res.innerHTML='<div class="empty-icon">🎨</div><p>Pegá el texto del producto con el precio marcado con $</p>';
   res.className='empty-state';
