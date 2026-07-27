@@ -2731,24 +2731,29 @@ function borrarDatosAlgoritmo(){
 
 /* 🔍 SINÓNIMOS — para que encuentre lo que busca, lo escriba como lo escriba */
 var SINONIMOS = {
-  'heladera':['refrigerador','nevera','frigorifico','freezer'],
-  'tv':['tele','television','televisor','smart','pantalla'],
-  'parlante':['bafle','altavoz','audio','sonido','torre','equipo'],
-  'estufa':['calefactor','caloventor','calefaccion','calor','panel'],
-  'aire':['acondicionado','split','frio','clima'],
-  'ventilador':['turbo','circulador','aire'],
-  'lavarropas':['lavadora','lavarropa','lavado'],
-  'colchon':['sommier','cama','descanso'],
-  'sabana':['sabanas','juego de cama','ropa de cama'],
-  'mueble':['ropero','placard','comoda','estanteria','rack'],
-  'celular':['telefono','smartphone','movil','equipo'],
-  'notebook':['laptop','computadora','compu','pc'],
+  'heladera':['refrigerador','nevera','frigorifico','freezer','fridge'],
+  'tv':['tele','television','televisor','smart','pantalla','smarttv','led','monitor'],
+  'parlante':['bafle','altavoz','audio','sonido','torre','equipo','bluetooth','speaker'],
+  'auricular':['auriculares','audifonos','manoslibres','headset','earbuds'],
+  'estufa':['calefactor','caloventor','calefaccion','calor','panel','halogena','cuarzo'],
+  'aire':['acondicionado','split','frio','clima','ac','aa'],
+  'ventilador':['turbo','circulador','aire','ventiladores'],
+  'lavarropas':['lavadora','lavarropa','lavado','lavasecarropas'],
+  'colchon':['sommier','cama','descanso','colchones'],
+  'sabana':['sabanas','juego de cama','ropa de cama','frazada','frazadas','acolchado','manta'],
+  'mueble':['ropero','placard','comoda','estanteria','rack','muebles','mesa','silla','sillon'],
+  'celular':['telefono','smartphone','movil','equipo','cel','celu'],
+  'notebook':['laptop','computadora','compu','pc','netbook'],
   'microondas':['microonda','micro'],
-  'cocina':['anafe','horno','hornalla'],
-  'licuadora':['licuado','batidora'],
-  'pava':['jarra','termo','hervidor'],
-  'bicicleta':['bici','rodado'],
-  'carpa':['camping','iglu']
+  'cocina':['anafe','horno','hornalla','cocinas'],
+  'licuadora':['licuado','batidora','procesadora','minipimer'],
+  'pava':['jarra','termo','hervidor','pavaelectrica'],
+  'bicicleta':['bici','rodado','bicicletas'],
+  'carpa':['camping','iglu'],
+  'plancha':['planchita','vapor'],
+  'cafetera':['cafe','express'],
+  'smartwatch':['reloj','smart watch','watch','relojinteligente'],
+  'tablet':['tableta','ipad']
 };
 /* devuelve la palabra + todos sus sinónimos */
 function conSinonimos(w){
@@ -3666,7 +3671,7 @@ function tiendaRender(){
 
     card+='<div style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:190px;border-radius:13px 13px 0 0;background:#fff url(\''+p.foto+'\') center/cover no-repeat;cursor:pointer;"></div>'
+        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;background:#fff url(\''+p.foto+'\') center/cover no-repeat;cursor:pointer;"></div>'
           +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
@@ -6068,29 +6073,55 @@ function tiendaProcesarCarga(){
   if(reemplazar){
     tiendaProductos=nuevos;
   }else{
-    // CARGA INTELIGENTE: emparejar por nombre. Si ya existe, actualiza SOLO precio/costo
-    // y respeta foto, características, categoría y visibilidad. Si no existe, lo agrega.
+    // CARGA INTELIGENTE v2: emparejar reconociendo PARECIDOS. Conserva fotos, avisa dudas.
+    function claveProd(nom){
+      var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');
+      s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');
+      s=s.replace(/(\d)\s*(cm|centimetros)\b/g,'$1cm');
+      s=s.replace(/(\d)\s*(w|watts|watt)\b/g,'$1w');
+      s=s.replace(/[x\u00d7\u00b7*]/g,'x');
+      s=s.replace(/[^a-z0-9]/g,'');
+      return s;
+    }
     var actualizados=0, agregados=0;
+    var dudas=[];
     nuevos.forEach(function(n){
-      var norm=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
+      var kn=claveProd(n.nombre);
+      var normSuave=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
       var existe=tiendaProductos.find(function(p){
-        return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===norm;
+        return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
       });
+      var esParecido=false;
+      if(!existe){
+        existe=tiendaProductos.find(function(p){ return claveProd(p.nombre)===kn && kn.length>=4; });
+      }
+      if(!existe && kn.length>=6){
+        var mejor=null, mejorLen=0;
+        tiendaProductos.forEach(function(p){
+          var kp=claveProd(p.nombre);
+          if(!kp || kp.length<6) return;
+          if(kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1){
+            var largo=Math.min(kn.length,kp.length);
+            if(largo>mejorLen){ mejorLen=largo; mejor=p; }
+          }
+        });
+        if(mejor){ existe=mejor; esParecido=true; }
+      }
       if(existe){
-        // sellar fecha solo si el precio realmente cambió
         if(Math.round(existe.venta)!==Math.round(n.venta) || Math.round(existe.costo||0)!==Math.round(n.costo||0)){
           existe.precioActualizado=Date.now();
         }
-        existe.costo=n.costo; existe.venta=n.venta;  // solo precio/costo
+        existe.costo=n.costo; existe.venta=n.venta;
         actualizados++;
-        // foto, caracteristicas, categoria, visible → NO se tocan
+        if(esParecido){ dudas.push({nuevo:n.nombre, viejo:existe.nombre}); }
       }else{
         n.visible=true;
         tiendaProductos.push(n);
         agregados++;
       }
     });
-    window._cargaResumen={actualizados:actualizados, agregados:agregados};
+    window._cargaResumen={actualizados:actualizados, agregados:agregados, dudas:dudas};
   }
 
   tiendaGuardarLocal();
@@ -6112,6 +6143,12 @@ function tiendaProcesarCarga(){
     var r=window._cargaResumen;
     msg='✅ Listo:\n\n• '+r.actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+r.agregados+' producto(s) nuevo(s)';
     if(r.agregados>0)msg+='\n\n🙈 Los nuevos quedaron OCULTOS. Cuando quieras publicarlos, tocá "👁️ Oculto" en cada uno (o usá "Mostrar marcados").';
+    if(r.dudas && r.dudas.length){
+      msg+='\n\n⚠️ REVISÁ ESTOS '+r.dudas.length+' (los emparejé por parecido, no idéntico):\n';
+      msg+=r.dudas.slice(0,12).map(function(d){return '• "'+d.nuevo+'" → lo tomé como "'+d.viejo+'"';}).join('\n');
+      if(r.dudas.length>12) msg+='\n...y '+(r.dudas.length-12)+' más.';
+      msg+='\n\n👉 Si alguno NO era el mismo, editá ese producto a mano. Las fotos NO se movieron.';
+    }
     window._cargaResumen=null;
   }else{
     msg='✅ Se cargaron '+nuevos.length+' productos (reemplazó todo el catálogo).';
