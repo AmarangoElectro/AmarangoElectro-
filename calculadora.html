@@ -1908,6 +1908,16 @@ function tiendaInit(){
   // reflejar el estado del modo oscuro en el botón
   var bmo=document.getElementById('btn-modo-oscuro');
   if(bmo)bmo.textContent=document.body.classList.contains('oscuro')?'☀️':'🌙';
+  // ═══ ABRIR PRODUCTO COMPARTIDO: si el link trae ?prod=ID, abrir ese producto ═══
+  try{
+    var mProd=(location.search+location.hash).match(/prod=([A-Za-z0-9_\-]+)/);
+    if(mProd && mProd[1] && !window._prodAbiertoDesdeLink){
+      window._prodAbiertoDesdeLink=true;
+      var idProd=mProd[1];
+      // esperar a que baje el catálogo de la nube, después abrir el detalle
+      setTimeout(function(){ try{ if(buscarProd(idProd)) tiendaVerDetalle(idProd); }catch(e){} }, 1800);
+    }
+  }catch(e){}
 }
 // Saludo según la hora del día (mañana / tarde / noche)
 function mostrarSaludoHora(){
@@ -4531,7 +4541,10 @@ function compartirProducto(id){
   var p=buscarProd(id);
   if(!p)return;
   var cuotasLines=armarCuotasLines(p.venta, p);
-  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  // link que abre la tienda mostrando ESTE producto
+  var base=window.location.href.split('#')[0].split('?')[0];
+  var linkProd=base+'?prod='+encodeURIComponent(id);
+  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines, null)+"\n\n🛒 Míralo acá: "+linkProd;
 
   // Si tiene foto, intentar compartir la imagen + texto
   if(p.foto && navigator.share){
