@@ -1887,17 +1887,24 @@ function tiendaInit(){
   tiendaRender();
   tiendaBajarNube();       // baja el catálogo de la nube
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
-  // ⚡ ARRANQUE RÁPIDO: solo el catálogo ahora. El resto, 1,5s después.
-  //    Antes se disparaban 9 descargas juntas y la app se trababa al abrir.
-  setTimeout(function(){
-    try{ bajarPremiosRuletaNube(); }catch(e){}
-    try{ bajarBannerNube(); }catch(e){}
-    try{ bajarCuponesNube(); }catch(e){}
-    try{ bajarHistorialNube(); }catch(e){}
-    try{ bajarClientesNube(); }catch(e){}
-    try{ bajarBancoFotosNube(); }catch(e){}
-    try{ if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','formatocuota').maybeSingle().then(function(r){ if(r&&r.data&&r.data.datos){ try{ localStorage.setItem('ae_formato_cuota', r.data.datos); }catch(e){} tiendaRender(); } }).catch(function(){}); } }catch(e){}
-  }, 1500);
+  // ⚡ ARRANQUE RÁPIDO Y FLUIDO: las descargas secundarias se escalonan de a una
+  //    (antes salían 6 juntas y el celular se trababa al abrir). Ahora van espaciadas.
+  var _tareasArranque=[
+    function(){ try{ bajarBannerNube(); }catch(e){} },
+    function(){ try{ bajarBancoFotosNube(); }catch(e){} },
+    function(){ try{ bajarPremiosRuletaNube(); }catch(e){} },
+    function(){ try{ bajarCuponesNube(); }catch(e){} },
+    function(){ try{ bajarClientesNube(); }catch(e){} },
+    function(){ try{ bajarHistorialNube(); }catch(e){} },
+    function(){ try{ if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','formatocuota').maybeSingle().then(function(r){ if(r&&r.data&&r.data.datos){ try{ localStorage.setItem('ae_formato_cuota', r.data.datos); }catch(e){} tiendaRender(); } }).catch(function(){}); } }catch(e){} }
+  ];
+  (function correrArranque(i){
+    if(i>=_tareasArranque.length) return;
+    // requestIdleCallback si existe (corre cuando el celu está libre), si no setTimeout
+    var siguiente=function(){ setTimeout(function(){ correrArranque(i+1); }, 350); };
+    _tareasArranque[i]();
+    if(window.requestIdleCallback){ requestIdleCallback(siguiente, {timeout:600}); } else { siguiente(); }
+  })(0);
   iniciarBannerRotativo();
   mostrarSaludoHora();     // saludo según la hora del día
   mailSuscribirMostrar();  // cartelito suave de suscripción por mail (opcional)
@@ -2891,6 +2898,7 @@ function toggleRuleta(){
 }
 
 // ═══ Buscador del header (espeja el buscador interno tienda-buscar) ═══
+var _buscarTimer=null;
 function hdrBuscarSync(){
   var h=document.getElementById('hdr-buscar-input');
   var inp=document.getElementById('tienda-buscar');
@@ -2898,8 +2906,12 @@ function hdrBuscarSync(){
   if(inp) inp.value=h.value;
   var x=document.getElementById('hdr-buscar-x');
   if(x) x.style.display=(h.value.trim()?'block':'none');
-  if(typeof tiendaRender==='function') tiendaRender();
-  if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
+  // DEBOUNCE: esperar 280ms a que dejes de escribir antes de filtrar (mucho más fluido)
+  if(_buscarTimer) clearTimeout(_buscarTimer);
+  _buscarTimer=setTimeout(function(){
+    if(typeof tiendaRender==='function') tiendaRender();
+    if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
+  }, 280);
 }
 function hdrBuscarLimpiar(){
   var h=document.getElementById('hdr-buscar-input');
