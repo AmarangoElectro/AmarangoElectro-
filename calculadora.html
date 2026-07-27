@@ -7687,11 +7687,32 @@ try{ aplicarTemaTienda(temaTiendaActual, false); }catch(e){}
 try{ actualizarTextoSonido(); }catch(e){}
 try{ tiendaInit(); }catch(e){}
 
-// Ocultar la pantalla de bienvenida a los ~1.8 segundos
-setTimeout(function(){
+// ═══ OCULTAR "CARGANDO" CUANDO LA TIENDA ESTÁ LISTA DE VERDAD ═══
+// Antes se ocultaba a 1.8s fijos, aunque la tienda no hubiera terminado
+// de cargar → el cliente veía la pantalla trabada. Ahora se oculta recién
+// cuando ya hay productos dibujados (con un tope de seguridad de 6s).
+(function ocultarSplashCuandoListo(){
   var sp=document.getElementById('splash-screen');
-  if(sp){ sp.classList.add('oculto'); setTimeout(function(){ sp.style.display='none'; },500); }
-}, 1800);
+  if(!sp) return;
+  var t0=Date.now();
+  function ocultar(){
+    if(sp._ocultado) return;
+    sp._ocultado=true;
+    sp.classList.add('oculto');
+    setTimeout(function(){ sp.style.display='none'; },500);
+  }
+  function chequear(){
+    if(sp._ocultado) return;
+    // ¿ya hay productos dibujados en la grilla?
+    var grid=document.getElementById('tienda-grid');
+    var listo = grid && grid.children && grid.children.length>0;
+    // mínimo 900ms para que no parpadee, o si ya está listo
+    var pasado=Date.now()-t0;
+    if((listo && pasado>=900) || pasado>=6000){ ocultar(); return; }
+    setTimeout(chequear, 200);
+  }
+  chequear();
+})();
 </script>
 </body>
 </html>
