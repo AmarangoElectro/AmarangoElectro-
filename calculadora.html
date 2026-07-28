@@ -613,7 +613,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <!-- El buscador visible ahora vive en el header azul. Este input queda oculto pero funcional (lo usan las funciones de render y se sincroniza con el del header). -->
       <div style="display:none;">
         <input id="tienda-buscar" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
-          oninput="tiendaRender();tiendaToggleLimpiar()">
+          oninput="tiendaToggleLimpiar();tiendaRenderDebounce()">
         <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
       <div id="tienda-chips" class="cat-grid" style="padding:6px 4px 2px;"></div>
@@ -2921,23 +2921,19 @@ function hdrPredictivo(){
   if(!h||!box) return;
   var q=normTxt(h.value||'');
   if(q.length<2){ box.style.display='none'; box.innerHTML=''; return; }
-  var palabras=q.split(' ').filter(Boolean).map(conSinonimos);
+  var palabras=q.split(' ').filter(Boolean);
   // juntar productos reales + celulares visibles
   var universo=[];
   try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || p.visible!==false)) universo.push(p); }); }catch(e){}
+  // 🎯 mismo ranking que la grilla: puntaje > 0 y ordenado por relevancia
   var res=[];
-  for(var i=0;i<universo.length && res.length<8;i++){
+  for(var i=0;i<universo.length;i++){
     var p=universo[i];
-    var texto=normTxt((p.nombre||'')+' '+(p.categoria||'')+' '+(p.caracteristicas||''));
-    var tp=texto.split(' ').filter(Boolean);
-    var todas=true;
-    for(var k=0;k<palabras.length;k++){
-      var grupo=palabras[k], ok=false;
-      for(var g=0;g<grupo.length;g++){ if(palabraCoincide(grupo[g], tp)){ ok=true; break; } }
-      if(!ok){ todas=false; break; }
-    }
-    if(todas) res.push(p);
+    var pj=puntajeBusqueda(p, palabras, q);
+    if(pj>0) res.push({p:p, pj:pj});
   }
+  res.sort(function(a,b){ return b.pj-a.pj; });
+  res = res.slice(0,8).map(function(x){ return x.p; });
   if(!res.length){ box.style.display='none'; box.innerHTML=''; return; }
   var html='';
   res.forEach(function(p){
@@ -3566,6 +3562,89 @@ function quitarDestacado(id){
   tiendaRender();
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// 🎯 PUNTAJE DE RELEVANCIA — reemplaza el filtro plano por un ranking real.
+// Devuelve un número: 0 = no coincide (se descarta). Cuanto más alto, más
+// arriba aparece. Las prioridades son las que pidió Max:
+//   P1 nombre exacto  ·  P2 modelo  ·  P3 marca  ·  P4 parcial en nombre
+// La búsqueda SÓLO puntúa contra el NOMBRE (y marca de celu). Las
+// características y sinónimos son sólo un pequeño refuerzo, NUNCA arrastran
+// solos un producto (por eso "Galaxy" ya no trae bicicletas).
+// ═══════════════════════════════════════════════════════════════════════
+function puntajeBusqueda(p, palabras, qNorm){
+  if(!palabras.length) return 1; // sin búsqueda: todos válidos, empate
+  var nombre = normTxt(p.nombre||'');
+  var nombrePalabras = nombre.split(' ').filter(function(w){return w;});
+  var marca = normTxt(p.esCelu ? marcaCelu(p.nombre) : '');
+  var carac = normTxt(p.caracteristicas||'');
+  var cat   = normTxt(catProd(p));
+
+  // P1 — nombre exacto o la frase completa contenida en el nombre
+  if(nombre === qNorm) return 100000;
+  if(qNorm.length>=3 && nombre.indexOf(qNorm)>=0) return 50000;
+
+  var score = 0;
+  // cada palabra buscada tiene que "justificarse" contra el NOMBRE (o marca).
+  // si alguna palabra no aparece ni en nombre, ni marca, ni como sinónimo de
+  // categoría → el producto NO califica (score 0).
+  for(var i=0;i<palabras.length;i++){
+    var w = palabras[i];
+    var pts = 0;
+    var tieneNum = /[0-9]/.test(w);
+
+    // P2 — MODELO: palabra con número (a56, g06, s26). Exacta en el nombre.
+    if(tieneNum){
+      if(nombrePalabras.indexOf(w)>=0)      pts = 8000;       // token exacto "a56"
+      else if(nombre.indexOf(w)>=0)         pts = 4000;       // "a56" pegada dentro
+      else                                  pts = 0;          // modelo no está → nada
+    } else {
+      // token de nombre idéntico
+      if(nombrePalabras.indexOf(w)>=0)                 pts = 3000;
+      // P4 — parcial: la palabra empieza un token del nombre ("galax"→"galaxy")
+      else if(nombrePalabras.some(function(nw){return nw.indexOf(w)===0;})) pts = 1500;
+      // contenida en el medio de un token del nombre
+      else if(nombre.indexOf(w)>=0)                    pts = 900;
+      // P3 — MARCA (para celus: "samsung" matchea aunque el nombre diga "Galaxy")
+      else if(marca && (marca.indexOf(w)>=0 || (w.length>=3 && marca.indexOf(w)===0))) pts = 2000;
+      // tolerancia a errores tipográficos SÓLO contra el nombre ("samsun","galaxi")
+      else if(w.length>=4){
+        for(var j=0;j<nombrePalabras.length;j++){
+          var nw=nombrePalabras[j];
+          if(nw.length<3) continue;
+          if(Math.abs(nw.length-w.length)>2) continue;
+          var d=distancia(w, nw);
+          if(d<=1){ pts=1200; break; }
+          if(d<=2 && w.length>=6){ pts=700; break; }
+        }
+      }
+      // refuerzo débil: sinónimos SÓLO contra la categoría (heladera↔nevera).
+      // Nunca deja pasar solo por características, así no entra basura.
+      if(pts===0){
+        var sins = conSinonimos(w);
+        for(var k=0;k<sins.length;k++){
+          if(cat.indexOf(sins[k])>=0){ pts = 500; break; }
+        }
+      }
+    }
+
+    if(pts===0) return 0; // esta palabra no se justifica → producto descartado
+    score += pts;
+    // bonus chico si además aparece en características (desempata, no arrastra)
+    if(!tieneNum && carac.indexOf(w)>=0) score += 50;
+  }
+  // bonus: respeta el orden/posición inicial (nombre empieza con lo buscado)
+  if(nombre.indexOf(palabras[0])===0) score += 300;
+  return score;
+}
+
+// ⚡ debounce: no reconstruye toda la grilla en cada tecla. Espera a que el
+// usuario haga una micro-pausa (180ms). Evita el freezing al escribir rápido.
+var _tiendaRenderTimer=null;
+function tiendaRenderDebounce(){
+  if(_tiendaRenderTimer) clearTimeout(_tiendaRenderTimer);
+  _tiendaRenderTimer=setTimeout(function(){ _tiendaRenderTimer=null; tiendaRender(); }, 180);
+}
+
 function tiendaRender(){
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
@@ -3623,7 +3702,7 @@ function tiendaRender(){
     diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);border:2px solid #f0c040;position:relative;overflow:hidden;">'
       +'<div style="position:absolute;top:0;right:0;background:#f0c040;color:#1a1a2e;font-size:.6rem;font-weight:900;padding:3px 12px;border-radius:0 14px 0 12px;">🌟 PRODUCTO DEL DÍA</div>'
       +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDelDia('+pidDia+')" title="Quitar de producto del día" style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,.9);border:none;width:26px;height:26px;border-radius:50%;font-size:.85rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
-      +(pDia.foto?'<div style="width:90px;height:90px;border-radius:12px;background:#fff url(\''+pDia.foto+'\') center/cover no-repeat;flex-shrink:0;"></div>':'<div style="font-size:3rem;flex-shrink:0;">'+catProd(pDia).split(' ')[0]+'</div>')
+      +(pDia.foto?'<img loading="lazy" decoding="async" src="'+String(pDia.foto).replace(/"/g,'&quot;')+'" style="width:90px;height:90px;border-radius:12px;object-fit:cover;background:#fff;flex-shrink:0;display:block;">':'<div style="font-size:3rem;flex-shrink:0;">'+catProd(pDia).split(' ')[0]+'</div>')
       +'<div style="flex:1;min-width:0;">'
         +'<div style="color:#fff;font-size:.85rem;font-weight:800;line-height:1.2;margin-top:8px;">'+pDia.nombre+'</div>'
         +(cdDia
@@ -3650,7 +3729,7 @@ function tiendaRender(){
       dh+='<div onclick="tiendaVerDetalle('+pid+')" style="flex:0 0 auto;width:150px;background:var(--wh);border:2px solid var(--nar);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 2px 8px rgba(255,122,0,.15);position:relative;">'
         +'<div style="position:absolute;top:-1px;left:-1px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px 0 12px 0;">⭐ DESTACADO</div>'
         +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDestacado('+pid+')" title="Quitar de destacados" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.95);border:1px solid #FECACA;width:24px;height:24px;border-radius:50%;font-size:.75rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
-        +(p.foto?'<div style="width:100%;height:90px;border-radius:8px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin:14px 0 6px;"></div>':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
+        +(p.foto?'<img loading="lazy" decoding="async" src="'+String(p.foto).replace(/"/g,'&quot;')+'" style="width:100%;height:90px;border-radius:8px;object-fit:cover;background:#f0f2f8;margin:14px 0 6px;display:block;">':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
         +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
         +(function(){
           var cd=mejorCuotaDatos(p.venta, p);
@@ -3686,15 +3765,13 @@ function tiendaRender(){
   var q=(document.getElementById('tienda-buscar').value||'').toLowerCase().trim();
   var palabras=normTxt(q).split(/\s+/).filter(function(w){return w;});
   var maxPrecio=parseFloat(document.getElementById('tienda-maxprecio').value)||0;
+  var qNorm=normTxt(q);
   var lista=universo.filter(function(p){
     var okCat=!tiendaCategoriaActiva || catProd(p)===tiendaCategoriaActiva;
-    // búsqueda inteligente: texto combinado (nombre + categoría + marca + características), sin acentos y tolerando errores
-    var texto=normTxt((p.nombre||'')+' '+catProd(p)+' '+(p.esCelu?marcaCelu(p.nombre):'')+' '+(p.caracteristicas||''));
-    var textoPalabras=texto.split(' ').filter(function(w){return w;});
-    // 🔍 busca la palabra Y sus sinónimos (heladera = refrigerador = nevera…)
-    var okBusq=!palabras.length || palabras.every(function(w){
-      return conSinonimos(w).some(function(sw){ return palabraCoincide(sw, textoPalabras); });
-    });
+    // 🎯 búsqueda con ranking: puntaje 0 = no coincide (nombre/modelo/marca)
+    var pj=puntajeBusqueda(p, palabras, qNorm);
+    p._pj=pj; // guardo el puntaje para ordenar después
+    var okBusq=pj>0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
     var okPrecio=!maxPrecio || p.venta<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
@@ -3713,7 +3790,13 @@ function tiendaRender(){
 
   // ordenar
   var orden=document.getElementById('tienda-orden').value;
-  if(orden==='menor')      lista.sort(function(a,b){return a.venta-b.venta;});
+  // 🎯 si hay texto buscado, mandan la RELEVANCIA (puntaje). El producto
+  // exacto queda primero, no una estufa. Sólo si el usuario elige un orden
+  // manual (menor/mayor/az/nuevos/ofertas) se respeta ese criterio.
+  if(palabras.length && (!orden || orden==='' || orden==='relevancia' || orden==='destacado')){
+    lista.sort(function(a,b){ return (b._pj||0)-(a._pj||0); });
+  }
+  else if(orden==='menor')      lista.sort(function(a,b){return a.venta-b.venta;});
   else if(orden==='mayor') lista.sort(function(a,b){return b.venta-a.venta;});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
   else if(orden==='nuevos')lista.sort(function(a,b){return (b.creado||0)-(a.creado||0);});
@@ -3769,7 +3852,7 @@ function tiendaRender(){
 
     card+='<div style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<div class="prod-foto" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;background:#fff url(\''+p.foto+'\') center/cover no-repeat;cursor:pointer;"></div>'
+        ? '<img class="prod-foto" loading="lazy" decoding="async" src="'+String(p.foto).replace(/"/g,'&quot;')+'" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:cover;background:#fff;cursor:pointer;display:block;">'
           +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
