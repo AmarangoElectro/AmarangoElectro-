@@ -623,14 +623,14 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     </div>
 
     <!-- Buscador (fijo arriba estilo Frávega) -->
-    <div id="tienda-buscar-wrap" style="position:sticky;top:0;background:var(--wh);padding:10px 0 8px;z-index:20;box-shadow:0 4px 12px rgba(11,45,107,.06);border-bottom:1px solid var(--bor);margin:0 -4px;">
+    <div id="tienda-buscar-wrap" style="position:sticky;top:0;background:var(--wh);padding:0;z-index:20;margin:0 -4px;">
       <!-- El buscador visible ahora vive en el header azul. Este input queda oculto pero funcional (lo usan las funciones de render y se sincroniza con el del header). -->
       <div style="display:none;">
         <input id="tienda-buscar" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
           oninput="tiendaToggleLimpiar();tiendaRenderDebounce()">
         <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
-      <div id="tienda-chips" class="cat-grid" style="padding:6px 4px 2px;"></div>
+      <div id="tienda-chips" class="cat-grid" style="padding:0;"></div>
       <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;padding:0 4px;"></div>
       <!-- Cajón con TODAS las categorías (red de seguridad si el buscador falla) -->
       <div id="cajon-cats" onclick="if(event.target===this)cerrarCajonCats()">
@@ -662,7 +662,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     </div>
 
     <!-- ═══ Orden estilo Amazon: saludo, producto del día, promo ═══ -->
-    <div id="tienda-saludo-hora" style="text-align:center;font-size:.9rem;font-weight:800;color:var(--txt);margin:10px 0 8px;letter-spacing:.2px;"></div>
+    <div id="tienda-saludo-hora" style="text-align:center;font-size:.9rem;font-weight:800;color:var(--txt);margin:4px 0 8px;letter-spacing:.2px;"></div>
 
     <!-- Producto del día (deal of the day) -->
     <div id="tienda-productodia" style="display:none;margin-bottom:12px;"></div>
@@ -3768,6 +3768,7 @@ function tiendaRender(){
   var chipsBox=document.getElementById('tienda-chips');
   chipsBox.innerHTML=chipsHtml;
   chipsBox.style.display = chipsHtml ? 'flex' : 'none';
+  chipsBox.style.padding = chipsHtml ? '6px 4px 2px' : '0';
 
   // PRODUCTO DEL DÍA (solo en vista principal sin filtros)
   var diaDiv=document.getElementById('tienda-productodia');
