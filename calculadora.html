@@ -2817,7 +2817,10 @@ function distancia(a,b){
 // ¿la palabra buscada aparece en el texto? tolera que esté "contenida" o con 1-2 errores
 function palabraCoincide(palabra, textoPalabras){
   if(!palabra) return true;
-  // 1) coincidencia directa (contiene)
+  // 0) buscar la palabra como subcadena en el TEXTO COMPLETO (encuentra aunque esté en el medio o pegada)
+  var textoJunto=textoPalabras.join(' ');
+  if(palabra.length>=3 && textoJunto.indexOf(palabra)>=0) return true;
+  // 1) coincidencia directa palabra por palabra (contiene)
   for(var i=0;i<textoPalabras.length;i++){
     if(textoPalabras[i].indexOf(palabra)>=0 || palabra.indexOf(textoPalabras[i])>=0) return true;
   }
@@ -6109,13 +6112,16 @@ function tiendaProcesarCarga(){
   if(reemplazar){
     tiendaProductos=nuevos;
   }else{
-    // CARGA INTELIGENTE v2: emparejar reconociendo PARECIDOS. Conserva fotos, avisa dudas.
+    // CARGA INTELIGENTE v3: emparejar reconociendo PARECIDOS con más fuerza. Conserva fotos, avisa dudas.
     function claveProd(nom){
       var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      // sacar emojis y símbolos varios que a veces vienen adelante/atrás del nombre
+      s=s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,'');
       s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');
       s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');
       s=s.replace(/(\d)\s*(cm|centimetros)\b/g,'$1cm');
       s=s.replace(/(\d)\s*(w|watts|watt)\b/g,'$1w');
+      s=s.replace(/(\d)\s*(pulgadas|pulg|"|'')/g,'$1pulg');
       s=s.replace(/[x\u00d7\u00b7*]/g,'x');
       s=s.replace(/[^a-z0-9]/g,'');
       return s;
@@ -6124,14 +6130,20 @@ function tiendaProcesarCarga(){
     var dudas=[];
     nuevos.forEach(function(n){
       var kn=claveProd(n.nombre);
-      var normSuave=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
-      var existe=tiendaProductos.find(function(p){
-        return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
-      });
-      var esParecido=false;
-      if(!existe){
-        existe=tiendaProductos.find(function(p){ return claveProd(p.nombre)===kn && kn.length>=4; });
+      // 1) match por clave normalizada FUERTE (ignora emojis, espacios, símbolos) — es el principal ahora
+      var existe=null;
+      if(kn.length>=3){
+        existe=tiendaProductos.find(function(p){ return claveProd(p.nombre)===kn; });
       }
+      // 2) si no, match suave por nombre casi idéntico
+      if(!existe){
+        var normSuave=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
+        existe=tiendaProductos.find(function(p){
+          return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
+        });
+      }
+      var esParecido=false;
+      // 3) si sigue sin match, buscar PARECIDO (uno contenido en el otro) → duda
       if(!existe && kn.length>=6){
         var mejor=null, mejorLen=0;
         tiendaProductos.forEach(function(p){
