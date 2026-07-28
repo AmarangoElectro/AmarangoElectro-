@@ -766,6 +766,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaCatalogoPDF()">📄 Descargar catálogo PDF</button>
     <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
       onclick="tiendaBackup()">💾 Descargar backup (respaldo)</button>
+    <button class="calc-btn" style="width:100%;background:#e11d48;margin-top:8px;"
+      onclick="tiendaLimpiarDuplicados()">🧹 Limpiar productos duplicados</button>
     <button id="tienda-btn-restore" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--az);border:2px solid var(--az);"
       onclick="tiendaRestaurarAbrir()">📂 Restaurar backup</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
@@ -6098,6 +6100,72 @@ function setCargaModo(m){
   if(dol) dol.style.display=(m==='usd')?'block':'none';
 }
 
+// ═══ LIMPIAR PRODUCTOS DUPLICADOS ═══
+// Detecta productos con el mismo nombre (ignorando emojis/espacios/símbolos),
+// se queda con el MEJOR (el que tiene foto, o el más completo) y borra los repetidos.
+// Guarda backup automático antes y pide confirmación. Los borrados van a papelera.
+function _claveDup(nom){
+  var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  s=s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,'');
+  s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');
+  s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');
+  s=s.replace(/[x\u00d7\u00b7*]/g,'x');
+  s=s.replace(/[^a-z0-9]/g,'');
+  return s;
+}
+function _puntajeProd(p){
+  // más puntaje = más completo (preferimos conservar este)
+  var pts=0;
+  if(p.foto) pts+=100;
+  if(p.caracteristicas) pts+=10;
+  if(p.categoria) pts+=5;
+  if(p.visible) pts+=2;
+  return pts;
+}
+function tiendaLimpiarDuplicados(){
+  if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede limpiar duplicados.'); return; }
+  // agrupar por clave
+  var grupos={};
+  tiendaProductos.forEach(function(p){
+    if(!p||!p.nombre) return;
+    var k=_claveDup(p.nombre);
+    if(k.length<2) return;
+    (grupos[k]=grupos[k]||[]).push(p);
+  });
+  // detectar los que tienen duplicados
+  var aBorrar=[], ejemplos=[];
+  Object.keys(grupos).forEach(function(k){
+    var arr=grupos[k];
+    if(arr.length<2) return;
+    // ordenar por puntaje (el mejor primero) y por precio actualizado más nuevo
+    arr.sort(function(a,b){ return _puntajeProd(b)-_puntajeProd(a) || (b.precioActualizado||0)-(a.precioActualizado||0); });
+    var conservar=arr[0];
+    for(var i=1;i<arr.length;i++){
+      // si el que vamos a borrar tiene foto y el que conservamos no, pasamos la foto
+      if(!conservar.foto && arr[i].foto) conservar.foto=arr[i].foto;
+      aBorrar.push(arr[i]);
+    }
+    if(ejemplos.length<8) ejemplos.push(conservar.nombre+' (x'+arr.length+')');
+  });
+  if(!aBorrar.length){ alert('✅ No encontré productos duplicados. Tu catálogo está limpio.'); return; }
+  var msg='🧹 Encontré '+aBorrar.length+' producto(s) DUPLICADO(S).\n\n';
+  msg+='Voy a conservar UNO de cada uno (el que tiene foto / más completo) y borrar los repetidos.\n\n';
+  msg+='Ejemplos:\n• '+ejemplos.join('\n• ');
+  msg+='\n\n⚠️ Antes guardo un backup automático. ¿Borro los '+aBorrar.length+' duplicados?';
+  if(!confirm(msg)) return;
+  // backup de seguridad antes de tocar
+  try{ tiendaBackupAuto(); }catch(e){}
+  // borrar (sacar del array los que están en aBorrar)
+  var setBorrar=new Set(aBorrar);
+  var antes=tiendaProductos.length;
+  tiendaProductos=tiendaProductos.filter(function(p){ return !setBorrar.has(p); });
+  var despues=tiendaProductos.length;
+  // guardar y subir (usa las mismas funciones que la carga normal)
+  try{ tiendaGuardarLocal(); }catch(e){}
+  try{ if(typeof tiendaSubirNube==='function') tiendaSubirNube(); else if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){}); } }catch(e){}
+  try{ tiendaRender(); }catch(e){}
+  alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
+}
 function tiendaProcesarCarga(){
  try{
   var texto=document.getElementById('carga-texto').value||'';
