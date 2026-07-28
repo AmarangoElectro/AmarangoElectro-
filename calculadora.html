@@ -2820,20 +2820,29 @@ function distancia(a,b){
 // ¿la palabra buscada aparece en el texto? tolera que esté "contenida" o con 1-2 errores
 function palabraCoincide(palabra, textoPalabras){
   if(!palabra) return true;
-  // 0) buscar la palabra como subcadena en el TEXTO COMPLETO (encuentra aunque esté en el medio o pegada)
+  // ¿la palabra tiene números? (modelos: a17, s26, dl60) → exigir coincidencia EXACTA, sin tolerancia
+  var tieneNumero=/[0-9]/.test(palabra);
   var textoJunto=textoPalabras.join(' ');
+  // 0) subcadena en el texto completo (encuentra aunque esté pegada o en el medio)
   if(palabra.length>=3 && textoJunto.indexOf(palabra)>=0) return true;
-  // 1) coincidencia directa palabra por palabra (contiene)
+  // 1) coincidencia palabra por palabra: la palabra buscada tiene que estar CONTENIDA en una del texto.
+  //    (NO al revés: antes "a" del texto matcheaba "a17" y traía basura)
   for(var i=0;i<textoPalabras.length;i++){
-    if(textoPalabras[i].indexOf(palabra)>=0 || palabra.indexOf(textoPalabras[i])>=0) return true;
+    var w0=textoPalabras[i];
+    if(w0.indexOf(palabra)>=0) return true;
+    // solo permitir "texto contenido en la búsqueda" si el texto es largo (evita que "a","17","gas" matcheen)
+    if(w0.length>=4 && palabra.indexOf(w0)>=0) return true;
   }
-  // 2) tolerancia a errores: distancia según el largo de la palabra
-  var tol = palabra.length<=4 ? 1 : (palabra.length<=7 ? 2 : 3);
+  // 2) modelos con número (a17, s26): NO usar tolerancia a errores (traía estufas). Solo exacto de arriba.
+  if(tieneNumero) return false;
+  // 3) tolerancia a errores SOLO para palabras de letras y de largo razonable
+  if(palabra.length<3) return false;
+  var tol = palabra.length<=5 ? 1 : (palabra.length<=8 ? 2 : 3);
   for(var j=0;j<textoPalabras.length;j++){
     var w=textoPalabras[j];
+    if(w.length<3) continue;
     if(Math.abs(w.length-palabra.length)>tol) continue;
     if(distancia(palabra, w)<=tol) return true;
-    // también contra el arranque de palabras largas ("samsu" vs "samsung")
     if(w.length>palabra.length && distancia(palabra, w.slice(0,palabra.length))<=tol) return true;
   }
   return false;
