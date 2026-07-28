@@ -90,6 +90,19 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .cat-tile-ic{font-size:1.25rem;line-height:1;}
 .cat-tile-txt{font-size:.54rem;font-weight:800;color:var(--az);text-align:center;line-height:1.05;}
 @media(max-width:360px){.cat-grid .cat-tile{width:64px;}}
+/* Botón "Categorías" (abre el cajón con TODAS) */
+.btn-cats-todas{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:72px;min-height:60px;padding:8px 2px;border-radius:12px;background:var(--az);border:1.5px solid var(--az);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.btn-cats-todas .cat-tile-ic{font-size:1.25rem;line-height:1;}
+.btn-cats-todas .cat-tile-txt{font-size:.54rem;font-weight:800;color:#fff;text-align:center;line-height:1.05;}
+@media(max-width:360px){.btn-cats-todas{width:64px;}}
+/* Cajón desplegable con TODAS las categorías en grilla */
+#cajon-cats{display:none;position:fixed;inset:0;z-index:120;background:rgba(11,45,107,.35);backdrop-filter:blur(2px);}
+#cajon-cats.open{display:block;}
+#cajon-cats-panel{position:absolute;left:0;right:0;bottom:0;background:var(--wh);border-radius:20px 20px 0 0;max-height:78vh;overflow-y:auto;padding:16px 14px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.25);animation:cajonSube .22s ease;}
+@keyframes cajonSube{from{transform:translateY(100%);}to{transform:translateY(0);}}
+#cajon-cats-panel .cajon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+@media(max-width:360px){#cajon-cats-panel .cajon-grid{grid-template-columns:repeat(3,1fr);}}
+#cajon-cats-panel .cat-tile{width:auto;}
 /* Buscador dentro del header azul */
 .hdr-buscar{width:100%;position:relative;z-index:1;margin-top:6px;padding:0 2px}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
@@ -618,6 +631,17 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       </div>
       <div id="tienda-chips" class="cat-grid" style="padding:6px 4px 2px;"></div>
       <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;padding:0 4px;"></div>
+      <!-- Cajón con TODAS las categorías (red de seguridad si el buscador falla) -->
+      <div id="cajon-cats" onclick="if(event.target===this)cerrarCajonCats()">
+        <div id="cajon-cats-panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:.95rem;font-weight:900;color:var(--az);">📂 Todas las categorías</span>
+            <button onclick="cerrarCajonCats()" style="background:var(--bg);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:1rem;font-weight:900;color:var(--sub);cursor:pointer;line-height:1;">✕</button>
+          </div>
+          <p style="font-size:.68rem;color:var(--sub);margin:4px 0 0;">Tocá una categoría para ver todos sus productos.</p>
+          <div id="cajon-cats-grid" class="cajon-grid"></div>
+        </div>
+      </div>
       <!-- Fila de orden/filtros movida al cajón lateral (☰). Inputs ocultos pero funcionales. -->
       <div style="display:none;">
         <select id="tienda-orden" onchange="tiendaRender()">
@@ -3619,10 +3643,14 @@ function puntajeBusqueda(p, palabras, qNorm){
       }
       // refuerzo débil: sinónimos SÓLO contra la categoría (heladera↔nevera).
       // Nunca deja pasar solo por características, así no entra basura.
-      if(pts===0){
+      // Exige palabra de 4+ letras y que el sinónimo aparezca como PALABRA
+      // completa dentro de la categoría (no como subcadena suelta), así en
+      // "Todos" no se cuela ruido por coincidencias parciales.
+      if(pts===0 && w.length>=4){
+        var catPalabras = cat.split(' ');
         var sins = conSinonimos(w);
         for(var k=0;k<sins.length;k++){
-          if(cat.indexOf(sins[k])>=0){ pts = 500; break; }
+          if(sins[k].length>=4 && catPalabras.indexOf(sins[k])>=0){ pts = 500; break; }
         }
       }
     }
@@ -3685,7 +3713,8 @@ function tiendaRender(){
   universo.forEach(function(p){ var c=catProd(p); cats[c]=(cats[c]||0)+1; });
   function catIcono(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(0,i):'📦'; }
   function catTexto(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(i+1).trim():s; }
-  var chipsHtml='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" onclick="tiendaFiltrarCat(\'\')"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
+  var chipsHtml='<div class="btn-cats-todas" onclick="abrirCajonCats()"><span class="cat-tile-ic">📂</span><span class="cat-tile-txt">Categorías</span></div>';
+  chipsHtml+='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" onclick="tiendaFiltrarCat(\'\')"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
   Object.keys(cats).forEach(function(c){
     var on=tiendaCategoriaActiva===c;
     chipsHtml+='<div class="cat-tile'+(on?' on':'')+'" onclick="tiendaFiltrarCat(\''+c+'\')"><span class="cat-tile-ic">'+catIcono(c)+'</span><span class="cat-tile-txt">'+catTexto(c)+'</span></div>';
@@ -4378,6 +4407,31 @@ function tiendaMarcados(accion){
   tiendaGuardarLocal(); tiendaRender();
   alert('✅ '+cont+' producto(s) '+(vis?'ahora VISIBLES en la tienda':'ahora OCULTOS de la tienda (siguen guardados en admin)')+'.');
 }
+
+// ═══ CAJÓN CON TODAS LAS CATEGORÍAS (red de seguridad para el cliente) ═══
+function abrirCajonCats(){
+  // armar el universo para contar cuántos productos hay por categoría
+  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(function(p){return p.visible!==false;});
+  try{
+    var celus=JSON.parse(localStorage.getItem('amarango_celulares')||'[]');
+    celus.forEach(function(c,i){
+      if(c.ocultoTienda && !tiendaEsAdmin)return;
+      universo.push({id:'celu_'+i, esCelu:true, nombre:c.nombre, categoria:'📱 Celulares', visible:!c.ocultoTienda});
+    });
+  }catch(e){}
+  var cats={};
+  universo.forEach(function(p){ var c=catProd(p); cats[c]=(cats[c]||0)+1; });
+  function ic(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(0,i):'📦'; }
+  function tx(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(i+1).trim():s; }
+  var html='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" onclick="tiendaFiltrarCat(\'\');cerrarCajonCats();"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
+  Object.keys(cats).sort().forEach(function(c){
+    var on=tiendaCategoriaActiva===c;
+    html+='<div class="cat-tile'+(on?' on':'')+'" onclick="tiendaFiltrarCat(\''+c.replace(/'/g,"\\'")+'\');cerrarCajonCats();"><span class="cat-tile-ic">'+ic(c)+'</span><span class="cat-tile-txt">'+tx(c)+' ('+cats[c]+')</span></div>';
+  });
+  document.getElementById('cajon-cats-grid').innerHTML=html;
+  document.getElementById('cajon-cats').classList.add('open');
+}
+function cerrarCajonCats(){ document.getElementById('cajon-cats').classList.remove('open'); }
 
 function tiendaFiltrarCat(c){
   var estabaActiva=(tiendaCategoriaActiva===c);
