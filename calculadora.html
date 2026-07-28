@@ -2553,10 +2553,19 @@ function tiendaCategoria(nombre){
   if(/notebook|computad|impresora|pc |teclado|mouse|pendrive|disco/.test(n))return '💻 Informática';
   if(/herramienta|taladro|amoladora|soldador|compresor|motosierra|bordeadora|hidro/.test(n))return '🔧 Herramientas';
   if(/juguete|mu[nñ]eca|auto a bater|triciclo|pelotero/.test(n))return '🧸 Juguetes';
+  if(/planchita|secador de pelo|afeitad|depilad|cortabarba|cortapelo|masajead|balanza|b[aá]scula|cepillo el[eé]ctrico|alisad/.test(n))return '💄 Belleza y cuidado personal';
+  if(/cochecit|coche de beb|cuna|moises|silla de auto|huevito|corralito|andador|mamader|esteriliz/.test(n))return '👶 Bebés';
+  if(/vajilla|olla|sart[eé]n|cacerol|cuberter|cubierto|bater[ií]a de cocina|bazar|copa|vaso|plato|jueg. de t[eé]|mate|termo de acero/.test(n))return '🍺 Bazar y mesa';
+  if(/grupo electr[oó]gen|generador|bater[ií]a|panel solar|ups|inversor|cargador solar|energ[ií]a/.test(n))return '🔋 Energía';
+  if(/casco|cubierta|neum[aá]tic|accesorio auto|accesorio moto|estereo|autoradio|parlante de auto|baul|moto\b/.test(n))return '🚗 Autos y motos';
+  if(/mascota|perro|gato|comeder|bebeder|rascador|jaula|acuario|pecera|correa|alimento balanceado/.test(n))return '🐶 Mascotas';
+  if(/consola|playstation|ps4|ps5|xbox|nintendo|joystick|control gamer|silla gamer|volante gamer|headset/.test(n))return '🎮 Gaming';
+  if(/aspiradora robot|robot aspir|mopa|trapead|escoba el[eé]ctric|limpiavidri|art[ií]culo de limpieza|productos de limpieza/.test(n))return '🧹 Limpieza';
+  if(/cortina|alfombra|cuadro|l[aá]mpara|iluminaci[oó]n|deco|adorno|espejo|florero|portarretrato|guirnalda/.test(n))return '🏠 Hogar y deco';
   return '📦 Otros';
 }
 // lista de categorías disponibles para elegir
-var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV','🔊 Audio','❄️ Heladeras','🍳 Cocina','🌬️ Aire acondicionado','🔥 Calefacción','🌀 Ventilación','🧺 Lavado','☕ Electro hogar','🛏️ Descanso','🪑 Muebles','⛺ Camping y aire libre','🚲 Deportes','💻 Informática','🔧 Herramientas','🧸 Juguetes','📦 Otros'];
+var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV','🔊 Audio','❄️ Heladeras','🍳 Cocina','🌬️ Aire acondicionado','🔥 Calefacción','🌀 Ventilación','🧺 Lavado','☕ Electro hogar','🛏️ Descanso','🪑 Muebles','⛺ Camping y aire libre','🚲 Deportes','💻 Informática','🔧 Herramientas','🧸 Juguetes','💄 Belleza y cuidado personal','👶 Bebés','🍺 Bazar y mesa','🔋 Energía','🚗 Autos y motos','🐶 Mascotas','🎮 Gaming','🧹 Limpieza','🏠 Hogar y deco','📦 Otros'];
 // categoría efectiva de un producto: la manual si tiene, sino la automática
 /* 🚦 SEMÁFORO DEL PRECIO — cuánto hace que no se actualiza (solo lo ve el admin)
    Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
