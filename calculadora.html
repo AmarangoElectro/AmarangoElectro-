@@ -2873,7 +2873,7 @@ function palabraCoincide(palabra, textoPalabras){
   if(tieneNumero) return false;
   // 3) tolerancia a errores SOLO para palabras de letras y de largo razonable
   if(palabra.length<3) return false;
-  var tol = palabra.length<=5 ? 1 : (palabra.length<=8 ? 2 : 3);
+  var tol = palabra.length<=4 ? 0 : (palabra.length<=8 ? 1 : 2);
   for(var j=0;j<textoPalabras.length;j++){
     var w=textoPalabras[j];
     if(w.length<3) continue;
@@ -3646,14 +3646,14 @@ function puntajeBusqueda(p, palabras, qNorm){
       // P3 — MARCA (para celus: "samsung" matchea aunque el nombre diga "Galaxy")
       else if(marca && (marca.indexOf(w)>=0 || (w.length>=3 && marca.indexOf(w)===0))) pts = 2000;
       // tolerancia a errores tipográficos SÓLO contra el nombre ("samsun","galaxi")
-      else if(w.length>=4){
+      else if(w.length>=5){
         for(var j=0;j<nombrePalabras.length;j++){
           var nw=nombrePalabras[j];
           if(nw.length<3) continue;
-          if(Math.abs(nw.length-w.length)>2) continue;
+          if(Math.abs(nw.length-w.length)>1) continue;
           var d=distancia(w, nw);
           if(d<=1){ pts=1200; break; }
-          if(d<=2 && w.length>=6){ pts=700; break; }
+          if(d<=2 && w.length>=7){ pts=700; break; }
         }
       }
       // refuerzo débil: sinónimos SÓLO contra la categoría (heladera↔nevera).
@@ -3969,6 +3969,9 @@ function tiendaCardsHtml(sublista){
     }
     if(tiendaEsAdmin && p.esCelu){
       card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
+    }
+    if(tiendaEsAdmin && p.automaticoProveedor){
+      card+='<div style="font-size:.6rem;font-weight:800;margin-top:5px;color:var(--az);background:#EEF4FF;border:1px solid #CFE3FF;border-radius:7px;padding:4px 6px;">🔄 '+(p.proveedor||'Proveedor')+' · stock '+(p.proveedorStock||0)+'</div>';
     }
 
     card+=''
