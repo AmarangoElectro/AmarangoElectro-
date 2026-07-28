@@ -293,11 +293,12 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <p>Equipá tu casa, fácil y en cuotas</p>
     </div>
   </div>
-  <div class="hdr-buscar">
+  <div class="hdr-buscar" style="position:relative;">
     <span class="hb-lupa">🔍</span>
-    <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
-      oninput="hdrBuscarSync()">
+    <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+      oninput="hdrBuscarSync()" onfocus="hdrPredictivo()">
     <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
+    <div id="hdr-sugerencias" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:1500;max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
   </div>
 </div>
 <div id="header-espacio"></div>
@@ -2902,6 +2903,48 @@ function toggleRuleta(){
 
 // ═══ Buscador del header (espeja el buscador interno tienda-buscar) ═══
 var _buscarTimer=null;
+// PREDICTIVO: muestra abajo del buscador los productos que coinciden mientras escribís
+function hdrPredictivo(){
+  var h=document.getElementById('hdr-buscar-input');
+  var box=document.getElementById('hdr-sugerencias');
+  if(!h||!box) return;
+  var q=normTxt(h.value||'');
+  if(q.length<2){ box.style.display='none'; box.innerHTML=''; return; }
+  var palabras=q.split(' ').filter(Boolean).map(conSinonimos);
+  // juntar productos reales + celulares visibles
+  var universo=[];
+  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || p.visible!==false)) universo.push(p); }); }catch(e){}
+  var res=[];
+  for(var i=0;i<universo.length && res.length<8;i++){
+    var p=universo[i];
+    var texto=normTxt((p.nombre||'')+' '+(p.categoria||'')+' '+(p.caracteristicas||''));
+    var tp=texto.split(' ').filter(Boolean);
+    var todas=true;
+    for(var k=0;k<palabras.length;k++){
+      var grupo=palabras[k], ok=false;
+      for(var g=0;g<grupo.length;g++){ if(palabraCoincide(grupo[g], tp)){ ok=true; break; } }
+      if(!ok){ todas=false; break; }
+    }
+    if(todas) res.push(p);
+  }
+  if(!res.length){ box.style.display='none'; box.innerHTML=''; return; }
+  var html='';
+  res.forEach(function(p){
+    var foto=p.foto?('<div style="width:38px;height:38px;border-radius:8px;background:#f2f2f2 url(\''+p.foto+'\') center/cover;flex:0 0 auto;"></div>'):('<div style="width:38px;height:38px;border-radius:8px;background:#eef;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">📦</div>');
+    html+='<div onclick="hdrElegirSug(\''+p.id+'\')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;-webkit-tap-highlight-color:transparent;">'
+      +foto
+      +'<div style="flex:1;min-width:0;"><div style="font-size:.82rem;font-weight:700;color:#0B2D6B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+p.nombre+'</div>'
+      +'<div style="font-size:.72rem;color:#FF7A00;font-weight:800;">$'+(p.venta||0).toLocaleString('es-AR')+'</div></div>'
+      +'<span style="color:#bbb;font-size:1rem;">↗</span></div>';
+  });
+  box.innerHTML=html;
+  box.style.display='block';
+}
+function hdrElegirSug(id){
+  var box=document.getElementById('hdr-sugerencias');
+  if(box){ box.style.display='none'; box.innerHTML=''; }
+  try{ tiendaVerDetalle(id); }catch(e){}
+}
 function hdrBuscarSync(){
   var h=document.getElementById('hdr-buscar-input');
   var inp=document.getElementById('tienda-buscar');
@@ -2909,7 +2952,8 @@ function hdrBuscarSync(){
   if(inp) inp.value=h.value;
   var x=document.getElementById('hdr-buscar-x');
   if(x) x.style.display=(h.value.trim()?'block':'none');
-  // DEBOUNCE: esperar 280ms a que dejes de escribir antes de filtrar (mucho más fluido)
+  hdrPredictivo(); // sugerencias instantáneas mientras escribe
+  // DEBOUNCE: filtrar la grilla completa recién cuando deja de escribir
   if(_buscarTimer) clearTimeout(_buscarTimer);
   _buscarTimer=setTimeout(function(){
     if(typeof tiendaRender==='function') tiendaRender();
@@ -2919,6 +2963,8 @@ function hdrBuscarSync(){
 function hdrBuscarLimpiar(){
   var h=document.getElementById('hdr-buscar-input');
   if(h){ h.value=''; h.focus(); }
+  var box=document.getElementById('hdr-sugerencias');
+  if(box){ box.style.display='none'; box.innerHTML=''; }
   var inp=document.getElementById('tienda-buscar');
   if(inp) inp.value='';
   if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
