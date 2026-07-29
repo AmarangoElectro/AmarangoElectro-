@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ARCHIVO CORRECTO AMARANGO: v-PROVEEDORES-SEGURO + LOGO DE CATÁLOGO Y AL COMPARTIR -->
+<!-- ARCHIVO PRINCIPAL AMARANGO: v-TIENDA-UNIFICADA + CATEGORIAS-LIMPIAS + COMPARTIR-PROVEEDORES -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -2591,44 +2591,59 @@ function tiendaPapeleraVaciar(){
 // detecta una categoría simple por palabras clave del nombre
 function tiendaCategoria(nombre){
   var n=(nombre||'').toLowerCase();
-  if(/samsung|motorola|xiaomi|iphone|celular|smartphone|tablet/.test(n))return '📱 Celulares';
   if(/cargador|cable usb|auricular bluetooth|power ?bank|funda|vidrio templado|soporte celular|adaptador|tarjeta sd|memoria micro/.test(n))return '🔌 Cargadores y accesorios';
-  if(/freezer|conservadora el[eé]ctric|congelador|cervecer/.test(n))return '🧊 Freezers';
-  if(/heladera|frio/.test(n))return '❄️ Heladeras';
-  if(/horno el[eé]ctric|microonda|horno delhi|horno pizzero|tostadora horno/.test(n))return '🔥 Hornos y microondas';
-  if(/cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocina';
-  if(/\btv\b|televis|smart ?tv|tcl|monitor|proyector/.test(n))return '📺 TV';
+  if(/samsung|motorola|xiaomi|iphone|celular|smartphone|tablet/.test(n))return '📱 Celulares';
+  if(/freezer|conservadora el[eé]ctric|congelador|cervecer|heladera|frio/.test(n))return '❄️ Refrigeración';
+  if(/\bhorno\b|microonda|air ?fryer|ayrfraier|parrilla|grill|panchera|cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocción';
+  if(/\btv\b|televis|smart ?tv|tcl|monitor|proyector/.test(n))return '📺 TV y video';
   if(/parlante|bafle|torre de sonido|soundbar|sound bar|barra de sonido|auricular|audio|equipo de m[uú]sica|karaoke|aiwa|jbl/.test(n))return '🔊 Audio';
-  if(/aire acond|split|portatil frio|frio.?calor/.test(n))return '🌬️ Aire acondicionado';
-  if(/estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|sirena/.test(n))return '🔥 Calefacción';
-  if(/ventilador|turbo|circulador|extractor/.test(n))return '🌀 Ventilación';
-  if(/lavarrop|secarrop|lavavaj|centrifug/.test(n))return '🧺 Lavado';
-  if(/colch[oó]n/.test(n))return '🛌 Colchones';
-  if(/sommier|somier|sonier/.test(n))return '🪟 Sommiers';
+  if(/aire acond|split|portatil frio|frio.?calor|estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|ventilador|turbo|circulador|extractor|termotanque|calef[oó]n/.test(n))return '🌡️ Climatización';
+  if(/lavarrop|secarrop|lavavaj|centrifug|tender/.test(n))return '🧺 Lavado';
+  if(/colch[oó]n|sommier|somier|sonier/.test(n))return '🛏️ Colchones y sommiers';
   if(/s[aá]bana|acolchad|frazada|manta|cubrecama|juego de cama|almohad|blanquer[ií]a|toalla|toall[oó]n|cortina de ba[nñ]o/.test(n))return '🧵 Blanquería';
-  if(/nebulizad|tensi[oó]metro|term[oó]metro|oxímetro|oximetro|inhalador|masajead|balanza digital|salud/.test(n))return '🩺 Salud y cuidado';
-  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich|multiproces|exprimidor|waflera|plancha|hervidor/.test(n))return '⚡ Pequeños electro';
-  if(/aspirador|hidrolav|enceradora|lustraspiradora/.test(n))return '☕ Electro hogar';
-  if(/almohada/.test(n))return '🛏️ Descanso';
+  if(/nebulizad|tensi[oó]metro|term[oó]metro|oxímetro|oximetro|inhalador|masajead|balanza digital|salud|planchita|secador de pelo|afeitad|depilad|cortabarba|cortapelo|cepillo el[eé]ctrico|alisad/.test(n))return '💄 Cuidado personal y salud';
+  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich|multiproces|exprimidor|waflera|plancha|hervidor|mixer|m[aá]quina de coser|maquina pan|vaporera|panquequera|dispensador de agua/.test(n))return '⚡ Pequeños electro';
+  if(/aspirador|hidrolav|enceradora|lustraspiradora|aspiradora robot|robot aspir|mopa|trapead|escoba el[eé]ctric|limpiavidri|art[ií]culo de limpieza|productos de limpieza/.test(n))return '🧹 Limpieza';
   if(/mueble|ropero|placard|c[oó]moda|mesa|silla|sill[oó]n|estanter|biblioteca|escritorio|rack|modular|respaldo/.test(n))return '🪑 Muebles';
-  if(/carpa|reposera|pileta|camping|conservadora|bolso t[eé]rmico|gazebo|sombrilla|inflable/.test(n))return '⛺ Camping y aire libre';
-  if(/bicicleta|monopat[ií]n|patineta|cinta de correr|bicicleta fija|pesas|mancuerna/.test(n))return '🚲 Deportes';
-  if(/notebook|computad|impresora|pc |teclado|mouse|pendrive|disco/.test(n))return '💻 Informática';
+  if(/carpa|reposera|pileta|camping|conservadora|bolso t[eé]rmico|gazebo|sombrilla|inflable|fogonero|fog[oó]n|carrito de playa|banco plegable|banquito plegable/.test(n))return '⛺ Camping y aire libre';
+  if(/bicicleta|monopat[ií]n|patineta|cinta de correr|bicicleta fija|pesas|mancuerna/.test(n))return '🚲 Deportes y movilidad';
+  if(/notebook|computad|impresora|pc |teclado|mouse|pendrive|disco|smartwatch|drone/.test(n))return '💻 Informática';
   if(/herramienta|taladro|amoladora|soldador|compresor|motosierra|bordeadora|hidro/.test(n))return '🔧 Herramientas';
-  if(/juguete|mu[nñ]eca|auto a bater|triciclo|pelotero/.test(n))return '🧸 Juguetes';
-  if(/planchita|secador de pelo|afeitad|depilad|cortabarba|cortapelo|cepillo el[eé]ctrico|alisad/.test(n))return '💄 Belleza y cuidado personal';
-  if(/cochecit|coche de beb|cuna|moises|silla de auto|huevito|corralito|andador|mamader|esteriliz/.test(n))return '👶 Bebés';
-  if(/vajilla|olla|sart[eé]n|cacerol|cuberter|cubierto|bater[ií]a de cocina|bazar|copa|vaso|plato|jueg. de t[eé]|mate|termo de acero/.test(n))return '🍺 Bazar y mesa';
+  if(/juguete|mu[nñ]eca|auto a bater|triciclo|tripiclo|pelotero|juego family/.test(n))return '🧸 Juguetes';
+  if(/cochecit|coche de beb|coche con huevito|coche latapy|cuna|moises|silla de auto|huevito|corralito|andador|mamader|esteriliz|pelela/.test(n))return '👶 Bebés';
+  if(/vajilla|olla|sart[eé]n|cacerol|cuberter|cubierto|bater[ií]a de cocina|bazar|copa|vaso|botella|pajita|plato|jueg. de t[eé]|mate|termo de acero/.test(n))return '🍺 Bazar y mesa';
   if(/grupo electr[oó]gen|generador|bater[ií]a|panel solar|ups|inversor|cargador solar|energ[ií]a/.test(n))return '🔋 Energía';
-  if(/casco|cubierta|neum[aá]tic|accesorio auto|accesorio moto|estereo|autoradio|parlante de auto|baul|moto\b/.test(n))return '🚗 Autos y motos';
+  if(/casco|cubierta|neum[aá]tic|accesorio auto|accesorio moto|estereo|autoradio|parlante de auto|baul|moto\b|bater[ií]a argenbat/.test(n))return '🚗 Autos y motos';
   if(/mascota|perro|gato|comeder|bebeder|rascador|jaula|acuario|pecera|correa|alimento balanceado/.test(n))return '🐶 Mascotas';
   if(/consola|playstation|ps4|ps5|xbox|nintendo|joystick|control gamer|silla gamer|volante gamer|headset/.test(n))return '🎮 Gaming';
-  if(/aspiradora robot|robot aspir|mopa|trapead|escoba el[eé]ctric|limpiavidri|art[ií]culo de limpieza|productos de limpieza/.test(n))return '🧹 Limpieza';
-  if(/cortina|alfombra|cuadro|l[aá]mpara|iluminaci[oó]n|deco|adorno|espejo|florero|portarretrato|guirnalda/.test(n))return '🏠 Hogar y deco';
+  if(/cortina|alfombra|cuadro|l[aá]mpara|iluminaci[oó]n|deco|adorno|espejo|florero|portarretrato|guirnalda|grifer[ií]a|vanitorio|ducha|contenedor|chango/.test(n))return '🏠 Hogar y deco';
   return '📦 Otros';
 }
 // lista de categorías disponibles para elegir
-var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV','🔊 Audio','❄️ Heladeras','🧊 Freezers','🍳 Cocina','🔥 Hornos y microondas','🌬️ Aire acondicionado','🔥 Calefacción','🌀 Ventilación','🧺 Lavado','☕ Electro hogar','⚡ Pequeños electro','🛏️ Descanso','🛌 Colchones','🪟 Sommiers','🧵 Blanquería','🪑 Muebles','⛺ Camping y aire libre','🚲 Deportes','💻 Informática','🔌 Cargadores y accesorios','🔧 Herramientas','🧸 Juguetes','💄 Belleza y cuidado personal','🩺 Salud y cuidado','👶 Bebés','🍺 Bazar y mesa','🔋 Energía','🚗 Autos y motos','🐶 Mascotas','🎮 Gaming','🧹 Limpieza','🏠 Hogar y deco','📦 Otros'];
+var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV y video','🔊 Audio','❄️ Refrigeración','🍳 Cocción','🌡️ Climatización','🧺 Lavado','⚡ Pequeños electro','🧹 Limpieza','🛏️ Colchones y sommiers','🧵 Blanquería','🪑 Muebles','🏠 Hogar y deco','🍺 Bazar y mesa','⛺ Camping y aire libre','🚲 Deportes y movilidad','💻 Informática','🔌 Cargadores y accesorios','🔧 Herramientas','🧸 Juguetes','💄 Cuidado personal y salud','👶 Bebés','🔋 Energía','🚗 Autos y motos','🐶 Mascotas','🎮 Gaming','📦 Otros'];
+
+// Convierte las categorías viejas a los nuevos grupos sin tener que editar
+// producto por producto. También evita que vuelvan a aparecer grupos repetidos.
+function tiendaNormalizarCategoria(cat){
+  var mapa={
+    '📺 TV':'📺 TV y video',
+    '❄️ Heladeras':'❄️ Refrigeración',
+    '🧊 Freezers':'❄️ Refrigeración',
+    '🍳 Cocina':'🍳 Cocción',
+    '🔥 Hornos y microondas':'🍳 Cocción',
+    '🌬️ Aire acondicionado':'🌡️ Climatización',
+    '🔥 Calefacción':'🌡️ Climatización',
+    '🌀 Ventilación':'🌡️ Climatización',
+    '☕ Electro hogar':'🧹 Limpieza',
+    '🛏️ Descanso':'🛏️ Colchones y sommiers',
+    '🛌 Colchones':'🛏️ Colchones y sommiers',
+    '🪟 Sommiers':'🛏️ Colchones y sommiers',
+    '🚲 Deportes':'🚲 Deportes y movilidad',
+    '💄 Belleza y cuidado personal':'💄 Cuidado personal y salud',
+    '🩺 Salud y cuidado':'💄 Cuidado personal y salud'
+  };
+  return mapa[cat]||cat||'📦 Otros';
+}
 // categoría efectiva de un producto: la manual si tiene, sino la automática
 /* 🚦 SEMÁFORO DEL PRECIO — cuánto hace que no se actualiza (solo lo ve el admin)
    Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
@@ -2653,7 +2668,16 @@ function tiendaAbrirOpciones(id){
   if(det){ det.open = !det.open; det.scrollIntoView({behavior:'smooth', block:'nearest'}); }
   else { tiendaVerDetalle(id); }
 }
-function catProd(p){ return (p && p.categoria) ? p.categoria : tiendaCategoria(p.nombre); }
+function catProd(p){
+  var cat=tiendaNormalizarCategoria((p && p.categoria) ? p.categoria : tiendaCategoria(p && p.nombre));
+  // Si quedó guardado como "Otros" pero el nombre ahora permite reconocerlo,
+  // se muestra en el grupo correcto inmediatamente.
+  if(cat==='📦 Otros' && p && p.nombre){
+    var detectada=tiendaCategoria(p.nombre);
+    if(detectada!=='📦 Otros') return detectada;
+  }
+  return cat;
+}
 // ===== BÚSQUEDA INTELIGENTE (tolera acentos y errores de tipeo) =====
 // quita acentos, pasa a minúscula, deja solo letras y números
 /* ═══════════════════════════════════════════════════════
@@ -4657,6 +4681,16 @@ function abrirCajonCats(){
 function cerrarCajonCats(){ document.getElementById('cajon-cats').classList.remove('open'); document.body.classList.remove('cajon-cats-abierto'); }
 
 function tiendaFiltrarCat(c){
+  // Una categoría es una navegación nueva: borra cualquier búsqueda previa
+  // tanto del buscador interno como del encabezado.
+  var buscador=document.getElementById('tienda-buscar');
+  var buscadorHeader=document.getElementById('hdr-buscar-input');
+  var sugerencias=document.getElementById('hdr-sugerencias');
+  if(buscador) buscador.value='';
+  if(buscadorHeader) buscadorHeader.value='';
+  if(sugerencias){ sugerencias.style.display='none'; sugerencias.innerHTML=''; }
+  if(typeof _buscarTimer!=='undefined' && _buscarTimer) clearTimeout(_buscarTimer);
+  if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
   var estabaActiva=(tiendaCategoriaActiva===c);
   tiendaCategoriaActiva=(estabaActiva?'':c);
   tiendaRender();
@@ -4952,6 +4986,7 @@ function tiendaVerDetalle(id){
   }else{
     // ADMIN / VENDEDOR: tarjeta simple, SOLO lo que usamos → Compartir y Editar
     html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);" onclick="tiendaDescargarImagenProducto('+pid+')">🖼️ Descargar imagen</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
   }
   // PRODUCTOS RELACIONADOS: misma categoría, hasta 4
@@ -5001,50 +5036,77 @@ function tiendaCargarImagenParaCanvas(url){
     });
 }
 
-// Para las fotos extraídas del catálogo genera una copia cuadrada con fondo
-// blanco y el logo. No modifica la foto guardada ni las imágenes manuales.
+// Para las fotos extraídas del catálogo genera una copia cuadrada. Para los
+// proveedores conserva el formato vertical completo y convierte WebP a JPEG,
+// que WhatsApp reconoce correctamente. No modifica ninguna foto guardada.
 function tiendaBlobParaCompartir(p){
   if(!p || !p.foto)return Promise.reject(new Error('Producto sin foto'));
-  var necesitaComponer=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
+  var esCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
+  var esProveedor=!!p.automaticoProveedor;
+  var necesitaComponer=esCatalogo||esProveedor;
   if(!necesitaComponer){
     return fetch(p.foto).then(function(r){
       if(!r.ok)throw new Error('No se pudo descargar la foto');
       return r.blob();
     });
   }
+  var logoUrl=esCatalogo
+    ? p.fotoCatalogoLogo
+    : 'https://amarangoelectro.com.ar/icon.png';
   return Promise.all([
     tiendaCargarImagenParaCanvas(p.foto),
-    tiendaCargarImagenParaCanvas(p.fotoCatalogoLogo)
+    tiendaCargarImagenParaCanvas(logoUrl)
   ]).then(function(imagenes){
     return new Promise(function(resolve,reject){
       var foto=imagenes[0], logo=imagenes[1];
-      var tam=1080, margen=34;
-      var canvas=document.createElement('canvas');
-      canvas.width=tam; canvas.height=tam;
-      var ctx=canvas.getContext('2d');
-      ctx.fillStyle='#FFFFFF';
-      ctx.fillRect(0,0,tam,tam);
-
       var fw=foto.naturalWidth||foto.width;
       var fh=foto.naturalHeight||foto.height;
-      var escala=Math.min((tam-margen*2)/fw,(tam-margen*2)/fh);
-      var ancho=Math.round(fw*escala);
-      var alto=Math.round(fh*escala);
-      var x=Math.round((tam-ancho)/2);
-      var y=Math.round((tam-alto)/2);
+      var canvas=document.createElement('canvas');
+      var margen, escala, ancho, alto, x, y;
+
+      if(esProveedor){
+        // El flyer del proveedor suele ser vertical: se conserva entero.
+        var maxLado=1600;
+        var escalaLienzo=Math.min(1,maxLado/Math.max(fw,fh));
+        canvas.width=Math.max(1,Math.round(fw*escalaLienzo));
+        canvas.height=Math.max(1,Math.round(fh*escalaLienzo));
+        margen=0;
+        ancho=canvas.width;
+        alto=canvas.height;
+        x=0; y=0;
+      }else{
+        // Las imágenes extraídas del PDF se ven mejor en placa cuadrada.
+        var tam=1080;
+        margen=34;
+        canvas.width=tam;
+        canvas.height=tam;
+        escala=Math.min((tam-margen*2)/fw,(tam-margen*2)/fh);
+        ancho=Math.round(fw*escala);
+        alto=Math.round(fh*escala);
+        x=Math.round((tam-ancho)/2);
+        y=Math.round((tam-alto)/2);
+      }
+
+      var ctx=canvas.getContext('2d');
+      ctx.fillStyle='#FFFFFF';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
       ctx.imageSmoothingEnabled=true;
       ctx.imageSmoothingQuality='high';
       ctx.drawImage(foto,x,y,ancho,alto);
 
-      var logoTam=180;
-      var logoX=tam-logoTam-28;
-      var logoY=tam-logoTam-28;
+      var menor=Math.min(canvas.width,canvas.height);
+      var logoTam=esProveedor
+        ? Math.max(76,Math.min(145,Math.round(menor*0.13)))
+        : Math.max(90,Math.min(180,Math.round(menor*0.17)));
+      var separacion=Math.max(16,Math.round(menor*0.026));
+      var logoX=canvas.width-logoTam-separacion;
+      var logoY=canvas.height-logoTam-separacion;
       ctx.save();
       ctx.shadowColor='rgba(0,0,0,.22)';
-      ctx.shadowBlur=18;
+      ctx.shadowBlur=Math.max(10,Math.round(logoTam*0.1));
       ctx.fillStyle='rgba(255,255,255,.96)';
       ctx.beginPath();
-      ctx.arc(logoX+logoTam/2,logoY+logoTam/2,logoTam/2+5,0,Math.PI*2);
+      ctx.arc(logoX+logoTam/2,logoY+logoTam/2,logoTam/2+4,0,Math.PI*2);
       ctx.fill();
       ctx.restore();
       ctx.drawImage(logo,logoX,logoY,logoTam,logoTam);
@@ -5072,6 +5134,35 @@ function tiendaArchivoCompartible(blob,p){
   );
 }
 
+// Alternativa para computadoras o aplicaciones que no aceptan compartir
+// archivos: descarga la misma imagen lista para enviar.
+function tiendaDescargarBlobProducto(blob,p){
+  var archivo=tiendaArchivoCompartible(blob,p);
+  var url=URL.createObjectURL(archivo);
+  var enlace=document.createElement('a');
+  enlace.href=url;
+  enlace.download=archivo.name;
+  enlace.style.display='none';
+  document.body.appendChild(enlace);
+  enlace.click();
+  setTimeout(function(){
+    URL.revokeObjectURL(url);
+    if(enlace.parentNode)enlace.parentNode.removeChild(enlace);
+  },1200);
+}
+function tiendaDescargarImagenProducto(id){
+  var p=buscarProd(id);
+  if(!p || !p.foto){ alert('Este producto todavía no tiene imagen.'); return; }
+  tiendaBlobParaCompartir(p)
+    .then(function(blob){
+      tiendaDescargarBlobProducto(blob,p);
+      mostrarToast('✅ Imagen lista para enviar');
+    })
+    .catch(function(){
+      alert('No pude preparar la imagen. Probá nuevamente con conexión a internet.');
+    });
+}
+
 // Compartir un producto: arma el mensaje lindo AmarangoElectro y comparte (con foto si se puede)
 function compartirProducto(id){
   var p=buscarProd(id);
@@ -5091,6 +5182,8 @@ function compartirProducto(id){
         if(navigator.canShare && navigator.canShare({files:[file]})){
           return navigator.share({ files:[file], text:msg });
         }else{
+          tiendaDescargarBlobProducto(blob,p);
+          mostrarToast('🖼️ La imagen se descargó para que puedas adjuntarla');
           return navigator.share({ text:msg }); // sin foto
         }
       })

@@ -1,6 +1,6 @@
-# Redirecciones de AmarangoElectro (Netlify)
-# El link viejo /calculadora.html sigue funcionando y lleva a la home (la tienda)
-/calculadora.html   /   301
-/calculadora        /   301
-# Atajo lindo por si querés compartir /tienda
-/tienda             /   301
+# AmarangoElectro: index.html es la única tienda principal.
+# El signo ! obliga la redirección aunque todavía exista el archivo antiguo.
+/calculadora.html   /   301!
+/calculadora        /   301!
+/index.html         /   301!
+/tienda             /   301!
