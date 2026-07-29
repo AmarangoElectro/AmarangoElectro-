@@ -4889,18 +4889,15 @@ function tiendaVerDetalle(id){
   var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
   // acciones
   if(!esVend){
+    // CLIENTE: comprar / carrito / consultar (esto sí le sirve a quien compra)
     html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);font-weight:900;padding:15px;font-size:.92rem;box-shadow:0 4px 14px rgba(255,122,0,.35);" onclick="tiendaComprar('+pid+')">🛒 Comprar ahora</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--bor);" onclick="agregarAlCarrito('+pid+')">➕ Agregar al carrito</button>';
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 Consultá este producto</button>';
+    // el cliente también puede compartir (sin cuotas): marketing
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--bor);" onclick="compartirProducto('+pid+', true)">📤 Compartir este producto</button>';
   }else{
-    html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);" onclick="agregarAlCarrito('+pid+')">🛒 Agregar al carrito</button>';
-  }
-  html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
-  if(esVend){
-    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);color:#fff;border:2px solid var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
-    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
-  }
-  // en modo admin: botón editar dentro del detalle
-  if(tiendaEsAdmin){
+    // ADMIN / VENDEDOR: tarjeta simple, SOLO lo que usamos → Compartir y Editar
+    html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
   }
   // PRODUCTOS RELACIONADOS: misma categoría, hasta 4
