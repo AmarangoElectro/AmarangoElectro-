@@ -675,6 +675,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <div id="tienda-selec-bar" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:1450;background:var(--wh);border-top:2px solid var(--nar);box-shadow:0 -4px 16px rgba(0,0,0,.18);padding:10px 14px;gap:8px;align-items:center;">
       <div style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);"><span id="selec-count">0</span> seleccionado(s)</div>
       <button onclick="tiendaCancelarSelec()" style="font-size:.72rem;padding:9px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit;">Cancelar</button>
+      <button id="btn-ocultar-varios" onclick="tiendaOcultarVarios(true)" style="display:none;font-size:.72rem;padding:9px 11px;background:#6b7280;color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">🙈 Ocultar</button>
+      <button id="btn-mostrar-varios" onclick="tiendaOcultarVarios(false)" style="display:none;font-size:.72rem;padding:9px 11px;background:var(--gr);color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">👁️ Mostrar</button>
       <button onclick="tiendaCompartirVarios()" style="font-size:.75rem;padding:9px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">📤 Compartir</button>
     </div>
 
@@ -4240,7 +4242,14 @@ function subirFotoStorage(blob, fid){
         if(celus[i]){ celus[i].foto=url; try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){} subirCelusNube(celus); guardarFotoBanco(celus[i].nombre, url); }
       }else{
         var p=tiendaProductos.find(function(x){return x.id==fid;});
-        if(p){ p.foto=url; tiendaGuardarLocal(); }
+        if(p){
+          p.foto=url;
+          // 🧹 al poner tu propia foto, dejar de tratarla como foto de catálogo:
+          // así se muestra tapando TODO (cover, sin bordes) y sin el logo encima.
+          delete p.fotoOrigen;
+          delete p.fotoCatalogoLogo;
+          tiendaGuardarLocal();
+        }
       }
       tiendaRender();
       // volver a la tarjeta del producto editado (no saltar al principio)
@@ -4269,6 +4278,12 @@ function tiendaQuitarFoto(id){
 }
 
 // EDITAR completo (solo admin): nombre, costo↔venta, categoría, características
+// devuelve <option> de todos los mayoristas ya usados (para autocompletar)
+function _sugerenciasMayoristas(){
+  var usados={};
+  tiendaProductos.forEach(function(p){ if(p&&p.mayorista) usados[p.mayorista]=true; });
+  return Object.keys(usados).sort().map(function(m){ return '<option value="'+m.replace(/"/g,'&quot;')+'">'; }).join('');
+}
 function tiendaEditarPrecio(id){
   var p=buscarProd(id);
   if(!p)return;
@@ -4291,6 +4306,9 @@ function tiendaEditarPrecio(id){
     +'<select id="edit-cat" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     + TIENDA_CATEGORIAS.map(function(c){ return '<option value="'+c+'"'+(catProd(p)===c?' selected':'')+'>'+c+'</option>'; }).join('')
     +'</select>'
+    +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">🏪 MAYORISTA</div>'
+    +'<input id="edit-mayorista" list="lista-mayoristas-edit" value="'+(p.mayorista||'').replace(/"/g,'&quot;')+'" placeholder="Ej: Stagliano, Galiano, Cachi..." autocomplete="off" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
+    +'<datalist id="lista-mayoristas-edit">'+_sugerenciasMayoristas()+'</datalist>'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">CARACTERÍSTICAS (pegá acá)</div>'
     +'<textarea id="edit-carac" rows="6" placeholder="Pegá las características del producto..." style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-size:.82rem;margin-bottom:14px;">'+(p.caracteristicas||'').replace(/</g,'&lt;')+'</textarea>'
     +'<button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaGuardarPrecios()">✅ Guardar</button>'
@@ -4324,6 +4342,8 @@ function tiendaGuardarPrecios(){
   var nombre=(document.getElementById('edit-nombre').value||'').trim();
   var cat=document.getElementById('edit-cat').value;
   var carac=(document.getElementById('edit-carac').value||'').trim();
+  var mayEl=document.getElementById('edit-mayorista');
+  var mayorista=mayEl?(mayEl.value||'').trim():'';
 
   if(window._tiendaEditEsCelu){
     // editar un celular: se guarda en la lista de celulares
@@ -4346,10 +4366,12 @@ function tiendaGuardarPrecios(){
       }
       p.costo=Math.round(costo); p.venta=Math.round(venta);
       p.categoria=cat; p.caracteristicas=carac;
+      p.mayorista=mayorista; // 🏪 mayorista editable
       tiendaGuardarLocal();
     }
   }
   document.getElementById('modal-cuotas').style.display='none';
+  try{ tiendaSubirNube(); }catch(e){}
   tiendaRender();
 }
 
@@ -4570,7 +4592,12 @@ function abrirCajonCats(){
   var html='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" onclick="tiendaFiltrarCat(\'\');cerrarCajonCats();"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
   Object.keys(cats).sort().forEach(function(c){
     var on=tiendaCategoriaActiva===c;
-    html+='<div class="cat-tile'+(on?' on':'')+'" onclick="tiendaFiltrarCat(\''+c.replace(/'/g,"\\'")+'\');cerrarCajonCats();"><span class="cat-tile-ic">'+ic(c)+'</span><span class="cat-tile-txt">'+tx(c)+' ('+cats[c]+')</span></div>';
+    // ¿cuántos de esta categoría están visibles? para saber si mostrar 🙈 o 👁️
+    var visiblesCat=0, totalCat=0;
+    tiendaProductos.forEach(function(p){ if(catProd(p)===c){ totalCat++; if(p.visible!==false)visiblesCat++; } });
+    var todosOcultos = totalCat>0 && visiblesCat===0;
+    var btnOcultar = tiendaEsAdmin ? '<button onclick="event.stopPropagation();tiendaOcultarCategoria(\''+c.replace(/'/g,"\\'")+'\','+(todosOcultos?'false':'true')+')" style="position:absolute;top:2px;right:2px;background:'+(todosOcultos?'var(--gr)':'#6b7280')+';color:#fff;border:none;border-radius:6px;font-size:.6rem;padding:2px 5px;font-weight:800;cursor:pointer;z-index:2;" title="'+(todosOcultos?'Mostrar categoría':'Ocultar categoría')+'">'+(todosOcultos?'👁️':'🙈')+'</button>' : '';
+    html+='<div class="cat-tile'+(on?' on':'')+'" style="position:relative;" onclick="tiendaFiltrarCat(\''+c.replace(/'/g,"\\'")+'\');cerrarCajonCats();">'+btnOcultar+'<span class="cat-tile-ic">'+ic(c)+'</span><span class="cat-tile-txt">'+tx(c)+' ('+cats[c]+')</span></div>';
   });
   document.getElementById('cajon-cats-grid').innerHTML=html;
   document.getElementById('cajon-cats').classList.add('open');
@@ -5106,6 +5133,9 @@ function tiendaToggleModoSelec(){
   if(!tiendaModoSelec)tiendaSelecSet={};
   var bar=document.getElementById('tienda-selec-bar');
   if(bar)bar.style.display=tiendaModoSelec?'flex':'none';
+  var bo=document.getElementById('btn-ocultar-varios'), bm=document.getElementById('btn-mostrar-varios');
+  if(bo)bo.style.display=(tiendaModoSelec && tiendaEsAdmin)?'inline-block':'none';
+  if(bm)bm.style.display=(tiendaModoSelec && tiendaEsAdmin)?'inline-block':'none';
   var btn=document.getElementById('btn-modo-selec');
   if(btn)btn.style.background=tiendaModoSelec?'var(--nar)':'var(--wh)';
   tiendaActualizarSelecCount();
@@ -5126,6 +5156,49 @@ function tiendaToggleSelec(id){
 function tiendaActualizarSelecCount(){
   var n=Object.keys(tiendaSelecSet).length;
   var el=document.getElementById('selec-count'); if(el)el.textContent=n;
+}
+
+// 🙈 OCULTAR / 👁️ MOSTRAR varios productos seleccionados de una (solo admin).
+// Ocultar = deja de verlo el cliente, pero el producto SIGUE guardado en admin.
+function tiendaOcultarVarios(ocultar){
+  if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede ocultar productos.'); return; }
+  var ids=Object.keys(tiendaSelecSet);
+  if(!ids.length){ alert('Primero tocá "Seleccionar" en los productos que querés '+(ocultar?'ocultar':'mostrar')+'.'); return; }
+  var vis=!ocultar;
+  var cont=0;
+  // productos propios
+  tiendaProductos.forEach(function(p){ if(tiendaSelecSet[p.id]){ p.visible=vis; cont++; } });
+  // celulares (usan ocultoTienda)
+  var celus=cargarListaCelus(), tocoCelu=false;
+  ids.forEach(function(id){
+    if((''+id).indexOf('celu_')===0){
+      var i=parseInt((''+id).replace('celu_',''),10);
+      if(celus[i]){ celus[i].ocultoTienda=ocultar; cont++; tocoCelu=true; }
+    }
+  });
+  if(tocoCelu){ try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
+  tiendaCancelarSelec();
+  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaRender();
+  mostrarToast('✅ '+cont+' producto'+(cont===1?'':'s')+(ocultar?' ocultado'+(cont===1?'':'s')+' (siguen en admin)':' visible'+(cont===1?'':'s')+' de nuevo'));
+}
+
+// 📂 OCULTAR / MOSTRAR una CATEGORÍA COMPLETA de una (desde el cajón, solo admin)
+function tiendaOcultarCategoria(cat, ocultar){
+  if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede ocultar categorías.'); return; }
+  var vis=!ocultar;
+  var cont=0;
+  tiendaProductos.forEach(function(p){ if(catProd(p)===cat){ p.visible=vis; cont++; } });
+  // celulares si la categoría es Celulares
+  if(cat==='📱 Celulares'){
+    var celus=cargarListaCelus();
+    celus.forEach(function(c){ c.ocultoTienda=ocultar; cont++; });
+    try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){}
+    subirCelusNube(celus);
+  }
+  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  cerrarCajonCats(); tiendaRender();
+  mostrarToast('✅ Categoría "'+cat+'": '+cont+' producto'+(cont===1?'':'s')+(ocultar?' ocultado'+(cont===1?'':'s'):' visible'+(cont===1?'':'s')));
 }
 // arma el texto combinado de todos los productos elegidos
 function tiendaTextoVarios(prods){
