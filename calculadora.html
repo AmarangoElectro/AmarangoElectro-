@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+<!-- ARCHIVO CORRECTO AMARANGO: v-PROVEEDORES-SEGURO + LOGO DE CATÁLOGO -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>Tienda AmarangoElectro 🐝🛒 [v-CAJON]</title>
+<title>Tienda AmarangoElectro 🐝🛒 [v-PROVEEDORES-SEGURO]</title>
 <meta name="theme-color" content="#0B2D6B">
 <meta name="description" content="Electrodomésticos y celulares en cuotas fijas. TV, celulares, heladeras, cocina, lavado y mucho más. Mínimos requisitos y atención personalizada.">
 
@@ -2227,12 +2228,53 @@ function tiendaDiagNube(){
     .catch(function(e){ alert('⚠️ Excepción: '+(e.message||e)+'\n\n'+r); });
 }
 
+// Guarda el catálogo sin perder los productos automáticos de proveedores.
+// Si una pestaña vieja todavía tiene sólo los productos manuales, primero
+// recupera los automáticos de la nube y recién después guarda la mezcla.
+function tiendaClaveProveedor(p){
+  if(!p || !p.automaticoProveedor) return '';
+  return String(p.proveedorClave||p.proveedor||'')+'|'+String(p.proveedorId||p.id||'');
+}
+function tiendaMezclarAutomaticosNube(datosNube){
+  var locales=Array.isArray(tiendaProductos)?tiendaProductos:[];
+  var nube=Array.isArray(datosNube)?datosNube:[];
+  var manuales=locales.filter(function(p){ return !p || !p.automaticoProveedor; });
+  var automaticos={};
+
+  // La nube es la red de seguridad cuando la pestaña local está desactualizada.
+  nube.forEach(function(p){
+    var clave=tiendaClaveProveedor(p);
+    if(clave) automaticos[clave]=p;
+  });
+  // Si el automático también está en la pestaña actual, conserva cambios
+  // voluntarios del administrador, por ejemplo ocultarlo manualmente.
+  locales.forEach(function(p){
+    var clave=tiendaClaveProveedor(p);
+    if(clave) automaticos[clave]=p;
+  });
+
+  return manuales.concat(Object.keys(automaticos).map(function(k){ return automaticos[k]; }));
+}
+function tiendaSubirNube(){
+  if(!NUBE_OK||!sbCalc) return Promise.resolve({data:null,error:null});
+  return sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+    .then(function(res){
+      if(res && res.error) return res;
+      var datosNube=(res && res.data && Array.isArray(res.data.datos))?res.data.datos:[];
+      tiendaProductos=tiendaMezclarAutomaticosNube(datosNube);
+      try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+      return sbCalc.from('tienda_catalogo')
+        .upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() })
+        .select();
+    });
+}
+
 // Fuerza subir TODO (productos + celulares) a la nube
 function tiendaForzarSubir(){
   if(!NUBE_OK||!sbCalc){ alert('Sin conexión a la nube.'); return; }
   var celus=cargarListaCelus();
   Promise.all([
-    sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).select(),
+    tiendaSubirNube(),
     sbCalc.from('celulares_lista').upsert({ id:'lista', datos:celus, actualizado:new Date().toISOString() }).select()
   ]).then(function(res){
     var e1=res[0].error, e2=res[1].error;
@@ -2401,7 +2443,7 @@ function tiendaGuardarLocal(){
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
   // subir a la nube (para que lo vean todos)
   if(NUBE_OK && sbCalc){
-    sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){});
+    tiendaSubirNube().then(function(){}).catch(function(){});
   }
 }
 
@@ -3951,11 +3993,14 @@ function tiendaCardsHtml(sublista){
       etiquetas+='<div class="lujo-badge" style="margin:0;">✦ PREMIUM</div>';
     }
 
+    var fotoDeCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf');
+    var logoFotoCatalogo=(fotoDeCatalogo && p.fotoCatalogoLogo)?String(p.fotoCatalogoLogo):'';
     card+='<div style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<img class="prod-foto" loading="lazy" decoding="async" src="'+fotoOpt(p.foto,400).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:cover;background:#fff;cursor:pointer;display:block;">'
+        ? '<img class="prod-foto" loading="lazy" decoding="async" src="'+fotoOpt(p.foto,400).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:'+(fotoDeCatalogo?'contain':'cover')+';background:#fff;cursor:pointer;display:block;">'
           +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
+      +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="position:absolute;top:7px;right:7px;background:rgba(255,255,255,.94);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);line-height:1;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>';
@@ -4730,7 +4775,12 @@ function tiendaVerDetalle(id){
   window._tiendaPedirId=id;
   var html='';
   if(p.foto){
-    html+='<img src="'+p.foto+'" onclick="abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="width:100%;border-radius:14px;margin-bottom:14px;display:block;cursor:pointer;box-shadow:0 4px 16px rgba(11,45,107,.12);">';
+    var detalleFotoCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf');
+    var detalleLogo=(detalleFotoCatalogo && p.fotoCatalogoLogo)?String(p.fotoCatalogoLogo):'';
+    html+='<div style="position:relative;margin-bottom:14px;">'
+      +'<img src="'+p.foto+'" onclick="abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="width:100%;max-height:430px;object-fit:'+(detalleFotoCatalogo?'contain':'cover')+';border-radius:14px;display:block;cursor:pointer;box-shadow:0 4px 16px rgba(11,45,107,.12);background:#fff;">'
+      +(detalleLogo?'<img src="'+detalleLogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;right:10px;bottom:10px;width:64px;height:64px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.93);padding:3px;box-shadow:0 2px 10px rgba(0,0,0,.2);pointer-events:none;">':'')
+      +'</div>';
   }else{
     html+='<div style="font-size:3rem;text-align:center;margin-bottom:8px;">'+catProd(p).split(' ')[0]+'</div>';
   }
@@ -6394,7 +6444,7 @@ function tiendaLimpiarDuplicados(){
   var despues=tiendaProductos.length;
   // guardar y subir (usa las mismas funciones que la carga normal)
   try{ tiendaGuardarLocal(); }catch(e){}
-  try{ if(typeof tiendaSubirNube==='function') tiendaSubirNube(); else if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({ id:'catalogo', datos:tiendaProductos, actualizado:new Date().toISOString() }).then(function(){}).catch(function(){}); } }catch(e){}
+  try{ tiendaSubirNube(); }catch(e){}
   try{ tiendaRender(); }catch(e){}
   alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
 }
