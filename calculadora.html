@@ -798,6 +798,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaBackup()">💾 Descargar backup (respaldo)</button>
     <button class="calc-btn" style="width:100%;background:#e11d48;margin-top:8px;"
       onclick="tiendaLimpiarDuplicados()">🧹 Limpiar productos duplicados</button>
+    <button class="calc-btn" style="width:100%;background:var(--az);margin-top:8px;"
+      onclick="tiendaReclasificarOtros()">🏷️ Reordenar productos de "Otros" en categorías</button>
     <button id="tienda-btn-restore" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--az);border:2px solid var(--az);"
       onclick="tiendaRestaurarAbrir()">📂 Restaurar backup</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
@@ -2585,23 +2587,31 @@ function tiendaPapeleraVaciar(){
 function tiendaCategoria(nombre){
   var n=(nombre||'').toLowerCase();
   if(/samsung|motorola|xiaomi|iphone|celular|smartphone|tablet/.test(n))return '📱 Celulares';
-  if(/heladera|freezer|frio|cervecer/.test(n))return '❄️ Heladeras';
-  if(/cocina|anafe|horno|microonda|campana/.test(n))return '🍳 Cocina';
+  if(/cargador|cable usb|auricular bluetooth|power ?bank|funda|vidrio templado|soporte celular|adaptador|tarjeta sd|memoria micro/.test(n))return '🔌 Cargadores y accesorios';
+  if(/freezer|conservadora el[eé]ctric|congelador|cervecer/.test(n))return '🧊 Freezers';
+  if(/heladera|frio/.test(n))return '❄️ Heladeras';
+  if(/horno el[eé]ctric|microonda|horno delhi|horno pizzero|tostadora horno/.test(n))return '🔥 Hornos y microondas';
+  if(/cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocina';
   if(/\btv\b|televis|smart ?tv|tcl|monitor|proyector/.test(n))return '📺 TV';
   if(/parlante|bafle|torre de sonido|soundbar|sound bar|barra de sonido|auricular|audio|equipo de m[uú]sica|karaoke|aiwa|jbl/.test(n))return '🔊 Audio';
   if(/aire acond|split|portatil frio|frio.?calor/.test(n))return '🌬️ Aire acondicionado';
-  if(/estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|hervidor/.test(n))return '🔥 Calefacción';
+  if(/estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|sirena/.test(n))return '🔥 Calefacción';
   if(/ventilador|turbo|circulador|extractor/.test(n))return '🌀 Ventilación';
   if(/lavarrop|secarrop|lavavaj|centrifug/.test(n))return '🧺 Lavado';
-  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich|multiproces|jugueta|exprimidor|waflera|plancha|aspirador|hidrolav|enceradora/.test(n))return '☕ Electro hogar';
-  if(/colch[oó]n|sommier|almohada|s[aá]bana|acolchad|frazada|manta|cubrecama|juego de cama/.test(n))return '🛏️ Descanso';
+  if(/colch[oó]n/.test(n))return '🛌 Colchones';
+  if(/sommier|somier|sonier/.test(n))return '🪟 Sommiers';
+  if(/s[aá]bana|acolchad|frazada|manta|cubrecama|juego de cama|almohad|blanquer[ií]a|toalla|toall[oó]n|cortina de ba[nñ]o/.test(n))return '🧵 Blanquería';
+  if(/nebulizad|tensi[oó]metro|term[oó]metro|oxímetro|oximetro|inhalador|masajead|balanza digital|salud/.test(n))return '🩺 Salud y cuidado';
+  if(/termo|pava|cafeter|licuad|batidor|freidora|yogurt|tostad|sandwich|multiproces|exprimidor|waflera|plancha|hervidor/.test(n))return '⚡ Pequeños electro';
+  if(/aspirador|hidrolav|enceradora|lustraspiradora/.test(n))return '☕ Electro hogar';
+  if(/almohada/.test(n))return '🛏️ Descanso';
   if(/mueble|ropero|placard|c[oó]moda|mesa|silla|sill[oó]n|estanter|biblioteca|escritorio|rack|modular|respaldo/.test(n))return '🪑 Muebles';
   if(/carpa|reposera|pileta|camping|conservadora|bolso t[eé]rmico|gazebo|sombrilla|inflable/.test(n))return '⛺ Camping y aire libre';
   if(/bicicleta|monopat[ií]n|patineta|cinta de correr|bicicleta fija|pesas|mancuerna/.test(n))return '🚲 Deportes';
   if(/notebook|computad|impresora|pc |teclado|mouse|pendrive|disco/.test(n))return '💻 Informática';
   if(/herramienta|taladro|amoladora|soldador|compresor|motosierra|bordeadora|hidro/.test(n))return '🔧 Herramientas';
   if(/juguete|mu[nñ]eca|auto a bater|triciclo|pelotero/.test(n))return '🧸 Juguetes';
-  if(/planchita|secador de pelo|afeitad|depilad|cortabarba|cortapelo|masajead|balanza|b[aá]scula|cepillo el[eé]ctrico|alisad/.test(n))return '💄 Belleza y cuidado personal';
+  if(/planchita|secador de pelo|afeitad|depilad|cortabarba|cortapelo|cepillo el[eé]ctrico|alisad/.test(n))return '💄 Belleza y cuidado personal';
   if(/cochecit|coche de beb|cuna|moises|silla de auto|huevito|corralito|andador|mamader|esteriliz/.test(n))return '👶 Bebés';
   if(/vajilla|olla|sart[eé]n|cacerol|cuberter|cubierto|bater[ií]a de cocina|bazar|copa|vaso|plato|jueg. de t[eé]|mate|termo de acero/.test(n))return '🍺 Bazar y mesa';
   if(/grupo electr[oó]gen|generador|bater[ií]a|panel solar|ups|inversor|cargador solar|energ[ií]a/.test(n))return '🔋 Energía';
@@ -2613,7 +2623,7 @@ function tiendaCategoria(nombre){
   return '📦 Otros';
 }
 // lista de categorías disponibles para elegir
-var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV','🔊 Audio','❄️ Heladeras','🍳 Cocina','🌬️ Aire acondicionado','🔥 Calefacción','🌀 Ventilación','🧺 Lavado','☕ Electro hogar','🛏️ Descanso','🪑 Muebles','⛺ Camping y aire libre','🚲 Deportes','💻 Informática','🔧 Herramientas','🧸 Juguetes','💄 Belleza y cuidado personal','👶 Bebés','🍺 Bazar y mesa','🔋 Energía','🚗 Autos y motos','🐶 Mascotas','🎮 Gaming','🧹 Limpieza','🏠 Hogar y deco','📦 Otros'];
+var TIENDA_CATEGORIAS=['📱 Celulares','📺 TV','🔊 Audio','❄️ Heladeras','🧊 Freezers','🍳 Cocina','🔥 Hornos y microondas','🌬️ Aire acondicionado','🔥 Calefacción','🌀 Ventilación','🧺 Lavado','☕ Electro hogar','⚡ Pequeños electro','🛏️ Descanso','🛌 Colchones','🪟 Sommiers','🧵 Blanquería','🪑 Muebles','⛺ Camping y aire libre','🚲 Deportes','💻 Informática','🔌 Cargadores y accesorios','🔧 Herramientas','🧸 Juguetes','💄 Belleza y cuidado personal','🩺 Salud y cuidado','👶 Bebés','🍺 Bazar y mesa','🔋 Energía','🚗 Autos y motos','🐶 Mascotas','🎮 Gaming','🧹 Limpieza','🏠 Hogar y deco','📦 Otros'];
 // categoría efectiva de un producto: la manual si tiene, sino la automática
 /* 🚦 SEMÁFORO DEL PRECIO — cuánto hace que no se actualiza (solo lo ve el admin)
    Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
@@ -4028,7 +4038,7 @@ function tiendaCardsHtml(sublista){
     card+=''
       +badgePrecioFecha(p)
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
-      +((tiendaEsAdmin && p.mayorista)?'<div style="font-size:.58rem;font-weight:800;color:#7c3aed;background:#f3ecff;border:1px solid #e0ccff;border-radius:6px;padding:2px 6px;margin-bottom:3px;display:inline-block;">🏪 '+p.mayorista+'</div>':'')
+      +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.58rem;font-weight:800;color:'+cm.txt+';background:'+cm.bg+';border:1px solid '+cm.bor+';border-radius:6px;padding:2px 6px;margin-bottom:3px;display:inline-block;">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
@@ -4279,6 +4289,42 @@ function tiendaQuitarFoto(id){
 
 // EDITAR completo (solo admin): nombre, costo↔venta, categoría, características
 // devuelve <option> de todos los mayoristas ya usados (para autocompletar)
+// 🎨 devuelve un color fijo y único por mayorista (mismo nombre = mismo color siempre).
+// Genera un tono a partir del texto, así cada mayorista se distingue de un vistazo.
+function colorMayorista(nombre){
+  var s=(nombre||'').toLowerCase().trim();
+  var h=0;
+  for(var i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i)) % 360; }
+  // color saturado y oscuro para el texto/borde, y una versión clarita para el fondo
+  return { txt:'hsl('+h+',70%,38%)', bg:'hsl('+h+',75%,95%)', bor:'hsl('+h+',60%,82%)' };
+}
+// 🏷️ reordena los productos que quedaron en "Otros" (o sin categoría) usando la
+// detección por nombre. Solo mueve los que la detección ubica en algo mejor.
+function tiendaReclasificarOtros(){
+  if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede reordenar categorías.'); return; }
+  var plan=[], ejemplos=[];
+  tiendaProductos.forEach(function(p){
+    if(p.esCelu) return;
+    var actual = p.categoria || tiendaCategoria(p.nombre);
+    if(actual==='📦 Otros' || !p.categoria){
+      var detectada = tiendaCategoria(p.nombre);
+      if(detectada && detectada!=='📦 Otros' && detectada!==p.categoria){
+        plan.push({p:p, cat:detectada});
+        if(ejemplos.length<10) ejemplos.push(p.nombre+' → '+detectada);
+      }
+    }
+  });
+  if(!plan.length){ alert('No encontré productos de "Otros" que pueda reordenar por su nombre.\n\nLos que quedan ahí podés moverlos a mano editando cada uno.'); return; }
+  var msg='🏷️ Puedo reordenar '+plan.length+' producto(s) que estaban en "Otros":\n\n• '+ejemplos.join('\n• ');
+  if(plan.length>10) msg+='\n• ...y '+(plan.length-10)+' más';
+  msg+='\n\n¿Los reordeno?';
+  if(!confirm(msg)) return;
+  try{ tiendaBackupAuto(); }catch(e){}
+  plan.forEach(function(x){ x.p.categoria=x.cat; });
+  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaRender();
+  mostrarToast('✅ '+plan.length+' producto'+(plan.length===1?'':'s')+' reordenado'+(plan.length===1?'':'s'));
+}
 function _sugerenciasMayoristas(){
   var usados={};
   tiendaProductos.forEach(function(p){ if(p&&p.mayorista) usados[p.mayorista]=true; });
