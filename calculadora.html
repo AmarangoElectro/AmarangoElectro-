@@ -675,6 +675,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <div id="tienda-selec-bar" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:1450;background:var(--wh);border-top:2px solid var(--nar);box-shadow:0 -4px 16px rgba(0,0,0,.18);padding:10px 14px;gap:8px;align-items:center;">
       <div style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);"><span id="selec-count">0</span> seleccionado(s)</div>
       <button onclick="tiendaCancelarSelec()" style="font-size:.72rem;padding:9px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit;">Cancelar</button>
+      <button id="btn-mover-cat" onclick="tiendaMoverVariosCategoria()" style="display:none;font-size:.72rem;padding:9px 12px;background:var(--az);color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">📂 Mover a…</button>
       <button onclick="tiendaCompartirVarios()" style="font-size:.75rem;padding:9px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">📤 Compartir</button>
     </div>
 
@@ -3961,7 +3962,7 @@ function tiendaCardsHtml(sublista){
     var selMarcado=tiendaSelecSet[p.id];
     var fadeClass = tiendaYaAnimo ? '' : ' card-fade';
     var delay=tiendaYaAnimo ? 0 : Math.min(_idx*40, 400); // fade escalonado (tope 0.4s)
-    var card='<div class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+    var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
     // modo compartir varios: casilla de selección (para todos)
     if(tiendaModoSelec){
@@ -4102,8 +4103,11 @@ function tiendaCardsHtml(sublista){
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
-        +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
+        // 🔄 REEMPLAZAR: sube la foto nueva ENCIMA (upsert). Nunca deja el
+        // producto sin foto, así no "se pierde" ni te saca de la tarjeta.
+        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarFoto('+pid+')">'+(p.foto?'🔄 Reemplazar':'🖼️ Foto')+'</button>'
+        +(p.foto?'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaQuitarFoto('+pid+')" title="Quitar foto">🚫🖼️</button>':'')
+        +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')" title="Eliminar producto">🗑️</button>')
       +'</div>'
       +'<div style="display:flex;gap:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
@@ -4116,6 +4120,10 @@ function tiendaCardsHtml(sublista){
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
         card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')">📤 Compartir</button>';
+      }else{
+        // 🎯 CLIENTE: comparte foto + nombre + link, SIN cuotas ni precio.
+        // Así difunde el producto y el que recibe entra a la tienda a ver el precio.
+        card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+', true)">📤 Compartir</button>';
       }
     }
     card+='</div>';
@@ -4231,7 +4239,14 @@ function subirFotoStorage(blob, fid){
         if(p){ p.foto=url; tiendaGuardarLocal(); }
       }
       tiendaRender();
-      alert('✅ Foto subida a la nube. Ahora la ven todos.');
+      // volver a la tarjeta del producto que acabo de editar (no saltar arriba)
+      setTimeout(function(){
+        try{
+          var card=document.getElementById('card-'+fid);
+          if(card){ card.scrollIntoView({behavior:'smooth', block:'center'}); card.style.transition='box-shadow .3s'; card.style.boxShadow='0 0 0 3px var(--nar)'; setTimeout(function(){ card.style.boxShadow=''; }, 1400); }
+        }catch(e){}
+      }, 150);
+      alert('✅ Foto actualizada. Ahora la ven todos.');
     })
     .catch(function(e){ alert('⚠️ Excepción al subir foto: '+(e.message||e)); });
 }
@@ -4849,6 +4864,10 @@ function tiendaVerDetalle(id){
     html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--nar);" onclick="agregarAlCarrito('+pid+')">🛒 Agregar al carrito</button>';
   }
   html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:#25D366;" onclick="tiendaPedirWA('+pid+')">📲 '+(esVend?'Pedir / Consultar':'Consultá este producto')+'</button>';
+  if(!esVend){
+    // 🎯 CLIENTE: compartir sin cuotas ni precio (foto + nombre + link)
+    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--bor);" onclick="compartirProducto('+pid+', true)">📤 Compartir este producto</button>';
+  }
   if(esVend){
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);color:#fff;border:2px solid var(--nar);" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
@@ -4977,14 +4996,22 @@ function tiendaArchivoCompartible(blob,p){
 }
 
 // Compartir un producto: arma el mensaje lindo AmarangoElectro y comparte (con foto si se puede)
-function compartirProducto(id){
+// modoCliente=true → mensaje SIN cuotas ni precio (solo foto + nombre + link).
+// Sirve para que los CLIENTES difundan y el que recibe entre a la tienda a ver el precio.
+function compartirProducto(id, modoCliente){
   var p=buscarProd(id);
   if(!p)return;
-  var cuotasLines=armarCuotasLines(p.venta, p);
   // link que abre la tienda mostrando ESTE producto
   var base=window.location.href.split('#')[0].split('?')[0];
   var linkProd=base+'?prod='+encodeURIComponent(id);
-  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines, null)+"\n\n🛒 Míralo acá: "+linkProd;
+  var msg;
+  if(modoCliente){
+    // 🎯 marketing: solo nombre + link. El precio se ve entrando a la tienda.
+    msg='*'+(p.nombre||'PRODUCTO').toUpperCase()+'* 🐝\n\n👉 Míralo acá: '+linkProd+'\n\n📷 @amarangoelectro';
+  }else{
+    var cuotasLines=armarCuotasLines(p.venta, p);
+    msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines, null)+"\n\n🛒 Míralo acá: "+linkProd;
+  }
 
   // Si tiene foto, intentar compartir la imagen + texto
   if(p.foto && navigator.share){
@@ -5087,6 +5114,8 @@ function tiendaToggleModoSelec(){
   if(!tiendaModoSelec)tiendaSelecSet={};
   var bar=document.getElementById('tienda-selec-bar');
   if(bar)bar.style.display=tiendaModoSelec?'flex':'none';
+  var btnMov=document.getElementById('btn-mover-cat');
+  if(btnMov)btnMov.style.display=(tiendaModoSelec && tiendaEsAdmin)?'inline-block':'none';
   var btn=document.getElementById('btn-modo-selec');
   if(btn)btn.style.background=tiendaModoSelec?'var(--nar)':'var(--wh)';
   tiendaActualizarSelecCount();
@@ -5138,6 +5167,42 @@ function tiendaCompartirVarios(){
   var btn=document.getElementById('btn-modo-selec'); if(btn)btn.style.background='var(--wh)';
   tiendaCompartirEnCadena(prods, 0);
 }
+
+// 📂 MOVER VARIOS a una categoría (solo admin). Usa la selección múltiple.
+function tiendaMoverVariosCategoria(){
+  var ids=Object.keys(tiendaSelecSet);
+  if(!ids.length){ alert('Primero tocá "Seleccionar" en los productos que querés mover.'); return; }
+  var prods=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});
+  var propios=prods.filter(function(p){return !p.esCelu;});
+  var celus=prods.length-propios.length;
+  if(!propios.length){ alert('Los celulares ya tienen su categoría fija (📱 Celulares) y no se pueden mover.'); return; }
+  // armar el diálogo con todas las categorías (menos Celulares, que es fija)
+  var opciones=TIENDA_CATEGORIAS.filter(function(c){return c!=='📱 Celulares';});
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;margin:0 0 4px;">📂 Mover '+propios.length+' producto'+(propios.length===1?'':'s')+'</h3>'
+    +(celus?'<div style="font-size:.68rem;color:var(--sub);margin-bottom:8px;">('+celus+' celular'+(celus===1?'':'es')+' se ignora'+(celus===1?'':'n')+', tienen categoría fija)</div>':'')
+    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);margin:6px 0 8px;">Elegí la categoría destino:</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:50vh;overflow-y:auto;">';
+  opciones.forEach(function(c){
+    html+='<button onclick="tiendaAplicarCategoriaVarios(\''+c.replace(/'/g,"\\'")+'\')" style="text-align:left;font-size:.74rem;padding:11px 9px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">'+c+'</button>';
+  });
+  html+='</div>'
+    +'<button onclick="cerrarModalCat()" style="width:100%;margin-top:12px;font-size:.74rem;padding:10px;background:var(--wh);color:var(--sub);border:1.5px solid var(--bor);border-radius:10px;font-weight:700;cursor:pointer;font-family:inherit;">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;document.getElementById('modal-cuotas').style.display='block';
+}
+function tiendaAplicarCategoriaVarios(cat){
+  var ids=Object.keys(tiendaSelecSet);
+  var n=0;
+  ids.forEach(function(id){
+    var p=tiendaProductos.find(function(x){return x.id==id;});
+    if(p && !p.esCelu){ p.categoria=cat; n++; }
+  });
+  tiendaGuardarLocal();
+  try{ tiendaSubirNube(); }catch(e){}
+  cerrarModalCat();
+  tiendaCancelarSelec();
+  mostrarToast('✅ '+n+' producto'+(n===1?'':'s')+' movido'+(n===1?'':'s')+' a '+cat);
+}
+function cerrarModalCat(){ var m=document.getElementById('modal-cuotas'); if(m)m.style.display='none'; }
 
 // comparte un producto de la lista y, al volver, ofrece el siguiente
 function tiendaCompartirEnCadena(prods, i){
