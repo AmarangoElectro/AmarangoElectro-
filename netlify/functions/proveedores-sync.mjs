@@ -68,41 +68,61 @@ function categoriaAmarango(categoriaProveedor, nombreProducto) {
     `${categoriaProveedor || ""} ${nombreProducto || ""}`,
   );
 
-  if (/SMART TV|TELEVISION|TELEVISOR|\bTV\b/.test(texto)) return "📺 TV";
+  if (/SMART TV|TELEVISION|TELEVISOR|\bTV\b|PROYECTOR|MONITOR/.test(texto))
+    return "📺 TV y video";
   if (/PARLANTE|TORRE|EQUIPO DE MUSICA|AURICULAR|AUDIO/.test(texto))
     return "🔊 Audio";
-  if (/HELADER|FREEZER|EXHIBIDOR/.test(texto)) return "❄️ Heladeras";
-  if (/AIRE ACONDICIONADO|SPLIT/.test(texto))
-    return "🌬️ Aire acondicionado";
-  if (/CALEFACCION|ESTUFA|CALOVENTOR|PANEL CALEFACTOR/.test(texto))
-    return "🔥 Calefacción";
-  if (/VENTILADOR|TURBO|CIRCULADOR/.test(texto)) return "🌀 Ventilación";
+  if (/HELADER|FREEZER|CONGELADOR|EXHIBIDOR|CERVECER/.test(texto))
+    return "❄️ Refrigeración";
+  if (
+    /AIRE ACONDICIONADO|SPLIT|CALEFACCION|ESTUFA|CALOVENTOR|PANEL CALEFACTOR|VENTILADOR|TURBO|CIRCULADOR|TERMOTANQUE|CALEFON/.test(
+      texto,
+    )
+  )
+    return "🌡️ Climatización";
   if (/LAVARROP|LAVASECARROP|LAVAVAJILL/.test(texto)) return "🧺 Lavado";
-  if (/ASPIRADOR|LIMPIEZA|MOPA/.test(texto)) return "🧹 Limpieza";
-  if (/COCINA|HORNO|ANAFE|MICROONDAS/.test(texto)) return "🍳 Cocina";
-  if (/COLCHON|SOMMIER|BLANQUERIA|SABANA|ACOLCHADO|ALMOHADA/.test(texto))
-    return "🛏️ Descanso";
+  if (/ASPIRADOR|LIMPIEZA|MOPA|HIDROLAV|ENCERADORA/.test(texto))
+    return "🧹 Limpieza";
+  if (/COCINA|HORNO|ANAFE|MICROONDAS|CAMPANA|HORNALLA/.test(texto))
+    return "🍳 Cocción";
+  if (/COLCHON|SOMMIER/.test(texto)) return "🛏️ Colchones y sommiers";
+  if (
+    /BLANQUERIA|SABANA|ACOLCHADO|ALMOHADA|MANTA|EDREDON|TOALLA|FRAZADA/.test(
+      texto,
+    )
+  )
+    return "🧵 Blanquería";
   if (/MUEBLE|MESA|SILLA|SILLON|PLACARD|ROPERO/.test(texto))
     return "🪑 Muebles";
   if (/CAMPING|CARPA|JARDINERIA|PILETA|GAZEBO/.test(texto))
     return "⛺ Camping y aire libre";
   if (/BICICLETA|FITNESS|DEPORTE|MONOPATIN/.test(texto))
-    return "🚲 Deportes";
+    return "🚲 Deportes y movilidad";
+  if (/CARGADOR|CABLE USB|POWER BANK|FUNDA|VIDRIO TEMPLADO|TARJETA SD/.test(texto))
+    return "🔌 Cargadores y accesorios";
   if (/NOTEBOOK|COMPUTACION|COMPUTADORA|TABLET|IMPRESORA|MONITOR|CAMARA/.test(texto))
     return "💻 Informática";
   if (/HERRAMIENTA|TALADRO|AMOLADORA|SIERRA/.test(texto))
     return "🔧 Herramientas";
   if (/JUGUETE|INFANTIL|MUÑECA/.test(texto)) return "🧸 Juguetes";
   if (/BEBE|BEBES|CUNA|COCHECITO/.test(texto)) return "👶 Bebés";
-  if (/BELLEZA|CUIDADO PERSONAL|SECADOR|PLANCHITA|CORTABARBA|MAQUINA DE PELO/.test(texto))
-    return "💄 Belleza y cuidado personal";
+  if (
+    /BELLEZA|CUIDADO PERSONAL|SALUD|NEBULIZADOR|TENSIOMETRO|TERMOMETRO|SECADOR|PLANCHITA|CORTABARBA|MAQUINA DE PELO/.test(
+      texto,
+    )
+  )
+    return "💄 Cuidado personal y salud";
   if (/BAZAR|VAJILLA|VASO|OLLA|SARTEN|TERMO|MATE/.test(texto))
     return "🍺 Bazar y mesa";
   if (/CONSOLA|GAMING|VIDEOJUEGO/.test(texto)) return "🎮 Gaming";
   if (/DECORACION|HOGAR Y DECO/.test(texto)) return "🏠 Hogar y deco";
   if (/AUTO|MOTO|AUTOMOTOR/.test(texto)) return "🚗 Autos y motos";
-  if (/TERMOTANQUE|PEQUEÑO ELECTRO|ELECTRODOMESTICO/.test(texto))
-    return "☕ Electro hogar";
+  if (/MASCOTA|PERRO|GATO|COMEDERO|BEBEDERO/.test(texto))
+    return "🐶 Mascotas";
+  if (/GENERADOR|GRUPO ELECTROGENO|PANEL SOLAR|UPS|INVERSOR/.test(texto))
+    return "🔋 Energía";
+  if (/PEQUENOS? ELECTRO|ELECTRODOMESTICO/.test(texto))
+    return "⚡ Pequeños electro";
 
   return "📦 Otros";
 }
