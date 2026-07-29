@@ -794,8 +794,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaCatalogoPDF()">📄 Descargar catálogo PDF</button>
     <button id="tienda-btn-backup" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--gr);"
       onclick="tiendaBackup()">💾 Descargar backup (respaldo)</button>
-    <button class="calc-btn" style="width:100%;background:var(--az);margin-top:8px;"
-      onclick="tiendaCompararProductos()">🔍 Comparar productos parecidos (elegir cuál dejar)</button>
     <button class="calc-btn" style="width:100%;background:#e11d48;margin-top:8px;"
       onclick="tiendaLimpiarDuplicados()">🧹 Limpiar productos duplicados</button>
     <button id="tienda-btn-restore" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--az);border:2px solid var(--az);"
@@ -843,6 +841,10 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       </select>
       <textarea id="carga-caracteristicas" placeholder="Características (ej: 6 kg · Carga superior · Blanco)" rows="2"
         style="width:100%;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.78rem;resize:vertical;"></textarea>
+      <div style="font-size:.66rem;color:var(--az);font-weight:800;margin:8px 0 4px;">🏪 ¿De qué mayorista es? (opcional)</div>
+      <input id="carga-mayorista" list="lista-mayoristas" placeholder="Ej: Stagliano, Galiano, Cachi..." autocomplete="off"
+        style="width:100%;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.78rem;">
+      <datalist id="lista-mayoristas"></datalist>
     </div>
     <input id="carga-dolar" placeholder="Cotización dólar (si es USD)" inputmode="numeric"
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
@@ -3963,7 +3965,7 @@ function tiendaCardsHtml(sublista){
     var selMarcado=tiendaSelecSet[p.id];
     var fadeClass = tiendaYaAnimo ? '' : ' card-fade';
     var delay=tiendaYaAnimo ? 0 : Math.min(_idx*40, 400); // fade escalonado (tope 0.4s)
-    var card='<div class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+    var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
     // modo compartir varios: casilla de selección (para todos)
     if(tiendaModoSelec){
@@ -4024,6 +4026,7 @@ function tiendaCardsHtml(sublista){
     card+=''
       +badgePrecioFecha(p)
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
+      +((tiendaEsAdmin && p.mayorista)?'<div style="font-size:.58rem;font-weight:800;color:#7c3aed;background:#f3ecff;border:1px solid #e0ccff;border-radius:6px;padding:2px 6px;margin-bottom:3px;display:inline-block;">🏪 '+p.mayorista+'</div>':'')
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
@@ -4104,8 +4107,11 @@ function tiendaCardsHtml(sublista){
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="'+(p.foto?'tiendaQuitarFoto':'tiendaEditarFoto')+'('+pid+')">'+(p.foto?'🖼️ Quitar':'🖼️ Foto')+'</button>'
-        +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')">🗑️</button>')
+        // 🔄 REEMPLAZAR: sube la foto nueva ENCIMA de la actual (mismo botón para
+        // poner o cambiar). Nunca deja el producto sin foto ni te saca de acá.
+        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarFoto('+pid+')">'+(p.foto?'🔄 Reemplazar':'🖼️ Foto')+'</button>'
+        +(p.foto?'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaQuitarFoto('+pid+')" title="Quitar foto">🚫🖼️</button>':'')
+        +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')" title="Eliminar producto">🗑️</button>')
       +'</div>'
       +'<div style="display:flex;gap:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
@@ -4218,12 +4224,16 @@ function dataURLaBlob(dataUrl){
 // Sube la foto al Storage de Supabase y guarda el LINK en el producto/celular
 function subirFotoStorage(blob, fid){
   if(!NUBE_OK || !sbCalc){ alert('Sin conexión a la nube. Esperá unos segundos e intentá de nuevo.'); return; }
-  var nombreArch = 'foto_'+fid+'_'+Date.now()+'.jpg';
-  sbCalc.storage.from('tienda-fotos').upload(nombreArch, blob, { contentType:'image/jpeg', upsert:true, cacheControl:'3600' })
+  // 🔑 nombre FIJO por producto: al reemplazar, el upsert PISA la foto anterior
+  // (no quedan fotos huérfanas en el Storage ni se "montan" una sobre otra).
+  var idLimpio = (''+fid).replace(/[^a-zA-Z0-9_]/g,'');
+  var nombreArch = 'foto_'+idLimpio+'.jpg';
+  sbCalc.storage.from('tienda-fotos').upload(nombreArch, blob, { contentType:'image/jpeg', upsert:true, cacheControl:'0' })
     .then(function(res){
       if(res.error){ alert('⚠️ Error al subir la foto:\n'+res.error.message); return; }
       var pub = sbCalc.storage.from('tienda-fotos').getPublicUrl(nombreArch);
-      var url = pub.data.publicUrl;
+      // rompe-caché: al ser el mismo nombre, forzamos que el navegador baje la NUEVA
+      var url = pub.data.publicUrl + '?v=' + Date.now();
       if((''+fid).indexOf('celu_')===0){
         var i=parseInt((''+fid).replace('celu_',''),10);
         var celus=cargarListaCelus();
@@ -4233,7 +4243,14 @@ function subirFotoStorage(blob, fid){
         if(p){ p.foto=url; tiendaGuardarLocal(); }
       }
       tiendaRender();
-      alert('✅ Foto subida a la nube. Ahora la ven todos.');
+      // volver a la tarjeta del producto editado (no saltar al principio)
+      setTimeout(function(){
+        try{
+          var card=document.getElementById('card-'+fid);
+          if(card){ card.scrollIntoView({behavior:'smooth', block:'center'}); card.style.transition='box-shadow .3s'; card.style.boxShadow='0 0 0 3px var(--nar)'; setTimeout(function(){ card.style.boxShadow=''; }, 1400); }
+        }catch(e){}
+      }, 150);
+      alert('✅ Foto reemplazada. Ahora la ven todos.');
     })
     .catch(function(e){ alert('⚠️ Excepción al subir foto: '+(e.message||e)); });
 }
@@ -6432,9 +6449,16 @@ function tiendaAbrirCarga(){
       });
     }
   }catch(e){}
+  // 🏪 llenar sugerencias de mayoristas ya usados (para no reescribir cada vez)
+  try{
+    var dl=document.getElementById('lista-mayoristas');
+    if(dl){
+      var usados={};
+      tiendaProductos.forEach(function(p){ if(p&&p.mayorista) usados[p.mayorista]=true; });
+      dl.innerHTML=Object.keys(usados).sort().map(function(m){ return '<option value="'+m.replace(/"/g,'&quot;')+'">'; }).join('');
+    }
+  }catch(e){}
 }
-
-// Guarda la foto elegida en la carga (comprimida) para asignarla al primer producto
 window._cargaFotoData = null;
 function cargaFotoElegida(e){
   var file=e.target.files && e.target.files[0];
@@ -6543,139 +6567,6 @@ function tiendaLimpiarDuplicados(){
   try{ tiendaRender(); }catch(e){}
   alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
 }
-// ═══════════════════════════════════════════════════════════════════════
-// 🔍 COMPARADOR DE PRODUCTOS IGUALES O PARECIDOS (interactivo)
-// Agrupa productos repetidos o similares y te pregunta grupo por grupo cuál
-// dejar y cuál quitar. Podés dejar 1, 2 o los que quieras de cada grupo.
-// ═══════════════════════════════════════════════════════════════════════
-var _compGrupos=[];   // grupos de productos parecidos pendientes de revisar
-var _compIdx=0;       // grupo que estamos mostrando
-
-function tiendaCompararProductos(){
-  if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede comparar productos.'); return; }
-  var prods=tiendaProductos.filter(function(p){return p&&p.nombre;});
-  if(prods.length<2){ alert('Necesitás al menos 2 productos para comparar.'); return; }
-
-  // 1) agrupar por clave normalizada (iguales) y después juntar los parecidos
-  var porClave={};
-  prods.forEach(function(p){
-    var k=_claveDup(p.nombre);
-    (porClave[k]=porClave[k]||[]).push(p);
-  });
-  var claves=Object.keys(porClave);
-  var usada={};
-  var grupos=[];
-  for(var i=0;i<claves.length;i++){
-    if(usada[i]) continue;
-    var grupo=porClave[claves[i]].slice();
-    usada[i]=true;
-    // buscar OTRAS claves parecidas (distancia chica) para unirlas al grupo
-    for(var j=i+1;j<claves.length;j++){
-      if(usada[j]) continue;
-      if(claves[i].length<3||claves[j].length<3) continue;
-      var d=distancia(claves[i], claves[j]);
-      // tolerancia proporcional al largo: nombres parecidos pero no idénticos
-      var tol = claves[i].length<=6 ? 1 : (claves[i].length<=12 ? 2 : 3);
-      if(d<=tol){
-        grupo=grupo.concat(porClave[claves[j]]);
-        usada[j]=true;
-      }
-    }
-    if(grupo.length>=2) grupos.push(grupo);
-  }
-
-  if(!grupos.length){ alert('✅ No encontré productos iguales ni parecidos. Tu catálogo está limpio.'); return; }
-
-  // ordenar cada grupo: el más completo primero (foto/características)
-  grupos.forEach(function(g){ g.sort(function(a,b){ return _puntajeProd(b)-_puntajeProd(a); }); });
-  // grupos con más repetidos primero
-  grupos.sort(function(a,b){ return b.length-a.length; });
-
-  _compGrupos=grupos;
-  _compIdx=0;
-  tiendaBackupAuto(); // por las dudas, backup antes de empezar a tocar
-  tiendaMostrarGrupoComp();
-}
-
-function tiendaMostrarGrupoComp(){
-  if(_compIdx>=_compGrupos.length){
-    // terminamos todos los grupos
-    try{ tiendaGuardarLocal(); tiendaSubirNube(); tiendaRender(); }catch(e){}
-    document.getElementById('modal-cuotas').style.display='none';
-    mostrarToast('✅ Comparación terminada');
-    return;
-  }
-  var grupo=_compGrupos[_compIdx];
-  var total=_compGrupos.length;
-  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">'
-    +'<h3 style="color:var(--az);font-weight:900;font-size:1rem;margin:0;">🔍 Productos parecidos</h3>'
-    +'<span style="font-size:.72rem;font-weight:800;color:var(--sub);background:var(--bg);padding:3px 9px;border-radius:20px;">'+(_compIdx+1)+' de '+total+'</span>'
-  +'</div>';
-  html+='<p style="font-size:.72rem;color:var(--sub);margin:2px 0 12px;">Encontré '+grupo.length+' que parecen el mismo. Destildá el que quieras <b>quitar</b>. Los que queden tildados se <b>conservan</b>.</p>';
-
-  grupo.forEach(function(p, idx){
-    var precio = p.venta ? ('$'+fmt(p.venta)) : '<span style="color:var(--sub);">sin precio</span>';
-    var foto = p.foto
-      ? '<img src="'+fotoOpt(p.foto,120).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'")+'\'" style="width:54px;height:54px;border-radius:9px;object-fit:cover;background:#fff;flex:0 0 auto;">'
-      : '<div style="width:54px;height:54px;border-radius:9px;background:#eef;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex:0 0 auto;">📦</div>';
-    // el primero (más completo) viene tildado por defecto; el resto destildado
-    var tildado = idx===0 ? 'checked' : '';
-    var etiqueta = idx===0 ? '<span style="font-size:.6rem;font-weight:800;color:var(--gr);background:#e6f8ee;padding:1px 6px;border-radius:8px;">recomendado dejar</span>' : '';
-    html+='<label style="display:flex;align-items:center;gap:10px;padding:9px;border:1.5px solid var(--bor);border-radius:11px;margin-bottom:7px;cursor:pointer;background:var(--wh);">'
-      +'<input type="checkbox" class="comp-chk" data-pid="'+p.id+'" '+tildado+' style="width:20px;height:20px;flex:0 0 auto;accent-color:var(--gr);">'
-      +foto
-      +'<div style="flex:1;min-width:0;">'
-        +'<div style="font-size:.76rem;font-weight:800;color:var(--az);line-height:1.15;">'+p.nombre+'</div>'
-        +'<div style="font-size:.72rem;font-weight:800;color:var(--nar);margin-top:2px;">'+precio+' '+etiqueta+'</div>'
-        +'<div style="font-size:.62rem;color:var(--sub);margin-top:1px;">'+(catProd(p)||'')+(p.foto?' · con foto':' · sin foto')+'</div>'
-      +'</div>'
-    +'</label>';
-  });
-
-  html+='<div style="display:flex;gap:6px;margin-top:12px;">'
-    +'<button onclick="tiendaSaltarGrupoComp()" style="flex:1;font-size:.74rem;padding:11px;background:var(--wh);color:var(--sub);border:1.5px solid var(--bor);border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;">⏭️ Dejar los '+grupo.length+' (saltar)</button>'
-    +'<button onclick="tiendaAplicarGrupoComp()" style="flex:1;font-size:.74rem;padding:11px;background:var(--az);color:#fff;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;">✓ Aplicar y seguir</button>'
-  +'</div>';
-  html+='<button onclick="tiendaCerrarComp()" style="width:100%;margin-top:8px;font-size:.72rem;padding:9px;background:transparent;color:var(--sub);border:none;font-weight:700;cursor:pointer;font-family:inherit;">Cancelar y salir</button>';
-
-  document.getElementById('modal-cuotas-body').innerHTML=html;
-  document.getElementById('modal-cuotas').style.display='block';
-}
-
-function tiendaAplicarGrupoComp(){
-  var grupo=_compGrupos[_compIdx];
-  var chks=document.querySelectorAll('.comp-chk');
-  var conservarIds={};
-  chks.forEach(function(ch){ if(ch.checked) conservarIds[ch.getAttribute('data-pid')]=true; });
-  var conservados=grupo.filter(function(p){ return conservarIds[p.id]; });
-  var aBorrar=grupo.filter(function(p){ return !conservarIds[p.id]; });
-
-  // seguridad: no dejar borrar TODO el grupo sin querer
-  if(!conservados.length){
-    if(!confirm('⚠️ No dejaste ninguno tildado. Eso borraría los '+grupo.length+' del grupo.\n\n¿Seguro que querés borrarlos todos?')) return;
-  }
-  // si conservamos uno sin foto pero borramos uno con foto, pasamos la foto
-  if(conservados.length && aBorrar.length){
-    var conFoto=aBorrar.find(function(p){return p.foto;});
-    conservados.forEach(function(c){ if(!c.foto && conFoto){ c.foto=conFoto.foto; } });
-  }
-  if(aBorrar.length){
-    var setB=new Set(aBorrar);
-    tiendaProductos=tiendaProductos.filter(function(p){ return !setB.has(p); });
-  }
-  _compIdx++;
-  tiendaMostrarGrupoComp();
-}
-
-function tiendaSaltarGrupoComp(){ _compIdx++; tiendaMostrarGrupoComp(); }
-
-function tiendaCerrarComp(){
-  // guardar lo que se haya hecho hasta ahora y cerrar
-  try{ tiendaGuardarLocal(); tiendaSubirNube(); tiendaRender(); }catch(e){}
-  document.getElementById('modal-cuotas').style.display='none';
-  mostrarToast('Comparación cerrada');
-}
-
 function tiendaProcesarCarga(){
  try{
   var texto=document.getElementById('carga-texto').value||'';
@@ -6684,10 +6575,11 @@ function tiendaProcesarCarga(){
   var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
   var reemplazar=document.getElementById('carga-reemplazar').checked;
   // 🏷️ categoría y características (opcionales, se aplican a todos)
-  var _cargaCat='', _cargaCarac='';
+  var _cargaCat='', _cargaCarac='', _cargaMayorista='';
   try{
     var _sc=document.getElementById('carga-categoria'); if(_sc) _cargaCat=_sc.value||'';
     var _cc=document.getElementById('carga-caracteristicas'); if(_cc) _cargaCarac=(_cc.value||'').trim();
+    var _cm=document.getElementById('carga-mayorista'); if(_cm) _cargaMayorista=(_cm.value||'').trim();
   }catch(e){}
 
   if(esUSD && dolar<=0){ alert('Elegiste USD. Cargá la cotización del dólar para convertir los precios.'); return; }
@@ -6725,6 +6617,7 @@ function tiendaProcesarCarga(){
     // 🏷️ categoría y características elegidas en el formulario
     if(_cargaCat) _prod.categoria=_cargaCat;
     if(_cargaCarac) _prod.caracteristicas=_cargaCarac;
+    if(_cargaMayorista) _prod.mayorista=_cargaMayorista; // 🏪 de qué mayorista es
     nuevos.push(_prod);
   });
 
