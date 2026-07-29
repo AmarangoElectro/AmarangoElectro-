@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- ARCHIVO CORRECTO AMARANGO: v-PROVEEDORES-SEGURO + LOGO DE CATÁLOGO -->
+<!-- ARCHIVO CORRECTO AMARANGO: v-PROVEEDORES-SEGURO + LOGO DE CATÁLOGO Y AL COMPARTIR -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
-<title>Tienda AmarangoElectro 🐝🛒 [v-PROVEEDORES-SEGURO]</title>
+<title>Tienda AmarangoElectro 🐝🛒 [v-PROVEEDORES-SEGURO-COMPARTIR]</title>
 <meta name="theme-color" content="#0B2D6B">
 <meta name="description" content="Electrodomésticos y celulares en cuotas fijas. TV, celulares, heladeras, cocina, lavado y mucho más. Mínimos requisitos y atención personalizada.">
 
@@ -4881,6 +4881,101 @@ function tiendaVerDetalle(id){
   document.getElementById('modal-cuotas').scrollTop=0;
 }
 
+// Carga una imagen como Blob y la deja lista para dibujarla en un canvas.
+function tiendaCargarImagenParaCanvas(url){
+  return fetch(url)
+    .then(function(r){
+      if(!r.ok)throw new Error('No se pudo descargar la imagen');
+      return r.blob();
+    })
+    .then(function(blob){
+      return new Promise(function(resolve,reject){
+        var objectUrl=URL.createObjectURL(blob);
+        var img=new Image();
+        img.onload=function(){
+          URL.revokeObjectURL(objectUrl);
+          resolve(img);
+        };
+        img.onerror=function(){
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error('No se pudo abrir la imagen'));
+        };
+        img.src=objectUrl;
+      });
+    });
+}
+
+// Para las fotos extraídas del catálogo genera una copia cuadrada con fondo
+// blanco y el logo. No modifica la foto guardada ni las imágenes manuales.
+function tiendaBlobParaCompartir(p){
+  if(!p || !p.foto)return Promise.reject(new Error('Producto sin foto'));
+  var necesitaComponer=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
+  if(!necesitaComponer){
+    return fetch(p.foto).then(function(r){
+      if(!r.ok)throw new Error('No se pudo descargar la foto');
+      return r.blob();
+    });
+  }
+  return Promise.all([
+    tiendaCargarImagenParaCanvas(p.foto),
+    tiendaCargarImagenParaCanvas(p.fotoCatalogoLogo)
+  ]).then(function(imagenes){
+    return new Promise(function(resolve,reject){
+      var foto=imagenes[0], logo=imagenes[1];
+      var tam=1080, margen=34;
+      var canvas=document.createElement('canvas');
+      canvas.width=tam; canvas.height=tam;
+      var ctx=canvas.getContext('2d');
+      ctx.fillStyle='#FFFFFF';
+      ctx.fillRect(0,0,tam,tam);
+
+      var fw=foto.naturalWidth||foto.width;
+      var fh=foto.naturalHeight||foto.height;
+      var escala=Math.min((tam-margen*2)/fw,(tam-margen*2)/fh);
+      var ancho=Math.round(fw*escala);
+      var alto=Math.round(fh*escala);
+      var x=Math.round((tam-ancho)/2);
+      var y=Math.round((tam-alto)/2);
+      ctx.imageSmoothingEnabled=true;
+      ctx.imageSmoothingQuality='high';
+      ctx.drawImage(foto,x,y,ancho,alto);
+
+      var logoTam=180;
+      var logoX=tam-logoTam-28;
+      var logoY=tam-logoTam-28;
+      ctx.save();
+      ctx.shadowColor='rgba(0,0,0,.22)';
+      ctx.shadowBlur=18;
+      ctx.fillStyle='rgba(255,255,255,.96)';
+      ctx.beginPath();
+      ctx.arc(logoX+logoTam/2,logoY+logoTam/2,logoTam/2+5,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+      ctx.drawImage(logo,logoX,logoY,logoTam,logoTam);
+
+      if(canvas.toBlob){
+        canvas.toBlob(function(blob){
+          if(blob)resolve(blob);
+          else reject(new Error('No se pudo generar la imagen para compartir'));
+        },'image/jpeg',0.92);
+      }else{
+        var blob=dataURLaBlob(canvas.toDataURL('image/jpeg',0.92));
+        if(blob)resolve(blob);
+        else reject(new Error('No se pudo generar la imagen para compartir'));
+      }
+    });
+  });
+}
+
+function tiendaArchivoCompartible(blob,p){
+  var esPng=(blob.type||'').toLowerCase().indexOf('png')>=0;
+  return new File(
+    [blob],
+    'amarango-producto-'+String(p.id||'foto')+(esPng?'.png':'.jpg'),
+    {type:blob.type||(esPng?'image/png':'image/jpeg')}
+  );
+}
+
 // Compartir un producto: arma el mensaje lindo AmarangoElectro y comparte (con foto si se puede)
 function compartirProducto(id){
   var p=buscarProd(id);
@@ -4893,10 +4988,9 @@ function compartirProducto(id){
 
   // Si tiene foto, intentar compartir la imagen + texto
   if(p.foto && navigator.share){
-    fetch(p.foto)
-      .then(function(r){ return r.blob(); })
+    tiendaBlobParaCompartir(p)
       .then(function(blob){
-        var file=new File([blob], 'producto.jpg', {type:blob.type||'image/jpeg'});
+        var file=tiendaArchivoCompartible(blob,p);
         // ¿el celu puede compartir archivos?
         if(navigator.canShare && navigator.canShare({files:[file]})){
           return navigator.share({ files:[file], text:msg });
@@ -5068,10 +5162,9 @@ function tiendaCompartirEnCadena(prods, i){
   }
 
   if(p.foto){
-    fetch(p.foto)
-      .then(function(r){return r.blob();})
+    tiendaBlobParaCompartir(p)
       .then(function(blob){
-        var file=new File([blob], 'producto.jpg', {type:blob.type||'image/jpeg'});
+        var file=tiendaArchivoCompartible(blob,p);
         if(navigator.canShare && navigator.canShare({files:[file]})){
           return navigator.share({ files:[file], text:msg });
         }
