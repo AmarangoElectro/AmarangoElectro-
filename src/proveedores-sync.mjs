@@ -14,6 +14,7 @@ const PARSE_APP_ID = "Ecu_Al@2019o_0708777z8A31qProt";
 let SUPABASE_URL = "https://zctaukyrhsmpjkcddcqq.supabase.co";
 let SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
+let DOLAR_PROVEEDORES = 1590;
 
 function configurarEntorno(env = {}) {
   SUPABASE_URL =
@@ -22,6 +23,9 @@ function configurarEntorno(env = {}) {
     env.SUPABASE_SECRET_KEY ||
     env.SUPABASE_ANON_KEY ||
     SUPABASE_KEY;
+  const cotizacion = Number(env.DOLAR_PROVEEDORES);
+  DOLAR_PROVEEDORES =
+    Number.isFinite(cotizacion) && cotizacion > 0 ? cotizacion : 1590;
 }
 
 const PROVEEDORES = [
@@ -58,6 +62,7 @@ const POST_KEYS = [
   "imageThumb",
   "mostrar_catalogo",
   "updatedAt",
+  "body",
 ].join(",");
 
 function normalizar(texto) {
@@ -67,6 +72,52 @@ function normalizar(texto) {
     .toUpperCase()
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function textoPlanoProveedor(texto) {
+  return String(texto || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;|&#160;/gi, " ")
+    .replace(/&aacute;|&#225;/gi, "á")
+    .replace(/&eacute;|&#233;/gi, "é")
+    .replace(/&iacute;|&#237;/gi, "í")
+    .replace(/&oacute;|&#243;/gi, "ó")
+    .replace(/&uacute;|&#250;/gi, "ú")
+    .replace(/&ntilde;|&#241;/gi, "ñ")
+    .replace(/&[^;]+;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Los proveedores no envían un campo de moneda. En sus catálogos, los importes
+// menores a 1.000 son dólares; algunos equipos de más valor lo aclaran en la
+// descripción. El límite de 5.000 evita convertir descripciones viejas cuando
+// el producto ya tiene un precio normal expresado en pesos.
+function monedaPrecioProveedor(producto) {
+  const precio = Number(producto && producto.precio);
+  const texto = normalizar(
+    textoPlanoProveedor(
+      `${producto && producto.titulo ? producto.titulo : ""} ${
+        producto && producto.body ? producto.body : ""
+      }`,
+    ),
+  );
+  const marcaUSD =
+    /(?:^|[^A-Z0-9])(?:USD|U\$S|US\$)(?:$|[^A-Z0-9])/.test(texto) ||
+    /\d\s*(?:USD|U\$S|US\$)(?:$|[^A-Z0-9])/.test(texto) ||
+    /\bPRECIOS?\s*(?:EN)?\s*DOLAR(?:ES)?\b/.test(texto) ||
+    /\bPRECIOS?\b.{0,45}\bDOLAR(?:ES)?\b/.test(texto) ||
+    /\bDOLAR(?:ES)?\b.{0,45}\bPRECIOS?\b/.test(texto);
+
+  if (Number.isFinite(precio) && precio > 0 && precio < 1000) return "USD";
+  if (
+    Number.isFinite(precio) &&
+    precio > 0 &&
+    precio <= 5000 &&
+    marcaUSD
+  )
+    return "USD";
+  return "ARS";
 }
 
 function categoriaAmarango(categoriaProveedor, nombreProducto) {
@@ -316,6 +367,379 @@ function claveProveedor(proveedor, idExterno) {
   return `${proveedor}|${idExterno}`;
 }
 
+const PALABRAS_DUPLICADO_IGNORAR = new Set([
+  "DE",
+  "DEL",
+  "LA",
+  "EL",
+  "LOS",
+  "LAS",
+  "PARA",
+  "Y",
+  "EN",
+  "MOD",
+  "MODELO",
+  "NUEVO",
+  "NUEVA",
+]);
+
+const PALABRAS_DUPLICADO_GENERICAS = new Set([
+  "SMART",
+  "TV",
+  "TELEVISOR",
+  "HELADERA",
+  "FREEZER",
+  "LAVARROPAS",
+  "ASPIRADORA",
+  "COCINA",
+  "HORNO",
+  "ANAFE",
+  "MICROONDAS",
+  "TERMOTANQUE",
+  "AIRE",
+  "ACONDICIONADO",
+  "PARLANTE",
+  "TORRE",
+  "AURICULAR",
+  "AURICULARES",
+  "FREIDORA",
+  "MIXER",
+  "BICICLETA",
+  "TALADRO",
+  "SET",
+  "COMBO",
+  "ELECTRICO",
+  "ELECTRICA",
+  "AUTOMATICO",
+  "AUTOMATICA",
+  "SEMIAUTOMATICO",
+  "SEMIAUTOMATICA",
+  "INVERTER",
+  "DIGITAL",
+]);
+
+function tokensDuplicado(nombre) {
+  const texto = normalizar(nombre)
+    .replace(/\bSTELAR\b/g, "ESTELAR")
+    .replace(/(\d+)\s*(?:LTS?|LITROS?)\b/g, "$1L")
+    .replace(/(\d+)\s*(?:KGS?|KILOS?)\b/g, "$1KG")
+    .replace(/(\d+)\s*(?:PULGADAS?|PULG)\b/g, "$1")
+    .replace(/[^A-Z0-9]+/g, " ");
+  return [
+    ...new Set(
+      texto
+        .split(/\s+/)
+        .filter(Boolean)
+        .filter((token) => !PALABRAS_DUPLICADO_IGNORAR.has(token)),
+    ),
+  ];
+}
+
+function firmaNumerica(tokens) {
+  return tokens
+    .filter((token) => /\d/.test(token))
+    .sort()
+    .join("|");
+}
+
+function modelosProducto(tokens) {
+  return tokens.filter(
+    (token) =>
+      token.length >= 3 &&
+      /[A-Z]/.test(token) &&
+      /\d/.test(token) &&
+      !/^\d+(?:L|LT|LTR|KG|W|V|CM|MM|RPM|P|PIEZAS?)$/.test(token) &&
+      !/^(?:R|X)\d+$/.test(token),
+  );
+}
+
+function tokensDistintivos(tokens) {
+  return tokens.filter(
+    (token) =>
+      !PALABRAS_DUPLICADO_GENERICAS.has(token) &&
+      !/^\d+$/.test(token) &&
+      !/^\d+(?:L|LT|LTR|KG|W|V|CM|MM|RPM|P|PIEZAS?)$/.test(token) &&
+      !/^(?:R|X)\d+$/.test(token),
+  );
+}
+
+function datosProductoDuplicado(producto) {
+  const tokens = tokensDuplicado(producto.nombre);
+  return {
+    producto,
+    tokens,
+    firmaNumerica: firmaNumerica(tokens),
+    modelos: modelosProducto(tokens),
+    distintivos: tokensDistintivos(tokens),
+    firmaExacta: tokens.slice().sort().join("|"),
+  };
+}
+
+function puntajeSimilitudProducto(a, b, datosA, datosB) {
+  if (!a || !b || !a.nombre || !b.nombre) return 0;
+
+  const preparadoA = datosA || datosProductoDuplicado(a);
+  const preparadoB = datosB || datosProductoDuplicado(b);
+  const tokensA = preparadoA.tokens;
+  const tokensB = preparadoB.tokens;
+  if (!tokensA.length || !tokensB.length) return 0;
+
+  const firmaA = preparadoA.firmaNumerica;
+  const firmaB = preparadoB.firmaNumerica;
+  if ((firmaA || firmaB) && firmaA !== firmaB) return 0;
+
+  const modelosA = preparadoA.modelos;
+  const modelosB = preparadoB.modelos;
+  if (
+    modelosA.length &&
+    modelosB.length &&
+    !modelosA.some((modelo) => modelosB.includes(modelo))
+  )
+    return 0;
+
+  const setB = new Set(tokensB);
+  const comunes = tokensA.filter((token) => setB.has(token)).length;
+  const union = new Set([...tokensA, ...tokensB]).size;
+  const jaccard = union ? comunes / union : 0;
+  const exacto = preparadoA.firmaExacta === preparadoB.firmaExacta;
+  const compartenModelo =
+    modelosA.length &&
+    modelosB.length &&
+    modelosA.some((modelo) => modelosB.includes(modelo));
+  const mismaCategoria = a.categoria === b.categoria;
+  const distintivosB = new Set(preparadoB.distintivos);
+  const distintivosComunes = preparadoA.distintivos.filter((token) =>
+    distintivosB.has(token),
+  ).length;
+
+  if (exacto) return 1;
+  if (compartenModelo && comunes >= 2) return Math.max(0.9, jaccard);
+  if (
+    mismaCategoria &&
+    distintivosComunes >= 1 &&
+    comunes >= 3 &&
+    jaccard >= 0.72
+  )
+    return jaccard;
+  return 0;
+}
+
+function claveProductoDuplicado(producto) {
+  if (producto.automaticoProveedor) {
+    return claveProveedor(producto.proveedorClave, producto.proveedorId);
+  }
+  return `manual|${String(producto.id)}`;
+}
+
+function idGrupoDuplicado(productos) {
+  const base = productos
+    .map(claveProductoDuplicado)
+    .sort()
+    .join("|");
+  let hash = 2166136261;
+  for (let i = 0; i < base.length; i++) {
+    hash ^= base.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `dup_${(hash >>> 0).toString(36)}`;
+}
+
+function aplicarDuplicadosProveedores(catalogo) {
+  const candidatos = catalogo.filter(
+    (producto) =>
+      producto &&
+      producto.nombre &&
+      producto.sinStock !== true,
+  );
+  const ocultosIntencionales = new Set(
+    candidatos.filter(
+      (producto) =>
+        producto.visible === false &&
+        producto.ocultoPorDuplicado !== true &&
+        producto.sinStock !== true,
+    ),
+  );
+
+  catalogo.forEach((producto) => {
+    if (!producto) return;
+    delete producto.duplicadoGrupo;
+    delete producto.duplicadoCantidad;
+    delete producto.duplicadoSimilitud;
+    if (producto.ocultoPorDuplicado) {
+      producto.visible =
+        producto.sinStock !== true && producto.ocultoManualProveedor !== true;
+      delete producto.ocultoPorDuplicado;
+    }
+  });
+
+  const padres = candidatos.map((_, indice) => indice);
+  const buscar = (indice) => {
+    while (padres[indice] !== indice) {
+      padres[indice] = padres[padres[indice]];
+      indice = padres[indice];
+    }
+    return indice;
+  };
+  const unir = (a, b) => {
+    const raizA = buscar(a);
+    const raizB = buscar(b);
+    if (raizA !== raizB) padres[raizB] = raizA;
+  };
+  const similitudes = new Map();
+  const preparados = candidatos.map(datosProductoDuplicado);
+  const buckets = new Map();
+  const agregarBucket = (clave, indice) => {
+    if (!clave) return;
+    if (!buckets.has(clave)) buckets.set(clave, []);
+    buckets.get(clave).push(indice);
+  };
+  preparados.forEach((datos, indice) => {
+    agregarBucket(`exacto|${datos.firmaExacta}`, indice);
+    datos.modelos.forEach((modelo) =>
+      agregarBucket(`modelo|${modelo}`, indice),
+    );
+    datos.distintivos.forEach((token) =>
+      agregarBucket(
+        `similar|${datos.producto.categoria || ""}|${
+          datos.firmaNumerica
+        }|${token}`,
+        indice,
+      ),
+    );
+  });
+
+  const pares = new Set();
+  for (const indices of buckets.values()) {
+    if (indices.length < 2) continue;
+    for (let a = 0; a < indices.length; a++) {
+      for (let b = a + 1; b < indices.length; b++) {
+        const menor = Math.min(indices[a], indices[b]);
+        const mayor = Math.max(indices[a], indices[b]);
+        pares.add(`${menor}|${mayor}`);
+      }
+    }
+  }
+
+  for (const par of pares) {
+    const [i, j] = par.split("|").map(Number);
+    const similitud = puntajeSimilitudProducto(
+      candidatos[i],
+      candidatos[j],
+      preparados[i],
+      preparados[j],
+    );
+    if (similitud > 0) {
+      unir(i, j);
+      similitudes.set(par, similitud);
+    }
+  }
+
+  const grupos = new Map();
+  candidatos.forEach((producto, indice) => {
+    const raiz = buscar(indice);
+    if (!grupos.has(raiz)) grupos.set(raiz, []);
+    grupos.get(raiz).push({ producto, indice });
+  });
+
+  let gruposDetectados = 0;
+  let productosOcultos = 0;
+  for (const miembros of grupos.values()) {
+    if (miembros.length < 2) continue;
+    const productos = miembros.map((miembro) => miembro.producto);
+    const grupoId = idGrupoDuplicado(productos);
+    const grupoIgnorado = productos.some(
+      (producto) => producto.duplicadoGrupoIgnorado === grupoId,
+    );
+    if (grupoIgnorado) {
+      productos.forEach((producto) => {
+        producto.duplicadoGrupoIgnorado = grupoId;
+        delete producto.duplicadoGrupo;
+        delete producto.duplicadoCantidad;
+        delete producto.duplicadoSimilitud;
+        delete producto.duplicadoPreferido;
+        delete producto.ocultoPorDuplicado;
+        if (
+          producto.sinStock !== true &&
+          producto.ocultoManualProveedor !== true &&
+          !ocultosIntencionales.has(producto)
+        )
+          producto.visible = true;
+      });
+      continue;
+    }
+    gruposDetectados++;
+    let preferido = productos.find(
+      (producto) =>
+        producto.duplicadoPreferido === true &&
+        producto.ocultoManualProveedor !== true &&
+        !ocultosIntencionales.has(producto),
+    );
+    if (!preferido) {
+      preferido = productos
+        .filter(
+          (producto) =>
+            producto.visible !== false &&
+            producto.ocultoManualProveedor !== true &&
+            !ocultosIntencionales.has(producto),
+        )
+        .sort(
+          (a, b) =>
+            Number(Boolean(a.automaticoProveedor)) -
+              Number(Boolean(b.automaticoProveedor)) ||
+            Number(Boolean(b.foto)) - Number(Boolean(a.foto)) ||
+            Number(a.venta || Infinity) - Number(b.venta || Infinity),
+        )[0];
+    }
+    if (!preferido) {
+      preferido = productos
+        .filter(
+          (producto) =>
+            producto.ocultoManualProveedor !== true &&
+            !ocultosIntencionales.has(producto),
+        )
+        .slice()
+        .sort(
+          (a, b) =>
+            Number(Boolean(a.automaticoProveedor)) -
+              Number(Boolean(b.automaticoProveedor)) ||
+            Number(Boolean(b.foto)) - Number(Boolean(a.foto)) ||
+            Number(a.venta || Infinity) - Number(b.venta || Infinity),
+        )[0];
+    }
+
+    productos.forEach((producto) => {
+      producto.duplicadoGrupo = grupoId;
+      producto.duplicadoCantidad = productos.length;
+      producto.duplicadoSimilitud = Math.max(
+        ...miembros
+          .filter((otro) => otro.producto !== producto)
+          .map((otro) => {
+            const propio = miembros.find(
+              (miembro) => miembro.producto === producto,
+            ).indice;
+            const a = Math.min(propio, otro.indice);
+            const b = Math.max(propio, otro.indice);
+            return similitudes.get(`${a}|${b}`) || 0;
+          }),
+      );
+      if (producto === preferido) {
+        producto.duplicadoPreferido = true;
+        producto.ocultoPorDuplicado = false;
+        producto.visible = true;
+      } else {
+        producto.duplicadoPreferido = false;
+        producto.ocultoPorDuplicado =
+          producto.ocultoManualProveedor !== true &&
+          !ocultosIntencionales.has(producto);
+        producto.visible = false;
+        productosOcultos++;
+      }
+    });
+  }
+
+  return { gruposDetectados, productosOcultos };
+}
+
 function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
   const ahora = Date.now();
   const siguienteResumen = {};
@@ -347,6 +771,7 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
     let nuevos = 0;
     let actualizados = 0;
     let ocultos = 0;
+    let usdConvertidos = 0;
     const ocultosManuales = new Set();
 
     // Primero suponemos que los automáticos de este proveedor se agotaron.
@@ -357,7 +782,11 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
         producto.automaticoProveedor &&
         producto.proveedorClave === proveedor.clave
       ) {
-        if (producto.visible === false && producto.sinStock !== true) {
+        if (
+          producto.visible === false &&
+          producto.sinStock !== true &&
+          producto.ocultoPorDuplicado !== true
+        ) {
           ocultosManuales.add(
             claveProveedor(producto.proveedorClave, producto.proveedorId),
           );
@@ -375,9 +804,24 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
       const fuente = item.producto;
       const llave = claveProveedor(proveedor.clave, fuente.objectId);
       let producto = indice.get(llave);
-      const costo = Math.round(Number(fuente.precio));
+      const precioProveedorOriginal = Number(fuente.precio);
+      const monedaProveedor = monedaPrecioProveedor(fuente);
+      const cotizacionManual = Number(
+        producto && producto.cotizacionDolarManual,
+      );
+      const cotizacionDolar =
+        monedaProveedor === "USD"
+          ? Number.isFinite(cotizacionManual) && cotizacionManual > 0
+            ? cotizacionManual
+            : DOLAR_PROVEEDORES
+          : 0;
+      const costo =
+        monedaProveedor === "USD"
+          ? Math.round(precioProveedorOriginal * cotizacionDolar)
+          : Math.round(precioProveedorOriginal);
       const venta = markupVenta(costo);
       const foto = fotoProducto(fuente);
+      if (monedaProveedor === "USD") usdConvertidos++;
 
       if (!producto) {
         producto = {
@@ -402,6 +846,7 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
       producto.costo = costo;
       producto.venta = venta;
       producto.visible = !ocultoManual;
+      producto.ocultoManualProveedor = ocultoManual;
       producto.sinStock = false;
       producto.categoria = categoriaAmarango(
         item.categoriaNombre,
@@ -421,6 +866,16 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
       producto.proveedorActualizado = fuente.updatedAt || "";
       producto.ultimaSincronizacionProveedor = fechaISO;
       producto.estadoProveedor = "disponible";
+      producto.precioProveedorOriginal = precioProveedorOriginal;
+      producto.monedaProveedor = monedaProveedor;
+      if (monedaProveedor === "USD") {
+        producto.cotizacionDolar = cotizacionDolar;
+        producto.usdConvertido = true;
+      } else {
+        delete producto.cotizacionDolar;
+        delete producto.cotizacionDolarManual;
+        delete producto.usdConvertido;
+      }
     }
 
     siguienteResumen[proveedor.clave] = {
@@ -431,9 +886,12 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
       nuevos,
       actualizados,
       ocultos,
+      usdConvertidos,
+      cotizacionDolar: DOLAR_PROVEEDORES,
     };
   }
 
+  siguienteResumen.duplicados = aplicarDuplicadosProveedores(catalogo);
   return { catalogo, resumen: siguienteResumen };
 }
 
@@ -517,6 +975,7 @@ async function ejecutarSincronizacionSegura(env = {}) {
 }
 
 export {
+  aplicarDuplicadosProveedores,
   bajarProveedor,
   ejecutarSincronizacion,
   ejecutarSincronizacionSegura,
