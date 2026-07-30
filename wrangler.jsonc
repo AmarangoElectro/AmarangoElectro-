@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "amarango-electro",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-07-29",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/.netlify/functions/*",
+      "/api/*",
+      "/calculadora",
+      "/calculadora.html",
+      "/index.html",
+      "/tienda"
+    ]
+  },
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "vars": {
+    "SUPABASE_URL": "https://zctaukyrhsmpjkcddcqq.supabase.co"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
