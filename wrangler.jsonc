@@ -19,7 +19,8 @@
     "crons": ["0 * * * *"]
   },
   "vars": {
-    "SUPABASE_URL": "https://zctaukyrhsmpjkcddcqq.supabase.co"
+    "SUPABASE_URL": "https://zctaukyrhsmpjkcddcqq.supabase.co",
+    "DOLAR_PROVEEDORES": "1590"
   },
   "observability": {
     "enabled": true
