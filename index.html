@@ -2165,16 +2165,48 @@ function tiendaBajarNube(intentos){
     if(intentos<25){ setTimeout(function(){ tiendaBajarNube(intentos+1); }, 200); }
     return;
   }
-  sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
-    .then(function(r){
-      if(r && r.data && r.data.datos){
-        tiendaProductos = r.data.datos;
-        tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
-        try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
-        tiendaRender();
+  // ⚡ AHORRO DE DATOS (egress): primero pregunto SOLO la fecha de actualización
+  // (pesa unos bytes). Si no cambió desde la última vez, NO bajo el catálogo
+  // completo → cero consumo. Solo bajo todo si de verdad hubo cambios.
+  sbCalc.from('tienda_catalogo').select('actualizado').eq('id','catalogo').maybeSingle()
+    .then(function(meta){
+      var fechaNube = (meta && meta.data && meta.data.actualizado) ? meta.data.actualizado : '';
+      var fechaLocal = '';
+      try{ fechaLocal = localStorage.getItem('ae_tienda_catalogo_fecha') || ''; }catch(e){}
+      var hayCache = false;
+      try{ hayCache = !!localStorage.getItem('ae_tienda_catalogo'); }catch(e){}
+      // si tengo el catálogo en caché Y la fecha coincide → no descargo nada
+      if(hayCache && fechaNube && fechaNube===fechaLocal){
+        return; // ✅ nada que bajar, se usa lo que ya está en pantalla
       }
+      // cambió (o es la primera vez): ahora sí bajo el catálogo completo
+      sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+        .then(function(r){
+          if(r && r.data && r.data.datos){
+            tiendaProductos = r.data.datos;
+            tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
+            try{
+              localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos));
+              if(fechaNube) localStorage.setItem('ae_tienda_catalogo_fecha', fechaNube);
+            }catch(e){}
+            tiendaRender();
+          }
+        })
+        .catch(function(){});
     })
-    .catch(function(){});
+    .catch(function(){
+      // si falla la consulta de fecha, caer al método viejo (bajar todo)
+      sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
+        .then(function(r){
+          if(r && r.data && r.data.datos){
+            tiendaProductos = r.data.datos;
+            tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
+            try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+            tiendaRender();
+          }
+        })
+        .catch(function(){});
+    });
 }
 
 // HISTORIAL DE PEDIDOS + ranking (solo admin)
@@ -5236,9 +5268,8 @@ function tiendaCargarImagenParaCanvas(url){
 // guardada en el catálogo no cambia y en la tienda continúa usando su URL real.
 function tiendaUrlFotoCompartible(p){
   if(!p || !p.foto) return '';
-  if(p.automaticoProveedor){
-    return '/.netlify/functions/imagen-proveedor?url='+encodeURIComponent(p.foto);
-  }
+  // (Antes esto pasaba por una función de Netlify que ya no existe en Cloudflare.
+  //  Ahora devolvemos la foto directa; el compartir la baja tal cual.)
   return p.foto;
 }
 
@@ -5248,8 +5279,10 @@ function tiendaUrlFotoCompartible(p){
 function tiendaBlobParaCompartir(p){
   if(!p || !p.foto)return Promise.reject(new Error('Producto sin foto'));
   var esCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
-  var esProveedor=!!p.automaticoProveedor;
-  var necesitaComponer=esCatalogo||esProveedor;
+  // 🖼️ Los productos de proveedor (Mega/Electro Impacto) NO se componen en canvas
+  // (la foto vive en otro servidor y el canvas falla por CORS). Se comparte la
+  // foto tal cual, que ya trae su propio diseño. Así SIEMPRE sale con imagen.
+  var necesitaComponer=esCatalogo;
   if(!necesitaComponer){
     return fetch(p.foto).then(function(r){
       if(!r.ok)throw new Error('No se pudo descargar la foto');
@@ -5259,6 +5292,7 @@ function tiendaBlobParaCompartir(p){
   var logoUrl=esCatalogo
     ? p.fotoCatalogoLogo
     : 'https://amarangoelectro.com.ar/icon.png';
+  var esProveedor=false; // los proveedores ya no se componen en canvas (van por foto directa)
   return Promise.all([
     tiendaCargarImagenParaCanvas(tiendaUrlFotoCompartible(p)),
     tiendaCargarImagenParaCanvas(logoUrl)
@@ -5390,18 +5424,48 @@ function compartirProducto(id){
         }else{
           tiendaDescargarBlobProducto(blob,p);
           mostrarToast('🖼️ La imagen se descargó para que puedas adjuntarla');
-          return navigator.share({ text:msg }); // sin foto
+          return navigator.share({ text:msg });
         }
       })
       .catch(function(){
-        // si algo falla, compartir solo texto por WhatsApp
-        compartirSoloTexto(msg);
+        // 🖼️ PLAN B: si componer la foto con el logo falló (típico en fotos de
+        // proveedores por CORS), NO caemos a solo texto: intentamos compartir
+        // la FOTO DIRECTA tal cual. Así siempre sale con imagen.
+        tiendaCompartirFotoDirecta(p, msg);
       });
     return;
   }
   // sin foto o sin compartir nativo: texto
   if(navigator.share){ navigator.share({title:p.nombre, text:msg}).catch(function(){compartirSoloTexto(msg);}); }
   else compartirSoloTexto(msg);
+}
+
+// 🖼️ Comparte la foto tal cual (sin componer con logo). Fallback para cuando
+// la composición en canvas falla (fotos de proveedor con CORS, etc).
+function tiendaCompartirFotoDirecta(p, msg){
+  if(!p || !p.foto){ compartirSoloTexto(msg); return; }
+  // intento 1: bajar por la ruta compartible (proxy que evita CORS si existe)
+  var urls=[];
+  try{ urls.push(tiendaUrlFotoCompartible(p)); }catch(e){}
+  urls.push(p.foto);
+  var i=0;
+  function intentar(){
+    if(i>=urls.length){ compartirSoloTexto(msg); return; } // ya no hay más opciones
+    fetch(urls[i]).then(function(r){
+      if(!r.ok) throw new Error('no ok');
+      return r.blob();
+    }).then(function(blob){
+      var file=tiendaArchivoCompartible(blob,p);
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        return navigator.share({ files:[file], text:msg });
+      }else{
+        tiendaDescargarBlobProducto(blob,p);
+        mostrarToast('🖼️ La imagen se descargó para que puedas adjuntarla');
+        return navigator.share({ text:msg });
+      }
+    }).catch(function(){ i++; intentar(); });
+  }
+  intentar();
 }
 
 // Copia el texto de la publicación para que pueda pegarse como descripción
