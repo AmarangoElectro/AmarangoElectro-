@@ -46,6 +46,8 @@ body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
 img,video,canvas,svg,iframe{max-width:100%;}
 .header{background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 45%,#1e5bc8 100%);padding:11px 14px 12px;display:flex;flex-direction:column;align-items:stretch;gap:9px;border-bottom:3px solid var(--nar);position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:900;overflow:hidden;transition:box-shadow .3s ease;}
+/* En la tienda: el header se une con la barra de categorías (sin línea naranja arriba, todo azul continuo) */
+/* header con su línea naranja también en la tienda */
 /* fila superior: logo + nombre juntos, a la izquierda; menú a la derecha */
 .hdr-marca{display:flex;align-items:center;gap:10px;padding-right:50px;}
 /* espaciador: ocupa el lugar del header fijo para que el contenido no quede tapado */
@@ -86,6 +88,14 @@ img,video,canvas,svg,iframe{max-width:100%;}
 .cajon-sep{font-size:.62rem;font-weight:800;color:rgba(255,255,255,.4);padding:14px 18px 6px;letter-spacing:1px;text-transform:uppercase}
 /* Grilla de categorías estilo app (cuadros grandes) */
 .cat-grid{display:flex;gap:8px;padding:4px 8px 8px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+/* Barra de categorías estilo Mercado Libre: texto plano, activa en negrita + rayita.
+   De punta a punta (rompe el padding lateral del tab-content) y pegada bajo el buscador. */
+.cat-barra{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--wh);margin:-18px -16px 12px;padding:0;border-bottom:2px solid var(--nar);}
+.cat-chip:first-child{padding-left:16px;}
+.cat-chip:last-child{padding-right:16px;}
+.cat-barra::-webkit-scrollbar{display:none;}
+.cat-chip{flex:0 0 auto;white-space:nowrap;background:none;color:#0a1633;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:0;padding:7px 13px;font-size:.72rem;font-weight:700;font-family:inherit;cursor:pointer;transition:color .15s ease;-webkit-tap-highlight-color:transparent;opacity:.5;}
+.cat-chip.on{color:#0a1633;font-weight:900;border-bottom-color:var(--nar);opacity:1;}
 .cat-grid::-webkit-scrollbar{display:none;}
 .cat-grid .cat-tile{flex:0 0 auto;width:72px;}
 @media(max-width:360px){.cat-grid .cat-tile{width:66px;}}
@@ -293,7 +303,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
-<body>
+<body class="en-tienda">
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
 
@@ -354,6 +364,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-algoritmo" style="display:none;" onclick="cerrarCajon();abrirQueBuscan()"><span class="ci-ic">🧠</span> Qué busca tu gente</button>
   <button class="cajon-item cj-admin" id="cajon-semaforo" style="display:none;" onclick="cerrarCajon();abrirSemaforoProductos()"><span class="ci-ic">🚦</span> Qué promocionar</button>
+  <button class="cajon-item cj-admin" id="cajon-duplicados" style="display:none;" onclick="cerrarCajon();abrirPosiblesDuplicados()"><span class="ci-ic">🧩</span> Posibles duplicados</button>
   <button class="cajon-item cj-admin" id="cajon-limpiar" style="display:none;" onclick="cerrarCajon();limpiarProductosFantasma()"><span class="ci-ic">🧹</span> Limpiar productos raros</button>
   <button class="cajon-item cj-admin" id="cajon-placas" style="display:none;" onclick="cerrarCajon();showTab('placas')"><span class="ci-ic">🎨</span> Placas</button>
   <button class="cajon-item cj-rev" id="cajon-colab" style="display:none;color:#FFD166;font-weight:800;" onclick="cerrarCajon();mostrarColaborador()"><span class="ci-ic">🐝</span> Programa Colaborador</button>
@@ -685,8 +696,14 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       </div>
     </div>
 
-    <!-- ═══ Orden estilo Amazon: saludo, producto del día, promo ═══ -->
-    <div id="tienda-saludo-hora" style="text-align:center;font-size:.9rem;font-weight:800;color:var(--txt);margin:4px 0 8px;letter-spacing:.2px;"></div>
+    <!-- ═══ Orden estilo Amazon: producto del día, promo ═══ -->
+    <div id="tienda-saludo-hora" style="display:none;"></div>
+
+    <!-- Banner de Instagram: suelto, ovalado, un poco más arriba (a pedido) -->
+    <a href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener"
+       style="display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;background:linear-gradient(90deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;font-size:.68rem;font-weight:800;padding:8px 14px;border-radius:30px;margin:0 30px 12px;box-shadow:0 3px 10px rgba(0,0,0,.15);">
+      <span style="font-size:.85rem;line-height:1;">📷</span> Seguinos en Instagram <b>@amarangoelectro</b> <span style="opacity:.85;">›</span>
+    </a>
 
     <!-- Producto del día (deal of the day) -->
     <div id="tienda-productodia" style="display:none;margin-bottom:12px;"></div>
@@ -900,13 +917,13 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <div style="background:#fff;border-radius:16px;padding:18px;max-width:440px;margin:12px auto 80px;" id="modal-cuotas-body"></div>
 </div>
 
-<div class="footer">
+<div class="footer" style="padding-bottom:90px;">
   Tienda AmarangoElectro 🐝 · <span>Equipo AmarangoElectro</span>
   <div style="margin-top:8px;display:flex;gap:14px;justify-content:center;">
     <a href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener" style="color:var(--nar);text-decoration:none;font-weight:700;font-size:.8rem;">📷 @amarangoelectro</a>
     <a href="https://whatsapp.com/channel/0029Vb21w9lKQuJM9CWY1347" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-weight:700;font-size:.8rem;">📢 Canal WhatsApp</a>
   </div>
-  <div style="margin-top:14px;font-size:.62rem;color:rgba(107,114,128,.75);letter-spacing:.2px;">Creado por Maximiliano Exequiel Cardozo</div>
+  <div style="margin-top:16px;padding:10px;background:linear-gradient(135deg,rgba(11,45,107,.05),rgba(255,122,0,.05));border-radius:10px;font-size:.72rem;color:var(--az);font-weight:800;letter-spacing:.2px;">💛 Creado por los dueños de AmarangoElectro 🐝</div>
 </div>
 
 <script>
@@ -1686,6 +1703,8 @@ function showTab(t, esAtras){
   document.querySelectorAll(".tab-content").forEach(function(el){el.classList.remove("on");});
   document.querySelectorAll(".tab").forEach(function(el){el.classList.remove("on");});
   document.getElementById("tab-"+t).classList.add("on");
+  // el header se une con la barra de categorías solo en la tienda
+  document.body.classList.toggle('en-tienda', t==='tienda');
   var btn=document.getElementById("tab-btn-"+t);
   if(btn)btn.classList.add("on");
   else{
@@ -2004,11 +2023,7 @@ function tiendaInit(){
 function mostrarSaludoHora(){
   var el=document.getElementById('tienda-saludo-hora');
   if(!el)return;
-  var h=new Date().getHours(), txt;
-  if(h>=6 && h<13)      txt='Buenos días 🌅';
-  else if(h>=13 && h<20)txt='Buenas tardes ☀️';
-  else                  txt='Buenas noches 🌙';
-  el.textContent=txt;
+  el.style.display='none'; // saludo quitado a pedido (Buenas tardes, etc.)
 }
 // Banner rotativo: mensajes que van cambiando
 var BANNER_DEFAULT=[
@@ -3083,7 +3098,7 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo','cajon-limpiar','cajon-semaforo'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo','cajon-limpiar','cajon-semaforo','cajon-duplicados'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
@@ -3951,19 +3966,18 @@ function tiendaRender(){
   if(!universo.length){ vacia.style.display='block'; cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML=''; return; }
   vacia.style.display='none';
 
-  // chips de categorías → cuadros grandes estilo app (ícono + nombre)
+  // chips de categorías → solo en el cajón de abajo (📂). Arriba no va nada,
+  // salvo un chip si hay categoría activa, para saber dónde estás y poder salir.
   var cats={};
   universo.forEach(function(p){ var c=catProd(p); cats[c]=(cats[c]||0)+1; });
   function catIcono(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(0,i):'📦'; }
   function catTexto(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(i+1).trim():s; }
-  // Arriba NO va nada de categorías: se navega desde el botón 📂 del menú de
-  // abajo (abre el cajón con todas). Solo mostramos, si hay una categoría
-  // elegida, un chip para saber dónde estás parado y poder salir con un toque.
   var chipsHtml='';
   if(tiendaCategoriaActiva && cats[tiendaCategoriaActiva]){
     chipsHtml+='<div class="cat-tile on" onclick="tiendaFiltrarCat(\''+tiendaCategoriaActiva.replace(/'/g,"\\'")+'\')"><span class="cat-tile-ic">'+catIcono(tiendaCategoriaActiva)+'</span><span class="cat-tile-txt">'+catTexto(tiendaCategoriaActiva)+' ✕</span></div>';
   }
   var chipsBox=document.getElementById('tienda-chips');
+  chipsBox.className='cat-grid';
   chipsBox.innerHTML=chipsHtml;
   chipsBox.style.display = chipsHtml ? 'flex' : 'none';
   chipsBox.style.padding = chipsHtml ? '6px 4px 2px' : '0';
@@ -4184,7 +4198,6 @@ function tiendaCardsHtml(sublista){
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
-      +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="position:absolute;top:7px;right:7px;background:rgba(255,255,255,.94);border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);line-height:1;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>';
 
     // controles de admin (debajo de la foto, no la empujan)
@@ -4200,10 +4213,25 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && p.automaticoProveedor){
       card+='<div style="font-size:.6rem;font-weight:800;margin-top:5px;color:var(--az);background:#EEF4FF;border:1px solid #CFE3FF;border-radius:7px;padding:4px 6px;">🔄 '+(p.proveedor||'Proveedor')+' · stock '+(p.proveedorStock||0)+'</div>';
     }
+    // 💵 PRECIO USD (solo admin): muestra el valor original del proveedor y
+    // permite cambiar la cotización. El sincronizador conserva este ajuste.
+    var esUSDProveedor=p.monedaProveedor==='USD' ||
+      (!p.monedaProveedor && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000);
+    if(tiendaEsAdmin && esUSDProveedor){
+      var usdOriginal=Number(p.precioProveedorOriginal)||Number(p.costo)||0;
+      var usdCotizacion=Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||1590;
+      card+='<div style="font-size:.6rem;font-weight:800;margin-top:5px;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;padding:5px 7px;">'
+        +'💵 '+usdOriginal.toLocaleString('es-AR')+' USD × $'+usdCotizacion.toLocaleString('es-AR')+' '
+        +'<button onclick="event.stopPropagation();tiendaConvertirUSD('+pid+')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:.58rem;font-weight:800;cursor:pointer;margin-left:4px;">Cambiar dólar</button>'
+        +'</div>';
+    }
 
     card+=''
       +badgePrecioFecha(p)
-      +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;margin:6px 0 2px;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
+      +'<div style="display:flex;align-items:flex-start;gap:6px;margin:6px 0 2px;">'
+      +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
+      +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="flex:0 0 auto;background:none;border:none;font-size:1.05rem;cursor:pointer;line-height:1;padding:0;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
+      +'</div>'
       +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.58rem;font-weight:800;color:'+cm.txt+';background:'+cm.bg+';border:1px solid '+cm.bor+';border-radius:6px;padding:2px 6px;margin-bottom:3px;display:inline-block;">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
@@ -6978,6 +7006,104 @@ function setCargaModo(m){
   if(dol) dol.style.display=(m==='usd')?'block':'none';
 }
 
+// ═══ REVISAR POSIBLES DUPLICADOS (NO BORRA NADA) ═══
+function _gruposDuplicadosRevision(){
+  var grupos={};
+  tiendaProductos.forEach(function(p){
+    if(!p || !p.duplicadoGrupo) return;
+    (grupos[p.duplicadoGrupo]=grupos[p.duplicadoGrupo]||[]).push(p);
+  });
+  return Object.keys(grupos).map(function(k){
+    return {id:k,productos:grupos[k]};
+  }).filter(function(g){return g.productos.length>1;});
+}
+function abrirPosiblesDuplicados(){
+  if(!tiendaEsAdmin){ alert('🔒 Solo el administrador puede revisar duplicados.'); return; }
+  var grupos=_gruposDuplicadosRevision();
+  var body=document.getElementById('modal-cuotas-body');
+  var modal=document.getElementById('modal-cuotas');
+  if(!body || !modal) return;
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;">'
+    +'<div><div style="font-size:1.05rem;font-weight:900;color:var(--az);">🧩 Posibles duplicados</div>'
+    +'<div style="font-size:.68rem;color:var(--sub);margin-top:2px;">No se borra ningún producto ni se cambia ninguna foto.</div></div>'
+    +'<button onclick="cerrarModalCompra()" style="border:none;background:var(--bg);border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;">✕</button></div>';
+  if(!grupos.length){
+    html+='<div style="text-align:center;padding:28px 12px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;margin-top:14px;">'
+      +'<div style="font-size:2rem;">✅</div><div style="font-size:.82rem;font-weight:900;color:#065f46;margin-top:6px;">No hay coincidencias pendientes</div>'
+      +'<div style="font-size:.68rem;color:#047857;margin-top:4px;">La revisión se actualiza con la sincronización de proveedores.</div></div>';
+  }
+  grupos.forEach(function(g,idx){
+    var arr=g.productos.slice().sort(function(a,b){
+      return Number(Boolean(b.duplicadoPreferido))-Number(Boolean(a.duplicadoPreferido))
+        || Number(Boolean(a.automaticoProveedor))-Number(Boolean(b.automaticoProveedor))
+        || Number(a.venta||Infinity)-Number(b.venta||Infinity);
+    });
+    html+='<div style="border:1.5px solid var(--bor);border-radius:14px;padding:10px;margin-top:12px;background:#fff;">'
+      +'<div style="font-size:.7rem;font-weight:900;color:var(--az);margin-bottom:8px;">Grupo '+(idx+1)+' · '+arr.length+' productos parecidos</div>';
+    arr.forEach(function(p){
+      var elegido=p.duplicadoPreferido===true && p.visible!==false;
+      var origen=p.automaticoProveedor?(p.proveedor||'Proveedor'):'Carga manual';
+      var foto=p.foto?'<img src="'+String(p.foto).replace(/"/g,'&quot;')+'" alt="" style="width:54px;height:54px;object-fit:contain;background:#fff;border:1px solid var(--bor);border-radius:9px;flex:0 0 auto;">'
+        :'<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:9px;font-size:1.4rem;flex:0 0 auto;">📦</div>';
+      html+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #eef1f5;">'
+        +foto
+        +'<div style="min-width:0;flex:1;"><div style="font-size:.7rem;font-weight:900;color:var(--txt);line-height:1.25;">'+escapeHtml(p.nombre||'Sin nombre')+'</div>'
+        +'<div style="font-size:.6rem;color:var(--sub);margin-top:3px;">'+escapeHtml(origen)+' · '+fmt(Number(p.venta)||0)+(p.foto?' · 📷':'')+'</div>'
+        +(elegido?'<div style="font-size:.59rem;color:#047857;font-weight:900;margin-top:3px;">✅ Visible elegido</div>':'')
+        +'</div>'
+        +'<button onclick="elegirDuplicadoVisible(\''+g.id+'\',\''+String(p.id).replace(/'/g,"\\'")+'\')" style="border:none;border-radius:8px;padding:7px 8px;font-size:.58rem;font-weight:900;cursor:pointer;background:'+(elegido?'#d1fae5':'var(--az)')+';color:'+(elegido?'#047857':'#fff')+';">'+(elegido?'Elegido':'Dejar visible')+'</button>'
+        +'</div>';
+    });
+    html+='<button onclick="marcarNoDuplicados(\''+g.id+'\')" style="width:100%;margin-top:8px;padding:8px;border:1px solid var(--bor);border-radius:8px;background:var(--bg);color:var(--az);font-size:.62rem;font-weight:900;cursor:pointer;">No son duplicados · mostrar todos</button>'
+      +'</div>';
+  });
+  body.innerHTML=html;
+  modal.style.display='block';
+}
+function elegirDuplicadoVisible(grupo,id){
+  if(!tiendaEsAdmin) return;
+  var arr=tiendaProductos.filter(function(p){return p && p.duplicadoGrupo===grupo;});
+  var elegido=arr.find(function(p){return String(p.id)===String(id);});
+  if(!elegido) return;
+  arr.forEach(function(p){
+    delete p.duplicadoGrupoIgnorado;
+    if(p===elegido){
+      p.visible=true;
+      p.duplicadoPreferido=true;
+      p.ocultoPorDuplicado=false;
+      p.ocultoManualProveedor=false;
+    }else{
+      p.visible=false;
+      p.duplicadoPreferido=false;
+      p.ocultoPorDuplicado=true;
+      p.ocultoManualProveedor=false;
+    }
+  });
+  tiendaGuardarLocal(); try{tiendaSubirNube();}catch(e){}
+  tiendaRender();
+  mostrarToast('✅ Producto visible elegido');
+  abrirPosiblesDuplicados();
+}
+function marcarNoDuplicados(grupo){
+  if(!tiendaEsAdmin) return;
+  var arr=tiendaProductos.filter(function(p){return p && p.duplicadoGrupo===grupo;});
+  if(!arr.length) return;
+  arr.forEach(function(p){
+    p.visible=true;
+    p.duplicadoGrupoIgnorado=grupo;
+    p.ocultoPorDuplicado=false;
+    p.ocultoManualProveedor=false;
+    delete p.duplicadoGrupo;
+    delete p.duplicadoCantidad;
+    delete p.duplicadoSimilitud;
+    delete p.duplicadoPreferido;
+  });
+  tiendaGuardarLocal(); try{tiendaSubirNube();}catch(e){}
+  tiendaRender();
+  mostrarToast('✅ Marcados como productos diferentes');
+  abrirPosiblesDuplicados();
+}
+
 // ═══ LIMPIAR PRODUCTOS DUPLICADOS ═══
 // Detecta productos con el mismo nombre (ignorando emojis/espacios/símbolos),
 // se queda con el MEJOR (el que tiene foto, o el más completo) y borra los repetidos.
@@ -7761,6 +7887,42 @@ function chequearCoherenciaMemoria(celus){
   return avisos;
 }
 // Markup AmarangoElectro: costo → precio de venta (igual que el CRM)
+// 💵 Cambia la cotización de un producto en DÓLARES. La elección queda guardada
+// en cotizacionDolarManual y el sincronizador la conserva en futuras cargas.
+var _ultimaCotizUSD = 1590;
+function tiendaConvertirUSD(id){
+  if(!tiendaEsAdmin){ return; }
+  var p=buscarProd(id);
+  if(!p){ return; }
+  var cotizAnterior=Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||_ultimaCotizUSD||1590;
+  var precioUSD=Number(p.precioProveedorOriginal)||0;
+  if(precioUSD<=0 && p.monedaProveedor==='USD' && Number(p.costo)>0){
+    precioUSD=Math.round((Number(p.costo)/cotizAnterior)*100)/100;
+  }
+  if(precioUSD<=0 && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000){
+    precioUSD=Number(p.costo);
+  }
+  if(precioUSD<=0){ alert('Este producto no tiene un precio para convertir.'); return; }
+  var resp = prompt('💵 CAMBIAR COTIZACIÓN\n\n"'+p.nombre+'"\nPrecio del proveedor: '+precioUSD+' USD\n\n¿A qué cotización lo paso?\n(Escribí solo el número, ej: 1590)', cotizAnterior);
+  if(resp===null) return; // canceló
+  var cotiz = parseFloat((''+resp).replace(/\./g,'').replace(/,/g,'.'))||0;
+  if(cotiz<=0){ alert('Cotización inválida. Poné un número, ej: 1590'); return; }
+  _ultimaCotizUSD = cotiz;
+  var costoPesos = Math.round(precioUSD * cotiz);
+  var ventaPesos = markupVentaCRM(costoPesos);
+  if(!confirm('Quedaría así:\n\n• Costo: '+precioUSD+' USD × '+cotiz+' = '+fmt(costoPesos)+'\n• Venta (con margen): '+fmt(ventaPesos)+'\n\nEste cambio se conservará en las próximas sincronizaciones.\n\n¿Confirmo?')) return;
+  p.precioProveedorOriginal = precioUSD;
+  p.monedaProveedor = 'USD';
+  p.cotizacionDolar = cotiz;
+  p.cotizacionDolarManual = cotiz;
+  p.costo = costoPesos;
+  p.venta = ventaPesos;
+  p.usdConvertido = true;
+  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaRender();
+  mostrarToast('✅ Cotización guardada: $'+cotiz.toLocaleString('es-AR'));
+}
+
 function markupVentaCRM(costo){
   var m;
   if(costo<=50000)m=1.80;
