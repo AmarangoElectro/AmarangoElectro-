@@ -1,6 +1,7 @@
 // Sincronización automática de proveedores para AmarangoElectro.
 //
-// - Se ejecuta una vez por hora mediante Cloudflare Cron Triggers.
+// - Se ejecuta una vez por día a las 08:00 de Argentina mediante Cloudflare
+//   Cron Triggers (11:00 UTC).
 // - Toma precio y stock publicados por Mega Electro y Electro Impacto.
 // - Calcula el precio de venta con la misma fórmula de calculadora.html.
 // - Nunca borra productos: cuando se agotan, los oculta; cuando vuelven,
@@ -361,6 +362,108 @@ async function actualizarCatalogoSiNoCambio(fila, productos) {
   }
   const filas = await respuesta.json();
   return Array.isArray(filas) && filas.length === 1;
+}
+
+// Únicos campos que determinan si existe un cambio comercial real.
+//
+// Se comparan de forma explícita precio, stock, moneda, cotización, nombre,
+// categoría, imagen y todos los estados de visibilidad/ocultamiento. También se
+// incluyen las identidades de proveedor y los metadatos de duplicados porque
+// cualquiera de ellos puede cambiar qué producto ve el cliente.
+//
+// No se comparan campos puramente temporales como:
+// - ultimaSincronizacionProveedor
+// - proveedorActualizado
+// - precioActualizado
+// - creado
+//
+// Los cambios funcionales que representan esos timestamps ya quedan cubiertos
+// por los campos estables de esta lista. Así una ejecución sin cambios no
+// invalida la caché del catálogo.
+const CAMPOS_COMPARACION_CATALOGO = Object.freeze([
+  "id",
+  "automaticoProveedor",
+  "proveedor",
+  "proveedorClave",
+  "proveedorId",
+  "proveedorCodigo",
+  "nombre",
+  "costo",
+  "venta",
+  "precioProveedorOriginal",
+  "monedaProveedor",
+  "cotizacionDolar",
+  "cotizacionDolarManual",
+  "categoria",
+  "proveedorCategoria",
+  "foto",
+  "fotoOrigen",
+  "fotoCatalogoLogo",
+  "proveedorStock",
+  "visible",
+  "sinStock",
+  "estadoProveedor",
+  "ocultoManualProveedor",
+  "ocultoPorDuplicado",
+  "duplicadoGrupo",
+  "duplicadoPreferido",
+  "duplicadoGrupoIgnorado",
+]);
+
+function valorComparable(producto, campo) {
+  if (
+    !producto ||
+    !Object.prototype.hasOwnProperty.call(producto, campo) ||
+    typeof producto[campo] === "undefined"
+  ) {
+    return null;
+  }
+  const valor = producto[campo];
+  if (typeof valor === "number" && !Number.isFinite(valor)) return null;
+  return valor;
+}
+
+function compararCatalogos(catalogoActual, catalogoSiguiente) {
+  const actual = Array.isArray(catalogoActual) ? catalogoActual : [];
+  const siguiente = Array.isArray(catalogoSiguiente) ? catalogoSiguiente : [];
+  const cambiosPorCampo = {};
+  const indicesCambiados = new Set();
+  const total = Math.max(actual.length, siguiente.length);
+
+  if (actual.length !== siguiente.length) {
+    cambiosPorCampo.cantidadProductos = Math.abs(
+      actual.length - siguiente.length,
+    );
+  }
+
+  for (let indice = 0; indice < total; indice++) {
+    const productoActual = actual[indice];
+    const productoSiguiente = siguiente[indice];
+
+    if (!productoActual || !productoSiguiente) {
+      indicesCambiados.add(indice);
+      continue;
+    }
+
+    for (const campo of CAMPOS_COMPARACION_CATALOGO) {
+      const antes = valorComparable(productoActual, campo);
+      const despues = valorComparable(productoSiguiente, campo);
+      if (JSON.stringify(antes) !== JSON.stringify(despues)) {
+        cambiosPorCampo[campo] = (cambiosPorCampo[campo] || 0) + 1;
+        indicesCambiados.add(indice);
+      }
+    }
+  }
+
+  const camposCambiados = Object.keys(cambiosPorCampo);
+  return {
+    hayCambios: camposCambiados.length > 0,
+    cantidadAnterior: actual.length,
+    cantidadSiguiente: siguiente.length,
+    productosCambiados: indicesCambiados.size,
+    camposCambiados,
+    cambiosPorCampo,
+  };
 }
 
 function claveProveedor(proveedor, idExterno) {
@@ -925,6 +1028,25 @@ async function ejecutarSincronizacion(env = {}) {
   for (let intento = 1; intento <= 3; intento++) {
     const fila = await leerCatalogo();
     const fusion = fusionarCatalogo(fila.datos, correctos, fechaISO);
+    const comparacion = compararCatalogos(fila.datos, fusion.catalogo);
+
+    // Si precio, stock, moneda, cotización, nombre, categoría, imagen y
+    // visibilidad siguen iguales, no hacemos respaldo ni PATCH. De esta forma
+    // tampoco cambia "actualizado" y los navegadores conservan su caché.
+    if (!comparacion.hayCambios) {
+      ultimoResultado = {
+        ok: errores.length === 0,
+        fecha: fechaISO,
+        antes: fila.datos.length,
+        despues: fusion.catalogo.length,
+        actualizoCatalogo: false,
+        motivo: "sin_cambios_reales",
+        comparacion,
+        proveedores: fusion.resumen,
+        errores,
+      };
+      break;
+    }
 
     await upsertFila("catalogo_respaldo_proveedores", {
       fecha: fechaISO,
@@ -939,6 +1061,9 @@ async function ejecutarSincronizacion(env = {}) {
         fecha: fechaISO,
         antes: fila.datos.length,
         despues: fusion.catalogo.length,
+        actualizoCatalogo: true,
+        motivo: "cambios_reales",
+        comparacion,
         proveedores: fusion.resumen,
         errores,
       };
@@ -975,8 +1100,10 @@ async function ejecutarSincronizacionSegura(env = {}) {
 }
 
 export {
+  CAMPOS_COMPARACION_CATALOGO,
   aplicarDuplicadosProveedores,
   bajarProveedor,
+  compararCatalogos,
   ejecutarSincronizacion,
   ejecutarSincronizacionSegura,
   fusionarCatalogo,
