@@ -16,7 +16,10 @@
     ]
   },
   "triggers": {
-    "crons": ["0 11 * * *"]
+    "crons": [
+      "15 11 * * 1-6",
+      "0 12-21 * * 1-6"
+    ]
   },
   "vars": {
     "SUPABASE_URL": "https://zctaukyrhsmpjkcddcqq.supabase.co",
