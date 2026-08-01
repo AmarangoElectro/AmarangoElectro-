@@ -1,7 +1,9 @@
 // Sincronización automática de proveedores para AmarangoElectro.
 //
-// - Se ejecuta una vez por día a las 08:00 de Argentina mediante Cloudflare
-//   Cron Triggers (11:00 UTC).
+// - Hace una conciliación completa a las 08:15 de Argentina y controles
+//   incrementales cada hora, de 09:00 a 18:00 (lunes a sábado).
+// - Los controles horarios consultan sólo registros cuyo updatedAt cambió y
+//   aplican un delta dentro de Supabase; no descargan el catálogo completo.
 // - Toma precio y stock publicados por Mega Electro y Electro Impacto.
 // - Calcula el precio de venta con la misma fórmula de calculadora.html.
 // - Nunca borra productos: cuando se agotan, los oculta; cuando vuelven,
@@ -16,6 +18,9 @@ let SUPABASE_URL = "https://zctaukyrhsmpjkcddcqq.supabase.co";
 let SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
 let DOLAR_PROVEEDORES = 1590;
+const VENTANA_SOLAPADA_MS = 5 * 60 * 1000;
+const PRIMERA_VENTANA_INCREMENTAL_MS = 26 * 60 * 60 * 1000;
+const ID_CONTROL_INCREMENTAL = "proveedores_sync_incremental";
 
 function configurarEntorno(env = {}) {
   SUPABASE_URL =
@@ -297,6 +302,115 @@ async function bajarProveedor(proveedor) {
   };
 }
 
+function fechaParse(iso) {
+  return { __type: "Date", iso };
+}
+
+async function bajarProveedorIncremental(proveedor, desdeISO) {
+  // No filtramos stock ni mostrar_catalogo en Parse: un producto que acaba de
+  // agotarse o que el proveedor quitó del catálogo también debe llegar como
+  // novedad para poder ocultarlo en Amarango.
+  const [categorias, productos] = await Promise.all([
+    parseTodos(
+      "Subcategory",
+      { owner: proveedor.owner },
+      "objectId,name,mostrar_tienda",
+    ),
+    parseTodos(
+      "Post",
+      {
+        owner_post: proveedor.owner,
+        updatedAt: { $gt: fechaParse(desdeISO) },
+      },
+      POST_KEYS,
+    ),
+  ]);
+
+  const categoriasPorId = new Map(
+    categorias.map((categoria) => [categoria.objectId, categoria.name || ""]),
+  );
+  const cambios = [];
+
+  for (const producto of productos) {
+    if (!producto || !producto.objectId) continue;
+    const categoriaId = producto.subcategory?.objectId || "";
+    const categoriaNombre = categoriasPorId.get(categoriaId) || "";
+    const nombre = String(producto.titulo || "").trim();
+    const precioProveedorOriginal = Number(producto.precio);
+    const stock = Number(producto.stock) || 0;
+    const excluido = proveedor.categoriasExcluidas.has(
+      normalizar(categoriaNombre),
+    );
+    const disponible =
+      producto.mostrar_catalogo === true &&
+      producto.sin_stock !== true &&
+      stock > 0 &&
+      nombre &&
+      Number.isFinite(precioProveedorOriginal) &&
+      precioProveedorOriginal > 0 &&
+      !excluido;
+
+    if (!disponible) {
+      cambios.push({
+        accion: "ocultar",
+        proveedorClave: proveedor.clave,
+        proveedorId: producto.objectId,
+        proveedorStock: 0,
+        visible: false,
+        sinStock: true,
+        estadoProveedor: "sin_stock",
+      });
+      continue;
+    }
+
+    const monedaProveedor = monedaPrecioProveedor(producto);
+    const cotizacionDolar =
+      monedaProveedor === "USD" ? DOLAR_PROVEEDORES : 0;
+    const costo =
+      monedaProveedor === "USD"
+        ? Math.round(precioProveedorOriginal * cotizacionDolar)
+        : Math.round(precioProveedorOriginal);
+    const foto = fotoProducto(producto);
+    const categoriaProveedor = categoriaAmarango(categoriaNombre, nombre);
+    const cambio = {
+      accion: "upsert",
+      automaticoProveedor: true,
+      proveedor: proveedor.nombre,
+      proveedorClave: proveedor.clave,
+      proveedorId: producto.objectId,
+      proveedorCodigo: String(producto.codigo || ""),
+      nombre,
+      costo,
+      venta: markupVenta(costo),
+      precioProveedorOriginal,
+      monedaProveedor,
+      categoriaProveedor,
+      categoria: categoriaProveedor,
+      proveedorCategoria: categoriaNombre,
+      proveedorStock: stock,
+      visible: true,
+      sinStock: false,
+      estadoProveedor: "disponible",
+    };
+    if (foto) {
+      cambio.fotoProveedor = foto;
+      cambio.foto = foto;
+    }
+    if (monedaProveedor === "USD") {
+      cambio.cotizacionDolar = cotizacionDolar;
+      cambio.usdConvertido = true;
+    }
+    cambios.push(cambio);
+  }
+
+  return {
+    proveedor,
+    desde: desdeISO,
+    recibidos: productos.length,
+    cambios,
+  };
+}
+
 function supabaseHeaders(extra = {}) {
   return {
     apikey: SUPABASE_KEY,
@@ -304,6 +418,63 @@ function supabaseHeaders(extra = {}) {
     "Content-Type": "application/json",
     ...extra,
   };
+}
+
+async function supabaseRpc(nombre, parametros = {}) {
+  const respuesta = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${nombre}`, {
+    method: "POST",
+    headers: supabaseHeaders({ Prefer: "return=representation" }),
+    body: JSON.stringify(parametros),
+  });
+  if (!respuesta.ok) {
+    const detalle = await respuesta.text().catch(() => "");
+    throw new Error(
+      `Supabase RPC ${nombre}: HTTP ${respuesta.status}${
+        detalle ? ` - ${detalle.slice(0, 300)}` : ""
+      }`,
+    );
+  }
+  const texto = await respuesta.text();
+  if (!texto) return null;
+  try {
+    return JSON.parse(texto);
+  } catch {
+    return texto;
+  }
+}
+
+async function leerFilaControl(id) {
+  const url = new URL(`${SUPABASE_URL}/rest/v1/tienda_catalogo`);
+  url.searchParams.set("id", `eq.${id}`);
+  url.searchParams.set("select", "datos,actualizado");
+  url.searchParams.set("limit", "1");
+  const respuesta = await fetch(url, { headers: supabaseHeaders() });
+  if (!respuesta.ok) {
+    throw new Error(`Supabase control ${id}: HTTP ${respuesta.status}`);
+  }
+  const filas = await respuesta.json();
+  return filas[0] || null;
+}
+
+async function adquirirSingleFlight(token, tipo) {
+  const resultado = await supabaseRpc("amarango_sync_adquirir_lock", {
+    p_token: token,
+    p_tipo: tipo,
+    p_ttl_segundos: 15 * 60,
+  });
+  return resultado === true || resultado?.adquirido === true;
+}
+
+async function liberarSingleFlight(token) {
+  await supabaseRpc("amarango_sync_liberar_lock", { p_token: token });
+}
+
+async function aplicarDeltaIncremental(token, cambios, fechaISO) {
+  return supabaseRpc("amarango_catalogo_aplicar_delta", {
+    p_token: token,
+    p_cambios: cambios,
+    p_fecha: fechaISO,
+  });
 }
 
 async function leerCatalogo() {
@@ -395,8 +566,13 @@ const CAMPOS_COMPARACION_CATALOGO = Object.freeze([
   "cotizacionDolar",
   "cotizacionDolarManual",
   "categoria",
+  "categoriaProveedor",
+  "categoriaManualProveedor",
+  "categoriaManualFijada",
   "proveedorCategoria",
   "foto",
+  "fotoProveedor",
+  "fotoManualProveedor",
   "fotoOrigen",
   "fotoCatalogoLogo",
   "proveedorStock",
@@ -945,17 +1121,26 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
         Math.round(Number(producto.venta || 0)) !== venta;
       const ocultoManual = ocultosManuales.has(llave);
 
+      const categoriaProveedor = categoriaAmarango(
+        item.categoriaNombre,
+        fuente.titulo,
+      );
+
       producto.nombre = String(fuente.titulo || "").trim();
       producto.costo = costo;
       producto.venta = venta;
       producto.visible = !ocultoManual;
       producto.ocultoManualProveedor = ocultoManual;
       producto.sinStock = false;
-      producto.categoria = categoriaAmarango(
-        item.categoriaNombre,
-        fuente.titulo,
-      );
-      if (foto) producto.foto = foto;
+      producto.categoriaProveedor = categoriaProveedor;
+      producto.categoria =
+        producto.categoriaManualProveedor || categoriaProveedor;
+      if (foto) producto.fotoProveedor = foto;
+      if (producto.fotoManualProveedor) {
+        producto.foto = producto.fotoManualProveedor;
+      } else if (foto) {
+        producto.foto = foto;
+      }
       producto.precioActualizado = precioCambio
         ? ahora
         : producto.precioActualizado || ahora;
@@ -1080,6 +1265,132 @@ async function ejecutarSincronizacion(env = {}) {
   return ultimoResultado;
 }
 
+function fechaCursorValida(valor, alternativa) {
+  const fecha = new Date(valor || "");
+  return Number.isFinite(fecha.getTime()) ? fecha : alternativa;
+}
+
+async function ejecutarSincronizacionIncremental(env = {}) {
+  configurarEntorno(env);
+  if (!SUPABASE_KEY) throw new Error("Falta la clave de Supabase");
+
+  const inicio = new Date();
+  const inicioISO = inicio.toISOString();
+  const control = await leerFilaControl(ID_CONTROL_INCREMENTAL);
+  const datosControl =
+    control && control.datos && typeof control.datos === "object"
+      ? control.datos
+      : {};
+  const cursores = { ...(datosControl.cursores || {}) };
+
+  const intentos = await Promise.allSettled(
+    PROVEEDORES.map((proveedor) => {
+      const respaldo = new Date(inicio.getTime() - PRIMERA_VENTANA_INCREMENTAL_MS);
+      const cursor = fechaCursorValida(cursores[proveedor.clave], respaldo);
+      const desde = new Date(cursor.getTime() - VENTANA_SOLAPADA_MS);
+      return bajarProveedorIncremental(proveedor, desde.toISOString());
+    }),
+  );
+  const correctos = [];
+  const errores = [];
+  intentos.forEach((intento, indice) => {
+    if (intento.status === "fulfilled") correctos.push(intento.value);
+    else {
+      errores.push({
+        proveedor: PROVEEDORES[indice].nombre,
+        error: String(intento.reason?.message || intento.reason),
+      });
+    }
+  });
+  if (!correctos.length) {
+    throw new Error(`Fallaron todos los proveedores: ${JSON.stringify(errores)}`);
+  }
+
+  const cambios = correctos.flatMap((resultado) => resultado.cambios);
+  let aplicacion = {
+    actualizo: false,
+    productos_cambiados: 0,
+    motivo: "proveedores_sin_novedades",
+  };
+  if (cambios.length) {
+    // El token real se inyecta desde la envoltura single-flight.
+    const token = String(env.__AMARANGO_SYNC_TOKEN || "");
+    if (!token) throw new Error("Falta el token interno de single-flight");
+    aplicacion = await aplicarDeltaIncremental(token, cambios, inicioISO);
+  }
+
+  correctos.forEach((resultado) => {
+    // Avanzamos el cursor sólo para proveedores cuya consulta terminó bien.
+    // La próxima ejecución vuelve cinco minutos hacia atrás y es idempotente.
+    cursores[resultado.proveedor.clave] = inicioISO;
+  });
+  await upsertFila(ID_CONTROL_INCREMENTAL, {
+    cursores,
+    ultimaEjecucion: inicioISO,
+    errores,
+  });
+
+  const resultado = {
+    ok: errores.length === 0,
+    modo: "incremental",
+    fecha: inicioISO,
+    actualizoCatalogo: Boolean(aplicacion && aplicacion.actualizo),
+    cambiosRecibidos: cambios.length,
+    aplicacion,
+    proveedores: correctos.map((item) => ({
+      clave: item.proveedor.clave,
+      nombre: item.proveedor.nombre,
+      desde: item.desde,
+      recibidos: item.recibidos,
+      cambios: item.cambios.length,
+    })),
+    errores,
+  };
+  await upsertFila("proveedores_sync", resultado);
+  console.log(`PROVEEDORES_SYNC_INCREMENTAL ${JSON.stringify(resultado)}`);
+  return resultado;
+}
+
+function crearTokenSync(tipo) {
+  const aleatorio =
+    globalThis.crypto && typeof globalThis.crypto.randomUUID === "function"
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${tipo}-${aleatorio}`;
+}
+
+async function ejecutarSincronizacionProgramadaSegura(env = {}, tipo = "completa") {
+  configurarEntorno(env);
+  const token = crearTokenSync(tipo);
+  const adquirido = await adquirirSingleFlight(token, tipo);
+  if (!adquirido) {
+    const omitido = {
+      ok: true,
+      omitido: true,
+      motivo: "otra_sincronizacion_en_curso",
+      modo: tipo,
+      fecha: new Date().toISOString(),
+    };
+    console.log(`PROVEEDORES_SYNC_OMITIDA ${JSON.stringify(omitido)}`);
+    return omitido;
+  }
+
+  const entornoConToken = { ...env, __AMARANGO_SYNC_TOKEN: token };
+  try {
+    return tipo === "incremental"
+      ? await ejecutarSincronizacionIncremental(entornoConToken)
+      : await ejecutarSincronizacion(env);
+  } finally {
+    try {
+      await liberarSingleFlight(token);
+    } catch (error) {
+      console.error(
+        `PROVEEDORES_SYNC_LOCK_ERROR ${String(error?.message || error)}`,
+      );
+    }
+  }
+}
+
 async function ejecutarSincronizacionSegura(env = {}) {
   try {
     return await ejecutarSincronizacion(env);
@@ -1103,8 +1414,11 @@ export {
   CAMPOS_COMPARACION_CATALOGO,
   aplicarDuplicadosProveedores,
   bajarProveedor,
+  bajarProveedorIncremental,
   compararCatalogos,
   ejecutarSincronizacion,
+  ejecutarSincronizacionIncremental,
+  ejecutarSincronizacionProgramadaSegura,
   ejecutarSincronizacionSegura,
   fusionarCatalogo,
   markupVenta,

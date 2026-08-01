@@ -1,4 +1,4 @@
-import { ejecutarSincronizacionSegura } from "./proveedores-sync.mjs";
+import { ejecutarSincronizacionProgramadaSegura } from "./proveedores-sync.mjs";
 
 const HOSTS_IMAGEN_PERMITIDOS = new Set(["cdn.catalog-store.link"]);
 const TIPOS_IMAGEN_PERMITIDOS = new Set([
@@ -120,7 +120,13 @@ export default {
     return env.ASSETS.fetch(request);
   },
 
-  async scheduled(_controller, env, ctx) {
-    ctx.waitUntil(ejecutarSincronizacionSegura(env));
+  async scheduled(controller, env, ctx) {
+    // 08:15 Argentina: conciliación completa.
+    // 09:00 a 18:00 Argentina: sólo novedades desde el último cursor.
+    const tipo =
+      controller && controller.cron === "0 12-21 * * 1-6"
+        ? "incremental"
+        : "completa";
+    ctx.waitUntil(ejecutarSincronizacionProgramadaSegura(env, tipo));
   },
 };
