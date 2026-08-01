@@ -845,6 +845,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaRestaurarAbrir()">📂 Restaurar backup</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
+    <button id="tienda-btn-auth-fotos" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#eef4ff;color:var(--az);border:2px solid #cddffb;"
+      onclick="tiendaAuthFotosAbrir()">🔐 Fotos: conectar administrador</button>
   </div>
 </div>
 
@@ -944,14 +946,33 @@ var fmt=function(n){return"$"+precioVisual(n).toLocaleString("es-AR");};
 /* ===== CONEXIÓN A LA NUBE (Supabase) — misma cuenta del CRM ===== */
 var SB_URL="https://zctaukyrhsmpjkcddcqq.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
-var sbCalc=null, NUBE_OK=false;
+var sbCalc=null, sbFotos=null, NUBE_OK=false;
 // Conecta a Supabase. Si la librería (del CDN) todavía no cargó, reintenta.
 function conectarNube(intentos){
   intentos = intentos||0;
   try{
     if(window.supabase && SB_URL && SB_KEY){
-      sbCalc=window.supabase.createClient(SB_URL, SB_KEY);
+      // La conexión histórica del catálogo continúa anónima para no alterar
+      // ninguna política de productos, clientes o ventas.
+      sbCalc=window.supabase.createClient(SB_URL, SB_KEY,{
+        auth:{
+          persistSession:false,
+          autoRefreshToken:false,
+          detectSessionInUrl:false,
+          storageKey:'amarango_catalogo_anon'
+        }
+      });
+      // Cliente separado: sesión real y recordada sólo para Storage de fotos.
+      sbFotos=window.supabase.createClient(SB_URL, SB_KEY,{
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:false,
+          storageKey:'amarango_admin_fotos_auth'
+        }
+      });
       NUBE_OK=true;
+      try{ tiendaAuthFotosInicializar(); }catch(e){}
       // ya conectados: bajar datos frescos de la nube y refrescar la tienda
       try{ tiendaBajarNube(); tiendaBajarCelusNube(); }catch(e){}
       return;
@@ -2358,16 +2379,55 @@ function tiendaMezclarAutomaticosNube(datosNube){
     var clave=tiendaClaveProveedor(p);
     if(clave) automaticos[clave]=p;
   });
-  // Si el automático también está en la pestaña actual, conserva cambios
-  // voluntarios del administrador, por ejemplo ocultarlo manualmente.
+  // Si el automático también está en la pestaña actual, partimos SIEMPRE
+  // de la versión más nueva de la nube y copiamos sólo las decisiones manuales.
+  // Así una pestaña vieja no puede devolver un precio o stock anterior cuando
+  // el administrador cambia una categoría o una foto.
   locales.forEach(function(p){
     var clave=tiendaClaveProveedor(p);
-    if(clave) automaticos[clave]=p;
+    if(!clave) return;
+    var remoto=automaticos[clave];
+    if(!remoto){ automaticos[clave]=p; return; }
+
+    var mezclado=Object.assign({}, remoto);
+    var camposManuales=[
+      'categoriaManualProveedor','categoriaManualFijada',
+      'fotoManualProveedor','ocultoManualProveedor',
+      'duplicadoPreferido','duplicadoGrupoIgnorado','ocultoPorDuplicado',
+      'destacado','delDia','pocoStock','sinInteres','precioAntes',
+      'caracteristicas','mayorista','cotizacionDolarManual'
+    ];
+    camposManuales.forEach(function(campo){
+      if(Object.prototype.hasOwnProperty.call(p,campo)) mezclado[campo]=p[campo];
+    });
+
+    if(p.categoriaManualProveedor){
+      mezclado.categoria=p.categoriaManualProveedor;
+      mezclado.categoriaManualFijada=true;
+    }
+    if(p.fotoManualProveedor){
+      mezclado.foto=p.fotoManualProveedor;
+      delete mezclado.fotoOrigen;
+      delete mezclado.fotoCatalogoLogo;
+    }
+    if(p.ocultoManualProveedor===true){ mezclado.visible=false; }
+    if(p.ocultoPorDuplicado===true){ mezclado.visible=false; }
+
+    // La cotización elegida a mano incluye el costo y la venta que calculó el
+    // administrador. Se conserva hasta que la quite o la cambie nuevamente.
+    if(Number(p.cotizacionDolarManual)>0){
+      mezclado.costo=p.costo;
+      mezclado.venta=p.venta;
+      mezclado.cotizacionDolar=p.cotizacionDolarManual;
+      mezclado.monedaProveedor='USD';
+      mezclado.usdConvertido=true;
+    }
+    automaticos[clave]=mezclado;
   });
 
   return manuales.concat(Object.keys(automaticos).map(function(k){ return automaticos[k]; }));
 }
-function tiendaSubirNube(){
+function tiendaSubirNubeUnaVez(){
   if(!NUBE_OK||!sbCalc) return Promise.resolve({data:null,error:null});
   return sbCalc.from('tienda_catalogo').select('datos').eq('id','catalogo').maybeSingle()
     .then(function(res){
@@ -2388,6 +2448,41 @@ function tiendaSubirNube(){
           return guardado;
         });
     });
+}
+
+// Cola de escritura del catálogo.
+// Si categoría y foto cambian casi juntas, nunca compiten dos escrituras:
+// termina la actual y luego vuelve a guardar el estado local más reciente.
+var _tiendaSubidaEnCurso=null;
+var _tiendaSubidaPendiente=false;
+function tiendaSubirNube(){
+  if(!NUBE_OK||!sbCalc) return Promise.resolve({data:null,error:null});
+  _tiendaSubidaPendiente=true;
+  if(_tiendaSubidaEnCurso) return _tiendaSubidaEnCurso;
+
+  function ejecutarCola(){
+    _tiendaSubidaPendiente=false;
+    return tiendaSubirNubeUnaVez().then(function(resultado){
+      if(_tiendaSubidaPendiente) return ejecutarCola();
+      return resultado;
+    },function(error){
+      // Un cambio posterior no se descarta aunque una escritura haya fallado.
+      if(_tiendaSubidaPendiente) return ejecutarCola();
+      throw error;
+    });
+  }
+
+  _tiendaSubidaEnCurso=ejecutarCola().then(function(resultado){
+    _tiendaSubidaEnCurso=null;
+    // Cubre un cambio ocurrido justo cuando terminaba la promesa anterior.
+    if(_tiendaSubidaPendiente) return tiendaSubirNube();
+    return resultado;
+  },function(error){
+    _tiendaSubidaEnCurso=null;
+    if(_tiendaSubidaPendiente) return tiendaSubirNube();
+    throw error;
+  });
+  return _tiendaSubidaEnCurso;
 }
 
 // Fuerza subir TODO (productos + celulares) a la nube
@@ -2438,6 +2533,132 @@ function tiendaConfirmarAdmin(){
     document.getElementById('tienda-admin-err').style.display='block';
   }
 }
+
+// ═══ SESIÓN SEGURA DE SUPABASE — únicamente para subir/reemplazar fotos ═══
+// El PIN continúa habilitando todas las herramientas. Esta segunda sesión no
+// guarda la contraseña: Supabase conserva sólo su sesión renovable.
+var _tiendaAuthFotosUsuario=null;
+var _tiendaAuthFotosEscucha=null;
+var _tiendaAuthFotoIdPendiente=null;
+var _tiendaAuthFotoBlobPendiente=null;
+
+function tiendaAuthFotosInicializar(){
+  if(!sbFotos || !sbFotos.auth) return;
+  sbFotos.auth.getSession().then(function(res){
+    _tiendaAuthFotosUsuario=(res.data && res.data.session)?res.data.session.user:null;
+    tiendaAuthFotosActualizarBoton();
+  }).catch(function(){ _tiendaAuthFotosUsuario=null; tiendaAuthFotosActualizarBoton(); });
+  if(!_tiendaAuthFotosEscucha && sbFotos.auth.onAuthStateChange){
+    var escucha=sbFotos.auth.onAuthStateChange(function(_evento,session){
+      _tiendaAuthFotosUsuario=session?session.user:null;
+      tiendaAuthFotosActualizarBoton();
+    });
+    _tiendaAuthFotosEscucha=escucha && escucha.data ? escucha.data.subscription : true;
+  }
+}
+function tiendaAuthFotosActualizarBoton(){
+  var btn=document.getElementById('tienda-btn-auth-fotos');
+  if(!btn) return;
+  if(_tiendaAuthFotosUsuario){
+    btn.textContent='✅ Fotos: administrador conectado';
+    btn.style.background='#ecfdf5'; btn.style.color='#047857'; btn.style.borderColor='#a7f3d0';
+  }else{
+    btn.textContent='🔐 Fotos: conectar administrador';
+    btn.style.background='#eef4ff'; btn.style.color='var(--az)'; btn.style.borderColor='#cddffb';
+  }
+}
+function tiendaAuthFotosSesion(){
+  if(!NUBE_OK || !sbFotos || !sbFotos.auth) return Promise.resolve(null);
+  return sbFotos.auth.getSession().then(function(res){
+    var sesion=(res.data && res.data.session)?res.data.session:null;
+    _tiendaAuthFotosUsuario=sesion?sesion.user:null;
+    tiendaAuthFotosActualizarBoton();
+    return sesion;
+  });
+}
+function tiendaAuthFotosEscapar(texto){
+  return String(texto||'').replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function tiendaAuthFotosAbrir(idPendiente,blobPendiente){
+  if(!adminUnlocked){
+    alert('🔒 Primero ingresá al modo administrador con tu PIN.');
+    return;
+  }
+  if(typeof idPendiente!=='undefined' && idPendiente!==null) _tiendaAuthFotoIdPendiente=idPendiente;
+  if(blobPendiente) _tiendaAuthFotoBlobPendiente=blobPendiente;
+  var body=document.getElementById('modal-cuotas-body');
+  var modal=document.getElementById('modal-cuotas');
+  if(!body || !modal) return;
+
+  tiendaAuthFotosSesion().then(function(sesion){
+    if(sesion){
+      var correo=tiendaAuthFotosEscapar((sesion.user && sesion.user.email)||'administrador');
+      body.innerHTML='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🔐 Fotos protegidas</h3>'
+        +'<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:12px;margin:12px 0;color:#047857;font-size:.75rem;font-weight:800;">✅ Sesión segura activa<br><span style="font-weight:600;">'+correo+'</span></div>'
+        +'<p style="font-size:.7rem;color:var(--sub);line-height:1.45;">Esta sesión se recuerda en este dispositivo. Tu PIN y el acceso de vendedores funcionan por separado.</p>'
+        +'<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--red);border:2px solid #fecaca;" onclick="tiendaAuthFotosCerrarSesion()">Cerrar solamente la sesión de fotos</button>'
+        +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Listo</button>';
+    }else{
+      body.innerHTML='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🔐 Autorizar reemplazo de fotos</h3>'
+        +'<p style="font-size:.72rem;color:var(--sub);line-height:1.45;margin:7px 0 12px;">Ingresá el usuario administrador de Supabase. Esto se pide únicamente para subir o reemplazar imágenes; el resto continúa funcionando con el PIN.</p>'
+        +'<div style="font-size:.68rem;font-weight:800;color:var(--sub);margin-bottom:4px;">EMAIL ADMINISTRADOR</div>'
+        +'<input id="auth-fotos-email" type="email" autocomplete="username" placeholder="administrador@amarango..." style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:10px;">'
+        +'<div style="font-size:.68rem;font-weight:800;color:var(--sub);margin-bottom:4px;">CONTRASEÑA</div>'
+        +'<input id="auth-fotos-pass" type="password" autocomplete="current-password" placeholder="Contraseña segura" onkeydown="if(event.key===\'Enter\')tiendaAuthFotosIngresar()" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;">'
+        +'<div id="auth-fotos-error" style="display:none;color:var(--red);font-size:.68rem;font-weight:800;margin-top:8px;"></div>'
+        +'<button id="auth-fotos-entrar" class="calc-btn" style="width:100%;margin-top:14px;background:var(--az);" onclick="tiendaAuthFotosIngresar()">Conectar de forma segura</button>'
+        +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="tiendaAuthFotosCancelar()">Cancelar</button>'
+        +'<div style="font-size:.62rem;color:var(--sub);margin-top:10px;text-align:center;">La contraseña no se guarda en el código ni en la tienda.</div>';
+    }
+    modal.style.display='block';
+  }).catch(function(e){
+    alert('⚠️ No pude comprobar la sesión segura: '+(e.message||e));
+  });
+}
+function tiendaAuthFotosCancelar(){
+  _tiendaAuthFotoIdPendiente=null;
+  _tiendaAuthFotoBlobPendiente=null;
+  var modal=document.getElementById('modal-cuotas');
+  if(modal) modal.style.display='none';
+}
+function tiendaAuthFotosIngresar(){
+  if(!adminUnlocked || !sbFotos || !sbFotos.auth) return;
+  var email=((document.getElementById('auth-fotos-email')||{}).value||'').trim();
+  var password=((document.getElementById('auth-fotos-pass')||{}).value||'');
+  var err=document.getElementById('auth-fotos-error');
+  var btn=document.getElementById('auth-fotos-entrar');
+  if(!email || !password){
+    if(err){ err.textContent='Completá email y contraseña.'; err.style.display='block'; }
+    return;
+  }
+  if(btn){ btn.disabled=true; btn.textContent='Conectando…'; }
+  sbFotos.auth.signInWithPassword({email:email,password:password}).then(function(res){
+    if(res.error) throw res.error;
+    _tiendaAuthFotosUsuario=res.data && res.data.user ? res.data.user : null;
+    tiendaAuthFotosActualizarBoton();
+    var id=_tiendaAuthFotoIdPendiente, blob=_tiendaAuthFotoBlobPendiente;
+    _tiendaAuthFotoIdPendiente=null; _tiendaAuthFotoBlobPendiente=null;
+    document.getElementById('modal-cuotas').style.display='none';
+    mostrarToast('✅ Fotos autorizadas en este dispositivo');
+    if(blob && id!==null) subirFotoStorageAutenticada(blob,id);
+    else if(id!==null) tiendaAbrirSelectorFoto(id);
+  }).catch(function(e){
+    if(err){ err.textContent='No se pudo ingresar: '+(e.message||e); err.style.display='block'; }
+    if(btn){ btn.disabled=false; btn.textContent='Conectar de forma segura'; }
+  });
+}
+function tiendaAuthFotosCerrarSesion(){
+  if(!sbFotos || !sbFotos.auth) return;
+  sbFotos.auth.signOut().then(function(){
+    _tiendaAuthFotosUsuario=null;
+    tiendaAuthFotosActualizarBoton();
+    document.getElementById('modal-cuotas').style.display='none';
+    mostrarToast('🔒 Sesión de fotos cerrada. El PIN sigue activo.');
+  }).catch(function(e){ alert('⚠️ No pude cerrar la sesión de fotos: '+(e.message||e)); });
+}
+
 function tiendaSalirAdmin(){
   tiendaEsAdmin=false; tiendaMarcadosSet={};
   tiendaAplicarModo();
@@ -2540,6 +2761,7 @@ function tiendaAplicarModo(){
   var btnBkp=document.getElementById('tienda-btn-backup-download'); if(btnBkp)btnBkp.style.display = tiendaEsAdmin?'block':'none';
   var btnDup=document.getElementById('btn-limpiar-dup'); if(btnDup)btnDup.style.display = tiendaEsAdmin?'block':'none';
   var btnRec=document.getElementById('btn-reclasificar'); if(btnRec)btnRec.style.display = tiendaEsAdmin?'block':'none';
+  var btnAuthFotos=document.getElementById('tienda-btn-auth-fotos'); if(btnAuthFotos){ btnAuthFotos.style.display=tiendaEsAdmin?'block':'none'; tiendaAuthFotosActualizarBoton(); }
   var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
   var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Formato de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
@@ -2572,8 +2794,14 @@ function tiendaGuardarLocal(){
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
   // subir a la nube (para que lo vean todos)
   if(NUBE_OK && sbCalc){
-    tiendaSubirNube().then(function(){}).catch(function(){});
+    var subida=tiendaSubirNube();
+    // La mayoría de los botones guardan sin bloquear la interfaz. Marcamos la
+    // promesa como atendida, pero la devolvemos para las acciones (como fotos)
+    // que necesitan confirmar que la nube terminó bien.
+    subida.catch(function(){});
+    return subida;
   }
+  return Promise.resolve({data:null,error:null});
 }
 
 // ═══ BACKUP AUTOMÁTICO DEL CATÁLOGO ═══
@@ -2786,6 +3014,9 @@ function tiendaAbrirOpciones(id){
 }
 function catProd(p){
   var cat=tiendaNormalizarCategoria((p && p.categoria) ? p.categoria : tiendaCategoria(p && p.nombre));
+  // Una categoría elegida expresamente por el administrador manda incluso si
+  // es "Otros". Los productos viejos sin esta marca siguen siendo reordenables.
+  if(p && (p.categoriaManualFijada===true || p.categoriaManualProveedor)) return cat;
   // Si quedó guardado como "Otros" pero el nombre ahora permite reconocerlo,
   // se muestra en el grupo correcto inmediatamente.
   if(cat==='📦 Otros' && p && p.nombre){
@@ -3980,6 +4211,49 @@ function tiendaPintarVerMas(){
   box.innerHTML='<button onclick="tiendaVerMas()" style="background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:12px;padding:11px 22px;font-weight:800;font-family:inherit;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.08);">Ver más productos ('+restan+') ▾</button>';
 }
 
+// Después de editar no perdemos la tarjeta. Si estaba fuera del primer lote,
+// cargamos automáticamente los lotes necesarios y volvemos a centrarla.
+function tiendaEnfocarProducto(id, segundoIntento){
+  setTimeout(function(){
+    var card=document.getElementById('card-'+id);
+    if(!card){
+      var indice=_tiendaListaFull.findIndex(function(p){ return String(p.id)===String(id); });
+      while(indice>=0 && _tiendaMostrados<=indice && _tiendaMostrados<_tiendaListaFull.length){
+        tiendaVerMas();
+      }
+      card=document.getElementById('card-'+id);
+    }
+    // Si el producto dejó de cumplir el filtro (por ejemplo, cambió de
+    // categoría), volvemos una sola vez a la vista general para no perderlo.
+    if(!card && !segundoIntento){
+      tiendaCategoriaActiva='';
+      tiendaMarcaActiva='';
+      verSoloFavoritos=false;
+      verSoloOfertas=false;
+      verSoloPreciosViejos=false;
+      var buscador=document.getElementById('tienda-buscar'); if(buscador)buscador.value='';
+      var buscadorHeader=document.getElementById('hdr-buscar-input'); if(buscadorHeader)buscadorHeader.value='';
+      tiendaRender();
+      tiendaEnfocarProducto(id,true);
+      return;
+    }
+    if(card){
+      card.scrollIntoView({behavior:'smooth',block:'center'});
+      card.style.transition='box-shadow .3s, transform .3s';
+      card.style.boxShadow='0 0 0 3px var(--nar),0 10px 24px rgba(11,45,107,.14)';
+      card.style.transform='translateY(-2px)';
+      setTimeout(function(){
+        card.style.boxShadow='';
+        card.style.transform='';
+      },1400);
+    }
+  },80);
+}
+function tiendaRenderYEnfocar(id){
+  tiendaRender();
+  tiendaEnfocarProducto(id,false);
+}
+
 // scroll infinito: cuando el usuario se acerca al final, carga el próximo lote
 (function(){
   if(!('IntersectionObserver' in window)) return;
@@ -4278,14 +4552,13 @@ function tiendaCardsHtml(sublista){
     }
     // 💵 PRECIO USD (solo admin): muestra el valor original del proveedor y
     // permite cambiar la cotización. El sincronizador conserva este ajuste.
-    var esUSDProveedor=p.monedaProveedor==='USD' ||
-      (!p.monedaProveedor && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000);
+    var esUSDProveedor=tiendaProductoPareceUSD(p);
     if(tiendaEsAdmin && esUSDProveedor){
-      var usdOriginal=Number(p.precioProveedorOriginal)||Number(p.costo)||0;
+      var usdOriginal=tiendaPrecioOriginalUSD(p,Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||1590);
       var usdCotizacion=Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||1590;
       card+='<div style="font-size:.6rem;font-weight:800;margin-top:5px;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;padding:5px 7px;">'
-        +'💵 '+usdOriginal.toLocaleString('es-AR')+' USD × $'+usdCotizacion.toLocaleString('es-AR')+' '
-        +'<button onclick="event.stopPropagation();tiendaConvertirUSD('+pid+')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:.58rem;font-weight:800;cursor:pointer;margin-left:4px;">Cambiar dólar</button>'
+        +'💵 '+(usdOriginal>0?usdOriginal.toLocaleString('es-AR')+' USD':'Precio indicado en USD')+(usdOriginal>0?' × $'+usdCotizacion.toLocaleString('es-AR'):'')+' '
+        +'<button onclick="event.stopPropagation();tiendaConvertirUSD('+pid+')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:.58rem;font-weight:800;cursor:pointer;margin-left:4px;">💵 Convertir a $</button>'
         +'</div>';
     }
 
@@ -4383,6 +4656,9 @@ function tiendaCardsHtml(sublista){
         +(p.foto?'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaQuitarFoto('+pid+')" title="Quitar foto">🚫🖼️</button>':'')
         +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')" title="Eliminar producto">🗑️</button>')
       +'</div>'
+      +(p.automaticoProveedor && p.fotoManualProveedor
+        ?'<button style="width:100%;font-size:.66rem;padding:8px 4px;margin-bottom:5px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaUsarFotoProveedor('+pid+')">↩️ Usar foto del proveedor</button>'
+        :'')
       +'<div style="display:flex;gap:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#fff;color:var(--nar);border:1.5px solid var(--nar);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaAbrirOpciones('+pid+')">⚙️ Opciones</button>'
@@ -4441,6 +4717,18 @@ function renderAvisoPreciosViejos(){
 
 // PONER foto desde la galería del celu (se comprime para no llenar el almacenamiento)
 function tiendaEditarFoto(id){
+  if(!adminUnlocked){
+    alert('🔒 Solo el administrador puede reemplazar fotos.');
+    return;
+  }
+  return tiendaAuthFotosSesion().then(function(sesion){
+    if(sesion) tiendaAbrirSelectorFoto(id);
+    else tiendaAuthFotosAbrir(id);
+  }).catch(function(e){
+    alert('⚠️ No pude comprobar la sesión de fotos: '+(e.message||e));
+  });
+}
+function tiendaAbrirSelectorFoto(id){
   window._tiendaFotoId=id;
   var inp=document.getElementById('tienda-foto-input');
   if(!inp){
@@ -4492,17 +4780,64 @@ function dataURLaBlob(dataUrl){
   }catch(e){ return null; }
 }
 
-// Sube la foto al Storage de Supabase y guarda el LINK en el producto/celular
+// Nombre nuevo y estable para futuras cargas. No renombra ni toca las URLs que
+// ya funcionan: sólo se usa después de que el administrador elige otra foto.
+function tiendaHashFoto(texto){
+  var s=String(texto||''), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  return (h>>>0).toString(36);
+}
+function tiendaTokenFoto(valor){
+  var original=String(valor||'sin-id');
+  var legible=original.toLowerCase()
+    .replace(/-/g,'neg_')
+    .replace(/[^a-z0-9_]+/g,'_')
+    .replace(/^_+|_+$/g,'')
+    .slice(0,80);
+  return (legible||'sin_id')+'_'+tiendaHashFoto(original);
+}
+function tiendaNombreFotoNueva(fid, producto){
+  if((''+fid).indexOf('celu_')===0){
+    return 'celulares/foto_'+tiendaTokenFoto(fid)+'.jpg';
+  }
+  if(producto && producto.automaticoProveedor){
+    var identidad=String(producto.proveedorClave||producto.proveedor||'proveedor')
+      +'|'+String(producto.proveedorId||producto.id);
+    return 'proveedores/'+tiendaTokenFoto(identidad)+'.jpg';
+  }
+  return 'manual/foto_'+tiendaTokenFoto(producto?producto.id:fid)+'.jpg';
+}
+
 function subirFotoStorage(blob, fid){
+  if(!adminUnlocked){
+    alert('🔒 Solo el administrador puede reemplazar fotos.');
+    return Promise.resolve({authRequerida:true});
+  }
+  return tiendaAuthFotosSesion().then(function(sesion){
+    if(!sesion){
+      tiendaAuthFotosAbrir(fid,blob);
+      return {authRequerida:true};
+    }
+    return subirFotoStorageAutenticada(blob,fid);
+  }).catch(function(e){
+    alert('⚠️ No pude comprobar la sesión de fotos: '+(e.message||e));
+    return {error:e};
+  });
+}
+
+// Sube la foto al Storage de Supabase y guarda el LINK en el producto/celular.
+// Sólo se invoca después de comprobar una sesión real de Supabase.
+function subirFotoStorageAutenticada(blob, fid){
   if(!NUBE_OK || !sbCalc){ alert('Sin conexión a la nube. Esperá unos segundos e intentá de nuevo.'); return; }
-  // 🔑 nombre FIJO por producto: al reemplazar, el upsert PISA la foto anterior
-  // (no quedan fotos huérfanas en el Storage ni se "montan" una sobre otra).
-  var idLimpio = (''+fid).replace(/[^a-zA-Z0-9_]/g,'');
-  var nombreArch = 'foto_'+idLimpio+'.jpg';
-  sbCalc.storage.from('tienda-fotos').upload(nombreArch, blob, { contentType:'image/jpeg', upsert:true, cacheControl:'0' })
+  var esCelu=(''+fid).indexOf('celu_')===0;
+  var productoFoto=esCelu?null:tiendaProductos.find(function(x){return x.id==fid;});
+  if(!esCelu && !productoFoto){ alert('⚠️ No encontré el producto para guardar la foto.'); return; }
+  var nombreArch=tiendaNombreFotoNueva(fid,productoFoto);
+  if(!sbFotos){ alert('La conexión segura para fotos todavía no está disponible.'); return Promise.resolve({error:new Error('Storage seguro no disponible')}); }
+  return sbFotos.storage.from('tienda-fotos').upload(nombreArch, blob, { contentType:'image/jpeg', upsert:true, cacheControl:'0' })
     .then(function(res){
-      if(res.error){ alert('⚠️ Error al subir la foto:\n'+res.error.message); return; }
-      var pub = sbCalc.storage.from('tienda-fotos').getPublicUrl(nombreArch);
+      if(res.error) throw res.error;
+      var pub = sbFotos.storage.from('tienda-fotos').getPublicUrl(nombreArch);
       // rompe-caché: al ser el mismo nombre, forzamos que el navegador baje la NUEVA
       var url = pub.data.publicUrl + '?v=' + Date.now();
       if((''+fid).indexOf('celu_')===0){
@@ -4513,25 +4848,44 @@ function subirFotoStorage(blob, fid){
         var p=tiendaProductos.find(function(x){return x.id==fid;});
         if(p){
           p.foto=url;
+          if(p.automaticoProveedor) p.fotoManualProveedor=url;
           // 🧹 al poner tu propia foto, dejar de tratarla como foto de catálogo:
           // así se muestra tapando TODO (cover, sin bordes) y sin el logo encima.
           delete p.fotoOrigen;
           delete p.fotoCatalogoLogo;
-          tiendaGuardarLocal();
+          return tiendaGuardarLocal().then(function(guardado){
+            if(guardado && guardado.error) throw guardado.error;
+            return url;
+          });
         }
+        throw new Error('No encontré el producto luego de subir la foto');
       }
-      tiendaRender();
-      // volver a la tarjeta del producto editado (no saltar al principio)
-      setTimeout(function(){
-        try{
-          var card=document.getElementById('card-'+fid);
-          if(card){ card.scrollIntoView({behavior:'smooth', block:'center'}); card.style.transition='box-shadow .3s'; card.style.boxShadow='0 0 0 3px var(--nar)'; setTimeout(function(){ card.style.boxShadow=''; }, 1400); }
-        }catch(e){}
-      }, 150);
+      return url;
+    })
+    .then(function(){
+      tiendaRenderYEnfocar(fid);
       alert('✅ Foto reemplazada. Ahora la ven todos.');
     })
     .catch(function(e){ alert('⚠️ Excepción al subir foto: '+(e.message||e)); });
 }
+
+// Quita solamente la foto elegida por Amarango y recupera la del proveedor.
+function tiendaUsarFotoProveedor(id){
+  var p=tiendaProductos.find(function(x){return x.id==id;});
+  if(!p || !p.automaticoProveedor) return;
+  if(!p.fotoProveedor){
+    alert('Todavía no tengo guardada la foto original del proveedor. Esperá a la próxima sincronización diaria y volvé a intentar.');
+    return;
+  }
+  p.foto=p.fotoProveedor;
+  delete p.fotoManualProveedor;
+  delete p.fotoOrigen;
+  delete p.fotoCatalogoLogo;
+  tiendaGuardarLocal();
+  tiendaRenderYEnfocar(id);
+  mostrarToast('↩️ Foto del proveedor restaurada');
+}
+
 // quitar la foto de un producto o celular
 function tiendaQuitarFoto(id){
   if(!confirm('¿Quitar la foto?'))return;
@@ -4539,11 +4893,15 @@ function tiendaQuitarFoto(id){
     var i=parseInt((''+id).replace('celu_',''),10);
     var celus=cargarListaCelus();
     if(celus[i]){ var nomC=celus[i].nombre; celus[i].foto=''; try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); subirCelusNube(celus); }catch(e){} guardarFotoBanco(nomC, ''); }
-    tiendaRender(); return;
+    tiendaRenderYEnfocar(id); return;
   }
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p||!p.foto)return;
-  p.foto=''; tiendaGuardarLocal(); tiendaRender();
+  if(p.automaticoProveedor && p.fotoManualProveedor){
+    tiendaUsarFotoProveedor(id);
+    return;
+  }
+  p.foto=''; tiendaGuardarLocal(); tiendaRenderYEnfocar(id);
 }
 
 // EDITAR completo (solo admin): nombre, costo↔venta, categoría, características
@@ -4564,6 +4922,9 @@ function tiendaReclasificarOtros(){
   var plan=[], ejemplos=[];
   tiendaProductos.forEach(function(p){
     if(p.esCelu) return;
+    // "Otros" elegido a mano se respeta. El reordenamiento masivo sólo trabaja
+    // con los productos que todavía no tienen una elección manual.
+    if(p.categoriaManualFijada===true || p.categoriaManualProveedor) return;
     var actual = p.categoria || tiendaCategoria(p.nombre);
     if(actual==='📦 Otros' || !p.categoria){
       var detectada = tiendaCategoria(p.nombre);
@@ -4579,8 +4940,12 @@ function tiendaReclasificarOtros(){
   msg+='\n\n¿Los reordeno?';
   if(!confirm(msg)) return;
   try{ tiendaBackupAuto(); }catch(e){}
-  plan.forEach(function(x){ x.p.categoria=x.cat; });
-  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  plan.forEach(function(x){
+    x.p.categoria=x.cat;
+    x.p.categoriaManualFijada=true;
+    if(x.p.automaticoProveedor) x.p.categoriaManualProveedor=x.cat;
+  });
+  tiendaGuardarLocal();
   tiendaRender();
   mostrarToast('✅ '+plan.length+' producto'+(plan.length===1?'':'s')+' reordenado'+(plan.length===1?'':'s'));
 }
@@ -4611,6 +4976,9 @@ function tiendaEditarPrecio(id){
     +'<select id="edit-cat" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     + TIENDA_CATEGORIAS.map(function(c){ return '<option value="'+c+'"'+(catProd(p)===c?' selected':'')+'>'+c+'</option>'; }).join('')
     +'</select>'
+    +(p.automaticoProveedor && p.categoriaManualProveedor
+      ?'<button type="button" onclick="tiendaUsarCategoriaProveedor('+p.id+')" style="width:100%;padding:8px;margin:-4px 0 12px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;">↩️ Usar categoría del proveedor</button>'
+      :'')
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">🏪 MAYORISTA</div>'
     +'<input id="edit-mayorista" list="lista-mayoristas-edit" value="'+(p.mayorista||'').replace(/"/g,'&quot;')+'" placeholder="Ej: Stagliano, Galiano, Cachi..." autocomplete="off" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     +'<datalist id="lista-mayoristas-edit">'+_sugerenciasMayoristas()+'</datalist>'
@@ -4670,14 +5038,29 @@ function tiendaGuardarPrecios(){
         p.precioActualizado=Date.now();
       }
       p.costo=Math.round(costo); p.venta=Math.round(venta);
-      p.categoria=cat; p.caracteristicas=carac;
+      p.categoria=cat;
+      p.categoriaManualFijada=true;
+      if(p.automaticoProveedor) p.categoriaManualProveedor=cat;
+      p.caracteristicas=carac;
       p.mayorista=mayorista; // 🏪 mayorista editable
       tiendaGuardarLocal();
     }
   }
   document.getElementById('modal-cuotas').style.display='none';
-  try{ tiendaSubirNube(); }catch(e){}
-  tiendaRender();
+  tiendaRenderYEnfocar(window._tiendaEditId);
+}
+
+// Quita solamente la elección manual y recupera la categoría automática.
+function tiendaUsarCategoriaProveedor(id){
+  var p=tiendaProductos.find(function(x){return x.id==id;});
+  if(!p || !p.automaticoProveedor) return;
+  p.categoria=p.categoriaProveedor || tiendaCategoria(p.nombre);
+  delete p.categoriaManualProveedor;
+  delete p.categoriaManualFijada;
+  tiendaGuardarLocal();
+  document.getElementById('modal-cuotas').style.display='none';
+  tiendaRenderYEnfocar(id);
+  mostrarToast('↩️ Categoría del proveedor restaurada');
 }
 
 // QUITAR producto (solo admin)
@@ -4714,7 +5097,7 @@ function tiendaToggleVisibleProd(id){
     }
   }catch(e){}
   if(typeof mostrarToast==='function') mostrarToast(p.visible?'👁️ Producto visible en la tienda':'🙈 Producto oculto de la tienda');
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // Marcar/desmarcar SIN STOCK manualmente
@@ -4730,7 +5113,7 @@ function tiendaToggleSinStock(id){
     } else { tiendaGuardarLocal(); }
   }catch(e){}
   if(typeof mostrarToast==='function') mostrarToast(p.sinStock?'⛔ Marcado SIN STOCK':'✅ Marcado con stock');
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // Marcar/desmarcar "cuotas sin interés": pide en cuántas cuotas va sin recargo
@@ -4753,7 +5136,7 @@ function tiendaSetSinInteres(id){
     if(pr){ if(valor)pr.sinInteres=valor; else delete pr.sinInteres; tiendaGuardarLocal(); }
   }
   mostrarToast(valor?('✨ '+valor+' cuotas sin interés'):'Sin interés quitado');
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // Poner/quitar oferta: guarda el precio ANTERIOR (el actual es el de oferta)
@@ -4801,7 +5184,7 @@ function tiendaSetOferta(id){
   }
   if(quitarOferta) mostrarToast('Oferta quitada');
   else { var off=Math.round((1-ahora/antes)*100); mostrarToast('🔥 Oferta -'+off+'% ('+fmt(antes)+' → '+fmt(ahora)+')'); }
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // Marcar/desmarcar "últimas unidades"
@@ -4814,7 +5197,7 @@ function tiendaTogglePocoStock(id){
     var p=tiendaProductos.find(function(x){return x.id==id;});
     if(p){ p.pocoStock=!p.pocoStock; tiendaGuardarLocal(); }
   }
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // Marcar/desmarcar un producto como destacado (aparece en el carrusel de arriba)
@@ -4828,7 +5211,7 @@ function tiendaToggleDestacado(id){
     var p=tiendaProductos.find(function(x){return x.id==id;});
     if(p){ p.destacado=!p.destacado; tiendaGuardarLocal(); }
   }
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // Producto del día: solo UNO a la vez. Al marcar uno, se desmarcan los demás.
@@ -4852,7 +5235,7 @@ function tiendaSetProductoDia(id){
   try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){}
   subirCelusNube(celus);
   tiendaGuardarLocal();
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
 }
 
 // mostrar u ocultar todos los marcados de una
@@ -4922,7 +5305,7 @@ function abrirCajonTools(){
       'tienda-btn-hist','tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
       'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
-      'btn-limpiar-dup','btn-reclasificar','sello-version'
+      'tienda-btn-auth-fotos','btn-limpiar-dup','btn-reclasificar','sello-version'
     ];
     ids.forEach(function(id){
       var el=document.getElementById(id);
@@ -5673,7 +6056,7 @@ function tiendaOcultarVarios(ocultar){
   });
   if(tocoCelu){ try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
   tiendaCancelarSelec();
-  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaGuardarLocal();
   tiendaRender();
   mostrarToast('✅ '+cont+' producto'+(cont===1?'':'s')+(ocultar?' ocultado'+(cont===1?'':'s')+' (siguen en admin)':' visible'+(cont===1?'':'s')+' de nuevo'));
 }
@@ -5691,7 +6074,7 @@ function tiendaOcultarCategoria(cat, ocultar){
     try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){}
     subirCelusNube(celus);
   }
-  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaGuardarLocal();
   cerrarCajonCats(); tiendaRender();
   mostrarToast('✅ Categoría "'+cat+'": '+cont+' producto'+(cont===1?'':'s')+(ocultar?' ocultado'+(cont===1?'':'s'):' visible'+(cont===1?'':'s')));
 }
@@ -6130,7 +6513,20 @@ function actualizarCarritoUI(){
   if(nb){ if(total>0){ nb.style.display='block'; nb.textContent=total>99?'99+':total; } else nb.style.display='none'; }
 }
 function abrirCarrito(){
-  if(!carrito.length){ alert('Tu carrito está vacío.'); return; }
+  if(!carrito.length){
+    var vacio='<div style="text-align:center;padding:8px 4px 4px;">'
+      +'<div style="width:92px;height:92px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(145deg,#eef4ff,#fff4e8);border:1px solid #dbe8fb;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(11,45,107,.1);position:relative;">'
+      +'<span style="font-size:2.5rem;line-height:1;">🛒</span><span style="position:absolute;right:4px;bottom:2px;font-size:1.55rem;">🐝</span></div>'
+      +'<h3 style="color:var(--az);font-weight:900;font-size:1.2rem;margin:0 0 7px;">Tu carrito está vacío</h3>'
+      +'<p style="color:var(--sub);font-size:.8rem;line-height:1.55;margin:0 auto 18px;max-width:285px;">Todavía no agregaste productos. Explorá nuestro catálogo y encontrá todo lo que necesitás para tu hogar.</p>'
+      +'<button class="calc-btn" style="width:100%;background:linear-gradient(135deg,var(--nar),#ff9a3d);padding:13px;font-weight:900;box-shadow:0 4px 14px rgba(255,122,0,.25);" onclick="carritoVacioVerProductos()">Ver productos</button>'
+      +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>'
+      +'</div>';
+    document.getElementById('modal-cuotas-body').innerHTML=vacio;
+    document.getElementById('modal-cuotas').style.display='block';
+    document.getElementById('modal-cuotas').scrollTop=0;
+    return;
+  }
   var total=0;
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1.1rem;">🛒 Tu pedido</h3>'
     +'<div style="margin:12px 0;">';
@@ -6170,6 +6566,23 @@ function abrirCarrito(){
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
+}
+function carritoVacioVerProductos(){
+  document.getElementById('modal-cuotas').style.display='none';
+  tiendaCategoriaActiva='';
+  tiendaMarcaActiva='';
+  verSoloFavoritos=false;
+  verSoloOfertas=false;
+  verSoloPreciosViejos=false;
+  var inp=document.getElementById('tienda-buscar'); if(inp)inp.value='';
+  var hdr=document.getElementById('hdr-buscar-input'); if(hdr)hdr.value='';
+  if(typeof marcarNavActiva==='function') marcarNavActiva('');
+  tiendaToggleLimpiar();
+  tiendaRender();
+  setTimeout(function(){
+    var destino=document.getElementById('tienda-grid')||document.getElementById('tienda-contador');
+    if(destino&&destino.scrollIntoView)destino.scrollIntoView({behavior:'smooth',block:'start'});
+  },60);
 }
 function aplicarCupon(){
   var cod=(document.getElementById('cupon-inp').value||'').trim().toUpperCase();
@@ -6561,13 +6974,12 @@ function cambiarCant(idx, delta){
     if(carrito[idx].cantidad<=0)carrito.splice(idx,1);
   }
   actualizarCarritoUI();
-  if(carrito.length)abrirCarrito();
-  else document.getElementById('modal-cuotas').style.display='none';
+  abrirCarrito();
 }
 function vaciarCarrito(){
   if(!confirm('¿Vaciar el carrito?'))return;
   carrito=[]; cuponAplicado=null; actualizarCarritoUI();
-  document.getElementById('modal-cuotas').style.display='none';
+  abrirCarrito();
 }
 // datos del pedido en curso (se van llenando en los pasos)
 // ═══════════════════════════════════════════════════════════════
@@ -7142,7 +7554,7 @@ function elegirDuplicadoVisible(grupo,id){
       p.ocultoManualProveedor=false;
     }
   });
-  tiendaGuardarLocal(); try{tiendaSubirNube();}catch(e){}
+  tiendaGuardarLocal();
   tiendaRender();
   mostrarToast('✅ Producto visible elegido');
   abrirPosiblesDuplicados();
@@ -7161,7 +7573,7 @@ function marcarNoDuplicados(grupo){
     delete p.duplicadoSimilitud;
     delete p.duplicadoPreferido;
   });
-  tiendaGuardarLocal(); try{tiendaSubirNube();}catch(e){}
+  tiendaGuardarLocal();
   tiendaRender();
   mostrarToast('✅ Marcados como productos diferentes');
   abrirPosiblesDuplicados();
@@ -7229,7 +7641,6 @@ function tiendaLimpiarDuplicados(){
   var despues=tiendaProductos.length;
   // guardar y subir (usa las mismas funciones que la carga normal)
   try{ tiendaGuardarLocal(); }catch(e){}
-  try{ tiendaSubirNube(); }catch(e){}
   try{ tiendaRender(); }catch(e){}
   alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
 }
@@ -7953,17 +8364,40 @@ function chequearCoherenciaMemoria(celus){
 // 💵 Cambia la cotización de un producto en DÓLARES. La elección queda guardada
 // en cotizacionDolarManual y el sincronizador la conserva en futuras cargas.
 var _ultimaCotizUSD = 1590;
+function tiendaProductoPareceUSD(p){
+  if(!p)return false;
+  if(p.monedaProveedor==='USD')return true;
+  var texto=((p.nombre||'')+' '+(p.caracteristicas||'')).toUpperCase();
+  if(/(?:^|[^A-Z0-9])(?:USD|U\$S|US\$)(?:$|[^A-Z0-9])/.test(texto))return true;
+  if(/\bD[OÓ]LAR(?:ES)?\b/.test(texto))return true;
+  return !p.monedaProveedor && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000;
+}
+function tiendaPrecioOriginalUSD(p,cotizacion){
+  var original=Number(p&&p.precioProveedorOriginal)||0;
+  if(original>0)return original;
+  var texto=String((p&&p.nombre)||'');
+  var m=texto.match(/([0-9]+(?:[.,][0-9]+)?)\s*(?:USD|U\$S|US\$|D[OÓ]LAR(?:ES)?)/i);
+  if(m){
+    var extraido=parseFloat(m[1].replace(',','.'));
+    if(extraido>0)return extraido;
+  }
+  var costo=Number(p&&p.costo)||0;
+  if(costo>0 && costo<5000)return costo;
+  if(p&&p.monedaProveedor==='USD' && costo>0 && Number(cotizacion)>0){
+    return Math.round((costo/Number(cotizacion))*100)/100;
+  }
+  return 0;
+}
 function tiendaConvertirUSD(id){
   if(!tiendaEsAdmin){ return; }
   var p=buscarProd(id);
   if(!p){ return; }
   var cotizAnterior=Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||_ultimaCotizUSD||1590;
-  var precioUSD=Number(p.precioProveedorOriginal)||0;
-  if(precioUSD<=0 && p.monedaProveedor==='USD' && Number(p.costo)>0){
-    precioUSD=Math.round((Number(p.costo)/cotizAnterior)*100)/100;
-  }
-  if(precioUSD<=0 && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000){
-    precioUSD=Number(p.costo);
+  var precioUSD=tiendaPrecioOriginalUSD(p,cotizAnterior);
+  if(precioUSD<=0){
+    var precioResp=prompt('💵 PRECIO DEL PROVEEDOR\n\n"'+p.nombre+'"\n\nNo pude leer automáticamente el importe. ¿Cuántos USD cuesta?\n(Escribí solo el número)', '');
+    if(precioResp===null)return;
+    precioUSD=parseFloat(String(precioResp).replace(/\./g,'').replace(',','.'))||0;
   }
   if(precioUSD<=0){ alert('Este producto no tiene un precio para convertir.'); return; }
   var resp = prompt('💵 CAMBIAR COTIZACIÓN\n\n"'+p.nombre+'"\nPrecio del proveedor: '+precioUSD+' USD\n\n¿A qué cotización lo paso?\n(Escribí solo el número, ej: 1590)', cotizAnterior);
@@ -7982,7 +8416,7 @@ function tiendaConvertirUSD(id){
   p.venta = ventaPesos;
   p.usdConvertido = true;
   tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
-  tiendaRender();
+  tiendaRenderYEnfocar(id);
   mostrarToast('✅ Cotización guardada: $'+cotiz.toLocaleString('es-AR'));
 }
 
