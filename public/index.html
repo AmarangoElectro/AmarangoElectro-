@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ARCHIVO PRINCIPAL AMARANGO: v-ESCRITORIO-RESPONSIVO + INSTAGRAM + COMPARTIR-DIRECTO + BUSQUEDA-EXACTA + FOTOS-WHATSAPP-PROVEEDORES -->
+<!-- ARCHIVO PRINCIPAL AMARANGO: V-FOTO-WHATSAPP-MANUAL-3 + ESCRITORIO + INSTAGRAM + BUSQUEDA-EXACTA -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -5681,25 +5681,30 @@ function tiendaCargarImagenParaCanvas(url){
     });
 }
 
-// Las imágenes automáticas están en un CDN que permite verlas en <img>, pero
-// no permite que el navegador las lea para adjuntarlas a WhatsApp (CORS).
-// Para compartirlas se bajan mediante una función propia de Netlify. La foto
-// guardada en el catálogo no cambia y en la tienda continúa usando su URL real.
+// Sólo la imagen ORIGINAL del CDN del proveedor necesita proxy por CORS.
+// Si Amarango reemplazó la foto de un producto automático, esa imagen vive en
+// Supabase y debe leerse directamente. Enviarla al proxy del proveedor haría
+// que éste la rechace y WhatsApp terminaría mostrando sólo el logo general.
 function tiendaUrlFotoCompartible(p){
   if(!p || !p.foto) return '';
-  if(p.automaticoProveedor){
-    return '/.netlify/functions/imagen-proveedor?url='+encodeURIComponent(p.foto);
+  var foto=String(p.foto||'');
+  var esFotoAmarango=!!p.fotoManualProveedor ||
+    foto.indexOf('/storage/v1/object/public/tienda-fotos/')>=0;
+  if(esFotoAmarango) return foto;
+  if(p.automaticoProveedor && /^https:\/\/cdn\.catalog-store\.link\//i.test(foto)){
+    return '/api/imagen-proveedor?url='+encodeURIComponent(foto);
   }
-  return p.foto;
+  return foto;
 }
 
-// Para las fotos extraídas del catálogo genera una copia cuadrada. Para los
-// proveedores conserva el formato vertical completo y convierte WebP a JPEG,
-// que WhatsApp reconoce correctamente. No modifica ninguna foto guardada.
+// Para las fotos extraídas del catálogo genera una copia cuadrada. Para la foto
+// ORIGINAL del proveedor conserva el formato vertical y suma el logo Amarango.
+// Si uno de los administradores reemplazó la foto, se comparte tal como fue
+// subida: no se recorta ni se le vuelve a colocar el logo.
 function tiendaBlobParaCompartir(p){
   if(!p || !p.foto)return Promise.reject(new Error('Producto sin foto'));
   var esCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
-  var esProveedor=!!p.automaticoProveedor;
+  var esProveedor=!!p.automaticoProveedor && !p.fotoManualProveedor;
   var necesitaComponer=esCatalogo||esProveedor;
   if(!necesitaComponer){
     return fetch(p.foto).then(function(r){
