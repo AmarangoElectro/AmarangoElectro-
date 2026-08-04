@@ -4254,6 +4254,21 @@ function tiendaRenderYEnfocar(id){
   tiendaEnfocarProducto(id,false);
 }
 
+// Después de mover un producto de categoría, conserva el filtro y el sector
+// que el administrador estaba revisando. También repone los lotes que ya
+// estaban cargados para no volver al comienzo de la lista.
+function tiendaRenderMantenerSector(scrollY, mostrados){
+  tiendaRender();
+  var cantidad=Math.max(0, Number(mostrados)||0);
+  while(_tiendaMostrados<cantidad && _tiendaMostrados<_tiendaListaFull.length){
+    tiendaVerMas();
+  }
+  setTimeout(function(){
+    var maxY=Math.max(0, document.documentElement.scrollHeight-window.innerHeight);
+    window.scrollTo({top:Math.min(Math.max(0, Number(scrollY)||0),maxY),behavior:'auto'});
+  },80);
+}
+
 // scroll infinito: cuando el usuario se acerca al final, carga el próximo lote
 (function(){
   if(!('IntersectionObserver' in window)) return;
@@ -4959,6 +4974,9 @@ function tiendaEditarPrecio(id){
   if(!p)return;
   window._tiendaEditId=id;
   window._tiendaEditEsCelu=!!p.esCelu;
+  window._tiendaEditCategoriaOriginal=catProd(p);
+  window._tiendaEditScrollY=window.scrollY||window.pageYOffset||0;
+  window._tiendaEditMostrados=_tiendaMostrados;
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🖍️ Editar producto</h3>'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin:10px 0 4px;">NOMBRE</div>'
     +'<input id="edit-nombre" value="'+(p.nombre||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:12px;">'
@@ -5018,6 +5036,7 @@ function tiendaGuardarPrecios(){
   var mayEl=document.getElementById('edit-mayorista');
   var mayorista=mayEl?(mayEl.value||'').trim():'';
 
+  var cambioCategoria=false;
   if(window._tiendaEditEsCelu){
     // editar un celular: se guarda en la lista de celulares
     var i=parseInt((''+window._tiendaEditId).replace('celu_',''),10);
@@ -5032,6 +5051,7 @@ function tiendaGuardarPrecios(){
   }else{
     var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
     if(p){
+      cambioCategoria=window._tiendaEditCategoriaOriginal!==cat;
       if(nombre)p.nombre=nombre;
       // sellar fecha SOLO si cambió el precio de venta o el costo
       if(Math.round(p.venta)!==Math.round(venta) || Math.round(p.costo||0)!==Math.round(costo)){
@@ -5047,7 +5067,11 @@ function tiendaGuardarPrecios(){
     }
   }
   document.getElementById('modal-cuotas').style.display='none';
-  tiendaRenderYEnfocar(window._tiendaEditId);
+  if(cambioCategoria){
+    tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
+  }else{
+    tiendaRenderYEnfocar(window._tiendaEditId);
+  }
 }
 
 // Quita solamente la elección manual y recupera la categoría automática.
@@ -5059,7 +5083,7 @@ function tiendaUsarCategoriaProveedor(id){
   delete p.categoriaManualFijada;
   tiendaGuardarLocal();
   document.getElementById('modal-cuotas').style.display='none';
-  tiendaRenderYEnfocar(id);
+  tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
   mostrarToast('↩️ Categoría del proveedor restaurada');
 }
 
@@ -5081,11 +5105,19 @@ function tiendaToggleMarcado(id){
   else tiendaMarcadosSet[id]=true;
 }
 
+// En productos automáticos, además de cambiar la vista guardamos la decisión
+// manual para que una actualización del proveedor no vuelva a mostrarlos.
+function tiendaSetVisibilidadManual(p, visible){
+  if(!p)return;
+  p.visible=visible;
+  if(p.automaticoProveedor) p.ocultoManualProveedor=!visible;
+}
+
 // Mostrar u ocultar un producto en la tienda (directo, por tarjeta)
 function tiendaToggleVisibleProd(id){
   var p=buscarProd(id);
   if(!p)return;
-  p.visible = !p.visible;
+  tiendaSetVisibilidadManual(p,!p.visible);
   // guardar según sea celu o producto propio
   try{
     if((''+id).indexOf('celu_')===0){
@@ -5246,7 +5278,7 @@ function tiendaMarcados(accion){
   var cont=0;
   // productos propios
   tiendaProductos.forEach(function(p){
-    if(tiendaMarcadosSet[p.id]){ p.visible=vis; cont++; }
+    if(tiendaMarcadosSet[p.id]){ tiendaSetVisibilidadManual(p,vis); cont++; }
   });
   // celulares (usan ocultoTienda porque su "visible" es siempre true)
   var celus=cargarListaCelus(), tocoCelu=false;
@@ -6050,7 +6082,7 @@ function tiendaOcultarVarios(ocultar){
   var vis=!ocultar;
   var cont=0;
   // productos propios
-  tiendaProductos.forEach(function(p){ if(tiendaSelecSet[p.id]){ p.visible=vis; cont++; } });
+  tiendaProductos.forEach(function(p){ if(tiendaSelecSet[p.id]){ tiendaSetVisibilidadManual(p,vis); cont++; } });
   // celulares (usan ocultoTienda)
   var celus=cargarListaCelus(), tocoCelu=false;
   ids.forEach(function(id){
@@ -6071,7 +6103,7 @@ function tiendaOcultarCategoria(cat, ocultar){
   if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede ocultar categorías.'); return; }
   var vis=!ocultar;
   var cont=0;
-  tiendaProductos.forEach(function(p){ if(catProd(p)===cat){ p.visible=vis; cont++; } });
+  tiendaProductos.forEach(function(p){ if(catProd(p)===cat){ tiendaSetVisibilidadManual(p,vis); cont++; } });
   // celulares si la categoría es Celulares
   if(cat==='📱 Celulares'){
     var celus=cargarListaCelus();
