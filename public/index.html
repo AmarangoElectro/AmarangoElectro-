@@ -2740,7 +2740,8 @@ function tiendaAplicarModo(){
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
-  var selloV=document.getElementById('sello-version'); if(selloV)selloV.style.display = tiendaEsAdmin?'block':'none';
+  // El texto técnico de versión no es una herramienta y no necesita mostrarse.
+  var selloV=document.getElementById('sello-version'); if(selloV)selloV.style.display = 'none';
   // En modo administrador, el carrito de la barra se convierte en un acceso
   // rápido a las herramientas. Para clientes continúa siendo el carrito.
   var navIc=document.getElementById('nav-carrito-ic'), navLbl=document.getElementById('nav-carrito-lbl');
@@ -2760,6 +2761,9 @@ function tiendaAplicarModo(){
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
   var btnSub=document.getElementById('tienda-btn-subs'); if(btnSub)btnSub.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
+  // Las herramientas administrativas viven únicamente dentro de su cajón.
+  // Se trasladan al iniciar el modo admin para que no aparezcan duplicadas.
+  if(tiendaEsAdmin && typeof prepararCajonTools==='function') prepararCajonTools();
   // Botón admin ahora vive en el cajón lateral: actualizamos su ícono/texto/acción
   var cItem=document.getElementById('cajon-admin-item');
   var cIc=document.getElementById('cajon-admin-ic');
@@ -4578,7 +4582,7 @@ function tiendaCardsHtml(sublista){
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="flex:0 0 auto;background:none;border:none;font-size:1.05rem;cursor:pointer;line-height:1;padding:0;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>'
-      +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.58rem;font-weight:800;color:'+cm.txt+';background:'+cm.bg+';border:1px solid '+cm.bor+';border-radius:6px;padding:2px 6px;margin-bottom:3px;display:inline-block;">🏪 '+p.mayorista+'</div>';})():'')
+      +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.62rem;font-weight:900;color:'+cm.txt+';background:'+cm.bg+';border:1.5px solid '+cm.bor+';border-radius:7px;padding:3px 8px;margin-bottom:4px;display:inline-block;box-shadow:inset 0 -5px 0 rgba(255,255,255,.18);">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
         var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
@@ -4640,6 +4644,12 @@ function tiendaCardsHtml(sublista){
       // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
       if(!p.esCelu){
         card+=etiquetaFechaPrecio(p);
+        // Los productos manuales no reciben actualizaciones del proveedor:
+        // el admin puede confirmar con un toque que el precio sigue vigente.
+        if(!p.automaticoProveedor){
+          var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
+          card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
+        }
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
@@ -4668,11 +4678,7 @@ function tiendaCardsHtml(sublista){
       +'</div>'
       +(p.automaticoProveedor && p.fotoManualProveedor
         ?'<button style="width:100%;font-size:.66rem;padding:8px 4px;margin-bottom:5px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaUsarFotoProveedor('+pid+')">↩️ Usar foto del proveedor</button>'
-        :'')
-      +'<div style="display:flex;gap:5px;">'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:'+(p.sinStock?'#FEF2F2':'#F0FDF4')+';color:'+(p.sinStock?'#DC2626':'#059669')+';border:1.5px solid '+(p.sinStock?'#FECACA':'#A7F3D0')+';border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'⛔ Sin stock':'✅ Con stock')+'</button>'
-        +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:#fff;color:var(--nar);border:1.5px solid var(--nar);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaAbrirOpciones('+pid+')">⚙️ Opciones</button>'
-      +'</div>';
+        :'');
     }else{
       // Un solo botón: la foto y el precio son los protagonistas.
       // "Ver cuotas" y "Consultar" quedan adentro del detalle del producto.
@@ -4922,6 +4928,12 @@ function tiendaQuitarFoto(id){
 // Genera un tono a partir del texto, así cada mayorista se distingue de un vistazo.
 function colorMayorista(nombre){
   var s=(nombre||'').toLowerCase().trim();
+  // Colores oficiales para reconocer los mayoristas de un vistazo.
+  if(s.indexOf('mega')>-1) return {txt:'#0B4AA2',bg:'#DCEBFF',bor:'#70A9F5'};
+  if(s.indexOf('elektro')>-1 || s.indexOf('electro')>-1) return {txt:'#08783E',bg:'#DDF7E8',bor:'#65C991'};
+  if(s.indexOf('women')>-1) return {txt:'#6D28A8',bg:'#F0E1FF',bor:'#B98AE6'};
+  if(s.indexOf('stagliano')>-1) return {txt:'#B45309',bg:'#FFF0D9',bor:'#F5A94C'};
+  if(s.indexOf('sofj')>-1) return {txt:'#B91C1C',bg:'#FFE1E1',bor:'#F08080'};
   var h=0;
   for(var i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i)) % 360; }
   // color saturado y oscuro para el texto/borde, y una versión clarita para el fondo
@@ -5062,6 +5074,8 @@ function tiendaGuardarPrecios(){
       if(p.automaticoProveedor) p.categoriaManualProveedor=cat;
       p.caracteristicas=carac;
       p.mayorista=mayorista; // 🏪 mayorista editable
+      // Guardar una edición manual también confirma que el precio fue revisado.
+      if(!p.automaticoProveedor) p.precioChequeadoManual=Date.now();
       tiendaGuardarLocal();
     }
   }
@@ -5071,6 +5085,19 @@ function tiendaGuardarPrecios(){
   }else{
     tiendaRenderYEnfocar(window._tiendaEditId);
   }
+}
+
+// Confirma que un producto cargado a mano conserva su precio actual.
+function tiendaConfirmarPrecioManual(id){
+  if(!tiendaExigirAdmin())return;
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p || p.automaticoProveedor || p.esCelu)return;
+  var ahora=Date.now();
+  p.precioActualizado=ahora;
+  p.precioChequeadoManual=ahora;
+  tiendaGuardarLocal();
+  tiendaRenderYEnfocar(id);
+  mostrarToast('✅ Precio confirmado hoy');
 }
 
 // Quita solamente la elección manual y recupera la categoría automática.
@@ -5345,16 +5372,16 @@ function cerrarCajonCats(){ document.getElementById('cajon-cats').classList.remo
 // Reúne las acciones administrativas en el botón 🧰 de la barra inferior.
 // Los botones conservan sus funciones originales; sólo cambia dónde se ven.
 var _toolsMovidos=false;
-function abrirCajonTools(){
-  if(!tiendaEsAdmin) return;
+function prepararCajonTools(){
   var body=document.getElementById('cajon-tools-body');
   if(body && !_toolsMovidos){
     var ids=[
+      'tienda-btn-cargar','tienda-btn-celus','tienda-btn-carac',
       'tienda-btn-subir','tienda-btn-banner','tienda-btn-cupones','tienda-btn-stats',
       'tienda-btn-hist','tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
       'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
-      'tienda-btn-auth-fotos','btn-limpiar-dup','btn-reclasificar','sello-version'
+      'tienda-btn-auth-fotos','btn-limpiar-dup','btn-reclasificar'
     ];
     ids.forEach(function(id){
       var el=document.getElementById(id);
@@ -5362,6 +5389,10 @@ function abrirCajonTools(){
     });
     _toolsMovidos=true;
   }
+}
+function abrirCajonTools(){
+  if(!tiendaEsAdmin) return;
+  prepararCajonTools();
   var cajon=document.getElementById('cajon-tools');
   if(cajon) cajon.style.display='block';
   document.body.classList.add('cajon-cats-abierto');
