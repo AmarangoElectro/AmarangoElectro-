@@ -1610,12 +1610,10 @@ function calcCapitalCompartido(){
         +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(document.getElementById(\'cc-msg\').value),\'_blank\')">📲 Invitar al colaborador</button>'
         +'<textarea id="cc-msg" style="display:none;">'+msg+'</textarea>');
 }
-// muestra las pestañas de cálculo para asesores de ventas (solo Pegar precio)
+// muestra las herramientas comerciales para asesores de ventas
 function mostrarPestanasRev(){
   document.getElementById('tab-btn-pegar').style.display='';
-  // Placas es solo para admin; si NO es admin, se mantiene oculta
-  var esAdmin=(typeof adminUnlocked!=='undefined' && adminUnlocked);
-  var tp=document.getElementById('tab-btn-placas'); if(tp) tp.style.display=esAdmin?'':'none';
+  var tp=document.getElementById('tab-btn-placas'); if(tp) tp.style.display='';
 }
 // muestra TODO (para admin): pestañas de cálculo + Placas
 function mostrarPestanasAdmin(){
@@ -1689,14 +1687,9 @@ function showTab(t, esAtras){
     pedirClaveRevendedor(t);
     return;
   }
-  // "Placas" es SOLO para admin (pide clave de admin)
-  if(t==='placas' && !adminUnlocked){
-    pendingTab='placas';
-    document.getElementById("admin-pass").value="";
-    document.getElementById("pass-err").classList.remove("show");
-    document.getElementById("admin-pass").classList.remove("error");
-    document.getElementById("login-overlay").style.display="flex";
-    setTimeout(function(){document.getElementById("admin-pass").focus();},200);
+  // "Placas" también es una herramienta de venta (pide clave de asesor)
+  if(t==='placas' && !revUnlocked){
+    pedirClaveRevendedor(t);
     return;
   }
   // El cajón "admin" pide clave una vez y muestra sub-pestañas
@@ -3392,11 +3385,11 @@ function abrirCajon(){
   // mostrar secciones según rol
   var esAdmin = (typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin) || (typeof adminUnlocked!=='undefined' && adminUnlocked);
   var esRev = (typeof revUnlocked!=='undefined' && revUnlocked);
-  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-placas','cajon-capcomp','cajon-algoritmo','cajon-limpiar','cajon-semaforo','cajon-duplicados'].forEach(function(id){
+  ['cajon-sep-admin','cajon-marc-mostrar','cajon-marc-ocultar','cajon-cargar-celu','cajon-ver-cliente','cajon-ruleta','cajon-capcomp','cajon-algoritmo','cajon-limpiar','cajon-semaforo','cajon-duplicados'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=esAdmin?'':'none';
   });
   var rt=document.getElementById('cajon-ruleta-txt'); if(rt){ rt.textContent = (localStorage.getItem('ae_ruleta_on')==='1')?'Ruleta: encendida':'Ruleta: apagada'; }
-  ['cajon-pegar','cajon-color','cajon-sonido','cajon-pedido'].forEach(function(id){
+  ['cajon-pegar','cajon-placas','cajon-color','cajon-sonido','cajon-pedido'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.style.display=(esAdmin||esRev)?'':'none';
   });
   // El Programa Colaborador lo ven revendedores, admins, y los invitados que
@@ -4082,6 +4075,7 @@ function cerrarFotoGrande(){
 
 /* ✕ Quitar el producto del día (rápido, desde la misma tarjeta) */
 function quitarDelDia(id){
+  if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
   if(!p) return;
   if(!confirm('¿Sacar "'+(p.nombre||'')+'" de Producto del día?')) return;
@@ -4091,6 +4085,7 @@ function quitarDelDia(id){
 }
 /* ✕ Quitar un producto de Destacados */
 function quitarDestacado(id){
+  if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
   if(!p) return;
   if(!confirm('¿Sacar "'+(p.nombre||'')+'" de Destacados?')) return;
@@ -4886,6 +4881,7 @@ function subirFotoStorageAutenticada(blob, fid){
 
 // Quita solamente la foto elegida por Amarango y recupera la del proveedor.
 function tiendaUsarFotoProveedor(id){
+  if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p || !p.automaticoProveedor) return;
   if(!p.fotoProveedor){
@@ -4903,6 +4899,7 @@ function tiendaUsarFotoProveedor(id){
 
 // quitar la foto de un producto o celular
 function tiendaQuitarFoto(id){
+  if(!tiendaExigirAdmin())return;
   if(!confirm('¿Quitar la foto?'))return;
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
@@ -4970,6 +4967,7 @@ function _sugerenciasMayoristas(){
   return Object.keys(usados).sort().map(function(m){ return '<option value="'+m.replace(/"/g,'&quot;')+'">'; }).join('');
 }
 function tiendaEditarPrecio(id){
+  if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
   window._tiendaEditId=id;
@@ -5028,6 +5026,7 @@ function tiendaRecalcCosto(){
   document.getElementById('edit-costo').value=mejor;
 }
 function tiendaGuardarPrecios(){
+  if(!tiendaExigirAdmin())return;
   var venta=_num('edit-venta'), costo=_num('edit-costo');
   if(venta<=0){ alert('El precio de venta no puede quedar vacío.'); return; }
   var nombre=(document.getElementById('edit-nombre').value||'').trim();
@@ -5076,6 +5075,7 @@ function tiendaGuardarPrecios(){
 
 // Quita solamente la elección manual y recupera la categoría automática.
 function tiendaUsarCategoriaProveedor(id){
+  if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p || !p.automaticoProveedor) return;
   p.categoria=p.categoriaProveedor || tiendaCategoria(p.nombre);
@@ -5089,6 +5089,7 @@ function tiendaUsarCategoriaProveedor(id){
 
 // QUITAR producto (solo admin)
 function tiendaEliminar(id){
+  if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p)return;
   if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)+'\n\n(Va a la 🗑️ Papelera por si te arrepentís)'))return;
@@ -5113,8 +5114,17 @@ function tiendaSetVisibilidadManual(p, visible){
   if(p.automaticoProveedor) p.ocultoManualProveedor=!visible;
 }
 
+// Protección central: aunque un botón viejo quede visible por caché, un vendedor
+// nunca puede ejecutar una modificación de productos.
+function tiendaExigirAdmin(){
+  if(typeof tiendaEsAdmin!=='undefined' && tiendaEsAdmin)return true;
+  alert('🔒 Solo el administrador puede modificar productos.');
+  return false;
+}
+
 // Mostrar u ocultar un producto en la tienda (directo, por tarjeta)
 function tiendaToggleVisibleProd(id){
+  if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
   tiendaSetVisibilidadManual(p,!p.visible);
@@ -5134,6 +5144,7 @@ function tiendaToggleVisibleProd(id){
 
 // Marcar/desmarcar SIN STOCK manualmente
 function tiendaToggleSinStock(id){
+  if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
   p.sinStock = !p.sinStock;
@@ -5150,6 +5161,7 @@ function tiendaToggleSinStock(id){
 
 // Marcar/desmarcar "cuotas sin interés": pide en cuántas cuotas va sin recargo
 function tiendaSetSinInteres(id){
+  if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
   var actual=p.sinInteres?parseInt(p.sinInteres,10):'';
@@ -5173,6 +5185,7 @@ function tiendaSetSinInteres(id){
 
 // Poner/quitar oferta: guarda el precio ANTERIOR (el actual es el de oferta)
 function tiendaSetOferta(id){
+  if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
 
@@ -5221,6 +5234,7 @@ function tiendaSetOferta(id){
 
 // Marcar/desmarcar "últimas unidades"
 function tiendaTogglePocoStock(id){
+  if(!tiendaExigirAdmin())return;
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var celus=cargarListaCelus();
@@ -5234,6 +5248,7 @@ function tiendaTogglePocoStock(id){
 
 // Marcar/desmarcar un producto como destacado (aparece en el carrusel de arriba)
 function tiendaToggleDestacado(id){
+  if(!tiendaExigirAdmin())return;
   if((''+id).indexOf('celu_')===0){
     // celular: guardar en su lista
     var i=parseInt((''+id).replace('celu_',''),10);
@@ -5248,6 +5263,7 @@ function tiendaToggleDestacado(id){
 
 // Producto del día: solo UNO a la vez. Al marcar uno, se desmarcan los demás.
 function tiendaSetProductoDia(id){
+  if(!tiendaExigirAdmin())return;
   var yaEra=false;
   // desmarcar todos los productos
   tiendaProductos.forEach(function(p){ if(p.delDia && p.id==id)yaEra=true; p.delDia=false; });
@@ -5272,6 +5288,7 @@ function tiendaSetProductoDia(id){
 
 // mostrar u ocultar todos los marcados de una
 function tiendaMarcados(accion){
+  if(!tiendaExigirAdmin())return;
   var ids=Object.keys(tiendaMarcadosSet);
   if(!ids.length){ alert('Primero marcá los productos (tocá la casilla arriba de cada uno).'); return; }
   var vis=(accion==='mostrar');
@@ -5660,11 +5677,13 @@ function tiendaVerDetalle(id){
     // el cliente también puede compartir (sin cuotas): marketing
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--az);border:2px solid var(--bor);" onclick="compartirProducto('+pid+', true)">📤 Compartir este producto</button>';
   }else{
-    // ADMIN / VENDEDOR: tarjeta simple, SOLO lo que usamos → Compartir y Editar
+    // ADMIN / VENDEDOR: herramientas para compartir. La edición es solo admin.
     html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--az);border:2px solid var(--az);" onclick="compartirProducto('+pid+')">📤 Compartir este producto</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;" onclick="compartirInstagram('+pid+')">📸 Compartir en Instagram</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);" onclick="tiendaDescargarImagenProducto('+pid+')">🖼️ Descargar imagen</button>';
-    html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
+    if(tiendaEsAdmin){
+      html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
+    }
   }
   // PRODUCTOS RELACIONADOS: misma categoría, hasta 4
   var relacionados=tiendaRelacionados(p);
@@ -7455,6 +7474,7 @@ function tiendaVerCuotas(id){
 
 // ---- carga de catálogo por pegado ----
 function tiendaAbrirCarga(){
+  if(!tiendaExigirAdmin())return;
   document.getElementById('modal-carga').style.display='block';
   setCargaModo('costo');  // arranca en modo Costo por defecto
   // 🏷️ llenar el selector con todas las categorías
@@ -7682,6 +7702,7 @@ function tiendaLimpiarDuplicados(){
   alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
 }
 function tiendaProcesarCarga(){
+ if(!tiendaExigirAdmin())return;
  try{
   var texto=document.getElementById('carga-texto').value||'';
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
