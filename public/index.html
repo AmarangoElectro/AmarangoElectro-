@@ -126,19 +126,23 @@ body.cajon-cats-abierto #nav-inferior{display:none !important;}
 .hdr-buscar .hb-lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
 /* ═══ PORTADA AMARANGO ═══ */
-.ae-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;margin:0 0 14px;border-radius:20px;border:1px solid rgba(11,45,107,.18);background:linear-gradient(118deg,#f9fbff 0%,#eef4ff 48%,#fff7ed 100%);box-shadow:0 10px 28px rgba(11,45,107,.14);display:flex;align-items:center;padding:22px 16px 22px 22px;}
+.ae-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;margin:0 0 12px;border-radius:20px;border:2px solid rgba(255,122,0,.78);background:linear-gradient(118deg,#020c2e 0%,#0B2D6B 50%,#174aa5 72%,#FF7A00 145%);box-shadow:0 10px 28px rgba(11,45,107,.25);display:flex;align-items:center;padding:22px 16px 22px 22px;}
 .ae-hero::before{content:'';position:absolute;inset:0;z-index:-2;opacity:.48;background-image:linear-gradient(30deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(150deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(30deg,rgba(255,122,0,.08) 12%,transparent 12.5%,transparent 87%,rgba(255,122,0,.08) 87.5%,rgba(255,122,0,.08));background-size:48px 84px;background-position:0 0,0 0,24px 42px;}
 .ae-hero::after{content:'';position:absolute;z-index:-1;width:125%;height:78px;right:-38%;bottom:-38px;border-radius:50%;border:18px solid var(--nar);box-shadow:0 -22px 0 0 var(--az),0 -25px 18px rgba(11,45,107,.12);transform:rotate(-7deg);opacity:.92;}
 .ae-hero-copy{flex:1;min-width:0;position:relative;z-index:1;}
 .ae-hero-kicker{display:inline-flex;align-items:center;gap:5px;background:var(--az);color:#fff;border-radius:30px;padding:4px 10px;font-size:.58rem;font-weight:900;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;box-shadow:0 3px 10px rgba(11,45,107,.2);}
-.ae-hero h2{font-size:1.42rem;line-height:1.05;color:var(--az);font-weight:900;letter-spacing:-.7px;max-width:250px;}
-.ae-hero h2 span{color:var(--nar);}
-.ae-hero p{font-size:.68rem;line-height:1.35;color:#4b5870;font-weight:700;margin-top:8px;max-width:235px;}
-.ae-hero-logo{width:132px;height:132px;object-fit:contain;flex:0 0 auto;position:relative;z-index:1;filter:drop-shadow(0 8px 10px rgba(11,45,107,.18));}
+.ae-hero h2{font-size:1.42rem;line-height:1.05;color:#fff;font-weight:900;letter-spacing:-.7px;max-width:250px;text-shadow:0 2px 9px rgba(0,0,0,.3);}
+.ae-hero h2 span{color:#FF9A3D;}
+.ae-hero p{font-size:.68rem;line-height:1.35;color:rgba(255,255,255,.86);font-weight:700;margin-top:8px;max-width:235px;}
+.ae-hero-logo{width:132px;height:132px;object-fit:cover;flex:0 0 auto;position:relative;z-index:1;clip-path:circle(48% at 50% 50%);filter:drop-shadow(0 8px 10px rgba(0,0,0,.28));}
+.ae-buscar-banner{margin:0 0 12px !important;padding:0 !important;position:relative;z-index:30;}
+.ae-buscar-banner input{box-shadow:0 5px 16px rgba(11,45,107,.16);}
 /* Categorías siempre visibles y desplazables debajo de la portada. */
 #tienda-buscar-wrap{border-radius:14px;box-shadow:0 5px 16px rgba(11,45,107,.10);border:1px solid var(--bor);margin-bottom:12px !important;}
-#tienda-chips.cat-grid{padding:8px !important;display:flex !important;gap:7px;background:linear-gradient(180deg,#fff,#f8faff);}
-#tienda-chips .cat-tile{width:78px;min-height:64px;box-shadow:0 2px 7px rgba(11,45,107,.07);}
+#tienda-chips.cat-grid{padding:7px !important;display:flex !important;gap:6px;background:linear-gradient(180deg,#fff,#f8faff);scroll-snap-type:x mandatory;scroll-padding-inline:42%;}
+#tienda-chips .cat-tile{width:62px;min-height:52px;padding:6px 2px;box-shadow:0 2px 7px rgba(11,45,107,.07);scroll-snap-align:center;}
+#tienda-chips .cat-tile-ic{font-size:1.05rem;}
+#tienda-chips .cat-tile-txt{font-size:.48rem;}
 #tienda-chips .cat-tile.on{background:linear-gradient(145deg,var(--az),#1e5bc8);border-color:var(--az);box-shadow:0 4px 10px rgba(11,45,107,.25);transform:translateY(-1px);}
 body.oscuro .ae-hero{background:linear-gradient(118deg,#10284a,#112442 55%,#3a2416);border-color:#355477;}
 body.oscuro .ae-hero p{color:#d5dfec;}
@@ -303,7 +307,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
    En pantallas grandes se aprovecha el ancho y se muestran más productos.
    En celulares no cambia absolutamente nada. */
 @media (min-width:900px){
-  html{background:#e9edf5;}
+  html{background:linear-gradient(135deg,#020c2e 0%,#0B2D6B 72%,#FF7A00 140%);background-attachment:fixed;}
   body{max-width:1280px;box-shadow:0 0 34px rgba(11,45,107,.12);}
   .header{max-width:1280px;padding-left:26px;padding-right:26px;}
   .tab-content{padding:22px 28px 32px;}
@@ -320,7 +324,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   .ae-hero p{font-size:.88rem;max-width:470px;}
   .ae-hero-kicker{font-size:.68rem;padding:6px 14px;}
   .ae-hero-logo{width:225px;height:225px;margin-right:32px;}
-  #tienda-chips .cat-tile{width:94px;min-height:72px;}
+  #tienda-chips .cat-tile{width:74px;min-height:58px;}
 }
 
 </style>
@@ -364,13 +368,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
       <p>Equipá tu casa, fácil y en cuotas</p>
     </div>
-  </div>
-  <div class="hdr-buscar" style="position:relative;">
-    <span class="hb-lupa">🔍</span>
-    <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
-      oninput="hdrBuscarSync()" onfocus="hdrPredictivo()">
-    <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
-    <div id="hdr-sugerencias" style="display:none;position:fixed;top:118px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
   </div>
 </div>
 <div id="header-espacio"></div>
@@ -684,6 +681,15 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <img class="ae-hero-logo" src="amara-logo.png" alt="Logo Amarango Electro" onerror="this.onerror=null;this.src='icon.png';">
     </section>
 
+    <!-- Buscador debajo de la portada -->
+    <div class="hdr-buscar ae-buscar-banner">
+      <span class="hb-lupa">🔍</span>
+      <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+        oninput="hdrBuscarSync()" onfocus="hdrPredictivo()">
+      <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
+      <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
+    </div>
+
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
       👑 Modo administrador — ves todos los productos y podés elegir cuáles mostrar.
@@ -784,9 +790,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
       <button onclick="ayudaAbrir()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
         <span style="font-size:22px;line-height:1;">❓</span><span style="font-size:.62rem;font-weight:700;">Ayuda</span>
-      </button>
-      <button class="nav-item" onclick="abrirCajonCats()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--az);">
-        <span style="font-size:22px;line-height:1;">📂</span><span style="font-size:.62rem;font-weight:700;">Categorías</span>
       </button>
       <button id="nav-carrito-btn" class="nav-item" onclick="navTienda('carrito')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);position:relative;">
         <span id="nav-carrito-ic" style="font-size:22px;line-height:1;">🛒</span><span id="nav-carrito-lbl" style="font-size:.62rem;font-weight:700;">Carrito</span>
@@ -1900,6 +1903,9 @@ var TIENDA_PIN='Amara4';         // PIN de acceso a la tienda
 var tiendaProductos=[];          // catálogo en memoria
 var tiendaYaAnimo=false;         // la animación de entrada solo la 1ra vez (evita parpadeo)
 var tiendaCategoriaActiva='';    // filtro de chip activo
+var _catScrollTimer=null;
+var _catScrollRestaurar=null;
+var _catIgnorarScroll=false;
 var tiendaMarcaActiva='';        // filtro de marca activo (dentro de Celulares)
 // detecta la marca de un celular por el nombre
 function marcaCelu(nombre){
@@ -4357,7 +4363,7 @@ function tiendaRender(){
   universo.forEach(function(p){ var c=catProd(p); cats[c]=(cats[c]||0)+1; });
   function catIcono(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(0,i):'📦'; }
   function catTexto(txt){ var s=(txt||'').trim(); var i=s.indexOf(' '); return i>0?s.slice(i+1).trim():s; }
-  var chipsHtml='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" onclick="tiendaFiltrarCat(\'\')"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
+  var chipsHtml='<div class="cat-tile'+(tiendaCategoriaActiva===''?' on':'')+'" data-categoria="" onclick="tiendaFiltrarCat(\'\')"><span class="cat-tile-ic">🏠</span><span class="cat-tile-txt">Todos</span></div>';
   var ordenCats=TIENDA_CATEGORIAS.filter(function(c){return cats[c];});
   Object.keys(cats).forEach(function(c){if(ordenCats.indexOf(c)===-1)ordenCats.push(c);});
   ordenCats.forEach(function(c){
@@ -4368,13 +4374,46 @@ function tiendaRender(){
   chipsBox.innerHTML=chipsHtml;
   chipsBox.style.display='flex';
   chipsBox.style.padding='8px';
-  // Mantener a la vista la categoría elegida sin mover la página verticalmente.
-  if(tiendaCategoriaActiva){
+  // Al desplazar, la categoría que queda en el centro cambia automáticamente
+  // los productos. Un pequeño retraso evita cambios mientras el dedo se mueve.
+  chipsBox.onscroll=function(){
+    if(_catIgnorarScroll)return;
+    if(_catScrollTimer)clearTimeout(_catScrollTimer);
+    _catScrollTimer=setTimeout(function(){
+      var centro=chipsBox.scrollLeft+(chipsBox.clientWidth/2);
+      var tiles=Array.prototype.slice.call(chipsBox.querySelectorAll('.cat-tile'));
+      var elegido=null,distancia=Infinity;
+      tiles.forEach(function(tile){
+        var medio=tile.offsetLeft+(tile.offsetWidth/2);
+        var d=Math.abs(medio-centro);
+        if(d<distancia){distancia=d;elegido=tile;}
+      });
+      if(!elegido)return;
+      var nueva=elegido.getAttribute('data-categoria')||'';
+      if(nueva!==tiendaCategoriaActiva){
+        _catScrollRestaurar=chipsBox.scrollLeft;
+        tiendaFiltrarCat(nueva,true);
+      }
+    },180);
+  };
+  // Conservar la posición horizontal cuando el cambio nació del desplazamiento.
+  if(_catScrollRestaurar!==null){
+    _catIgnorarScroll=true;
+    chipsBox.scrollLeft=_catScrollRestaurar;
+    _catScrollRestaurar=null;
+    setTimeout(function(){_catIgnorarScroll=false;},260);
+  }else if(tiendaCategoriaActiva){
+    _catIgnorarScroll=true;
     setTimeout(function(){
       var activo=chipsBox.querySelector('.cat-tile.on');
       if(activo){ chipsBox.scrollLeft=Math.max(0,activo.offsetLeft-(chipsBox.clientWidth-activo.offsetWidth)/2); }
+      setTimeout(function(){_catIgnorarScroll=false;},220);
     },0);
-  }else{ chipsBox.scrollLeft=0; }
+  }else{
+    _catIgnorarScroll=true;
+    chipsBox.scrollLeft=0;
+    setTimeout(function(){_catIgnorarScroll=false;},220);
+  }
 
   // PRODUCTO DEL DÍA (solo en vista principal sin filtros)
   var diaDiv=document.getElementById('tienda-productodia');
@@ -4609,9 +4648,11 @@ function tiendaCardsHtml(sublista){
       var stockProveedor=Number(p.proveedorStock);
       if(!isFinite(stockProveedor))stockProveedor=0;
       var hayStockProveedor=stockProveedor>0;
-      card+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.62rem;font-weight:900;margin-top:5px;color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'#E8F8EF':'#FEECEC')+';border:1.5px solid '+(hayStockProveedor?'#86D5A9':'#F4A4A4')+';border-radius:8px;padding:5px 7px;">'
-        +'<span>🔄 '+(p.proveedor||p.mayorista||'Proveedor')+'</span>'
-        +'<span>'+(hayStockProveedor?'📦 Stock: '+stockProveedor:'⛔ SIN STOCK')+'</span>'
+      var nombreProveedor=p.proveedor||p.mayorista||'Proveedor';
+      var colorProveedor=colorMayorista(nombreProveedor);
+      card+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.62rem;font-weight:900;margin-top:5px;color:'+colorProveedor.txt+';background:'+colorProveedor.bg+';border:1.5px solid '+colorProveedor.bor+';border-radius:8px;padding:5px 7px;">'
+        +'<span>🔄 '+nombreProveedor+'</span>'
+        +'<span style="color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'rgba(255,255,255,.72)':'#fff')+';border-radius:20px;padding:2px 6px;white-space:nowrap;">'+(hayStockProveedor?'📦 '+stockProveedor:'⛔ SIN STOCK')+'</span>'
         +'</div>';
     }
     // 💵 PRECIO USD (solo admin): muestra el valor original del proveedor y
@@ -5453,7 +5494,8 @@ function cerrarCajonTools(){
   document.body.classList.remove('cajon-cats-abierto');
 }
 
-function tiendaFiltrarCat(c){
+function tiendaFiltrarCat(c, desdeDesplazamiento){
+  if(desdeDesplazamiento && tiendaCategoriaActiva===c)return;
   // Una categoría es una navegación nueva: borra cualquier búsqueda previa
   // tanto del buscador interno como del encabezado.
   var buscador=document.getElementById('tienda-buscar');
@@ -5465,10 +5507,10 @@ function tiendaFiltrarCat(c){
   if(typeof _buscarTimer!=='undefined' && _buscarTimer) clearTimeout(_buscarTimer);
   if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
   var estabaActiva=(tiendaCategoriaActiva===c);
-  tiendaCategoriaActiva=(estabaActiva?'':c);
+  tiendaCategoriaActiva=desdeDesplazamiento?c:(estabaActiva?'':c);
   tiendaRender();
   // si se seleccionó una categoría (no al deseleccionar), bajar a los productos
-  if(!estabaActiva && tiendaCategoriaActiva){
+  if(!desdeDesplazamiento && !estabaActiva && tiendaCategoriaActiva){
     setTimeout(function(){
       var destino=document.getElementById('tienda-grid')||document.getElementById('tienda-contador');
       if(destino && destino.scrollIntoView){ destino.scrollIntoView({behavior:'smooth', block:'start'}); }
