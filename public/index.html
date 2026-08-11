@@ -388,6 +388,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
   <div class="cajon-sep">Navegación</div>
   <button class="cajon-item cj-admin" id="cajon-tienda-admin" style="display:none;" onclick="cerrarCajon();showTab('tienda')"><span class="ci-ic">🛒</span> Tienda</button>
+  <button class="cajon-item cj-admin" id="cajon-clientes-reg" style="display:none;color:#9FE3BA;font-weight:900;" onclick="cerrarCajon();tiendaClientesAbrir()"><span class="ci-ic">👥</span> Clientes registrados</button>
+  <button class="cajon-item cj-admin" id="cajon-ventas-vend" style="display:none;color:#FFD166;font-weight:900;" onclick="cerrarCajon();tiendaHistorial()"><span class="ci-ic">🧾</span> Pedidos y ventas</button>
   <button class="cajon-item cj-rev" id="cajon-pegar" style="display:none !important;" onclick="cerrarCajon();showTab('pegar')"><span class="ci-ic">📋</span> Pegar precio</button>
   <button class="cajon-item cj-admin" id="cajon-algoritmo" style="display:none;" onclick="cerrarCajon();abrirQueBuscan()"><span class="ci-ic">🧠</span> Qué busca tu gente</button>
   <button class="cajon-item cj-admin" id="cajon-semaforo" style="display:none;" onclick="cerrarCajon();abrirSemaforoProductos()"><span class="ci-ic">🚦</span> Qué promocionar</button>
@@ -427,8 +429,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item cj-admin" id="cajon-cargar-celu" style="display:none;" onclick="cerrarCajon();showTab('celulares')"><span class="ci-ic">📱</span> Cargar celulares</button>
   <button class="cajon-item cj-admin" id="cajon-ver-cliente" style="display:none;" onclick="cerrarCajon();toggleVistaCliente()"><span class="ci-ic">👁️</span> Ver como cliente</button>
   <button class="cajon-item cj-admin" id="cajon-ruleta" style="display:none;" onclick="toggleRuleta()"><span class="ci-ic">🎰</span> <span id="cajon-ruleta-txt">Ruleta: apagada</span></button>
-  <button class="cajon-item cj-admin" id="cajon-clientes-reg" style="display:none;" onclick="cerrarCajon();tiendaClientesAbrir()"><span class="ci-ic">👥</span> Clientes registrados</button>
-  <button class="cajon-item cj-admin" id="cajon-ventas-vend" style="display:none;" onclick="cerrarCajon();tiendaHistorial()"><span class="ci-ic">🧾</span> Pedidos y ventas</button>
 
   <div class="cajon-sep">Cuenta</div>
   <button class="cajon-item admin" id="cajon-admin-item" onclick="cerrarCajon();abrirIngresoRoles()"><span class="ci-ic" id="cajon-admin-ic">🔐</span> <span id="cajon-admin-txt">Ingresar</span></button>
@@ -809,7 +809,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <button id="nav-favoritos-btn" class="nav-item" onclick="navTienda('favoritos')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
         <span style="font-size:22px;line-height:1;">❤️</span><span style="font-size:.62rem;font-weight:700;">Favoritos</span>
       </button>
-      <button id="nav-ofertas-btn" class="nav-item" onclick="navTienda('ofertas')" style="display:none !important;flex:1;background:none;border:none;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+      <button id="nav-ofertas-btn" class="nav-item" onclick="navTienda('ofertas')" style="display:flex;flex:1;background:none;border:none;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
         <span style="font-size:22px;line-height:1;">🔥</span><span style="font-size:.62rem;font-weight:700;">Ofertas</span>
       </button>
     </div>
@@ -2773,20 +2773,11 @@ function tiendaAplicarModo(){
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
-  // 🧾 El botón flotante cambia según quién sea:
-  //    Asesor → agregar pedido (cliente + productos) · Admin → cargar producto
+  // El botón flotante queda reservado al administrador.
+  // El vendedor carga pedidos desde la barra inferior o desde el menú.
   var cargarFab=document.getElementById('cargar-fab');
   if(cargarFab){
-    var esAsesor = (typeof revUnlocked!=='undefined' && revUnlocked===true) && !tiendaEsAdmin;
-    if(esAsesor){
-      cargarFab.style.display='flex';
-      cargarFab.textContent='🧾';
-      cargarFab.title='Agregar pedido';
-      cargarFab.onclick=function(){ abrirPedido(); };
-      cargarFab.style.background='#0B2D6B';
-      cargarFab.style.color='#fff';
-      cargarFab.style.borderColor='#FF7A00';
-    } else if(tiendaEsAdmin){
+    if(tiendaEsAdmin){
       cargarFab.style.display='flex';
       cargarFab.textContent='🐝';
       cargarFab.title='Cargar producto';
