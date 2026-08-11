@@ -295,13 +295,18 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 .confeti-pza{position:fixed;top:-20px;width:10px;height:14px;z-index:2100;animation:confetiCae linear forwards;}
 
 /* Fondo colmena AmarangoElectro (marca) */
-body{background:#f4f6fb;background-attachment:scroll;} /* fondo liviano por defecto (cliente) */
-/* Fondos por rol: celeste clarito para revendedores, naranja clarito para admin */
-body.rol-revendedor{background:#fff !important;}
-body.rol-admin{background:#fff !important;}
+html{background:#020c2e;}
+body{background:linear-gradient(145deg,#020c2e 0%,#0B2D6B 58%,#173f8c 76%,#FF7A00 145%) fixed !important;}
+/* El fondo de marca se mantiene igual para clientes, vendedores y admin. */
+body.rol-revendedor{background:linear-gradient(145deg,#020c2e 0%,#0B2D6B 58%,#173f8c 76%,#FF7A00 145%) fixed !important;}
+body.rol-admin{background:linear-gradient(145deg,#020c2e 0%,#0B2D6B 58%,#173f8c 76%,#FF7A00 145%) fixed !important;}
 body.oscuro.rol-revendedor{background:#0a1830 !important;}
 body.oscuro.rol-admin{background:#0a1830 !important;}
 body.oscuro{background:#0a1830;background-attachment:scroll;}
+#tab-tienda,#tienda-cont,#tienda-grid{background:transparent !important;}
+#tienda-grid .prod-card{background:#fff !important;border:2px solid rgba(255,255,255,.92) !important;box-shadow:0 5px 16px rgba(0,0,0,.22) !important;}
+#tienda-contador{color:rgba(255,255,255,.88) !important;}
+#tienda-vacia{background:rgba(255,255,255,.95);border-radius:14px;color:var(--az) !important;}
 
 /* ═══ VISTA AUTOMÁTICA PARA COMPUTADORA ═══
    En pantallas grandes se aprovecha el ancho y se muestran más productos.
@@ -360,16 +365,6 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   </div>
 </div>
 
-<div class="header">
-  <button class="hdr-menu-btn" onclick="abrirCajon()" title="Menú" aria-label="Menú">☰</button>
-  <div class="hdr-marca">
-    <img src="icon.png" class="header-logo" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}">
-    <div class="header-info">
-      <h1>AmarangoElectr<span class="pwr"></span> 🐝</h1>
-      <p>Equipá tu casa, fácil y en cuotas</p>
-    </div>
-  </div>
-</div>
 <div id="header-espacio"></div>
 
 <!-- ═══ Cajón lateral deslizable ═══ -->
@@ -685,7 +680,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <div class="hdr-buscar ae-buscar-banner">
       <span class="hb-lupa">🔍</span>
       <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
-        oninput="hdrBuscarSync()" onfocus="hdrPredictivo()">
+        oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
+        onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
+        onblur="setTimeout(hdrCerrarSugerencias,180)">
       <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
       <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
     </div>
@@ -788,6 +785,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- ===== BARRA DE NAVEGACIÓN INFERIOR (estilo Mercado Libre) ===== -->
     <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
+      <button onclick="abrirCajon()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
+        <span style="font-size:22px;line-height:1;">☰</span><span style="font-size:.62rem;font-weight:700;">Menú</span>
+      </button>
       <button onclick="ayudaAbrir()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
         <span style="font-size:22px;line-height:1;">❓</span><span style="font-size:.62rem;font-weight:700;">Ayuda</span>
       </button>
@@ -3472,6 +3472,11 @@ function toggleRuleta(){
 
 // ═══ Buscador del header (espeja el buscador interno tienda-buscar) ═══
 var _buscarTimer=null;
+var _cerrarSugTimer=null;
+function hdrCerrarSugerencias(){
+  var box=document.getElementById('hdr-sugerencias');
+  if(box){ box.style.display='none'; box.innerHTML=''; }
+}
 // PREDICTIVO: muestra abajo del buscador los productos que coinciden mientras escribís
 function hdrPredictivo(){
   var h=document.getElementById('hdr-buscar-input');
@@ -3524,8 +3529,7 @@ function hdrPredictivo(){
   box.style.display='block';
 }
 function hdrElegirSug(id){
-  var box=document.getElementById('hdr-sugerencias');
-  if(box){ box.style.display='none'; box.innerHTML=''; }
+  hdrCerrarSugerencias();
   try{ tiendaVerDetalle(id); }catch(e){}
 }
 function hdrBuscarSync(){
@@ -3536,6 +3540,8 @@ function hdrBuscarSync(){
   var x=document.getElementById('hdr-buscar-x');
   if(x) x.style.display=(h.value.trim()?'block':'none');
   hdrPredictivo(); // sugerencias instantáneas mientras escribe
+  if(_cerrarSugTimer) clearTimeout(_cerrarSugTimer);
+  _cerrarSugTimer=setTimeout(hdrCerrarSugerencias,1200);
   // si empezó a buscar y estaba parado en una categoría, salir a "Todos" para
   // que la búsqueda global se vea coherente (no atrapada en la categoría).
   if(h.value.trim() && typeof tiendaCategoriaActiva!=='undefined' && tiendaCategoriaActiva){ tiendaCategoriaActiva=''; }
@@ -3549,8 +3555,7 @@ function hdrBuscarSync(){
 function hdrBuscarLimpiar(){
   var h=document.getElementById('hdr-buscar-input');
   if(h){ h.value=''; h.focus(); }
-  var box=document.getElementById('hdr-sugerencias');
-  if(box){ box.style.display='none'; box.innerHTML=''; }
+  hdrCerrarSugerencias();
   var inp=document.getElementById('tienda-buscar');
   if(inp) inp.value='';
   if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
@@ -3560,6 +3565,10 @@ function hdrBuscarLimpiar(){
   if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
   if(typeof tiendaRender==='function') tiendaRender();
 }
+window.addEventListener('scroll',hdrCerrarSugerencias,{passive:true});
+document.addEventListener('pointerdown',function(e){
+  if(!e.target.closest('.hdr-buscar')) hdrCerrarSugerencias();
+});
 
 // muestra/oculta la X según haya texto en el buscador
 function tiendaToggleLimpiar(){
@@ -4419,7 +4428,7 @@ function tiendaRender(){
   var diaDiv=document.getElementById('tienda-productodia');
   var qDia=(document.getElementById('tienda-buscar').value||'').trim();
   var pDia=universo.find(function(p){return p.delDia;});
-  if(pDia && !tiendaCategoriaActiva && !qDia){
+  if(pDia && verSoloOfertas && !tiendaCategoriaActiva && !qDia){
     var pidDia="'"+pDia.id+"'";
     var cdDia=mejorCuotaDatos(pDia.venta, pDia);
     diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);border:2px solid #f0c040;position:relative;overflow:hidden;">'
@@ -4443,8 +4452,8 @@ function tiendaRender(){
   var destDiv=document.getElementById('tienda-destacados');
   var q0=(document.getElementById('tienda-buscar').value||'').trim();
   var destacados=universo.filter(function(p){return p.destacado;});
-  if(destacados.length && !tiendaCategoriaActiva && !q0){
-    var dh='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:1rem;">⭐</span><span style="font-size:.85rem;font-weight:900;color:var(--az);">Destacados de la semana</span></div>';
+  if(destacados.length && verSoloOfertas && !tiendaCategoriaActiva && !q0){
+    var dh='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:1rem;">⭐</span><span style="font-size:.85rem;font-weight:900;color:#fff;">Destacados de la semana</span></div>';
     dh+='<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;">';
     destacados.forEach(function(p){
       var pid="'"+p.id+"'";
@@ -4643,16 +4652,20 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && p.esCelu){
       card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
     }
-    var esProdAutomatico=!!(p.automaticoProveedor || (p.proveedor && Object.prototype.hasOwnProperty.call(p,'proveedorStock')));
+    var nombreProveedorDetectado=String(p.proveedor||p.mayorista||'');
+    var esProveedorSincronizado=/mega|elektro|electro.?impacto/i.test(nombreProveedorDetectado);
+    var esProdAutomatico=!!(p.automaticoProveedor || p.proveedorClave || p.proveedorId || esProveedorSincronizado);
     if(tiendaEsAdmin && esProdAutomatico){
-      var stockProveedor=Number(p.proveedorStock);
-      if(!isFinite(stockProveedor))stockProveedor=0;
-      var hayStockProveedor=stockProveedor>0;
+      var stockInfo=tiendaLeerStockProveedor(p);
+      var stockProveedor=stockInfo.valor;
+      var sinStockProveedor=(p.sinStock===true || p.estadoProveedor==='sin_stock' || (stockInfo.informado && stockProveedor<=0));
+      var hayStockProveedor=!sinStockProveedor;
       var nombreProveedor=p.proveedor||p.mayorista||'Proveedor';
       var colorProveedor=colorMayorista(nombreProveedor);
+      var textoStock=sinStockProveedor?'⛔ SIN STOCK':(stockInfo.informado?'📦 Stock: '+stockProveedor:'✅ Disponible');
       card+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.62rem;font-weight:900;margin-top:5px;color:'+colorProveedor.txt+';background:'+colorProveedor.bg+';border:1.5px solid '+colorProveedor.bor+';border-radius:8px;padding:5px 7px;">'
         +'<span>🔄 '+nombreProveedor+'</span>'
-        +'<span style="color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'rgba(255,255,255,.72)':'#fff')+';border-radius:20px;padding:2px 6px;white-space:nowrap;">'+(hayStockProveedor?'📦 '+stockProveedor:'⛔ SIN STOCK')+'</span>'
+        +'<span style="color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'rgba(255,255,255,.72)':'#fff')+';border-radius:20px;padding:2px 6px;white-space:nowrap;">'+textoStock+'</span>'
         +'</div>';
     }
     // 💵 PRECIO USD (solo admin): muestra el valor original del proveedor y
@@ -5029,6 +5042,22 @@ function colorMayorista(nombre){
   for(var i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i)) % 360; }
   // color saturado y oscuro para el texto/borde, y una versión clarita para el fondo
   return { txt:'hsl('+h+',70%,38%)', bg:'hsl('+h+',75%,95%)', bor:'hsl('+h+',60%,82%)' };
+}
+// Lee el stock aunque venga de una versión anterior con otro nombre de campo.
+function tiendaLeerStockProveedor(p){
+  var campos=['proveedorStock','stockProveedor','stock','cantidadStock','cantidadDisponible'];
+  for(var i=0;i<campos.length;i++){
+    if(Object.prototype.hasOwnProperty.call(p,campos[i])){
+      var bruto=p[campos[i]];
+      var n=Number(bruto);
+      if(!isFinite(n) && typeof bruto==='string'){
+        var m=bruto.replace(/\./g,'').match(/\d+/);
+        if(m)n=Number(m[0]);
+      }
+      if(isFinite(n))return {informado:true,valor:Math.max(0,n)};
+    }
+  }
+  return {informado:false,valor:0};
 }
 // 🏷️ reordena los productos que quedaron en "Otros" (o sin categoría) usando la
 // detección por nombre. Solo mueve los que la detección ubica en algo mejor.
@@ -5546,7 +5575,7 @@ function navTienda(accion){
 function marcarNavActiva(accion){
   var nav=document.getElementById('nav-inferior'); if(!nav) return;
   var botones=nav.querySelectorAll('.nav-item');
-  var orden=['categorias','carrito','favoritos','ofertas'];
+  var orden=['carrito','favoritos','ofertas'];
   botones.forEach(function(b,i){ b.style.color = (orden[i]===accion) ? 'var(--az)' : 'var(--sub)'; });
 }
 // muestra la barra inferior y actualiza el contador del carrito
