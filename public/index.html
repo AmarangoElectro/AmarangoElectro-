@@ -2045,7 +2045,21 @@ function tiendaInit(){
   tiendaCargarLocal();     // primero lo local (instantáneo)
   tiendaAplicarModo();
   tiendaRender();
-  tiendaBajarNube();       // baja el catálogo de la nube
+  // IndexedDB admite catálogos con muchas fotos, a diferencia de localStorage.
+  // Lo recuperamos antes de preguntar por versiones nuevas para no partir de
+  // una copia incompleta cuando el catálogo creció demasiado.
+  tiendaCacheGrandeCargar().then(function(cache){
+    if(cache&&Array.isArray(cache.productos)&&cache.productos.length){
+      tiendaProductos=cache.productos;
+      tiendaProductos.forEach(function(p){if(typeof p.visible==='undefined')p.visible=true;});
+      // La versión pertenece a esta misma copia. Si es anterior, la nube
+      // enviará los cambios que falten; nunca conservamos una versión mayor
+      // junto con datos más viejos.
+      tiendaGuardarVersionIncremental(Number(cache.version)||0);
+      tiendaRender();
+    }
+    tiendaBajarNube();
+  }).catch(function(){tiendaBajarNube();});
   tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
   // ⚡ ARRANQUE RÁPIDO Y FLUIDO: las descargas secundarias se escalonan de a una
   //    (antes salían 6 juntas y el celular se trababa al abrir). Ahora van espaciadas.
@@ -2309,6 +2323,40 @@ var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
 
+function tiendaCacheGrandeAbrir(){
+  return new Promise(function(resolve,reject){
+    if(!window.indexedDB){reject(new Error('IndexedDB no disponible'));return;}
+    var req=indexedDB.open('amarango_tienda_cache',1);
+    req.onupgradeneeded=function(){
+      var db=req.result;
+      if(!db.objectStoreNames.contains('catalogo'))db.createObjectStore('catalogo',{keyPath:'id'});
+    };
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){reject(req.error||new Error('No se pudo abrir IndexedDB'));};
+  });
+}
+function tiendaCacheGrandeGuardar(productos,version){
+  return tiendaCacheGrandeAbrir().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction('catalogo','readwrite');
+      tx.objectStore('catalogo').put({id:'principal',productos:productos||[],version:Number(version)||0});
+      tx.oncomplete=function(){db.close();resolve(true);};
+      tx.onerror=function(){db.close();reject(tx.error||new Error('No se pudo guardar el catálogo'));};
+    });
+  });
+}
+function tiendaCacheGrandeCargar(){
+  return tiendaCacheGrandeAbrir().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction('catalogo','readonly');
+      var req=tx.objectStore('catalogo').get('principal');
+      req.onsuccess=function(){resolve(req.result||null);};
+      req.onerror=function(){reject(req.error||new Error('No se pudo leer el catálogo'));};
+      tx.oncomplete=function(){db.close();};
+    });
+  });
+}
+
 function tiendaVersionIncrementalLocal(){
   try{ return parseInt(localStorage.getItem(TIENDA_INCREMENTAL_VERSION_KEY)||'0',10)||0; }
   catch(e){ return 0; }
@@ -2332,6 +2380,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
     localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));
     localStorage.setItem('ae_tienda_catalogo_fecha','incremental:'+maxima);
   }catch(e){}
+  tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
   return maxima;
 }
@@ -2354,6 +2403,22 @@ function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
       return acumuladas;
     });
 }
+function tiendaCantidadLocalIncremental(){
+  var ids={};
+  (tiendaProductos||[]).forEach(function(p){
+    if(p&&p.id!=null)ids[String(p.id)]=true;
+  });
+  return Object.keys(ids).length;
+}
+function tiendaContarIncrementalesActivos(){
+  return sbCalc.from(TIENDA_INCREMENTAL_TABLA)
+    .select('producto_id',{count:'exact',head:true})
+    .eq('eliminado',false)
+    .then(function(r){
+      if(r&&r.error)throw r.error;
+      return (r&&typeof r.count==='number')?r.count:null;
+    });
+}
 function tiendaBajarNube(intentos){
   intentos=intentos||0;
   if(!NUBE_OK||!sbCalc){
@@ -2362,7 +2427,20 @@ function tiendaBajarNube(intentos){
   }
   if(_tiendaBajarNubeEnCurso)return _tiendaBajarNubeEnCurso;
   var versionLocal=tiendaVersionIncrementalLocal();
-  var proceso=tiendaBajarPaginaIncremental(versionLocal,0,[])
+  // Además de consultar versiones nuevas, comparamos la cantidad de filas.
+  // Si el navegador perdió parte del localStorage pero conservó la versión,
+  // reconstruimos su catálogo completo automáticamente una sola vez.
+  var proceso=tiendaContarIncrementalesActivos().catch(function(){return null;})
+    .then(function(cantidadNube){
+      var cantidadLocal=tiendaCantidadLocalIncremental();
+      if(versionLocal>0 && cantidadNube!==null && cantidadLocal!==cantidadNube){
+        console.warn('Catálogo local incompleto; reconstruyendo.',cantidadLocal,cantidadNube);
+        versionLocal=0;
+        tiendaProductos=[];
+        tiendaGuardarVersionIncremental(0);
+      }
+      return tiendaBajarPaginaIncremental(versionLocal,0,[]);
+    })
     .then(function(filas){
       if(filas.length){
         var maxima=tiendaAplicarCambiosIncrementales(filas,versionLocal);
@@ -2950,6 +3028,7 @@ function tiendaCargarLocal(){
 }
 function tiendaGuardarLocal(){
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
+  try{ tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){}); }catch(e){}
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
   // subir a la nube (para que lo vean todos)
   if(NUBE_OK && sbCalc){
