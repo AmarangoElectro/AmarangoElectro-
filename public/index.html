@@ -431,7 +431,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   <button class="cajon-item cj-admin" id="cajon-ruleta" style="display:none;" onclick="toggleRuleta()"><span class="ci-ic">🎰</span> <span id="cajon-ruleta-txt">Ruleta: apagada</span></button>
 
   <div class="cajon-sep">Cuenta</div>
-  <button class="cajon-item admin" id="cajon-admin-item" onclick="cerrarCajon();abrirIngresoRoles()"><span class="ci-ic" id="cajon-admin-ic">🔐</span> <span id="cajon-admin-txt">Ingresar</span></button>
+  <button class="cajon-item admin" id="cajon-admin-item" onclick="cerrarCajon();abrirIngresoRoles()"><span class="ci-ic" id="cajon-admin-ic">🔐</span> <span id="cajon-admin-txt">Ingreso del equipo</span></button>
 </div>
 
 <div class="install-banner" id="install-banner">
@@ -768,7 +768,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <button onclick="tiendaCancelarSelec()" style="font-size:.72rem;padding:9px 12px;background:var(--bg);color:var(--sub);border:1.5px solid var(--bor);border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit;">Cancelar</button>
       <button id="btn-ocultar-varios" onclick="tiendaOcultarVarios(true)" style="display:none;font-size:.72rem;padding:9px 11px;background:#6b7280;color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">🙈 Ocultar</button>
       <button id="btn-mostrar-varios" onclick="tiendaOcultarVarios(false)" style="display:none;font-size:.72rem;padding:9px 11px;background:var(--gr);color:#fff;border:none;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;">👁️ Mostrar</button>
-      <button onclick="tiendaCompartirVarios()" style="font-size:.75rem;padding:10px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;font-weight:900;cursor:pointer;font-family:inherit;">📤 Compartir seleccionados</button>
+      <button onclick="tiendaCompartirVarios()" style="font-size:.75rem;padding:10px 16px;background:#25D366;color:#fff;border:none;border-radius:9px;font-weight:900;cursor:pointer;font-family:inherit;">💬 Enviar por WhatsApp</button>
     </div>
 
     <!-- Barra de acciones en tanda (solo admin) -->
@@ -2228,15 +2228,15 @@ function tiendaBajarCelusNube(intentos){
 // Baja el catálogo desde la nube y refresca.
 // SINGLE-FLIGHT: si conectarNube() y tiendaInit() llaman al mismo tiempo,
 // ambas reutilizan una sola consulta y nunca descargan dos catálogos.
-var _tiendaBajarNubeEnCurso=null;
-function tiendaBajarNube(intentos){
+var _tiendaBajarNubeLegacyEnCurso=null;
+function tiendaBajarNubeLegacy(intentos){
   intentos=intentos||0;
   if(!NUBE_OK||!sbCalc){
     // la nube todavía no conectó: reintentar
     if(intentos<25){ setTimeout(function(){ tiendaBajarNube(intentos+1); }, 200); }
     return Promise.resolve(null);
   }
-  if(_tiendaBajarNubeEnCurso) return _tiendaBajarNubeEnCurso;
+  if(_tiendaBajarNubeLegacyEnCurso) return _tiendaBajarNubeLegacyEnCurso;
 
   // Primero se consultan solamente unos pocos bytes: la fecha del catálogo.
   // El JSON completo se descarga únicamente cuando esa fecha cambió o cuando
@@ -2291,13 +2291,116 @@ function tiendaBajarNube(intentos){
         }).catch(function(){ return null; });
     });
 
-  _tiendaBajarNubeEnCurso=proceso;
+  _tiendaBajarNubeLegacyEnCurso=proceso;
   proceso.then(
-    function(){ _tiendaBajarNubeEnCurso=null; },
-    function(){ _tiendaBajarNubeEnCurso=null; }
+    function(){ _tiendaBajarNubeLegacyEnCurso=null; },
+    function(){ _tiendaBajarNubeLegacyEnCurso=null; }
   );
   return proceso;
 }
+
+// ═══ SINCRONIZACIÓN INCREMENTAL DEL CATÁLOGO ═══
+// Primera visita: baja todos los productos en páginas chicas.
+// Visitas siguientes: pide únicamente filas cuya versión sea posterior a la
+// guardada en este dispositivo. Si la tabla todavía no fue creada, vuelve al
+// sistema histórico por timestamp para que la tienda nunca quede vacía.
+var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
+var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
+var TIENDA_INCREMENTAL_LOTE=500;
+var _tiendaBajarNubeEnCurso=null;
+
+function tiendaVersionIncrementalLocal(){
+  try{ return parseInt(localStorage.getItem(TIENDA_INCREMENTAL_VERSION_KEY)||'0',10)||0; }
+  catch(e){ return 0; }
+}
+function tiendaGuardarVersionIncremental(v){
+  try{ localStorage.setItem(TIENDA_INCREMENTAL_VERSION_KEY,String(v||0)); }catch(e){}
+}
+function tiendaAplicarCambiosIncrementales(filas, versionInicial){
+  var mapa={};
+  (tiendaProductos||[]).forEach(function(p){ if(p&&p.id!=null)mapa[String(p.id)]=p; });
+  var maxima=versionInicial||0;
+  (filas||[]).forEach(function(f){
+    var id=String(f.producto_id);
+    maxima=Math.max(maxima,parseInt(f.version,10)||0);
+    if(f.eliminado){ delete mapa[id]; return; }
+    if(f.datos&&typeof f.datos==='object')mapa[id]=f.datos;
+  });
+  tiendaProductos=Object.keys(mapa).map(function(k){return mapa[k];});
+  tiendaProductos.forEach(function(p){if(typeof p.visible==='undefined')p.visible=true;});
+  try{
+    localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));
+    localStorage.setItem('ae_tienda_catalogo_fecha','incremental:'+maxima);
+  }catch(e){}
+  tiendaGuardarVersionIncremental(maxima);
+  return maxima;
+}
+function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
+  acumuladas=acumuladas||[];
+  var inicio=pagina*TIENDA_INCREMENTAL_LOTE;
+  var fin=inicio+TIENDA_INCREMENTAL_LOTE-1;
+  return sbCalc.from(TIENDA_INCREMENTAL_TABLA)
+    .select('producto_id,datos,eliminado,version')
+    .gt('version',desdeVersion)
+    .order('version',{ascending:true})
+    .range(inicio,fin)
+    .then(function(r){
+      if(r&&r.error)throw r.error;
+      var filas=(r&&Array.isArray(r.data))?r.data:[];
+      Array.prototype.push.apply(acumuladas,filas);
+      if(filas.length===TIENDA_INCREMENTAL_LOTE){
+        return tiendaBajarPaginaIncremental(desdeVersion,pagina+1,acumuladas);
+      }
+      return acumuladas;
+    });
+}
+function tiendaBajarNube(intentos){
+  intentos=intentos||0;
+  if(!NUBE_OK||!sbCalc){
+    if(intentos<25)setTimeout(function(){tiendaBajarNube(intentos+1);},200);
+    return Promise.resolve(null);
+  }
+  if(_tiendaBajarNubeEnCurso)return _tiendaBajarNubeEnCurso;
+  var versionLocal=tiendaVersionIncrementalLocal();
+  var proceso=tiendaBajarPaginaIncremental(versionLocal,0,[])
+    .then(function(filas){
+      if(filas.length){
+        var maxima=tiendaAplicarCambiosIncrementales(filas,versionLocal);
+        tiendaRender();
+        return {incremental:true,cambios:filas.length,version:maxima};
+      }
+      // Si es la primera activación y todavía no hay filas, el SQL aún no se
+      // ejecutó o la carga inicial está vacía: usar el respaldo histórico.
+      if(versionLocal===0 && !filas.length){
+        return tiendaBajarNubeLegacy(0);
+      }
+      return {incremental:true,cambios:0,version:versionLocal};
+    })
+    .catch(function(error){
+      console.warn('Catálogo incremental no disponible; usando respaldo.',error);
+      return tiendaBajarNubeLegacy(0);
+    });
+  _tiendaBajarNubeEnCurso=proceso;
+  proceso.then(function(){_tiendaBajarNubeEnCurso=null;},function(){_tiendaBajarNubeEnCurso=null;});
+  return proceso;
+}
+
+// Mantiene varios dispositivos alineados sin bajar el catálogo completo:
+// revisa cambios al volver a la pestaña y cada 10 minutos mientras está abierta.
+(function(){
+  var ultimaRevision=0;
+  function revisarIncremental(){
+    var ahora=Date.now();
+    if(ahora-ultimaRevision<60000)return;
+    ultimaRevision=ahora;
+    try{tiendaBajarNube();}catch(e){}
+  }
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible')revisarIncremental();
+  });
+  window.addEventListener('focus',revisarIncremental);
+  setInterval(revisarIncremental,10*60*1000);
+})();
 
 // HISTORIAL DE PEDIDOS + ranking (solo admin)
 function tiendaHistorial(){
@@ -2833,7 +2936,7 @@ function tiendaAplicarModo(){
       cIc.textContent='🚪'; cTxt.textContent='Cerrar sesión';
       cItem.setAttribute('onclick','cerrarCajon();cerrarSesion()');
     }else{
-      cIc.textContent='🔐'; cTxt.textContent='Ingresar';
+      cIc.textContent='🔐'; cTxt.textContent='Ingreso del equipo';
       cItem.setAttribute('onclick','cerrarCajon();abrirIngresoRoles()');
     }
   }
@@ -6254,7 +6357,7 @@ function tiendaToggleModoSelec(){
   if(btn)btn.style.background=tiendaModoSelec?'var(--nar)':'var(--wh)';
   tiendaActualizarSelecCount();
   tiendaRender();
-  if(tiendaModoSelec && typeof mostrarToast==='function')mostrarToast('Tocá los productos y después “Compartir seleccionados”');
+  if(tiendaModoSelec && typeof mostrarToast==='function')mostrarToast('Tocá los productos y después “Enviar por WhatsApp”');
 }
 function tiendaCancelarSelec(){
   tiendaModoSelec=false; tiendaSelecSet={};
@@ -6330,20 +6433,11 @@ function tiendaCompartirVarios(){
   var prods=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});
   if(!prods.length){ alert('No se encontraron los productos seleccionados.'); return; }
 
-  // Si es uno solo: comparte directo (foto + su precio)
-  if(prods.length===1){ tiendaCancelarSelec(); compartirProducto(prods[0].id); return; }
-
-  // Sin compartir nativo: cae al texto combinado por WhatsApp
-  if(!navigator.share){ compartirSoloTexto(tiendaTextoVarios(prods)); tiendaCancelarSelec(); return; }
-
-  // VARIOS: se envían de a UNO, cada foto con SU nombre y SU precio.
-  // Android no deja poner un texto distinto por cada imagen en un solo envío,
-  // así que los mandamos en secuencia (compartís uno, volvés, sale el siguiente).
-  if(!confirm('Vas a compartir '+prods.length+' productos.\n\nComo cada foto lleva SU propio precio, se envían de a uno: compartís el primero, volvés a la app y aparece el siguiente.\n\n¿Empezamos?')){ return; }
-  tiendaModoSelec=false;
-  var bar=document.getElementById('tienda-selec-bar'); if(bar)bar.style.display='none';
-  var btn=document.getElementById('btn-modo-selec'); if(btn)btn.style.background='var(--wh)';
-  tiendaCompartirEnCadena(prods, 0);
+  // Abrir WhatsApp directamente es más confiable que el menú general del
+  // navegador, especialmente cuando se eligen varios productos.
+  var mensaje=tiendaTextoVarios(prods);
+  tiendaCancelarSelec();
+  abrirWhatsAppMsg(mensaje);
 }
 
 // comparte un producto de la lista y, al volver, ofrece el siguiente
@@ -7346,7 +7440,7 @@ function pasoBienvenida(){
     +'<div style="font-size:2.4rem;margin-bottom:6px;">🐝</div>'
     +'<h3 style="color:var(--az);font-weight:900;font-size:1.1rem;">¡Bienvenido a AmarangoElectro!</h3>'
     +'<p style="font-size:.8rem;color:var(--sub);margin:8px 0 10px;">Registrate una sola vez para comprar más rápido y no volver a escribir tus datos.</p>'
-    +'<div style="background:#EEF4FF;border-radius:11px;padding:10px 12px;margin-bottom:16px;font-size:.68rem;color:var(--az);line-height:1.55;text-align:left;">🔒 Tus datos son de uso interno para gestionar pedidos y facilitar futuras compras. AmarangoElectro no vende ni comparte esta información con terceros.</div></div>'
+    +'<div style="background:#EEF4FF;border-radius:11px;padding:10px 12px;margin-bottom:16px;font-size:.68rem;color:var(--az);line-height:1.55;text-align:left;">🔒 Tus datos son de uso interno para gestionar pedidos y facilitar futuras compras. Quedarán guardados en este dispositivo. Si cambiás de celular, computadora o borrás los datos del navegador, tendrás que registrarte nuevamente. AmarangoElectro no vende ni comparte esta información con otras empresas.</div></div>'
     +'<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:10px;padding:14px;" onclick="pasoFormulario()">📝 Registrarme (1 minuto)</button>'
     +'<button class="calc-btn" style="width:100%;background:var(--wh);color:var(--az);border:2px solid var(--bor);margin-bottom:10px;" onclick="continuarCompraSinRegistro()">Continuar esta vez sin registrarme</button>'
     +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarModalCompra()">← Cancelar</button>';
@@ -7357,7 +7451,7 @@ function pasoBienvenida(){
 function pasoFormulario(){
   var mi=cargarMiCuenta()||{};
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">📝 Tus datos</h3>'
-    +'<p style="font-size:.72rem;color:var(--sub);margin:6px 0 14px;">'+(_compraSinRegistro?'Los usamos solamente para gestionar esta compra.':'Quedan guardados de forma segura para agilizar tus próximas compras.')+'</p>';
+    +'<p style="font-size:.72rem;color:var(--sub);margin:6px 0 14px;">'+(_compraSinRegistro?'Los usamos solamente para gestionar esta compra.':'Quedan guardados en este dispositivo para agilizar tus próximas compras.')+'</p>';
   html+=campoForm('Nombre y apellido','cli-nombre','Ej: Juan Pérez',pedidoActual.nombre||mi.nombre||'','text',true)
     +campoForm('DNI','cli-dni','Ej: 40123456',pedidoActual.dni||mi.dni||'','numeric',true)
     +campoForm('Teléfono (WhatsApp)','cli-telefono','Ej: 11 2345 6789',pedidoActual.telefono||mi.telefono||'','tel',true)
