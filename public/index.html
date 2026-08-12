@@ -2515,14 +2515,32 @@ function tiendaHistorial(){
     }
 
     html+='<div style="font-size:.8rem;font-weight:900;color:var(--az);margin-bottom:6px;">Últimos pedidos</div>';
-    hist.slice(0,20).forEach(function(p){
+    hist.slice(0,20).forEach(function(p,idx){
       var f=new Date(p.fecha);
       var fstr=f.getDate()+'/'+(f.getMonth()+1)+' '+('0'+f.getHours()).slice(-2)+':'+('0'+f.getMinutes()).slice(-2);
-      var items=(p.items||[]).map(function(it){return it.cantidad+'x '+it.nombre;}).join(', ');
+      var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+      var items=(p.items||[]).map(function(it){return esc(it.cantidad)+'x '+esc(it.nombre);}).join(', ');
+      var detalle=[];
+      if(p.dni)detalle.push(['DNI',p.dni]);
+      if(p.telefono)detalle.push(['Teléfono',p.telefono]);
+      if(p.direccion)detalle.push(['Dirección',p.direccion]);
+      if(p.localidad)detalle.push(['Localidad',p.localidad]);
+      if(p.email)detalle.push(['Email',p.email]);
+      if(p.precioContado)detalle.push(['Precio de venta',fmt(p.precioContado)]);
+      if(p.cantidadCuotas)detalle.push(['Plan',p.cantidadCuotas+' cuotas de '+fmt(p.valorCuota||0)]);
+      else if(p.origen==='vendedor')detalle.push(['Plan','Contado']);
+      if(p.senia)detalle.push(['Seña/entrega',p.senia]);
+      if(p.notas)detalle.push(['Notas',p.notas]);
+      var detalleId='pedido-detalle-'+idx;
       html+='<div style="border:1px solid var(--bor);border-radius:10px;padding:8px 10px;margin-bottom:6px;">'
-        +'<div style="display:flex;justify-content:space-between;"><span style="font-size:.68rem;color:var(--sub);">🕐 '+fstr+(p.destinatario?' · '+p.destinatario:'')+'</span><span style="font-weight:800;color:var(--nar);font-size:.8rem;">'+fmt(p.total)+'</span></div>'
-        +(p.origen==='vendedor'?'<div style="font-size:.67rem;color:#047857;font-weight:800;margin-top:3px;">🧑‍💼 Cargado por: '+(p.vendedor||'Vendedor')+(p.plan?' · '+p.plan:'')+'</div>':'')
-        +'<div style="font-size:.72rem;color:var(--az);margin-top:3px;">'+items+'</div></div>';
+        +'<div style="display:flex;justify-content:space-between;"><span style="font-size:.68rem;color:var(--sub);">🕐 '+fstr+(p.destinatario?' · '+esc(p.destinatario):'')+'</span><span style="font-weight:800;color:var(--nar);font-size:.8rem;">'+fmt(p.total)+'</span></div>'
+        +(p.origen==='vendedor'?'<div style="font-size:.67rem;color:#047857;font-weight:800;margin-top:3px;">🧑‍💼 Cargado por: '+esc(p.vendedor||'Vendedor')+(p.plan?' · '+esc(p.plan):'')+'</div>':'')
+        +'<div style="font-size:.72rem;color:var(--az);margin-top:3px;">'+items+'</div>'
+        +(p.origen==='vendedor'?'<button onclick="var d=document.getElementById(\''+detalleId+'\');var abierto=d.style.display!==\'none\';d.style.display=abierto?\'none\':\'block\';this.textContent=abierto?\'👁️ Ver detalles\':\'▲ Ocultar detalles\';" style="margin-top:7px;background:#EEF4FF;color:var(--az);border:none;border-radius:7px;padding:7px 10px;font-size:.68rem;font-weight:900;cursor:pointer;">👁️ Ver detalles</button>':'')
+        +(p.origen==='vendedor'?'<div id="'+detalleId+'" style="display:none;background:var(--bg);border-radius:8px;padding:9px 10px;margin-top:7px;">'
+          +(detalle.length?detalle.map(function(d){return '<div style="display:flex;gap:8px;padding:3px 0;font-size:.69rem;"><b style="color:var(--sub);min-width:92px;">'+esc(d[0])+':</b><span style="color:var(--az);word-break:break-word;">'+esc(d[1])+'</span></div>';}).join(''):'<div style="font-size:.68rem;color:var(--sub);">Esta venta es anterior a la mejora y sólo tiene guardado el resumen.</div>')
+          +'</div>':'')
+        +'</div>';
     });
   }
   html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--red);border:2px solid #ffd5d5;" onclick="borrarHistorial()">🗑️ Borrar historial</button>';
@@ -4075,6 +4093,8 @@ function guardarYEnviarPedidoCliente(){
   var n=parseInt(document.getElementById('pd-cuotas').value,10)||0;
   var senia=(document.getElementById('pd-senia').value||'').trim();
   var notas=(document.getElementById('pd-notas').value||'').trim();
+  var localidad=(document.getElementById('pd-loc').value||'').trim();
+  var email=(document.getElementById('pd-mail').value||'').trim();
 
   // Solo el nombre es obligatorio. El resto es opcional.
   if(!nombre){ alert('Poné al menos el nombre del cliente.'); return; }
@@ -4121,7 +4141,22 @@ function guardarYEnviarPedidoCliente(){
   m+='Fecha: '+new Date().toLocaleDateString('es-AR')+'\n';
 
   var totalVenta=n>0?(cuota*n):precio;
-  guardarPedidoHistorial(totalVenta,nombre,[{nombre:prod,cantidad:1,venta:precio}],{origen:'vendedor',vendedor:quien||'Vendedor',plan:n>0?n+' cuotas':'Contado'});
+  guardarPedidoHistorial(totalVenta,nombre,[{nombre:prod,cantidad:1,venta:precio}],{
+    origen:'vendedor',
+    vendedor:quien||'Vendedor',
+    plan:n>0?n+' cuotas':'Contado',
+    dni:dni,
+    telefono:tel,
+    direccion:dir,
+    localidad:localidad,
+    email:email,
+    producto:prod,
+    precioContado:precio,
+    cantidadCuotas:n,
+    valorCuota:cuota,
+    senia:senia,
+    notas:notas
+  });
   window.open('https://wa.me/'+WA_PEDIDOS+'?text='+encodeURIComponent(m),'_blank');
   setTimeout(function(){
     mostrarPasoCompra('<div style="text-align:center;padding:12px 2px;"><div style="font-size:2.8rem;">✅</div><h2 style="color:var(--az);font-size:1.12rem;margin:8px 0;">Pedido cargado correctamente</h2><p style="font-size:.78rem;color:var(--sub);line-height:1.55;margin:0 0 18px;">Recibimos los datos del cliente y del producto solicitado. Angie o Maxi se comunicarán con vos a la brevedad para confirmar la disponibilidad y continuar con la gestión de la venta.</p><button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="abrirPedido()">Cargar otro pedido</button><button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarModalCompra()">Volver a la tienda</button></div>');
