@@ -895,6 +895,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
     <button id="tienda-btn-auth-fotos" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#eef4ff;color:var(--az);border:2px solid #cddffb;"
       onclick="tiendaAuthFotosAbrir()">🔐 Fotos: conectar administrador</button>
+    <button id="tienda-btn-auth-fotos-salir" class="calc-btn" style="display:none;width:100%;margin-top:8px;background:#fff1f2;color:var(--red);border:2px solid #fecaca;"
+      onclick="tiendaAuthFotosCerrarSesion()">🔒 Cerrar sesión segura de fotos</button>
   </div>
 </div>
 
@@ -2816,13 +2818,16 @@ function tiendaAuthFotosInicializar(){
 }
 function tiendaAuthFotosActualizarBoton(){
   var btn=document.getElementById('tienda-btn-auth-fotos');
+  var salir=document.getElementById('tienda-btn-auth-fotos-salir');
   if(!btn) return;
   if(_tiendaAuthFotosUsuario){
     btn.textContent='✅ Fotos: administrador conectado';
     btn.style.background='#ecfdf5'; btn.style.color='#047857'; btn.style.borderColor='#a7f3d0';
+    if(salir)salir.style.display=tiendaEsAdmin?'block':'none';
   }else{
     btn.textContent='🔐 Fotos: conectar administrador';
     btn.style.background='#eef4ff'; btn.style.color='var(--az)'; btn.style.borderColor='#cddffb';
+    if(salir)salir.style.display='none';
   }
 }
 function tiendaAuthFotosSesion(){
@@ -3014,6 +3019,7 @@ function tiendaAplicarModo(){
   var btnDup=document.getElementById('btn-limpiar-dup'); if(btnDup)btnDup.style.display = tiendaEsAdmin?'block':'none';
   var btnRec=document.getElementById('btn-reclasificar'); if(btnRec)btnRec.style.display = tiendaEsAdmin?'block':'none';
   var btnAuthFotos=document.getElementById('tienda-btn-auth-fotos'); if(btnAuthFotos){ btnAuthFotos.style.display=tiendaEsAdmin?'block':'none'; tiendaAuthFotosActualizarBoton(); }
+  var btnSalirFotos=document.getElementById('tienda-btn-auth-fotos-salir'); if(btnSalirFotos && !tiendaEsAdmin)btnSalirFotos.style.display='none';
   var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
   var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Formato de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
@@ -5189,6 +5195,30 @@ function subirFotoStorage(blob, fid){
   });
 }
 
+// Guarda en Supabase solamente el producto cuya foto cambió. La función RPC
+// modifica el JSON en el servidor bajo bloqueo de fila, dispara el espejo
+// incremental y devuelve el producto ya confirmado.
+function tiendaGuardarSoloFotoProducto(fid,url){
+  if(!sbFotos || !sbFotos.rpc) return Promise.reject(new Error('Conexión segura no disponible'));
+  return sbFotos.rpc('actualizar_foto_producto',{
+    p_producto_id:String(fid),
+    p_foto_url:url
+  }).then(function(res){
+    if(res && res.error) throw res.error;
+    var confirmado=res && res.data;
+    if(!confirmado || confirmado.foto!==url){
+      throw new Error('Supabase no confirmó el enlace nuevo');
+    }
+    var p=tiendaProductos.find(function(x){return x.id==fid;});
+    if(p){
+      Object.keys(confirmado).forEach(function(k){p[k]=confirmado[k];});
+      try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+      try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
+    }
+    return confirmado;
+  });
+}
+
 // Sube la foto al Storage de Supabase y guarda el LINK en el producto/celular.
 // Sólo se invoca después de comprobar una sesión real de Supabase.
 function subirFotoStorageAutenticada(blob, fid){
@@ -5211,16 +5241,7 @@ function subirFotoStorageAutenticada(blob, fid){
       }else{
         var p=tiendaProductos.find(function(x){return x.id==fid;});
         if(p){
-          p.foto=url;
-          if(p.automaticoProveedor) p.fotoManualProveedor=url;
-          // 🧹 al poner tu propia foto, dejar de tratarla como foto de catálogo:
-          // así se muestra tapando TODO (cover, sin bordes) y sin el logo encima.
-          delete p.fotoOrigen;
-          delete p.fotoCatalogoLogo;
-          return tiendaGuardarLocal().then(function(guardado){
-            if(guardado && guardado.error) throw guardado.error;
-            return url;
-          });
+          return tiendaGuardarSoloFotoProducto(fid,url).then(function(){return url;});
         }
         throw new Error('No encontré el producto luego de subir la foto');
       }
@@ -5230,7 +5251,9 @@ function subirFotoStorageAutenticada(blob, fid){
       tiendaRenderYEnfocar(fid);
       alert('✅ Foto reemplazada. Ahora la ven todos.');
     })
-    .catch(function(e){ alert('⚠️ Excepción al subir foto: '+(e.message||e)); });
+    .catch(function(e){
+      alert('⚠️ La imagen pudo haberse subido, pero no quedó guardada en el producto.\n\n'+(e.message||e));
+    });
 }
 
 // Quita solamente la foto elegida por Amarango y recupera la del proveedor.
@@ -5745,7 +5768,7 @@ function prepararCajonTools(){
       'tienda-btn-hist','tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
       'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
-      'tienda-btn-auth-fotos','btn-limpiar-dup','btn-reclasificar'
+      'tienda-btn-auth-fotos','tienda-btn-auth-fotos-salir','btn-limpiar-dup','btn-reclasificar'
     ];
     ids.forEach(function(id){
       var el=document.getElementById(id);
@@ -8630,19 +8653,10 @@ function bajarBancoFotosNube(){
     .then(function(r){ if(r && r.data && r.data.datos){ try{localStorage.setItem('ae_banco_fotos_celus',JSON.stringify(r.data.datos));}catch(e){} } })
     .catch(function(){});
 }
-// ⚡ RENDIMIENTO: pide a Supabase una versión REDUCIDA de la foto en vez de la
-// original (que puede pesar 1-3 MB). Cambia /object/public/ por
-// /render/image/public/ y limita el ancho. Si la transformación no está
-// disponible, la <img> cae sola a la original vía onerror.
+// Las fotos se comprimen antes de subirlas. Se usa directamente la URL pública
+// para evitar consumir Storage Image Transformations de Supabase.
 function fotoOpt(url, ancho){
-  if(!url) return '';
-  try{
-    if(url.indexOf('/storage/v1/object/public/')>=0){
-      var base=url.replace('/object/public/','/render/image/public/');
-      return base+(base.indexOf('?')>=0?'&':'?')+'width='+(ancho||400)+'&quality=70&resize=contain';
-    }
-  }catch(e){}
-  return url; // no es de Supabase Storage → dejar como está
+  return url || '';
 }
 function guardarFotoBanco(nombre, foto){
   if(!nombre)return;
