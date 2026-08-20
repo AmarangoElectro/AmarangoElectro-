@@ -784,7 +784,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 
     <!-- Bandejas privadas para ordenar el trabajo de Angie y Max -->
     <div id="tienda-bandejas-admin" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px;">
-      <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🆕 Nuevos productos <span id="cnt-bandeja-nuevos">0</span></button>
+      <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🖼️ Imágenes pendientes <span id="cnt-bandeja-nuevos">0</span></button>
       <button id="btn-bandeja-revision" onclick="tiendaAbrirBandejaAdmin('revision')" style="padding:10px 7px;background:#FFF7E6;color:#A05200;border:1.5px solid #F0C040;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🕓 Revisar manuales <span id="cnt-bandeja-revision">0</span></button>
     </div>
 
@@ -4699,7 +4699,9 @@ function tiendaEsAutomatico(p){
   return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
 }
 function tiendaEsPendienteImagenAdmin(p){
-  return !!(p && tiendaEsAutomatico(p) && p.pendienteImagenAdmin===true &&
+  // Todo producto automático que todavía usa la foto original del proveedor
+  // queda reunido acá, sin importar cuándo se incorporó al catálogo.
+  return !!(p && !p.esCelu && tiendaEsAutomatico(p) &&
     !p.fotoManualProveedor && p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
@@ -4711,9 +4713,9 @@ function tiendaPrepararBandejasAdmin(){
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
-      // Los automáticos recién incorporados se publican, pero quedan en la
-      // bandeja hasta reemplazar o aprobar su imagen.
-      if(esNuevo(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true && p.pendienteImagenAdmin!==true){
+      // Todos los automáticos con foto original del proveedor permanecen
+      // publicados, pero quedan en la bandeja hasta reemplazar o aprobarla.
+      if(!p.fotoManualProveedor && p.imagenProveedorAprobada!==true && p.pendienteImagenAdmin!==true){
         p.pendienteImagenAdmin=true;
         cambio=true;
       }
@@ -4827,7 +4829,7 @@ function tiendaRender(){
 
   if(!universo.length){
     vacia.style.display='block';
-    if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan productos nuevos con imagen pendiente.';
+    if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan imágenes de proveedores pendientes de revisar.';
     else if(tiendaBandejaAdmin==='revision')vacia.innerHTML='✅ No quedan productos manuales pendientes de revisión.';
     else vacia.innerHTML='📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.';
     cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML='';
@@ -5216,7 +5218,7 @@ function tiendaCardsHtml(sublista){
 
     if(tiendaEsAdmin){
       if(tiendaEsPendienteImagenAdmin(p)){
-        card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🆕 Imagen pendiente de revisar</div>'
+        card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🖼️ Imagen del proveedor pendiente</div>'
           +'<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:#EAF8EF;color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaAprobarImagenActual('+pid+')">✅ Aprobar imagen actual</button>';
       }
       if(tiendaEsPendienteRevisionManual(p)){
@@ -5439,6 +5441,15 @@ function tiendaGuardarSoloFotoProducto(fid,url){
     var p=tiendaProductos.find(function(x){return x.id==fid;});
     if(p){
       Object.keys(confirmado).forEach(function(k){p[k]=confirmado[k];});
+      // La URL confirmada vive en el bucket propio de Amarango: la marcamos
+      // explícitamente como foto reemplazada para sacarla de la bandeja aun
+      // cuando una versión anterior de la función RPC no devuelva este campo.
+      if(tiendaEsAutomatico(p) && String(url).indexOf('/storage/v1/object/public/tienda-fotos/')>=0){
+        p.foto=url;
+        p.fotoManualProveedor=url;
+        p.pendienteImagenAdmin=false;
+        p.imagenProveedorAprobada=false;
+      }
       try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
       try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
     }
@@ -5495,6 +5506,8 @@ function tiendaUsarFotoProveedor(id){
   }
   p.foto=p.fotoProveedor;
   delete p.fotoManualProveedor;
+  p.imagenProveedorAprobada=false;
+  p.pendienteImagenAdmin=true;
   delete p.fotoOrigen;
   delete p.fotoCatalogoLogo;
   tiendaGuardarLocal();
