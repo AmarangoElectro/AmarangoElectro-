@@ -782,6 +782,12 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <button style="flex:1;font-size:.82rem;padding:12px;background:var(--az);color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(11,45,107,.3);" onclick="showTab('celulares')">📱 Cargar celulares</button>
     </div>
 
+    <!-- Bandejas privadas para ordenar el trabajo de Angie y Max -->
+    <div id="tienda-bandejas-admin" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px;">
+      <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🆕 Nuevos productos <span id="cnt-bandeja-nuevos">0</span></button>
+      <button id="btn-bandeja-revision" onclick="tiendaAbrirBandejaAdmin('revision')" style="padding:10px 7px;background:#FFF7E6;color:#A05200;border:1.5px solid #F0C040;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🕓 Revisar manuales <span id="cnt-bandeja-revision">0</span></button>
+    </div>
+
     <!-- Aviso de precios viejos (solo admin) -->
     <div id="tienda-aviso-precios" style="display:none;margin:8px 0;"></div>
 
@@ -997,6 +1003,9 @@ var fmt=function(n){return"$"+precioVisual(n).toLocaleString("es-AR");};
 var SB_URL="https://zctaukyrhsmpjkcddcqq.supabase.co";
 var SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjdGF1a3lyaHNtcGprY2RkY3FxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MzQ0ODAsImV4cCI6MjA5NzQxMDQ4MH0.lxhPH9bASIV__jETAwYZvoJmSpk0Q32CJl9tSlQeLdA";
 var sbCalc=null, sbFotos=null, NUBE_OK=false;
+// El arranque espera a que termine de leerse (o repararse) la copia local.
+// Evita que una respuesta nueva de Supabase sea pisada luego por IndexedDB.
+var _tiendaCacheInicialPromesa=null;
 // Conecta a Supabase. Si la librería (del CDN) todavía no cargó, reintenta.
 function conectarNube(intentos){
   intentos = intentos||0;
@@ -1024,7 +1033,10 @@ function conectarNube(intentos){
       NUBE_OK=true;
       try{ tiendaAuthFotosInicializar(); }catch(e){}
       // ya conectados: bajar datos frescos de la nube y refrescar la tienda
-      try{ tiendaBajarNube(); tiendaBajarCelusNube(); }catch(e){}
+      try{
+        var cacheLista=_tiendaCacheInicialPromesa||Promise.resolve();
+        cacheLista.then(function(){ tiendaBajarNube(); tiendaBajarCelusNube(); });
+      }catch(e){}
       return;
     }
   }catch(e){ NUBE_OK=false; }
@@ -2007,6 +2019,7 @@ var tiendaMarcadosSet={};        // productos marcados para tanda
 var tiendaModoSelec=false;       // modo "compartir varios" activo
 var tiendaSelecSet={};           // productos seleccionados para compartir
 var tiendaVista=0;               // 0 = normal (2 col), 1 = grande (1 col), 2 = chica (3 col)
+var tiendaBandejaAdmin='';       // '' | 'nuevos' | 'revision'
 var tiendaFormatoCuota='caja';   // 'caja' = cajita de color (Frávega), 'simple' = precio grande + texto
 var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
 var cuponAplicado=null;          // cupón activo en el carrito
@@ -2044,14 +2057,29 @@ function tiendaInit(){
   // restaurar sesión guardada (admin/revendedor quedan logueados hasta cerrar sesión)
   if(adminUnlocked){ tiendaEsAdmin=true; if(typeof mostrarPestanasAdmin==='function')mostrarPestanasAdmin(); }
   else if(revUnlocked){ if(typeof mostrarPestanasRev==='function')mostrarPestanasRev(); }
-  tiendaCargarLocal();     // primero lo local (instantáneo)
+  // v16 repara una sola vez los celulares que conservaron fotos viejas con
+  // una versión incremental aparentemente actualizada.
+  var repararCache=tiendaNecesitaReparacionFotosV16();
+  if(repararCache){
+    tiendaProductos=[];
+    tiendaGuardarVersionIncremental(0);
+    try{
+      localStorage.removeItem('ae_tienda_catalogo');
+      localStorage.removeItem('ae_tienda_catalogo_fecha');
+    }catch(e){}
+  }else{
+    tiendaCargarLocal();   // primero lo local (instantáneo)
+  }
   tiendaAplicarModo();
   tiendaRender();
   // IndexedDB admite catálogos con muchas fotos, a diferencia de localStorage.
   // Lo recuperamos antes de preguntar por versiones nuevas para no partir de
   // una copia incompleta cuando el catálogo creció demasiado.
-  tiendaCacheGrandeCargar().then(function(cache){
-    if(cache&&Array.isArray(cache.productos)&&cache.productos.length){
+  _tiendaCacheInicialPromesa=(repararCache?Promise.resolve(null):tiendaCacheGrandeCargar()).then(function(cache){
+    // Una copia leída antes de una sincronización puede resolver después.
+    // Sólo se aplica si no es más vieja que la versión que ya está en uso.
+    var versionActual=tiendaVersionIncrementalLocal();
+    if(cache&&Array.isArray(cache.productos)&&cache.productos.length&&Number(cache.version||0)>=versionActual){
       tiendaProductos=cache.productos;
       tiendaProductos.forEach(function(p){if(typeof p.visible==='undefined')p.visible=true;});
       // La versión pertenece a esta misma copia. Si es anterior, la nube
@@ -2060,9 +2088,13 @@ function tiendaInit(){
       tiendaGuardarVersionIncremental(Number(cache.version)||0);
       tiendaRender();
     }
+    return true;
+  }).catch(function(){return true;});
+  _tiendaCacheInicialPromesa.then(function(){
     tiendaBajarNube();
-  }).catch(function(){tiendaBajarNube();});
-  tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+    tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+    tiendaRestaurarEstadoReciente(0);
+  });
   // ⚡ ARRANQUE RÁPIDO Y FLUIDO: las descargas secundarias se escalonan de a una
   //    (antes salían 6 juntas y el celular se trababa al abrir). Ahora van espaciadas.
   var _tareasArranque=[
@@ -2322,8 +2354,18 @@ function tiendaBajarNubeLegacy(intentos){
 // sistema histórico por timestamp para que la tienda nunca quede vacía.
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
+var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
+var TIENDA_CACHE_FOTOS_VERSION='v16-20260820';
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
+
+function tiendaNecesitaReparacionFotosV16(){
+  try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
+  catch(e){return true;}
+}
+function tiendaConfirmarReparacionFotosV16(){
+  try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
+}
 
 function tiendaCacheGrandeAbrir(){
   return new Promise(function(resolve,reject){
@@ -2384,6 +2426,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
+  tiendaConfirmarReparacionFotosV16();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -2466,7 +2509,7 @@ function tiendaBajarNube(intentos){
 }
 
 // Mantiene varios dispositivos alineados sin bajar el catálogo completo:
-// revisa cambios al volver a la pestaña y cada 10 minutos mientras está abierta.
+// revisa cambios al volver a la pestaña y cada 2 minutos mientras está abierta.
 (function(){
   var ultimaRevision=0;
   function revisarIncremental(){
@@ -2479,8 +2522,90 @@ function tiendaBajarNube(intentos){
     if(document.visibilityState==='visible')revisarIncremental();
   });
   window.addEventListener('focus',revisarIncremental);
-  setInterval(revisarIncremental,10*60*1000);
+  setInterval(revisarIncremental,2*60*1000);
 })();
+
+// ═══ REANUDAR LA TIENDA AL VOLVER DE WHATSAPP / REABRIR LA APP ═══
+// Android a veces libera la pestaña cuando abre WhatsApp. Durante 5 minutos
+// recordamos la categoría, la búsqueda, los filtros, el scroll y el producto.
+var TIENDA_REANUDAR_KEY='ae_tienda_reanudar_v17';
+var TIENDA_REANUDAR_MS=5*60*1000;
+var _tiendaReanudacionIntentada=false;
+
+function tiendaGuardarEstadoReciente(){
+  try{
+    var buscar=document.getElementById('tienda-buscar');
+    var orden=document.getElementById('tienda-orden');
+    var maxPrecio=document.getElementById('tienda-maxprecio');
+    var modal=document.getElementById('modal-cuotas');
+    var modalAbierto=!!(modal && window.getComputedStyle(modal).display!=='none');
+    var estado={
+      ts:Date.now(),
+      categoria:tiendaCategoriaActiva||'',
+      bandejaAdmin:tiendaBandejaAdmin||'',
+      marca:tiendaMarcaActiva||'',
+      busqueda:buscar?buscar.value:'',
+      orden:orden?orden.value:'',
+      maxPrecio:maxPrecio?maxPrecio.value:'',
+      soloOfertas:!!verSoloOfertas,
+      soloFavoritos:!!verSoloFavoritos,
+      scrollY:window.pageYOffset||document.documentElement.scrollTop||0,
+      productoId:(modalAbierto&&window._tiendaDetalleId!=null)?String(window._tiendaDetalleId):'',
+      modalScroll:modal?modal.scrollTop:0
+    };
+    localStorage.setItem(TIENDA_REANUDAR_KEY,JSON.stringify(estado));
+  }catch(e){}
+}
+
+function tiendaRestaurarEstadoReciente(intento){
+  intento=intento||0;
+  if(_tiendaReanudacionIntentada)return;
+  var estado=null;
+  try{estado=JSON.parse(localStorage.getItem(TIENDA_REANUDAR_KEY)||'null');}catch(e){}
+  if(!estado || !estado.ts || Date.now()-Number(estado.ts)>TIENDA_REANUDAR_MS){
+    _tiendaReanudacionIntentada=true;
+    try{localStorage.removeItem(TIENDA_REANUDAR_KEY);}catch(e){}
+    return;
+  }
+  // Esperar el catálogo reparado/sincronizado antes de restaurar el producto.
+  if((!tiendaProductos || !tiendaProductos.length) && intento<40){
+    setTimeout(function(){tiendaRestaurarEstadoReciente(intento+1);},150);
+    return;
+  }
+  _tiendaReanudacionIntentada=true;
+  tiendaCategoriaActiva=estado.categoria||'';
+  tiendaBandejaAdmin=tiendaEsAdmin?(estado.bandejaAdmin||''):'';
+  tiendaMarcaActiva=estado.marca||'';
+  verSoloOfertas=!!estado.soloOfertas;
+  verSoloFavoritos=!!estado.soloFavoritos;
+  var buscar=document.getElementById('tienda-buscar');
+  var buscarHeader=document.getElementById('hdr-buscar-input');
+  var orden=document.getElementById('tienda-orden');
+  var maxPrecio=document.getElementById('tienda-maxprecio');
+  if(buscar)buscar.value=estado.busqueda||'';
+  if(buscarHeader)buscarHeader.value=estado.busqueda||'';
+  if(orden && estado.orden)orden.value=estado.orden;
+  if(maxPrecio)maxPrecio.value=estado.maxPrecio||'';
+  tiendaToggleLimpiar();
+  tiendaRender();
+  setTimeout(function(){
+    var maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+    window.scrollTo({top:Math.min(Math.max(0,Number(estado.scrollY)||0),maxY),behavior:'auto'});
+    if(estado.productoId && buscarProd(estado.productoId)){
+      tiendaVerDetalle(estado.productoId);
+      setTimeout(function(){
+        var modal=document.getElementById('modal-cuotas');
+        if(modal)modal.scrollTop=Math.max(0,Number(estado.modalScroll)||0);
+      },50);
+    }
+  },120);
+}
+
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden')tiendaGuardarEstadoReciente();
+});
+window.addEventListener('pagehide',tiendaGuardarEstadoReciente);
+window.addEventListener('beforeunload',tiendaGuardarEstadoReciente);
 
 // HISTORIAL DE PEDIDOS + ranking (solo admin)
 function tiendaHistorial(){
@@ -2653,6 +2778,7 @@ function tiendaMezclarAutomaticosNube(datosNube){
     var camposManuales=[
       'categoriaManualProveedor','categoriaManualFijada',
       'fotoManualProveedor','ocultoManualProveedor',
+      'pendienteImagenAdmin','imagenProveedorAprobada',
       'duplicadoPreferido','duplicadoGrupoIgnorado','ocultoPorDuplicado',
       'destacado','delDia','pocoStock','sinInteres','precioAntes',
       'caracteristicas','mayorista','cotizacionDolarManual'
@@ -2974,6 +3100,7 @@ function tiendaAplicarModo(){
   document.getElementById('tienda-admin-banner').style.display = 'none';
   document.getElementById('tienda-tanda-bar').style.display = 'none';
   var adminTop=document.getElementById('tienda-admin-top'); if(adminTop)adminTop.style.display = 'none';
+  var bandejasAdmin=document.getElementById('tienda-bandejas-admin'); if(bandejasAdmin)bandejasAdmin.style.display=tiendaEsAdmin?'grid':'none';
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
@@ -4567,6 +4694,82 @@ function tiendaRenderMantenerSector(scrollY, mostrados){
   },80);
 }
 
+// ═══ BANDEJAS PRIVADAS DE CONTROL ADMINISTRATIVO ═══
+function tiendaEsAutomatico(p){
+  return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
+}
+function tiendaEsPendienteImagenAdmin(p){
+  return !!(p && tiendaEsAutomatico(p) && p.pendienteImagenAdmin===true &&
+    !p.fotoManualProveedor && p.imagenProveedorAprobada!==true);
+}
+function tiendaEsPendienteRevisionManual(p){
+  return !!(p && !p.esCelu && !tiendaEsAutomatico(p) && p.pendienteRevisionManual===true);
+}
+function tiendaPrepararBandejasAdmin(){
+  if(!tiendaEsAdmin)return false;
+  var cambio=false;
+  tiendaProductos.forEach(function(p){
+    if(!p || p.esCelu)return;
+    if(tiendaEsAutomatico(p)){
+      // Los automáticos recién incorporados se publican, pero quedan en la
+      // bandeja hasta reemplazar o aprobar su imagen.
+      if(esNuevo(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true && p.pendienteImagenAdmin!==true){
+        p.pendienteImagenAdmin=true;
+        cambio=true;
+      }
+      return;
+    }
+    // Los manuales sin fecha o con 30+ días se archivan y ocultan hasta
+    // confirmar el mismo precio o guardar uno corregido.
+    var dias=diasPrecio(p);
+    if((dias===null || dias>=30) && p.pendienteRevisionManual!==true){
+      p.visibleAntesRevisionManual=(p.visible!==false);
+      p.pendienteRevisionManual=true;
+      p.visible=false;
+      cambio=true;
+    }
+  });
+  if(cambio)tiendaGuardarLocal();
+  return cambio;
+}
+function tiendaActualizarBandejasAdmin(){
+  var nuevos=tiendaProductos.filter(tiendaEsPendienteImagenAdmin).length;
+  var revision=tiendaProductos.filter(tiendaEsPendienteRevisionManual).length;
+  var cn=document.getElementById('cnt-bandeja-nuevos'); if(cn)cn.textContent=nuevos;
+  var cr=document.getElementById('cnt-bandeja-revision'); if(cr)cr.textContent=revision;
+  var bn=document.getElementById('btn-bandeja-nuevos');
+  var br=document.getElementById('btn-bandeja-revision');
+  if(bn){bn.style.boxShadow=tiendaBandejaAdmin==='nuevos'?'0 0 0 3px var(--nar)':'none';}
+  if(br){br.style.boxShadow=tiendaBandejaAdmin==='revision'?'0 0 0 3px var(--nar)':'none';}
+}
+function tiendaAbrirBandejaAdmin(tipo){
+  if(!tiendaExigirAdmin())return;
+  tiendaBandejaAdmin=(tiendaBandejaAdmin===tipo)?'':tipo;
+  tiendaCategoriaActiva=''; tiendaMarcaActiva='';
+  verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
+  var b=document.getElementById('tienda-buscar'); if(b)b.value='';
+  var h=document.getElementById('hdr-buscar-input'); if(h)h.value='';
+  tiendaToggleLimpiar();
+  tiendaRender();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tiendaAprobarImagenActual(id){
+  if(!tiendaExigirAdmin())return;
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p || !tiendaEsAutomatico(p))return;
+  p.imagenProveedorAprobada=true;
+  p.pendienteImagenAdmin=false;
+  tiendaGuardarLocal();
+  tiendaRender();
+  mostrarToast('✅ Imagen aprobada');
+}
+function tiendaLiberarRevisionManual(p){
+  if(!p)return;
+  p.pendienteRevisionManual=false;
+  if(p.visibleAntesRevisionManual!==false)p.visible=true;
+  delete p.visibleAntesRevisionManual;
+}
+
 // scroll infinito: cuando el usuario se acerca al final, carga el próximo lote
 (function(){
   if(!('IntersectionObserver' in window)) return;
@@ -4585,12 +4788,21 @@ function tiendaRender(){
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
 
+  if(tiendaEsAdmin)tiendaPrepararBandejasAdmin();
+  tiendaActualizarBandejasAdmin();
+
   // en modo público solo se ven los visibles; en admin se ven todos
   var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(function(p){return p.visible;});
+  if(tiendaEsAdmin && tiendaBandejaAdmin==='nuevos'){
+    universo=universo.filter(tiendaEsPendienteImagenAdmin);
+  }else if(tiendaEsAdmin && tiendaBandejaAdmin==='revision'){
+    universo=universo.filter(tiendaEsPendienteRevisionManual);
+  }
 
   // 🌟 traer los CELULARES a la tienda como productos de la categoría 📱 Celulares
   var celus=cargarListaCelus();
   celus.forEach(function(c, i){
+    if(tiendaEsAdmin && tiendaBandejaAdmin)return;
     if(!c || !c.precio)return;
     // si el celu está oculto de la tienda y NO sos admin, no lo mostramos
     if(c.ocultoTienda && !tiendaEsAdmin)return;
@@ -4613,7 +4825,15 @@ function tiendaRender(){
     });
   });
 
-  if(!universo.length){ vacia.style.display='block'; cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML=''; return; }
+  if(!universo.length){
+    vacia.style.display='block';
+    if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan productos nuevos con imagen pendiente.';
+    else if(tiendaBandejaAdmin==='revision')vacia.innerHTML='✅ No quedan productos manuales pendientes de revisión.';
+    else vacia.innerHTML='📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.';
+    cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML='';
+    tiendaAplicarVistaYAvisos();
+    return;
+  }
   vacia.style.display='none';
 
   // Categorías principales siempre visibles en una fila horizontal desplazable.
@@ -4761,7 +4981,7 @@ function tiendaRender(){
     var okPrecio=!maxPrecio || p.venta<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
-    var okViejo=!verSoloPreciosViejos || (!p.esCelu && (diasPrecio(p)||0)>=30);
+    var okViejo=!verSoloPreciosViejos || (!p.esCelu && !tiendaEsAutomatico(p) && ((diasPrecio(p)===null)||(diasPrecio(p)>=30)));
     // filtro "solo ofertas": producto con precio tachado o cuotas sin interés
     var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
     return okCat && okBusq && okMarca && okPrecio && okFav && okViejo && okOferta;
@@ -4995,6 +5215,13 @@ function tiendaCardsHtml(sublista){
       })();
 
     if(tiendaEsAdmin){
+      if(tiendaEsPendienteImagenAdmin(p)){
+        card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🆕 Imagen pendiente de revisar</div>'
+          +'<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:#EAF8EF;color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaAprobarImagenActual('+pid+')">✅ Aprobar imagen actual</button>';
+      }
+      if(tiendaEsPendienteRevisionManual(p)){
+        card+='<div style="background:#FFF7E6;border:1.5px solid #F0C040;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:#A05200;">🕓 Oculto hasta revisar el precio</div>';
+      }
       // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
       if(!p.esCelu){
         card+=etiquetaFechaPrecio(p);
@@ -5066,7 +5293,7 @@ function renderAvisoPreciosViejos(){
   var box=document.getElementById('tienda-aviso-precios');
   if(!box)return;
   if(!tiendaEsAdmin){ box.style.display='none'; box.innerHTML=''; return; }
-  var viejos=tiendaProductos.filter(function(p){ return !p.esCelu && (diasPrecio(p)||0)>=30; });
+  var viejos=tiendaProductos.filter(function(p){ return !p.esCelu && !tiendaEsAutomatico(p) && tiendaEsPendienteRevisionManual(p); });
   box.style.display='block';
   if(!viejos.length && !verSoloPreciosViejos){
     box.innerHTML='<div style="background:#eefaf2;border:1px solid #b8e6c8;border-radius:10px;padding:9px 12px;font-size:.7rem;font-weight:800;color:var(--gr);text-align:center;">✅ Todos los precios están actualizados (menos de 1 mes)</div>';
@@ -5248,7 +5475,8 @@ function subirFotoStorageAutenticada(blob, fid){
       return url;
     })
     .then(function(){
-      tiendaRenderYEnfocar(fid);
+      if(tiendaBandejaAdmin==='nuevos')tiendaRender();
+      else tiendaRenderYEnfocar(fid);
       alert('✅ Foto reemplazada. Ahora la ven todos.');
     })
     .catch(function(e){
@@ -5435,6 +5663,7 @@ function tiendaGuardarPrecios(){
   var mayorista=mayEl?(mayEl.value||'').trim():'';
 
   var cambioCategoria=false;
+  var liberoRevision=false;
   if(window._tiendaEditEsCelu){
     // editar un celular: se guarda en la lista de celulares
     var i=parseInt((''+window._tiendaEditId).replace('celu_',''),10);
@@ -5462,12 +5691,18 @@ function tiendaGuardarPrecios(){
       p.caracteristicas=carac;
       p.mayorista=mayorista; // 🏪 mayorista editable
       // Guardar una edición manual también confirma que el precio fue revisado.
-      if(!p.automaticoProveedor) p.precioChequeadoManual=Date.now();
+      if(!p.automaticoProveedor){
+        p.precioChequeadoManual=Date.now();
+        if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p); liberoRevision=true; }
+      }
       tiendaGuardarLocal();
     }
   }
   document.getElementById('modal-cuotas').style.display='none';
-  if(cambioCategoria){
+  if(liberoRevision){
+    tiendaRender();
+    mostrarToast('✅ Precio corregido y producto publicado');
+  }else if(cambioCategoria){
     tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
   }else{
     tiendaRenderYEnfocar(window._tiendaEditId);
@@ -5482,9 +5717,10 @@ function tiendaConfirmarPrecioManual(id){
   var ahora=Date.now();
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
+  tiendaLiberarRevisionManual(p);
   tiendaGuardarLocal();
-  tiendaRenderYEnfocar(id);
-  mostrarToast('✅ Precio confirmado hoy');
+  tiendaRender();
+  mostrarToast('✅ Precio confirmado y producto publicado');
 }
 
 // Quita solamente la elección manual y recupera la categoría automática.
@@ -5541,6 +5777,10 @@ function tiendaToggleVisibleProd(id){
   if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
+  if(tiendaEsPendienteRevisionManual(p) && !p.visible){
+    alert('Este producto está pendiente de revisión.\n\nConfirmá el mismo precio o editá el precio para publicarlo.');
+    return;
+  }
   tiendaSetVisibilidadManual(p,!p.visible);
   // guardar según sea celu o producto propio
   try{
@@ -6016,6 +6256,7 @@ function tiendaVerDetalle(id){
   try{ registrarVista(id); }catch(e){}
   var p=buscarProd(id);
   if(!p)return;
+  window._tiendaDetalleId=id;
   window._tiendaPedirId=id;
   // ← botón "atrás" flotante y elegante (círculo con flecha, estilo app)
   var html='<button onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'" '
@@ -8219,7 +8460,11 @@ function tiendaProcesarCarga(){
       costo = num;                // costo directo
       venta = markupVentaCRM(costo); // fórmula Amarango
     }
-    var _prod={ id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta, creado:Date.now(), precioActualizado:Date.now(), visible:false };
+    var _prod={
+      id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta,
+      creado:Date.now(), precioActualizado:Date.now(), visible:false,
+      pendienteRevisionManual:true, visibleAntesRevisionManual:true
+    };
     // 🏷️ categoría y características elegidas en el formulario
     if(_cargaCat) _prod.categoria=_cargaCat;
     if(_cargaCarac) _prod.caracteristicas=_cargaCarac;
@@ -8287,7 +8532,11 @@ function tiendaProcesarCarga(){
         actualizados++;
         if(esParecido){ dudas.push({nuevo:n.nombre, viejo:existe.nombre}); }
       }else{
-        n.visible=true;
+        // Los manuales nuevos se archivan primero: no se publican hasta que
+        // Angie o Max confirmen/corrijan el precio desde la bandeja.
+        n.visible=false;
+        n.pendienteRevisionManual=true;
+        n.visibleAntesRevisionManual=true;
         tiendaProductos.push(n);
         agregados++;
       }
@@ -8313,7 +8562,7 @@ function tiendaProcesarCarga(){
   if(window._cargaResumen){
     var r=window._cargaResumen;
     msg='✅ Listo:\n\n• '+r.actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+r.agregados+' producto(s) nuevo(s)';
-    if(r.agregados>0)msg+='\n\n🙈 Los nuevos quedaron OCULTOS. Cuando quieras publicarlos, tocá "👁️ Oculto" en cada uno (o usá "Mostrar marcados").';
+    if(r.agregados>0)msg+='\n\n🕓 Los nuevos quedaron OCULTOS en "Revisar manuales". Se publican al confirmar o corregir el precio.';
     if(r.dudas && r.dudas.length){
       msg+='\n\n⚠️ REVISÁ ESTOS '+r.dudas.length+' (los emparejé por parecido, no idéntico):\n';
       msg+=r.dudas.slice(0,12).map(function(d){return '• "'+d.nuevo+'" → lo tomé como "'+d.viejo+'"';}).join('\n');
