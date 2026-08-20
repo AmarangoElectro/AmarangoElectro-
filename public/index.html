@@ -125,6 +125,11 @@ body.cajon-cats-abierto #nav-inferior{display:none !important;}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
 .hdr-buscar .hb-lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
+.ae-buscar-fila{display:flex;align-items:stretch;gap:9px;width:100%;}
+.ae-buscar-fila .hdr-buscar{flex:1;min-width:0;}
+.admin-cargar-buscador{display:none;flex:0 0 58px;align-items:center;justify-content:center;margin-top:6px;border:2px solid var(--nar);border-radius:14px;background:#fff;color:var(--az);box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:26px;line-height:1;cursor:pointer;}
+.admin-cargar-buscador:hover{background:#fff6ec;transform:translateY(-1px);}
+.admin-cargar-buscador:focus-visible{outline:3px solid rgba(255,122,0,.35);outline-offset:2px;}
 /* ═══ PORTADA AMARANGO ═══ */
 .ae-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;margin:0 0 12px;border-radius:20px;border:2px solid rgba(255,122,0,.78);background:linear-gradient(118deg,#020c2e 0%,#0B2D6B 50%,#174aa5 72%,#FF7A00 145%);box-shadow:0 10px 28px rgba(11,45,107,.25);display:flex;align-items:center;padding:22px 16px 22px 22px;}
 .ae-hero::before{content:'';position:absolute;inset:0;z-index:-2;opacity:.48;background-image:linear-gradient(30deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(150deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(30deg,rgba(255,122,0,.08) 12%,transparent 12.5%,transparent 87%,rgba(255,122,0,.08) 87.5%,rgba(255,122,0,.08));background-size:48px 84px;background-position:0 0,0 0,24px 42px;}
@@ -691,14 +696,17 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     </section>
 
     <!-- Buscador debajo de la portada -->
-    <div class="hdr-buscar ae-buscar-banner">
-      <span class="hb-lupa">🔍</span>
-      <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
-        oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
-        onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
-        onblur="setTimeout(hdrCerrarSugerencias,180)">
-      <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
-      <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
+    <div class="ae-buscar-fila">
+      <div class="hdr-buscar ae-buscar-banner">
+        <span class="hb-lupa">🔍</span>
+        <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+          oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
+          onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
+          onblur="setTimeout(hdrCerrarSugerencias,180)">
+        <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
+        <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
+      </div>
+      <button id="admin-cargar-buscador" class="admin-cargar-buscador" onclick="tiendaAbrirCarga()" title="Cargar producto" aria-label="Cargar producto">🐝</button>
     </div>
 
     <!-- Banner modo admin (oculto por defecto) -->
@@ -3110,22 +3118,11 @@ function tiendaAplicarModo(){
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
-  // El botón flotante queda reservado al administrador.
-  // El vendedor carga pedidos desde la barra inferior o desde el menú.
+  // La abeja queda junto al buscador y libera la esquina para Margarita.
   var cargarFab=document.getElementById('cargar-fab');
-  if(cargarFab){
-    if(tiendaEsAdmin){
-      cargarFab.style.display='flex';
-      cargarFab.textContent='🐝';
-      cargarFab.title='Cargar producto';
-      cargarFab.onclick=function(){ tiendaAbrirCarga(); };
-      cargarFab.style.background='#ffffff';
-      cargarFab.style.color='';
-      cargarFab.style.borderColor='#0B2D6B';
-    } else {
-      cargarFab.style.display='none';
-    }
-  }
+  if(cargarFab)cargarFab.style.display='none';
+  var cargarBuscador=document.getElementById('admin-cargar-buscador');
+  if(cargarBuscador)cargarBuscador.style.display=tiendaEsAdmin?'flex':'none';
   var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab){ var ruOn=(localStorage.getItem('ae_ruleta_on')==='1'); ruletaFab.style.display=(ruOn && !tiendaEsAdmin)?'flex':'none'; }
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
