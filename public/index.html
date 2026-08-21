@@ -125,6 +125,13 @@ body.cajon-cats-abierto #nav-inferior{display:none !important;}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
 .hdr-buscar .hb-lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
+.ae-buscar-fila{display:flex;align-items:stretch;gap:9px;width:100%;}
+.ae-buscar-fila .hdr-buscar{flex:1;min-width:0;}
+.admin-cargar-buscador{display:none;flex:0 0 178px;align-items:center;justify-content:center;gap:8px;margin-top:6px;border:2px solid var(--nar);border-radius:14px;background:#fff;color:var(--az);box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:.82rem;font-weight:900;line-height:1;cursor:pointer;white-space:nowrap;}
+.admin-cargar-buscador .admin-cargar-icono{font-size:25px;line-height:1;}
+.admin-cargar-buscador:hover{background:#fff6ec;transform:translateY(-1px);}
+.admin-cargar-buscador:focus-visible{outline:3px solid rgba(255,122,0,.35);outline-offset:2px;}
+@media(max-width:520px){.ae-buscar-fila{gap:6px}.admin-cargar-buscador{flex-basis:118px;gap:4px;font-size:.66rem;white-space:normal;line-height:1.05}.admin-cargar-buscador .admin-cargar-icono{font-size:21px}}
 /* ═══ PORTADA AMARANGO ═══ */
 .ae-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;margin:0 0 12px;border-radius:20px;border:2px solid rgba(255,122,0,.78);background:linear-gradient(118deg,#020c2e 0%,#0B2D6B 50%,#174aa5 72%,#FF7A00 145%);box-shadow:0 10px 28px rgba(11,45,107,.25);display:flex;align-items:center;padding:22px 16px 22px 22px;}
 .ae-hero::before{content:'';position:absolute;inset:0;z-index:-2;opacity:.48;background-image:linear-gradient(30deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(150deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(30deg,rgba(255,122,0,.08) 12%,transparent 12.5%,transparent 87%,rgba(255,122,0,.08) 87.5%,rgba(255,122,0,.08));background-size:48px 84px;background-position:0 0,0 0,24px 42px;}
@@ -311,7 +318,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 /* ═══ VISTA AUTOMÁTICA PARA COMPUTADORA ═══
    En pantallas grandes se aprovecha el ancho y se muestran más productos.
    En celulares no cambia absolutamente nada. */
-@media (min-width:900px){
+@media (min-width:720px){
   html{background:linear-gradient(135deg,#020c2e 0%,#0B2D6B 72%,#FF7A00 140%);background-attachment:fixed;}
   body{max-width:1280px;box-shadow:0 0 34px rgba(11,45,107,.12);}
   .header{max-width:1280px;padding-left:26px;padding-right:26px;}
@@ -691,14 +698,17 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     </section>
 
     <!-- Buscador debajo de la portada -->
-    <div class="hdr-buscar ae-buscar-banner">
-      <span class="hb-lupa">🔍</span>
-      <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
-        oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
-        onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
-        onblur="setTimeout(hdrCerrarSugerencias,180)">
-      <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
-      <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
+    <div class="ae-buscar-fila">
+      <div class="hdr-buscar ae-buscar-banner">
+        <span class="hb-lupa">🔍</span>
+        <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+          oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
+          onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
+          onblur="setTimeout(hdrCerrarSugerencias,180)">
+        <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
+        <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
+      </div>
+      <button id="admin-cargar-buscador" class="admin-cargar-buscador" onclick="tiendaAbrirCarga()" title="Cargar producto" aria-label="Cargar producto"><span class="admin-cargar-icono">🐝</span><span>Cargar producto</span></button>
     </div>
 
     <!-- Banner modo admin (oculto por defecto) -->
@@ -1845,6 +1855,9 @@ function checkAdminPass(){
     adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin","1");}catch(e){}
     revUnlocked=true;          // admin también puede usar herramientas de revendedor
     tiendaEsAdmin=true;        // admin también edita la tienda (sin pedir clave de nuevo)
+    tiendaBandejaAdmin='';     // comenzar siempre con el catálogo completo
+    tiendaCategoriaActiva=''; tiendaMarcaActiva='';
+    verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
     mostrarPestanasAdmin();    // mostrar pestañas de cálculo
     document.getElementById("login-overlay").style.display="none";
     if(pendingTab==='__celuadmin__'){pendingTab=null;toggleCeluAdmin();}
@@ -2613,7 +2626,8 @@ function tiendaRestaurarEstadoReciente(intento){
   }
   _tiendaReanudacionIntentada=true;
   tiendaCategoriaActiva=estado.categoria||'';
-  tiendaBandejaAdmin=tiendaEsAdmin?(estado.bandejaAdmin||''):'';
+  // Las bandejas administrativas son filtros temporales y no se restauran.
+  tiendaBandejaAdmin='';
   tiendaMarcaActiva=estado.marca||'';
   verSoloOfertas=!!estado.soloOfertas;
   verSoloFavoritos=!!estado.soloFavoritos;
@@ -3096,6 +3110,8 @@ function tiendaSalirAdmin(){
 function toggleVistaCliente(){
   vistaPreviaCliente=!vistaPreviaCliente;
   tiendaEsAdmin = adminUnlocked && !vistaPreviaCliente; // en vista cliente, no mostrar herramientas admin
+  // Al volver a Administración siempre se parte del catálogo completo.
+  if(tiendaEsAdmin)tiendaBandejaAdmin='';
   tiendaAplicarModo();
   tiendaRender();
   var b=document.getElementById('tienda-vistaprev-banner');
@@ -3143,22 +3159,11 @@ function tiendaAplicarModo(){
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
-  // El botón flotante queda reservado al administrador.
-  // El vendedor carga pedidos desde la barra inferior o desde el menú.
+  // La abeja queda junto al buscador y libera la esquina para Margarita.
   var cargarFab=document.getElementById('cargar-fab');
-  if(cargarFab){
-    if(tiendaEsAdmin){
-      cargarFab.style.display='flex';
-      cargarFab.textContent='🐝';
-      cargarFab.title='Cargar producto';
-      cargarFab.onclick=function(){ tiendaAbrirCarga(); };
-      cargarFab.style.background='#ffffff';
-      cargarFab.style.color='';
-      cargarFab.style.borderColor='#0B2D6B';
-    } else {
-      cargarFab.style.display='none';
-    }
-  }
+  if(cargarFab)cargarFab.style.display='none';
+  var cargarBuscador=document.getElementById('admin-cargar-buscador');
+  if(cargarBuscador)cargarBuscador.style.display=tiendaEsAdmin?'flex':'none';
   var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab){ var ruOn=(localStorage.getItem('ae_ruleta_on')==='1'); ruletaFab.style.display=(ruOn && !tiendaEsAdmin)?'flex':'none'; }
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
@@ -6121,6 +6126,8 @@ function cerrarCajonTools(){
 
 function tiendaFiltrarCat(c, desdeDesplazamiento){
   if(desdeDesplazamiento && tiendaCategoriaActiva===c)return;
+  // Elegir una categoría sale de cualquier bandeja privada activa.
+  if(!desdeDesplazamiento && tiendaEsAdmin)tiendaBandejaAdmin='';
   // Una categoría es una navegación nueva: borra cualquier búsqueda previa
   // tanto del buscador interno como del encabezado.
   var buscador=document.getElementById('tienda-buscar');
@@ -10267,5 +10274,74 @@ try{ tiendaInit(); }catch(e){}
   chequear();
 })();
 </script>
+<!-- Margarita: etapa de prueba exclusiva para Administración.
+     El widget reconoce automáticamente ae_sesion_admin / ae_sesion_rev. -->
+<script>
+window.MARGARITA_SOLO_ADMIN=true;
+
+/* Margarita inicia como botón compacto. Esto evita que un iframe externo
+   bloqueado por una vista previa ocupe media pantalla antes de que se abra. */
+(function prepararMargaritaCompacta(){
+  function compactar(frame){
+    if(!frame||frame.dataset.aeInicioCompacto==='1')return;
+    frame.dataset.aeInicioCompacto='1';
+    frame.style.width='70px';
+    frame.style.height='70px';
+  }
+  var existente=document.getElementById('margarita-amarango-widget');
+  if(existente){compactar(existente);return;}
+  var observador=new MutationObserver(function(cambios){
+    for(var i=0;i<cambios.length;i++){
+      for(var j=0;j<cambios[i].addedNodes.length;j++){
+        var nodo=cambios[i].addedNodes[j];
+        if(nodo&&nodo.id==='margarita-amarango-widget'){
+          compactar(nodo);
+          observador.disconnect();
+          return;
+        }
+      }
+    }
+  });
+  observador.observe(document.body,{childList:true});
+})();
+
+window.addEventListener('margarita:buscar',function(event){
+  var detalle=(event&&event.detail)||{};
+  var query=String(detalle.query||'').trim();
+  var id=String(detalle.id||'').trim();
+  if(!query&&!id)return;
+
+  function normalizarMargarita(txt){
+    return String(txt||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  }
+  var encontrado=null;
+  try{
+    if(id&&typeof buscarProd==='function')encontrado=buscarProd(id);
+    if(!encontrado&&Array.isArray(tiendaProductos)){
+      var objetivo=normalizarMargarita(query);
+      encontrado=tiendaProductos.find(function(p){return normalizarMargarita(p&&p.nombre)===objetivo;})||
+        tiendaProductos.find(function(p){
+          var nombre=normalizarMargarita(p&&p.nombre);
+          return objetivo&&nombre&&(nombre.indexOf(objetivo)>=0||objetivo.indexOf(nombre)>=0);
+        });
+    }
+    if(!encontrado&&typeof cargarListaCelus==='function'){
+      var celulares=cargarListaCelus()||[];
+      var objetivoCelu=normalizarMargarita(query);
+      var indice=celulares.findIndex(function(c){return normalizarMargarita(c&&c.nombre)===objetivoCelu;});
+      if(indice<0)indice=celulares.findIndex(function(c){
+        var nombre=normalizarMargarita(c&&c.nombre);
+        return objetivoCelu&&nombre&&(nombre.indexOf(objetivoCelu)>=0||objetivoCelu.indexOf(nombre)>=0);
+      });
+      if(indice>=0)encontrado=buscarProd('celu_'+indice);
+    }
+    if(encontrado&&typeof tiendaVerDetalle==='function'){
+      if(typeof showTab==='function')showTab('tienda');
+      setTimeout(function(){tiendaVerDetalle(encontrado.id);},120);
+    }
+  }catch(e){}
+});
+</script>
+<script src="https://amara.max-huracan73.workers.dev/widget.js" defer></script>
 </body>
 </html>
