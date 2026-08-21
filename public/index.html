@@ -5292,14 +5292,16 @@ function tiendaCardsHtml(sublista){
           +'<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:#EAF8EF;color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaAprobarImagenActual('+pid+')">✅ Aprobar imagen actual</button>';
       }
       if(tiendaEsPendienteRevisionManual(p)){
-        card+='<div style="background:#FFF7E6;border:1.5px solid #F0C040;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:#A05200;">🕓 Oculto hasta revisar el precio</div>';
+        card+='<div style="background:#FFF7E6;border:1.5px solid #F0C040;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:#A05200;">🕓 Oculto hasta revisar el precio</div>'
+          +'<button style="width:100%;font-size:.67rem;padding:8px 5px;margin-bottom:6px;background:#16A34A;color:#fff;border:none;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">✅ Confirmar y publicar</button>'
+          +'<button style="width:100%;font-size:.67rem;padding:8px 5px;margin-bottom:6px;background:var(--az);color:#fff;border:none;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Corregir precio y publicar</button>';
       }
       // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
       if(!p.esCelu){
         card+=etiquetaFechaPrecio(p);
         // Los productos manuales no reciben actualizaciones del proveedor:
         // el admin puede confirmar con un toque que el precio sigue vigente.
-        if(!p.automaticoProveedor){
+        if(!p.automaticoProveedor && !tiendaEsPendienteRevisionManual(p)){
           var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
           card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
         }
@@ -5804,6 +5806,8 @@ function tiendaConfirmarPrecioManual(id){
   p.precioChequeadoManual=ahora;
   tiendaLiberarRevisionManual(p);
   tiendaGuardarLocal();
+  var modal=document.getElementById('modal-cuotas');
+  if(modal)modal.style.display='none';
   tiendaRender();
   mostrarToast('✅ Precio confirmado y producto publicado');
 }
@@ -6341,6 +6345,7 @@ function tiendaVerDetalle(id){
   try{ registrarVista(id); }catch(e){}
   var p=buscarProd(id);
   if(!p)return;
+  var pid="'"+p.id+"'";
   window._tiendaDetalleId=id;
   window._tiendaPedirId=id;
   // ← botón "atrás" flotante y elegante (círculo con flecha, estilo app)
@@ -6359,6 +6364,18 @@ function tiendaVerDetalle(id){
   }
   html+='<h3 style="color:var(--az);font-weight:900;font-size:1.02rem;line-height:1.2;margin:0;">'+p.nombre+'</h3>'
     +'<div style="display:flex;align-items:center;gap:5px;margin:4px 0 10px;font-size:.64rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>';
+
+  // En la ficha móvil, las acciones de revisión deben verse antes del precio
+  // y de la lista de cuotas. Así el administrador no tiene que buscarlas al
+  // final de una pantalla larga para volver a publicar el producto.
+  if(tiendaEsAdmin && tiendaEsPendienteRevisionManual(p)){
+    html+='<div style="background:#FFF7E6;border:2px solid #F0C040;border-radius:13px;padding:12px;margin:4px 0 12px;box-shadow:0 3px 12px rgba(160,82,0,.12);">'
+      +'<div style="font-size:.78rem;font-weight:900;color:#A05200;margin-bottom:4px;">🕓 Producto oculto hasta revisar el precio</div>'
+      +'<div style="font-size:.68rem;color:#7C4A12;margin-bottom:10px;line-height:1.35;">Elegí una opción para aprobarlo y volver a publicarlo.</div>'
+      +'<button class="calc-btn" style="width:100%;background:var(--gr);font-weight:900;margin:0 0 7px;" onclick="tiendaConfirmarPrecioManual('+pid+')">✅ Confirmar mismo precio y publicar</button>'
+      +'<button class="calc-btn" style="width:100%;background:var(--az);font-weight:900;margin:0;" onclick="tiendaEditarPrecio('+pid+')">✏️ Corregir precio y publicar</button>'
+      +'</div>';
+  }
 
   // ═══ BLOQUE DE PRECIO PRO: la cuota manda, el contado va de referencia ═══
   var _mejor=mejorCuotaDatos(p.venta, p);
@@ -6412,7 +6429,6 @@ function tiendaVerDetalle(id){
         +'<span style="font-weight:900;color:var(--nar);font-size:.9rem;">'+fmt(vc)+'</span></div>';
     }
   }
-  var pid="'"+p.id+"'";
   var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
   // acciones
   if(!esVend){
