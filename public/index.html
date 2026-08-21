@@ -3926,6 +3926,10 @@ function hdrPredictivo(){
 }
 function hdrElegirSug(id){
   hdrCerrarSugerencias();
+  // Las sugerencias se arman con todo el catálogo. Si el administrador estaba
+  // dentro de una bandeja privada, salir de ella para que el producto elegido
+  // y los resultados relacionados también queden visibles al cerrar el detalle.
+  if(tiendaEsAdmin && typeof tiendaBandejaAdmin!=='undefined')tiendaBandejaAdmin='';
   try{ tiendaVerDetalle(id); }catch(e){}
 }
 function hdrBuscarSync(){
@@ -3941,6 +3945,12 @@ function hdrBuscarSync(){
   // si empezó a buscar y estaba parado en una categoría, salir a "Todos" para
   // que la búsqueda global se vea coherente (no atrapada en la categoría).
   if(h.value.trim() && typeof tiendaCategoriaActiva!=='undefined' && tiendaCategoriaActiva){ tiendaCategoriaActiva=''; }
+  // Lo mismo para las bandejas privadas del administrador: al escribir en el
+  // buscador, la búsqueda pasa automáticamente a TODO el catálogo.
+  if(h.value.trim() && tiendaEsAdmin && typeof tiendaBandejaAdmin!=='undefined' && tiendaBandejaAdmin){
+    tiendaBandejaAdmin='';
+    tiendaMarcaActiva='';
+  }
   // DEBOUNCE: filtrar la grilla completa recién cuando deja de escribir
   if(_buscarTimer) clearTimeout(_buscarTimer);
   _buscarTimer=setTimeout(function(){
@@ -4840,6 +4850,15 @@ function tiendaRender(){
 
   if(tiendaEsAdmin)tiendaPrepararBandejasAdmin();
   tiendaActualizarBandejasAdmin();
+
+  // Una búsqueda escrita siempre es global. Esto también cubre el regreso
+  // desde WhatsApp o una sesión restaurada que conservó abierta una bandeja.
+  var busquedaGlobalActual=document.getElementById('tienda-buscar');
+  if(tiendaEsAdmin && tiendaBandejaAdmin && busquedaGlobalActual && busquedaGlobalActual.value.trim()){
+    tiendaBandejaAdmin='';
+    tiendaMarcaActiva='';
+    tiendaActualizarBandejasAdmin();
+  }
 
   // en modo público solo se ven los visibles; en admin se ven todos
   var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(function(p){return p.visible;});
