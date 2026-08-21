@@ -4826,7 +4826,10 @@ function tiendaAprobarImagenActual(id){
 function tiendaLiberarRevisionManual(p){
   if(!p)return;
   p.pendienteRevisionManual=false;
-  if(p.visibleAntesRevisionManual!==false)p.visible=true;
+  // Aprobar una revisión significa volver a publicarlo. En productos antiguos
+  // visibleAntesRevisionManual podía haber quedado en false por una migración
+  // y el producto salía de la bandeja pero continuaba oculto.
+  p.visible=true;
   delete p.visibleAntesRevisionManual;
 }
 
@@ -5772,7 +5775,9 @@ function tiendaGuardarPrecios(){
       p.mayorista=mayorista; // 🏪 mayorista editable
       // Guardar una edición manual también confirma que el precio fue revisado.
       if(!p.automaticoProveedor){
-        p.precioChequeadoManual=Date.now();
+        var revisionAhora=Date.now();
+        p.precioActualizado=revisionAhora;
+        p.precioChequeadoManual=revisionAhora;
         if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p); liberoRevision=true; }
       }
       tiendaGuardarLocal();
