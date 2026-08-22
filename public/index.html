@@ -2939,8 +2939,10 @@ function tiendaMezclarAutomaticosNube(datosNube){
       mezclado.categoria=p.categoriaManualProveedor;
       mezclado.categoriaManualFijada=true;
     }
-    if(p.fotoManualProveedor){
-      mezclado.foto=p.fotoManualProveedor;
+    var fotoLocalEsAmarango=tiendaEsFotoAmarango(p);
+    if(fotoLocalEsAmarango){
+      mezclado.foto=p.fotoManualProveedor||p.foto;
+      mezclado.fotoManualProveedor=p.fotoManualProveedor||p.foto;
       delete mezclado.fotoOrigen;
       delete mezclado.fotoCatalogoLogo;
     }
@@ -4869,6 +4871,13 @@ function tiendaRenderMantenerSector(scrollY, mostrados){
 function tiendaEsAutomatico(p){
   return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
 }
+function tiendaEsFotoAmarango(p){
+  if(!p)return false;
+  var foto=String(p.foto||'');
+  return !!p.fotoManualProveedor ||
+    foto.indexOf('/storage/v1/object/public/tienda-fotos/')>=0 ||
+    foto.indexOf('/tienda-fotos/')>=0;
+}
 function tiendaEstaVisibleYConStock(p){
   if(!p || p.visible!==true || p.sinStock===true || p.estadoProveedor==='sin_stock' ||
      p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true)return false;
@@ -4879,7 +4888,7 @@ function tiendaEsPendienteImagenAdmin(p){
   // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
   // Los ocultos/sin stock reaparecen automáticamente si vuelven a estar activos.
   return !!(p && !p.esCelu && tiendaEsAutomatico(p) &&
-    tiendaEstaVisibleYConStock(p) && !p.fotoManualProveedor &&
+    tiendaEstaVisibleYConStock(p) && !tiendaEsFotoAmarango(p) &&
     p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
@@ -4891,12 +4900,8 @@ function tiendaPrepararBandejasAdmin(){
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
-      // Todos los automáticos con foto original del proveedor permanecen
-      // publicados, pero quedan en la bandeja hasta reemplazar o aprobarla.
-      if(tiendaEstaVisibleYConStock(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true && p.pendienteImagenAdmin!==true){
-        p.pendienteImagenAdmin=true;
-        cambio=true;
-      }
+      // La bandeja de imágenes es un filtro calculado: abrirla nunca modifica
+      // ni vuelve a guardar cientos de productos automáticos.
       return;
     }
     // Los manuales sin fecha o con 30+ días se archivan y ocultan hasta
@@ -4970,7 +4975,7 @@ function tiendaProductoAptoPortada(p){
   if(stock.informado && stock.valor<=0)return false;
   // En productos automáticos se priorizan las imágenes ya trabajadas por
   // Amarango o expresamente aprobadas; las pendientes nunca abren la tienda.
-  if(tiendaEsAutomatico(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true)return false;
+  if(tiendaEsAutomatico(p) && !tiendaEsFotoAmarango(p) && p.imagenProveedorAprobada!==true)return false;
   return true;
 }
 function tiendaVerCategoriaPortada(cat){
