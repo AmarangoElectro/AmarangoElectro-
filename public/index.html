@@ -282,6 +282,12 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 #tienda-grid.vista-chica .calc-btn{font-size:.58rem !important;padding:6px 2px !important;}
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
 #tienda-grid.vista-lista .prod-foto{height:240px !important;}
+.portada-cat-seccion{grid-column:1/-1;margin:2px 0 14px;min-width:0;}
+.portada-cat-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 8px;}
+.portada-cat-cab h3{margin:0;color:#fff;font-size:1rem;font-weight:900;}
+.portada-cat-ver{border:none;border-radius:18px;background:#fff;color:var(--az);padding:7px 12px;font-size:.68rem;font-weight:900;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.14);}
+.portada-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
+@media(min-width:760px){.portada-cat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.portada-cat-cab h3{font-size:1.15rem}}
 /* 🎰 Ruleta de descuentos */
 #ruleta-fab{position:fixed;bottom:145px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
 @keyframes ruletaPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
@@ -1962,6 +1968,9 @@ var _catScrollTimer=null;
 var _catScrollRestaurar=null;
 var _catIgnorarScroll=false;
 var tiendaMarcaActiva='';        // filtro de marca activo (dentro de Celulares)
+var tiendaSubfiltroActivo='';    // tipo/pulgadas dentro de categorías mixtas
+var tiendaMostrarTodos=false;    // botón final de la vidriera
+var tiendaModoPortada=true;      // entrada explícita para clientes/vendedores
 // detecta la marca de un celular por el nombre
 function marcaCelu(nombre){
   var n=(nombre||'').toLowerCase();
@@ -1976,6 +1985,86 @@ function marcaCelu(nombre){
   return 'Otros';
 }
 function tiendaFiltrarMarca(mk){ tiendaMarcaActiva=(tiendaMarcaActiva===mk?'':mk); tiendaRender(); }
+function tiendaFiltrarSubtipo(tipo){
+  tiendaSubfiltroActivo=(tiendaSubfiltroActivo===tipo?'':tipo);
+  tiendaRender();
+}
+
+// Devuelve el subtipo comercial que corresponde dentro de categorías amplias.
+// Los filtros se crean desde los productos existentes: nunca aparecen vacíos.
+function tiendaSubtipoProducto(p,cat){
+  var n=normTxt((p&&p.nombre)||'');
+  if(cat==='📺 TV y video'){
+    var nums=n.match(/\b\d{2,3}\b/g)||[], pulg='';
+    nums.some(function(x){var v=parseInt(x,10);if(v>=19&&v<=100){pulg=v+' pulgadas';return true;}return false;});
+    return pulg||(/proyector/.test(n)?'Proyectores':(/monitor/.test(n)?'Monitores':'Otros'));
+  }
+  if(cat==='🍳 Cocción'){
+    if(/microonda/.test(n))return 'Microondas';
+    if(/freidora|air fryer|airfryer/.test(n))return 'Freidoras';
+    if(/anafe|hornalla/.test(n))return 'Anafes';
+    if(/campana|extractor/.test(n))return 'Campanas';
+    if(/parrilla|grill|panchera/.test(n))return 'Parrillas y grill';
+    if(/horno/.test(n))return 'Hornos';
+    if(/cocina/.test(n))return 'Cocinas';
+  }
+  if(cat==='❄️ Refrigeración'){
+    if(/exhibidor|exhibidora|vidriera/.test(n))return 'Exhibidoras';
+    if(/freezer|congelador/.test(n))return 'Freezers';
+    if(/frigobar|bajo mesada/.test(n))return 'Frigobares';
+    if(/conservadora/.test(n))return 'Conservadoras';
+    if(/heladera/.test(n))return 'Heladeras';
+  }
+  if(cat==='🌡️ Climatización'){
+    if(/aire acond|split/.test(n))return 'Aires acondicionados';
+    if(/caloventor/.test(n))return 'Caloventores';
+    if(/ventilador|turbo|circulador/.test(n))return 'Ventiladores';
+    if(/estufa|calefactor|panel calef|salamandra|tiro balanceado/.test(n))return 'Estufas y calefactores';
+    if(/climatizador/.test(n))return 'Climatizadores';
+    if(/extractor/.test(n))return 'Extractores';
+  }
+  if(cat==='🧺 Lavado'){
+    if(/lavavajilla/.test(n))return 'Lavavajillas';
+    if(/secarrop/.test(n))return 'Secarropas';
+    if(/centrifug/.test(n))return 'Centrífugas';
+    if(/lavarrop/.test(n))return 'Lavarropas';
+  }
+  if(cat==='⚡ Pequeños electro'){
+    if(/pava|hervidor/.test(n))return 'Pavas eléctricas';
+    if(/licuad/.test(n))return 'Licuadoras';
+    if(/cafeter/.test(n))return 'Cafeteras';
+    if(/tostad|sandwich|waflera/.test(n))return 'Tostadoras y sandwicheras';
+    if(/batidor|mixer|multiproces/.test(n))return 'Batidoras y mixers';
+    if(/plancha/.test(n))return 'Planchas';
+    if(/freidora|air fryer/.test(n))return 'Freidoras';
+  }
+  if(cat==='💄 Cuidado personal y salud'){
+    if(/cortapelo|cortabarba|afeitad/.test(n))return 'Cortadoras y afeitadoras';
+    if(/secador de pelo/.test(n))return 'Secadores';
+    if(/planchita|alisad/.test(n))return 'Planchitas';
+    if(/depilad/.test(n))return 'Depiladoras';
+    if(/tensiometro|termometro|oximetro|nebuliz|salud/.test(n))return 'Salud';
+  }
+  if(cat==='🔧 Herramientas'){
+    if(/taladro|atornillador/.test(n))return 'Taladros';
+    if(/amoladora/.test(n))return 'Amoladoras';
+    if(/soldador/.test(n))return 'Soldadoras';
+    if(/motosierra|bordeadora|desmalez|cortacesped/.test(n))return 'Jardín';
+    if(/hidrolav/.test(n))return 'Hidrolavadoras';
+  }
+  if(cat==='🚲 Deportes y movilidad'){
+    if(/bicicleta fija|cinta de correr|pesas|mancuerna/.test(n))return 'Fitness';
+    if(/monopatin|patineta/.test(n))return 'Monopatines';
+    if(/bicicleta/.test(n))return 'Bicicletas';
+  }
+  if(cat==='🔊 Audio'){
+    if(/auricular/.test(n))return 'Auriculares';
+    if(/soundbar|barra de sonido/.test(n))return 'Barras de sonido';
+    if(/parlante|bafle|torre/.test(n))return 'Parlantes';
+  }
+  if(cat==='🛏️ Colchones y sommiers')return /sommier|somier|sonier/.test(n)?'Sommiers':'Colchones';
+  return 'Otros';
+}
 
 // ===== Carga masiva de características de celulares =====
 function tiendaAbrirCarac(){
@@ -2084,8 +2173,22 @@ function bajarPremiosRuletaNube(){
 function tiendaInit(){
   _tiendaSincronizacionInicialLista=false;
   // restaurar sesión guardada (admin/revendedor quedan logueados hasta cerrar sesión)
-  if(adminUnlocked){ tiendaEsAdmin=true; if(typeof mostrarPestanasAdmin==='function')mostrarPestanasAdmin(); }
-  else if(revUnlocked){ if(typeof mostrarPestanasRev==='function')mostrarPestanasRev(); }
+  // No reactivar herramientas de administrador mientras se está usando
+  // "Ver como cliente", aunque la contraseña siga recordada en este equipo.
+  if(adminUnlocked && !vistaPreviaCliente){
+    tiendaEsAdmin=true;
+    if(typeof mostrarPestanasAdmin==='function')mostrarPestanasAdmin();
+  }else{
+    tiendaEsAdmin=false;
+    if(revUnlocked && !vistaPreviaCliente && typeof mostrarPestanasRev==='function')mostrarPestanasRev();
+  }
+  tiendaModoPortada=!tiendaEsAdmin;
+  if(tiendaModoPortada){
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+    tiendaMostrarTodos=false;
+  }
   // v16 repara una sola vez los celulares que conservaron fotos viejas con
   // una versión incremental aparentemente actualizada.
   var repararCache=tiendaNecesitaReparacionFotosV16();
@@ -2580,7 +2683,10 @@ function tiendaGuardarEstadoReciente(){
     var modalAbierto=!!(modal && window.getComputedStyle(modal).display!=='none');
     var estado={
       ts:Date.now(),
+      modoPortada:!!tiendaModoPortada,
+      mostrarTodos:!!tiendaMostrarTodos,
       categoria:tiendaCategoriaActiva||'',
+      subfiltro:tiendaSubfiltroActivo||'',
       bandejaAdmin:tiendaBandejaAdmin||'',
       marca:tiendaMarcaActiva||'',
       busqueda:buscar?buscar.value:'',
@@ -2612,7 +2718,10 @@ function tiendaRestaurarEstadoReciente(intento){
     return;
   }
   _tiendaReanudacionIntentada=true;
+  tiendaModoPortada=(typeof estado.modoPortada==='boolean')?estado.modoPortada:!(estado.categoria||estado.busqueda||estado.productoId);
+  tiendaMostrarTodos=!!estado.mostrarTodos;
   tiendaCategoriaActiva=estado.categoria||'';
+  tiendaSubfiltroActivo=estado.subfiltro||'';
   tiendaBandejaAdmin=tiendaEsAdmin?(estado.bandejaAdmin||''):'';
   tiendaMarcaActiva=estado.marca||'';
   verSoloOfertas=!!estado.soloOfertas;
@@ -3096,6 +3205,19 @@ function tiendaSalirAdmin(){
 function toggleVistaCliente(){
   vistaPreviaCliente=!vistaPreviaCliente;
   tiendaEsAdmin = adminUnlocked && !vistaPreviaCliente; // en vista cliente, no mostrar herramientas admin
+  if(vistaPreviaCliente){
+    tiendaModoPortada=true;
+    tiendaMostrarTodos=false;
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+    verSoloFavoritos=false;
+    verSoloOfertas=false;
+    var buscarPreview=document.getElementById('tienda-buscar');if(buscarPreview)buscarPreview.value='';
+    var buscarHeaderPreview=document.getElementById('hdr-buscar-input');if(buscarHeaderPreview)buscarHeaderPreview.value='';
+  }else{
+    tiendaModoPortada=false;
+  }
   tiendaAplicarModo();
   tiendaRender();
   var b=document.getElementById('tienda-vistaprev-banner');
@@ -3366,7 +3488,7 @@ function tiendaCategoria(nombre){
   if(/cargador|cable usb|auricular bluetooth|power ?bank|funda|vidrio templado|soporte celular|adaptador|tarjeta sd|memoria micro/.test(n))return '🔌 Cargadores y accesorios';
   if(/samsung|motorola|xiaomi|iphone|celular|smartphone|tablet/.test(n))return '📱 Celulares';
   if(/freezer|conservadora el[eé]ctric|congelador|cervecer|heladera|frio/.test(n))return '❄️ Refrigeración';
-  if(/\bhorno\b|microonda|air ?fryer|ayrfraier|parrilla|grill|panchera|cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocción';
+  if(/\bhorno\b|microonda|freidora|air ?fryer|ayrfraier|parrilla|grill|panchera|cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocción';
   if(/\btv\b|televis|smart ?tv|tcl|monitor|proyector/.test(n))return '📺 TV y video';
   if(/parlante|bafle|torre de sonido|soundbar|sound bar|barra de sonido|auricular|audio|equipo de m[uú]sica|karaoke|aiwa|jbl/.test(n))return '🔊 Audio';
   if(/aire acond|split|portatil frio|frio.?calor|estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|ventilador|turbo|circulador|extractor|termotanque|calef[oó]n/.test(n))return '🌡️ Climatización';
@@ -3445,6 +3567,9 @@ function catProd(p){
   // Una categoría elegida expresamente por el administrador manda incluso si
   // es "Otros". Los productos viejos sin esta marca siguen siendo reordenables.
   if(p && (p.categoriaManualFijada===true || p.categoriaManualProveedor)) return cat;
+  // Las freidoras que habían quedado clasificadas como pequeño electro pasan
+  // a Cocción, tal como se organiza la nueva navegación.
+  if(cat==='⚡ Pequeños electro' && p && /freidora|air ?fryer|airfryer/i.test(p.nombre||''))return '🍳 Cocción';
   // Si quedó guardado como "Otros" pero el nombre ahora permite reconocerlo,
   // se muestra en el grupo correcto inmediatamente.
   if(cat==='📦 Otros' && p && p.nombre){
@@ -3933,6 +4058,7 @@ function hdrBuscarSync(){
   var inp=document.getElementById('tienda-buscar');
   if(!h)return;
   if(inp) inp.value=h.value;
+  if(h.value.trim())tiendaModoPortada=false;
   var x=document.getElementById('hdr-buscar-x');
   if(x) x.style.display=(h.value.trim()?'block':'none');
   hdrPredictivo(); // sugerencias instantáneas mientras escribe
@@ -3940,7 +4066,11 @@ function hdrBuscarSync(){
   _cerrarSugTimer=setTimeout(hdrCerrarSugerencias,1200);
   // si empezó a buscar y estaba parado en una categoría, salir a "Todos" para
   // que la búsqueda global se vea coherente (no atrapada en la categoría).
-  if(h.value.trim() && typeof tiendaCategoriaActiva!=='undefined' && tiendaCategoriaActiva){ tiendaCategoriaActiva=''; }
+  if(h.value.trim() && typeof tiendaCategoriaActiva!=='undefined' && tiendaCategoriaActiva){
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+  }
   // DEBOUNCE: filtrar la grilla completa recién cuando deja de escribir
   if(_buscarTimer) clearTimeout(_buscarTimer);
   _buscarTimer=setTimeout(function(){
@@ -3954,6 +4084,7 @@ function hdrBuscarLimpiar(){
   hdrCerrarSugerencias();
   var inp=document.getElementById('tienda-buscar');
   if(inp) inp.value='';
+  if(!tiendaEsAdmin && !tiendaCategoriaActiva)tiendaModoPortada=true;
   if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
   if(typeof marcarNavActiva==='function') marcarNavActiva('');
   var x=document.getElementById('hdr-buscar-x');
@@ -3981,6 +4112,7 @@ function tiendaToggleLimpiar(){
 function tiendaLimpiarBusqueda(){
   var inp=document.getElementById('tienda-buscar');
   if(inp){ inp.value=''; inp.focus(); }
+  if(!tiendaEsAdmin && !tiendaCategoriaActiva)tiendaModoPortada=true;
   if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
   if(typeof marcarNavActiva==='function') marcarNavActiva('');
   tiendaToggleLimpiar();
@@ -4737,19 +4869,17 @@ function tiendaRenderMantenerSector(scrollY, mostrados){
 function tiendaEsAutomatico(p){
   return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
 }
-function tiendaEstaPublicadoYConStock(p){
-  if(!p || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;
-  // Si el proveedor informa una cantidad concreta, sólo queda pendiente
-  // mientras haya unidades. Si no informa cantidad, respetamos su estado
-  // visible/disponible para no esconder productos válidos.
+function tiendaEstaVisibleYConStock(p){
+  if(!p || p.visible!==true || p.sinStock===true || p.estadoProveedor==='sin_stock' ||
+     p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true)return false;
   var stock=tiendaLeerStockProveedor(p);
-  return !stock.informado || stock.valor>0;
+  return !(stock.informado && stock.valor<=0);
 }
 function tiendaEsPendienteImagenAdmin(p){
-  // Todo producto automático que todavía usa la foto original del proveedor
-  // queda reunido acá sólo mientras esté publicado y con stock.
+  // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
+  // Los ocultos/sin stock reaparecen automáticamente si vuelven a estar activos.
   return !!(p && !p.esCelu && tiendaEsAutomatico(p) &&
-    tiendaEstaPublicadoYConStock(p) && !p.fotoManualProveedor &&
+    tiendaEstaVisibleYConStock(p) && !p.fotoManualProveedor &&
     p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
@@ -4761,9 +4891,9 @@ function tiendaPrepararBandejasAdmin(){
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
-      // Sólo los automáticos actualmente publicados y con stock aparecen en
-      // la bandeja. Al reactivarse, vuelven solos si conservan la foto original.
-      if(tiendaEstaPublicadoYConStock(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true && p.pendienteImagenAdmin!==true){
+      // Todos los automáticos con foto original del proveedor permanecen
+      // publicados, pero quedan en la bandeja hasta reemplazar o aprobarla.
+      if(tiendaEstaVisibleYConStock(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true && p.pendienteImagenAdmin!==true){
         p.pendienteImagenAdmin=true;
         cambio=true;
       }
@@ -4833,6 +4963,68 @@ function tiendaLiberarRevisionManual(p){
   };
   if(document.readyState!=='loading') arranca(); else document.addEventListener('DOMContentLoaded', arranca);
 })();
+
+function tiendaProductoAptoPortada(p){
+  if(!p || !p.foto || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;
+  var stock=tiendaLeerStockProveedor(p);
+  if(stock.informado && stock.valor<=0)return false;
+  // En productos automáticos se priorizan las imágenes ya trabajadas por
+  // Amarango o expresamente aprobadas; las pendientes nunca abren la tienda.
+  if(tiendaEsAutomatico(p) && !p.fotoManualProveedor && p.imagenProveedorAprobada!==true)return false;
+  return true;
+}
+function tiendaVerCategoriaPortada(cat){
+  tiendaModoPortada=false;
+  tiendaMostrarTodos=false;
+  tiendaCategoriaActiva=cat;
+  tiendaMarcaActiva='';
+  tiendaSubfiltroActivo='';
+  verSoloFavoritos=false;
+  verSoloOfertas=false;
+  tiendaRender();
+  setTimeout(function(){
+    var destino=document.getElementById('tienda-submarcas')||document.getElementById('tienda-grid');
+    if(destino&&destino.scrollIntoView)destino.scrollIntoView({behavior:'smooth',block:'start'});
+  },60);
+}
+function tiendaRenderPortadaCategorias(universo,cont){
+  var secciones=[
+    {cat:'📱 Celulares',titulo:'📱 Celulares destacados'},
+    {cat:'🍳 Cocción',titulo:'🍳 Cocción para tu hogar'},
+    {cat:'🚲 Deportes y movilidad',titulo:'🚲 Bicicletas y movilidad'},
+    {cat:'❄️ Refrigeración',titulo:'❄️ Refrigeración'},
+    {cat:'🌡️ Climatización',titulo:'🌡️ Climatización'},
+    {cat:'⚡ Pequeños electro',titulo:'⚡ Pequeños electrodomésticos'}
+  ];
+  var html='';
+  secciones.forEach(function(sec){
+    var productos=universo.filter(function(p){return catProd(p)===sec.cat && tiendaProductoAptoPortada(p);});
+    productos.sort(function(a,b){
+      var da=a.destacado?1:0, db=b.destacado?1:0;
+      if(db!==da)return db-da;
+      return Number(b.creado||0)-Number(a.creado||0);
+    });
+    productos=productos.slice(0,4);
+    if(!productos.length)return;
+    var catJs=sec.cat.replace(/'/g,"\\'");
+    html+='<section class="portada-cat-seccion">'
+      +'<div class="portada-cat-cab"><h3>'+sec.titulo+'</h3>'
+      +'<button class="portada-cat-ver" onclick="tiendaVerCategoriaPortada(\''+catJs+'\')">Ver todo ›</button></div>'
+      +'<div class="portada-cat-grid">'+tiendaCardsHtml(productos)+'</div></section>';
+  });
+  if(!html){
+    html='<div style="grid-column:1/-1;background:#fff;border-radius:14px;padding:22px;text-align:center;color:var(--az);font-weight:800;">Estamos preparando la vidriera. Tocá una categoría arriba para ver sus productos.</div>';
+  }else{
+    html='<div style="grid-column:1/-1;color:#fff;font-size:1.15rem;font-weight:900;margin:2px 2px 6px;">Explorá nuestros productos</div>'+html;
+    html+='<div style="grid-column:1/-1;text-align:center;margin:0 0 28px;"><button onclick="tiendaModoPortada=false;tiendaMostrarTodos=true;tiendaRender();" style="background:var(--nar);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(255,122,0,.28);">Ver todos los productos</button></div>';
+  }
+  _tiendaListaFull=[];
+  _tiendaMostrados=0;
+  cont.innerHTML=html;
+  var vm=document.getElementById('tienda-vermas');if(vm)vm.innerHTML='';
+  var cnt=document.getElementById('tienda-contador');if(cnt)cnt.textContent='Elegí una categoría para ver más';
+  tiendaAplicarVistaYAvisos();
+}
 
 function tiendaRender(){
   var cont=document.getElementById('tienda-grid');
@@ -4997,20 +5189,56 @@ function tiendaRender(){
     destDiv.style.display='none';
   }
 
-  // sub-chips de MARCA cuando estás en la categoría Celulares
+  // Subfiltros contextuales: marcas en celulares y tipos/pulgadas en las
+  // categorías amplias. Se construyen con el stock visible del momento.
+  var subBox=document.getElementById('tienda-submarcas');
   if(tiendaCategoriaActiva==='📱 Celulares'){
+    tiendaSubfiltroActivo='';
     var marcas={};
     universo.forEach(function(p){ if(catProd(p)==='📱 Celulares'){ var mk=marcaCelu(p.nombre); marcas[mk]=(marcas[mk]||0)+1; } });
-    var mHtml='<div onclick="tiendaFiltrarMarca(\'\')" style="flex:0 0 auto;padding:5px 11px;border-radius:16px;font-size:.66rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(tiendaMarcaActiva===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todas</div>';
+    var mHtml='<div onclick="tiendaFiltrarMarca(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(tiendaMarcaActiva===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
     Object.keys(marcas).sort().forEach(function(mk){
       var on=tiendaMarcaActiva===mk;
-      mHtml+='<div onclick="tiendaFiltrarMarca(\''+mk+'\')" style="flex:0 0 auto;padding:5px 11px;border-radius:16px;font-size:.66rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+mk+' ('+marcas[mk]+')</div>';
+      mHtml+='<div onclick="tiendaFiltrarMarca(\''+mk+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+mk+' ('+marcas[mk]+')</div>';
     });
-    document.getElementById('tienda-submarcas').innerHTML=mHtml;
-    document.getElementById('tienda-submarcas').style.display='flex';
-  }else{
-    document.getElementById('tienda-submarcas').style.display='none';
+    subBox.innerHTML=mHtml;
+    subBox.style.display='flex';
+  }else if(tiendaCategoriaActiva){
     tiendaMarcaActiva='';
+    var subtipos={};
+    universo.forEach(function(p){
+      if(catProd(p)!==tiendaCategoriaActiva)return;
+      var st=tiendaSubtipoProducto(p,tiendaCategoriaActiva);
+      if(st && st!=='Otros')subtipos[st]=(subtipos[st]||0)+1;
+    });
+    var nombresSub=Object.keys(subtipos).sort(function(a,b){
+      if(tiendaCategoriaActiva==='📺 TV y video')return (parseInt(a,10)||999)-(parseInt(b,10)||999);
+      return a.localeCompare(b);
+    });
+    if(nombresSub.length>1){
+      var sHtml='<div onclick="tiendaFiltrarSubtipo(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(tiendaSubfiltroActivo===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
+      nombresSub.forEach(function(st){
+        var on=tiendaSubfiltroActivo===st;
+        sHtml+='<div onclick="tiendaFiltrarSubtipo(\''+st.replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+st+' ('+subtipos[st]+')</div>';
+      });
+      subBox.innerHTML=sHtml;
+      subBox.style.display='flex';
+    }else{
+      tiendaSubfiltroActivo='';
+      subBox.style.display='none';
+    }
+  }else{
+    subBox.style.display='none';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+  }
+
+  // La entrada de clientes y vendedores es una vidriera por categorías. El
+  // administrador conserva el catálogo completo para poder trabajar.
+  var qPortada=(document.getElementById('tienda-buscar').value||'').trim();
+  if(!tiendaEsAdmin && tiendaModoPortada && !qPortada){
+    tiendaRenderPortadaCategorias(universo,cont);
+    return;
   }
 
   // filtrar por búsqueda EXACTA + categoría + marca + precio máximo
@@ -5028,13 +5256,14 @@ function tiendaRender(){
     p._pj=pj; // guardo el puntaje para ordenar después
     var okBusq=pj>0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
+    var okSubtipo=!tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
     var okPrecio=!maxPrecio || p.venta<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
     var okViejo=!verSoloPreciosViejos || (!p.esCelu && !tiendaEsAutomatico(p) && ((diasPrecio(p)===null)||(diasPrecio(p)>=30)));
     // filtro "solo ofertas": producto con precio tachado o cuotas sin interés
     var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
-    return okCat && okBusq && okMarca && okPrecio && okFav && okViejo && okOferta;
+    return okCat && okBusq && okMarca && okSubtipo && okPrecio && okFav && okViejo && okOferta;
   });
   // 🧠 registrar qué buscó la gente y si encontró algo
   try{ if(q) registrarBusqueda(q, lista.length); }catch(e){}
@@ -6104,6 +6333,9 @@ function tiendaFiltrarCat(c, desdeDesplazamiento){
   if(typeof _buscarTimer!=='undefined' && _buscarTimer) clearTimeout(_buscarTimer);
   if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
   var estabaActiva=(tiendaCategoriaActiva===c);
+  tiendaModoPortada=(c==='' && !desdeDesplazamiento);
+  tiendaMostrarTodos=false;
+  tiendaSubfiltroActivo='';
   tiendaCategoriaActiva=desdeDesplazamiento?c:(estabaActiva?'':c);
   tiendaRender();
   // si se seleccionó una categoría (no al deseleccionar), bajar a los productos
@@ -6118,6 +6350,11 @@ function tiendaFiltrarCat(c, desdeDesplazamiento){
 var verSoloOfertas=false;
 function navTienda(accion){
   if(accion==='categorias'){
+    tiendaModoPortada=true;
+    tiendaMostrarTodos=false;
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
     verSoloOfertas=false;
     window.scrollTo({top:0,behavior:'smooth'});
     var chips=document.getElementById('tienda-buscar-wrap');
