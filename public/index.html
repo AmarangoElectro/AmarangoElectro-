@@ -125,6 +125,8 @@ body.cajon-cats-abierto #nav-inferior{display:none !important;}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
 .hdr-buscar .hb-lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
+.ae-buscar-fila{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}.ae-buscar-fila .hdr-buscar{flex:1;min-width:0;margin-top:0}.btn-subir-header{display:none;flex:0 0 auto;align-items:center;justify-content:center;gap:5px;background:#fff;color:var(--az);border:2px solid var(--nar);border-radius:13px;padding:8px 11px;font-family:inherit;font-size:.7rem;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap}
+@media(max-width:430px){.btn-subir-header{padding:7px 8px;font-size:.62rem}.ae-buscar-fila{gap:5px}.hdr-buscar input{padding-left:38px;font-size:.78rem}}
 /* ═══ PORTADA AMARANGO ═══ */
 .ae-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;margin:0 0 12px;border-radius:20px;border:2px solid rgba(255,122,0,.78);background:linear-gradient(118deg,#020c2e 0%,#0B2D6B 50%,#174aa5 72%,#FF7A00 145%);box-shadow:0 10px 28px rgba(11,45,107,.25);display:flex;align-items:center;padding:22px 16px 22px 22px;}
 .ae-hero::before{content:'';position:absolute;inset:0;z-index:-2;opacity:.48;background-image:linear-gradient(30deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(150deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(30deg,rgba(255,122,0,.08) 12%,transparent 12.5%,transparent 87%,rgba(255,122,0,.08) 87.5%,rgba(255,122,0,.08));background-size:48px 84px;background-position:0 0,0 0,24px 42px;}
@@ -697,7 +699,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     </section>
 
     <!-- Buscador debajo de la portada -->
-    <div class="hdr-buscar ae-buscar-banner">
+    <div class="ae-buscar-fila"><div class="hdr-buscar ae-buscar-banner">
       <span class="hb-lupa">🔍</span>
       <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
         oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
@@ -705,7 +707,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
         onblur="setTimeout(hdrCerrarSugerencias,180)">
       <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
       <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
-    </div>
+    </div><button id="tienda-subir-header" class="btn-subir-header" onclick="tiendaAbrirCarga()">🐝 Subir<br>productos</button></div>
 
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
@@ -794,6 +796,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       <button id="btn-bandeja-revision" onclick="tiendaAbrirBandejaAdmin('revision')" style="padding:10px 7px;background:#FFF7E6;color:#A05200;border:1.5px solid #F0C040;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🕓 Revisar manuales <span id="cnt-bandeja-revision">0</span></button>
       <button id="btn-bandeja-ocultos" onclick="tiendaAbrirBandejaAdmin('ocultos')" style="padding:10px 7px;background:#F3F4F6;color:#374151;border:1.5px solid #D1D5DB;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🙈 Ocultos <span id="cnt-bandeja-ocultos">0</span></button>
       <button id="btn-bandeja-sinstock" onclick="tiendaAbrirBandejaAdmin('sinstock')" style="padding:10px 7px;background:#FEF2F2;color:#B91C1C;border:1.5px solid #FECACA;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">📦 Sin stock <span id="cnt-bandeja-sinstock">0</span></button>
+      <button id="btn-bandeja-volver" onclick="tiendaSalirBandejaAdmin()" style="display:none;grid-column:1/-1;padding:11px;background:var(--az);color:#fff;border:none;border-radius:11px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit;">← Volver a la tienda y ver todos los productos</button>
     </div>
 
     <!-- Aviso de precios viejos (solo admin) -->
@@ -3275,22 +3278,12 @@ function tiendaAplicarModo(){
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
-  // El botón flotante queda reservado al administrador.
-  // El vendedor carga pedidos desde la barra inferior o desde el menú.
+  // La abeja para subir productos vive al lado del buscador. El espacio
+  // flotante queda exclusivamente para la imagen de Margarita.
+  var subirHeader=document.getElementById('tienda-subir-header');
+  if(subirHeader)subirHeader.style.display=tiendaEsAdmin?'flex':'none';
   var cargarFab=document.getElementById('cargar-fab');
-  if(cargarFab){
-    if(tiendaEsAdmin){
-      cargarFab.style.display='flex';
-      cargarFab.textContent='🐝';
-      cargarFab.title='Cargar producto';
-      cargarFab.onclick=function(){ tiendaAbrirCarga(); };
-      cargarFab.style.background='#ffffff';
-      cargarFab.style.color='';
-      cargarFab.style.borderColor='#0B2D6B';
-    } else {
-      cargarFab.style.display='none';
-    }
-  }
+  if(cargarFab)cargarFab.style.display='none';
   var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab){ var ruOn=(localStorage.getItem('ae_ruleta_on')==='1'); ruletaFab.style.display=(ruOn && !tiendaEsAdmin)?'flex':'none'; }
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
@@ -4947,14 +4940,18 @@ function tiendaActualizarBandejasAdmin(){
   var br=document.getElementById('btn-bandeja-revision');
   var bo=document.getElementById('btn-bandeja-ocultos');
   var bs=document.getElementById('btn-bandeja-sinstock');
+  var bv=document.getElementById('btn-bandeja-volver');
   if(bn){bn.style.boxShadow=tiendaBandejaAdmin==='nuevos'?'0 0 0 3px var(--nar)':'none';}
   if(br){br.style.boxShadow=tiendaBandejaAdmin==='revision'?'0 0 0 3px var(--nar)':'none';}
   if(bo){bo.style.boxShadow=tiendaBandejaAdmin==='ocultos'?'0 0 0 3px var(--nar)':'none';}
   if(bs){bs.style.boxShadow=tiendaBandejaAdmin==='sinstock'?'0 0 0 3px var(--nar)':'none';}
+  if(bv){bv.style.display=tiendaBandejaAdmin?'block':'none';}
 }
 function tiendaAbrirBandejaAdmin(tipo){
   if(!tiendaExigirAdmin())return;
   tiendaBandejaAdmin=(tiendaBandejaAdmin===tipo)?'':tipo;
+  tiendaModoPortada=!tiendaBandejaAdmin;
+  tiendaMostrarTodos=false;
   tiendaCategoriaActiva=''; tiendaMarcaActiva='';
   verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
   var b=document.getElementById('tienda-buscar'); if(b)b.value='';
@@ -4962,6 +4959,17 @@ function tiendaAbrirBandejaAdmin(tipo){
   tiendaToggleLimpiar();
   tiendaRender();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+function tiendaSalirBandejaAdmin(){
+  if(!tiendaExigirAdmin())return;
+  tiendaBandejaAdmin='';
+  tiendaModoPortada=true;
+  tiendaMostrarTodos=false;
+  tiendaCategoriaActiva=''; tiendaMarcaActiva=''; tiendaSubfiltroActivo='';
+  verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
+  var b=document.getElementById('tienda-buscar');if(b)b.value='';
+  var h=document.getElementById('hdr-buscar-input');if(h)h.value='';
+  tiendaToggleLimpiar();tiendaRender();window.scrollTo({top:0,behavior:'smooth'});
 }
 function tiendaAprobarImagenActual(id){
   if(!tiendaExigirAdmin())return;
@@ -10509,12 +10517,12 @@ try{ tiendaInit(); }catch(e){}
 
 <!-- ═══ MARGARITA · ASISTENTE DE VENTAS ═══ -->
 <button id="margarita-fab" onclick="margaritaAbrir()" aria-label="Hablar con Margarita"
-  style="position:fixed;left:14px;bottom:76px;z-index:1420;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0B2D6B,#1e5bc8);border:3px solid #FF7A00;color:#fff;font-size:24px;cursor:pointer;box-shadow:0 5px 18px rgba(11,45,107,.4);display:flex;align-items:center;justify-content:center;line-height:1;-webkit-tap-highlight-color:transparent;">🐝</button>
+  style="position:fixed;right:18px;bottom:76px;z-index:1420;width:60px;height:60px;padding:0;overflow:hidden;border-radius:50%;background:#fff;border:3px solid #0B2D6B;cursor:pointer;box-shadow:0 0 0 3px #FF7A00,0 5px 18px rgba(11,45,107,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;"><img id="margarita-fab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"></button>
 <div id="margarita-overlay" onclick="if(event.target===this)margaritaCerrar()"
   style="display:none;position:fixed;inset:0;background:rgba(2,12,46,.5);z-index:3100;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);">
   <div style="width:100%;max-width:480px;height:min(78vh,680px);background:#ECE5DD;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 30px rgba(0,0,0,.35);">
     <div style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;padding:12px 15px;display:flex;align-items:center;gap:10px;border-bottom:3px solid #FF7A00;">
-      <div style="width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🐝</div>
+      <div style="width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;"><img id="margarita-cab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;"></div>
       <div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:1rem;">Margarita</div><div style="font-size:.67rem;opacity:.86;">Asistente de AmarangoElectro · en línea</div></div>
       <button onclick="margaritaCerrar()" aria-label="Cerrar" style="background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;padding:4px;">×</button>
     </div>
@@ -10528,8 +10536,13 @@ try{ tiendaInit(); }catch(e){}
 <style>
 .margarita-burb{max-width:82%;padding:9px 13px;border-radius:14px;font-size:.86rem;line-height:1.42;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .margarita-cli{align-self:flex-end;background:#DCF8C6;color:#111;border-bottom-right-radius:4px}.margarita-bot{align-self:flex-start;background:#fff;color:#111;border-bottom-left-radius:4px}.margarita-bot a{color:#0B2D6B;font-weight:800}.margarita-escribe{align-self:flex-start;background:#fff;color:#777;font-size:.78rem;padding:9px 13px;border-radius:14px}
-@media(min-width:800px){#margarita-fab{bottom:20px!important;left:20px!important}}
+@media(min-width:800px){#margarita-fab{bottom:20px!important;right:20px!important}}
 </style>
+<script type="module">
+import { MARGARITA_AVATAR } from './margarita-ui.js';
+var mf=document.getElementById('margarita-fab-img');if(mf)mf.src=MARGARITA_AVATAR;
+var mc=document.getElementById('margarita-cab-img');if(mc)mc.src=MARGARITA_AVATAR;
+</script>
 <script>
 var _margaritaHist=[],_margaritaCargando=false;
 function margaritaAbrir(){
