@@ -1136,6 +1136,16 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
       producto.categoria =
         producto.categoriaManualProveedor || categoriaProveedor;
       if (foto) producto.fotoProveedor = foto;
+      // Compatibilidad con fotos editadas antes de existir el campo protector:
+      // si la URL actual pertenece al Storage de Amarango, se adopta como
+      // fotoManualProveedor antes de considerar la imagen nueva del mayorista.
+      const fotoActual = String(producto.foto || "");
+      const fotoActualEsAmarango =
+        fotoActual.includes("/storage/v1/object/public/tienda-fotos/") ||
+        fotoActual.includes("/tienda-fotos/");
+      if (!producto.fotoManualProveedor && fotoActualEsAmarango) {
+        producto.fotoManualProveedor = fotoActual;
+      }
       if (producto.fotoManualProveedor) {
         producto.foto = producto.fotoManualProveedor;
       } else if (foto) {
