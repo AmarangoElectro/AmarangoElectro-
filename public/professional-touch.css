@@ -29,3 +29,8 @@ img{
 a,button,summary,[role="button"]{
   touch-action:manipulation;
 }
+
+/* Los sellos de implementación son útiles para desarrollo, no para una app terminada. */
+#sello-version{
+  display:none!important;
+}
