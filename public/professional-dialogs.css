@@ -1,0 +1,32 @@
+/* AmarangoElectro · confirmaciones y entradas profesionales */
+.ae-pro-dialog-kicker{
+  display:inline-flex;align-items:center;gap:6px;
+  margin:0 0 8px;padding:4px 9px;border-radius:999px;
+  background:#eef4ff;color:#0B2D6B;
+  font-size:.58rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+}
+.ae-pro-dialog-kicker.danger{background:#fff1f2;color:#b42318;}
+.ae-pro-question-message{
+  color:#17233f;font-size:.86rem;line-height:1.48;white-space:pre-line;
+}
+.ae-pro-input-wrap{margin-top:14px;}
+.ae-pro-input{
+  width:100%;min-height:48px;padding:12px 13px;
+  border:1.5px solid #d8deea;border-radius:12px;background:#fff;
+  color:#14213d;font-family:inherit;font-size:.88rem;font-weight:700;
+  box-sizing:border-box;outline:none;
+  transition:border-color .16s ease,box-shadow .16s ease;
+}
+.ae-pro-input:focus{
+  border-color:#0B2D6B;
+  box-shadow:0 0 0 4px rgba(11,45,107,.09);
+}
+.ae-pro-btn.danger{
+  background:linear-gradient(135deg,#b42318,#d92d20);
+  color:#fff;
+  box-shadow:0 7px 16px rgba(180,35,24,.20);
+}
+.ae-pro-dialog-note{
+  margin-top:10px;padding:9px 10px;border-radius:10px;
+  background:#f8fafc;color:#667085;font-size:.64rem;font-weight:650;line-height:1.4;
+}
