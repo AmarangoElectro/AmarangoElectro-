@@ -6,6 +6,99 @@ const CACHE_CATALOGO_SEG = 30;
 const CACHE_IMAGEN_BROWSER_SEG = 30 * 24 * 60 * 60;
 const CACHE_IMAGEN_EDGE_SEG = 365 * 24 * 60 * 60;
 
+const ADMIN_UI_STYLE = `<style id="ae-admin-ui-prof-style">
+.ae-visibilidad-prof{display:flex!important;align-items:center!important;gap:8px!important;margin-top:7px!important;color:var(--sub)!important;font-size:.62rem!important;font-weight:900!important;line-height:1!important;min-height:30px!important}
+.ae-vis-switch{position:relative!important;width:48px!important;height:28px!important;min-width:48px!important;border:0!important;border-radius:999px!important;padding:0!important;background:#d7dce5!important;box-shadow:inset 0 0 0 1px rgba(15,23,42,.08)!important;cursor:pointer!important;transition:background .18s ease,box-shadow .18s ease,transform .12s ease!important;-webkit-tap-highlight-color:transparent!important}
+.ae-vis-switch:active{transform:scale(.96)!important}
+.ae-vis-switch.is-on{background:#22c55e!important;box-shadow:inset 0 0 0 1px rgba(5,150,105,.16),0 0 0 3px rgba(34,197,94,.09)!important}
+.ae-vis-knob{position:absolute!important;top:3px!important;left:3px!important;width:22px!important;height:22px!important;border-radius:50%!important;background:#fff!important;box-shadow:0 2px 5px rgba(0,0,0,.24)!important;transition:transform .18s cubic-bezier(.4,0,.2,1)!important;pointer-events:none!important}
+.ae-vis-switch.is-on .ae-vis-knob{transform:translateX(20px)!important}
+.ae-vis-label{font-size:.64rem!important;font-weight:900!important;letter-spacing:.01em!important;white-space:nowrap!important}
+.ae-vis-label.is-on{color:#159447!important}
+.ae-vis-label.is-off{color:#6b7280!important}
+details[id^="opts-"]>summary.ae-opciones-prof{cursor:pointer!important;list-style:none!important;padding:10px 12px!important;background:linear-gradient(135deg,#0B2D6B 0%,#174f9c 100%)!important;border:1px solid rgba(255,255,255,.16)!important;border-bottom:3px solid var(--nar)!important;border-radius:10px!important;font-size:.72rem!important;font-weight:900!important;color:#fff!important;text-align:center!important;box-shadow:0 5px 13px rgba(11,45,107,.20)!important;letter-spacing:.01em!important;transition:transform .14s ease,box-shadow .14s ease!important;-webkit-tap-highlight-color:transparent!important}
+details[id^="opts-"]>summary.ae-opciones-prof::-webkit-details-marker{display:none!important}
+details[id^="opts-"]>summary.ae-opciones-prof:active{transform:scale(.985)!important;box-shadow:0 2px 7px rgba(11,45,107,.18)!important}
+details[id^="opts-"][open]>summary.ae-opciones-prof{background:linear-gradient(135deg,#123e8f 0%,#1e5bc8 100%)!important}
+</style>`;
+
+const ADMIN_UI_SCRIPT = `<script id="ae-admin-ui-prof-script">
+(function(){
+  if(window.__aeAdminUiProfesional)return;
+  window.__aeAdminUiProfesional=true;
+  var raf=0,observador=null,gridObservado=null;
+  function idDesdeMarcador(input){
+    var codigo=input.getAttribute('onchange')||'';
+    var m=codigo.match(/tiendaToggleMarcado\\(([^)]+)\\)/);
+    if(!m)return null;
+    var raw=(m[1]||'').trim();
+    if((raw.charAt(0)==='\\''&&raw.charAt(raw.length-1)==='\\'')||(raw.charAt(0)==='"'&&raw.charAt(raw.length-1)==='"'))raw=raw.slice(1,-1);
+    if(/^-?\\d+$/.test(raw))return Number(raw);
+    return raw;
+  }
+  function transformarVisibilidad(){
+    var grid=document.getElementById('tienda-grid');
+    if(!grid)return;
+    var labels=grid.querySelectorAll('label');
+    for(var i=0;i<labels.length;i++){
+      var label=labels[i];
+      if(label.classList.contains('ae-visibilidad-prof'))continue;
+      var input=label.querySelector('input[type="checkbox"][onchange*="tiendaToggleMarcado"]');
+      if(!input)continue;
+      var texto=(label.textContent||'').trim();
+      if(texto.indexOf('Visible')<0&&texto.indexOf('Oculto')<0)continue;
+      var pid=idDesdeMarcador(input);
+      if(pid===null||pid==='')continue;
+      var visible=texto.indexOf('Visible')>=0&&texto.indexOf('Oculto')<0;
+      label.removeAttribute('style');
+      label.className='ae-visibilidad-prof';
+      while(label.firstChild)label.removeChild(label.firstChild);
+      var sw=document.createElement('button');
+      sw.type='button';
+      sw.className='ae-vis-switch'+(visible?' is-on':'');
+      sw.setAttribute('role','switch');
+      sw.setAttribute('aria-checked',visible?'true':'false');
+      sw.setAttribute('aria-label',visible?'Ocultar producto':'Mostrar producto');
+      var knob=document.createElement('span');
+      knob.className='ae-vis-knob';
+      sw.appendChild(knob);
+      sw.addEventListener('click',(function(id){return function(ev){
+        ev.preventDefault();ev.stopPropagation();
+        if(typeof window.tiendaToggleVisibleProd==='function')window.tiendaToggleVisibleProd(id);
+      };})(pid));
+      var estado=document.createElement('span');
+      estado.className='ae-vis-label '+(visible?'is-on':'is-off');
+      estado.textContent=visible?'Visible':'Oculto';
+      label.appendChild(sw);label.appendChild(estado);
+    }
+  }
+  function transformarOpciones(){
+    var sums=document.querySelectorAll('details[id^="opts-"] > summary');
+    for(var i=0;i<sums.length;i++){
+      var s=sums[i];
+      if(s.classList.contains('ae-opciones-prof'))continue;
+      if((s.textContent||'').indexOf('Opciones del producto')<0)continue;
+      s.removeAttribute('style');
+      s.classList.add('ae-opciones-prof');
+      s.textContent='⚙️ Opciones del producto ▾';
+    }
+  }
+  function aplicar(){transformarVisibilidad();transformarOpciones();vigilarGrid();}
+  function programar(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;aplicar();});}
+  function vigilarGrid(){
+    var grid=document.getElementById('tienda-grid');
+    if(!grid||grid===gridObservado)return;
+    if(observador)observador.disconnect();
+    gridObservado=grid;
+    observador=new MutationObserver(programar);
+    observador.observe(grid,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',programar,{once:true});
+  else programar();
+  setTimeout(programar,250);setTimeout(programar,900);
+})();
+</script>`;
+
 function respuestaJson(datos, status = 200, headersExtra = {}) {
   return new Response(JSON.stringify(datos), {
     status,
@@ -26,6 +119,15 @@ async function cachePutSeguro(cache, key, response, ctx) {
   const trabajo = cache.put(key, response.clone()).catch(() => {});
   if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(trabajo);
   else await trabajo;
+}
+
+function aplicarUiAdminProfesional(response) {
+  const tipo = String(response.headers.get("content-type") || "").toLowerCase();
+  if (!tipo.includes("text/html")) return response;
+  return new HTMLRewriter()
+    .on("head", { element(el){ el.append(ADMIN_UI_STYLE,{html:true}); } })
+    .on("body", { element(el){ el.append(ADMIN_UI_SCRIPT,{html:true}); } })
+    .transform(response);
 }
 
 async function servirCatalogoCache(request, env, ctx) {
@@ -136,8 +238,6 @@ async function servirImagenTienda(request, env, ctx) {
 
   const transformada = construirOrigenImagen(origen.toString(), ancho);
   let r = await fetchImagenValida(transformada);
-  // Image Transformations puede no estar disponible según el plan de Supabase.
-  // En ese caso usamos el original, pero igualmente queda cacheado en Cloudflare.
   if (!r && transformada.toString() !== origen.toString()) r = await fetchImagenValida(origen);
   if (!r) return respuestaJson({ ok:false, error:"No se pudo cargar la imagen" }, 502);
 
@@ -159,7 +259,9 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/api/catalogo-cache") return servirCatalogoCache(request, env, ctx);
     if (url.pathname === "/api/imagen-tienda") return servirImagenTienda(request, env, ctx);
-    return core.fetch(request, env, ctx);
+    const respuesta = await core.fetch(request, env, ctx);
+    if (request.method === "GET") return aplicarUiAdminProfesional(respuesta);
+    return respuesta;
   },
   async scheduled(controller, env, ctx) {
     return core.scheduled(controller, env, ctx);
