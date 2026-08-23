@@ -1,16 +1,16 @@
 name: Aplicar UI admin profesional
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/aplicar-ui-admin-profesional.yml'
+  issues:
+    types: [opened]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   actualizar-ui:
+    if: github.event_name == 'workflow_dispatch' || github.event.issue.title == 'APLICAR UI ADMIN PROFESIONAL'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
