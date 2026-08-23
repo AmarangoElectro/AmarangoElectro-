@@ -10,6 +10,7 @@ const PRO_UX_BODY = `
 <script src="/professional-ux.js?v=20260823-1" defer></script>
 <script src="/professional-dialogs.js?v=20260823-1" defer></script>
 <script src="/margarita-teaser.js?v=20260823-1" defer></script>
+<script src="/margarita-product-cards.js?v=20260823-1" defer></script>
 `;
 
 const MARGARITA_RESCUE_PROMPT = `
@@ -18,6 +19,7 @@ Hablás en español argentino, natural, cálido, breve y resolutivo.
 Nunca inventes productos, precios, características, stock ni enlaces.
 Usá únicamente PRODUCTOS REALES recibidos en el pedido.
 Si el usuario pide productos, ofrecé hasta 3 opciones relevantes y concretas.
+Cuando ofrezcas un producto, incluí también SU URL EXACTA recibida en PRODUCTOS REALES; la interfaz la usa para armar la ficha visual.
 Si no hay productos reales suficientes, decí que no encontrás ese producto en este momento.
 No expongas costos, mayoristas ni información interna a clientes o asesores.
 Margarita no cobra ni envía links de pago; los pagos se coordinan con Maxi o Angie.
@@ -136,7 +138,7 @@ function fallbackCatalogo(body) {
   if (!productos.length) {
     return "No encuentro ese producto en este momento 🐝 Si querés, decime qué alternativa te sirve y lo buscamos por categoría o precio.";
   }
-  const lineas = productos.map((p) => `• ${p.nombre} — ${dinero(p.precio)}`);
+  const lineas = productos.map((p) => `• ${p.nombre} — ${dinero(p.precio)}${p.url ? `\n${p.url}` : ""}`);
   return `Sí 🐝 Encontré estas opciones en la tienda:\n${lineas.join("\n")}\n¿Querés que te compare las 3 o te pase la más conveniente?`;
 }
 
