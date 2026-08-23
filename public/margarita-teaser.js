@@ -1,6 +1,17 @@
 /* AmarangoElectro · mini saludo visible de Margarita para clientes */
 (function(){
   'use strict';
+
+  // La capa de identidad se carga desde este script porque este archivo ya se
+  // inyecta siempre desde el Worker profesional (cliente, asesor y admin).
+  if(!window.__MG_IDENTIDAD_LOADER__){
+    window.__MG_IDENTIDAD_LOADER__=true;
+    var ident=document.createElement('script');
+    ident.src='/margarita-identidad.js?v=20260823-1';
+    ident.defer=true;
+    document.head.appendChild(ident);
+  }
+
   var ID='margarita-teaser';
   var TIMER=null;
   var INTENTOS=0;
