@@ -9,6 +9,7 @@ const PRO_UX_HEAD = `
 const PRO_UX_BODY = `
 <script src="/professional-ux.js?v=20260823-1" defer></script>
 <script src="/professional-dialogs.js?v=20260823-1" defer></script>
+<script src="/margarita-teaser.js?v=20260823-1" defer></script>
 `;
 
 function aplicarUxProfesional(response) {
