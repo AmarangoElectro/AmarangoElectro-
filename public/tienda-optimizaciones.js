@@ -1,4 +1,4 @@
-const VERSION = "egress-2026-08-23-1";
+const VERSION = "egress-2026-08-23-2";
 const STORAGE_MARK = "/storage/v1/object/public/tienda-fotos/";
 const STORAGE_RENDER_MARK = "/storage/v1/render/image/public/tienda-fotos/";
 
@@ -55,7 +55,7 @@ function instalarCatalogoCache() {
 
     enCurso = fetch("/api/catalogo-cache", {
       method: "GET",
-      headers: { accept: "application/json" },
+      headers: { accept:"application/json" },
       cache: "default",
     })
       .then((r) => {
@@ -116,13 +116,105 @@ function instalarCacheUploads() {
   return true;
 }
 
+// En Administradores, ocultar un producto significa sacarlo SOLO de la tienda
+// de clientes. La tarjeta sigue en la misma grilla y en la misma posición.
+function instalarVisibilidadAdminPersistente() {
+  if (window.__aeVisibilidadAdminPersistente === VERSION) return true;
+  if (typeof window.tiendaEstaVisibleYConStock !== "function" ||
+      typeof window.tiendaProductoAptoPortada !== "function" ||
+      typeof window.tiendaRender !== "function" ||
+      typeof window.tiendaToggleVisibleProd !== "function") return false;
+
+  const visibleStockOriginal = window.tiendaEstaVisibleYConStock;
+  const aptoPortadaOriginal = window.tiendaProductoAptoPortada;
+
+  window.tiendaEstaVisibleYConStock = function tiendaEstaVisibleYConStockAdmin(p) {
+    if (!window.tiendaEsAdmin || !p || p.visible !== false) return visibleStockOriginal(p);
+
+    const visibleAnterior = p.visible;
+    const ocultoManualAnterior = p.ocultoManualProveedor;
+    const ocultoDuplicadoAnterior = p.ocultoPorDuplicado;
+    try {
+      p.visible = true;
+      p.ocultoManualProveedor = false;
+      p.ocultoPorDuplicado = false;
+      return visibleStockOriginal(p);
+    } finally {
+      p.visible = visibleAnterior;
+      p.ocultoManualProveedor = ocultoManualAnterior;
+      p.ocultoPorDuplicado = ocultoDuplicadoAnterior;
+    }
+  };
+  window.tiendaEstaVisibleYConStock.__aeAdminPersistente = VERSION;
+
+  window.tiendaProductoAptoPortada = function tiendaProductoAptoPortadaAdmin(p) {
+    if (!window.tiendaEsAdmin || !p || p.visible !== false) return aptoPortadaOriginal(p);
+
+    const visibleAnterior = p.visible;
+    try {
+      p.visible = true;
+      return aptoPortadaOriginal(p);
+    } finally {
+      p.visible = visibleAnterior;
+    }
+  };
+  window.tiendaProductoAptoPortada.__aeAdminPersistente = VERSION;
+
+  // Captura el switch profesional antes de su handler anterior para que el
+  // movimiento ON/OFF sea visible. Después de la animación se guarda el estado.
+  document.addEventListener("click", function animarSwitchVisibilidad(ev) {
+    const objetivo = ev.target && ev.target.closest ? ev.target.closest(".ae-vis-switch") : null;
+    if (!objetivo || !window.tiendaEsAdmin) return;
+
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    if (objetivo.dataset.aeBusy === "1") return;
+    objetivo.dataset.aeBusy = "1";
+
+    const pasaAVisible = !objetivo.classList.contains("is-on");
+    objetivo.classList.toggle("is-on", pasaAVisible);
+    objetivo.setAttribute("aria-checked", pasaAVisible ? "true" : "false");
+    objetivo.setAttribute("aria-label", pasaAVisible ? "Ocultar producto" : "Mostrar producto");
+
+    const fila = objetivo.closest(".ae-visibilidad-prof");
+    const etiqueta = fila ? fila.querySelector(".ae-vis-label") : null;
+    if (etiqueta) {
+      etiqueta.textContent = pasaAVisible ? "Visible" : "Oculto";
+      etiqueta.classList.toggle("is-on", pasaAVisible);
+      etiqueta.classList.toggle("is-off", !pasaAVisible);
+    }
+
+    const tarjeta = objetivo.closest('[id^="card-"]');
+    const id = tarjeta ? tarjeta.id.slice(5) : "";
+
+    window.setTimeout(function() {
+      try {
+        if (id !== "") window.tiendaToggleVisibleProd(id);
+      } finally {
+        objetivo.dataset.aeBusy = "0";
+      }
+    }, 220);
+  }, true);
+
+  window.__aeVisibilidadAdminPersistente = VERSION;
+
+  // Refresca una sola vez para reincorporar en la grilla principal del admin
+  // los productos que ya estaban ocultos, sin publicarlos para clientes.
+  window.setTimeout(function() {
+    if (window.tiendaEsAdmin && typeof window.tiendaRender === "function") window.tiendaRender();
+  }, 0);
+
+  return true;
+}
+
 let intentos = 0;
 function instalar() {
   const a = instalarFotoProxy();
   const b = instalarZoomProxy();
   const c = instalarCatalogoCache();
   const d = instalarCacheUploads();
-  if (!(a && b && c && d) && intentos++ < 60) setTimeout(instalar, 250);
+  const e = instalarVisibilidadAdminPersistente();
+  if (!(a && b && c && d && e) && intentos++ < 60) setTimeout(instalar, 250);
 }
 
 if (document.readyState === "loading") {
