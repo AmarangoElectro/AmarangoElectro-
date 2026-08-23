@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'public/asesores-*.js'
+      - 'public/margarita-simulador-*.js'
       - 'wrangler.jsonc'
       - 'package.json'
   workflow_dispatch:
@@ -31,3 +32,5 @@ jobs:
           node --check public/asesores-registro.js
           node --check public/asesores-coach-auth.js
           node --check public/asesores-app-dialogs.js
+          node --check public/margarita-simulador-admin.js
+          node --check public/margarita-simulador-key.js
