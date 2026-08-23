@@ -1,0 +1,189 @@
+/* AmarangoElectro · capa UX profesional
+   Mantiene la lógica existente y unifica sensaciones de app. */
+:root{
+  --ae-pro-blue:#0B2D6B;
+  --ae-pro-blue-2:#174f9c;
+  --ae-pro-orange:#FF7A00;
+  --ae-pro-text:#13213d;
+  --ae-pro-sub:#667085;
+  --ae-pro-surface:#ffffff;
+  --ae-pro-line:#e7eaf0;
+  --ae-pro-shadow:0 22px 70px rgba(3,15,45,.28);
+}
+
+html{-webkit-tap-highlight-color:transparent;}
+button,summary,.tab,.cat-tile,.nav-item,.prod-card,.hdr-menu-btn,.cajon-item{
+  -webkit-tap-highlight-color:transparent;
+}
+button,summary,.tab,.cat-tile,.nav-item,.hdr-menu-btn,.cajon-item,
+.prod-card img,.prod-card .prod-nombre,#modal-cuotas-body img{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+input,textarea,select,[contenteditable="true"],.ae-allow-select{
+  -webkit-user-select:text!important;
+  user-select:text!important;
+  -webkit-touch-callout:default!important;
+}
+
+/* Feedback táctil/visual consistente. */
+button,.calc-btn,summary,.tab,.cat-tile,.nav-item,.cajon-item{
+  transition:transform .12s cubic-bezier(.2,.8,.2,1),opacity .12s ease,box-shadow .16s ease,background-color .16s ease!important;
+}
+button:active,.calc-btn:active,summary:active,.tab:active,.cat-tile:active,.nav-item:active,.cajon-item:active{
+  transform:scale(.975)!important;
+  opacity:.88!important;
+}
+button:focus-visible,.calc-btn:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:3px solid rgba(255,122,0,.30)!important;
+  outline-offset:2px!important;
+}
+
+/* Toasts: dejan de parecer alertas genéricas. */
+#ae-toast{
+  background:rgba(7,28,70,.97)!important;
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-left:4px solid var(--ae-pro-orange)!important;
+  border-radius:14px!important;
+  padding:11px 15px!important;
+  max-width:min(88vw,420px)!important;
+  box-shadow:0 12px 32px rgba(2,12,35,.28)!important;
+  font-size:.78rem!important;
+  font-weight:800!important;
+  line-height:1.3!important;
+  text-align:left!important;
+}
+
+/* Fondo común de diálogos y sheets propios. */
+.ae-pro-overlay{
+  position:fixed;
+  inset:0;
+  z-index:12000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(2,12,35,.58);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .20s ease,visibility .20s ease;
+}
+.ae-pro-overlay.is-open{opacity:1;visibility:visible;}
+.ae-pro-dialog{
+  width:min(100%,430px);
+  background:var(--ae-pro-surface);
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:22px;
+  box-shadow:var(--ae-pro-shadow);
+  overflow:hidden;
+  transform:translateY(14px) scale(.985);
+  transition:transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.ae-pro-overlay.is-open .ae-pro-dialog{transform:translateY(0) scale(1);}
+.ae-pro-dialog-head{
+  position:relative;
+  padding:22px 22px 13px;
+  text-align:center;
+}
+.ae-pro-brand-badge{
+  width:54px;height:54px;margin:0 auto 10px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#fff,#f5f7fb);
+  border:1px solid #e4e8ef;
+  box-shadow:0 7px 20px rgba(11,45,107,.14);
+  overflow:hidden;
+}
+.ae-pro-brand-badge img{width:48px;height:48px;object-fit:contain;}
+.ae-pro-dialog-title{color:var(--ae-pro-blue);font-size:1rem;font-weight:900;letter-spacing:-.01em;}
+.ae-pro-dialog-accent{height:3px;width:46px;background:var(--ae-pro-orange);border-radius:99px;margin:9px auto 0;}
+.ae-pro-dialog-body{padding:4px 22px 18px;}
+.ae-pro-dialog-message{
+  color:var(--ae-pro-text);
+  font-size:.88rem;
+  line-height:1.48;
+  white-space:pre-line;
+  text-align:left;
+}
+.ae-pro-dialog-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  padding:0 22px 22px;
+}
+.ae-pro-dialog-actions.two{grid-template-columns:1fr 1fr;}
+.ae-pro-btn{
+  min-height:46px;
+  border-radius:12px;
+  border:0;
+  font-family:inherit;
+  font-size:.78rem;
+  font-weight:900;
+  cursor:pointer;
+}
+.ae-pro-btn.primary{background:linear-gradient(135deg,var(--ae-pro-blue),var(--ae-pro-blue-2));color:#fff;box-shadow:0 7px 16px rgba(11,45,107,.20);}
+.ae-pro-btn.secondary{background:#fff;color:var(--ae-pro-blue);border:1.5px solid #d5dbe7;}
+.ae-pro-btn.orange{background:linear-gradient(135deg,var(--ae-pro-orange),#ff9838);color:#fff;}
+
+/* Action sheet para imágenes: reemplaza el menú gris de Android/Chrome. */
+.ae-sheet-overlay{align-items:flex-end;padding:0;}
+.ae-sheet{
+  width:min(100%,480px);
+  max-height:min(82vh,690px);
+  background:#fff;
+  border-radius:24px 24px 0 0;
+  box-shadow:0 -18px 54px rgba(3,15,45,.30);
+  padding:10px 14px calc(16px + env(safe-area-inset-bottom));
+  transform:translateY(100%);
+  transition:transform .25s cubic-bezier(.2,.8,.2,1);
+  overflow:auto;
+}
+.ae-sheet-overlay.is-open .ae-sheet{transform:translateY(0);}
+.ae-sheet-handle{width:46px;height:4px;background:#c7cbd3;border-radius:99px;margin:2px auto 13px;}
+.ae-sheet-product{display:flex;align-items:center;gap:11px;padding:0 5px 14px;}
+.ae-sheet-thumb{width:52px;height:52px;object-fit:cover;border-radius:11px;border:1px solid #e5e7eb;background:#fff;flex:0 0 auto;}
+.ae-sheet-product-copy{min-width:0;flex:1;}
+.ae-sheet-brand{font-size:.61rem;font-weight:900;color:var(--ae-pro-orange);letter-spacing:.07em;text-transform:uppercase;margin-bottom:2px;}
+.ae-sheet-name{font-size:.82rem;font-weight:900;color:var(--ae-pro-blue);line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
+.ae-sheet-menu{border:1px solid #e5e8ef;border-radius:17px;overflow:hidden;background:#fff;}
+.ae-sheet-row{
+  width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;
+  background:#fff;border:0;border-bottom:1px solid #edf0f4;text-align:left;
+  color:var(--ae-pro-text);font-family:inherit;cursor:pointer;
+}
+.ae-sheet-row:last-child{border-bottom:0;}
+.ae-sheet-icon{width:36px;height:36px;border-radius:10px;background:#eef4ff;color:var(--ae-pro-blue);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.ae-sheet-icon svg{width:20px;height:20px;}
+.ae-sheet-row-main{flex:1;min-width:0;}
+.ae-sheet-row-title{font-size:.80rem;font-weight:900;color:var(--ae-pro-blue);line-height:1.18;}
+.ae-sheet-row-sub{font-size:.65rem;font-weight:600;color:var(--ae-pro-sub);margin-top:2px;line-height:1.25;}
+.ae-sheet-chevron{font-size:1.25rem;color:#98a2b3;font-weight:600;}
+.ae-sheet-close{width:100%;margin-top:10px;min-height:48px;border:1.5px solid #ffd0ad;background:#fff7ed;color:#c65300;border-radius:14px;font-weight:900;font-family:inherit;}
+
+/* Copiar nombre / copiar todo en detalle de producto. */
+.ae-detail-title-row{display:flex;align-items:flex-start;gap:8px;margin:0 0 2px;}
+.ae-detail-title-row>h3{flex:1;min-width:0;margin:0!important;}
+.ae-copy-actions{display:flex;gap:6px;flex:0 0 auto;}
+.ae-copy-square{
+  width:44px;height:44px;padding:4px 2px;border-radius:11px;
+  border:1.5px solid #cfd8e8;background:#fff;color:var(--ae-pro-blue);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  box-shadow:0 3px 9px rgba(11,45,107,.08);
+}
+.ae-copy-square svg{width:17px;height:17px;display:block;}
+.ae-copy-square span{font-size:.46rem;line-height:1;font-weight:900;letter-spacing:-.01em;}
+.ae-copy-square.copied{background:#eaf8ef;border-color:#78d6a1;color:#08783e;}
+
+@media(max-width:360px){
+  .ae-pro-overlay{padding:14px;}
+  .ae-pro-dialog-head{padding-left:17px;padding-right:17px;}
+  .ae-pro-dialog-body,.ae-pro-dialog-actions{padding-left:17px;padding-right:17px;}
+  .ae-copy-square{width:40px;height:42px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;}
+}
