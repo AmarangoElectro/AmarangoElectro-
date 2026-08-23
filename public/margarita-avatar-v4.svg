@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Margarita">
+  <defs>
+    <clipPath id="circulo"><circle cx="400" cy="400" r="398"/></clipPath>
+  </defs>
+  <image href="margarita-avatar-oficial.jpeg" x="0" y="0" width="800" height="800" preserveAspectRatio="xMidYMid slice" clip-path="url(#circulo)"/>
+</svg>
