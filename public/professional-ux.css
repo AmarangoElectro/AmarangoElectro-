@@ -14,6 +14,7 @@
 html{-webkit-tap-highlight-color:transparent;}
 button,summary,.tab,.cat-tile,.nav-item,.prod-card,.hdr-menu-btn,.cajon-item{
   -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
 }
 button,summary,.tab,.cat-tile,.nav-item,.hdr-menu-btn,.cajon-item,
 .prod-card img,.prod-card .prod-nombre,#modal-cuotas-body img{
@@ -38,6 +39,24 @@ button:active,.calc-btn:active,summary:active,.tab:active,.cat-tile:active,.nav-
 button:focus-visible,.calc-btn:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
   outline:3px solid rgba(255,122,0,.30)!important;
   outline-offset:2px!important;
+}
+
+/* Modal general de la tienda: misma sensación visual que los diálogos nuevos. */
+#modal-cuotas{
+  background:rgba(2,12,35,.58)!important;
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+#modal-cuotas-body{
+  border-radius:20px!important;
+  border:1px solid rgba(255,255,255,.78)!important;
+  box-shadow:0 22px 60px rgba(3,15,45,.28)!important;
+  overflow:hidden;
+  animation:aeModalEntrada .20s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes aeModalEntrada{
+  from{opacity:.35;transform:translateY(12px) scale(.99)}
+  to{opacity:1;transform:translateY(0) scale(1)}
 }
 
 /* Toasts: dejan de parecer alertas genéricas. */
