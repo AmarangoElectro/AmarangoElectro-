@@ -1,18 +1,18 @@
 name: Aplicar UI admin profesional
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/aplicar-ui-admin-profesional.yml
   workflow_dispatch:
+  issues:
+    types:
+      - opened
+      - reopened
 
 permissions:
   contents: write
 
 jobs:
   actualizar-ui:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issues' && github.event.issue.title == 'APLICAR UI ADMIN PROFESIONAL')
     runs-on: ubuntu-latest
     steps:
       - name: Descargar repositorio
@@ -30,16 +30,21 @@ jobs:
           path = Path('public/index.html')
           s = path.read_text(encoding='utf-8')
 
-          patron = re.compile(
-              r"    // controles de admin \(debajo de la foto, no la empujan\)\n"
-              r"    if\(tiendaEsAdmin && !p\.esCelu\)\{\n"
-              r".*?"
-              r"    \}\n"
-              r"    if\(tiendaEsAdmin && p\.esCelu\)\{",
-              re.S,
-          )
+          if 'function tiendaToggleVisibleProd(id)' not in s:
+              raise SystemExit('No existe tiendaToggleVisibleProd(id); se cancela para no dejar un switch sin guardado')
 
-          nuevo = '''    // control profesional de visibilidad: un toque = guardar Visible/Oculto
+          marcador_nuevo = '// control profesional de visibilidad: un toque = guardar Visible/Oculto'
+          if marcador_nuevo not in s:
+              patron = re.compile(
+                  r"    // controles de admin \(debajo de la foto, no la empujan\)\n"
+                  r"    if\(tiendaEsAdmin && !p\.esCelu\)\{\n"
+                  r".*?"
+                  r"    \}\n"
+                  r"    if\(tiendaEsAdmin && p\.esCelu\)\{",
+                  re.S,
+              )
+
+              nuevo = '''    // control profesional de visibilidad: un toque = guardar Visible/Oculto
     if(tiendaEsAdmin && !p.esCelu){
       card+='<div style="display:flex;align-items:center;gap:8px;margin-top:7px;min-height:30px;">'
         +'<button type="button" role="switch" aria-checked="'+(p.visible?'true':'false')+'" aria-label="'+(p.visible?'Ocultar producto':'Mostrar producto')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibleProd('+pid+')" style="position:relative;width:48px;height:28px;min-width:48px;border:0;border-radius:999px;padding:0;cursor:pointer;background:'+(p.visible?'#22c55e':'#d7dce5')+';box-shadow:inset 0 0 0 1px rgba(15,23,42,.08);transition:background .18s ease;-webkit-tap-highlight-color:transparent;">'
@@ -50,9 +55,11 @@ jobs:
     }
     if(tiendaEsAdmin && p.esCelu){'''
 
-          s, cantidad = patron.subn(nuevo, s, count=1)
-          if cantidad != 1:
-              raise SystemExit(f'Bloque Visible/Oculto no encontrado de forma unica: {cantidad}')
+              s, cantidad = patron.subn(nuevo, s, count=1)
+              if cantidad != 1:
+                  raise SystemExit(f'Bloque Visible/Oculto viejo no encontrado de forma unica: {cantidad}')
+          else:
+              print('Switch Visible/Oculto ya estaba aplicado; no se duplica')
 
           texto = '⚙️ Opciones del producto ▾</summary>'
           idx = s.find(texto)
@@ -77,7 +84,7 @@ jobs:
           s = s[:ini_style] + estilo + s[fin_style:]
 
           path.write_text(s, encoding='utf-8')
-          print('UI admin profesional aplicada correctamente')
+          print('UI admin profesional verificada/aplicada correctamente')
           PY
 
       - name: Guardar cambio en main
@@ -90,5 +97,5 @@ jobs:
             echo "No hay cambios pendientes"
             exit 0
           fi
-          git commit -m "Mejora tarjetas admin con switch visible y opciones destacadas"
+          git commit -m "Aplica switch Visible Oculto y boton Opciones del producto"
           git push origin main
