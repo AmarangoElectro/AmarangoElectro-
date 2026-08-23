@@ -1,0 +1,31 @@
+/* Sensación de app: el contenido de interfaz no entra en modo selección del navegador. */
+body,
+#tienda-grid,
+#modal-cuotas-body,
+.header,
+.tabs,
+#nav-inferior,
+#cajon-lateral{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"],
+.ae-allow-select{
+  -webkit-user-select:text!important;
+  user-select:text!important;
+  -webkit-touch-callout:default!important;
+}
+
+img{
+  -webkit-user-drag:none;
+  user-drag:none;
+}
+
+a,button,summary,[role="button"]{
+  touch-action:manipulation;
+}
