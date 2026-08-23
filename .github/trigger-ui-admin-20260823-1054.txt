@@ -1,0 +1,1 @@
+Trigger temporal para ejecutar la corrección de UI admin profesional.
