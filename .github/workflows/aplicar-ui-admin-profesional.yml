@@ -1,0 +1,86 @@
+name: Aplicar UI admin profesional
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aplicar-ui-admin-profesional.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reemplazar controles de admin en public/index.html
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('public/index.html')
+          s = path.read_text(encoding='utf-8')
+
+          # 1) Reemplaza la casilla de marcado por un switch directo Visible/Oculto.
+          patron = re.compile(
+              r"    // controles de admin \(debajo de la foto, no la empujan\)\n"
+              r"    if\(tiendaEsAdmin && !p\.esCelu\)\{\n"
+              r".*?"
+              r"    \}\n"
+              r"    if\(tiendaEsAdmin && p\.esCelu\)\{",
+              re.S,
+          )
+
+          nuevo = '''    // control profesional de visibilidad: un toque = guardar Visible/Oculto
+    if(tiendaEsAdmin && !p.esCelu){
+      card+='<div style="display:flex;align-items:center;gap:8px;margin-top:7px;min-height:30px;">'
+        +'<button type="button" role="switch" aria-checked="'+(p.visible?'true':'false')+'" aria-label="'+(p.visible?'Ocultar producto':'Mostrar producto')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibleProd('+pid+')" style="position:relative;width:48px;height:28px;min-width:48px;border:0;border-radius:999px;padding:0;cursor:pointer;background:'+(p.visible?'#22c55e':'#d7dce5')+';box-shadow:inset 0 0 0 1px rgba(15,23,42,.08);transition:background .18s ease;-webkit-tap-highlight-color:transparent;">'
+          +'<span style="position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.24);transform:'+(p.visible?'translateX(20px)':'translateX(0)')+';transition:transform .18s cubic-bezier(.4,0,.2,1);pointer-events:none;"></span>'
+        +'</button>'
+        +'<span style="font-size:.64rem;font-weight:900;white-space:nowrap;color:'+(p.visible?'#159447':'#6b7280')+';">'+(p.visible?'Visible':'Oculto')+'</span>'
+      +'</div>';
+    }
+    if(tiendaEsAdmin && p.esCelu){'''
+
+          s2, cantidad = patron.subn(nuevo, s, count=1)
+          if cantidad != 1:
+              raise SystemExit(f'No se encontro de forma unica el bloque Visible/Oculto viejo: {cantidad}')
+          s = s2
+
+          # 2) Hace mucho mas visible el boton Opciones del producto.
+          texto = '⚙️ Opciones del producto ▾</summary>'
+          idx = s.find(texto)
+          if idx < 0:
+              raise SystemExit('No se encontro Opciones del producto')
+          ini = s.rfind('<summary style="', 0, idx)
+          if ini < 0:
+              raise SystemExit('No se encontro el summary de Opciones del producto')
+          ini_style = ini + len('<summary style="')
+          fin_style = s.find('"', ini_style)
+          if fin_style < 0:
+              raise SystemExit('No se pudo cerrar el style de Opciones del producto')
+          estilo = ('cursor:pointer;list-style:none;padding:10px 12px;'
+                    'background:linear-gradient(135deg,#0B2D6B 0%,#174f9c 100%);'
+                    'border:1px solid rgba(255,255,255,.16);border-bottom:3px solid #FF7A00;'
+                    'border-radius:10px;font-size:.72rem;font-weight:900;color:#fff;'
+                    'text-align:center;box-shadow:0 5px 13px rgba(11,45,107,.20);'
+                    'letter-spacing:.01em;-webkit-tap-highlight-color:transparent;')
+          s = s[:ini_style] + estilo + s[fin_style:]
+
+          path.write_text(s, encoding='utf-8')
+          print('UI admin profesional aplicada correctamente')
+          PY
+
+      - name: Guardar cambio en main
+        shell: bash
+        run: |
+          git config user.name "AmarangoElectro Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Mejora tarjetas admin con switch visible y opciones destacadas"
+          git push origin main
