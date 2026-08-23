@@ -10539,9 +10539,20 @@ try{ tiendaInit(); }catch(e){}
 @media(min-width:800px){#margarita-fab{bottom:20px!important;right:20px!important}}
 </style>
 <script type="module">
-import { MARGARITA_AVATAR } from './margarita-ui.js';
+// Conservamos margarita-ui.js y todos sus módulos internos, pero el avatar
+// visible usa siempre la foto oficial elegida por Angie.
+import './margarita-ui.js';
+const MARGARITA_AVATAR='./margarita-avatar-oficial.jpeg?v=20260823';
 var mf=document.getElementById('margarita-fab-img');if(mf)mf.src=MARGARITA_AVATAR;
 var mc=document.getElementById('margarita-cab-img');if(mc)mc.src=MARGARITA_AVATAR;
+// Si un módulo visual anterior intenta reponer un avatar viejo después de
+// cargar, conservamos la foto oficial en ambos círculos.
+[mf,mc].forEach(function(img){
+  if(!img)return;
+  new MutationObserver(function(){
+    if(img.getAttribute('src')!==MARGARITA_AVATAR)img.setAttribute('src',MARGARITA_AVATAR);
+  }).observe(img,{attributes:true,attributeFilter:['src']});
+});
 </script>
 <script>
 var _margaritaHist=[],_margaritaCargando=false;
