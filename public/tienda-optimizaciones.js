@@ -1,4 +1,4 @@
-const VERSION = "egress-2026-08-23-2";
+const VERSION = "egress-2026-08-23-3";
 const STORAGE_MARK = "/storage/v1/object/public/tienda-fotos/";
 const STORAGE_RENDER_MARK = "/storage/v1/render/image/public/tienda-fotos/";
 
@@ -207,6 +207,156 @@ function instalarVisibilidadAdminPersistente() {
   return true;
 }
 
+function esAdminActual() {
+  if (window.tiendaEsAdmin === true) return true;
+  try { return localStorage.getItem("ae_sesion_admin") === "1"; }
+  catch (e) { return false; }
+}
+
+function mostrarAvisoBreve(texto) {
+  try {
+    if (typeof window.mostrarToast === "function") {
+      window.mostrarToast(texto);
+      return;
+    }
+  } catch (e) {}
+  const n = document.createElement("div");
+  n.textContent = texto;
+  n.style.cssText = "position:fixed;left:50%;bottom:88px;transform:translateX(-50%);z-index:15000;background:#071c46;color:#fff;border-left:4px solid #FF7A00;border-radius:13px;padding:10px 14px;font:800 .78rem/1.25 system-ui;box-shadow:0 10px 28px rgba(0,0,0,.25);max-width:86vw;text-align:center;";
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 1800);
+}
+
+function urlPublicaTienda() {
+  return `${window.location.origin}/`;
+}
+
+async function compartirTiendaPublica() {
+  const url = urlPublicaTienda();
+  const datos = {
+    title: "AmarangoElectro",
+    text: "Mirá la tienda de AmarangoElectro 🐝",
+    url,
+  };
+  try {
+    if (navigator.share) {
+      await navigator.share(datos);
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === "AbortError") return;
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+      mostrarAvisoBreve("🔗 Enlace de la tienda copiado");
+      return;
+    }
+  } catch (e) {}
+  window.prompt("Compartí este enlace de AmarangoElectro:", url);
+}
+
+function instalarBotonCompartirTienda() {
+  const header = document.querySelector(".header");
+  if (!header) return false;
+
+  let boton = document.getElementById("ae-share-store-btn");
+  const admin = esAdminActual();
+  const marca = header.querySelector(".hdr-marca");
+
+  if (admin) {
+    if (boton) boton.remove();
+    if (marca && marca.dataset.aeSharePadding === "1") {
+      marca.style.removeProperty("padding-right");
+      delete marca.dataset.aeSharePadding;
+    }
+    return true;
+  }
+
+  if (!boton) {
+    boton = document.createElement("button");
+    boton.id = "ae-share-store-btn";
+    boton.type = "button";
+    boton.className = "ae-share-store-btn";
+    boton.setAttribute("aria-label", "Compartir tienda AmarangoElectro");
+    boton.setAttribute("title", "Compartir tienda");
+    boton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="m8.3 10.7 7.3-4.2M8.3 13.3l7.3 4.2"></path></svg>';
+    boton.style.cssText = "position:absolute;top:11px;right:58px;z-index:6;width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.28);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 3px 10px rgba(0,0,0,.10);-webkit-tap-highlight-color:transparent;touch-action:manipulation;";
+    const svg = boton.querySelector("svg");
+    if (svg) svg.style.cssText = "width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;";
+    boton.addEventListener("click", function(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      try { if (navigator.vibrate) navigator.vibrate(6); } catch (e) {}
+      compartirTiendaPublica();
+    });
+    header.appendChild(boton);
+  }
+
+  if (marca) {
+    marca.style.setProperty("padding-right", "96px", "important");
+    marca.dataset.aeSharePadding = "1";
+  }
+  return true;
+}
+
+function protegerControlesInternosFueraDeAdmin() {
+  const admin = esAdminActual();
+  const selectores = [
+    ".ae-visibilidad-prof",
+    'details[id^="opts-"]',
+    ".ae-copy-actions"
+  ];
+
+  document.querySelectorAll(selectores.join(",")).forEach((el) => {
+    if (admin) {
+      if (el.dataset.aeClienteOculto === "1") {
+        el.style.removeProperty("display");
+        delete el.dataset.aeClienteOculto;
+      }
+      return;
+    }
+    el.style.setProperty("display", "none", "important");
+    el.dataset.aeClienteOculto = "1";
+  });
+
+  // Si el modal de marca llegara a reconstruir una acción de edición, un
+  // usuario no admin nunca debe verla ni poder tocarla.
+  document.querySelectorAll(".ae-pro-dialog-actions .secondary").forEach((el) => {
+    if (!admin && /editar|borrar|eliminar|precio/i.test(el.textContent || "")) {
+      el.style.setProperty("display", "none", "important");
+      el.dataset.aeClienteOculto = "1";
+    } else if (admin && el.dataset.aeClienteOculto === "1") {
+      el.style.removeProperty("display");
+      delete el.dataset.aeClienteOculto;
+    }
+  });
+}
+
+function instalarProteccionClienteYCompartir() {
+  if (window.__aeProteccionClienteCompartir !== VERSION) {
+    // En vista no administrativa, mantener apretada una imagen no abre ni el
+    // menú gris del navegador ni las herramientas internas de imagen.
+    window.addEventListener("contextmenu", function bloquearMenuImagenCliente(ev) {
+      if (esAdminActual()) return;
+      const img = ev.target && ev.target.closest ? ev.target.closest("#tienda-grid img, #modal-cuotas-body img") : null;
+      if (!img) return;
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+    }, true);
+
+    const obs = new MutationObserver(function() {
+      protegerControlesInternosFueraDeAdmin();
+      instalarBotonCompartirTienda();
+    });
+    obs.observe(document.documentElement, { childList:true, subtree:true });
+    window.__aeProteccionClienteCompartir = VERSION;
+  }
+
+  protegerControlesInternosFueraDeAdmin();
+  return instalarBotonCompartirTienda();
+}
+
 let intentos = 0;
 function instalar() {
   const a = instalarFotoProxy();
@@ -214,7 +364,8 @@ function instalar() {
   const c = instalarCatalogoCache();
   const d = instalarCacheUploads();
   const e = instalarVisibilidadAdminPersistente();
-  if (!(a && b && c && d && e) && intentos++ < 60) setTimeout(instalar, 250);
+  const f = instalarProteccionClienteYCompartir();
+  if (!(a && b && c && d && e && f) && intentos++ < 60) setTimeout(instalar, 250);
 }
 
 if (document.readyState === "loading") {
