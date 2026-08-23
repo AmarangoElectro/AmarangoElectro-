@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "amarango-electro",
-  "main": "src/worker-asesores.mjs",
+  "main": "src/worker-asesores-registro.mjs",
   "compatibility_date": "2026-07-29",
   "assets": {
     "directory": "./public",
