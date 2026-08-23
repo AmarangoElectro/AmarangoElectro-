@@ -11,7 +11,7 @@ const PRO_UX_BODY = `
 <script src="/professional-dialogs.js?v=20260823-1" defer></script>
 <script src="/margarita-teaser.js?v=20260823-1" defer></script>
 <script src="/margarita-product-cards.js?v=20260823-1" defer></script>
-<script src="/margarita-visual-tune.js?v=20260823-2" defer></script>
+<script src="/margarita-visual-tune.js?v=20260823-3" defer></script>
 `;
 
 const MARGARITA_RESCUE_PROMPT = `
