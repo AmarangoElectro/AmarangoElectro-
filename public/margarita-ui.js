@@ -1,25 +1,27 @@
 export const MARGARITA_AVATAR = "/margarita-avatar.webp";
 
-const MARGARITA_SIDEBAR_VERSION = "sidebar-2026-08-23-4";
-const MARGARITA_UI_DEFAULT = { formato:"mitad" };
+const MARGARITA_SIDEBAR_VERSION = "sidebar-2026-08-23-5";
+const MARGARITA_UI_DEFAULT = { formato: "mitad" };
 
-function instalarMargaritaSidebar(){
+function instalarMargaritaSidebar() {
   const overlay = document.getElementById("margarita-overlay");
   const fab = document.getElementById("margarita-fab");
   const mensajes = document.getElementById("margarita-msgs");
   const input = document.getElementById("margarita-input");
-  if(!overlay || !fab || !mensajes || !input) return;
+  if (!overlay || !fab || !mensajes || !input) return;
 
   const panel = overlay.firstElementChild;
-  if(!panel) return;
+  if (!panel) return;
 
   panel.id = "margarita-panel";
   const header = panel.children[0] || null;
-  if(header) header.classList.add("mg-header");
-  mensajes.classList.add("mg-mensajes");
-  if(panel.children[2]) panel.children[2].classList.add("mg-input");
+  const inputBar = panel.children[2] || null;
 
-  if(!document.getElementById("margarita-sidebar-estilos")){
+  if (header) header.classList.add("mg-header");
+  mensajes.classList.add("mg-mensajes");
+  if (inputBar) inputBar.classList.add("mg-input");
+
+  if (!document.getElementById("margarita-sidebar-estilos")) {
     const style = document.createElement("style");
     style.id = "margarita-sidebar-estilos";
     style.textContent = `
@@ -34,9 +36,12 @@ function instalarMargaritaSidebar(){
         pointer-events:none!important;
         align-items:initial!important;
         justify-content:initial!important;
-        transition:opacity .24s ease!important;
+        transition:opacity .22s ease!important;
       }
-      #margarita-overlay.abierto{opacity:1!important;pointer-events:auto!important}
+      #margarita-overlay.abierto{
+        opacity:1!important;
+        pointer-events:auto!important;
+      }
 
       #margarita-panel{
         position:fixed!important;
@@ -51,8 +56,8 @@ function instalarMargaritaSidebar(){
         overflow:hidden!important;
         border:1px solid rgba(255,255,255,.34)!important;
         box-shadow:-18px 0 46px rgba(0,0,0,.28)!important;
-        transition:transform .30s cubic-bezier(.4,0,.2,1),width .22s ease,height .22s ease,bottom .22s ease!important;
-        will-change:transform,width,height,bottom!important;
+        transition:transform .28s cubic-bezier(.4,0,.2,1),width .18s ease!important;
+        will-change:transform,width!important;
       }
 
       html[data-margarita-formato="mitad"] #margarita-panel{
@@ -78,7 +83,7 @@ function instalarMargaritaSidebar(){
         bottom:18px!important;
         border-radius:26px!important;
         box-shadow:0 22px 55px rgba(0,0,0,.34)!important;
-        transform:translateY(22px) scale(.985)!important;
+        transform:translateY(20px) scale(.985)!important;
       }
       html[data-margarita-formato="globo"] #margarita-overlay.abierto #margarita-panel{
         transform:translateY(0) scale(1)!important;
@@ -88,6 +93,42 @@ function instalarMargaritaSidebar(){
         flex:0 0 auto!important;
         box-shadow:0 1px 0 rgba(255,255,255,.16)!important;
       }
+      #margarita-panel .mg-header img{
+        width:48px!important;
+        height:48px!important;
+        object-fit:cover!important;
+        border-radius:50%!important;
+      }
+
+      .mg-formato-switch{
+        display:none;
+        flex:0 0 auto;
+        grid-template-columns:1fr 1fr;
+        gap:7px;
+        padding:8px 9px;
+        background:linear-gradient(180deg,#f8fbff,#eef4fb);
+        border-bottom:1px solid rgba(11,45,107,.10);
+      }
+      .mg-formato-switch.on{display:grid}
+      .mg-formato-switch button{
+        border:1px solid #d7e0ec;
+        border-radius:11px;
+        background:#fff;
+        color:#475569;
+        padding:8px 6px;
+        font-size:.68rem;
+        line-height:1;
+        font-weight:900;
+        font-family:inherit;
+        cursor:pointer;
+      }
+      .mg-formato-switch button.on{
+        color:#0B2D6B;
+        border-color:#0B2D6B;
+        background:#eef5ff;
+        box-shadow:inset 0 0 0 1px #0B2D6B;
+      }
+
       #margarita-panel .mg-mensajes{
         flex:1 1 auto!important;
         min-height:0!important;
@@ -97,10 +138,39 @@ function instalarMargaritaSidebar(){
         padding-left:10px!important;
         padding-right:10px!important;
       }
+
       #margarita-panel .mg-input{
         flex:0 0 auto!important;
         position:relative!important;
+        display:flex!important;
+        align-items:center!important;
+        gap:8px!important;
+        padding:9px 9px calc(9px + env(safe-area-inset-bottom))!important;
         box-shadow:0 -8px 24px rgba(38,50,56,.05)!important;
+      }
+      #margarita-panel .mg-input input,
+      #margarita-panel .mg-input textarea{
+        flex:1 1 auto!important;
+        min-width:0!important;
+        height:56px!important;
+        min-height:56px!important;
+        border-radius:28px!important;
+      }
+      #margarita-panel .mg-input button{
+        flex:0 0 58px!important;
+        width:58px!important;
+        min-width:58px!important;
+        max-width:58px!important;
+        height:58px!important;
+        min-height:58px!important;
+        padding:0!important;
+        margin:0!important;
+        border-radius:50%!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        font-size:1.55rem!important;
+        line-height:1!important;
       }
 
       #margarita-fab{
@@ -122,18 +192,18 @@ function instalarMargaritaSidebar(){
         align-self:flex-start!important;
         display:flex!important;
         align-items:flex-end!important;
-        gap:7px!important;
-        max-width:96%!important;
+        gap:8px!important;
+        max-width:97%!important;
         width:auto!important;
       }
       .mg-bot-avatar{
-        width:29px!important;
-        height:29px!important;
-        flex:0 0 29px!important;
+        width:36px!important;
+        height:36px!important;
+        flex:0 0 36px!important;
         border-radius:50%!important;
         object-fit:cover!important;
         border:2px solid #fff!important;
-        box-shadow:0 2px 8px rgba(11,45,107,.18)!important;
+        box-shadow:0 3px 10px rgba(11,45,107,.22)!important;
         background:#fff!important;
       }
       .mg-bot-row .margarita-bot{
@@ -190,6 +260,10 @@ function instalarMargaritaSidebar(){
       @media(max-width:360px){
         html[data-margarita-formato="mitad"] #margarita-panel{width:62vw!important}
         html[data-margarita-formato="globo"] #margarita-panel{width:90vw!important;right:8px!important}
+        #margarita-panel .mg-input button{
+          flex-basis:54px!important;width:54px!important;min-width:54px!important;max-width:54px!important;height:54px!important;min-height:54px!important;
+        }
+        .mg-bot-avatar{width:34px!important;height:34px!important;flex-basis:34px!important}
       }
       @media(min-width:700px){
         html[data-margarita-formato="mitad"] #margarita-panel{width:360px!important}
@@ -198,68 +272,73 @@ function instalarMargaritaSidebar(){
     document.head.appendChild(style);
   }
 
-  function esAdminActual(){
-    try{
-      if(typeof window.esAdmin === "function") return !!window.esAdmin();
-    }catch(e){}
-    try{
-      for(let i=0;i<localStorage.length;i++){
-        const k = String(localStorage.key(i)||"");
-        if(!/ae_rol/i.test(k)) continue;
-        if(String(localStorage.getItem(k)||"").toLowerCase()==="admin") return true;
+  function esAdminActual() {
+    try {
+      if (typeof window.esAdmin === "function") return !!window.esAdmin();
+    } catch (e) {}
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = String(localStorage.key(i) || "");
+        if (!/ae_rol/i.test(k)) continue;
+        if (String(localStorage.getItem(k) || "").toLowerCase() === "admin") return true;
       }
-    }catch(e){}
+    } catch (e) {}
     return false;
   }
 
-  function preferenciasActuales(){
+  function preferenciasActuales() {
     const cfg = window.CONFIG && window.CONFIG.margaritaUI ? window.CONFIG.margaritaUI : null;
-    return {
-      formato: cfg && cfg.formato === "globo" ? "globo" : "mitad"
-    };
+    return { formato: cfg && cfg.formato === "globo" ? "globo" : "mitad" };
   }
 
   let preferenciasAplicadas = "";
-  function aplicarPreferencias(){
-    const pref = preferenciasActuales();
-    if(pref.formato === preferenciasAplicadas) return;
-    preferenciasAplicadas = pref.formato;
-    document.documentElement.dataset.margaritaFormato = pref.formato;
-    const modal = document.getElementById("mg-admin-modal");
-    if(modal){
-      modal.querySelectorAll("[data-mg-formato]").forEach((b)=>
-        b.classList.toggle("on",b.dataset.mgFormato===pref.formato)
-      );
-    }
+
+  function refrescarBotonesFormato(formato) {
+    document.querySelectorAll("[data-mg-formato]").forEach((b) => {
+      b.classList.toggle("on", b.dataset.mgFormato === formato);
+    });
   }
 
-  function guardarFormato(valor){
-    if(!esAdminActual() || !window.CONFIG) return;
-    if(!window.CONFIG.margaritaUI || typeof window.CONFIG.margaritaUI !== "object"){
-      window.CONFIG.margaritaUI = {...MARGARITA_UI_DEFAULT};
+  function aplicarPreferencias() {
+    const pref = preferenciasActuales();
+    if (pref.formato !== preferenciasAplicadas) {
+      preferenciasAplicadas = pref.formato;
+      document.documentElement.dataset.margaritaFormato = pref.formato;
+    }
+    refrescarBotonesFormato(pref.formato);
+  }
+
+  function guardarFormato(valor) {
+    if (!esAdminActual() || !window.CONFIG) return;
+    if (!window.CONFIG.margaritaUI || typeof window.CONFIG.margaritaUI !== "object") {
+      window.CONFIG.margaritaUI = { ...MARGARITA_UI_DEFAULT };
     }
     window.CONFIG.margaritaUI.formato = valor;
     preferenciasAplicadas = "";
     aplicarPreferencias();
-    try{
-      if(typeof window.guardarConfig === "function") window.guardarConfig();
-    }catch(e){}
+
+    try {
+      if (typeof window.guardarConfig === "function") window.guardarConfig();
+    } catch (e) {}
+
     const ok = document.querySelector("#mg-admin-modal .mg-admin-ok");
-    if(ok){
+    if (ok) {
       ok.textContent = "✓ Guardado para toda la tienda";
-      setTimeout(()=>{ if(ok) ok.textContent=""; },1700);
+      setTimeout(() => { if (ok) ok.textContent = ""; }, 1700);
     }
-    setTimeout(ajustarViewport,40);
+
+    requestAnimationFrame(ajustarViewport);
   }
 
-  function crearModalAdmin(){
-    if(document.getElementById("mg-admin-modal")) return;
+  function crearModalAdmin() {
+    if (document.getElementById("mg-admin-modal")) return;
+
     const modal = document.createElement("div");
     modal.id = "mg-admin-modal";
     modal.innerHTML = `
       <div class="mg-admin-card" role="dialog" aria-modal="true" aria-label="Configurar Margarita">
         <div class="mg-admin-title">⚙️ Apariencia de Margarita</div>
-        <div class="mg-admin-sub">Dos estilos premium. El formato que elijas queda aplicado para toda la tienda.</div>
+        <div class="mg-admin-sub">Elegí entre los dos formatos premium. El que selecciones queda aplicado para toda la tienda.</div>
         <div class="mg-admin-label">Formato</div>
         <div class="mg-admin-opciones">
           <button class="mg-admin-opcion" data-mg-formato="mitad">◧ Panel Mitad</button>
@@ -268,79 +347,121 @@ function instalarMargaritaSidebar(){
         <div class="mg-admin-ok"></div>
         <button class="mg-admin-cerrar" type="button">Listo</button>
       </div>`;
+
     document.body.appendChild(modal);
-    modal.addEventListener("click",(ev)=>{ if(ev.target===modal) modal.classList.remove("on"); });
-    modal.querySelector(".mg-admin-cerrar").addEventListener("click",()=>modal.classList.remove("on"));
-    modal.querySelectorAll("[data-mg-formato]").forEach((b)=>
-      b.addEventListener("click",()=>guardarFormato(b.dataset.mgFormato))
-    );
+    modal.addEventListener("click", (ev) => {
+      if (ev.target === modal) modal.classList.remove("on");
+    });
+    modal.querySelector(".mg-admin-cerrar").addEventListener("click", () => modal.classList.remove("on"));
+    modal.querySelectorAll("[data-mg-formato]").forEach((b) => {
+      b.addEventListener("click", () => guardarFormato(b.dataset.mgFormato));
+    });
   }
 
-  function abrirConfigAdmin(){
-    if(!esAdminActual()) return;
+  function abrirConfigAdmin() {
+    if (!esAdminActual()) return;
     crearModalAdmin();
     aplicarPreferencias();
     document.getElementById("mg-admin-modal").classList.add("on");
   }
 
-  function asegurarControlesAdmin(){
-    if(!header) return;
+  function crearSelectorRapido() {
+    let switcher = panel.querySelector(".mg-formato-switch");
+    if (switcher) return switcher;
+
+    switcher = document.createElement("div");
+    switcher.className = "mg-formato-switch";
+    switcher.innerHTML = `
+      <button type="button" data-mg-formato="mitad">◧ Panel</button>
+      <button type="button" data-mg-formato="globo">💬 Globo</button>`;
+
+    if (header) header.insertAdjacentElement("afterend", switcher);
+    else panel.insertBefore(switcher, mensajes);
+
+    switcher.querySelectorAll("[data-mg-formato]").forEach((b) => {
+      b.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        guardarFormato(b.dataset.mgFormato);
+      });
+    });
+    return switcher;
+  }
+
+  function asegurarControlesAdmin() {
+    if (!header) return;
+
     const admin = esAdminActual();
     let btn = header.querySelector(".mg-admin-config-btn");
-    if(admin && !btn){
+
+    if (admin && !btn) {
       btn = document.createElement("button");
       btn.type = "button";
       btn.className = "mg-admin-config-btn";
       btn.title = "Configurar Margarita";
-      btn.setAttribute("aria-label","Configurar Margarita");
+      btn.setAttribute("aria-label", "Configurar Margarita");
       btn.textContent = "⚙️";
-      const cerrar = Array.from(header.querySelectorAll("button")).find((b)=>
-        /cerrar/i.test(b.getAttribute("aria-label")||"") || String(b.textContent||"").trim()==="×"
+
+      const cerrar = Array.from(header.querySelectorAll("button")).find((b) =>
+        /cerrar/i.test(b.getAttribute("aria-label") || "") ||
+        String(b.textContent || "").trim() === "×"
       );
-      if(cerrar) header.insertBefore(btn,cerrar); else header.appendChild(btn);
-      btn.addEventListener("click",(ev)=>{
+
+      if (cerrar) header.insertBefore(btn, cerrar);
+      else header.appendChild(btn);
+
+      btn.addEventListener("click", (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
         abrirConfigAdmin();
       });
     }
-    if(btn) btn.style.display = admin ? "flex" : "none";
+
+    if (btn) btn.style.display = admin ? "flex" : "none";
+
+    const switcher = crearSelectorRapido();
+    switcher.classList.toggle("on", admin);
+    aplicarPreferencias();
   }
 
-  function decorarBurbujaBot(burbuja){
-    if(!burbuja || !burbuja.classList || !burbuja.classList.contains("margarita-bot")) return;
-    if(burbuja.parentElement && burbuja.parentElement.classList.contains("mg-bot-row")) return;
+  function decorarBurbujaBot(burbuja) {
+    if (!burbuja || !burbuja.classList || !burbuja.classList.contains("margarita-bot")) return;
+    if (burbuja.parentElement && burbuja.parentElement.classList.contains("mg-bot-row")) return;
+
     const fila = document.createElement("div");
     fila.className = "mg-bot-row";
+
     const avatar = document.createElement("img");
     avatar.className = "mg-bot-avatar";
     avatar.src = MARGARITA_AVATAR;
     avatar.alt = "Margarita";
-    burbuja.parentNode.insertBefore(fila,burbuja);
+
+    burbuja.parentNode.insertBefore(fila, burbuja);
     fila.appendChild(avatar);
     fila.appendChild(burbuja);
   }
 
-  function decorarMensajes(){
+  function decorarMensajes() {
     mensajes.querySelectorAll(".margarita-bot").forEach(decorarBurbujaBot);
   }
 
-  const observadorMensajes = new MutationObserver((cambios)=>{
-    cambios.forEach((cambio)=>{
-      cambio.addedNodes.forEach((nodo)=>{
-        if(nodo.nodeType!==1) return;
-        if(nodo.classList && nodo.classList.contains("margarita-bot")) decorarBurbujaBot(nodo);
-        nodo.querySelectorAll && nodo.querySelectorAll(".margarita-bot").forEach(decorarBurbujaBot);
+  const observadorMensajes = new MutationObserver((cambios) => {
+    cambios.forEach((cambio) => {
+      cambio.addedNodes.forEach((nodo) => {
+        if (nodo.nodeType !== 1) return;
+        if (nodo.classList && nodo.classList.contains("margarita-bot")) decorarBurbujaBot(nodo);
+        if (nodo.querySelectorAll) nodo.querySelectorAll(".margarita-bot").forEach(decorarBurbujaBot);
       });
     });
   });
-  observadorMensajes.observe(mensajes,{childList:true,subtree:false});
+  observadorMensajes.observe(mensajes, { childList: true, subtree: false });
 
   let saludoVisto = false;
-  Array.from(mensajes.querySelectorAll(".margarita-bot")).forEach((burbuja)=>{
+  Array.from(mensajes.querySelectorAll(".margarita-bot")).forEach((burbuja) => {
     const txt = String(burbuja.textContent || "").trim();
-    if(!txt.startsWith("¡Hola! Soy Margarita")) return;
-    if(saludoVisto) burbuja.remove(); else saludoVisto = true;
+    if (!txt.startsWith("¡Hola! Soy Margarita")) return;
+    if (saludoVisto) burbuja.remove();
+    else saludoVisto = true;
   });
   decorarMensajes();
 
@@ -348,107 +469,125 @@ function instalarMargaritaSidebar(){
   let scrollBase = window.scrollY || 0;
   const vv = window.visualViewport || null;
 
-  function abierto(){
+  function abierto() {
     return overlay.classList.contains("abierto");
   }
 
-  function ajustarViewport(){
-    if(!abierto()) return;
+  function ajustarViewport() {
+    if (!abierto()) return;
+
     const top = vv ? vv.offsetTop : 0;
     const alto = vv ? vv.height : window.innerHeight;
     const pref = preferenciasActuales();
 
-    if(pref.formato === "globo"){
-      const margen = 10;
-      const teclado = Math.max(0,window.innerHeight-(top+alto));
-      panel.style.setProperty("top","auto","important");
-      panel.style.setProperty("bottom",(teclado+margen)+"px","important");
-      panel.style.setProperty("height",Math.max(300,Math.min(560,Math.round(alto*.72)))+"px","important");
-    }else{
-      panel.style.setProperty("top",Math.max(0,Math.round(top))+"px","important");
-      panel.style.setProperty("bottom","auto","important");
-      panel.style.setProperty("height",Math.max(220,Math.round(alto))+"px","important");
+    if (pref.formato === "globo") {
+      const margen = 8;
+      const teclado = Math.max(0, window.innerHeight - (top + alto));
+      panel.style.setProperty("top", "auto", "important");
+      panel.style.setProperty("bottom", (teclado + margen) + "px", "important");
+      panel.style.setProperty("height", Math.max(280, Math.min(520, Math.round(alto - 14))) + "px", "important");
+    } else {
+      panel.style.setProperty("top", Math.max(0, Math.round(top)) + "px", "important");
+      panel.style.setProperty("bottom", "auto", "important");
+      panel.style.setProperty("height", Math.max(220, Math.round(alto)) + "px", "important");
     }
 
-    if(document.activeElement === input && Math.abs((window.scrollY||0)-scrollBase) > 1){
-      try{ window.scrollTo(0,scrollBase); }catch(e){}
+    if (document.activeElement === input && Math.abs((window.scrollY || 0) - scrollBase) > 1) {
+      try { window.scrollTo(0, scrollBase); } catch (e) {}
     }
   }
 
-  window.margaritaAbrir = function(){
+  function ajustarViewportRapido() {
+    ajustarViewport();
+    requestAnimationFrame(ajustarViewport);
+    setTimeout(ajustarViewport, 18);
+  }
+
+  window.margaritaAbrir = function () {
     clearTimeout(cierreTimer);
     overlay.style.display = "block";
     scrollBase = window.scrollY || 0;
 
-    const yaHaySaludo = Array.from(mensajes.querySelectorAll(".margarita-bot")).some((b)=>
-      String(b.textContent||"").trim().startsWith("¡Hola! Soy Margarita")
+    const yaHaySaludo = Array.from(mensajes.querySelectorAll(".margarita-bot")).some((b) =>
+      String(b.textContent || "").trim().startsWith("¡Hola! Soy Margarita")
     );
-    if(!yaHaySaludo && typeof window.margaritaPintar === "function"){
-      window.margaritaPintar("margarita","¡Hola! Soy Margarita 🐝 ¿Qué estás buscando? Te hago unas preguntas cortitas y te ayudo a elegir la mejor opción.");
+
+    if (!yaHaySaludo && typeof window.margaritaPintar === "function") {
+      window.margaritaPintar(
+        "margarita",
+        "¡Hola! Soy Margarita 🐝 ¿Qué estás buscando? Te hago unas preguntas cortitas y te ayudo a elegir la mejor opción."
+      );
     }
 
-    requestAnimationFrame(()=>{
+    requestAnimationFrame(() => {
       overlay.classList.add("abierto");
       decorarMensajes();
-      ajustarViewport();
-      mensajes.scrollTop = mensajes.scrollHeight;
       asegurarControlesAdmin();
+      ajustarViewportRapido();
+      mensajes.scrollTop = mensajes.scrollHeight;
     });
   };
 
-  window.margaritaCerrar = function(){
+  window.margaritaCerrar = function () {
     overlay.classList.remove("abierto");
     clearTimeout(cierreTimer);
-    cierreTimer = setTimeout(()=>{
-      if(!abierto()){
+
+    cierreTimer = setTimeout(() => {
+      if (!abierto()) {
         overlay.style.display = "none";
         panel.style.removeProperty("top");
         panel.style.removeProperty("bottom");
         panel.style.removeProperty("height");
       }
-    },320);
+    }, 300);
   };
 
-  fab.onclick = function(ev){
-    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
-    if(abierto()) window.margaritaCerrar(); else window.margaritaAbrir();
+  fab.onclick = function (ev) {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+    }
+    if (abierto()) window.margaritaCerrar();
+    else window.margaritaAbrir();
     return false;
   };
 
-  overlay.addEventListener("click",(ev)=>{
-    if(ev.target === overlay) window.margaritaCerrar();
+  overlay.addEventListener("click", (ev) => {
+    if (ev.target === overlay) window.margaritaCerrar();
   });
 
-  input.addEventListener("focus",()=>{
+  input.addEventListener("focus", () => {
     scrollBase = window.scrollY || 0;
-    setTimeout(()=>{
-      ajustarViewport();
-      mensajes.scrollTop = mensajes.scrollHeight;
-    },60);
+    ajustarViewportRapido();
+    mensajes.scrollTop = mensajes.scrollHeight;
   });
-  input.addEventListener("blur",()=>setTimeout(ajustarViewport,80));
 
-  if(vv){
-    vv.addEventListener("resize",()=>requestAnimationFrame(ajustarViewport));
-    vv.addEventListener("scroll",()=>requestAnimationFrame(ajustarViewport));
+  input.addEventListener("blur", () => {
+    requestAnimationFrame(ajustarViewport);
+  });
+
+  if (vv) {
+    vv.addEventListener("resize", ajustarViewportRapido);
+    vv.addEventListener("scroll", ajustarViewportRapido);
   }
-  window.addEventListener("resize",()=>requestAnimationFrame(ajustarViewport));
-  window.addEventListener("orientationchange",()=>setTimeout(ajustarViewport,250));
+
+  window.addEventListener("resize", ajustarViewportRapido);
+  window.addEventListener("orientationchange", () => setTimeout(ajustarViewportRapido, 120));
 
   document.documentElement.dataset.margaritaFormato = MARGARITA_UI_DEFAULT.formato;
   aplicarPreferencias();
   asegurarControlesAdmin();
 
-  setInterval(()=>{
+  setInterval(() => {
     aplicarPreferencias();
     asegurarControlesAdmin();
-  },1200);
+  }, 1200);
 
   document.documentElement.dataset.margaritaSidebar = MARGARITA_SIDEBAR_VERSION;
 }
 
-if(document.readyState === "loading"){
-  document.addEventListener("DOMContentLoaded",instalarMargaritaSidebar,{once:true});
-}else{
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", instalarMargaritaSidebar, { once: true });
+} else {
   instalarMargaritaSidebar();
 }
