@@ -1,6 +1,6 @@
 export const MARGARITA_AVATAR = "/margarita-avatar.webp";
 
-const MARGARITA_SIDEBAR_VERSION = "sidebar-2026-08-23-2";
+const MARGARITA_SIDEBAR_VERSION = "sidebar-2026-08-23-3";
 const MARGARITA_UI_DEFAULT = { formato:"angosto", logo:"pequeno" };
 
 function instalarMargaritaSidebar(){
@@ -125,9 +125,10 @@ function instalarMargaritaSidebar(){
   }
 
   function guardarPreferencia(tipo,valor){
-    if(!esAdminActual()) return;
-    if(!window.CONFIG) return;
-    if(!window.CONFIG.margaritaUI || typeof window.CONFIG.margaritaUI !== "object") window.CONFIG.margaritaUI = {...MARGARITA_UI_DEFAULT};
+    if(!esAdminActual() || !window.CONFIG) return;
+    if(!window.CONFIG.margaritaUI || typeof window.CONFIG.margaritaUI !== "object"){
+      window.CONFIG.margaritaUI = {...MARGARITA_UI_DEFAULT};
+    }
     window.CONFIG.margaritaUI[tipo] = valor;
     preferenciasAplicadas = "";
     aplicarPreferencias();
@@ -135,25 +136,9 @@ function instalarMargaritaSidebar(){
       if(typeof window.guardarConfig === "function") window.guardarConfig();
     }catch(e){}
     const ok = document.querySelector("#mg-admin-modal .mg-admin-ok");
-    if(ok){ ok.textContent = "✓ Guardado para la tienda"; setTimeout(()=>{ if(ok) ok.textContent=""; },1600); }
-  }
-
-  function asegurarControlesAdmin(){
-    const admin = esAdminActual();
-    if(header){
-      let btn = header.querySelector(".mg-admin-config-btn");
-      if(admin && !btn){
-        btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "mg-admin-config-btn";
-        btn.title = "Configurar Margarita";
-        btn.setAttribute("aria-label","Configurar Margarita");
-        btn.textContent = "⚙️";
-        const cerrar = Array.from(header.querySelectorAll("button")).find((b)=>/cerrar/i.test(b.getAttribute("aria-label")||"") || String(b.textContent||"").trim()==="×");
-        if(cerrar) header.insertBefore(btn,cerrar); else header.appendChild(btn);
-        btn.addEventListener("click",(ev)=>{ ev.preventDefault(); ev.stopPropagation(); abrirConfigAdmin(); });
-      }
-      if(btn) btn.style.display = admin ? "flex" : "none";
+    if(ok){
+      ok.textContent = "✓ Guardado para la tienda";
+      setTimeout(()=>{ if(ok) ok.textContent=""; },1600);
     }
   }
 
@@ -192,6 +177,24 @@ function instalarMargaritaSidebar(){
     document.getElementById("mg-admin-modal").classList.add("on");
   }
 
+  function asegurarControlesAdmin(){
+    if(!header) return;
+    const admin = esAdminActual();
+    let btn = header.querySelector(".mg-admin-config-btn");
+    if(admin && !btn){
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mg-admin-config-btn";
+      btn.title = "Configurar Margarita";
+      btn.setAttribute("aria-label","Configurar Margarita");
+      btn.textContent = "⚙️";
+      const cerrar = Array.from(header.querySelectorAll("button")).find((b)=>/cerrar/i.test(b.getAttribute("aria-label")||"") || String(b.textContent||"").trim()==="×");
+      if(cerrar) header.insertBefore(btn,cerrar); else header.appendChild(btn);
+      btn.addEventListener("click",(ev)=>{ ev.preventDefault(); ev.stopPropagation(); abrirConfigAdmin(); });
+    }
+    if(btn) btn.style.display = admin ? "flex" : "none";
+  }
+
   // Elimina bienvenida duplicada de versiones anteriores.
   let saludoVisto = false;
   Array.from(mensajes.querySelectorAll(".margarita-bot")).forEach((burbuja)=>{
@@ -204,7 +207,9 @@ function instalarMargaritaSidebar(){
   let scrollBase = window.scrollY || 0;
   const vv = window.visualViewport || null;
 
-  function abierto(){ return overlay.classList.contains("abierto"); }
+  function abierto(){
+    return overlay.classList.contains("abierto");
+  }
 
   function ajustarViewport(){
     if(!abierto()) return;
@@ -269,7 +274,6 @@ function instalarMargaritaSidebar(){
   aplicarPreferencias();
   asegurarControlesAdmin();
 
-  // Espera la CONFIG que llega de Supabase y refleja cambios sin recargar.
   setInterval(()=>{
     aplicarPreferencias();
     asegurarControlesAdmin();
