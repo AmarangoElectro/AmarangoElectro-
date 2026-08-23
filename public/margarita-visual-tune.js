@@ -6,8 +6,8 @@
 */
 (function(){
   'use strict';
-  const VERSION='margarita-visual-tune-2026-08-23-4';
-  const AVATAR='/margarita-avatar-v4.svg?v=20260823-1';
+  const VERSION='margarita-visual-tune-2026-08-23-5';
+  const AVATAR='/margarita-avatar-v4.webp?v=20260823-2';
   if(window.__AE_MARGARITA_VISUAL_TUNE__===VERSION)return;
   window.__AE_MARGARITA_VISUAL_TUNE__=VERSION;
 
