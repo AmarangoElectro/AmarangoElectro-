@@ -1,9 +1,10 @@
 /* AmarangoElectro · guardia de intención para Margarita
    Evita arrastrar productos de una categoría anterior cuando el usuario cambia de rubro.
+   También marca búsquedas sin coincidencias para derivarlas al equipo sin inventar productos.
 */
 (function(){
   'use strict';
-  var VERSION='mg-query-guard-2026-08-23-1';
+  var VERSION='mg-query-guard-2026-08-23-2';
   if(window.__MG_QUERY_GUARD__===VERSION)return;
   window.__MG_QUERY_GUARD__=VERSION;
 
@@ -68,7 +69,7 @@
     return out;
   }
 
-  var STOP=new Set(['algo','hay','tenes','tenes','tienen','quiero','quisiera','busco','buscar','pasame','dame','mostrame','ver','uno','una','unos','unas','por','para','con','del','de','la','el','los','las','que','me','xfa','porfa']);
+  var STOP=new Set(['algo','hay','tenes','tienen','quiero','quisiera','busco','buscar','buscame','pasame','dame','mostrame','ver','uno','una','unos','unas','por','para','con','del','de','la','el','los','las','que','me','xfa','porfa','oferta','ofertas','barato','barata','baratos','baratas','economico','economica','economicos','economicas','bueno','buena','mejor']);
   function tokens(text){return norm(text).split(' ').filter(function(w){return w.length>2&&!STOP.has(w);}).map(function(w){return w.length>4&&/s$/.test(w)?w.slice(0,-1):w;});}
 
   function score(p,text,intent){
@@ -94,9 +95,32 @@
   }
 
   function intentAnterior(ms,ultimoIdx){
-    if(!Array.isArray(ms))return '';
-    for(var i=ultimoIdx-1;i>=0;i--){var m=ms[i];if(!m||m.rol==='margarita')continue;var it=intentOf(m.texto||'');if(it)return it;}
-    return '';
+    if(!Array.isArray(ms))return null;
+    for(var i=ultimoIdx-1;i>=0;i--){
+      var m=ms[i];if(!m||m.rol==='margarita')continue;
+      var it=intentOf(m.texto||'');if(it)return {intent:it,m:m,i:i};
+    }
+    return null;
+  }
+
+  function esContinuacion(text){
+    return /^(otro|otra|otros|otras|algo|uno|una|mas|más|barato|barata|economico|economica|mejor|similar|alternativa|oferta|dale|si|sí|no|bueno)\b/.test(norm(text));
+  }
+
+  function pareceBusquedaProducto(text){
+    var t=norm(text);if(esContinuacion(t))return false;
+    return /\b(tenes|tienen|hay|busco|buscar|buscame|pasame|dame|mostrame|quiero|necesito|venden|vendes|conseguis|conseguir|conseguen)\b/.test(t)&&tokens(t).length>0;
+  }
+
+  function coincideGenerico(p,text){
+    var tk=tokens(text);if(!tk.length)return true;
+    var bolsa=norm((p&&p.nombre||'')+' '+(p&&p.categoria||'')+' '+(p&&p.caracteristicas||''));
+    return tk.some(function(w){
+      if(bolsa.indexOf(w)>=0)return true;
+      if(/^(play|playstation|ps5)$/.test(w)&&/playstation|ps ?5/.test(bolsa))return true;
+      if(/^(notebook|laptop)$/.test(w)&&/notebook|laptop/.test(bolsa))return true;
+      return false;
+    });
   }
 
   if(window.fetch&&window.fetch.__mgQueryGuard!==VERSION){
@@ -113,12 +137,22 @@
               var prev=intentAnterior(body.mensajes||[],u.i);
               body.productos=candidatos(intent,u.m.texto||'');
               body.intencionCategoria=intent;
-              if(prev&&prev!==intent){
+              body.sinCoincidencias=body.productos.length===0;
+              if(prev&&prev.intent!==intent){
+                body.cambioTema={anterior:prev.intent,nuevo:intent,consultaAnterior:String(prev.m.texto||'').slice(0,120),consultaNueva:String(u.m.texto||'').slice(0,120)};
                 body.mensajes=[u.m];
                 body.contextoReiniciado=true;
               }
-              init=Object.assign({},init,{body:JSON.stringify(body)});
+            }else if(pareceBusquedaProducto(u.m.texto||'')){
+              var base=Array.isArray(body.productos)?body.productos:[];
+              var filtrados=base.filter(function(p){return coincideGenerico(p,u.m.texto||'');});
+              body.productos=filtrados;
+              if(!filtrados.length){
+                body.sinCoincidencias=true;
+                body.consultaNoEncontrada=String(u.m.texto||'').slice(0,160);
+              }
             }
+            init=Object.assign({},init,{body:JSON.stringify(body)});
           }
         }
       }catch(e){}
