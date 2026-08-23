@@ -2,12 +2,10 @@ name: Aplicar UI admin profesional
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - '.github/workflows/aplicar-ui-admin-profesional.yml'
-      - '.github/trigger-ui-admin-20260823-1054.txt'
-  issues:
-    types: [opened]
+      - .github/workflows/aplicar-ui-admin-profesional.yml
   workflow_dispatch:
 
 permissions:
@@ -15,22 +13,23 @@ permissions:
 
 jobs:
   actualizar-ui:
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.issue.title == 'APLICAR UI ADMIN PROFESIONAL'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Reemplazar controles de admin en public/index.html
+      - name: Aplicar switch Visible Oculto y destacar Opciones del producto
         shell: bash
         run: |
-          python <<'PY'
+          python3 <<'PY'
           from pathlib import Path
           import re
 
           path = Path('public/index.html')
           s = path.read_text(encoding='utf-8')
 
-          # 1) Reemplaza la casilla de marcado por un switch directo Visible/Oculto.
           patron = re.compile(
               r"    // controles de admin \(debajo de la foto, no la empujan\)\n"
               r"    if\(tiendaEsAdmin && !p\.esCelu\)\{\n"
@@ -51,12 +50,10 @@ jobs:
     }
     if(tiendaEsAdmin && p.esCelu){'''
 
-          s2, cantidad = patron.subn(nuevo, s, count=1)
+          s, cantidad = patron.subn(nuevo, s, count=1)
           if cantidad != 1:
-              raise SystemExit(f'No se encontro de forma unica el bloque Visible/Oculto viejo: {cantidad}')
-          s = s2
+              raise SystemExit(f'Bloque Visible/Oculto no encontrado de forma unica: {cantidad}')
 
-          # 2) Hace mucho mas visible el boton Opciones del producto.
           texto = '⚙️ Opciones del producto ▾</summary>'
           idx = s.find(texto)
           if idx < 0:
@@ -68,12 +65,15 @@ jobs:
           fin_style = s.find('"', ini_style)
           if fin_style < 0:
               raise SystemExit('No se pudo cerrar el style de Opciones del producto')
-          estilo = ('cursor:pointer;list-style:none;padding:10px 12px;'
-                    'background:linear-gradient(135deg,#0B2D6B 0%,#174f9c 100%);'
-                    'border:1px solid rgba(255,255,255,.16);border-bottom:3px solid #FF7A00;'
-                    'border-radius:10px;font-size:.72rem;font-weight:900;color:#fff;'
-                    'text-align:center;box-shadow:0 5px 13px rgba(11,45,107,.20);'
-                    'letter-spacing:.01em;-webkit-tap-highlight-color:transparent;')
+
+          estilo = (
+              'cursor:pointer;list-style:none;padding:10px 12px;'
+              'background:linear-gradient(135deg,#0B2D6B 0%,#174f9c 100%);'
+              'border:1px solid rgba(255,255,255,.16);border-bottom:3px solid #FF7A00;'
+              'border-radius:10px;font-size:.72rem;font-weight:900;color:#fff;'
+              'text-align:center;box-shadow:0 5px 13px rgba(11,45,107,.20);'
+              'letter-spacing:.01em;-webkit-tap-highlight-color:transparent;'
+          )
           s = s[:ini_style] + estilo + s[fin_style:]
 
           path.write_text(s, encoding='utf-8')
@@ -86,6 +86,9 @@ jobs:
           git config user.name "AmarangoElectro Bot"
           git config user.email "actions@users.noreply.github.com"
           git add public/index.html
-          git diff --cached --quiet && exit 0
+          if git diff --cached --quiet; then
+            echo "No hay cambios pendientes"
+            exit 0
+          fi
           git commit -m "Mejora tarjetas admin con switch visible y opciones destacadas"
           git push origin main
