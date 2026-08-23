@@ -3,7 +3,7 @@ import base from "./worker.mjs";
 const PRO_UX_HEAD = `
 <link rel="stylesheet" href="/professional-ux.css?v=20260823-2">
 <link rel="stylesheet" href="/professional-dialogs.css?v=20260823-1">
-<link rel="stylesheet" href="/professional-touch.css?v=20260823-1">
+<link rel="stylesheet" href="/professional-touch.css?v=20260823-2">
 `;
 
 const PRO_UX_BODY = `
