@@ -3,6 +3,7 @@ import { ejecutarSincronizacionProgramadaSegura } from "./proveedores-sync.mjs";
 const HOSTS_IMAGEN_PERMITIDOS = new Set(["cdn.catalog-store.link"]);
 const TIPOS_IMAGEN_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_IMAGEN_BYTES = 5 * 1024 * 1024;
+const MARGARITA_CONFIG_ID = "margarita_ui";
 
 function json(datos, estado = 200) {
   return new Response(JSON.stringify(datos), {
@@ -84,11 +85,22 @@ VENTA Y CUOTAS
 - Si recibís precio contado, podés calcular:
   2 cuotas = contado +15%
   4 cuotas = contado +55%
-  6 cuotas = contado +80%
+  6 cuotas = contado +80%.
   Total financiado dividido por cantidad de cuotas.
 - Nunca inventes cuotas si no recibiste un precio válido.
 - Margarita NO cobra, NO envía links de pago y NO recibe pagos.
 - El cierre final, pagos y confirmaciones se derivan al equipo. Los pagos válidos se coordinan únicamente con Maxi o Angie.
+
+VENTA ASCENDENTE — UPSELL SUAVE
+- Cuando el cliente YA eligió, compró, reservó o está por cerrar un producto, hacé UNA sola propuesta ascendente útil antes del cierre.
+- Prioridad 1: mismo modelo o familia con más memoria, capacidad o una mejora real.
+- Prioridad 2: otra marca/modelo de la misma categoría, precio parecido o apenas superior, pero con una mejora concreta respaldada por nombre/características.
+- Usá los CANDIDATOS DE VENTA ASCENDENTE recibidos. Si están vacíos, no inventes una opción.
+- Ejemplo de enfoque: si eligió un Moto E15 128GB y existe E15 con más memoria, mostrale primero ese. Si no, buscá otro celular real de precio similar o un poco mayor con una mejora comprobable.
+- Si podés calcular la diferencia con precios recibidos, expresala simple: "Por $X más tenés...".
+- No llames "mejor" a algo si los datos no muestran una mejora.
+- No subas más de aproximadamente 30% el precio salvo que el cliente pida algo superior.
+- Si el cliente dice que no, no insistas ni vuelvas a ofrecer la venta ascendente en esa decisión.
 
 RESPUESTAS
 - Cliente: idealmente 2 a 5 líneas, salvo que pida comparación detallada.
@@ -146,6 +158,119 @@ function limpiarResumen(valor) {
   };
 }
 
+function normalizar(valor) {
+  return String(valor||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").replace(/\s+/g," ").trim();
+}
+
+function ultimoTextoUsuario(valor) {
+  if (!Array.isArray(valor)) return "";
+  for (let i=valor.length-1;i>=0;i--) {
+    const m=valor[i];
+    if (m && m.rol !== "margarita" && String(m.texto||"").trim()) return String(m.texto||"");
+  }
+  return "";
+}
+
+function memoriaGB(nombre) {
+  const m=String(nombre||"").match(/(\d+)\s*(tb|gb)/i);
+  if (!m) return 0;
+  const n=Number(m[1])||0;
+  return String(m[2]).toLowerCase()==="tb" ? n*1024 : n;
+}
+
+function tokensModelo(nombre) {
+  return normalizar(nombre).split(" ").filter((w)=>w.length>1 && !/^\d+$/.test(w) && !/^(gb|tb|ram|rom|5g|4g)$/.test(w));
+}
+
+function candidatosUpsell(productos, texto) {
+  if (!productos.length) return [];
+  const q=normalizar(texto);
+  const qTokens=q.split(" ").filter((w)=>w.length>1);
+  let base=null, mejor=-1;
+  for (const p of productos) {
+    const n=normalizar(p.nombre);
+    let s=0;
+    for (const w of qTokens) if (n.includes(w)) s += w.length>=4 ? 4 : 2;
+    if (q && n.includes(q)) s += 20;
+    if (s>mejor) { mejor=s; base=p; }
+  }
+  if (!base || mejor<=0) return [];
+  const precio=Number(base.precio)||0;
+  if (!precio) return [];
+  const memBase=memoriaGB(base.nombre);
+  const baseTokens=tokensModelo(base.nombre);
+  return productos.filter((p)=>p.id!==base.id && p.categoria===base.categoria && Number(p.precio)>=precio && Number(p.precio)<=precio*1.30)
+    .map((p)=>{
+      const n=normalizar(p.nombre);
+      const mem=memoriaGB(p.nombre);
+      let score=0;
+      const comunes=baseTokens.filter((w)=>n.includes(w)).length;
+      score += comunes*5;
+      if (memBase && mem>memBase) score += 24;
+      if (memBase && mem===memBase) score += 3;
+      score += Math.max(0,12-Math.round(((Number(p.precio)-precio)/precio)*40));
+      return {p,score,diferencia:Math.max(0,Math.round(Number(p.precio)-precio))};
+    })
+    .sort((a,b)=>b.score-a.score || a.diferencia-b.diferencia)
+    .slice(0,6)
+    .map((x)=>({...x.p,diferencia:x.diferencia}));
+}
+
+function partesArgentina() {
+  const partes=new Intl.DateTimeFormat("en-US",{timeZone:"America/Argentina/Buenos_Aires",weekday:"short",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date());
+  const get=(t)=>partes.find((x)=>x.type===t)?.value||"";
+  return {dia:get("weekday"),hora:Number(get("hour")||0),minuto:Number(get("minute")||0)};
+}
+
+function estaEnHorarioAutomatico() {
+  const {dia,hora}=partesArgentina();
+  if (dia==="Sun") return false;
+  if (dia==="Sat") return hora>=9 && hora<13;
+  return hora>=10 && hora<16;
+}
+
+function headersSupabase(env) {
+  const key=String(env.SUPABASE_ANON_KEY||"");
+  if (!key || !env.SUPABASE_URL) return null;
+  return {apikey:key,authorization:`Bearer ${key}`,"content-type":"application/json"};
+}
+
+async function leerConfigMargarita(env) {
+  const headers=headersSupabase(env);
+  if (!headers) return {formato:"mitad",modo:"auto"};
+  try {
+    const r=await fetch(`${env.SUPABASE_URL}/rest/v1/tienda_catalogo?id=eq.${MARGARITA_CONFIG_ID}&select=datos`,{headers});
+    const filas=await r.json();
+    const datos=Array.isArray(filas)&&filas[0]&&filas[0].datos&&typeof filas[0].datos==="object"?filas[0].datos:{};
+    return {formato:datos.formato==="globo"?"globo":"mitad",modo:["auto","on","off"].includes(datos.modo)?datos.modo:"auto"};
+  } catch { return {formato:"mitad",modo:"auto"}; }
+}
+
+async function guardarModoMargarita(env, modo) {
+  const headers=headersSupabase(env);
+  if (!headers) return false;
+  const actual=await leerConfigMargarita(env);
+  const datos={...actual,modo};
+  try {
+    const r=await fetch(`${env.SUPABASE_URL}/rest/v1/tienda_catalogo?on_conflict=id`,{
+      method:"POST",
+      headers:{...headers,prefer:"resolution=merge-duplicates,return=minimal"},
+      body:JSON.stringify([{id:MARGARITA_CONFIG_ID,datos,actualizado:new Date().toISOString()}])
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+function comandoModoAdmin(texto) {
+  const t=normalizar(texto);
+  if (!t.includes("margarita") && !t.includes("24") && !t.includes("horario")) return "";
+  if (/\b(desactivar|apagar|pausar)\b/.test(t)) return "off";
+  if (/\b(automatico|automatica|horario)\b/.test(t) && /\b(auto|automatico|automatica|horario)\b/.test(t)) return "auto";
+  if (/\b(activar|encender)\b/.test(t) && /\b(24|siempre|todo el dia)\b/.test(t)) return "on";
+  if (/\bmodo 24\b/.test(t) || /\b24 horas\b/.test(t)) return "on";
+  return "";
+}
+
 async function servirMargarita(request, env) {
   if (request.method !== "POST") return json({error:"Método no permitido"},405);
   if (!env.GEMINI_API_KEY) return json({respuesta:"Margarita está descansando un momento 🐝 Probá nuevamente en unos minutos."},200);
@@ -162,14 +287,33 @@ async function servirMargarita(request, env) {
     ? body.taxonomia.slice(0,40).map((x)=>String(x||"").slice(0,90)).filter(Boolean)
     : [];
   const saludoPendiente=body.saludoEspecialPendiente===true;
+  const ultimo=ultimoTextoUsuario(body.mensajes);
 
+  const configMargarita=await leerConfigMargarita(env);
+  if (rol==="admin") {
+    const comando=comandoModoAdmin(ultimo);
+    if (comando) {
+      const ok=await guardarModoMargarita(env,comando);
+      if (!ok) return json({respuesta:"No pude guardar ese cambio ahora 🐝 Probá de nuevo en un momento."},200);
+      if (comando==="on") return json({respuesta:"Listo 🐝 Margarita queda activa 24 hs para clientes y asesores. Ustedes, como administradores, pueden probarme las 24 hs siempre."},200);
+      if (comando==="off") return json({respuesta:"Listo 🐝 La dejé desactivada para clientes y asesores. Los administradores pueden seguir probándome las 24 hs."},200);
+      return json({respuesta:"Listo 🐝 Volví al horario automático de la tienda. Los administradores siguen con acceso 24 hs para pruebas."},200);
+    }
+  } else {
+    if (configMargarita.modo==="off") return json({respuesta:"Margarita está desactivada en este momento 🐝 Cuando el equipo la vuelva a habilitar, te voy a poder servir por acá."},200);
+    if (configMargarita.modo==="auto" && !estaEnHorarioAutomatico()) return json({respuesta:"Margarita está fuera de horario en este momento 🐝 Volvé a intentar dentro del horario de atención y te sirvo al toque."},200);
+  }
+
+  const upsell=candidatosUpsell(productos,ultimo);
   const contexto = [
     `CONTEXTO DE ROL: ${rol}`,
     `NOMBRE DE SESIÓN: ${nombre || "no informado"}`,
     `SALUDO_ESPECIAL_PENDIENTE: ${saludoPendiente ? "true" : "false"}`,
+    `MODO GLOBAL DE MARGARITA: ${configMargarita.modo}`,
     `TAXONOMÍA REAL DE LA TIENDA: ${JSON.stringify(taxonomia)}`,
     `RESUMEN OPERATIVO: ${JSON.stringify(resumen)}`,
-    `PRODUCTOS DISPONIBLES PARA ESTA CONSULTA (lista cerrada; no inventar): ${JSON.stringify(productos)}`
+    `PRODUCTOS DISPONIBLES PARA ESTA CONSULTA (lista cerrada; no inventar): ${JSON.stringify(productos)}`,
+    `CANDIDATOS DE VENTA ASCENDENTE (usar sólo si corresponde): ${JSON.stringify(upsell)}`
   ].join("\n");
 
   const contents=mensajes.length?mensajes:[{role:"user",parts:[{text:"Hola"}]}];
