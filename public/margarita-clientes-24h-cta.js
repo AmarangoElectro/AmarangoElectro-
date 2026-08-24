@@ -1,11 +1,11 @@
 /* AmarangoElectro · Margarita Clientes 24h + CTA de registro
    - Mantiene la guía/registro disponible todo el día para clientes.
    - Intercepta el botón enviar para evitar que el horario legado corte a clientes.
-   - Mejora bienvenida y comunica el beneficio de registro sin alterar admin/asesores.
+   - Unifica el tono: bienvenida profesional, ayudar/guiar y beneficio en primera compra.
 */
 (function(){
   'use strict';
-  var VERSION='mg-clientes-24h-cta-2026-08-24-1';
+  var VERSION='mg-clientes-24h-cta-2026-08-24-2';
   if(window.__MG_CLIENTES_24H_CTA__===VERSION)return;
   window.__MG_CLIENTES_24H_CTA__=VERSION;
 
@@ -17,31 +17,50 @@
     try{if(window.vistaPreviaCliente===true)return false;return window.revUnlocked===true||/asesor|revendedor|vendedor/i.test(String(localStorage.getItem('ae_rol')||''));}catch(e){return false;}
   }
   function esCliente(){return !esAdmin()&&!esAsesor();}
-
   function texto(el){return String(el&&el.textContent||'').trim();}
   function esBot(el){return el&&el.nodeType===1&&el.classList&&el.classList.contains('margarita-bot');}
+
+  var BIENVENIDA='¡Bienvenido a AmarangoElectro! 🐝 Soy Margarita. Estoy acá para ayudarte a recorrer la tienda y hacer tu experiencia más simple. ¿En qué te puedo ayudar?';
+  var REGISTRO='Si querés, puedo adelantarte el registro en unos segundos. Así el equipo ya tiene tus datos cuando quieras avanzar con una compra. 🎁 Además, al registrarte y concretar tu primera compra, recibís un obsequio de AmarangoElectro. ¿Querés registrarte?';
+
+  function reemplazarServir(t){
+    return t
+      .replace(/¿?en qué te puedo servir\??/gi,'¿En qué te puedo ayudar?')
+      .replace(/¿?en que te puedo servir\??/gi,'¿En qué te puedo ayudar?')
+      .replace(/te puedo servir/gi,'te puedo ayudar')
+      .replace(/puedo servirte/gi,'puedo ayudarte')
+      .replace(/servirte/gi,'ayudarte');
+  }
 
   function ajustarMensaje(bot){
     if(!esBot(bot)||!esCliente())return;
     var t=texto(bot);
-    if(/en que te puedo servir/i.test(t)||/soy margarita.*servir/i.test(t)){
-      bot.textContent='¡Bienvenido a AmarangoElectro! 🐝 Soy Margarita. Estoy para ayudarte a recorrer la tienda y orientarte en lo que necesites. ¿En qué te puedo ayudar?';
+
+    if(/en que te puedo servir|en qué te puedo servir|soy margarita.*servir/i.test(t)||(/^¡Hola!\s*Soy Margarita/i.test(t)&&!/Bienvenido a AmarangoElectro/i.test(t))){
+      bot.textContent=BIENVENIDA;
       return;
     }
-    if(/^¡Hola!\s*Soy Margarita/i.test(t)&&!/Bienvenido a AmarangoElectro/i.test(t)){
-      bot.textContent='¡Bienvenido a AmarangoElectro! 🐝 Soy Margarita. Estoy para ayudarte a recorrer la tienda y orientarte en lo que necesites. ¿En qué te puedo ayudar?';
+    if(/tambien puedo registrarte en unos segundos|también puedo registrarte en unos segundos|puedo registrarte en unos segundos|adelantarte el registro/i.test(t)){
+      bot.textContent=REGISTRO;
       return;
     }
-    if(/tambien puedo registrarte en unos segundos|puedo registrarte en unos segundos/i.test(t)){
-      bot.textContent='Si querés, puedo adelantarte el registro en unos segundos para que el equipo ya tenga tus datos básicos. 🎁 Además, si te registrás y concretás tu primera compra, el equipo de AmarangoElectro te hace un obsequio con tu primera cuota. ¿Querés registrarte ahora?';
+    if(/ya te voy a recordar por tu nombre/i.test(t)){
+      var limpio=t
+        .replace(/\s*🎁\s*Y acordate:[\s\S]*$/i,'')
+        .replace(/\s*Y acordate:[\s\S]*$/i,'');
+      bot.textContent=limpio+' 🎁 Y acordate: al haberte registrado, si concretás tu primera compra recibís un obsequio de AmarangoElectro.';
       return;
     }
-    if(/ya te voy a recordar por tu nombre/i.test(t)&&!/obsequio/i.test(t)){
-      bot.textContent=t+' 🎁 Y acordate: al haberte registrado, si concretás tu primera compra el equipo de AmarangoElectro te hace un obsequio con tu primera cuota.';
+    if(/obsequio|regalo/i.test(t)&&/primera cuota/i.test(t)){
+      bot.textContent=t.replace(/con tu primera cuota/gi,'en tu primera compra').replace(/con la primera cuota/gi,'en tu primera compra').replace(/con su primera cuota/gi,'en su primera compra');
       return;
     }
     if(/fuera de horario|horario de atencion|horario de atención/i.test(t)){
       bot.textContent='Estoy disponible para ayudarte con la tienda y con tu registro 😊 Decime qué necesitás y seguimos.';
+      return;
+    }
+    if(/servir/i.test(t)){
+      bot.textContent=reemplazarServir(t);
     }
   }
 
