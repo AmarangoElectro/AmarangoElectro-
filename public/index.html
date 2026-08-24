@@ -2197,9 +2197,9 @@ function tiendaInit(){
     tiendaSubfiltroActivo='';
     tiendaMostrarTodos=false;
   }
-  // v20 repara una sola vez los dispositivos que conservaron un catálogo viejo con
+  // v21 repara una sola vez los dispositivos que conservaron un catálogo viejo con
   // una versión incremental aparentemente actualizada.
-  var repararCache=tiendaNecesitaReparacionCacheV20();
+  var repararCache=tiendaNecesitaReparacionCacheV21();
   if(repararCache){
     tiendaProductos=[];
     tiendaGuardarVersionIncremental(0);
@@ -2505,7 +2505,7 @@ function tiendaBajarNubeLegacy(intentos){
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
-var TIENDA_CACHE_FOTOS_VERSION='v20-20260824-publicacion-verificada';
+var TIENDA_CACHE_FOTOS_VERSION='v21-20260824-visibilidad-unificada';
 var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
@@ -2518,7 +2518,10 @@ var TIENDA_MANUALES_ID='catalogo_manuales';
 function tiendaMapaControlPublicacion(){
   var mapa={};
   (tiendaProductos||[]).forEach(function(p){
-    if(!p || p.id==null)return;
+    // Los manuales se guardan completos en catalogo_manuales. Incluirlos
+    // también acá generaba dos autoridades y un valor viejo podía volver a
+    // ocultarlos después de aprobar el precio.
+    if(!p || p.id==null || !tiendaEsAutomatico(p))return;
     mapa[String(p.id)]={
       visible:p.visible===true,
       pendienteRevisionManual:p.pendienteRevisionManual===true,
@@ -2534,7 +2537,9 @@ function tiendaAplicarControlPublicacion(mapa){
   if(!mapa || typeof mapa!=='object')return false;
   var cambio=false;
   (tiendaProductos||[]).forEach(function(p){
-    if(!p || p.id==null)return;
+    // El control liviano sólo gobierna automáticos. Para manuales manda
+    // exclusivamente la fila catalogo_manuales.
+    if(!p || p.id==null || !tiendaEsAutomatico(p))return;
     var c=mapa[String(p.id)];if(!c)return;
     ['visible','pendienteRevisionManual','ocultoManualProveedor','ocultoPorDuplicado','sinStock','estadoProveedor'].forEach(function(k){
       if(Object.prototype.hasOwnProperty.call(c,k) && p[k]!==c[k]){p[k]=c[k];cambio=true;}
@@ -2612,11 +2617,11 @@ function tiendaBajarControlPublicacion(){
     }).catch(function(){return false;});
 }
 
-function tiendaNecesitaReparacionCacheV20(){
+function tiendaNecesitaReparacionCacheV21(){
   try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
   catch(e){return true;}
 }
-function tiendaConfirmarReparacionCacheV20(){
+function tiendaConfirmarReparacionCacheV21(){
   try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
 }
 
@@ -2679,7 +2684,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
-  tiendaConfirmarReparacionCacheV20();
+  tiendaConfirmarReparacionCacheV21();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -5174,9 +5179,8 @@ function tiendaProductoAptoPortada(p){
   if(!p || !p.foto || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;
   var stock=tiendaLeerStockProveedor(p);
   if(stock.informado && stock.valor<=0)return false;
-  // En productos automáticos se priorizan las imágenes ya trabajadas por
-  // Amarango o expresamente aprobadas; las pendientes nunca abren la tienda.
-  if(tiendaEsAutomatico(p) && !tiendaEsFotoAmarango(p) && p.imagenProveedorAprobada!==true)return false;
+  // Tener la foto original del proveedor NO oculta el producto. Solamente lo
+  // incorpora a la bandeja privada de "Imágenes pendientes" del administrador.
   return true;
 }
 function tiendaVerCategoriaPortada(cat){
