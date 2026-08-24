@@ -8,7 +8,7 @@
 */
 (function(){
   'use strict';
-  var VERSION='margarita-client-onboarding-2026-08-24-4';
+  var VERSION='margarita-client-onboarding-2026-08-24-5';
   if(window.__AE_MARGARITA_CLIENT_ONBOARDING__===VERSION)return;
   window.__AE_MARGARITA_CLIENT_ONBOARDING__=VERSION;
 
@@ -57,8 +57,8 @@
   async function buscar(telefono){var d=await api({accion:'buscar',telefono:tel(telefono)});return d.encontrado?d.cliente:null;}
   async function guardarServidor(accion,data){var d=await api({accion:accion,telefono:tel(data.telefono),cliente:data});return d.cliente;}
   function guardarIdentidad(c){
-    var ap=preferido(c);
-    set({id:c.id||'',nombre:ap,nombreCompleto:nombre(c.nombre)||nombre(c.nombreCompleto),apodo:ap,telefono:tel(c.telefono),nombrePreferidoConfirmado:c.nombrePreferidoConfirmado===true,actualizado:Date.now()});
+    var ap=preferido(c),prev=get();
+    set(Object.assign({},prev,{id:c.id||prev.id||'',nombre:ap,nombreCompleto:nombre(c.nombre)||nombre(c.nombreCompleto)||prev.nombreCompleto||'',apodo:ap,telefono:tel(c.telefono),nombrePreferidoConfirmado:c.nombrePreferidoConfirmado===true,aceptaPromos:c.aceptaPromos===true,regaloPendiente:c.regaloPendiente===true,codigoReferido:String(c.codigoReferido||prev.codigoReferido||''),referidosCantidad:Number(c.referidosCantidad||prev.referidosCantidad||0),referidosConCompra:Number(c.referidosConCompra||prev.referidosConCompra||0),metaReferidosObjetivo:Number(c.metaReferidosObjetivo||prev.metaReferidosObjetivo||10),regaloReferidosPendiente:c.regaloReferidosPendiente===true,actualizado:Date.now()}));
     try{localStorage.removeItem(K_SKIP);}catch(e){}
   }
 
@@ -128,94 +128,32 @@
 
   async function actualizarConsentimientoExistente(c){
     if(!estado.solicitoPromos)return c;
-    try{
-      return await guardarServidor('actualizar',{id:c&&c.id,nombre:c&&c.nombre,telefono:estado.telefono,apodo:c&&c.apodo,nombrePreferidoConfirmado:c&&c.nombrePreferidoConfirmado===true,aceptaPromos:true,origenRegistro:'margarita_cliente_existente'});
-    }catch(e){return c;}
+    try{return await guardarServidor('actualizar',{id:c&&c.id,nombre:c&&c.nombre,telefono:estado.telefono,apodo:c&&c.apodo,nombrePreferidoConfirmado:c&&c.nombrePreferidoConfirmado===true,aceptaPromos:true,origenRegistro:'margarita_cliente_existente'});}catch(e){return c;}
   }
 
   async function continuar(){
     var n=nombre(document.getElementById('mgonombre').value),t=document.getElementById('mgotel').value;
-    if(n.length<3)return err('Escribí tu nombre y apellido.');
-    if(!telOk(t))return err('Revisá el número de WhatsApp.');
-    estado.nombre=n;estado.telefono=tel(t);estado.solicitoPromos=!!(document.getElementById('mgopromos')&&document.getElementById('mgopromos').checked);
+    if(n.length<3)return err('Escribí tu nombre y apellido.');if(!telOk(t))return err('Revisá el número de WhatsApp.');estado.nombre=n;estado.telefono=tel(t);estado.solicitoPromos=!!(document.getElementById('mgopromos')&&document.getElementById('mgopromos').checked);
     var b=document.getElementById('mgonext');b.disabled=true;b.textContent='Buscando…';
-    try{
-      var c=await buscar(t);
-      if(c){
-        if(c.nombrePreferidoConfirmado&&c.apodo){c=await actualizarConsentimientoExistente(c);guardarIdentidad(c);cerrar();mostrarSaludo(c,true);}
-        else pedirApodo(c,'existente');
-      }else pedirApodo({nombre:n,telefono:t},'nuevo');
-    }catch(e){err(e.message||'No pude consultar el registro.');}
-    finally{b.disabled=false;b.textContent='Continuar';}
+    try{var c=await buscar(t);if(c){if(c.nombrePreferidoConfirmado&&c.apodo){c=await actualizarConsentimientoExistente(c);guardarIdentidad(c);cerrar();mostrarSaludo(c,true);}else pedirApodo(c,'existente');}else pedirApodo({nombre:n,telefono:t},'nuevo');}catch(e){err(e.message||'No pude consultar el registro.');}finally{b.disabled=false;b.textContent='Continuar';}
   }
 
   async function recuperar(){
-    var t=document.getElementById('mgofindtel').value;
-    if(!telOk(t))return err('Revisá el número de WhatsApp.','mgoerr3');
-    var b=document.getElementById('mgofind');b.disabled=true;b.textContent='Buscando…';
-    try{
-      var c=await buscar(t);
-      if(!c)return err('No encontré ese WhatsApp. Podés registrarte como cliente nuevo.','mgoerr3');
-      estado.nombre=nombre(c.nombre);estado.telefono=tel(c.telefono);estado.solicitoPromos=false;
-      if(c.nombrePreferidoConfirmado&&c.apodo){guardarIdentidad(c);cerrar();mostrarSaludo(c,true);}
-      else pedirApodo(c,'existente');
-    }catch(e){err(e.message||'No pude consultar el registro.','mgoerr3');}
-    finally{b.disabled=false;b.textContent='Buscar mi registro';}
+    var t=document.getElementById('mgofindtel').value;if(!telOk(t))return err('Revisá el número de WhatsApp.','mgoerr3');var b=document.getElementById('mgofind');b.disabled=true;b.textContent='Buscando…';
+    try{var c=await buscar(t);if(!c)return err('No encontré ese WhatsApp. Podés registrarte como cliente nuevo.','mgoerr3');estado.nombre=nombre(c.nombre);estado.telefono=tel(c.telefono);estado.solicitoPromos=false;if(c.nombrePreferidoConfirmado&&c.apodo){guardarIdentidad(c);cerrar();mostrarSaludo(c,true);}else pedirApodo(c,'existente');}catch(e){err(e.message||'No pude consultar el registro.','mgoerr3');}finally{b.disabled=false;b.textContent='Buscar mi registro';}
   }
 
   async function finalizar(){
-    var ap=nombre(document.getElementById('mgoapodo').value).slice(0,32);
-    if(!ap)return err('Decime cómo querés que te llame.','mgoerr2');
-    var b=document.getElementById('mgosave');b.disabled=true;b.textContent='Guardando…';
-    try{
-      var payload={id:estado.cliente&&estado.cliente.id,nombre:estado.nombre,telefono:estado.telefono,apodo:ap,nombrePreferidoConfirmado:true,origenAlta:estado.tipo==='nuevo'?'margarita_cliente':'cliente_existente',origenRegistro:estado.tipo==='nuevo'?'registro_web':'cliente_existente'};
-      if(estado.tipo==='nuevo'){
-        payload.aceptaPromos=estado.solicitoPromos===true;
-        payload.regaloPendiente=true;
-        payload.clienteTibio=true;
-      }else if(estado.solicitoPromos===true){
-        payload.aceptaPromos=true;
-      }
-      var c=await guardarServidor(estado.tipo==='nuevo'?'registrar':'actualizar',payload);
-      guardarIdentidad(c);cerrar();mostrarSaludo(c,estado.tipo!=='nuevo');
-    }catch(e){err(e.message||'No pude guardar tus datos.','mgoerr2');}
-    finally{b.disabled=false;b.textContent='🎁 Guardar y reservar mi regalo';}
+    var ap=nombre(document.getElementById('mgoapodo').value).slice(0,32);if(!ap)return err('Decime cómo querés que te llame.','mgoerr2');var b=document.getElementById('mgosave');b.disabled=true;b.textContent='Guardando…';
+    try{var payload={id:estado.cliente&&estado.cliente.id,nombre:estado.nombre,telefono:estado.telefono,apodo:ap,nombrePreferidoConfirmado:true,origenAlta:estado.tipo==='nuevo'?'margarita_cliente':'cliente_existente',origenRegistro:estado.tipo==='nuevo'?'registro_web':'cliente_existente'};if(estado.tipo==='nuevo'){payload.aceptaPromos=estado.solicitoPromos===true;payload.regaloPendiente=true;payload.clienteTibio=true;}else if(estado.solicitoPromos===true){payload.aceptaPromos=true;}var c=await guardarServidor(estado.tipo==='nuevo'?'registrar':'actualizar',payload);guardarIdentidad(c);cerrar();mostrarSaludo(c,estado.tipo!=='nuevo');}catch(e){err(e.message||'No pude guardar tus datos.','mgoerr2');}finally{b.disabled=false;b.textContent='🎁 Guardar y reservar mi regalo';}
   }
 
-  function pos(){
-    var g=document.getElementById(GREET),f=document.getElementById('margarita-fab');if(!g||!f)return;
-    var r=f.getBoundingClientRect(),w=g.offsetWidth||220,h=g.offsetHeight||50;
-    g.style.left=Math.max(10,Math.min(innerWidth-w-10,r.left-w-10))+'px';
-    g.style.top=Math.max(72,Math.min(innerHeight-h-14,r.top+(r.height-h)/2))+'px';
-  }
+  function pos(){var g=document.getElementById(GREET),f=document.getElementById('margarita-fab');if(!g||!f)return;var r=f.getBoundingClientRect(),w=g.offsetWidth||220,h=g.offsetHeight||50;g.style.left=Math.max(10,Math.min(innerWidth-w-10,r.left-w-10))+'px';g.style.top=Math.max(72,Math.min(innerHeight-h-14,r.top+(r.height-h)/2))+'px';}
   function ocultar(){var g=document.getElementById(GREET);if(!g)return;g.classList.remove('on');setTimeout(function(){if(g&&g.parentNode)g.remove();},220);}
-  function mostrarSaludo(c,vuelve){
-    quitarTeaser();quitarInvitacion();
-    var f=document.getElementById('margarita-fab');if(!f){setTimeout(function(){mostrarSaludo(c,vuelve);},180);return;}
-    var old=document.getElementById(GREET);if(old)old.remove();var n=preferido(c)||'cliente';
-    var g=document.createElement('button');g.id=GREET;g.type='button';
-    var cierre=vuelve?'Qué bueno verte de nuevo. ':'¡Listo! 🎁 Tu regalo quedó reservado para tu primera compra. ';
-    g.innerHTML='<b>'+esc(saludoDia()+', '+n)+' 🐝</b><br>'+cierre+'Estoy acá por cualquier cosa.';
-    g.onclick=function(){ocultar();f.click();};document.body.appendChild(g);pos();
-    requestAnimationFrame(function(){g.classList.add('on');pos();});setTimeout(ocultar,6500);
-  }
+  function mostrarSaludo(c,vuelve){quitarTeaser();quitarInvitacion();var f=document.getElementById('margarita-fab');if(!f){setTimeout(function(){mostrarSaludo(c,vuelve);},180);return;}var old=document.getElementById(GREET);if(old)old.remove();var n=preferido(c)||'cliente';var g=document.createElement('button');g.id=GREET;g.type='button';var cierre=vuelve?'Qué bueno verte de nuevo. ':'¡Listo! 🎁 Tu regalo quedó reservado para tu primera compra. ';g.innerHTML='<b>'+esc(saludoDia()+', '+n)+' 🐝</b><br>'+cierre+'Estoy acá por cualquier cosa.';g.onclick=function(){ocultar();f.click();};document.body.appendChild(g);pos();requestAnimationFrame(function(){g.classList.add('on');pos();});setTimeout(ocultar,6500);}
 
-  function iniciar(){
-    if(!esCliente())return;
-    css();crear();
-    var x=get();
-    if(identidadValida(x)){setTimeout(function(){mostrarSaludo(x,true);},650);return;}
-    if(postergado()||ss(K_SESSION)==='1')return;
-    setSs(K_SESSION,'1');
-    setTimeout(mostrarInvitacion,1000);
-  }
+  function iniciar(){if(!esCliente())return;css();crear();var x=get();if(identidadValida(x)){setTimeout(function(){mostrarSaludo(x,true);},650);return;}if(postergado()||ss(K_SESSION)==='1')return;setSs(K_SESSION,'1');setTimeout(mostrarInvitacion,1000);}
 
-  window.margaritaClienteOnboarding={
-    abrir:abrir,
-    identidad:get,
-    resetear:function(){try{localStorage.removeItem(K);localStorage.removeItem(K_SKIP);sessionStorage.removeItem(K_SESSION);}catch(e){}mostrarInvitacion();},
-    buscarPorTelefono:buscar,
-    mostrarInvitacion:mostrarInvitacion
-  };
+  window.margaritaClienteOnboarding={abrir:abrir,identidad:get,resetear:function(){try{localStorage.removeItem(K);localStorage.removeItem(K_SKIP);sessionStorage.removeItem(K_SESSION);}catch(e){}mostrarInvitacion();},buscarPorTelefono:buscar,mostrarInvitacion:mostrarInvitacion};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar,{once:true});else iniciar();
 })();
