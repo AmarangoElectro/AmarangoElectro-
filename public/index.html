@@ -2911,7 +2911,24 @@ function tiendaClaveProveedor(p){
 function tiendaMezclarAutomaticosNube(datosNube){
   var locales=Array.isArray(tiendaProductos)?tiendaProductos:[];
   var nube=Array.isArray(datosNube)?datosNube:[];
-  var manuales=locales.filter(function(p){ return !p || !p.automaticoProveedor; });
+  // Un dispositivo puede tener una copia parcial o vieja. Antes se tomaban
+  // solamente sus manuales y eso borraba de la nube los que habían cargado
+  // Angie o Max desde otro equipo. Conservamos los remotos y superponemos los
+  // locales por id; así ningún guardado normal pisa manuales ajenos.
+  var manualesPorId={};
+  nube.forEach(function(p,idx){
+    if(!p || p.automaticoProveedor)return;
+    var idValido=p.id!==null && typeof p.id!=='undefined' && String(p.id)!=='' && String(p.id)!=='NaN';
+    var clave=idValido?'id:'+String(p.id):'remoto:'+String(p.nombre||'')+'|'+String(p.creado||idx);
+    manualesPorId[clave]=p;
+  });
+  locales.forEach(function(p,idx){
+    if(!p || p.automaticoProveedor)return;
+    var idValido=p.id!==null && typeof p.id!=='undefined' && String(p.id)!=='' && String(p.id)!=='NaN';
+    var clave=idValido?'id:'+String(p.id):'local:'+String(p.nombre||'')+'|'+String(p.creado||idx);
+    manualesPorId[clave]=p;
+  });
+  var manuales=Object.keys(manualesPorId).map(function(k){return manualesPorId[k];});
   var automaticos={};
 
   // La nube es la red de seguridad cuando la pestaña local está desactualizada.
@@ -4904,9 +4921,28 @@ function tiendaEsPendienteImagenAdmin(p){
 function tiendaEsPendienteRevisionManual(p){
   return !!(p && !p.esCelu && !tiendaEsAutomatico(p) && p.pendienteRevisionManual===true);
 }
+function tiendaRepararIdsManuales(){
+  var usados={};
+  var maxId=0;
+  tiendaProductos.forEach(function(p){
+    var n=Number(p&&p.id);
+    if(Number.isFinite(n) && n>0){maxId=Math.max(maxId,Math.floor(n));usados[String(Math.floor(n))]=true;}
+  });
+  var cambio=false;
+  tiendaProductos.forEach(function(p){
+    if(!p || tiendaEsAutomatico(p))return;
+    var n=Number(p.id);
+    var invalido=p.id===null || typeof p.id==='undefined' || !Number.isFinite(n) || n<=0;
+    if(invalido){
+      do{maxId++;}while(usados[String(maxId)]);
+      p.id=maxId;usados[String(maxId)]=true;cambio=true;
+    }
+  });
+  return cambio;
+}
 function tiendaPrepararBandejasAdmin(){
   if(!tiendaEsAdmin)return false;
-  var cambio=false;
+  var cambio=tiendaRepararIdsManuales();
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
@@ -6058,9 +6094,15 @@ function tiendaConfirmarPrecioManual(id){
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
   tiendaLiberarRevisionManual(p);
-  tiendaGuardarLocal();
+  var guardado=tiendaGuardarLocal();
   tiendaRender();
-  mostrarToast('✅ Precio confirmado y producto publicado');
+  mostrarToast('⏳ Guardando y publicando...');
+  Promise.resolve(guardado).then(function(res){
+    if(res && res.error)throw res.error;
+    mostrarToast('✅ Precio confirmado y producto publicado');
+  }).catch(function(err){
+    alert('⚠️ El cambio quedó guardado en este dispositivo, pero no llegó a Supabase.\n\nRevisá la conexión y volvé a confirmar.\n\nDetalle: '+((err&&err.message)||err||'error de guardado'));
+  });
 }
 
 // Quita solamente la elección manual y recupera la categoría automática.
@@ -8785,7 +8827,13 @@ function tiendaProcesarCarga(){
 
   var lineas=texto.split(/\r?\n/);
   var nuevos=[];
-  var maxId=tiendaProductos.reduce(function(a,p){return Math.max(a,p.id||0);},0);
+  // Los proveedores usan también ids de texto. Math.max con uno de esos ids
+  // devolvía NaN y JSON lo convertía en null; dos cargas manuales podían
+  // terminar con el mismo id. Para manuales usamos sólo ids numéricos válidos.
+  var maxId=tiendaProductos.reduce(function(a,p){
+    var n=Number(p&&p.id);
+    return Number.isFinite(n) && n>0 ? Math.max(a,Math.floor(n)) : a;
+  },0);
   var descartadas=0;
 
   lineas.forEach(function(l){
