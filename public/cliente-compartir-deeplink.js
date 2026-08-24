@@ -2,12 +2,13 @@
    - amplía compartirProducto() solo para clientes, sin tocar Admin/Asesor
    - reutiliza tiendaBlobParaCompartir/tiendaArchivoCompartible: sin loops extra de imágenes
    - comparte foto cuando existe, texto comercial y URL exacta del producto
+   - conserva el código de referido del cliente registrado
    - fallback: share sin archivo o portapapeles
    - ?producto=ID abre el detalle exacto si está publicado
 */
 (function(){
   'use strict';
-  var VERSION='cliente-share-deeplink-2026-08-24-2';
+  var VERSION='cliente-share-deeplink-2026-08-24-3';
   if(window.__AE_CLIENT_SHARE_DEEPLINK__===VERSION)return;
   window.__AE_CLIENT_SHARE_DEEPLINK__=VERSION;
 
@@ -63,6 +64,13 @@
     u.searchParams.set('producto',String(id));
     return u.toString();
   }
+  async function linkConReferido(url){
+    try{
+      if(window.AmarangoReferidos&&typeof window.AmarangoReferidos.obtenerUrl==='function')return await window.AmarangoReferidos.obtenerUrl(url);
+      if(window.AmarangoReferidos&&typeof window.AmarangoReferidos.decorarUrl==='function')return window.AmarangoReferidos.decorarUrl(url);
+    }catch(e){}
+    return url;
+  }
 
   function financiacion(p,precio){
     try{
@@ -76,10 +84,9 @@
     return 'Consultá financiación disponible';
   }
 
-  function mensajeProducto(p,id){
+  function mensajeProducto(p,link){
     var precio=Number(p&&p.venta||p&&p.precioVenta||p&&p.precio||0);
     var nombre=String(p&&p.nombre||'Producto AmarangoElectro').trim();
-    var link=linkProducto(id);
     return '🐝 *'+nombre+'*\n'
       +'💵 '+dinero(precio)+'\n'
       +'💳 '+financiacion(p,precio)+'\n'
@@ -104,7 +111,8 @@
     try{if(typeof window.buscarProd==='function')p=window.buscarProd(id);}catch(e){}
     if(!p){aviso('No encontré ese producto para compartir.');return;}
 
-    var texto=mensajeProducto(p,id);
+    var link=await linkConReferido(linkProducto(id));
+    var texto=mensajeProducto(p,link);
     if(p.foto&&navigator.share&&typeof window.tiendaBlobParaCompartir==='function'){
       try{
         var blob=await window.tiendaBlobParaCompartir(p);
@@ -115,15 +123,12 @@
         }
       }catch(e){
         if(e&&e.name==='AbortError')return;
-        // Si la foto falla, seguimos con texto+link; nunca hacemos un segundo loop de descarga.
       }
     }
 
     if(navigator.share){
-      try{
-        await navigator.share({title:String(p.nombre||'AmarangoElectro'),text:texto});
-        return;
-      }catch(e){if(e&&e.name==='AbortError')return;}
+      try{await navigator.share({title:String(p.nombre||'AmarangoElectro'),text:texto});return;}
+      catch(e){if(e&&e.name==='AbortError')return;}
     }
 
     try{await copiar(texto);aviso('✅ ¡Copiado! Pegalo donde quieras.');}
@@ -144,8 +149,7 @@
     return true;
   }
 
-  function mensajeTienda(){
-    var link=new URL('/',window.location.origin).toString();
+  function mensajeTienda(link){
     return '🐝 *AmarangoElectro* — Todo para tu hogar, más fácil\n'
       +'📱 Electrodomésticos, tecnología y mucho más.\n'
       +'💳 Contado y financiación disponible.\n'
@@ -153,7 +157,8 @@
   }
 
   async function compartirTiendaCliente(){
-    var texto=mensajeTienda();
+    var link=await linkConReferido(new URL('/',window.location.origin).toString());
+    var texto=mensajeTienda(link);
     if(navigator.share){
       try{await navigator.share({title:'AmarangoElectro',text:texto});return;}
       catch(e){if(e&&e.name==='AbortError')return;}
@@ -163,7 +168,7 @@
   }
 
   document.addEventListener('click',function(ev){
-    var btn=ev.target&&ev.target.closest?ev.target.closest('#ae-share-store-btn'):null;
+    var btn=ev.target&&ev.target.closest?ev.target.closest('#ae-share-store-btn,#ae-share-store-public-btn'):null;
     if(!btn||!esCliente())return;
     ev.preventDefault();ev.stopImmediatePropagation();
     try{if(navigator.vibrate)navigator.vibrate(6);}catch(e){}
@@ -186,17 +191,11 @@
     var listoDetalle=typeof window.tiendaVerDetalle==='function';
     var syncConocida=typeof window._tiendaSincronizacionInicialLista!=='undefined';
     var syncLista=!syncConocida||window._tiendaSincronizacionInicialLista===true;
-    if((!listoBuscar||!listoDetalle||!syncLista)&&intentos<90){
-      setTimeout(function(){procesarDeepLink(intentos+1);},180);return;
-    }
+    if((!listoBuscar||!listoDetalle||!syncLista)&&intentos<90){setTimeout(function(){procesarDeepLink(intentos+1);},180);return;}
 
     var p=null;
     try{if(listoBuscar)p=window.buscarProd(id);}catch(e){}
-    // Si buscarProd ya existe pero el catálogo todavía no terminó de hidratar,
-    // no declaramos el link inválido: esperamos hasta ~16 s antes de abandonar.
-    if(!p&&intentos<90){
-      setTimeout(function(){procesarDeepLink(intentos+1);},180);return;
-    }
+    if(!p&&intentos<90){setTimeout(function(){procesarDeepLink(intentos+1);},180);return;}
     window.__AE_PRODUCTO_DEEPLINK_ABIERTO__=id;
     if(!p){aviso('Ese producto ya no está disponible. Te mostramos la tienda.');return;}
     if(!productoApto(p)){aviso('Ese producto no está disponible ahora. Te mostramos alternativas.');return;}
