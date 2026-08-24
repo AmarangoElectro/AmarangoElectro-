@@ -1,0 +1,56 @@
+name: Refinar productividad tienda
+
+on:
+  push:
+    branches:
+      - feat/scroll-rapido-mayoristas-copiar-20260824
+    paths:
+      - .github/workflows/refinar-tienda-productividad-20260824.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/scroll-rapido-mayoristas-copiar-20260824
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Evitar trabajo innecesario durante scroll
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('public/tienda-productividad.js')
+          s=p.read_text()
+          old="""    window.addEventListener('resize',function(){if(!rafUi)rafUi=requestAnimationFrame(function(){rafUi=0;posicionarFastNav();actualizarFastNavVisible();});},{passive:true});
+    window.addEventListener('scroll',actualizarFastNavVisible,{passive:true});
+"""
+          new="""    window.addEventListener('resize',function(){if(!rafUi)rafUi=requestAnimationFrame(function(){rafUi=0;posicionarFastNav();actualizarFastNavVisible();});},{passive:true});
+    if(typeof window.showTab==='function'&&!window.showTab.__aeFastNav){
+      var showTabOriginal=window.showTab;
+      var showTabAe=function(){var r=showTabOriginal.apply(this,arguments);setTimeout(programarUi,0);return r;};
+      showTabAe.__aeFastNav=VERSION;showTabAe.__original=showTabOriginal;window.showTab=showTabAe;
+    }
+"""
+          if old not in s:
+              raise SystemExit('No se encontró bloque de scroll final')
+          p.write_text(s.replace(old,new,1))
+          PY
+      - name: Validar
+        run: |
+          node --check public/tienda-productividad.js
+          node --check src/worker-professional.mjs
+          ! grep -q "addEventListener('scroll',actualizarFastNavVisible" public/tienda-productividad.js
+          grep -q 'showTabAe.__aeFastNav' public/tienda-productividad.js
+          git diff --check
+      - name: Guardar refinamiento
+        run: |
+          git config user.name "chatgpt-amarango"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/tienda-productividad.js
+          git commit -m "Reduce trabajo durante desplazamiento de tienda" || exit 0
+          git push origin HEAD:feat/scroll-rapido-mayoristas-copiar-20260824
