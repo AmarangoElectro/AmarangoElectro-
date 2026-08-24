@@ -14,4 +14,4 @@ import "./cliente-compartir-deeplink.js?v=20260824-3";
 import "./cliente-ui-comercial.js?v=20260824-3";
 import "./margarita-query-guard.js?v=20260823-2";
 import "./admin-stable-actions.js?v=20260823-1";
-import "./app-dialog-guard.js?v=20260824-1";
+import "./app-dialog-guard.js?v=20260824-2";
