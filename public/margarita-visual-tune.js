@@ -2,12 +2,12 @@
    - launcher más visible cuando el chat está cerrado
    - launcher oculto mientras el chat está abierto
    - cabecera azul más compacta para ganar área útil
-   - avatar oficial opción 4 en launcher, cabecera y mensajes
+   - avatar oficial elegido para launcher, cabecera y mensajes
 */
 (function(){
   'use strict';
-  const VERSION='margarita-visual-tune-2026-08-23-5';
-  const AVATAR='/margarita-avatar-v4.webp?v=20260823-2';
+  const VERSION='margarita-visual-tune-2026-08-24-1';
+  const AVATAR='/margarita-avatar-oficial.jpeg?v=20260824-1';
   if(window.__AE_MARGARITA_VISUAL_TUNE__===VERSION)return;
   window.__AE_MARGARITA_VISUAL_TUNE__=VERSION;
 
