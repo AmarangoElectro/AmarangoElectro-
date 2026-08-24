@@ -2,7 +2,6 @@
    - suaviza listeners de scroll que escribían en DOM en cada frame
    - agrega copiar nombre en tarjetas admin
    - agrega filtro dinámico por mayorista para administradores
-   - agrega navegación rápida por categorías en el lateral
    - fuerza el action sheet de marca en imágenes admin (sin menú gris nativo)
 */
 (function(){
@@ -17,12 +16,6 @@
   var renderOriginal=null;
   var abrirCajonOriginal=null;
   var rafUi=0;
-  var fastNav=null;
-  var fastBubble=null;
-  var fastCats=[];
-  var fastPendiente='';
-  var fastDragging=false;
-  var fastPointerId=null;
 
   var ICON_COPY='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 
@@ -111,12 +104,6 @@
       +'#ae-mayorista-banner .ae-mb-copy{flex:1;min-width:0;font-size:.69rem;font-weight:800;line-height:1.25}\n'
       +'#ae-mayorista-banner .ae-mb-copy b{display:block;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}\n'
       +'#ae-mayorista-banner button{flex:0 0 auto;border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.13);color:#fff;border-radius:9px;padding:6px 8px;font:900 .64rem/1 system-ui;cursor:pointer}\n'
-      +'#ae-fast-nav{position:fixed;z-index:840;display:none;flex-direction:column;align-items:center;gap:2px;width:27px;padding:5px 3px;border:1px solid rgba(11,45,107,.14);border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 4px 14px rgba(3,15,45,.14);touch-action:none;user-select:none;-webkit-user-select:none;contain:layout paint}\n'
-      +'#ae-fast-nav.on{display:flex}\n'
-      +'#ae-fast-nav button{width:20px;height:20px;min-height:20px;border:0;background:transparent;border-radius:7px;padding:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;line-height:1;cursor:pointer;color:#0B2D6B;touch-action:none}\n'
-      +'#ae-fast-nav button.active{background:#0B2D6B;color:#fff;transform:scale(1.08)}\n'
-      +'#ae-fast-bubble{position:fixed;z-index:845;display:none;pointer-events:none;min-width:122px;max-width:210px;background:#071c46;color:#fff;border-left:4px solid #FF7A00;border-radius:12px;padding:9px 11px;font:900 .74rem/1.2 system-ui;box-shadow:0 8px 24px rgba(3,15,45,.22);text-align:left}\n'
-      +'#ae-fast-bubble.on{display:block}\n'
       +'@media (pointer:coarse){#tienda-grid .prod-card{touch-action:pan-y pinch-zoom!important}#tienda-grid .prod-card:active{transform:none!important;box-shadow:0 1px 3px rgba(0,0,0,.05)!important}#tienda-grid .prod-card button[onclick*="abrirFotoGrande"]{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(11,45,107,.94)!important}}\n';
     document.head.appendChild(s);
   }
@@ -372,138 +359,6 @@
     if(!viejo)grid.parentNode.insertBefore(b,grid);
   }
 
-  function categoriasDisponibles(){
-    var desdeChips=[];
-    try{
-      document.querySelectorAll('#tienda-chips .cat-tile[data-categoria]').forEach(function(el){
-        var c=String(el.getAttribute('data-categoria')||'').trim();
-        if(c&&desdeChips.indexOf(c)===-1)desdeChips.push(c);
-      });
-    }catch(e){}
-    if(desdeChips.length>=4)return desdeChips;
-
-    var set={};
-    var lista=Array.isArray(window.tiendaProductos)?window.tiendaProductos:[];
-    lista.forEach(function(p){
-      if(mayoristaActivo&&esAdmin()&&!coincideMayorista(p,mayoristaActivo))return;
-      try{
-        if(!esAdmin() && typeof window.tiendaEstaVisibleYConStock==='function' && !window.tiendaEstaVisibleYConStock(p))return;
-      }catch(e){}
-      var c='';try{c=typeof window.catProd==='function'?window.catProd(p):String(p.categoria||'');}catch(e){c=String(p&&p.categoria||'');}
-      if(c)set[c]=1;
-    });
-    try{
-      var celus=typeof window.cargarListaCelus==='function'?window.cargarListaCelus():[];
-      if(!mayoristaActivo && Array.isArray(celus) && celus.some(function(c){return c&&c.precio&&!c.ocultoTienda&&!c.sinStock;}))set['📱 Celulares']=1;
-    }catch(e){}
-    var base=Array.isArray(window.TIENDA_CATEGORIAS)?window.TIENDA_CATEGORIAS.slice():[];
-    var out=base.filter(function(c){return set[c];});
-    Object.keys(set).forEach(function(c){if(out.indexOf(c)===-1)out.push(c);});
-    return out;
-  }
-
-  function iconoCategoria(cat){
-    var s=String(cat||'').trim();
-    var m=s.match(/^([^\w\s]{1,4})\s*/u);
-    if(m&&m[1])return m[1];
-    var txt=s.replace(/^\S+\s+/,'').trim();
-    return (txt.charAt(0)||'•').toUpperCase();
-  }
-
-  function asegurarFastNav(){
-    if(!fastNav){
-      fastNav=document.createElement('div');fastNav.id='ae-fast-nav';fastNav.setAttribute('aria-label','Navegación rápida por categorías');
-      document.body.appendChild(fastNav);
-      fastBubble=document.createElement('div');fastBubble.id='ae-fast-bubble';document.body.appendChild(fastBubble);
-      fastNav.addEventListener('pointerdown',fastPointerDown);
-      fastNav.addEventListener('pointermove',fastPointerMove);
-      fastNav.addEventListener('pointerup',fastPointerUp);
-      fastNav.addEventListener('pointercancel',fastPointerCancel);
-    }
-    var cats=categoriasDisponibles();
-    var firma=cats.join('|');
-    if(fastNav.dataset.firma!==firma){
-      fastCats=cats;fastNav.dataset.firma=firma;
-      fastNav.innerHTML='';
-      cats.forEach(function(c){
-        var b=document.createElement('button');b.type='button';b.dataset.cat=c;b.setAttribute('aria-label',c);b.setAttribute('title',c);b.textContent=iconoCategoria(c);fastNav.appendChild(b);
-      });
-    }
-    posicionarFastNav();
-    actualizarFastNavVisible();
-  }
-
-  function posicionarFastNav(){
-    if(!fastNav)return;
-    var cuerpo=document.body.getBoundingClientRect();
-    var right=Math.max(3,Math.round(window.innerWidth-cuerpo.right+3));
-    fastNav.style.right=right+'px';
-    fastNav.style.top='50%';fastNav.style.transform='translateY(-50%)';
-  }
-
-  function actualizarFastNavVisible(){
-    if(!fastNav)return;
-    var tab=document.getElementById('tab-tienda');
-    var visible=!!(tab&&tab.classList.contains('on')&&fastCats.length>=4);
-    fastNav.classList.toggle('on',visible);
-    if(!visible&&fastBubble)fastBubble.classList.remove('on');
-  }
-
-  function indiceDesdeY(y){
-    var r=fastNav.getBoundingClientRect();
-    if(!r.height||!fastCats.length)return -1;
-    var pos=Math.max(0,Math.min(r.height-1,y-r.top));
-    return Math.max(0,Math.min(fastCats.length-1,Math.floor(pos/r.height*fastCats.length)));
-  }
-
-  function marcarFast(indice,y){
-    if(indice<0||!fastCats[indice])return;
-    fastPendiente=fastCats[indice];
-    var botones=fastNav.querySelectorAll('button');
-    for(var i=0;i<botones.length;i++)botones[i].classList.toggle('active',i===indice);
-    if(fastBubble){
-      fastBubble.textContent=fastPendiente;
-      var rr=fastNav.getBoundingClientRect();
-      var br=fastBubble.getBoundingClientRect();
-      fastBubble.style.right=(Math.max(36,window.innerWidth-rr.left+8))+'px';
-      fastBubble.style.top=Math.max(78,Math.min(window.innerHeight-br.height-88,y-(br.height/2)))+'px';
-      fastBubble.classList.add('on');
-    }
-  }
-
-  function fastPointerDown(ev){
-    if(!fastCats.length)return;
-    fastDragging=true;fastPointerId=ev.pointerId;
-    try{fastNav.setPointerCapture(ev.pointerId);}catch(e){}
-    marcarFast(indiceDesdeY(ev.clientY),ev.clientY);
-    try{if(navigator.vibrate)navigator.vibrate(5);}catch(e){}
-    ev.preventDefault();
-  }
-  function fastPointerMove(ev){
-    if(!fastDragging||ev.pointerId!==fastPointerId)return;
-    marcarFast(indiceDesdeY(ev.clientY),ev.clientY);ev.preventDefault();
-  }
-  function aplicarCategoriaRapida(cat){
-    if(!cat)return;
-    try{
-      if(typeof window.tiendaFiltrarCat==='function')window.tiendaFiltrarCat(cat);
-      else if(typeof window.tiendaVerCategoriaPortada==='function')window.tiendaVerCategoriaPortada(cat);
-    }catch(e){}
-    setTimeout(function(){
-      var d=document.getElementById('tienda-grid');if(d&&d.scrollIntoView)d.scrollIntoView({behavior:'auto',block:'start'});
-    },20);
-  }
-  function fastPointerUp(ev){
-    if(!fastDragging||ev.pointerId!==fastPointerId)return;
-    fastDragging=false;fastPointerId=null;
-    try{fastNav.releasePointerCapture(ev.pointerId);}catch(e){}
-    if(fastBubble)fastBubble.classList.remove('on');
-    var botones=fastNav.querySelectorAll('button');for(var i=0;i<botones.length;i++)botones[i].classList.remove('active');
-    var cat=fastPendiente;fastPendiente='';aplicarCategoriaRapida(cat);ev.preventDefault();
-  }
-  function fastPointerCancel(){
-    fastDragging=false;fastPointerId=null;fastPendiente='';if(fastBubble)fastBubble.classList.remove('on');
-  }
 
   /* El action sheet profesional ya existe en professional-ux.js. Esta captura
      sólo bloquea el menú gris nativo antes de que Android lo dibuje; no corta
@@ -523,7 +378,6 @@
       decorarMayoristasTarjeta();
       poblarMayoristas();
       pintarBannerMayorista();
-      asegurarFastNav();
     });
   }
 
@@ -543,8 +397,6 @@
       var obs=new MutationObserver(programarUi);
       obs.observe(grid,{childList:true,subtree:true});
     }
-    window.addEventListener('resize',function(){if(!rafUi)rafUi=requestAnimationFrame(function(){rafUi=0;posicionarFastNav();actualizarFastNavVisible();});},{passive:true});
-    window.addEventListener('scroll',actualizarFastNavVisible,{passive:true});
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalar,{once:true});
