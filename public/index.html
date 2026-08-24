@@ -1856,6 +1856,7 @@ function checkAdminPass(){
     adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin","1");}catch(e){}
     revUnlocked=true;          // admin también puede usar herramientas de revendedor
     tiendaEsAdmin=true;        // admin también edita la tienda (sin pedir clave de nuevo)
+    tiendaPublicarControlAdmin(true);
     mostrarPestanasAdmin();    // mostrar pestañas de cálculo
     document.getElementById("login-overlay").style.display="none";
     if(pendingTab==='__celuadmin__'){pendingTab=null;toggleCeluAdmin();}
@@ -2196,9 +2197,9 @@ function tiendaInit(){
     tiendaSubfiltroActivo='';
     tiendaMostrarTodos=false;
   }
-  // v16 repara una sola vez los celulares que conservaron fotos viejas con
+  // v19 repara una sola vez los dispositivos que conservaron un catálogo viejo con
   // una versión incremental aparentemente actualizada.
-  var repararCache=tiendaNecesitaReparacionFotosV16();
+  var repararCache=tiendaNecesitaReparacionCacheV19();
   if(repararCache){
     tiendaProductos=[];
     tiendaGuardarVersionIncremental(0);
@@ -2504,15 +2505,118 @@ function tiendaBajarNubeLegacy(intentos){
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
-var TIENDA_CACHE_FOTOS_VERSION='v16-20260820';
+var TIENDA_CACHE_FOTOS_VERSION='v19-20260824-guardado-liviano';
+var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
+var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
+var TIENDA_MANUALES_ID='catalogo_manuales';
 
-function tiendaNecesitaReparacionFotosV16(){
+// Estado administrativo liviano. Las filas incrementales vienen de los
+// proveedores y no siempre incluyen un ocultamiento hecho por Angie o Max.
+// Este mapa pequeño evita descargar nuevamente todas las fotos del catálogo.
+function tiendaMapaControlPublicacion(){
+  var mapa={};
+  (tiendaProductos||[]).forEach(function(p){
+    if(!p || p.id==null)return;
+    mapa[String(p.id)]={
+      visible:p.visible===true,
+      pendienteRevisionManual:p.pendienteRevisionManual===true,
+      ocultoManualProveedor:p.ocultoManualProveedor===true,
+      ocultoPorDuplicado:p.ocultoPorDuplicado===true,
+      sinStock:p.sinStock===true,
+      estadoProveedor:p.estadoProveedor||''
+    };
+  });
+  return mapa;
+}
+function tiendaAplicarControlPublicacion(mapa){
+  if(!mapa || typeof mapa!=='object')return false;
+  var cambio=false;
+  (tiendaProductos||[]).forEach(function(p){
+    if(!p || p.id==null)return;
+    var c=mapa[String(p.id)];if(!c)return;
+    ['visible','pendienteRevisionManual','ocultoManualProveedor','ocultoPorDuplicado','sinStock','estadoProveedor'].forEach(function(k){
+      if(Object.prototype.hasOwnProperty.call(c,k) && p[k]!==c[k]){p[k]=c[k];cambio=true;}
+    });
+  });
+  if(cambio){
+    try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+    try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
+  }
+  return cambio;
+}
+function tiendaSubirControlPublicacion(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  return sbCalc.from('tienda_catalogo').upsert({
+    id:TIENDA_CONTROL_PUBLICACION_ID,
+    datos:tiendaMapaControlPublicacion(),
+    actualizado:new Date().toISOString()
+  }).select('actualizado');
+}
+function tiendaSubirManualesNube(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  var manuales=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
+  return sbCalc.from('tienda_catalogo').upsert({
+    id:TIENDA_MANUALES_ID,
+    datos:manuales,
+    actualizado:new Date().toISOString()
+  }).select('actualizado');
+}
+function tiendaGuardarNubeLiviano(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  return Promise.all([tiendaSubirControlPublicacion(),tiendaSubirManualesNube()])
+    .then(function(res){
+      var error=(res[0]&&res[0].error)||(res[1]&&res[1].error);
+      return error?{data:null,error:error}:{data:true,error:null};
+    });
+}
+function tiendaPublicarControlAdmin(mostrarAviso){
+  if(!tiendaEsAdmin && !adminUnlocked)return Promise.resolve(false);
+  var lista=(window._tiendaSincronizacionInicialPromesa && typeof window._tiendaSincronizacionInicialPromesa.then==='function')
+    ?window._tiendaSincronizacionInicialPromesa:Promise.resolve(true);
+  return lista.catch(function(){return false;}).then(function(){
+    if(!tiendaProductos || !tiendaProductos.length)throw new Error('El catálogo todavía no terminó de cargar');
+    return tiendaGuardarNubeLiviano();
+  }).then(function(r){
+    if(r&&r.error)throw r.error;
+    if(mostrarAviso && typeof mostrarToast==='function')mostrarToast('✅ Ocultos y manuales sincronizados con clientes');
+    return true;
+  }).catch(function(err){
+    if(mostrarAviso)alert('⚠️ No se pudo sincronizar la lista de productos ocultos con Supabase.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+    return false;
+  });
+}
+function tiendaBajarControlPublicacion(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
+  return Promise.all([
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
+  ]).then(function(res){
+      var r=res[0], rm=res[1];
+      if(r&&r.error)throw r.error;
+      if(rm&&rm.error)throw rm.error;
+      if(rm&&rm.data&&Array.isArray(rm.data.datos)){
+        var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
+        tiendaProductos=automaticos.concat(rm.data.datos);
+      }
+      if(r&&r.data&&r.data.datos){
+        var cambio=tiendaAplicarControlPublicacion(r.data.datos);
+        try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+        return cambio;
+      }
+      // La primera vez, el administrador que ya tiene el estado correcto crea
+      // el mapa para que clientes y vendedores lo reciban inmediatamente.
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return false;});
+      return false;
+    }).catch(function(){return false;});
+}
+
+function tiendaNecesitaReparacionCacheV19(){
   try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
   catch(e){return true;}
 }
-function tiendaConfirmarReparacionFotosV16(){
+function tiendaConfirmarReparacionCacheV19(){
   try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
 }
 
@@ -2575,7 +2679,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
-  tiendaConfirmarReparacionFotosV16();
+  tiendaConfirmarReparacionCacheV19();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -2619,6 +2723,12 @@ function tiendaBajarNube(intentos){
     if(intentos<25)setTimeout(function(){tiendaBajarNube(intentos+1);},200);
     return Promise.resolve(null);
   }
+  if(!TIENDA_USAR_INCREMENTAL){
+    return tiendaBajarNubeLegacy(intentos).then(function(resultado){
+      tiendaRender();
+      return resultado;
+    });
+  }
   if(_tiendaBajarNubeEnCurso)return _tiendaBajarNubeEnCurso;
   var versionLocal=tiendaVersionIncrementalLocal();
   // Además de consultar versiones nuevas, comparamos la cantidad de filas.
@@ -2651,6 +2761,12 @@ function tiendaBajarNube(intentos){
     .catch(function(error){
       console.warn('Catálogo incremental no disponible; usando respaldo.',error);
       return tiendaBajarNubeLegacy(0);
+    })
+    .then(function(resultado){
+      return tiendaBajarControlPublicacion().then(function(){
+        tiendaRender();
+        return resultado;
+      });
     });
   _tiendaBajarNubeEnCurso=proceso;
   proceso.then(function(){_tiendaBajarNubeEnCurso=null;},function(){_tiendaBajarNubeEnCurso=null;});
@@ -3005,7 +3121,10 @@ function tiendaSubirNubeUnaVez(){
               ?guardado.data[0].actualizado:fechaEnvio;
             try{ localStorage.setItem('ae_tienda_catalogo_fecha',fechaGuardada); }catch(e){}
           }
-          return guardado;
+          if(guardado && guardado.error)return guardado;
+          return tiendaSubirControlPublicacion().then(function(control){
+            return (control&&control.error)?control:guardado;
+          });
         });
     });
 }
@@ -3068,6 +3187,7 @@ function tiendaLoginAdmin(){
     tiendaBandejaAdmin='';
     tiendaAplicarModo();
     tiendaRender();
+    tiendaPublicarControlAdmin(true);
     return;
   }
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;text-align:center;">🔒 Modo administrador</h3>'
@@ -3093,6 +3213,7 @@ function tiendaConfirmarAdmin(){
     document.getElementById('modal-cuotas').style.display='none';
     tiendaAplicarModo();
     tiendaRender();
+    tiendaPublicarControlAdmin(true);
   }else{
     document.getElementById('tienda-admin-err').style.display='block';
   }
@@ -3362,9 +3483,11 @@ function tiendaGuardarLocal(){
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
   try{ tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){}); }catch(e){}
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
-  // subir a la nube (para que lo vean todos)
+  // Guardado liviano: no reescribe el JSON gigante del catálogo. Supabase
+  // cancelaba esa operación por statement_timeout. Subimos solamente los
+  // manuales y las decisiones administrativas de publicación.
   if(NUBE_OK && sbCalc){
-    var subida=tiendaSubirNube();
+    var subida=tiendaGuardarNubeLiviano();
     // La mayoría de los botones guardan sin bloquear la interfaz. Marcamos la
     // promesa como atendida, pero la devolvemos para las acciones (como fotos)
     // que necesitan confirmar que la nube terminó bien.
@@ -4028,7 +4151,7 @@ function hdrPredictivo(){
   var palabras=q.split(' ').filter(Boolean);
   // juntar productos reales + celulares visibles
   var universo=[];
-  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || p.visible!==false)) universo.push(p); }); }catch(e){}
+  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || tiendaEstaVisibleYConStock(p))) universo.push(p); }); }catch(e){}
   // Primero se muestran únicamente coincidencias exactas de palabra.
   var res=[];
   for(var i=0;i<universo.length;i++){
@@ -4897,7 +5020,8 @@ function tiendaEsFotoAmarango(p){
     foto.indexOf('/tienda-fotos/')>=0;
 }
 function tiendaEstaVisibleYConStock(p){
-  if(!p || p.visible!==true || p.sinStock===true || p.estadoProveedor==='sin_stock' ||
+  if(!p || p.visible!==true || p.pendienteRevisionManual===true ||
+     p.sinStock===true || p.estadoProveedor==='sin_stock' ||
      p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true)return false;
   var stock=tiendaLeerStockProveedor(p);
   return !(stock.informado && stock.valor<=0);
@@ -6350,7 +6474,7 @@ function tiendaMarcados(accion){
 // ═══ CAJÓN CON TODAS LAS CATEGORÍAS (red de seguridad para el cliente) ═══
 function abrirCajonCats(){
   // armar el universo para contar cuántos productos hay por categoría
-  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(function(p){return p.visible!==false;});
+  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(tiendaEstaVisibleYConStock);
   try{
     var celus=JSON.parse(localStorage.getItem('amarango_celulares')||'[]');
     celus.forEach(function(c,i){
@@ -7335,7 +7459,7 @@ function toggleModoOscuro(){
 // Devuelve TODOS los productos (propios + celulares) como universo unificado
 function tiendaTodosLosProductos(soloVisibles){
   var universo = soloVisibles
-    ? tiendaProductos.filter(function(p){return p.visible;})
+    ? tiendaProductos.filter(tiendaEstaVisibleYConStock)
     : tiendaProductos.slice();
   var celus=cargarListaCelus();
   celus.forEach(function(c,i){
@@ -9584,7 +9708,7 @@ function tiendaConvertirUSD(id){
   p.costo = costoPesos;
   p.venta = ventaPesos;
   p.usdConvertido = true;
-  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaGuardarLocal();
   tiendaRenderYEnfocar(id);
   mostrarToast('✅ Cotización guardada: $'+cotiz.toLocaleString('es-AR'));
 }
