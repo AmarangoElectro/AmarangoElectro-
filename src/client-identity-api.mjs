@@ -1,4 +1,5 @@
 const ROW_CLIENTES = "clientes_tienda";
+const META_REFERIDOS_OBJETIVO = 10;
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -29,6 +30,10 @@ function telefonoClave(v) {
   if (d.startsWith("54")) d = d.slice(2);
   if (d.length > 10) d = d.slice(-10);
   return d;
+}
+
+function limpiarCodigo(v) {
+  return String(v || "").toUpperCase().replace(/[^A-Z0-9-]/g, "").slice(0, 28);
 }
 
 function headersPrivados(env) {
@@ -64,6 +69,53 @@ async function guardarClientes(cfg, lista) {
   if (!r.ok) throw new Error(`supabase_write_${r.status}`);
 }
 
+function prefijoCodigo(nombre) {
+  const limpio = normalizarNombre(nombre).replace(/[^a-z0-9]/g, "").toUpperCase();
+  return (limpio || "CLIENTE").slice(0, 7);
+}
+
+function codigoNuevo(lista, nombre, telefono) {
+  const usados = new Set(lista.map((c) => limpiarCodigo(c && c.codigoReferido)).filter(Boolean));
+  const base = prefijoCodigo(nombre);
+  const tel = telefonoClave(telefono).slice(-4);
+  for (let i = 0; i < 20; i++) {
+    const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+    const c = limpiarCodigo(`${base}-${tel || rnd.slice(0, 2)}${rnd.slice(-2)}`);
+    if (!usados.has(c)) return c;
+  }
+  return limpiarCodigo(`AE-${Date.now().toString(36).toUpperCase()}`);
+}
+
+function asegurarCodigo(lista, reg) {
+  if (!reg.codigoReferido) reg.codigoReferido = codigoNuevo(lista, reg.nombre, reg.telefono || reg.tel);
+  reg.codigoReferido = limpiarCodigo(reg.codigoReferido);
+  return reg.codigoReferido;
+}
+
+function recalcularReferidos(lista) {
+  const porId = new Map();
+  lista.forEach((c) => { if (c && c.id) porId.set(String(c.id), c); });
+  const cantidades = new Map();
+  const conCompra = new Map();
+  lista.forEach((c) => {
+    const refId = String(c && c.referidoPorId || "");
+    if (!refId || !porId.has(refId)) return;
+    cantidades.set(refId, (cantidades.get(refId) || 0) + 1);
+    if (c.primeraCompraFecha) conCompra.set(refId, (conCompra.get(refId) || 0) + 1);
+  });
+  lista.forEach((c) => {
+    if (!c || !c.id) return;
+    asegurarCodigo(lista, c);
+    const id = String(c.id);
+    c.referidosCantidad = cantidades.get(id) || 0;
+    c.referidosConCompra = conCompra.get(id) || 0;
+    c.metaReferidosObjetivo = META_REFERIDOS_OBJETIVO;
+    const habilita = c.referidosCantidad >= META_REFERIDOS_OBJETIVO && c.referidosConCompra > 0;
+    if (habilita && c.regaloReferidosEntregado !== true) c.regaloReferidosPendiente = true;
+    if (c.regaloReferidosEntregado === true) c.regaloReferidosPendiente = false;
+  });
+}
+
 function publico(c) {
   if (!c) return null;
   return {
@@ -76,6 +128,12 @@ function publico(c) {
     regaloPendiente: c.regaloPendiente === true,
     regaloDescripcion: limpiarNombre(c.regaloDescripcion, 120),
     clienteTibio: c.clienteTibio === true,
+    codigoReferido: limpiarCodigo(c.codigoReferido),
+    referidosCantidad: Number(c.referidosCantidad || 0),
+    referidosConCompra: Number(c.referidosConCompra || 0),
+    metaReferidosObjetivo: Number(c.metaReferidosObjetivo || META_REFERIDOS_OBJETIVO),
+    regaloReferidosPendiente: c.regaloReferidosPendiente === true,
+    primeraCompraFecha: String(c.primeraCompraFecha || "").slice(0, 40),
   };
 }
 
@@ -94,6 +152,17 @@ function nuevoId(telefono) {
   return `tel-${telefonoClave(telefono) || Date.now().toString(36)}`;
 }
 
+function aplicarReferente(lista, reg, codigo) {
+  const ref = limpiarCodigo(codigo);
+  if (!ref || reg.referidoPorId) return;
+  const referente = lista.find((c) => c && c.id !== reg.id && limpiarCodigo(c.codigoReferido) === ref);
+  if (!referente) return;
+  reg.referidoPorId = referente.id;
+  reg.referidoPorCodigo = ref;
+  reg.referidoPorNombre = limpiarNombre(referente.apodo || referente.nombre, 50);
+  reg.referidoFecha = new Date().toISOString();
+}
+
 export async function servirIdentidadCliente(request, env) {
   if (request.method !== "POST") return json({ ok: false, error: "Método no permitido" }, 405);
   let body;
@@ -106,10 +175,32 @@ export async function servirIdentidadCliente(request, env) {
 
   try {
     const { cfg, lista } = await leerClientes(env);
+    let guardar = false;
 
     if (accion === "buscar") {
       const encontrado = encontrar(lista, telefono);
+      if (encontrado) {
+        const antes = encontrado.codigoReferido;
+        asegurarCodigo(lista, encontrado);
+        recalcularReferidos(lista);
+        guardar = !antes;
+        if (guardar) await guardarClientes(cfg, lista.slice(-5000));
+      }
       return json({ ok: true, encontrado: !!encontrado, cliente: publico(encontrado) });
+    }
+
+    if (accion === "registrar_compra") {
+      const encontrado = encontrar(lista, telefono, body && body.nombre);
+      if (!encontrado) return json({ ok: false, error: "Cliente no registrado" }, 404);
+      const ahora = new Date().toISOString();
+      if (!encontrado.primeraCompraFecha) encontrado.primeraCompraFecha = ahora;
+      encontrado.ultimaCompraFecha = ahora;
+      encontrado.comprasCantidad = Math.max(0, Number(encontrado.comprasCantidad || 0)) + 1;
+      encontrado.clienteTibio = false;
+      encontrado.actualizado = ahora;
+      recalcularReferidos(lista);
+      await guardarClientes(cfg, lista.slice(-5000));
+      return json({ ok: true, cliente: publico(encontrado) });
     }
 
     if (accion === "registrar" || accion === "actualizar") {
@@ -124,8 +215,6 @@ export async function servirIdentidadCliente(request, env) {
       const esAltaNueva = i < 0 && accion === "registrar";
       const ahora = new Date().toISOString();
 
-      // El regalo no depende del monto de compra: queda pendiente para el primer cierre.
-      // El equipo define el obsequio concreto según el producto comprado.
       const regaloPendiente = esAltaNueva
         ? true
         : (typeof entrada.regaloPendiente === "boolean" ? entrada.regaloPendiente : previo.regaloPendiente === true);
@@ -151,8 +240,11 @@ export async function servirIdentidadCliente(request, env) {
         creado: previo.creado || ahora,
         actualizado: ahora,
       };
+      asegurarCodigo(lista, reg);
+      if (esAltaNueva) aplicarReferente(lista, reg, entrada.referidoPorCodigo || body.referidoPorCodigo);
 
       if (i >= 0) lista[i] = reg; else lista.push(reg);
+      recalcularReferidos(lista);
       await guardarClientes(cfg, lista.slice(-5000));
       return json({ ok: true, cliente: publico(reg) });
     }
