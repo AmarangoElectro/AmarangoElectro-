@@ -3,10 +3,11 @@
    - usa el compartir nativo ya existente de la tienda
    - conserva foto, texto comercial y URL del producto generados por compartirProducto
    - no agrega herramientas internas de Admin/Asesor
+   - sincronización liviana, sin timers permanentes
 */
 (function(){
   'use strict';
-  var VERSION='cliente-share-productos-2026-08-24-1';
+  var VERSION='cliente-share-productos-2026-08-24-2';
   if(window.__AE_CLIENT_SHARE_PRODUCTS__===VERSION)return;
   window.__AE_CLIENT_SHARE_PRODUCTS__=VERSION;
 
@@ -53,7 +54,6 @@
     btn.setAttribute('aria-label','Compartir producto');btn.innerHTML=ICON+'<span>Compartir</span>';
     btn.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();try{if(navigator.vibrate)navigator.vibrate(6);}catch(e){}compartir(id);});
 
-    // Va debajo de “Ver producto”: visible, consistente y sin tapar foto/precio.
     var ver=Array.from(card.querySelectorAll('button')).find(function(b){return /ver producto/i.test(String(b.textContent||''));});
     if(ver&&ver.parentNode===card){
       if(ver.nextSibling)card.insertBefore(btn,ver.nextSibling);else card.appendChild(btn);
@@ -67,11 +67,14 @@
     document.querySelectorAll('#tienda-grid .prod-card[id^="card-"]').forEach(agregar);
   }
 
+  var pendiente=0;
+  function programar(){if(pendiente)return;pendiente=setTimeout(function(){pendiente=0;sincronizar();},60);}
   var obs=null;
   function instalar(){
     sincronizar();
-    if(!obs&&document.body){obs=new MutationObserver(function(){sincronizar();});obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});}
-    setInterval(sincronizar,1400);
+    var grid=document.getElementById('tienda-grid')||document.body;
+    if(!obs&&grid){obs=new MutationObserver(programar);obs.observe(grid,{childList:true,subtree:true});}
+    document.addEventListener('click',function(){setTimeout(programar,80);},true);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalar,{once:true});else instalar();
 })();
