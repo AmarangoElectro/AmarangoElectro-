@@ -6,6 +6,7 @@ const MODULOS_AUXILIARES = [
   "./tienda-optimizaciones.js",
   "./margarita-identidad.js",
   "./margarita-ui-approved-guard.js?v=20260824-1",
+  "./margarita-visual-tune.js?v=20260824-1",
   "./cliente-referidos.js?v=20260824-3",
   "./equipo-ventas-menu.js?v=20260823-1",
   "./fidelidad-compra-hook.js?v=20260824-2",
