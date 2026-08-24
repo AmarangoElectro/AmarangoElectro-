@@ -1,0 +1,23 @@
+/* Completa el nombre preferido de clientes existentes o precargados por asesores. */
+(function(){
+  'use strict';
+  var VERSION='margarita-client-preferred-name-2026-08-23-1';
+  if(window.__AE_CLIENT_PREFERRED_NAME__===VERSION)return;
+  window.__AE_CLIENT_PREFERRED_NAME__=VERSION;
+  var K='ae_cliente_identidad',CLIENTES='ae_clientes_tienda',intentos=0;
+  function get(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+  function set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
+  function digits(s){return String(s||'').replace(/\D+/g,'').slice(-10);}
+  function first(s){s=String(s||'').trim().replace(/\s+/g,' ');return s?s.split(' ')[0].slice(0,32):'';}
+  function cliente(){try{if(window.vistaPreviaCliente===true)return true;if(window.tiendaEsAdmin===true||window.adminUnlocked===true||window.revUnlocked===true)return false;var r=String(localStorage.getItem('ae_rol')||'').toLowerCase();return !(/admin|asesor|revendedor|vendedor/.test(r));}catch(e){return true;}}
+  function lista(){try{if(typeof window.cargarClientesTienda==='function')return window.cargarClientesTienda()||[];}catch(e){}return get(CLIENTES,[]);}
+  function guardarLista(a){try{if(typeof window.guardarClientesTienda==='function'){window.guardarClientesTienda(a);return;}}catch(e){}set(CLIENTES,a);}
+  function buscar(t){var k=digits(t);return lista().find(function(c){return digits(c&&(c.telefono||c.tel))===k;})||null;}
+  function estilos(){if(document.getElementById('ae-pref-name-style'))return;var s=document.createElement('style');s.id='ae-pref-name-style';s.textContent='#ae-pref-name{position:fixed;inset:0;z-index:22100;background:rgba(2,12,35,.58);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:18px}#ae-pref-name-card{width:min(380px,94vw);background:#fff;border-radius:21px;padding:17px;box-shadow:0 24px 70px rgba(0,0,0,.36);font-family:inherit}#ae-pref-name-card h3{margin:0;color:#0B2D6B;font-size:.98rem;font-weight:950}#ae-pref-name-card p{font-size:.7rem;color:#596579;line-height:1.45;margin:7px 0 11px}#ae-pref-name-card input{width:100%;box-sizing:border-box;border:1.5px solid #d7e0eb;border-radius:12px;padding:11px;font:750 .8rem inherit;outline:none}#ae-pref-name-card input:focus{border-color:#FF7A00;box-shadow:0 0 0 3px rgba(255,122,0,.09)}#ae-pref-name-card button{width:100%;border:0;border-radius:12px;padding:11px;background:#0B2D6B;color:#fff;font:900 .76rem inherit;margin-top:9px}';document.head.appendChild(s);}
+  function abrir(reg){
+    if(document.getElementById('ae-pref-name'))return;estilos();var ident=get(K,{}),sugerido=first(reg.nombre||ident.nombreCompleto||ident.nombre);var o=document.createElement('div');o.id='ae-pref-name';o.innerHTML='<div id="ae-pref-name-card"><h3>🐝 Una cosita antes de seguir</h3><p>Te tengo registrado como <b>'+esc(reg.nombre||ident.nombreCompleto||'cliente')+'</b>. ¿Cómo querés que te llame Margarita? Así te saludo de una forma más natural cada vez que entrás.</p><input id="ae-pref-input" autocomplete="nickname" value="'+esc(sugerido)+'" placeholder="Ej: Maxi"><button id="ae-pref-save" type="button">Guardar nombre preferido</button></div>';document.body.appendChild(o);var inp=o.querySelector('#ae-pref-input');inp.focus();inp.select();o.querySelector('#ae-pref-save').onclick=function(){var ap=String(inp.value||'').trim().replace(/\s+/g,' ').slice(0,32);if(!ap)return;var a=lista(),k=digits(reg.telefono||reg.tel||ident.telefono),i=a.findIndex(function(c){return digits(c&&(c.telefono||c.tel))===k;});if(i>=0){a[i]=Object.assign({},a[i],{apodo:ap,nombrePreferidoConfirmado:true,actualizado:new Date().toISOString()});guardarLista(a);}ident.apodo=ap;ident.nombre=ap;ident.nombreCompleto=ident.nombreCompleto||reg.nombre||'';ident.nombrePreferidoConfirmado=true;ident.actualizado=Date.now();set(K,ident);o.remove();};inp.addEventListener('keydown',function(e){if(e.key==='Enter')o.querySelector('#ae-pref-save').click();});
+  }
+  function iniciar(){if(!cliente())return;var ident=get(K,{});if(!digits(ident.telefono)){if(intentos++<50)setTimeout(iniciar,180);return;}var reg=buscar(ident.telefono);if(!reg)return;if(reg.apodo||reg.nombrePreferidoConfirmado||ident.nombrePreferidoConfirmado)return;setTimeout(function(){abrir(reg);},750);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(iniciar,900);},{once:true});else setTimeout(iniciar,900);
+})();
