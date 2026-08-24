@@ -4,7 +4,7 @@ import "./margarita-identidad.js";
 import "./cliente-referidos.js?v=20260824-3";
 import "./equipo-ventas-menu.js?v=20260823-1";
 import "./fidelidad-compra-hook.js?v=20260824-2";
-import "./asesor-registrar-venta.js?v=20260824-3";
+import "./asesor-registrar-venta.js?v=20260824-4";
 import "./margarita-client-onboarding.js?v=20260824-5";
 import "./margarita-client-alias-guard.js?v=20260823-1";
 import "./clientes-crm-export.js?v=20260824-4";
