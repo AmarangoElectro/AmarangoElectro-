@@ -13,6 +13,7 @@ const MODULOS_AUXILIARES = [
   "./asesor-registrar-venta.js?v=20260824-4",
   "./margarita-client-onboarding.js?v=20260824-5",
   "./margarita-client-alias-guard.js?v=20260823-1",
+  "./margarita-client-role-guard.js?v=20260824-1",
   "./clientes-crm-export.js?v=20260824-4",
   "./admin-clientes-fidelidad.js?v=20260824-2",
   "./cliente-compartir-productos.js?v=20260824-1",
