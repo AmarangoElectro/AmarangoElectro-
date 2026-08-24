@@ -5,8 +5,11 @@
 */
 (function(){
   'use strict';
-  var VERSION='margarita-ui-approved-2026-08-24-1';
-  var AVATAR='/margarita-avatar-oficial.jpeg?v=20260824-1';
+  var VERSION='margarita-ui-approved-2026-08-24-2';
+  // IMPORTANTE: esta cadena debe coincidir EXACTAMENTE con la que todavía fija index.html.
+  // Si dos observers fuerzan URLs distintas del mismo avatar, se generan mutaciones en bucle
+  // y el splash puede quedar colgado.
+  var AVATAR='./margarita-avatar-oficial.jpeg?v=20260823';
   var UI_KEY='ae_margarita_ui_formato';
   if(window.__AE_MARGARITA_UI_APPROVED__===VERSION)return;
   window.__AE_MARGARITA_UI_APPROVED__=VERSION;
