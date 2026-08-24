@@ -7,4 +7,4 @@ import "./admin-stable-actions.js?v=20260823-1";
 import "./tienda-inicio-productos.js?v=20260824-1";
 import "./tienda-compartir-producto.js?v=20260824-2";
 import "./margarita-guia-clientes.js?v=20260824-3";
-import "./margarita-clientes-24h-cta.js?v=20260824-1";
+import "./margarita-clientes-24h-cta.js?v=20260824-2";
