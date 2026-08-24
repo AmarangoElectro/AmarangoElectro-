@@ -7,6 +7,6 @@ import "./margarita-client-onboarding.js?v=20260824-3";
 import "./margarita-client-alias-guard.js?v=20260823-1";
 import "./clientes-crm-export.js?v=20260823-1";
 import "./cliente-compartir-productos.js?v=20260824-1";
-import "./cliente-compartir-deeplink.js?v=20260824-1";
+import "./cliente-compartir-deeplink.js?v=20260824-2";
 import "./margarita-query-guard.js?v=20260823-2";
 import "./admin-stable-actions.js?v=20260823-1";
