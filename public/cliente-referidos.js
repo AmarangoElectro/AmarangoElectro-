@@ -1,11 +1,12 @@
 /* AmarangoElectro · referidos de clientes
    - guarda el código de quien recomendó la tienda
    - cada cliente registrado recibe su propio código
-   - compartir tienda/productos puede conservar ese código sin exponer datos personales
+   - compartir tienda/productos conserva ese código sin exponer datos personales
+   - el alta de Margarita hereda automáticamente el referente
 */
 (function(){
   'use strict';
-  var VERSION='cliente-referidos-2026-08-24-1';
+  var VERSION='cliente-referidos-2026-08-24-2';
   if(window.__AE_CLIENTE_REFERIDOS__===VERSION)return;
   window.__AE_CLIENTE_REFERIDOS__=VERSION;
 
@@ -34,6 +35,41 @@
   function identidad(){return json(K_IDENTIDAD);}
   function codigoActual(){return codigo(identidad().codigoReferido);}
 
+  function guardarClientePublico(c){
+    if(!c||!tel(c.telefono))return;
+    setTimeout(function(){
+      var previo=identidad();
+      if(tel(previo.telefono)!==tel(c.telefono))return;
+      setJson(K_IDENTIDAD,Object.assign({},previo,c,{actualizado:Date.now()}));
+    },0);
+  }
+
+  function instalarFetch(){
+    if(!window.fetch||window.fetch.__aeReferidos)return;
+    var orig=window.fetch.bind(window);
+    var fn=async function(input,init){
+      var tocar=false,body=null,url='';
+      try{
+        url=typeof input==='string'?input:(input&&input.url)||'';
+        var metodo=String(init&&init.method||(input&&input.method)||'GET').toUpperCase();
+        if(metodo==='POST'&&/\/api\/cliente-identidad(?:\?|$)/.test(url)&&init&&typeof init.body==='string'){
+          body=JSON.parse(init.body);
+          if(String(body&&body.accion||'').toLowerCase()==='registrar'){
+            var ref=referidoEntrante();
+            if(ref){body.referidoPorCodigo=ref;body.cliente=Object.assign({},body.cliente||{},{referidoPorCodigo:ref});}
+            init=Object.assign({},init,{body:JSON.stringify(body)});tocar=true;
+          }else tocar=true;
+        }
+      }catch(e){}
+      var r=await orig(input,init);
+      if(tocar){
+        try{var d=await r.clone().json();if(d&&d.ok&&d.cliente)guardarClientePublico(d.cliente);}catch(e){}
+      }
+      return r;
+    };
+    fn.__aeReferidos=VERSION;fn.__original=orig;window.fetch=fn;
+  }
+
   async function hidratar(){
     var id=identidad();
     if(codigo(id.codigoReferido))return id;
@@ -43,10 +79,7 @@
       try{
         var r=await fetch('/api/cliente-identidad',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({accion:'buscar',telefono:tel(id.telefono)})});
         var d={};try{d=await r.json();}catch(e){}
-        if(r.ok&&d&&d.ok&&d.cliente){
-          id=Object.assign({},id,d.cliente,{actualizado:Date.now()});
-          setJson(K_IDENTIDAD,id);
-        }
+        if(r.ok&&d&&d.ok&&d.cliente){id=Object.assign({},id,d.cliente,{actualizado:Date.now()});setJson(K_IDENTIDAD,id);}
       }catch(e){}
       HIDRATANDO=null;return id;
     })();
@@ -57,11 +90,9 @@
     var c=codigoActual();if(!c)return String(url||'');
     try{var u=new URL(String(url||''),window.location.origin);u.searchParams.set('ref',c);return u.toString();}catch(e){return String(url||'');}
   }
-  async function obtenerUrl(url){
-    await hidratar();return decorarUrlSync(url);
-  }
+  async function obtenerUrl(url){await hidratar();return decorarUrlSync(url);}
 
-  capturarReferido();
+  capturarReferido();instalarFetch();
   setTimeout(hidratar,900);
   window.AmarangoReferidos={
     referidoEntrante:referidoEntrante,
