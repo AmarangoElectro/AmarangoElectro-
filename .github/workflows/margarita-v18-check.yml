@@ -1,0 +1,21 @@
+name: Margarita V18 check
+
+on:
+  push:
+    branches:
+      - agent/margarita-v18-asesores
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: node --check public/margarita-v18-bridge.js
+      - run: node --check public/margarita-asesor-copy.js
+      - run: node --check public/margarita-nueva-consulta.js
+      - run: npm run check
