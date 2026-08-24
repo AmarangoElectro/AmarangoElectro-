@@ -1,0 +1,168 @@
+name: Aplicar fix raiz V19 en rama
+
+on:
+  push:
+    branches:
+      - fix/v19-sync-ocultos-validacion-20260824
+    paths:
+      - .github/workflows/apply-v19-root-fix-branch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  aplicar-y-validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar rama de prueba
+        uses: actions/checkout@v4
+        with:
+          ref: fix/v19-sync-ocultos-validacion-20260824
+          fetch-depth: 0
+
+      - name: Aplicar cambios quirurgicos a public/index.html
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('public/index.html')
+          s=p.read_text(encoding='utf-8')
+
+          def rep(old,new,label):
+              global s
+              n=s.count(old)
+              if n!=1:
+                  raise SystemExit(f'{label}: se esperaba 1 coincidencia y hay {n}')
+              s=s.replace(old,new,1)
+              print('OK',label)
+
+          rep(
+              "var TIENDA_USAR_INCREMENTAL=true;\nvar TIENDA_INCREMENTAL_LOTE=500;",
+              "var TIENDA_USAR_INCREMENTAL=true;\n// V19 habia creado un segundo estado de publicacion (control_publicacion + catalogo_manuales).\n// Lo dejamos desactivado: la fuente canonica vuelve a ser tienda_catalogo y su espejo incremental.\n// Esto evita que un snapshot viejo vuelva a imponer stock/visibilidad sobre datos frescos del proveedor.\nvar TIENDA_GUARDADO_LIVIANO_ACTIVO=false;\nvar TIENDA_INCREMENTAL_LOTE=500;",
+              'flag fuente canonica')
+
+          rep(
+              "function tiendaSubirControlPublicacion(){\n  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});",
+              "function tiendaSubirControlPublicacion(){\n  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve({data:null,error:null});\n  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});",
+              'desactivar subida control paralelo')
+
+          rep(
+              "function tiendaSubirManualesNube(){\n  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});",
+              "function tiendaSubirManualesNube(){\n  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve({data:null,error:null});\n  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});",
+              'desactivar manuales paralelos')
+
+          rep(
+              "function tiendaGuardarNubeLiviano(){\n  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});",
+              "function tiendaGuardarNubeLiviano(){\n  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve({data:null,error:null});\n  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});",
+              'desactivar guardado paralelo')
+
+          rep(
+              "function tiendaPublicarControlAdmin(mostrarAviso){\n  if(!tiendaEsAdmin && !adminUnlocked)return Promise.resolve(false);",
+              "function tiendaPublicarControlAdmin(mostrarAviso){\n  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve(true);\n  if(!tiendaEsAdmin && !adminUnlocked)return Promise.resolve(false);",
+              'no publicar control paralelo')
+
+          rep(
+              "function tiendaBajarControlPublicacion(){\n  if(!NUBE_OK||!sbCalc)return Promise.resolve(false);",
+              "function tiendaBajarControlPublicacion(){\n  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve(false);\n  if(!NUBE_OK||!sbCalc)return Promise.resolve(false);",
+              'no reinyectar snapshot paralelo')
+
+          rep(
+              "    var subida=tiendaGuardarNubeLiviano();",
+              "    var subida=TIENDA_GUARDADO_LIVIANO_ACTIVO?tiendaGuardarNubeLiviano():tiendaSubirNube();",
+              'guardar contra catalogo canonico')
+
+          rep(
+              "          if(guardado && guardado.error)return guardado;\n          return tiendaSubirControlPublicacion().then(function(control){",
+              "          if(guardado && guardado.error)return guardado;\n          if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return guardado;\n          return tiendaSubirControlPublicacion().then(function(control){",
+              'no duplicar guardado canonico')
+
+          rep(
+              "    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };",
+              "    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, ocultoTienda:!!c.ocultoTienda, sinStock:!!c.sinStock, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };",
+              'estado completo celular virtual')
+
+          rep(
+              "function tiendaProductoAptoPortada(p){\n  if(!p || !p.foto || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;\n  var stock=tiendaLeerStockProveedor(p);\n  if(stock.informado && stock.valor<=0)return false;",
+              "function tiendaProductoAptoPortada(p){\n  if(!p || !p.foto)return false;\n  if(p.esCelu){\n    if(p.visible===false || p.ocultoTienda===true || p.sinStock===true)return false;\n  }else if(!tiendaEstaVisibleYConStock(p))return false;",
+              'portada usa regla central')
+
+          rep(
+              "      if(c.ocultoTienda && !tiendaEsAdmin)return;",
+              "      if((c.ocultoTienda || c.sinStock) && !tiendaEsAdmin)return;",
+              'categorias no cuentan celulares sin stock')
+
+          rep(
+              "    tiendaProductos.forEach(function(p){ if(catProd(p)===c){ totalCat++; if(p.visible!==false)visiblesCat++; } });",
+              "    tiendaProductos.forEach(function(p){ if(catProd(p)===c){ totalCat++; if(tiendaEstaVisibleYConStock(p))visiblesCat++; } });",
+              'conteo categoria consistente')
+
+          rep(
+              "  // universo: productos visibles + celulares\n  var uni=tiendaProductos.filter(function(x){return x.visible;}).slice();\n  var celus=cargarListaCelus();\n  celus.forEach(function(c,i){ if(c&&c.precio)uni.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,categoria:'📱 Celulares',foto:c.foto||''}); });",
+              "  // universo: solo productos realmente publicables + celulares visibles y con stock\n  var uni=tiendaProductos.filter(tiendaEstaVisibleYConStock).slice();\n  var celus=cargarListaCelus();\n  celus.forEach(function(c,i){ if(c&&c.precio&&!c.ocultoTienda&&!c.sinStock)uni.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,categoria:'📱 Celulares',foto:c.foto||'',visible:true,sinStock:false}); });",
+              'relacionados no filtran ocultos')
+
+          rep(
+              "function tiendaVerDetalle(id){\n  try{ registrarVista(id); }catch(e){}\n  var p=buscarProd(id);\n  if(!p)return;",
+              "function tiendaVerDetalle(id){\n  var p=buscarProd(id);\n  if(!p)return;\n  // Un enlace viejo/directo nunca debe reabrir un producto que ya no esta publicado.\n  // Admin conserva acceso desde sus carpetas privadas para revisarlo.\n  if(!tiendaEsAdmin){\n    var publicable=p.esCelu\n      ? (p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true)\n      : tiendaEstaVisibleYConStock(p);\n    if(!publicable){\n      if(typeof mostrarToast==='function')mostrarToast('Este producto ya no está disponible en la tienda');\n      return;\n    }\n  }\n  try{ registrarVista(id); }catch(e){}",
+              'bloquear detalle directo oculto')
+
+          rep(
+              "    if(soloVisibles && c.ocultoTienda)return; // celu oculto no va al catálogo del cliente",
+              "    if(soloVisibles && (c.ocultoTienda || c.sinStock))return; // celu oculto/sin stock no va al catálogo del cliente",
+              'catalogo compartible excluye celular sin stock')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validar diff y reglas criticas
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          test "$(git diff --name-only)" = "public/index.html"
+          python3 <<'PY'
+          from pathlib import Path
+          s=Path('public/index.html').read_text(encoding='utf-8')
+          checks={
+            'fuente_canonica': 'var TIENDA_GUARDADO_LIVIANO_ACTIVO=false;' in s,
+            'guardado_canonico': 'TIENDA_GUARDADO_LIVIANO_ACTIVO?tiendaGuardarNubeLiviano():tiendaSubirNube()' in s,
+            'portada_central': 'else if(!tiendaEstaVisibleYConStock(p))return false;' in s,
+            'detalle_directo': "Este producto ya no está disponible en la tienda" in s,
+            'relacionados_central': 'var uni=tiendaProductos.filter(tiendaEstaVisibleYConStock).slice();' in s,
+            'celu_sin_stock': 'ocultoTienda:!!c.ocultoTienda, sinStock:!!c.sinStock' in s,
+            'pdf_celu_sin_stock': 'soloVisibles && (c.ocultoTienda || c.sinStock)' in s,
+          }
+          faltan=[k for k,v in checks.items() if not v]
+          if faltan: raise SystemExit('Fallaron controles: '+', '.join(faltan))
+          print('Controles funcionales OK:', ', '.join(checks))
+          PY
+
+      - name: Validar sintaxis JavaScript inline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('public/index.html').read_text(encoding='utf-8')
+          scripts=[]
+          for attrs,code in re.findall(r'<script([^>]*)>(.*?)</script>',s,re.I|re.S):
+              if re.search(r'\bsrc\s*=',attrs,re.I): continue
+              scripts.append(code)
+          if not scripts: raise SystemExit('No se encontraron scripts inline')
+          out=Path('/tmp/amarango-jscheck'); out.mkdir(exist_ok=True)
+          for i,code in enumerate(scripts,1): (out/f'inline-{i}.js').write_text(code,encoding='utf-8')
+          print('Scripts inline:',len(scripts))
+          PY
+          for f in /tmp/amarango-jscheck/*.js; do node --check "$f"; done
+
+      - name: Guardar public/index.html solo en la rama
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "AmarangoElectro Branch Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/index.html
+          git commit -m "Fix catalog save root path and hidden-product leaks [branch-test]"
+          git push origin HEAD:fix/v19-sync-ocultos-validacion-20260824
