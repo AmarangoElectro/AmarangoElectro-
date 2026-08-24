@@ -2507,6 +2507,10 @@ var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
 var TIENDA_CACHE_FOTOS_VERSION='v19-20260824-guardado-liviano';
 var TIENDA_USAR_INCREMENTAL=true;
+// V19 habia creado un segundo estado de publicacion (control_publicacion + catalogo_manuales).
+// Lo dejamos desactivado: la fuente canonica vuelve a ser tienda_catalogo y su espejo incremental.
+// Esto evita que un snapshot viejo vuelva a imponer stock/visibilidad sobre datos frescos del proveedor.
+var TIENDA_GUARDADO_LIVIANO_ACTIVO=false;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
 var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
@@ -2547,6 +2551,7 @@ function tiendaAplicarControlPublicacion(mapa){
   return cambio;
 }
 function tiendaSubirControlPublicacion(){
+  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve({data:null,error:null});
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
   return sbCalc.from('tienda_catalogo').upsert({
     id:TIENDA_CONTROL_PUBLICACION_ID,
@@ -2555,6 +2560,7 @@ function tiendaSubirControlPublicacion(){
   }).select('actualizado');
 }
 function tiendaSubirManualesNube(){
+  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve({data:null,error:null});
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
   var manuales=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
   return sbCalc.from('tienda_catalogo').upsert({
@@ -2564,6 +2570,7 @@ function tiendaSubirManualesNube(){
   }).select('actualizado');
 }
 function tiendaGuardarNubeLiviano(){
+  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve({data:null,error:null});
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
   return Promise.all([tiendaSubirControlPublicacion(),tiendaSubirManualesNube()])
     .then(function(res){
@@ -2572,6 +2579,7 @@ function tiendaGuardarNubeLiviano(){
     });
 }
 function tiendaPublicarControlAdmin(mostrarAviso){
+  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve(true);
   if(!tiendaEsAdmin && !adminUnlocked)return Promise.resolve(false);
   var lista=(window._tiendaSincronizacionInicialPromesa && typeof window._tiendaSincronizacionInicialPromesa.then==='function')
     ?window._tiendaSincronizacionInicialPromesa:Promise.resolve(true);
@@ -2588,6 +2596,7 @@ function tiendaPublicarControlAdmin(mostrarAviso){
   });
 }
 function tiendaBajarControlPublicacion(){
+  if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return Promise.resolve(false);
   if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
   return Promise.all([
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
@@ -3122,6 +3131,7 @@ function tiendaSubirNubeUnaVez(){
             try{ localStorage.setItem('ae_tienda_catalogo_fecha',fechaGuardada); }catch(e){}
           }
           if(guardado && guardado.error)return guardado;
+          if(!TIENDA_GUARDADO_LIVIANO_ACTIVO)return guardado;
           return tiendaSubirControlPublicacion().then(function(control){
             return (control&&control.error)?control:guardado;
           });
@@ -3487,7 +3497,7 @@ function tiendaGuardarLocal(){
   // cancelaba esa operación por statement_timeout. Subimos solamente los
   // manuales y las decisiones administrativas de publicación.
   if(NUBE_OK && sbCalc){
-    var subida=tiendaGuardarNubeLiviano();
+    var subida=TIENDA_GUARDADO_LIVIANO_ACTIVO?tiendaGuardarNubeLiviano():tiendaSubirNube();
     // La mayoría de los botones guardan sin bloquear la interfaz. Marcamos la
     // promesa como atendida, pero la devolvemos para las acciones (como fotos)
     // que necesitan confirmar que la nube terminó bien.
@@ -4071,7 +4081,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, ocultoTienda:!!c.ocultoTienda, sinStock:!!c.sinStock, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
   }
   return null;
 }
@@ -5163,9 +5173,10 @@ function tiendaLiberarRevisionManual(p){
 })();
 
 function tiendaProductoAptoPortada(p){
-  if(!p || !p.foto || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;
-  var stock=tiendaLeerStockProveedor(p);
-  if(stock.informado && stock.valor<=0)return false;
+  if(!p || !p.foto)return false;
+  if(p.esCelu){
+    if(p.visible===false || p.ocultoTienda===true || p.sinStock===true)return false;
+  }else if(!tiendaEstaVisibleYConStock(p))return false;
   // En productos automáticos se priorizan las imágenes ya trabajadas por
   // Amarango o expresamente aprobadas; las pendientes nunca abren la tienda.
   if(tiendaEsAutomatico(p) && !tiendaEsFotoAmarango(p) && p.imagenProveedorAprobada!==true)return false;
@@ -6478,7 +6489,7 @@ function abrirCajonCats(){
   try{
     var celus=JSON.parse(localStorage.getItem('amarango_celulares')||'[]');
     celus.forEach(function(c,i){
-      if(c.ocultoTienda && !tiendaEsAdmin)return;
+      if((c.ocultoTienda || c.sinStock) && !tiendaEsAdmin)return;
       universo.push({id:'celu_'+i, esCelu:true, nombre:c.nombre, categoria:'📱 Celulares', visible:!c.ocultoTienda});
     });
   }catch(e){}
@@ -6491,7 +6502,7 @@ function abrirCajonCats(){
     var on=tiendaCategoriaActiva===c;
     // ¿cuántos de esta categoría están visibles? para saber si mostrar 🙈 o 👁️
     var visiblesCat=0, totalCat=0;
-    tiendaProductos.forEach(function(p){ if(catProd(p)===c){ totalCat++; if(p.visible!==false)visiblesCat++; } });
+    tiendaProductos.forEach(function(p){ if(catProd(p)===c){ totalCat++; if(tiendaEstaVisibleYConStock(p))visiblesCat++; } });
     var todosOcultos = totalCat>0 && visiblesCat===0;
     var btnOcultar = tiendaEsAdmin ? '<button onclick="event.stopPropagation();tiendaOcultarCategoria(\''+c.replace(/'/g,"\\'")+'\','+(todosOcultos?'false':'true')+')" style="position:absolute;top:2px;right:2px;background:'+(todosOcultos?'var(--gr)':'#6b7280')+';color:#fff;border:none;border-radius:6px;font-size:.6rem;padding:2px 5px;font-weight:800;cursor:pointer;z-index:2;" title="'+(todosOcultos?'Mostrar categoría':'Ocultar categoría')+'">'+(todosOcultos?'👁️':'🙈')+'</button>' : '';
     html+='<div class="cat-tile'+(on?' on':'')+'" style="position:relative;" onclick="tiendaFiltrarCat(\''+c.replace(/'/g,"\\'")+'\');cerrarCajonCats();">'+btnOcultar+'<span class="cat-tile-ic">'+ic(c)+'</span><span class="cat-tile-txt">'+tx(c)+' ('+cats[c]+')</span></div>';
@@ -6755,10 +6766,10 @@ function visitasProducto(id){
 function tiendaRelacionados(p){
   if(!p)return [];
   var cat=catProd(p);
-  // universo: productos visibles + celulares
-  var uni=tiendaProductos.filter(function(x){return x.visible;}).slice();
+  // universo: solo productos realmente publicables + celulares visibles y con stock
+  var uni=tiendaProductos.filter(tiendaEstaVisibleYConStock).slice();
   var celus=cargarListaCelus();
-  celus.forEach(function(c,i){ if(c&&c.precio)uni.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,categoria:'📱 Celulares',foto:c.foto||''}); });
+  celus.forEach(function(c,i){ if(c&&c.precio&&!c.ocultoTienda&&!c.sinStock)uni.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,categoria:'📱 Celulares',foto:c.foto||'',visible:true,sinStock:false}); });
   // misma categoría, distinto al actual
   var rel=uni.filter(function(x){ return (''+x.id)!==(''+p.id) && catProd(x)===cat; });
   // mezclar un poco y tomar 4
@@ -6767,9 +6778,20 @@ function tiendaRelacionados(p){
 }
 
 function tiendaVerDetalle(id){
-  try{ registrarVista(id); }catch(e){}
   var p=buscarProd(id);
   if(!p)return;
+  // Un enlace viejo/directo nunca debe reabrir un producto que ya no esta publicado.
+  // Admin conserva acceso desde sus carpetas privadas para revisarlo.
+  if(!tiendaEsAdmin){
+    var publicable=p.esCelu
+      ? (p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true)
+      : tiendaEstaVisibleYConStock(p);
+    if(!publicable){
+      if(typeof mostrarToast==='function')mostrarToast('Este producto ya no está disponible en la tienda');
+      return;
+    }
+  }
+  try{ registrarVista(id); }catch(e){}
   window._tiendaDetalleId=id;
   window._tiendaPedirId=id;
   // ← botón "atrás" flotante y elegante (círculo con flecha, estilo app)
@@ -7464,7 +7486,7 @@ function tiendaTodosLosProductos(soloVisibles){
   var celus=cargarListaCelus();
   celus.forEach(function(c,i){
     if(!c||!c.precio)return;
-    if(soloVisibles && c.ocultoTienda)return; // celu oculto no va al catálogo del cliente
+    if(soloVisibles && (c.ocultoTienda || c.sinStock))return; // celu oculto/sin stock no va al catálogo del cliente
     universo.push({
       id:'celu_'+i, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0,
       categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda,
