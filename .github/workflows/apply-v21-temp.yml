@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
     paths:
-      - '.v21-upload50-20260824/READY'
+      - '.v21-upload-20260824/READY'
 permissions:
   contents: write
 jobs:
@@ -17,11 +17,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat .v21-upload50-20260824/chunk_* | base64 -d | gzip -d > public/index.html
+          cat .v21-upload-20260824/chunk_* | base64 -d | gzip -d > public/index.html
           ACTUAL="$(git hash-object public/index.html)"
           EXPECTED="6e4f903ac8c42319d78848b46b29f3aa9acc63b0"
           test "$ACTUAL" = "$EXPECTED"
-          rm -rf .v21-upload50-20260824 .v21-upload-20260824
+          rm -rf .v21-upload-20260824
           rm -f .github/workflows/apply-v21-temp.yml
           git config user.name "chatgpt-amarango"
           git config user.email "actions@users.noreply.github.com"
