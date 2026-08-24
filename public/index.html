@@ -4086,6 +4086,18 @@ function buscarProd(id){
   return null;
 }
 
+// Regla unica de publicacion para cualquier accion que pueda exponer un producto.
+function tiendaProductoPublicable(p){
+  if(!p)return false;
+  if(p.esCelu)return p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true;
+  return tiendaEstaVisibleYConStock(p);
+}
+function tiendaAvisarNoPublicable(p){
+  if(tiendaProductoPublicable(p))return false;
+  if(typeof mostrarToast==='function')mostrarToast('Este producto ya no está disponible en la tienda');
+  return true;
+}
+
 // ═══ Cajón lateral ═══
 function abrirCajon(){
   var c=document.getElementById('cajon-lateral');
@@ -6782,15 +6794,7 @@ function tiendaVerDetalle(id){
   if(!p)return;
   // Un enlace viejo/directo nunca debe reabrir un producto que ya no esta publicado.
   // Admin conserva acceso desde sus carpetas privadas para revisarlo.
-  if(!tiendaEsAdmin){
-    var publicable=p.esCelu
-      ? (p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true)
-      : tiendaEstaVisibleYConStock(p);
-    if(!publicable){
-      if(typeof mostrarToast==='function')mostrarToast('Este producto ya no está disponible en la tienda');
-      return;
-    }
-  }
+  if(!tiendaEsAdmin && tiendaAvisarNoPublicable(p))return;
   try{ registrarVista(id); }catch(e){}
   window._tiendaDetalleId=id;
   window._tiendaPedirId=id;
@@ -7062,6 +7066,7 @@ function tiendaDescargarBlobProducto(blob,p){
 }
 function tiendaDescargarImagenProducto(id){
   var p=buscarProd(id);
+  if(tiendaAvisarNoPublicable(p))return;
   if(!p || !p.foto){ alert('Este producto todavía no tiene imagen.'); return; }
   tiendaBlobParaCompartir(p)
     .then(function(blob){
@@ -7081,6 +7086,7 @@ function compartirProducto(id){
   }
   var p=buscarProd(id);
   if(!p)return;
+  if(tiendaAvisarNoPublicable(p))return;
   var cuotasLines=armarCuotasLines(p.venta, p);
   // link que abre la tienda mostrando ESTE producto
   var base=window.location.href.split('#')[0].split('?')[0];
@@ -7136,6 +7142,7 @@ function copiarTextoInstagram(texto){
 function compartirInstagram(id){
   var p=buscarProd(id);
   if(!p)return;
+  if(tiendaAvisarNoPublicable(p))return;
   var base=window.location.href.split('#')[0].split('?')[0];
   var linkProd=base+'?prod='+encodeURIComponent(id);
   var mejor=null;
@@ -7203,7 +7210,7 @@ var FRASES_PROMO=[
   '🎁 Entrá a nuestra tienda y girá la ruleta para ganar descuentos 🎰'
 ];
 function compartirTienda(){
-  var link=window.location.href.split('#')[0];
+  var link=window.location.href.split('#')[0].split('?')[0];
   var frase=FRASES_PROMO[Math.floor(Math.random()*FRASES_PROMO.length)];
   var msg=frase+'\n\n👉 '+link+'\n\n📷 Instagram: @amarangoelectro\n📢 Canal WhatsApp: https://whatsapp.com/channel/0029Vb21w9lKQuJM9CWY1347';
 
@@ -7348,8 +7355,10 @@ function tiendaTextoVarios(prods){
 function tiendaCompartirVarios(){
   var ids=Object.keys(tiendaSelecSet);
   if(!ids.length){ alert('Tocá "Seleccionar" en los productos que querés compartir.'); return; }
-  var prods=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});
-  if(!prods.length){ alert('No se encontraron los productos seleccionados.'); return; }
+  var encontrados=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});
+  var prods=encontrados.filter(tiendaProductoPublicable);
+  if(prods.length!==encontrados.length && typeof mostrarToast==='function')mostrarToast('Se omitieron productos que ya no están disponibles');
+  if(!prods.length){ alert('Los productos seleccionados ya no están disponibles.'); return; }
 
   // Abrir WhatsApp directamente es más confiable que el menú general del
   // navegador, especialmente cuando se eligen varios productos.
@@ -7718,9 +7727,22 @@ var verSoloPreciosViejos=false;
 function toggleVerPreciosViejos(){ verSoloPreciosViejos=!verSoloPreciosViejos; tiendaRender(); }
 
 // ===== CARRITO =====
+function tiendaRevalidarCarrito(){
+  var cambio=false, siguiente=[];
+  (carrito||[]).forEach(function(x){
+    var p=buscarProd(x.id);
+    if(!tiendaProductoPublicable(p)){cambio=true;return;}
+    var venta=Number(p.venta)||0;
+    if(x.nombre!==p.nombre || Number(x.venta)!==venta){x.nombre=p.nombre;x.venta=venta;cambio=true;}
+    siguiente.push(x);
+  });
+  carrito=siguiente;
+  return cambio;
+}
 function agregarAlCarrito(id){
   var p=buscarProd(id);
   if(!p)return;
+  if(tiendaAvisarNoPublicable(p))return;
   var item=carrito.find(function(x){return x.id==id;});
   if(item){ item.cantidad++; }
   else{ carrito.push({id:p.id, nombre:p.nombre, venta:p.venta, cantidad:1}); }
@@ -7753,6 +7775,7 @@ function mostrarToast(texto){
   },1600);
 }
 function actualizarCarritoUI(){
+  tiendaRevalidarCarrito();
   var total=carrito.reduce(function(s,x){return s+x.cantidad;},0);
   var b=document.getElementById('carrito-flotante');
   var c=document.getElementById('carrito-count');
@@ -7763,6 +7786,7 @@ function actualizarCarritoUI(){
   if(nb){ if(total>0){ nb.style.display='block'; nb.textContent=total>99?'99+':total; } else nb.style.display='none'; }
 }
 function abrirCarrito(){
+  if(tiendaRevalidarCarrito() && typeof mostrarToast==='function')mostrarToast('Actualizamos tu carrito con la disponibilidad y precios vigentes');
   if(!carrito.length){
     var vacio='<div style="text-align:center;padding:8px 4px 4px;">'
       +'<div style="width:92px;height:92px;border-radius:50%;margin:0 auto 14px;background:linear-gradient(145deg,#eef4ff,#fff4e8);border:1px solid #dbe8fb;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(11,45,107,.1);position:relative;">'
@@ -8332,8 +8356,9 @@ function abrirRegistroCliente(){
 function continuarCompraSinRegistro(){ _compraSinRegistro=true; _registroSolo=false; pasoFormulario(); }
 
 // ── ENTRADAS ──
-function tiendaComprar(id){ pedidoActual.prodId=id; iniciarCompra(); }
+function tiendaComprar(id){ var p=buscarProd(id); if(tiendaAvisarNoPublicable(p))return; pedidoActual.prodId=id; iniciarCompra(); }
 function finalizarPedido(){
+  if(tiendaRevalidarCarrito()){ actualizarCarritoUI(); alert('Actualizamos el carrito porque cambió la disponibilidad o el precio de un producto. Revisalo antes de continuar.'); abrirCarrito(); return; }
   if(!carrito.length){ alert('Tu carrito está vacío.'); return; }
   pedidoActual.prodId=null; iniciarCompra();
 }

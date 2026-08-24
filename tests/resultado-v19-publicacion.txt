@@ -1,0 +1,14 @@
+OK - bateria final V19
+- sintaxis JavaScript inline: OK
+- vidriera cliente/asesor: filtro central OK
+- buscador predictivo: filtro central OK
+- categorias: filtro central OK
+- relacionados: filtro central OK
+- enlace directo: ocultos bloqueados OK
+- compartir producto/Instagram/varios: ocultos bloqueados OK
+- compartir tienda: no arrastra ?prod= OK
+- carrito: elimina ocultos/sin stock y refresca precio OK
+- compra directa: revalida disponibilidad OK
+- fuente canonica: catalogo + incremental OK
+- guardado liviano V19: desactivado OK
+- casos funcionales de publicacion: 11/11 OK
