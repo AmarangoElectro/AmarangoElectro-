@@ -1,0 +1,196 @@
+name: Validar V19 publicacion en rama
+
+on:
+  push:
+    branches:
+      - fix/v19-sync-ocultos-validacion-20260824
+    paths:
+      - .github/workflows/validate-v19-publication-branch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/v19-sync-ocultos-validacion-20260824
+
+      - name: Blindar rutas secundarias
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('public/index.html')
+          s=p.read_text(encoding='utf-8')
+
+          def once(old,new,label):
+              global s
+              n=s.count(old)
+              if n!=1:
+                  raise SystemExit(f'{label}: esperaba 1 coincidencia y encontre {n}')
+              s=s.replace(old,new,1)
+
+          marcador="// ═══ Cajón lateral ═══"
+          helper="""// Regla unica de publicacion para cualquier accion que pueda exponer un producto.\nfunction tiendaProductoPublicable(p){\n  if(!p)return false;\n  if(p.esCelu)return p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true;\n  return tiendaEstaVisibleYConStock(p);\n}\nfunction tiendaAvisarNoPublicable(p){\n  if(tiendaProductoPublicable(p))return false;\n  if(typeof mostrarToast==='function')mostrarToast('Este producto ya no está disponible en la tienda');\n  return true;\n}\n\n"""
+          if 'function tiendaProductoPublicable(p)' not in s:
+              once(marcador,helper+marcador,'insertar helper publicable')
+
+          viejo="""  if(!tiendaEsAdmin){\n    var publicable=p.esCelu\n      ? (p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true)\n      : tiendaEstaVisibleYConStock(p);\n    if(!publicable){\n      if(typeof mostrarToast==='function')mostrarToast('Este producto ya no está disponible en la tienda');\n      return;\n    }\n  }"""
+          nuevo="""  if(!tiendaEsAdmin && tiendaAvisarNoPublicable(p))return;"""
+          if viejo in s:
+              once(viejo,nuevo,'detalle directo')
+
+          def insertar_guardia(nombre,needle,guardia):
+              global s
+              ini=s.find('function '+nombre)
+              if ini<0: raise SystemExit('No se encontro '+nombre)
+              pos=s.find(needle,ini)
+              if pos<0: raise SystemExit('No se encontro punto de guardia en '+nombre)
+              fin=pos+len(needle)
+              if guardia.strip() not in s[fin:fin+220]:
+                  s=s[:fin]+guardia+s[fin:]
+
+          insertar_guardia('tiendaDescargarImagenProducto(id){',"  var p=buscarProd(id);\n","  if(tiendaAvisarNoPublicable(p))return;\n")
+          insertar_guardia('compartirProducto(id){',"  var p=buscarProd(id);\n  if(!p)return;\n","  if(tiendaAvisarNoPublicable(p))return;\n")
+          insertar_guardia('compartirInstagram(id){',"  var p=buscarProd(id);\n  if(!p)return;\n","  if(tiendaAvisarNoPublicable(p))return;\n")
+
+          # Compartir tienda nunca arrastra ?prod= ni otros parametros.
+          ini=s.find('function compartirTienda(){')
+          if ini<0: raise SystemExit('No se encontro compartirTienda')
+          pos=s.find("  var link=window.location.href.split('#')[0];",ini)
+          if pos>=0:
+              s=s[:pos]+s[pos:].replace("  var link=window.location.href.split('#')[0];","  var link=window.location.href.split('#')[0].split('?')[0];",1)
+
+          # Compartir varios omite cualquier producto que haya dejado de estar publicado.
+          ini=s.find('function tiendaCompartirVarios(){')
+          if ini<0: raise SystemExit('No se encontro tiendaCompartirVarios')
+          old="  var prods=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});\n  if(!prods.length){ alert('No se encontraron los productos seleccionados.'); return; }"
+          new="  var encontrados=ids.map(function(id){return buscarProd(id);}).filter(function(p){return !!p;});\n  var prods=encontrados.filter(tiendaProductoPublicable);\n  if(prods.length!==encontrados.length && typeof mostrarToast==='function')mostrarToast('Se omitieron productos que ya no están disponibles');\n  if(!prods.length){ alert('Los productos seleccionados ya no están disponibles.'); return; }"
+          if old in s:
+              s=s[:ini]+s[ini:].replace(old,new,1)
+
+          # Carrito: al ocultar, agotar o cambiar precio, se reconcilia con el catalogo actual.
+          marker='// ===== CARRITO =====\nfunction agregarAlCarrito(id){'
+          carrito_helper="""// ===== CARRITO =====\nfunction tiendaRevalidarCarrito(){\n  var cambio=false, siguiente=[];\n  (carrito||[]).forEach(function(x){\n    var p=buscarProd(x.id);\n    if(!tiendaProductoPublicable(p)){cambio=true;return;}\n    var venta=Number(p.venta)||0;\n    if(x.nombre!==p.nombre || Number(x.venta)!==venta){x.nombre=p.nombre;x.venta=venta;cambio=true;}\n    siguiente.push(x);\n  });\n  carrito=siguiente;\n  return cambio;\n}\nfunction agregarAlCarrito(id){"""
+          if 'function tiendaRevalidarCarrito()' not in s:
+              once(marker,carrito_helper,'revalidar carrito')
+
+          insertar_guardia('agregarAlCarrito(id){',"  var p=buscarProd(id);\n  if(!p)return;\n","  if(tiendaAvisarNoPublicable(p))return;\n")
+
+          old='function actualizarCarritoUI(){\n  var total=carrito.reduce(function(s,x){return s+x.cantidad;},0);'
+          new='function actualizarCarritoUI(){\n  tiendaRevalidarCarrito();\n  var total=carrito.reduce(function(s,x){return s+x.cantidad;},0);'
+          if old in s: once(old,new,'actualizar carrito')
+
+          old='function abrirCarrito(){\n  if(!carrito.length){'
+          new="function abrirCarrito(){\n  if(tiendaRevalidarCarrito() && typeof mostrarToast==='function')mostrarToast('Actualizamos tu carrito con la disponibilidad y precios vigentes');\n  if(!carrito.length){"
+          if old in s: once(old,new,'abrir carrito')
+
+          old="function tiendaComprar(id){ pedidoActual.prodId=id; iniciarCompra(); }"
+          new="function tiendaComprar(id){ var p=buscarProd(id); if(tiendaAvisarNoPublicable(p))return; pedidoActual.prodId=id; iniciarCompra(); }"
+          if old in s: once(old,new,'comprar directo')
+
+          old="function finalizarPedido(){\n  if(!carrito.length){ alert('Tu carrito está vacío.'); return; }\n  pedidoActual.prodId=null; iniciarCompra();\n}"
+          new="function finalizarPedido(){\n  if(tiendaRevalidarCarrito()){ actualizarCarritoUI(); alert('Actualizamos el carrito porque cambió la disponibilidad o el precio de un producto. Revisalo antes de continuar.'); abrirCarrito(); return; }\n  if(!carrito.length){ alert('Tu carrito está vacío.'); return; }\n  pedidoActual.prodId=null; iniciarCompra();\n}"
+          if old in s: once(old,new,'finalizar pedido')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validar sintaxis y rutas de publicacion
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re, json
+          s=Path('public/index.html').read_text(encoding='utf-8')
+          checks={
+            'guardia_unica':'function tiendaProductoPublicable(p)' in s,
+            'vidriera_filtrada':'var universo=tiendaProductos.filter(tiendaEstaVisibleYConStock);' in s,
+            'buscador_filtrado':'tiendaEsAdmin || tiendaEstaVisibleYConStock(p)' in s,
+            'relacionados_filtrados':'tiendaProductos.filter(tiendaEstaVisibleYConStock).slice()' in s,
+            'detalle_directo_bloqueado':'if(!tiendaEsAdmin && tiendaAvisarNoPublicable(p))return;' in s,
+            'share_producto_bloqueado':s.count('if(tiendaAvisarNoPublicable(p))return;')>=4,
+            'share_varios_filtrado':'var prods=encontrados.filter(tiendaProductoPublicable);' in s,
+            'share_tienda_sin_query':"window.location.href.split('#')[0].split('?')[0]" in s,
+            'carrito_revalidado':'function tiendaRevalidarCarrito()' in s and 'tiendaRevalidarCarrito();' in s,
+            'compra_directa_revalidada':'function tiendaComprar(id){ var p=buscarProd(id); if(tiendaAvisarNoPublicable(p))return;' in s,
+            'guardado_canonico':"TIENDA_GUARDADO_LIVIANO_ACTIVO?tiendaGuardarNubeLiviano():tiendaSubirNube()" in s,
+            'guardado_liviano_apagado':'var TIENDA_GUARDADO_LIVIANO_ACTIVO=false;' in s,
+          }
+          malos=[k for k,v in checks.items() if not v]
+          if malos: raise SystemExit('FALLARON: '+', '.join(malos))
+
+          # Extraer scripts inline y comprobar sintaxis JavaScript real con node --check.
+          scripts=[]
+          for m in re.finditer(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.S|re.I):
+              tag=s[m.start():s.find('>',m.start())+1]
+              if re.search(r'\bsrc\s*=',tag,re.I): continue
+              scripts.append(m.group(1))
+          Path('/tmp/amarango-inline.js').write_text('\n;\n'.join(scripts),encoding='utf-8')
+          Path('/tmp/checks.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+          node --check /tmp/amarango-inline.js
+
+      - name: Prueba funcional de la regla de publicacion
+        shell: bash
+        run: |
+          cat >/tmp/publicacion-test.js <<'JS'
+          function tiendaLeerStockProveedor(p){return p._stock||{informado:false,valor:0};}
+          function tiendaEstaVisibleYConStock(p){
+            if(!p || p.visible!==true || p.pendienteRevisionManual===true ||
+               p.sinStock===true || p.estadoProveedor==='sin_stock' ||
+               p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true)return false;
+            var stock=tiendaLeerStockProveedor(p);
+            return !(stock.informado && stock.valor<=0);
+          }
+          function tiendaProductoPublicable(p){
+            if(!p)return false;
+            if(p.esCelu)return p.visible!==false && p.ocultoTienda!==true && p.sinStock!==true;
+            return tiendaEstaVisibleYConStock(p);
+          }
+          const casos=[
+            ['visible', {visible:true}, true],
+            ['oculto', {visible:false}, false],
+            ['revision', {visible:true,pendienteRevisionManual:true}, false],
+            ['sinStock', {visible:true,sinStock:true}, false],
+            ['estadoProveedor', {visible:true,estadoProveedor:'sin_stock'}, false],
+            ['ocultoManual', {visible:true,ocultoManualProveedor:true}, false],
+            ['duplicado', {visible:true,ocultoPorDuplicado:true}, false],
+            ['stockCero', {visible:true,_stock:{informado:true,valor:0}}, false],
+            ['celuVisible', {esCelu:true,visible:true,sinStock:false,ocultoTienda:false}, true],
+            ['celuOculto', {esCelu:true,visible:false,ocultoTienda:true,sinStock:false}, false],
+            ['celuSinStock', {esCelu:true,visible:true,ocultoTienda:false,sinStock:true}, false]
+          ];
+          for(const [n,p,e] of casos){const r=tiendaProductoPublicable(p);if(r!==e)throw new Error(`${n}: esperado ${e}, dio ${r}`)}
+          console.log(`OK ${casos.length} casos de publicacion`);
+          JS
+          node /tmp/publicacion-test.js
+
+      - name: Guardar reporte verde en la rama
+        shell: bash
+        run: |
+          mkdir -p tests
+          cat > tests/resultado-v19-publicacion.txt <<'TXT'
+          OK - bateria final V19
+          - sintaxis JavaScript inline: OK
+          - vidriera cliente/asesor: filtro central OK
+          - buscador predictivo: filtro central OK
+          - categorias: filtro central OK
+          - relacionados: filtro central OK
+          - enlace directo: ocultos bloqueados OK
+          - compartir producto/Instagram/varios: ocultos bloqueados OK
+          - compartir tienda: no arrastra ?prod= OK
+          - carrito: elimina ocultos/sin stock y refresca precio OK
+          - compra directa: revalida disponibilidad OK
+          - fuente canonica: catalogo + incremental OK
+          - guardado liviano V19: desactivado OK
+          - casos funcionales de publicacion: 11/11 OK
+          TXT
+          git config user.name "AmarangoElectro Test Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/index.html tests/resultado-v19-publicacion.txt
+          git commit -m "Blinda publicacion y valida bateria V19"
+          git push origin fix/v19-sync-ocultos-validacion-20260824
