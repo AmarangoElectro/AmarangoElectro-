@@ -4,11 +4,12 @@
 */
 (function(){
   'use strict';
-  var VERSION='margarita-client-role-guard-2026-08-24-1';
+  var VERSION='margarita-client-role-guard-2026-08-24-2';
   if(window.__AE_MARGARITA_CLIENT_ROLE_GUARD__===VERSION)return;
   window.__AE_MARGARITA_CLIENT_ROLE_GUARD__=VERSION;
 
   var K_CLIENTE='ae_cliente_identidad';
+  var intentos=0;
 
   function leerCliente(){
     try{return JSON.parse(localStorage.getItem(K_CLIENTE)||'{}')||{};}catch(e){return {};}
@@ -47,7 +48,7 @@
   }
 
   function instalarFetch(){
-    if(!window.fetch||window.fetch.__aeClientRoleGuard)return;
+    if(!window.fetch||window.fetch.__aeClientRoleGuard)return !!window.fetch;
     var original=window.fetch.bind(window);
     var fn=async function(input,init){
       try{
@@ -66,11 +67,13 @@
     fn.__aeClientRoleGuard=VERSION;
     fn.__original=original;
     window.fetch=fn;
+    return true;
   }
 
   function envolverAbrir(){
     var actual=window.margaritaAbrir;
-    if(typeof actual!=='function'||actual.__aeClientRoleGuard)return false;
+    if(typeof actual!=='function')return false;
+    if(actual.__aeClientRoleGuard)return true;
     var fn=function(){
       var r=actual.apply(this,arguments);
       setTimeout(corregirSaludo,0);
@@ -86,7 +89,8 @@
 
   function envolverVistaCliente(){
     var actual=window.toggleVistaCliente;
-    if(typeof actual!=='function'||actual.__aeClientRoleGuard)return false;
+    if(typeof actual!=='function')return false;
+    if(actual.__aeClientRoleGuard)return true;
     var fn=function(){
       var r=actual.apply(this,arguments);
       setTimeout(corregirSaludo,0);
@@ -99,18 +103,24 @@
     return true;
   }
 
-  function instalar(){
-    instalarFetch();
-    envolverAbrir();
-    envolverVistaCliente();
-    corregirSaludo();
+  function observarMensajes(){
     var cont=document.getElementById('margarita-msgs');
-    if(cont&&!cont.__aeClientRoleGuardObs){
-      var obs=new MutationObserver(function(){requestAnimationFrame(corregirSaludo);});
-      obs.observe(cont,{childList:true,subtree:true});
-      cont.__aeClientRoleGuardObs=obs;
-    }
-    setTimeout(instalar,500);
+    if(!cont)return false;
+    if(cont.__aeClientRoleGuardObs)return true;
+    var obs=new MutationObserver(function(){requestAnimationFrame(corregirSaludo);});
+    obs.observe(cont,{childList:true,subtree:true});
+    cont.__aeClientRoleGuardObs=obs;
+    return true;
+  }
+
+  function instalar(){
+    var okFetch=instalarFetch();
+    var okAbrir=envolverAbrir();
+    var okVista=envolverVistaCliente();
+    var okObs=observarMensajes();
+    corregirSaludo();
+    if(okFetch&&okAbrir&&okVista&&okObs)return;
+    if(intentos++<30)setTimeout(instalar,250);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalar,{once:true});
