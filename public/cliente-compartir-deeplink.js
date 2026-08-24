@@ -7,7 +7,7 @@
 */
 (function(){
   'use strict';
-  var VERSION='cliente-share-deeplink-2026-08-24-1';
+  var VERSION='cliente-share-deeplink-2026-08-24-2';
   if(window.__AE_CLIENT_SHARE_DEEPLINK__===VERSION)return;
   window.__AE_CLIENT_SHARE_DEEPLINK__=VERSION;
 
@@ -192,6 +192,11 @@
 
     var p=null;
     try{if(listoBuscar)p=window.buscarProd(id);}catch(e){}
+    // Si buscarProd ya existe pero el catálogo todavía no terminó de hidratar,
+    // no declaramos el link inválido: esperamos hasta ~16 s antes de abandonar.
+    if(!p&&intentos<90){
+      setTimeout(function(){procesarDeepLink(intentos+1);},180);return;
+    }
     window.__AE_PRODUCTO_DEEPLINK_ABIERTO__=id;
     if(!p){aviso('Ese producto ya no está disponible. Te mostramos la tienda.');return;}
     if(!productoApto(p)){aviso('Ese producto no está disponible ahora. Te mostramos alternativas.');return;}
