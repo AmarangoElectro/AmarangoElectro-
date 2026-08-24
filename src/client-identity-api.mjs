@@ -72,6 +72,10 @@ function publico(c) {
     apodo: limpiarNombre(c.apodo, 32),
     telefono: telefonoDigitos(c.telefono || c.tel),
     nombrePreferidoConfirmado: c.nombrePreferidoConfirmado === true,
+    aceptaPromos: c.aceptaPromos === true,
+    regaloPendiente: c.regaloPendiente === true,
+    regaloDescripcion: limpiarNombre(c.regaloDescripcion, 120),
+    clienteTibio: c.clienteTibio === true,
   };
 }
 
@@ -117,7 +121,15 @@ export async function servirIdentidadCliente(request, env) {
       let i = lista.findIndex((c) => telefonoClave(c && (c.telefono || c.tel)) === telefonoClave(telefono));
       if (i < 0 && nombre) i = lista.findIndex((c) => normalizarNombre(c && c.nombre) === normalizarNombre(nombre));
       const previo = i >= 0 ? lista[i] : {};
+      const esAltaNueva = i < 0 && accion === "registrar";
       const ahora = new Date().toISOString();
+
+      // El regalo no depende del monto de compra: queda pendiente para el primer cierre.
+      // El equipo define el obsequio concreto según el producto comprado.
+      const regaloPendiente = esAltaNueva
+        ? true
+        : (typeof entrada.regaloPendiente === "boolean" ? entrada.regaloPendiente : previo.regaloPendiente === true);
+
       const reg = {
         ...previo,
         id: previo.id || nuevoId(telefono),
@@ -125,10 +137,21 @@ export async function servirIdentidadCliente(request, env) {
         apodo: apodo || previo.apodo || "",
         telefono,
         nombrePreferidoConfirmado: entrada.nombrePreferidoConfirmado === true || previo.nombrePreferidoConfirmado === true,
+        aceptaPromos: typeof entrada.aceptaPromos === "boolean" ? entrada.aceptaPromos : previo.aceptaPromos === true,
+        consentimientoWhatsAppFecha: entrada.aceptaPromos === true
+          ? (previo.consentimientoWhatsAppFecha || ahora)
+          : (entrada.aceptaPromos === false ? "" : (previo.consentimientoWhatsAppFecha || "")),
+        regaloPendiente,
+        regaloDescripcion: previo.regaloDescripcion || "Obsequio acorde al producto de la primera compra",
+        regaloCondicion: previo.regaloCondicion || "primera_compra_sin_minimo",
+        clienteTibio: esAltaNueva ? true : (typeof entrada.clienteTibio === "boolean" ? entrada.clienteTibio : previo.clienteTibio === true),
+        origenRegistro: previo.origenRegistro || String(entrada.origenRegistro || entrada.origenAlta || "registro_web").slice(0, 50),
+        fechaRegistroWeb: previo.fechaRegistroWeb || (esAltaNueva ? ahora : ""),
         origenAlta: previo.origenAlta || String(entrada.origenAlta || "margarita_cliente").slice(0, 40),
         creado: previo.creado || ahora,
         actualizado: ahora,
       };
+
       if (i >= 0) lista[i] = reg; else lista.push(reg);
       await guardarClientes(cfg, lista.slice(-5000));
       return json({ ok: true, cliente: publico(reg) });
