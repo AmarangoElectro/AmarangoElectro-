@@ -4,7 +4,7 @@
 */
 (function(){
   'use strict';
-  var VERSION='ae-share-product-2026-08-24-1';
+  var VERSION='ae-share-product-2026-08-24-2';
   if(window.__AE_SHARE_PRODUCT__===VERSION)return;
   window.__AE_SHARE_PRODUCT__=VERSION;
 
@@ -40,25 +40,47 @@
     copiar(texto).then(function(){toast('🔗 Enlace copiado para compartir');}).catch(function(){toast('No se pudo compartir');});
   }
   function posicionar(card,zoom,b){
-    if(!card||!zoom||!b)return;
+    if(!card||!zoom||!b)return false;
     var cr=card.getBoundingClientRect(),zr=zoom.getBoundingClientRect();
-    if(!cr.width||!zr.width)return;
+    if(!cr.width||!zr.width||!zr.height)return false;
     if(getComputedStyle(card).position==='static')card.style.position='relative';
-    b.style.left=Math.round(zr.left-cr.left+zr.width+8)+'px';
-    b.style.top=Math.round(zr.top-cr.top)+'px';
-    b.style.width=Math.round(zr.width)+'px';
-    b.style.height=Math.round(zr.height)+'px';
+    var size=Math.max(34,Math.min(44,Math.round(Math.min(zr.width,zr.height))));
+    b.style.left=Math.round(zr.left-cr.left+zr.width+7)+'px';
+    b.style.top=Math.round(zr.top-cr.top+(zr.height-size)/2)+'px';
+    b.style.width=size+'px';
+    b.style.height=size+'px';
+    b.style.opacity='1';
+    return true;
   }
-  function decorarCard(card){
-    if(!card||card.querySelector('.ae-share-product'))return;
-    var zoom=card.querySelector('button[onclick*="abrirFotoGrande"],button[aria-label*="ampli" i],button[title*="ampli" i]');
-    if(!zoom)return;
-    var b=document.createElement('button');b.type='button';b.className='ae-share-product';b.setAttribute('aria-label','Compartir producto');b.setAttribute('title','Compartir producto');b.innerHTML=ICON;
-    b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();compartir(card);});
-    card.appendChild(b);positionar(card,zoom,b);
+  function buscarZoom(card){
+    return card&&card.querySelector('button[onclick*="abrirFotoGrande"],button[aria-label*="ampli" i],button[title*="ampli" i]');
   }
-  function decorar(){document.querySelectorAll('#tienda-grid .prod-card,[id^="card-"]').forEach(decorarCard);}
-  function estilos(){if(document.getElementById('ae-share-product-css'))return;var s=document.createElement('style');s.id='ae-share-product-css';s.textContent='.ae-share-product{position:absolute;z-index:7;border:0;border-radius:999px;background:rgba(11,45,107,.82);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 3px 12px rgba(0,0,0,.18);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);cursor:pointer;-webkit-tap-highlight-color:transparent}.ae-share-product svg{width:52%;height:52%}.ae-share-product:active{transform:scale(.94)}';document.head.appendChild(s);}
-  function instalar(){estilos();decorar();var g=document.getElementById('tienda-grid');if(g)new MutationObserver(decorar).observe(g,{childList:true,subtree:true});window.addEventListener('resize',function(){document.querySelectorAll('.ae-share-product').forEach(function(b){var c=b.closest('[id^="card-"],.prod-card');var z=c&&c.querySelector('button[onclick*="abrirFotoGrande"],button[aria-label*="ampli" i],button[title*="ampli" i]');if(c&&z)posicionar(c,z,b);});},{passive:true});}
+  function ajustarCard(card){
+    if(!card)return;
+    var zoom=buscarZoom(card);if(!zoom)return;
+    var b=card.querySelector('.ae-share-product');
+    if(!b){
+      b=document.createElement('button');b.type='button';b.className='ae-share-product';b.setAttribute('aria-label','Compartir producto');b.setAttribute('title','Compartir producto');b.innerHTML=ICON;
+      b.addEventListener('click',function(ev){ev.preventDefault();ev.stopPropagation();compartir(card);});
+      card.appendChild(b);
+    }
+    posicionar(card,zoom,b);
+  }
+  function decorar(){document.querySelectorAll('#tienda-grid .prod-card,[id^="card-"]').forEach(ajustarCard);}
+  function reacomodar(){
+    decorar();
+    requestAnimationFrame(function(){decorar();requestAnimationFrame(decorar);});
+    setTimeout(decorar,120);
+    setTimeout(decorar,350);
+  }
+  function estilos(){if(document.getElementById('ae-share-product-css'))return;var s=document.createElement('style');s.id='ae-share-product-css';s.textContent='.ae-share-product{position:absolute;z-index:7;width:40px;height:40px;max-width:44px;max-height:44px;min-width:34px;min-height:34px;opacity:0;border:0;border-radius:999px;background:rgba(11,45,107,.82);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 3px 12px rgba(0,0,0,.18);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .12s ease,transform .08s ease}.ae-share-product svg{display:block;width:54%;height:54%;max-width:24px;max-height:24px;pointer-events:none}.ae-share-product:active{transform:scale(.94)}';document.head.appendChild(s);}
+  function instalar(){
+    estilos();reacomodar();
+    var g=document.getElementById('tienda-grid');
+    if(g)new MutationObserver(function(){reacomodar();}).observe(g,{childList:true,subtree:true});
+    window.addEventListener('resize',reacomodar,{passive:true});
+    window.addEventListener('load',reacomodar,{once:true});
+    document.addEventListener('load',function(ev){if(ev.target&&ev.target.tagName==='IMG')setTimeout(reacomodar,0);},true);
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalar,{once:true});else instalar();
 })();
