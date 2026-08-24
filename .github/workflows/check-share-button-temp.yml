@@ -1,0 +1,19 @@
+name: Check share button temp
+on:
+  push:
+    branches: [fix/share-button-size-cache-20260824]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax
+        run: node --check public/tienda-compartir-producto.js
+      - name: Scope
+        run: |
+          set -e
+          git diff --name-only origin/main...HEAD | grep -Fx 'public/index.html' && exit 1 || true
+          grep -q "max-width:44px" public/tienda-compartir-producto.js
+          grep -q "tienda-compartir-producto.js?v=20260824-2" public/margarita-ui.js
