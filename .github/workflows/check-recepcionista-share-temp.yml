@@ -20,3 +20,4 @@ jobs:
           grep -q 'Margarita Recepcionista' public/margarita-guia-clientes.js
           grep -q 'Compartir producto' public/tienda-compartir-producto.js
           grep -q 'tienda-compartir-producto' public/margarita-ui.js
+# trigger
