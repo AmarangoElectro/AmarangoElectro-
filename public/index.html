@@ -4161,7 +4161,7 @@ var _buscarTimer=null;
 var _cerrarSugTimer=null;
 function hdrCerrarSugerencias(){
   var box=document.getElementById('hdr-sugerencias');
-  if(box){ box.style.display='none'; box.innerHTML=''; }
+  if(box && (box.style.display!=='none' || box.childNodes.length)){ box.style.display='none'; box.innerHTML=''; }
 }
 // PREDICTIVO: muestra abajo del buscador los productos que coinciden mientras escribís
 function hdrPredictivo(){
@@ -5776,6 +5776,10 @@ function tiendaCardsHtml(sublista){
       // Un solo botón: la foto y el precio son los protagonistas.
       // "Ver cuotas" y "Consultar" quedan adentro del detalle del producto.
       card+='<button class="calc-btn" style="font-size:.8rem;padding:11px;background:var(--nar);margin-top:2px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.32);" onclick="tiendaVerDetalle('+pid+')">Ver producto</button>';
+      // Marketing orgánico: el cliente puede compartir un producto sin ver controles internos.
+      if((!revUnlocked&&!adminUnlocked)||vistaPreviaCliente){
+        card+='<button class="ae-share-product-client" style="width:100%;font-size:.72rem;padding:9px 8px;margin-top:7px;background:#fff;color:var(--az);border:1.5px solid #cbdaf0;border-radius:9px;font-weight:850;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 2px 7px rgba(11,45,107,.08);" onclick="event.stopPropagation();compartirProducto('+pid+')"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="18" cy="5" r="2.3"></circle><circle cx="6" cy="12" r="2.3"></circle><circle cx="18" cy="19" r="2.3"></circle><path d="m8.1 10.8 7.6-4.4M8.1 13.2l7.6 4.4"></path></svg><span>Compartir</span></button>';
+      }
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
         card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')">📤 Compartir</button>';
@@ -6637,8 +6641,7 @@ function mostrarNavInferior(){
 // Vendedores para el pedido por WhatsApp
 var TIENDA_VENDEDORES=[
   {nombre:'Maximiliano', tel:'5491168610532'},
-  {nombre:'Angela',      tel:'5491168746034'},
-  {nombre:'Selene',      tel:'5491162107212'}
+  {nombre:'Ángela',      tel:'5491168746034'}
 ];
 
 // Abre un selector de vendedor y arma el mensaje de WhatsApp con el producto
@@ -6662,7 +6665,7 @@ function tiendaPedirWA(id){
     html+='<button class="calc-btn" style="width:100%;background:var(--nar);margin-bottom:8px;font-size:1rem;" onclick="tiendaVender()">🛍️ VENDER (enviar al cliente)</button>';
   }else{
     // opción SOLO para clientes: consultar con su vendedor (elige contacto)
-    html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="tiendaConsultarVendedor()">🤝 Consultá con tu vendedor</button>';
+    html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="tiendaConsultarVendedor()">🤝 Consultá con tu asesor</button>';
   }
   html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
@@ -6676,9 +6679,9 @@ function tiendaComoComprar(){
 
     +'<div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div style="font-size:.82rem;color:var(--az);"><b>Mirá los productos</b><br><span style="color:var(--sub);">Tocá cualquier producto para ver la foto, el precio de contado y las cuotas.</span></div></div>'
 
-    +'<div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div style="font-size:.82rem;color:var(--az);"><b>Consultá el stock</b><br><span style="color:var(--sub);">Tocá <b>📲 Consultar</b> en el producto.<br>• <b>¿Primera vez?</b> Escribile a <b>Maxi, Angela o Selene</b>, ellos te guían. 😊<br>• <b>¿Ya tenés vendedor?</b> Elegí <b>🤝 Consultá con tu vendedor</b> y buscalo en tus contactos.</span></div></div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div style="font-size:.82rem;color:var(--az);"><b>Consultá el stock</b><br><span style="color:var(--sub);">Tocá <b>📲 Consultar</b> en el producto.<br>• <b>¿Primera vez?</b> Escribile a <b>Maximiliano o Ángela</b>, ellos te guían. 😊<br>• <b>¿Ya tenés asesor?</b> Elegí <b>🤝 Consultá con tu asesor</b> y buscalo en tus contactos.</span></div></div>'
 
-    +'<div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div style="font-size:.82rem;color:var(--az);"><b>Coordinás y listo</b><br><span style="color:var(--sub);">Te confirmamos el stock y arreglás la entrega. Los <b>pagos los coordinás con tu vendedor</b>. ¡Así de fácil! 🎉</span></div></div>'
+    +'<div style="display:flex;gap:10px;margin-bottom:14px;align-items:flex-start;"><div style="background:var(--nar);color:#fff;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div style="font-size:.82rem;color:var(--az);"><b>Coordinás y listo</b><br><span style="color:var(--sub);">Te confirmamos el stock y arreglás la entrega. Los <b>pagos los coordinás con tu asesor</b>. ¡Así de fácil! 🎉</span></div></div>'
 
     +'<div style="background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:10px 12px;font-size:.75rem;color:var(--az);margin-bottom:14px;">💬 <b>¿Tenés dudas?</b> No te compliques, escribinos y te asesoramos sin compromiso. Estamos para ayudarte.</div>'
 
@@ -6696,7 +6699,7 @@ function tiendaAsesoramiento(){
     var msg='Hola '+v.nombre+'! 🐝 Quiero que me asesoren para comprar en AmarangoElectro.';
     html+='<button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="window.open(\'https://wa.me/'+v.tel+'?text='+encodeURIComponent(msg)+'\',\'_blank\')">💬 '+v.nombre+'</button>';
   });
-  html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent('Hola! 🐝 Soy cliente de AmarangoElectro y quiero que me asesoren.')+'\',\'_blank\')">🤝 Consultá con tu vendedor</button>';
+  html+='<button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent('Hola! 🐝 Soy cliente de AmarangoElectro y quiero que me asesoren.')+'\',\'_blank\')">🤝 Consultá con tu asesor</button>';
   html+='<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="tiendaComoComprar()">← Volver</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
 }
@@ -7423,13 +7426,19 @@ function volverArriba(){
     var sc=(tab&&tab.scrollTop)||window.scrollY||document.documentElement.scrollTop||0;
     b.style.display = (sc>300 && tab && tab.classList.contains('on'))?'block':'none';
   }
-  window.addEventListener('scroll', chequear, true);
+  var _arribaScrollRaf=0;
+  function chequearSuave(){
+    if(_arribaScrollRaf)return;
+    _arribaScrollRaf=window.requestAnimationFrame(function(){_arribaScrollRaf=0;chequear();});
+  }
+  window.addEventListener('scroll', chequearSuave, {passive:true});
+  chequear();
 })();
 
 // Genera el código QR de la tienda
 function mostrarQR(){
   if(!adminUnlocked){ alert('🔒 El código QR está disponible únicamente para administradores.'); return; }
-  var link=window.location.href.split('#')[0];
+  var link=window.location.href.split('#')[0].split('?')[0];
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;text-align:center;">📱 Código QR de tu tienda</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);text-align:center;margin:6px 0 14px;">Imprimilo y pegalo en tu local, flyers o donde quieras. La gente lo escanea y entra a tu tienda.</p>'
     +'<div id="qr-box" style="display:flex;justify-content:center;padding:16px;background:#fff;border-radius:12px;margin-bottom:14px;"></div>'
@@ -7461,7 +7470,7 @@ function descargarQR(){
 
 // Compartir la tienda entera con un mensaje de presentación
 function compartirTienda(){
-  var link=window.location.href.split('#')[0];
+  var link=window.location.href.split('#')[0].split('?')[0];
   var msg='🐝 *AmarangoElectro* — Tu tienda de electro y celulares\n\n'
     +'✨ Equipá tu casa, fácil y en cuotas fijas\n'
     +'📱 Celulares · ❄️ Heladeras · 📺 TV · 🍳 Cocina y más\n\n'
@@ -10743,6 +10752,7 @@ try{ tiendaInit(); }catch(e){}
     <div style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;padding:12px 15px;display:flex;align-items:center;gap:10px;border-bottom:3px solid #FF7A00;">
       <div style="width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;"><img id="margarita-cab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;"></div>
       <div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:1rem;">Margarita</div><div style="font-size:.67rem;opacity:.86;">Asistente de AmarangoElectro · en línea</div></div>
+      <button id="margarita-reset-btn" onclick="margaritaNuevaCharla()" aria-label="Nueva charla" title="Nueva charla" style="width:38px;height:38px;border-radius:11px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;flex:0 0 auto;">↻</button>
       <button onclick="margaritaCerrar()" aria-label="Cerrar" style="background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;padding:4px;">×</button>
     </div>
     <div id="margarita-msgs" style="flex:1;overflow-y:auto;padding:13px 11px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;"></div>
@@ -10779,6 +10789,17 @@ function margaritaAbrir(){
   document.getElementById('margarita-overlay').style.display='flex';
   if(!_margaritaHist.length)margaritaPintar('margarita','¡Hola! Soy Margarita 🐝 ¿Qué estás buscando? Te hago unas preguntas cortitas y te ayudo a elegir la mejor opción.');
   setTimeout(function(){var i=document.getElementById('margarita-input');if(i)i.focus();},250);
+}
+function margaritaNuevaCharla(){
+  _margaritaHist=[];
+  _margaritaCargando=false;
+  try{margaritaEscribiendo(false);}catch(e){}
+  var cont=document.getElementById('margarita-msgs');
+  var inp=document.getElementById('margarita-input');
+  if(cont)cont.innerHTML='';
+  if(inp)inp.value='';
+  margaritaPintar('margarita','¡Hola! Soy Margarita 🐝 ¿Qué estás buscando? Te hago unas preguntas cortitas y te ayudo a elegir la mejor opción.');
+  if(inp)setTimeout(function(){inp.focus();},40);
 }
 function margaritaCerrar(){document.getElementById('margarita-overlay').style.display='none';}
 function margaritaPintar(quien,texto){

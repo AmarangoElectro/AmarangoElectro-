@@ -1,4 +1,4 @@
-const VERSION = "egress-2026-08-23-3";
+const VERSION = "marketing-scroll-2026-08-24-1";
 const STORAGE_MARK = "/storage/v1/object/public/tienda-fotos/";
 const STORAGE_RENDER_MARK = "/storage/v1/render/image/public/tienda-fotos/";
 
@@ -261,17 +261,7 @@ function instalarBotonCompartirTienda() {
   if (!header) return false;
 
   let boton = document.getElementById("ae-share-store-btn");
-  const admin = esAdminActual();
   const marca = header.querySelector(".hdr-marca");
-
-  if (admin) {
-    if (boton) boton.remove();
-    if (marca && marca.dataset.aeSharePadding === "1") {
-      marca.style.removeProperty("padding-right");
-      delete marca.dataset.aeSharePadding;
-    }
-    return true;
-  }
 
   if (!boton) {
     boton = document.createElement("button");
@@ -345,9 +335,14 @@ function instalarProteccionClienteYCompartir() {
       ev.stopImmediatePropagation();
     }, true);
 
+    let uiRaf = 0;
     const obs = new MutationObserver(function() {
-      protegerControlesInternosFueraDeAdmin();
-      instalarBotonCompartirTienda();
+      if (uiRaf) return;
+      uiRaf = window.requestAnimationFrame(function() {
+        uiRaf = 0;
+        protegerControlesInternosFueraDeAdmin();
+        instalarBotonCompartirTienda();
+      });
     });
     obs.observe(document.documentElement, { childList:true, subtree:true });
     window.__aeProteccionClienteCompartir = VERSION;
