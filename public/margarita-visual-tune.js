@@ -2,12 +2,11 @@
    - launcher más visible cuando el chat está cerrado
    - launcher oculto mientras el chat está abierto
    - cabecera azul más compacta para ganar área útil
-   - avatar oficial opción 4 en launcher, cabecera y mensajes
+   - NO administra el avatar: la UI aprobada es la única fuente visual
 */
 (function(){
   'use strict';
-  const VERSION='margarita-visual-tune-2026-08-23-5';
-  const AVATAR='/margarita-avatar-v4.webp?v=20260823-2';
+  const VERSION='margarita-visual-tune-2026-08-24-2';
   if(window.__AE_MARGARITA_VISUAL_TUNE__===VERSION)return;
   window.__AE_MARGARITA_VISUAL_TUNE__=VERSION;
 
@@ -42,9 +41,7 @@
         width:38px!important;height:38px!important;flex-basis:38px!important;
       }
       #margarita-panel .mg-mensajes{padding-top:12px!important;}
-      #margarita-panel .mg-bot-avatar{
-        object-fit:cover!important;border-radius:50%!important;
-      }
+      #margarita-panel .mg-bot-avatar{object-fit:cover!important;border-radius:50%!important;}
       @media(max-width:360px){
         #margarita-fab{width:61px!important;height:61px!important;min-width:61px!important;min-height:61px!important;}
         #margarita-panel .mg-header{padding:9px 10px!important;gap:8px!important;}
@@ -53,41 +50,23 @@
     `;document.head.appendChild(s);
   }
 
-  function aplicarAvatar(){
-    const selectores=[
-      '#margarita-fab img',
-      '#margarita-panel .mg-header img',
-      '#margarita-panel .mg-bot-avatar'
-    ];
-    document.querySelectorAll(selectores.join(',')).forEach(img=>{
-      if(img && img.tagName==='IMG' && img.getAttribute('src')!==AVATAR){
-        img.setAttribute('src',AVATAR);
-        img.setAttribute('alt','Margarita');
-      }
-    });
-  }
-
   function sincronizar(){
     const overlay=document.getElementById('margarita-overlay');
     const abierto=!!(overlay&&overlay.classList.contains('abierto'));
     document.body&&document.body.classList.toggle('ae-margarita-abierta',abierto);
-    aplicarAvatar();
   }
 
   function instalar(){
     instalarEstilos();
-    aplicarAvatar();
     const overlay=document.getElementById('margarita-overlay');
     if(!overlay){setTimeout(instalar,180);return;}
     sincronizar();
     if(!overlay.__aeVisualObserver){
-      const obs=new MutationObserver(()=>{sincronizar();aplicarAvatar();});
-      obs.observe(overlay,{attributes:true,attributeFilter:['class','style'],childList:true,subtree:true});
+      const obs=new MutationObserver(sincronizar);
+      obs.observe(overlay,{attributes:true,attributeFilter:['class','style']});
       overlay.__aeVisualObserver=obs;
     }
     document.addEventListener('click',function(){setTimeout(sincronizar,0);setTimeout(sincronizar,220);},true);
-    setTimeout(aplicarAvatar,350);
-    setTimeout(aplicarAvatar,900);
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalar,{once:true});
