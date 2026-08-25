@@ -910,6 +910,10 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaRestaurarAbrir()">📂 Restaurar backup</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
+    <button id="tienda-btn-diag-ocultos" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#fff7ed;color:#b45309;border:2px solid #fed7aa;"
+      onclick="tiendaDiagnosticoOcultos()">🕵️ Diagnóstico de ocultos y pendientes</button>
+    <button id="tienda-btn-restaurar-manuales" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#fef2f2;color:#b91c1c;border:2px solid #fecaca;"
+      onclick="tiendaRestaurarOcultosManuales()">👁️ Mostrar productos ocultados a mano (revisar antes)</button>
     <button id="tienda-btn-auth-fotos" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#eef4ff;color:var(--az);border:2px solid #cddffb;"
       onclick="tiendaAuthFotosAbrir()">🔐 Fotos: conectar administrador</button>
     <button id="tienda-btn-auth-fotos-salir" class="calc-btn" style="display:none;width:100%;margin-top:8px;background:#fff1f2;color:var(--red);border:2px solid #fecaca;"
@@ -3462,6 +3466,8 @@ function tiendaAplicarModo(){
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
   var btnSubir=document.getElementById('tienda-btn-subir'); if(btnSubir)btnSubir.style.display = tiendaEsAdmin?'block':'none';
   var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
+  var btnDiagOcultos=document.getElementById('tienda-btn-diag-ocultos'); if(btnDiagOcultos)btnDiagOcultos.style.display = tiendaEsAdmin?'block':'none';
+  var btnRestaurarManuales=document.getElementById('tienda-btn-restaurar-manuales'); if(btnRestaurarManuales)btnRestaurarManuales.style.display = tiendaEsAdmin?'block':'none';
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
@@ -5064,6 +5070,62 @@ function tiendaActualizarMotivosOcultos(){
     else delete p.motivoOculto;
   });
 }
+// Cuenta TODOS los productos ocultos/pendientes por motivo real, de una sola
+// vez, para no tener que revisar producto por producto a mano.
+function tiendaDiagnosticoOcultos(){
+  var conteo={manual:0,duplicado:0,sin_stock:0,revision_precio:0,sin_motivo:0};
+  var ejemplos={manual:[],duplicado:[],sin_motivo:[]};
+  (tiendaProductos||[]).forEach(function(p){
+    var motivo=tiendaMotivoOcultoActual(p);
+    if(!motivo)return;
+    conteo[motivo]=(conteo[motivo]||0)+1;
+    if(ejemplos[motivo] && ejemplos[motivo].length<5){
+      ejemplos[motivo].push(p.nombre+' (stock: '+(tiendaLeerStockProveedor(p).informado?tiendaLeerStockProveedor(p).valor:'-')+')');
+    }
+  });
+  var gruposDuplicadosDiag={};
+  (tiendaProductos||[]).forEach(function(p){
+    if(p&&p.duplicadoGrupo)(gruposDuplicadosDiag[String(p.duplicadoGrupo)]=gruposDuplicadosDiag[String(p.duplicadoGrupo)]||[]).push(p);
+  });
+  var totalGrupos=Object.keys(gruposDuplicadosDiag).length;
+  var revisionManualCount=tiendaProductos.filter(tiendaEsPendienteRevisionManual).length;
+  var imagenesPendCount=tiendaProductos.filter(tiendaEsPendienteImagenAdmin).length;
+  var r='📊 Total productos: '+tiendaProductos.length+'\n\n'
+    +'🔒 Ocultados a mano: '+conteo.manual+'\n'
+    +'🧩 Ocultos por duplicado: '+conteo.duplicado+' (en '+totalGrupos+' grupos detectados)\n'
+    +'📦 Sin stock: '+conteo.sin_stock+'\n'
+    +'🕓 Ocultos por revisión de precio (manuales): '+conteo.revision_precio+'\n'
+    +'⚠️ SIN MOTIVO (bug, deberían estar visibles): '+conteo.sin_motivo+'\n\n'
+    +'Bandeja "Revisar manuales": '+revisionManualCount+'\n'
+    +'Bandeja "Imágenes pendientes": '+imagenesPendCount+'\n';
+  if(ejemplos.sin_motivo.length)r+='\nEjemplos SIN MOTIVO:\n- '+ejemplos.sin_motivo.join('\n- ');
+  if(ejemplos.manual.length)r+='\n\nEjemplos ocultados a mano:\n- '+ejemplos.manual.join('\n- ');
+  if(ejemplos.duplicado.length)r+='\n\nEjemplos por duplicado:\n- '+ejemplos.duplicado.join('\n- ');
+  alert('🕵️ DIAGNÓSTICO DE OCULTOS:\n\n'+r);
+}
+// Restaura de una sola vez los productos automáticos marcados como "ocultados
+// a mano" en tanda (ej: un "Ocultar marcados" o "Ocultar categoría" aplicado
+// por error a muchos productos). Primero MUESTRA la lista completa y pide
+// confirmación explícita: esta marca significa "decisión humana" y el sistema
+// nunca la debe borrar solo, sin que un admin lo apruebe a propósito.
+function tiendaRestaurarOcultosManuales(){
+  var afectados=(tiendaProductos||[]).filter(function(p){
+    return p && tiendaEsAutomatico(p) && p.ocultoManualProveedor===true && !tiendaTieneSinStock(p);
+  });
+  if(!afectados.length){ alert('✅ No hay productos automáticos ocultados a mano en este momento.'); return; }
+  var muestra=afectados.slice(0,15).map(function(p){return '- '+p.nombre;}).join('\n');
+  var extra=afectados.length>15?'\n... y '+(afectados.length-15)+' más.':'';
+  var ok=confirm('⚠️ Se encontraron '+afectados.length+' productos automáticos marcados como "ocultados a mano":\n\n'
+    +muestra+extra+
+    '\n\n¿Confirmás que ninguno de estos lo ocultaste a propósito y querés VOLVER A MOSTRARLOS a todos?\n\n'
+    +'Esto no toca los que están ocultos por sin stock, duplicado o revisión de precio — solo estos.');
+  if(!ok)return;
+  afectados.forEach(function(p){ p.visible=true; p.ocultoManualProveedor=false; delete p.motivoOculto; });
+  tiendaGuardarLocal();
+  tiendaPublicarControlAdmin(false);
+  tiendaRender();
+  alert('✅ Se restauraron '+afectados.length+' productos. Publicando el cambio a Supabase para que se vea en todos los dispositivos...');
+}
 
 var TIENDA_VARIANTES_DUPLICADO={
   blanco:1,blanca:1,negro:1,negra:1,gris:1,plata:1,plateado:1,plateada:1,
@@ -5791,7 +5853,7 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && !p.esCelu){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
       card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
-        +'<input type="checkbox" '+checked2+' onchange="tiendaToggleMarcado('+pid+')"> '
+        +'<input type="checkbox" '+(p.visible?'checked':'')+' onchange="event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+');"> '
         +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
@@ -6464,6 +6526,30 @@ function tiendaEliminar(id){
 function tiendaToggleMarcado(id){
   if(tiendaMarcadosSet[id]) delete tiendaMarcadosSet[id];
   else tiendaMarcadosSet[id]=true;
+}
+// El interruptor "Oculto/Visible" de cada tarjeta parece un switch directo,
+// pero antes solo marcaba el producto para una acción en tanda posterior
+// ("Ocultar marcados") sin cambiar nada hasta apretar ese otro botón. Eso
+// generó confusión real: alguien tocaba el switch pensando que ocultaba/
+// mostraba al toque, y esos toques se acumulaban silenciosos en el fondo
+// hasta que un "Ocultar marcados" posterior los ocultaba a todos de golpe,
+// sin relación entre sí. Ahora el switch cambia la visibilidad al instante,
+// como visualmente promete, y lo publica enseguida.
+function tiendaToggleVisibilidadDirecta(id){
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  var haciendoVisible=!p.visible;
+  tiendaSetVisibilidadManual(p,haciendoVisible);
+  // La revisión de precio manda por encima del interruptor simple: si no se
+  // libera acá también, tocar "Visible" podía no mostrar nada y parecer que
+  // el switch no funcionó. Un admin que decide mostrarlo está aprobando todo.
+  if(haciendoVisible && p.pendienteRevisionManual===true){
+    p.pendienteRevisionManual=false;
+    delete p.visibleAntesRevisionManual;
+  }
+  tiendaGuardarLocal();
+  tiendaRender();
+  tiendaPublicarControlAdmin(false);
 }
 
 // En productos automáticos, además de cambiar la vista guardamos la decisión
