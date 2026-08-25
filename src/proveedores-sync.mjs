@@ -581,6 +581,7 @@ const CAMPOS_COMPARACION_CATALOGO = Object.freeze([
   "estadoProveedor",
   "ocultoManualProveedor",
   "ocultoPorDuplicado",
+  "motivoOculto",
   "duplicadoGrupo",
   "duplicadoPreferido",
   "duplicadoGrupoIgnorado",
@@ -697,6 +698,17 @@ const PALABRAS_DUPLICADO_GENERICAS = new Set([
   "DIGITAL",
 ]);
 
+// Diferencias que representan variantes comerciales reales. Dos productos no
+// deben ocultarse entre sí si cambia color, terminación o presentación.
+const PALABRAS_VARIANTE_PRODUCTO = new Set([
+  "BLANCO", "BLANCA", "NEGRO", "NEGRA", "GRIS", "PLATA", "PLATEADO",
+  "PLATEADA", "ROJO", "ROJA", "AZUL", "VERDE", "ROSA", "ROSADO",
+  "ROSADA", "VIOLETA", "MORADO", "MORADA", "BEIGE", "MARRON",
+  "DORADO", "DORADA", "CELESTE", "TURQUESA", "LISO", "LISA",
+  "ESTAMPADO", "ESTAMPADA", "RAYADO", "RAYADA", "FLORAL",
+  "INFANTIL", "JUNIOR", "PREMIUM", "GOLD", "INOX", "INOXIDABLE",
+]);
+
 function tokensDuplicado(nombre) {
   const texto = normalizar(nombre)
     .replace(/\bSTELAR\b/g, "ESTELAR")
@@ -750,6 +762,9 @@ function datosProductoDuplicado(producto) {
     firmaNumerica: firmaNumerica(tokens),
     modelos: modelosProducto(tokens),
     distintivos: tokensDistintivos(tokens),
+    variantes: tokens
+      .filter((token) => PALABRAS_VARIANTE_PRODUCTO.has(token))
+      .sort(),
     firmaExacta: tokens.slice().sort().join("|"),
   };
 }
@@ -763,9 +778,21 @@ function puntajeSimilitudProducto(a, b, datosA, datosB) {
   const tokensB = preparadoB.tokens;
   if (!tokensA.length || !tokensB.length) return 0;
 
+  // Dentro del mismo proveedor, ids diferentes representan publicaciones o
+  // variantes diferentes. No se ocultan automáticamente entre sí.
+  if (
+    a.automaticoProveedor && b.automaticoProveedor &&
+    a.proveedorClave && a.proveedorClave === b.proveedorClave &&
+    String(a.proveedorId || "") !== String(b.proveedorId || "")
+  ) return 0;
+
   const firmaA = preparadoA.firmaNumerica;
   const firmaB = preparadoB.firmaNumerica;
   if ((firmaA || firmaB) && firmaA !== firmaB) return 0;
+
+  const variantesA = preparadoA.variantes.join("|");
+  const variantesB = preparadoB.variantes.join("|");
+  if (variantesA && variantesB && variantesA !== variantesB) return 0;
 
   const modelosA = preparadoA.modelos;
   const modelosB = preparadoB.modelos;
@@ -833,9 +860,8 @@ function aplicarDuplicadosProveedores(catalogo) {
   const ocultosIntencionales = new Set(
     candidatos.filter(
       (producto) =>
-        producto.visible === false &&
-        producto.ocultoPorDuplicado !== true &&
-        producto.sinStock !== true,
+        producto.ocultoManualProveedor === true ||
+        producto.motivoOculto === "manual",
     ),
   );
 
@@ -849,6 +875,9 @@ function aplicarDuplicadosProveedores(catalogo) {
         producto.sinStock !== true && producto.ocultoManualProveedor !== true;
       delete producto.ocultoPorDuplicado;
     }
+    if (producto.sinStock === true) producto.motivoOculto = "sin_stock";
+    else if (producto.ocultoManualProveedor === true) producto.motivoOculto = "manual";
+    else delete producto.motivoOculto;
   });
 
   const padres = candidatos.map((_, indice) => indice);
@@ -943,6 +972,7 @@ function aplicarDuplicadosProveedores(catalogo) {
           !ocultosIntencionales.has(producto)
         )
           producto.visible = true;
+        if (producto.visible === true) delete producto.motivoOculto;
       });
       continue;
     }
@@ -1005,12 +1035,16 @@ function aplicarDuplicadosProveedores(catalogo) {
         producto.duplicadoPreferido = true;
         producto.ocultoPorDuplicado = false;
         producto.visible = true;
+        delete producto.motivoOculto;
       } else {
         producto.duplicadoPreferido = false;
         producto.ocultoPorDuplicado =
           producto.ocultoManualProveedor !== true &&
           !ocultosIntencionales.has(producto);
         producto.visible = false;
+        producto.motivoOculto = producto.ocultoPorDuplicado
+          ? "duplicado"
+          : "manual";
         productosOcultos++;
       }
     });
@@ -1062,9 +1096,8 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
         producto.proveedorClave === proveedor.clave
       ) {
         if (
-          producto.visible === false &&
-          producto.sinStock !== true &&
-          producto.ocultoPorDuplicado !== true
+          producto.ocultoManualProveedor === true ||
+          producto.motivoOculto === "manual"
         ) {
           ocultosManuales.add(
             claveProveedor(producto.proveedorClave, producto.proveedorId),
@@ -1075,6 +1108,7 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
         producto.sinStock = true;
         producto.proveedorStock = 0;
         producto.estadoProveedor = "sin_stock";
+        producto.motivoOculto = "sin_stock";
         producto.ultimaSincronizacionProveedor = fechaISO;
       }
     });
@@ -1132,20 +1166,12 @@ function fusionarCatalogo(catalogoActual, resultados, fechaISO) {
       producto.visible = !ocultoManual;
       producto.ocultoManualProveedor = ocultoManual;
       producto.sinStock = false;
+      if (ocultoManual) producto.motivoOculto = "manual";
+      else delete producto.motivoOculto;
       producto.categoriaProveedor = categoriaProveedor;
       producto.categoria =
         producto.categoriaManualProveedor || categoriaProveedor;
       if (foto) producto.fotoProveedor = foto;
-      // Compatibilidad con fotos editadas antes de existir el campo protector:
-      // si la URL actual pertenece al Storage de Amarango, se adopta como
-      // fotoManualProveedor antes de considerar la imagen nueva del mayorista.
-      const fotoActual = String(producto.foto || "");
-      const fotoActualEsAmarango =
-        fotoActual.includes("/storage/v1/object/public/tienda-fotos/") ||
-        fotoActual.includes("/tienda-fotos/");
-      if (!producto.fotoManualProveedor && fotoActualEsAmarango) {
-        producto.fotoManualProveedor = fotoActual;
-      }
       if (producto.fotoManualProveedor) {
         producto.foto = producto.fotoManualProveedor;
       } else if (foto) {
