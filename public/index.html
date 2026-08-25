@@ -5793,6 +5793,17 @@ function tiendaCardsHtml(sublista){
       card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
         +'<input type="checkbox" '+checked2+' onchange="tiendaToggleMarcado('+pid+')"> '
         +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
+      // Motivo del ocultamiento visible para el admin: sin esto no había forma
+      // de saber, a simple vista, por qué un producto con stock quedaba oculto.
+      if(!p.visible || tiendaEstaOcultoAdmin(p)){
+        var _motivo=tiendaMotivoOcultoActual(p);
+        var _motivoTexto={manual:'🔒 Ocultado a mano',duplicado:'🧩 Posible duplicado',
+          sin_stock:'📦 Sin stock',revision_precio:'🕓 Revisando precio',
+          sin_motivo:'⚠️ Sin motivo — revisar'}[_motivo]||'';
+        if(_motivoTexto){
+          card+='<div style="font-size:.6rem;font-weight:800;margin-top:2px;color:'+(_motivo==='sin_motivo'?'#B91C1C':'#6b7280')+';">'+_motivoTexto+'</div>';
+        }
+      }
     }
     if(tiendaEsAdmin && p.esCelu){
       card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
