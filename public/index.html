@@ -5256,7 +5256,13 @@ function tiendaPrepararBandejasAdmin(){
       cambio=true;
     }
   });
-  if(cambio)tiendaGuardarLocal();
+  if(cambio){
+    tiendaGuardarLocal();
+    // La reparación de ocultos huérfanos/duplicados incompatibles no sirve de
+    // nada si se queda solo en este dispositivo: hay que publicarla para que
+    // clientes y el resto del equipo dejen de ver productos mal ocultados.
+    tiendaPublicarControlAdmin(false);
+  }
   return cambio;
 }
 function tiendaActualizarBandejasAdmin(){
