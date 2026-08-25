@@ -12,4 +12,4 @@ import "./margarita-tono-profesional-v2.js?v=20260824-1";
 import "./margarita-detalles-premium.js?v=20260824-1";
 import "./margarita-recepcion-contacto.js?v=20260825-1";
 import "./margarita-guia-visual.js?v=20260825-2";
-import "./margarita-ajustes-ux-voz.js?v=20260825-1";
+import "./margarita-ajustes-ux-voz.js?v=20260825-2";
