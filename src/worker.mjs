@@ -260,7 +260,25 @@ export default {
     if (url.pathname === "/api/catalogo-cache") return servirCatalogoCache(request, env, ctx);
     if (url.pathname === "/api/imagen-tienda") return servirImagenTienda(request, env, ctx);
     const respuesta = await core.fetch(request, env, ctx);
-    if (request.method === "GET") return aplicarUiAdminProfesional(respuesta);
+    if (request.method === "GET") {
+      const conUi = aplicarUiAdminProfesional(respuesta);
+      // El documento principal (/ e /index.html, que redirige a /) es el que
+      // cambia con cada deploy. Si el borde de Cloudflare o el navegador lo
+      // guardan en caché, un cambio subido a GitHub puede tardar en verse o
+      // directamente no verse hasta purgar el caché a mano. Forzamos que
+      // SIEMPRE se pida una copia fresca del HTML; los assets con hash
+      // (imágenes, JS, CSS con ?v=) siguen cacheados normalmente aparte.
+      if (url.pathname === "/" || url.pathname === "/index.html") {
+        const tipo = String(conUi.headers.get("content-type") || "").toLowerCase();
+        if (tipo.includes("text/html")) {
+          const h = new Headers(conUi.headers);
+          h.set("cache-control", "no-store, must-revalidate");
+          h.set("cdn-cache-control", "no-store");
+          return new Response(conUi.body, { status: conUi.status, headers: h });
+        }
+      }
+      return conUi;
+    }
     return respuesta;
   },
   async scheduled(controller, env, ctx) {
