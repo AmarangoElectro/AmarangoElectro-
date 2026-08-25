@@ -2200,9 +2200,9 @@ function tiendaInit(){
     tiendaSubfiltroActivo='';
     tiendaMostrarTodos=false;
   }
-  // v24 repara una sola vez los dispositivos que conservaron un catálogo viejo con
+  // v25 repara una sola vez los dispositivos que conservaron un catálogo viejo con
   // una versión incremental aparentemente actualizada.
-  var repararCache=tiendaNecesitaReparacionCacheV24();
+  var repararCache=tiendaNecesitaReparacionCacheV25();
   if(repararCache){
     tiendaProductos=[];
     tiendaGuardarVersionIncremental(0);
@@ -2510,7 +2510,7 @@ function tiendaBajarNubeLegacy(intentos){
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
-var TIENDA_CACHE_FOTOS_VERSION='v24-20260825-publicacion-y-motivos-estables';
+var TIENDA_CACHE_FOTOS_VERSION='v25-20260825-proveedores-sin-confirmacion-manual';
 var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
@@ -2647,11 +2647,11 @@ function tiendaBajarControlPublicacion(){
     });
 }
 
-function tiendaNecesitaReparacionCacheV24(){
+function tiendaNecesitaReparacionCacheV25(){
   try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
   catch(e){return true;}
 }
-function tiendaConfirmarReparacionCacheV24(){
+function tiendaConfirmarReparacionCacheV25(){
   try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
 }
 
@@ -2714,7 +2714,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
-  tiendaConfirmarReparacionCacheV24();
+  tiendaConfirmarReparacionCacheV25();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -3056,7 +3056,7 @@ function tiendaDiagNube(){
 // Si una pestaña vieja todavía tiene sólo los productos manuales, primero
 // recupera los automáticos de la nube y recién después guarda la mezcla.
 function tiendaClaveProveedor(p){
-  if(!p || !p.automaticoProveedor) return '';
+  if(!p || !tiendaEsAutomatico(p)) return '';
   return String(p.proveedorClave||p.proveedor||'')+'|'+String(p.proveedorId||p.id||'');
 }
 function tiendaMezclarAutomaticosNube(datosNube){
@@ -3068,13 +3068,13 @@ function tiendaMezclarAutomaticosNube(datosNube){
   // locales por id; así ningún guardado normal pisa manuales ajenos.
   var manualesPorId={};
   nube.forEach(function(p,idx){
-    if(!p || p.automaticoProveedor)return;
+    if(!p || tiendaEsAutomatico(p))return;
     var idValido=p.id!==null && typeof p.id!=='undefined' && String(p.id)!=='' && String(p.id)!=='NaN';
     var clave=idValido?'id:'+String(p.id):'remoto:'+String(p.nombre||'')+'|'+String(p.creado||idx);
     manualesPorId[clave]=p;
   });
   locales.forEach(function(p,idx){
-    if(!p || p.automaticoProveedor)return;
+    if(!p || tiendaEsAutomatico(p))return;
     var idValido=p.id!==null && typeof p.id!=='undefined' && String(p.id)!=='' && String(p.id)!=='NaN';
     var clave=idValido?'id:'+String(p.id):'local:'+String(p.nombre||'')+'|'+String(p.creado||idx);
     manualesPorId[clave]=p;
@@ -5891,15 +5891,13 @@ function tiendaCardsHtml(sublista){
       if(tiendaEsPendienteRevisionManual(p)){
         card+='<div style="background:#FFF7E6;border:1.5px solid #F0C040;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:#A05200;">🕓 Oculto hasta revisar el precio</div>';
       }
-      // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
-      if(!p.esCelu){
+      // La antigüedad y confirmación manual se aplican exclusivamente a los
+      // productos cargados a mano. Los automáticos ya son validados en cada
+      // sincronización del proveedor y nunca deben pedir confirmación de precio.
+      if(!p.esCelu && !tiendaEsAutomatico(p)){
         card+=etiquetaFechaPrecio(p);
-        // Los productos manuales no reciben actualizaciones del proveedor:
-        // el admin puede confirmar con un toque que el precio sigue vigente.
-        if(!p.automaticoProveedor){
-          var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
-          card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
-        }
+        var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
+        card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
@@ -5926,7 +5924,7 @@ function tiendaCardsHtml(sublista){
         +(p.foto?'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaQuitarFoto('+pid+')" title="Quitar foto">🚫🖼️</button>':'')
         +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')" title="Eliminar producto">🗑️</button>')
       +'</div>'
-      +(p.automaticoProveedor && p.fotoManualProveedor
+      +(tiendaEsAutomatico(p) && p.fotoManualProveedor
         ?'<button style="width:100%;font-size:.66rem;padding:8px 4px;margin-bottom:5px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaUsarFotoProveedor('+pid+')">↩️ Usar foto del proveedor</button>'
         :'');
     }else{
@@ -6066,7 +6064,7 @@ function tiendaNombreFotoNueva(fid, producto){
   if((''+fid).indexOf('celu_')===0){
     return 'celulares/foto_'+tiendaTokenFoto(fid)+'.jpg';
   }
-  if(producto && producto.automaticoProveedor){
+  if(producto && tiendaEsAutomatico(producto)){
     var identidad=String(producto.proveedorClave||producto.proveedor||'proveedor')
       +'|'+String(producto.proveedorId||producto.id);
     return 'proveedores/'+tiendaTokenFoto(identidad)+'.jpg';
@@ -6166,7 +6164,7 @@ function subirFotoStorageAutenticada(blob, fid){
 function tiendaUsarFotoProveedor(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
-  if(!p || !p.automaticoProveedor) return;
+  if(!p || !tiendaEsAutomatico(p)) return;
   if(!p.fotoProveedor){
     alert('Todavía no tengo guardada la foto original del proveedor. Esperá a la próxima sincronización diaria y volvé a intentar.');
     return;
@@ -6194,7 +6192,7 @@ function tiendaQuitarFoto(id){
   }
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p||!p.foto)return;
-  if(p.automaticoProveedor && p.fotoManualProveedor){
+  if(tiendaEsAutomatico(p) && p.fotoManualProveedor){
     tiendaUsarFotoProveedor(id);
     return;
   }
@@ -6262,7 +6260,7 @@ function tiendaReclasificarOtros(){
   plan.forEach(function(x){
     x.p.categoria=x.cat;
     x.p.categoriaManualFijada=true;
-    if(x.p.automaticoProveedor) x.p.categoriaManualProveedor=x.cat;
+    if(tiendaEsAutomatico(x.p)) x.p.categoriaManualProveedor=x.cat;
   });
   tiendaGuardarLocal();
   tiendaRender();
@@ -6299,7 +6297,7 @@ function tiendaEditarPrecio(id){
     +'<select id="edit-cat" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     + TIENDA_CATEGORIAS.map(function(c){ return '<option value="'+c+'"'+(catProd(p)===c?' selected':'')+'>'+c+'</option>'; }).join('')
     +'</select>'
-    +(p.automaticoProveedor && p.categoriaManualProveedor
+    +(tiendaEsAutomatico(p) && p.categoriaManualProveedor
       ?'<button type="button" onclick="tiendaUsarCategoriaProveedor('+p.id+')" style="width:100%;padding:8px;margin:-4px 0 12px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;">↩️ Usar categoría del proveedor</button>'
       :'')
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">🏪 MAYORISTA</div>'
@@ -6367,11 +6365,11 @@ function tiendaGuardarPrecios(){
       p.costo=Math.round(costo); p.venta=Math.round(venta);
       p.categoria=cat;
       p.categoriaManualFijada=true;
-      if(p.automaticoProveedor) p.categoriaManualProveedor=cat;
+      if(tiendaEsAutomatico(p)) p.categoriaManualProveedor=cat;
       p.caracteristicas=carac;
       p.mayorista=mayorista; // 🏪 mayorista editable
       // Guardar una edición manual también confirma que el precio fue revisado.
-      if(!p.automaticoProveedor){
+      if(!tiendaEsAutomatico(p)){
         p.precioChequeadoManual=Date.now();
         if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p,true); liberoRevision=true; }
       }
@@ -6393,7 +6391,7 @@ function tiendaGuardarPrecios(){
 function tiendaConfirmarPrecioManual(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
-  if(!p || p.automaticoProveedor || p.esCelu)return;
+  if(!p || tiendaEsAutomatico(p) || p.esCelu)return;
   var ahora=Date.now();
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
@@ -6422,7 +6420,7 @@ function tiendaConfirmarPrecioManual(id){
 function tiendaUsarCategoriaProveedor(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
-  if(!p || !p.automaticoProveedor) return;
+  if(!p || !tiendaEsAutomatico(p)) return;
   p.categoria=p.categoriaProveedor || tiendaCategoria(p.nombre);
   delete p.categoriaManualProveedor;
   delete p.categoriaManualFijada;
@@ -7107,7 +7105,7 @@ function tiendaUrlFotoCompartible(p){
   var esFotoAmarango=!!p.fotoManualProveedor ||
     foto.indexOf('/storage/v1/object/public/tienda-fotos/')>=0;
   if(esFotoAmarango) return foto;
-  if(p.automaticoProveedor && /^https:\/\/cdn\.catalog-store\.link\//i.test(foto)){
+  if(tiendaEsAutomatico(p) && /^https:\/\/cdn\.catalog-store\.link\//i.test(foto)){
     return '/api/imagen-proveedor?url='+encodeURIComponent(foto);
   }
   return foto;
@@ -7120,7 +7118,7 @@ function tiendaUrlFotoCompartible(p){
 function tiendaBlobParaCompartir(p){
   if(!p || !p.foto)return Promise.reject(new Error('Producto sin foto'));
   var esCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
-  var esProveedor=!!p.automaticoProveedor && !p.fotoManualProveedor;
+  var esProveedor=tiendaEsAutomatico(p) && !p.fotoManualProveedor;
   var necesitaComponer=esCatalogo||esProveedor;
   if(!necesitaComponer){
     return fetch(p.foto).then(function(r){
@@ -8987,14 +8985,14 @@ function abrirPosiblesDuplicados(){
   grupos.forEach(function(g,idx){
     var arr=g.productos.slice().sort(function(a,b){
       return Number(Boolean(b.duplicadoPreferido))-Number(Boolean(a.duplicadoPreferido))
-        || Number(Boolean(a.automaticoProveedor))-Number(Boolean(b.automaticoProveedor))
+        || Number(tiendaEsAutomatico(a))-Number(tiendaEsAutomatico(b))
         || Number(a.venta||Infinity)-Number(b.venta||Infinity);
     });
     html+='<div style="border:1.5px solid var(--bor);border-radius:14px;padding:10px;margin-top:12px;background:#fff;">'
       +'<div style="font-size:.7rem;font-weight:900;color:var(--az);margin-bottom:8px;">Grupo '+(idx+1)+' · '+arr.length+' productos parecidos</div>';
     arr.forEach(function(p){
       var elegido=p.duplicadoPreferido===true && p.visible!==false;
-      var origen=p.automaticoProveedor?(p.proveedor||'Proveedor'):'Carga manual';
+      var origen=tiendaEsAutomatico(p)?(p.proveedor||'Proveedor'):'Carga manual';
       var foto=p.foto?'<img src="'+String(p.foto).replace(/"/g,'&quot;')+'" alt="" style="width:54px;height:54px;object-fit:contain;background:#fff;border:1px solid var(--bor);border-radius:9px;flex:0 0 auto;">'
         :'<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:9px;font-size:1.4rem;flex:0 0 auto;">📦</div>';
       html+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #eef1f5;">'
@@ -9854,7 +9852,7 @@ function tiendaProductoPareceUSD(p){
   var texto=((p.nombre||'')+' '+(p.caracteristicas||'')).toUpperCase();
   if(/(?:^|[^A-Z0-9])(?:USD|U\$S|US\$)(?:$|[^A-Z0-9])/.test(texto))return true;
   if(/\bD[OÓ]LAR(?:ES)?\b/.test(texto))return true;
-  return !p.monedaProveedor && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000;
+  return !p.monedaProveedor && tiendaEsAutomatico(p) && Number(p.costo)>0 && Number(p.costo)<1000;
 }
 function tiendaPrecioOriginalUSD(p,cotizacion){
   var original=Number(p&&p.precioProveedorOriginal)||0;
