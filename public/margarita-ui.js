@@ -9,3 +9,4 @@ import "./tienda-compartir-producto.js?v=20260824-2";
 import "./margarita-guia-clientes.js?v=20260824-3";
 import "./margarita-clientes-24h-cta.js?v=20260824-3";
 import "./margarita-tono-profesional-v2.js?v=20260824-1";
+import "./margarita-detalles-premium.js?v=20260824-1";
