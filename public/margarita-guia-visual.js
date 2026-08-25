@@ -1,0 +1,134 @@
+/* AmarangoElectro · Margarita guía visual contextual
+   Explica, se aparta y resalta la parte correcta de la tienda.
+   No toca V21 ni reemplaza la lógica central.
+*/
+(function(){
+  'use strict';
+  const VERSION='mg-guia-visual-20260825-1';
+  if(window.__MG_GUIA_VISUAL__===VERSION)return;
+  window.__MG_GUIA_VISUAL__=VERSION;
+
+  function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();}
+  function esAdmin(){try{return (typeof window.esAdmin==='function'&&window.esAdmin())||window.tiendaEsAdmin===true||(window.adminUnlocked===true&&window.vistaPreviaCliente!==true)||localStorage.getItem('ae_rol')==='admin';}catch(e){return false;}}
+  function esAsesor(){if(esAdmin())return false;try{if(window.vistaPreviaCliente===true)return false;return window.revUnlocked===true||/asesor|revendedor|vendedor/i.test(String(localStorage.getItem('ae_rol')||''));}catch(e){return false;}}
+  function esCliente(){return !esAdmin()&&!esAsesor();}
+
+  function estilos(){
+    if(document.getElementById('mg-guia-visual-style'))return;
+    const s=document.createElement('style');
+    s.id='mg-guia-visual-style';
+    s.textContent=`
+      @keyframes mgGuidePulse{
+        0%{box-shadow:0 0 0 0 rgba(255,122,0,.0),0 0 0 0 rgba(35,103,209,.0);transform:scale(1)}
+        22%{box-shadow:0 0 0 5px rgba(255,122,0,.30),0 0 26px 7px rgba(35,103,209,.42);transform:scale(1.012)}
+        50%{box-shadow:0 0 0 2px rgba(255,122,0,.48),0 0 18px 5px rgba(35,103,209,.30);transform:scale(1)}
+        78%{box-shadow:0 0 0 5px rgba(255,122,0,.25),0 0 24px 6px rgba(35,103,209,.36);transform:scale(1.008)}
+        100%{box-shadow:0 0 0 0 rgba(255,122,0,0),0 0 0 0 rgba(35,103,209,0);transform:scale(1)}
+      }
+      .mg-guide-target{position:relative!important;z-index:1200!important;border-color:#FF7A00!important;animation:mgGuidePulse 1.05s ease-in-out 3!important;transition:box-shadow .25s ease,transform .25s ease!important}
+      .mg-guide-label{position:fixed;z-index:15020;background:#0B2D6B;color:#fff;border-left:4px solid #FF7A00;border-radius:12px;padding:9px 12px;max-width:min(82vw,330px);font:800 .72rem/1.35 system-ui,-apple-system,Segoe UI,sans-serif;box-shadow:0 10px 28px rgba(3,15,45,.28);opacity:0;transform:translateY(6px);transition:.2s ease;pointer-events:none}
+      .mg-guide-label.on{opacity:1;transform:translateY(0)}
+    `;
+    document.head.appendChild(s);
+  }
+
+  function visible(el){if(!el)return false;const r=el.getBoundingClientRect();const cs=getComputedStyle(el);return r.width>8&&r.height>8&&cs.display!=='none'&&cs.visibility!=='hidden';}
+  function primeroVisible(sel){return Array.from(document.querySelectorAll(sel)).find(visible)||null;}
+  function porTexto(re){
+    const candidatos=Array.from(document.querySelectorAll('button,a,[role="button"],div,section'));
+    return candidatos.find(el=>visible(el)&&re.test(norm(el.textContent||'')))||null;
+  }
+  function buscador(){return primeroVisible('#hdr-buscar-input,#tienda-buscar,input[placeholder*="Buscar"],input[placeholder*="buscar"]');}
+  function categorias(){
+    let el=primeroVisible('.portada-cat-grid,.categorias-scroll,.categorias,.category-scroll,[class*="categorias"],[class*="cats"]');
+    if(el)return el;
+    const c=porTexto(/celulares.*tv|tv.*audio|refrigeracion/);
+    return c?c.closest('div,section,nav')||c:null;
+  }
+  function carrito(){return primeroVisible('[data-tab="carrito"],#btn-carrito,#nav-carrito,[aria-label*="Carrito" i]')||porTexto(/^carrito$/);}
+  function favoritos(){return primeroVisible('[data-tab="favoritos"],#btn-favoritos,#nav-favoritos,[aria-label*="Favorit" i]')||porTexto(/^favoritos$/);}
+  function ofertas(){return primeroVisible('[data-tab="ofertas"],#btn-ofertas,#nav-ofertas,[aria-label*="Ofertas" i]')||porTexto(/^ofertas$/);}
+
+  const OBJETIVOS={buscador,categorias,carrito,favoritos,ofertas};
+  const MENSAJES={
+    buscador:'Te dejo el buscador señalado 🔎 Escribí ahí lo que necesitás. Justo debajo tenés las categorías para recorrer la tienda. Cualquier cosa, volvés a tocarme 🐝',
+    categorias:'Te dejo las categorías señaladas 😊 Tocá el rubro que quieras ver y la tienda te muestra las opciones disponibles. Si necesitás ayuda, acá estoy 🐝',
+    carrito:'Te señalo el carrito 🛒 Ahí podés revisar lo que fuiste agregando antes de continuar.',
+    favoritos:'Te señalo Favoritos ❤️ Ahí quedan guardados los productos que marcaste para volver a verlos después.',
+    ofertas:'Te señalo Ofertas 🔥 Ahí podés revisar las promociones destacadas de la tienda.'
+  };
+
+  function detectar(t){
+    const n=norm(t);
+    if(/\b(carrito|donde esta el carrito|ver mi carrito)\b/.test(n))return 'carrito';
+    if(/\b(favoritos|mis favoritos|guardados|corazon)\b/.test(n))return 'favoritos';
+    if(/\b(ofertas|promociones|promo|promos)\b/.test(n))return 'ofertas';
+    if(/\b(categorias|categoria|rubros|rubro)\b/.test(n)&&/\b(donde|como|buscar|ver|estan|esta)\b/.test(n))return 'categorias';
+    if(/\b(como busco|donde busco|quiero buscar|buscar producto|buscar algo|usar el buscador|donde esta el buscador|encontrar un producto|como encuentro)\b/.test(n))return 'buscador';
+    return '';
+  }
+
+  function etiqueta(el,texto){
+    document.querySelector('.mg-guide-label')?.remove();
+    const lab=document.createElement('div');lab.className='mg-guide-label';lab.textContent=texto;document.body.appendChild(lab);
+    const r=el.getBoundingClientRect();const w=lab.offsetWidth||260;let left=Math.max(12,Math.min(innerWidth-w-12,r.left));let top=r.bottom+10;if(top+(lab.offsetHeight||50)>innerHeight-20)top=Math.max(12,r.top-(lab.offsetHeight||50)-10);lab.style.left=left+'px';lab.style.top=top+'px';requestAnimationFrame(()=>lab.classList.add('on'));setTimeout(()=>{lab.classList.remove('on');setTimeout(()=>lab.remove(),220);},3000);
+  }
+
+  function resaltar(tipo){
+    estilos();
+    const fn=OBJETIVOS[tipo];const el=fn&&fn();if(!el)return false;
+    try{el.scrollIntoView({behavior:'smooth',block:tipo==='carrito'||tipo==='favoritos'||tipo==='ofertas'?'nearest':'center',inline:'nearest'});}catch(e){}
+    setTimeout(()=>{
+      el.classList.add('mg-guide-target');
+      etiqueta(el,tipo==='buscador'?'🔎 Buscá acá':tipo==='categorias'?'📂 Elegí una categoría':tipo==='carrito'?'🛒 Tu carrito':tipo==='favoritos'?'❤️ Tus favoritos':'🔥 Ofertas');
+      setTimeout(()=>el.classList.remove('mg-guide-target'),3300);
+      if(tipo==='buscador'&&el.focus)setTimeout(()=>el.focus({preventScroll:true}),650);
+    },420);
+    return true;
+  }
+
+  function responderGuia(tipo,textoUsuario){
+    const input=document.getElementById('margarita-input');
+    if(!input)return false;
+    window.margaritaPintar?.('cliente',textoUsuario);
+    input.value='';
+    window.margaritaEscribiendo?.(true);
+    setTimeout(()=>{
+      window.margaritaEscribiendo?.(false);
+      window.margaritaPintar?.('margarita',MENSAJES[tipo]);
+      const msgs=document.getElementById('margarita-msgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;
+      setTimeout(()=>{
+        window.margaritaCerrar?.();
+        setTimeout(()=>resaltar(tipo),330);
+      },1150);
+    },Math.min(520,220+MENSAJES[tipo].length*1.4));
+    return true;
+  }
+
+  function envolverEnvio(){
+    const original=window.margaritaEnviar;
+    if(typeof original!=='function'||original.__mgGuiaVisual)return false;
+    function env(){
+      if(esCliente()){
+        const input=document.getElementById('margarita-input');
+        const texto=String(input?.value||'').trim();
+        const tipo=detectar(texto);
+        if(tipo&&texto)return responderGuia(tipo,texto);
+      }
+      return original.apply(this,arguments);
+    }
+    env.__mgGuiaVisual=VERSION;
+    env.__original=original;
+    window.margaritaEnviar=env;
+    return true;
+  }
+
+  function instalar(){
+    if(!esCliente())return;
+    estilos();
+    if(envolverEnvio())return;
+    let i=0;const t=setInterval(()=>{if(envolverEnvio()||++i>40)clearInterval(t);},150);
+    window.margaritaGuiaVisual=resaltar;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',instalar,{once:true});else instalar();
+})();
