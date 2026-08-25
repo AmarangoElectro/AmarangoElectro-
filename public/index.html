@@ -2200,9 +2200,9 @@ function tiendaInit(){
     tiendaSubfiltroActivo='';
     tiendaMostrarTodos=false;
   }
-  // v22 repara una sola vez los dispositivos que conservaron un catálogo viejo con
+  // v24 repara una sola vez los dispositivos que conservaron un catálogo viejo con
   // una versión incremental aparentemente actualizada.
-  var repararCache=tiendaNecesitaReparacionCacheV22();
+  var repararCache=tiendaNecesitaReparacionCacheV24();
   if(repararCache){
     tiendaProductos=[];
     tiendaGuardarVersionIncremental(0);
@@ -2510,7 +2510,7 @@ function tiendaBajarNubeLegacy(intentos){
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
-var TIENDA_CACHE_FOTOS_VERSION='v22-20260825-stock-y-guardado-estable';
+var TIENDA_CACHE_FOTOS_VERSION='v24-20260825-publicacion-y-motivos-estables';
 var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
@@ -2532,6 +2532,10 @@ function tiendaMapaControlPublicacion(){
       pendienteRevisionManual:p.pendienteRevisionManual===true,
       ocultoManualProveedor:p.ocultoManualProveedor===true,
       ocultoPorDuplicado:p.ocultoPorDuplicado===true,
+      motivoOculto:tiendaMotivoOcultoActual(p),
+      duplicadoGrupo:p.duplicadoGrupo||'',
+      duplicadoPreferido:p.duplicadoPreferido===true,
+      duplicadoGrupoIgnorado:p.duplicadoGrupoIgnorado||'',
       sinStock:p.sinStock===true,
       estadoProveedor:p.estadoProveedor||''
     };
@@ -2546,7 +2550,9 @@ function tiendaAplicarControlPublicacion(mapa){
     // exclusivamente la fila catalogo_manuales.
     if(!p || p.id==null || !tiendaEsAutomatico(p))return;
     var c=mapa[String(p.id)];if(!c)return;
-    ['visible','pendienteRevisionManual','ocultoManualProveedor','ocultoPorDuplicado','sinStock','estadoProveedor'].forEach(function(k){
+    ['visible','pendienteRevisionManual','ocultoManualProveedor','ocultoPorDuplicado',
+     'duplicadoGrupo','duplicadoPreferido','duplicadoGrupoIgnorado','motivoOculto',
+     'sinStock','estadoProveedor'].forEach(function(k){
       if(Object.prototype.hasOwnProperty.call(c,k) && p[k]!==c[k]){p[k]=c[k];cambio=true;}
     });
   });
@@ -2641,11 +2647,11 @@ function tiendaBajarControlPublicacion(){
     });
 }
 
-function tiendaNecesitaReparacionCacheV22(){
+function tiendaNecesitaReparacionCacheV24(){
   try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
   catch(e){return true;}
 }
-function tiendaConfirmarReparacionCacheV22(){
+function tiendaConfirmarReparacionCacheV24(){
   try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
 }
 
@@ -2708,7 +2714,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
-  tiendaConfirmarReparacionCacheV22();
+  tiendaConfirmarReparacionCacheV24();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -3096,7 +3102,7 @@ function tiendaMezclarAutomaticosNube(datosNube){
       'categoriaManualProveedor','categoriaManualFijada',
       'fotoManualProveedor','ocultoManualProveedor',
       'pendienteImagenAdmin','imagenProveedorAprobada',
-      'duplicadoPreferido','duplicadoGrupoIgnorado','ocultoPorDuplicado',
+      'duplicadoPreferido','duplicadoGrupoIgnorado','ocultoPorDuplicado','motivoOculto',
       'destacado','delDia','pocoStock','sinInteres','precioAntes',
       'caracteristicas','mayorista','cotizacionDolarManual'
     ];
@@ -3509,6 +3515,7 @@ function tiendaCargarLocal(){
   tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
 }
 function tiendaGuardarLocal(){
+  tiendaActualizarMotivosOcultos();
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
   try{ tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){}); }catch(e){}
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
@@ -5041,6 +5048,53 @@ function tiendaRenderMantenerSector(scrollY, mostrados){
 function tiendaEsAutomatico(p){
   return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
 }
+function tiendaMotivoOcultoActual(p){
+  if(!p)return '';
+  if(tiendaTieneSinStock(p))return 'sin_stock';
+  if(p.ocultoManualProveedor===true || p.ocultoManualAdmin===true)return 'manual';
+  if(p.ocultoPorDuplicado===true)return 'duplicado';
+  if(p.pendienteRevisionManual===true)return 'revision_precio';
+  return p.visible===false?'sin_motivo':'';
+}
+function tiendaActualizarMotivosOcultos(){
+  (tiendaProductos||[]).forEach(function(p){
+    if(!p)return;
+    var motivo=tiendaMotivoOcultoActual(p);
+    if(motivo)p.motivoOculto=motivo;
+    else delete p.motivoOculto;
+  });
+}
+
+var TIENDA_VARIANTES_DUPLICADO={
+  blanco:1,blanca:1,negro:1,negra:1,gris:1,plata:1,plateado:1,plateada:1,
+  rojo:1,roja:1,azul:1,verde:1,rosa:1,rosado:1,rosada:1,violeta:1,
+  morado:1,morada:1,beige:1,marron:1,dorado:1,dorada:1,celeste:1,
+  turquesa:1,liso:1,lisa:1,estampado:1,estampada:1,rayado:1,rayada:1,
+  floral:1,infantil:1,junior:1,premium:1,gold:1,inox:1,inoxidable:1
+};
+function tiendaDatosVarianteDuplicado(p){
+  var s=String((p&&p.nombre)||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  s=s.replace(/(\d+)\s*(?:lts?|litros?)\b/g,'$1l')
+    .replace(/(\d+)\s*(?:kgs?|kilos?)\b/g,'$1kg')
+    .replace(/(\d+)\s*(?:pulgadas?|pulg)\b/g,'$1p');
+  var tokens=s.match(/[a-z0-9]+/g)||[];
+  var numeros=tokens.filter(function(t){return /\d/.test(t);}).sort();
+  var modelos=tokens.filter(function(t){return t.length>=3&&/[a-z]/.test(t)&&/\d/.test(t);}).sort();
+  var variantes=tokens.filter(function(t){return TIENDA_VARIANTES_DUPLICADO[t];}).sort();
+  return {numeros:numeros,modelos:modelos,variantes:variantes};
+}
+function tiendaPuedenSerDuplicados(a,b){
+  if(!a||!b)return false;
+  if(tiendaEsAutomatico(a)&&tiendaEsAutomatico(b)&&a.proveedorClave&&
+     a.proveedorClave===b.proveedorClave&&String(a.proveedorId||'')!==String(b.proveedorId||''))return false;
+  var da=tiendaDatosVarianteDuplicado(a),db=tiendaDatosVarianteDuplicado(b);
+  var na=da.numeros.join('|'),nb=db.numeros.join('|');
+  if(na&&nb&&na!==nb)return false;
+  if(da.modelos.length&&db.modelos.length&&!da.modelos.some(function(m){return db.modelos.indexOf(m)>=0;}))return false;
+  var va=da.variantes.join('|'),vb=db.variantes.join('|');
+  if(va&&vb&&va!==vb)return false;
+  return true;
+}
 function tiendaEsFotoAmarango(p){
   if(!p)return false;
   var foto=String(p.foto||'');
@@ -5107,9 +5161,75 @@ function tiendaPrepararBandejasAdmin(){
   if(!tiendaEsAdmin || !_tiendaSincronizacionInicialLista ||
      !_tiendaControlPublicacionNubeListo)return false;
   var cambio=tiendaRepararIdsManuales();
+  var gruposDuplicados={};
+  tiendaProductos.forEach(function(p){
+    if(p&&p.duplicadoGrupo){
+      (gruposDuplicados[String(p.duplicadoGrupo)]=gruposDuplicados[String(p.duplicadoGrupo)]||[]).push(p);
+    }
+  });
+
+  // Si un grupo mezcla colores, medidas, capacidades, modelos o ids distintos
+  // del mismo proveedor, no es un duplicado confiable. Liberamos todo el grupo
+  // para que ninguna variante comercial desaparezca de la tienda.
+  Object.keys(gruposDuplicados).forEach(function(clave){
+    var grupo=gruposDuplicados[clave];
+    var incompatible=false;
+    for(var i=0;i<grupo.length&&!incompatible;i++){
+      for(var j=i+1;j<grupo.length;j++){
+        if(!tiendaPuedenSerDuplicados(grupo[i],grupo[j])){incompatible=true;break;}
+      }
+    }
+    if(!incompatible)return;
+    grupo.forEach(function(p){
+      p.ocultoPorDuplicado=false;
+      p.duplicadoPreferido=false;
+      delete p.duplicadoGrupo;
+      delete p.duplicadoCantidad;
+      delete p.duplicadoSimilitud;
+      if(p.ocultoManualProveedor!==true && !tiendaTieneSinStock(p))p.visible=true;
+    });
+    delete gruposDuplicados[clave];
+    cambio=true;
+  });
+
+  // Un grupo válido nunca puede dejar todos sus productos ocultos. Si una
+  // sincronización anterior perdió el elegido, recuperamos uno que tenga stock.
+  Object.keys(gruposDuplicados).forEach(function(clave){
+    var grupo=gruposDuplicados[clave];
+    if(grupo.length<2)return;
+    var tieneVisible=grupo.some(function(p){return p.visible===true && !tiendaTieneSinStock(p);});
+    if(tieneVisible)return;
+    var elegido=grupo.find(function(p){
+      return !tiendaTieneSinStock(p) && p.ocultoManualProveedor!==true;
+    });
+    if(elegido){
+      elegido.visible=true;
+      elegido.ocultoPorDuplicado=false;
+      elegido.duplicadoPreferido=true;
+      cambio=true;
+    }
+  });
+
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
+      var grupo=p.duplicadoGrupo?gruposDuplicados[String(p.duplicadoGrupo)]:null;
+      var duplicadoHuerfano=p.ocultoPorDuplicado===true && (!grupo || grupo.length<2);
+      if(duplicadoHuerfano){
+        // La marca sobrevivió, pero el grupo para revisarla ya no existe.
+        // No hay motivo verificable para mantener el producto escondido.
+        p.ocultoPorDuplicado=false;
+        p.duplicadoPreferido=false;
+        delete p.duplicadoGrupo;
+        if(p.ocultoManualProveedor!==true && !tiendaTieneSinStock(p))p.visible=true;
+        cambio=true;
+      }else if(p.visible===false && p.ocultoManualProveedor!==true &&
+               p.ocultoPorDuplicado!==true && !tiendaTieneSinStock(p)){
+        // visible=false sin una causa persistida era otro residuo del sistema
+        // anterior. Stock disponible vuelve a publicarse de forma segura.
+        p.visible=true;
+        cambio=true;
+      }
       // La bandeja de imágenes es un filtro calculado: abrirla nunca modifica
       // ni vuelve a guardar cientos de productos automáticos.
       return;
@@ -9111,7 +9231,8 @@ function tiendaProcesarCarga(){
         tiendaProductos.forEach(function(p){
           var kp=claveProd(p.nombre);
           if(!kp || kp.length<6) return;
-          if(kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1){
+          if((kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1) &&
+             tiendaPuedenSerDuplicados(n,p)){
             var largo=Math.min(kn.length,kp.length);
             if(largo>mejorLen){ mejorLen=largo; mejor=p; }
           }
