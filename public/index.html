@@ -1021,6 +1021,9 @@ var _tiendaCacheInicialPromesa=null;
 // previa pero no se habilita para compartir. Así nunca se manda una foto vieja.
 var _tiendaSincronizacionInicialLista=false;
 var _tiendaSincronizacionInicialPromesa=null;
+// Se activa exclusivamente después de leer sin errores tanto el mapa de
+// publicación como el catálogo manual. Una descarga parcial no es autoritativa.
+var _tiendaControlPublicacionNubeListo=false;
 function tiendaMarcarSincronizacionInicial(cargando){
   var grid=document.getElementById('tienda-grid');
   var aviso=document.getElementById('tienda-sync-inicial');
@@ -2197,9 +2200,9 @@ function tiendaInit(){
     tiendaSubfiltroActivo='';
     tiendaMostrarTodos=false;
   }
-  // v21 repara una sola vez los dispositivos que conservaron un catálogo viejo con
+  // v22 repara una sola vez los dispositivos que conservaron un catálogo viejo con
   // una versión incremental aparentemente actualizada.
-  var repararCache=tiendaNecesitaReparacionCacheV21();
+  var repararCache=tiendaNecesitaReparacionCacheV22();
   if(repararCache){
     tiendaProductos=[];
     tiendaGuardarVersionIncremental(0);
@@ -2240,7 +2243,9 @@ function tiendaInit(){
     })
     .catch(function(){return false;})
     .then(function(resultado){
-      _tiendaSincronizacionInicialLista=true;
+      // Si Supabase no respondió, no habilitamos tareas automáticas capaces de
+      // archivar productos: es preferible conservar el estado remoto anterior.
+      _tiendaSincronizacionInicialLista=(resultado===true);
       tiendaMarcarSincronizacionInicial(false);
       tiendaRender();
       return resultado;
@@ -2505,7 +2510,7 @@ function tiendaBajarNubeLegacy(intentos){
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
-var TIENDA_CACHE_FOTOS_VERSION='v21-20260824-visibilidad-unificada';
+var TIENDA_CACHE_FOTOS_VERSION='v22-20260825-stock-y-guardado-estable';
 var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
@@ -2576,6 +2581,21 @@ function tiendaGuardarNubeLiviano(){
       return error?{data:null,error:error}:{data:true,error:null};
     });
 }
+// Un producto puede disparar varios guardados seguidos (confirmar, renderizar,
+// cambiar de bandeja). Antes esas escrituras completas corrían en paralelo y
+// una solicitud vieja podía terminar última, pisando la confirmación nueva.
+// La cola conserva el orden y cada turno toma el estado más reciente.
+var _tiendaGuardadoNubeCola=Promise.resolve();
+function tiendaEncolarGuardadoNube(){
+  var turno=_tiendaGuardadoNubeCola.catch(function(){return null;}).then(function(){
+    return tiendaGuardarNubeLiviano();
+  }).then(function(r){
+    if(r&&r.error)throw r.error;
+    return r;
+  });
+  _tiendaGuardadoNubeCola=turno;
+  return turno;
+}
 function tiendaPublicarControlAdmin(mostrarAviso){
   if(!tiendaEsAdmin && !adminUnlocked)return Promise.resolve(false);
   var lista=(window._tiendaSincronizacionInicialPromesa && typeof window._tiendaSincronizacionInicialPromesa.then==='function')
@@ -2601,6 +2621,7 @@ function tiendaBajarControlPublicacion(){
       var r=res[0], rm=res[1];
       if(r&&r.error)throw r.error;
       if(rm&&rm.error)throw rm.error;
+      _tiendaControlPublicacionNubeListo=true;
       if(rm&&rm.data&&Array.isArray(rm.data.datos)){
         var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
         tiendaProductos=automaticos.concat(rm.data.datos);
@@ -2614,14 +2635,17 @@ function tiendaBajarControlPublicacion(){
       // el mapa para que clientes y vendedores lo reciban inmediatamente.
       if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return false;});
       return false;
-    }).catch(function(){return false;});
+    }).catch(function(){
+      _tiendaControlPublicacionNubeListo=false;
+      return false;
+    });
 }
 
-function tiendaNecesitaReparacionCacheV21(){
+function tiendaNecesitaReparacionCacheV22(){
   try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
   catch(e){return true;}
 }
-function tiendaConfirmarReparacionCacheV21(){
+function tiendaConfirmarReparacionCacheV22(){
   try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
 }
 
@@ -2684,7 +2708,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
-  tiendaConfirmarReparacionCacheV21();
+  tiendaConfirmarReparacionCacheV22();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -3492,7 +3516,7 @@ function tiendaGuardarLocal(){
   // cancelaba esa operación por statement_timeout. Subimos solamente los
   // manuales y las decisiones administrativas de publicación.
   if(NUBE_OK && sbCalc){
-    var subida=tiendaGuardarNubeLiviano();
+    var subida=tiendaEncolarGuardadoNube();
     // La mayoría de los botones guardan sin bloquear la interfaz. Marcamos la
     // promesa como atendida, pero la devolvemos para las acciones (como fotos)
     // que necesitan confirmar que la nube terminó bien.
@@ -5031,14 +5055,20 @@ function tiendaEstaVisibleYConStock(p){
   var stock=tiendaLeerStockProveedor(p);
   return !(stock.informado && stock.valor<=0);
 }
-function tiendaEstaOcultoAdmin(p){
-  return !!(p && (p.visible===false || p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true));
-}
-function tiendaEstaSinStockAdmin(p){
-  if(!p || tiendaEstaOcultoAdmin(p))return false;
+function tiendaTieneSinStock(p){
+  if(!p)return false;
   if(p.sinStock===true || p.estadoProveedor==='sin_stock')return true;
   var stock=tiendaLeerStockProveedor(p);
   return !!(stock.informado && stock.valor<=0);
+}
+function tiendaEstaOcultoAdmin(p){
+  // Sin stock tiene prioridad sobre cualquier marca de ocultamiento. Así un
+  // producto agotado no se mezcla con los que requieren una decisión del admin.
+  return !!(p && !tiendaTieneSinStock(p) &&
+    (p.visible===false || p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true));
+}
+function tiendaEstaSinStockAdmin(p){
+  return tiendaTieneSinStock(p);
 }
 function tiendaEsPendienteImagenAdmin(p){
   // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
@@ -5048,7 +5078,8 @@ function tiendaEsPendienteImagenAdmin(p){
     p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
-  return !!(p && !p.esCelu && !tiendaEsAutomatico(p) && p.pendienteRevisionManual===true);
+  return !!(p && !p.esCelu && !tiendaEsAutomatico(p) &&
+    !tiendaTieneSinStock(p) && p.pendienteRevisionManual===true);
 }
 function tiendaRepararIdsManuales(){
   var usados={};
@@ -5070,13 +5101,29 @@ function tiendaRepararIdsManuales(){
   return cambio;
 }
 function tiendaPrepararBandejasAdmin(){
-  if(!tiendaEsAdmin)return false;
+  // Nunca transformar ni guardar la copia local mientras todavía se está
+  // descargando el estado autoritativo de Supabase. Ese orden invertido era el
+  // que volvía a ocultar productos ya confirmados desde otro dispositivo.
+  if(!tiendaEsAdmin || !_tiendaSincronizacionInicialLista ||
+     !_tiendaControlPublicacionNubeListo)return false;
   var cambio=tiendaRepararIdsManuales();
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
       // La bandeja de imágenes es un filtro calculado: abrirla nunca modifica
       // ni vuelve a guardar cientos de productos automáticos.
+      return;
+    }
+    // Recuperación acotada: si existe una confirmación reciente y el producto
+    // reapareció como pendiente por la carrera de caché anterior, la aprobación
+    // gana. No toca productos que el administrador ocultó deliberadamente.
+    var confirmacion=Number(p.precioChequeadoManual)||0;
+    if(confirmacion>0 && (Date.now()-confirmacion)<30*24*60*60*1000 &&
+       p.pendienteRevisionManual===true){
+      p.pendienteRevisionManual=false;
+      p.visible=true;
+      delete p.visibleAntesRevisionManual;
+      cambio=true;
       return;
     }
     // Los manuales sin fecha o con 30+ días se archivan y ocultan hasta
@@ -5155,6 +5202,7 @@ function tiendaLiberarRevisionManual(p, publicar){
   if(publicar===true){
     p.visible=true;
     delete p.ocultoManualProveedor;
+    delete p.ocultoManualAdmin;
   }else if(p.visibleAntesRevisionManual!==false){
     p.visible=true;
   }
@@ -6288,7 +6336,8 @@ function tiendaToggleMarcado(id){
 function tiendaSetVisibilidadManual(p, visible){
   if(!p)return;
   p.visible=visible;
-  if(p.automaticoProveedor) p.ocultoManualProveedor=!visible;
+  if(tiendaEsAutomatico(p)) p.ocultoManualProveedor=!visible;
+  else p.ocultoManualAdmin=!visible;
 }
 
 // Protección central: aunque un botón viejo quede visible por caché, un vendedor
