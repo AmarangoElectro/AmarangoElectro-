@@ -10087,7 +10087,7 @@ function parsearCeluLinea(linea, esUSD){
   var nombre=linea
     .replace(/\([^)]*\)/g,'') // sacar el paréntesis de colores
     .replace(/(?:usd|u\$s|us\$|d[oó]lares?)\s*\$?\s*[\d][\d.,]*/i,'').replace(/[\d][\d.,]*\s*(?:usd|u\$s|us\$|d[oó]lares?)/i,'').replace(/\$\s*[\d][\d.,]*/,'').replace(/[\d][\d.,]*\s*\$/,'').replace(/[*_•▪️📱🍎]/g,'').replace(/[-–—]\s*$/,'').replace(/\s{2,}/g,' ').trim();
-  // limpiar caracteres rotos: emojis mal formados, surrogates sueltos y el carácter de reemplazo �
+  // limpiar caracteres rotos: emojis mal formados, surrogates sueltos y el carácter de reemplazo  
   nombre=limpiarTexto(nombre);
   if(!nombre||nombre.length<2)return null;
   return {nombre:nombre.substring(0,60),precio:precio,colores:colores};
@@ -10119,7 +10119,7 @@ function lineaColores(colores){
   if(!colores||!colores.length)return '';
   return colores.map(function(c){return capit(c)+' '+emojiColor(c);}).join(' · ');
 }
-// Quita caracteres que rompen encodeURIComponent (surrogates sueltos) y el �
+// Quita caracteres que rompen encodeURIComponent (surrogates sueltos) y el  
 function limpiarTexto(s){
   if(!s)return '';
   // sacar el carácter de reemplazo y surrogates sin pareja
