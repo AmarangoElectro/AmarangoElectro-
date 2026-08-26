@@ -2659,14 +2659,50 @@ function tiendaSubirControlPublicacion(){
     actualizado:new Date().toISOString()
   }).select('actualizado');
 }
+// Fix 2026-08-26: subir el array completo de manuales tal como lo tiene ESTE
+// dispositivo pisaba lo que haya en el servidor. Si otro dispositivo (otro
+// celu/PC del equipo) tenía una copia un poco más vieja y guardaba cualquier
+// cosa, revivía visibilidad/estados que el otro dispositivo acababa de
+// cambiar segundos antes ("puse visible y se volvió a ocultar solo").
+// Ahora se compara producto por producto contra el servidor justo antes de
+// subir, y por cada producto se conserva la version mas reciente segun su
+// propia marca de tiempo — no la del dispositivo que llega ultimo.
+function tiendaMarcaTiempoProducto(p){
+  if(!p)return 0;
+  return Math.max(
+    Number(p.estadoRevisionActualizado)||0,
+    Number(p.precioChequeadoManual)||0,
+    Number(p.precioActualizado)||0,
+    Number(p.creado)||0
+  );
+}
 function tiendaSubirManualesNube(){
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
-  var manuales=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
-  return sbCalc.from('tienda_catalogo').upsert({
-    id:TIENDA_MANUALES_ID,
-    datos:manuales,
-    actualizado:new Date().toISOString()
-  }).select('actualizado');
+  var manualesLocal=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
+  return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
+    .then(function(res){
+      var manualesServidor=(res && !res.error && res.data && Array.isArray(res.data.datos))?res.data.datos:[];
+      var porId={};
+      manualesServidor.forEach(function(p){ if(p && p.id!=null) porId[String(p.id)]=p; });
+      manualesLocal.forEach(function(pLocal){
+        if(pLocal==null || pLocal.id==null)return;
+        var clave=String(pLocal.id);
+        var pServidor=porId[clave];
+        // Si el servidor no lo tiene, o la version local es igual o mas
+        // reciente, gana la local (incluye el cambio que se esta guardando
+        // ahora mismo). Si el servidor tiene algo MAS nuevo que esta copia
+        // nunca vio, se respeta esa version en vez de pisarla a ciegas.
+        if(!pServidor || tiendaMarcaTiempoProducto(pLocal)>=tiendaMarcaTiempoProducto(pServidor)){
+          porId[clave]=pLocal;
+        }
+      });
+      var fusionado=Object.keys(porId).map(function(k){return porId[k];});
+      return sbCalc.from('tienda_catalogo').upsert({
+        id:TIENDA_MANUALES_ID,
+        datos:fusionado,
+        actualizado:new Date().toISOString()
+      }).select('actualizado');
+    });
 }
 function tiendaGuardarNubeLiviano(){
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
@@ -6568,7 +6604,10 @@ function tiendaGuardarPrecios(){
   }
   document.getElementById('modal-cuotas').style.display='none';
   if(liberoRevision){
-    tiendaRender();
+    // Fix 2026-08-26: mismo problema que en tiendaConfirmarPrecioManual —
+    // tiendaRender() a secas mandaba el scroll arriba de todo al confirmar
+    // desde el diálogo de edición.
+    tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
     mostrarToast('✅ Precio corregido y producto publicado');
   }else if(cambioCategoria){
     tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
@@ -6582,6 +6621,14 @@ function tiendaConfirmarPrecioManual(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
   if(!p || tiendaEsAutomatico(p) || p.esCelu)return;
+  // Fix 2026-08-26: guardamos dónde estaba parado el admin ANTES de tocar
+  // nada. tiendaRender() a secas reconstruye toda la grilla y manda el
+  // scroll arriba de todo — al revisar muchos productos seguidos eso
+  // obligaba a bajar de nuevo cada vez. tiendaRenderMantenerSector() repone
+  // el scroll y la cantidad de tarjetas ya cargadas, como ya se hace en
+  // otras acciones (cambiar categoría, etc.).
+  var scrollPrevio=window.scrollY;
+  var mostradosPrevios=_tiendaMostrados;
   var ahora=Date.now();
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
@@ -6594,7 +6641,7 @@ function tiendaConfirmarPrecioManual(id){
     tiendaGuardarLocal(),
     tiendaGuardarRevisionManualNube(p)
   ]);
-  tiendaRender();
+  tiendaRenderMantenerSector(scrollPrevio, mostradosPrevios);
   mostrarToast('⏳ Guardando y publicando...');
   Promise.resolve(guardado).then(function(res){
     var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
