@@ -2542,6 +2542,64 @@ var _tiendaBajarNubeEnCurso=null;
 var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
 var TIENDA_MANUALES_ID='catalogo_manuales';
 var TIENDA_REVISION_MANUAL_PREFIJO='revision_manual_';
+var TIENDA_ELIMINACION_PREFIJO='eliminacion_producto_';
+
+// El borrado se guarda en una fila independiente por producto. No alcanza
+// con sacarlo del array local: los automáticos vuelven a llegar desde el
+// proveedor y una copia vieja de los manuales también puede reinsertarlos.
+// Esta fila es la autoridad final para todos los dispositivos.
+function tiendaEliminacionId(id){
+  return TIENDA_ELIMINACION_PREFIJO+String(id);
+}
+function tiendaGuardarEliminacionNube(p, eliminado){
+  if(!NUBE_OK||!sbCalc||!p||p.id==null){
+    return Promise.resolve({data:null,error:null});
+  }
+  var actualizadoEn=Number(p.estadoEliminacionActualizado)||Date.now();
+  p.estadoEliminacionActualizado=actualizadoEn;
+  return Promise.resolve(sbCalc.from('tienda_catalogo').upsert({
+    id:tiendaEliminacionId(p.id),
+    datos:{
+      productoId:String(p.id),
+      actualizadoEn:actualizadoEn,
+      eliminado:eliminado===true,
+      visibleAntesEliminacion:p.visibleAntesEliminacion!==false
+    },
+    actualizado:new Date(actualizadoEn).toISOString()
+  }).select('datos'));
+}
+function tiendaAplicarEliminacionesNube(filas){
+  if(!Array.isArray(filas)||!filas.length)return false;
+  var porId={};
+  (tiendaProductos||[]).forEach(function(p){if(p&&p.id!=null)porId[String(p.id)]=p;});
+  var cambio=false;
+  filas.forEach(function(fila){
+    var d=fila&&fila.datos;
+    if(!d||d.productoId==null)return;
+    var p=porId[String(d.productoId)];if(!p)return;
+    var remoto=Number(d.actualizadoEn)||0;
+    var local=Number(p.estadoEliminacionActualizado)||0;
+    if(!remoto||remoto<local)return;
+    p.estadoEliminacionActualizado=remoto;
+    p.eliminadoActualizado=remoto;
+    if(d.eliminado===true){
+      if(p.eliminado!==true||p.visible!==false)cambio=true;
+      p.eliminado=true;
+      p.visibleAntesEliminacion=d.visibleAntesEliminacion!==false;
+      p.visible=false;
+    }else{
+      if(p.eliminado===true)cambio=true;
+      delete p.eliminado;
+      p.visible=d.visibleAntesEliminacion!==false;
+      delete p.visibleAntesEliminacion;
+    }
+  });
+  if(cambio){
+    try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+    try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
+  }
+  return cambio;
+}
 
 // La aprobación de cada producto manual vive también en una fila pequeña e
 // independiente. Así una pestaña vieja no puede volver a ocultarlo al subir
@@ -2587,6 +2645,9 @@ function tiendaAplicarRevisionesManualesNube(filas){
     var d=fila&&fila.datos;
     if(!d||d.productoId==null)return;
     var p=porId[String(d.productoId)];if(!p)return;
+    // Una confirmación de precio anterior nunca puede revivir un producto
+    // que ya fue enviado a la papelera.
+    if(p.eliminado===true)return;
     var remoto=Number(d.actualizadoEn)||0;
     var local=Number(p.estadoRevisionActualizado)||0;
     if(!remoto||remoto<local)return;
@@ -2796,12 +2857,14 @@ function tiendaBajarControlPublicacion(){
   return Promise.all([
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle(),
-    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_REVISION_MANUAL_PREFIJO+'%')
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_REVISION_MANUAL_PREFIJO+'%'),
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_ELIMINACION_PREFIJO+'%')
   ]).then(function(res){
-      var r=res[0], rm=res[1], rr=res[2];
+      var r=res[0], rm=res[1], rr=res[2], re=res[3];
       if(r&&r.error)throw r.error;
       if(rm&&rm.error)throw rm.error;
       if(rr&&rr.error)throw rr.error;
+      if(re&&re.error)throw re.error;
       _tiendaControlPublicacionNubeListo=true;
       if(rm&&rm.data&&Array.isArray(rm.data.datos)){
         var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
@@ -2810,13 +2873,17 @@ function tiendaBajarControlPublicacion(){
       var cambioRevision=tiendaAplicarRevisionesManualesNube(rr&&Array.isArray(rr.data)?rr.data:[]);
       if(r&&r.data&&r.data.datos){
         var cambio=tiendaAplicarControlPublicacion(r.data.datos);
+        // Debe aplicarse último: ni una revisión de precio vieja ni el estado
+        // del proveedor pueden revivir algo que está en la papelera.
+        var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
         try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
-        return cambio||cambioRevision;
+        return cambio||cambioRevision||cambioEliminacion;
       }
       // La primera vez, el administrador que ya tiene el estado correcto crea
       // el mapa para que clientes y vendedores lo reciban inmediatamente.
-      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision;});
-      return cambioRevision;
+      var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision||cambioEliminacion;});
+      return cambioRevision||cambioEliminacion;
     }).catch(function(error){
       // No silenciar del todo: mantiene el modo lectura (el guard de
       // tiendaPrepararBandejasAdmin ya bloquea acciones automáticas mientras
@@ -2884,7 +2951,19 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
     var id=String(f.producto_id);
     maxima=Math.max(maxima,parseInt(f.version,10)||0);
     if(f.eliminado){ delete mapa[id]; return; }
-    if(f.datos&&typeof f.datos==='object')mapa[id]=f.datos;
+    if(f.datos&&typeof f.datos==='object'){
+      var anterior=mapa[id];
+      // Una actualización normal del proveedor modifica precio/stock/foto,
+      // pero no constituye una restauración desde la papelera.
+      if(anterior&&anterior.eliminado===true){
+        f.datos.eliminado=true;
+        f.datos.visible=false;
+        f.datos.visibleAntesEliminacion=anterior.visibleAntesEliminacion;
+        f.datos.eliminadoActualizado=anterior.eliminadoActualizado;
+        f.datos.estadoEliminacionActualizado=anterior.estadoEliminacionActualizado;
+      }
+      mapa[id]=f.datos;
+    }
   });
   tiendaProductos=Object.keys(mapa).map(function(k){return mapa[k];});
   tiendaProductos.forEach(function(p){if(typeof p.visible==='undefined')p.visible=true;});
@@ -3823,16 +3902,31 @@ function tiendaPapeleraRestaurar(idx){
     // con eliminado=true (para que el borrado se sincronice entre
     // dispositivos), no sacándose del array. Si ya existe esa entrada,
     // hay que revivir ESA en vez de agregar una copia nueva al lado.
-    var existente=it.dato && it.dato.id!=null ? tiendaProductos.find(function(x){return x.id===it.dato.id;}) : null;
+    var existente=it.dato && it.dato.id!=null ? tiendaProductos.find(function(x){return String(x.id)===String(it.dato.id);}) : null;
+    var restaurado=null;
     if(existente){
       delete existente.eliminado;
-      delete existente.eliminadoActualizado;
       existente.visible=(it.dato.visible!==false);
+      restaurado=existente;
     }else{
       tiendaProductos.push(it.dato);
+      restaurado=it.dato;
     }
-    if(it.dato && !tiendaEsAutomatico(it.dato)) tiendaOlvidarEliminacionManual(it.dato.id);
-    tiendaGuardarLocal();
+    if(restaurado){
+      var ahoraRestauracion=Date.now();
+      restaurado.estadoEliminacionActualizado=ahoraRestauracion;
+      restaurado.eliminadoActualizado=ahoraRestauracion;
+      restaurado.visibleAntesEliminacion=restaurado.visible!==false;
+      tiendaOlvidarEliminacionManual(restaurado.id);
+      Promise.all([tiendaGuardarLocal(),tiendaGuardarEliminacionNube(restaurado,false)])
+        .then(function(res){
+          var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
+          if(error)throw error;
+          mostrarToast('♻️ Producto restaurado y sincronizado');
+        }).catch(function(err){
+          alert('⚠️ Se restauró en este dispositivo, pero Supabase no confirmó el cambio.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+        });
+    }
   }else if(it.tipo==='celular'){
     var celus=cargarListaCelus();
     celus.push(it.dato);
@@ -3842,7 +3936,7 @@ function tiendaPapeleraRestaurar(idx){
     var cups=cargarCupones(); cups.push(it.dato); guardarCupones(cups);
   }
   pap.splice(idx,1); guardarPapelera(pap);
-  mostrarToast('♻️ Restaurado');
+  if(it.tipo!=='producto')mostrarToast('♻️ Restaurado');
   tiendaPapeleraAbrir(); tiendaRender();
 }
 // vacía la papelera para siempre
@@ -5264,6 +5358,7 @@ function tiendaDiagnosticoOcultos(){
   var conteo={manual:0,duplicado:0,sin_stock:0,revision_precio:0,sin_motivo:0};
   var ejemplos={manual:[],duplicado:[],sin_motivo:[]};
   (tiendaProductos||[]).forEach(function(p){
+    if(!p||p.eliminado===true)return;
     var motivo=tiendaMotivoOcultoActual(p);
     if(!motivo)return;
     conteo[motivo]=(conteo[motivo]||0)+1;
@@ -5273,7 +5368,7 @@ function tiendaDiagnosticoOcultos(){
   });
   var gruposDuplicadosDiag={};
   (tiendaProductos||[]).forEach(function(p){
-    if(p&&p.duplicadoGrupo)(gruposDuplicadosDiag[String(p.duplicadoGrupo)]=gruposDuplicadosDiag[String(p.duplicadoGrupo)]||[]).push(p);
+    if(p&&p.eliminado!==true&&p.duplicadoGrupo)(gruposDuplicadosDiag[String(p.duplicadoGrupo)]=gruposDuplicadosDiag[String(p.duplicadoGrupo)]||[]).push(p);
   });
   var totalGrupos=Object.keys(gruposDuplicadosDiag).length;
   var revisionManualCount=tiendaProductos.filter(tiendaEsPendienteRevisionManual).length;
@@ -5359,7 +5454,7 @@ function tiendaEsFotoAmarango(p){
 // pendiente de confirmar. Ahora solo excluye por causas comprobables: sin
 // stock, ocultamiento manual del proveedor, o duplicado confirmado.
 function tiendaEstaVisibleYConStock(p){
-  if(!p || p.visible!==true ||
+  if(!p || p.eliminado===true || p.visible!==true ||
      p.sinStock===true || p.estadoProveedor==='sin_stock' ||
      p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true)return false;
   var stock=tiendaLeerStockProveedor(p);
@@ -5381,7 +5476,7 @@ function tiendaEstaOcultoAdmin(p){
     (p.visible===false || p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true));
 }
 function tiendaEstaSinStockAdmin(p){
-  return tiendaTieneSinStock(p);
+  return !!(p && p.eliminado!==true && tiendaTieneSinStock(p));
 }
 function tiendaEsPendienteImagenAdmin(p){
   // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
@@ -5391,7 +5486,7 @@ function tiendaEsPendienteImagenAdmin(p){
     p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
-  return !!(p && !p.esCelu && !tiendaEsAutomatico(p) &&
+  return !!(p && p.eliminado!==true && !p.esCelu && !tiendaEsAutomatico(p) &&
     !tiendaTieneSinStock(p) && p.pendienteRevisionManual===true);
 }
 function tiendaRepararIdsManuales(){
@@ -6755,26 +6850,27 @@ function tiendaEliminar(id){
   if(!p)return;
   if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)+'\n\n(Va a la 🗑️ Papelera por si te arrepentís)'))return;
   papeleraAgregar('producto', p);
-  // Fix 2026-08-26 (v2): sacarlo del array (tiendaProductos=filter(...))
-  // hacía que, apenas OTRO dispositivo con una copia local un poco vieja
-  // guardara cualquier cosa, lo volviera a subir — ese dispositivo nunca se
-  // enteró del borrado porque no había ningún rastro compartido de que
-  // pasó. Ahora el producto se marca eliminado (queda en memoria, oculto en
-  // todos lados) y esa marca viaja con el resto de la sincronización, así
-  // CUALQUIER dispositivo que la vea respeta el borrado, no solo el que lo
-  // hizo. El registro local (tiendaRegistrarEliminacionManual) queda como
-  // resguardo extra para el ratito antes de la primera sincronización.
-  if(!tiendaEsAutomatico(p)){
-    tiendaRegistrarEliminacionManual(id);
-    p.eliminado=true;
-    p.eliminadoActualizado=Date.now();
-    p.visible=false;
-  }else{
-    tiendaProductos=tiendaProductos.filter(function(x){return x.id!=id;});
-  }
+  // Tanto los manuales como los automáticos permanecen como una lápida
+  // invisible. Si se quitara el automático del array, el proveedor lo
+  // descargaría otra vez en la siguiente sincronización.
+  var ahora=Date.now();
+  tiendaRegistrarEliminacionManual(id);
+  p.visibleAntesEliminacion=p.visible!==false;
+  p.eliminado=true;
+  p.eliminadoActualizado=ahora;
+  p.estadoEliminacionActualizado=ahora;
+  p.visible=false;
   delete tiendaMarcadosSet[id];
-  tiendaGuardarLocal(); tiendaRender();
-  mostrarToast('🗑️ Movido a la papelera');
+  var guardado=Promise.all([tiendaGuardarLocal(),tiendaGuardarEliminacionNube(p,true)]);
+  tiendaRender();
+  mostrarToast('⏳ Borrando y sincronizando...');
+  guardado.then(function(res){
+    var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
+    if(error)throw error;
+    mostrarToast('🗑️ Producto borrado y sincronizado');
+  }).catch(function(err){
+    alert('⚠️ Se ocultó en este dispositivo, pero Supabase no confirmó el borrado.\n\nVolvé a intentarlo con conexión.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+  });
 }
 
 // marcar/desmarcar producto para acciones en tanda
