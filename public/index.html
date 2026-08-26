@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <!-- ARCHIVO PRINCIPAL AMARANGO: V-FOTO-WHATSAPP-MANUAL-3 + ESCRITORIO + INSTAGRAM + BUSQUEDA-EXACTA -->
 <html lang="es">
@@ -126,13 +125,8 @@ body.cajon-cats-abierto #nav-inferior{display:none !important;}
 .hdr-buscar input{width:100%;padding:12px 40px 12px 42px;border:2px solid var(--nar);border-radius:14px;font-size:.9rem;font-family:inherit;font-weight:600;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.25);background:#fff}
 .hdr-buscar .hb-lupa{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none}
 .hdr-buscar .hb-x{display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--sub);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.8rem;cursor:pointer;font-family:inherit;line-height:1;padding:0}
-.ae-buscar-fila{display:flex;align-items:stretch;gap:9px;width:100%;}
-.ae-buscar-fila .hdr-buscar{flex:1;min-width:0;}
-.admin-cargar-buscador{display:none;flex:0 0 178px;align-items:center;justify-content:center;gap:8px;margin-top:6px;border:2px solid var(--nar);border-radius:14px;background:#fff;color:var(--az);box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:.82rem;font-weight:900;line-height:1;cursor:pointer;white-space:nowrap;}
-.admin-cargar-buscador .admin-cargar-icono{font-size:25px;line-height:1;}
-.admin-cargar-buscador:hover{background:#fff6ec;transform:translateY(-1px);}
-.admin-cargar-buscador:focus-visible{outline:3px solid rgba(255,122,0,.35);outline-offset:2px;}
-@media(max-width:520px){.ae-buscar-fila{gap:6px}.admin-cargar-buscador{flex-basis:118px;gap:4px;font-size:.66rem;white-space:normal;line-height:1.05}.admin-cargar-buscador .admin-cargar-icono{font-size:21px}}
+.ae-buscar-fila{display:flex;align-items:stretch;gap:8px;margin-bottom:8px}.ae-buscar-fila .hdr-buscar{flex:1;min-width:0;margin-top:0}.btn-subir-header{display:none;flex:0 0 auto;align-items:center;justify-content:center;gap:5px;background:#fff;color:var(--az);border:2px solid var(--nar);border-radius:13px;padding:8px 11px;font-family:inherit;font-size:.7rem;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:nowrap}
+@media(max-width:430px){.btn-subir-header{padding:7px 8px;font-size:.62rem}.ae-buscar-fila{gap:5px}.hdr-buscar input{padding-left:38px;font-size:.78rem}}
 /* ═══ PORTADA AMARANGO ═══ */
 .ae-hero{position:relative;isolation:isolate;overflow:hidden;min-height:178px;margin:0 0 12px;border-radius:20px;border:2px solid rgba(255,122,0,.78);background:linear-gradient(118deg,#020c2e 0%,#0B2D6B 50%,#174aa5 72%,#FF7A00 145%);box-shadow:0 10px 28px rgba(11,45,107,.25);display:flex;align-items:center;padding:22px 16px 22px 22px;}
 .ae-hero::before{content:'';position:absolute;inset:0;z-index:-2;opacity:.48;background-image:linear-gradient(30deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(150deg,rgba(11,45,107,.10) 12%,transparent 12.5%,transparent 87%,rgba(11,45,107,.10) 87.5%,rgba(11,45,107,.10)),linear-gradient(30deg,rgba(255,122,0,.08) 12%,transparent 12.5%,transparent 87%,rgba(255,122,0,.08) 87.5%,rgba(255,122,0,.08));background-size:48px 84px;background-position:0 0,0 0,24px 42px;}
@@ -290,6 +284,12 @@ body.lujo h1{background:linear-gradient(90deg,#fff,#f0d97d,#fff);background-size
 #tienda-grid.vista-chica .calc-btn{font-size:.58rem !important;padding:6px 2px !important;}
 #tienda-grid.vista-lista{grid-template-columns:1fr !important;}
 #tienda-grid.vista-lista .prod-foto{height:240px !important;}
+.portada-cat-seccion{grid-column:1/-1;margin:2px 0 14px;min-width:0;}
+.portada-cat-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 2px 8px;}
+.portada-cat-cab h3{margin:0;color:#fff;font-size:1rem;font-weight:900;}
+.portada-cat-ver{border:none;border-radius:18px;background:#fff;color:var(--az);padding:7px 12px;font-size:.68rem;font-weight:900;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.14);}
+.portada-cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;}
+@media(min-width:760px){.portada-cat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.portada-cat-cab h3{font-size:1.15rem}}
 /* 🎰 Ruleta de descuentos */
 #ruleta-fab{position:fixed;bottom:145px;right:18px;z-index:1395;width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#e11d48,#ff7a00);color:#fff;font-size:1.6rem;box-shadow:0 4px 16px rgba(225,29,72,.5);display:flex;align-items:center;justify-content:center;animation:ruletaPulse 2s ease-in-out infinite;}
 @keyframes ruletaPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
@@ -699,18 +699,15 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     </section>
 
     <!-- Buscador debajo de la portada -->
-    <div class="ae-buscar-fila">
-      <div class="hdr-buscar ae-buscar-banner">
-        <span class="hb-lupa">🔍</span>
-        <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
-          oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
-          onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
-          onblur="setTimeout(hdrCerrarSugerencias,180)">
-        <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
-        <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
-      </div>
-      <button id="admin-cargar-buscador" class="admin-cargar-buscador" onclick="tiendaAbrirCarga()" title="Cargar producto" aria-label="Cargar producto"><span class="admin-cargar-icono">🐝</span><span>Cargar producto</span></button>
-    </div>
+    <div class="ae-buscar-fila"><div class="hdr-buscar ae-buscar-banner">
+      <span class="hb-lupa">🔍</span>
+      <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+        oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
+        onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
+        onblur="setTimeout(hdrCerrarSugerencias,180)">
+      <button class="hb-x" id="hdr-buscar-x" onclick="hdrBuscarLimpiar()">✕</button>
+      <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
+    </div><button id="tienda-subir-header" class="btn-subir-header" onclick="tiendaAbrirCarga()">🐝 Subir<br>productos</button></div>
 
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
@@ -797,6 +794,9 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <div id="tienda-bandejas-admin" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px;">
       <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🖼️ Imágenes pendientes <span id="cnt-bandeja-nuevos">0</span></button>
       <button id="btn-bandeja-revision" onclick="tiendaAbrirBandejaAdmin('revision')" style="padding:10px 7px;background:#FFF7E6;color:#A05200;border:1.5px solid #F0C040;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🕓 Revisar manuales <span id="cnt-bandeja-revision">0</span></button>
+      <button id="btn-bandeja-ocultos" onclick="tiendaAbrirBandejaAdmin('ocultos')" style="padding:10px 7px;background:#F3F4F6;color:#374151;border:1.5px solid #D1D5DB;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🙈 Ocultos <span id="cnt-bandeja-ocultos">0</span></button>
+      <button id="btn-bandeja-sinstock" onclick="tiendaAbrirBandejaAdmin('sinstock')" style="padding:10px 7px;background:#FEF2F2;color:#B91C1C;border:1.5px solid #FECACA;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">📦 Sin stock <span id="cnt-bandeja-sinstock">0</span></button>
+      <button id="btn-bandeja-volver" onclick="tiendaSalirBandejaAdmin()" style="display:none;grid-column:1/-1;padding:11px;background:var(--az);color:#fff;border:none;border-radius:11px;font-size:.74rem;font-weight:900;cursor:pointer;font-family:inherit;">← Volver a la tienda y ver todos los productos</button>
     </div>
 
     <!-- Aviso de precios viejos (solo admin) -->
@@ -910,6 +910,10 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaRestaurarAbrir()">📂 Restaurar backup</button>
     <button id="tienda-btn-diag" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);"
       onclick="tiendaDiagNube()">🔍 Diagnóstico de la nube</button>
+    <button id="tienda-btn-diag-ocultos" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#fff7ed;color:#b45309;border:2px solid #fed7aa;"
+      onclick="tiendaDiagnosticoOcultos()">🕵️ Diagnóstico de ocultos y pendientes</button>
+    <button id="tienda-btn-restaurar-manuales" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#fef2f2;color:#b91c1c;border:2px solid #fecaca;"
+      onclick="tiendaRestaurarOcultosManuales()">👁️ Mostrar productos ocultados a mano (revisar antes)</button>
     <button id="tienda-btn-auth-fotos" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#eef4ff;color:var(--az);border:2px solid #cddffb;"
       onclick="tiendaAuthFotosAbrir()">🔐 Fotos: conectar administrador</button>
     <button id="tienda-btn-auth-fotos-salir" class="calc-btn" style="display:none;width:100%;margin-top:8px;background:#fff1f2;color:var(--red);border:2px solid #fecaca;"
@@ -1017,6 +1021,37 @@ var sbCalc=null, sbFotos=null, NUBE_OK=false;
 // El arranque espera a que termine de leerse (o repararse) la copia local.
 // Evita que una respuesta nueva de Supabase sea pisada luego por IndexedDB.
 var _tiendaCacheInicialPromesa=null;
+// Mientras se verifica la nube al abrir, el catálogo local sirve de vista
+// previa pero no se habilita para compartir. Así nunca se manda una foto vieja.
+var _tiendaSincronizacionInicialLista=false;
+var _tiendaSincronizacionInicialPromesa=null;
+// Se activa exclusivamente después de leer sin errores tanto el mapa de
+// publicación como el catálogo manual. Una descarga parcial no es autoritativa.
+var _tiendaControlPublicacionNubeListo=false;
+function tiendaMarcarSincronizacionInicial(cargando){
+  var grid=document.getElementById('tienda-grid');
+  var aviso=document.getElementById('tienda-sync-inicial');
+  if(cargando){
+    if(grid){grid.style.opacity='.45';grid.style.pointerEvents='none';grid.setAttribute('aria-busy','true');}
+    if(!aviso && grid && grid.parentNode){
+      aviso=document.createElement('div');
+      aviso.id='tienda-sync-inicial';
+      aviso.style.cssText='position:sticky;top:8px;z-index:90;margin:8px auto 12px;max-width:520px;padding:10px 14px;border-radius:12px;background:#EAF2FF;border:1.5px solid #BFD3F5;color:#0B2D6B;text-align:center;font-size:.76rem;font-weight:900;box-shadow:0 4px 14px rgba(11,45,107,.14);';
+      aviso.textContent='🔄 Actualizando fotos y productos…';
+      grid.parentNode.insertBefore(aviso,grid);
+    }
+  }else{
+    if(grid){grid.style.opacity='';grid.style.pointerEvents='';grid.removeAttribute('aria-busy');}
+    if(aviso && aviso.parentNode)aviso.parentNode.removeChild(aviso);
+  }
+}
+function tiendaEsperarNubeInicial(intentos){
+  intentos=intentos||0;
+  if(NUBE_OK && sbCalc)return tiendaBajarNube();
+  if(intentos>=40)return Promise.resolve({sinConexion:true});
+  return new Promise(function(resolve){setTimeout(resolve,150);})
+    .then(function(){return tiendaEsperarNubeInicial(intentos+1);});
+}
 // Conecta a Supabase. Si la librería (del CDN) todavía no cargó, reintenta.
 function conectarNube(intentos){
   intentos = intentos||0;
@@ -1828,9 +1863,7 @@ function checkAdminPass(){
     adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin","1");}catch(e){}
     revUnlocked=true;          // admin también puede usar herramientas de revendedor
     tiendaEsAdmin=true;        // admin también edita la tienda (sin pedir clave de nuevo)
-    tiendaBandejaAdmin='';     // comenzar siempre con el catálogo completo
-    tiendaCategoriaActiva=''; tiendaMarcaActiva='';
-    verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
+    tiendaPublicarControlAdmin(true);
     mostrarPestanasAdmin();    // mostrar pestañas de cálculo
     document.getElementById("login-overlay").style.display="none";
     if(pendingTab==='__celuadmin__'){pendingTab=null;toggleCeluAdmin();}
@@ -1948,6 +1981,9 @@ var _catScrollTimer=null;
 var _catScrollRestaurar=null;
 var _catIgnorarScroll=false;
 var tiendaMarcaActiva='';        // filtro de marca activo (dentro de Celulares)
+var tiendaSubfiltroActivo='';    // tipo/pulgadas dentro de categorías mixtas
+var tiendaMostrarTodos=false;    // botón final de la vidriera
+var tiendaModoPortada=true;      // entrada explícita para clientes/vendedores
 // detecta la marca de un celular por el nombre
 function marcaCelu(nombre){
   var n=(nombre||'').toLowerCase();
@@ -1962,6 +1998,86 @@ function marcaCelu(nombre){
   return 'Otros';
 }
 function tiendaFiltrarMarca(mk){ tiendaMarcaActiva=(tiendaMarcaActiva===mk?'':mk); tiendaRender(); }
+function tiendaFiltrarSubtipo(tipo){
+  tiendaSubfiltroActivo=(tiendaSubfiltroActivo===tipo?'':tipo);
+  tiendaRender();
+}
+
+// Devuelve el subtipo comercial que corresponde dentro de categorías amplias.
+// Los filtros se crean desde los productos existentes: nunca aparecen vacíos.
+function tiendaSubtipoProducto(p,cat){
+  var n=normTxt((p&&p.nombre)||'');
+  if(cat==='📺 TV y video'){
+    var nums=n.match(/\b\d{2,3}\b/g)||[], pulg='';
+    nums.some(function(x){var v=parseInt(x,10);if(v>=19&&v<=100){pulg=v+' pulgadas';return true;}return false;});
+    return pulg||(/proyector/.test(n)?'Proyectores':(/monitor/.test(n)?'Monitores':'Otros'));
+  }
+  if(cat==='🍳 Cocción'){
+    if(/microonda/.test(n))return 'Microondas';
+    if(/freidora|air fryer|airfryer/.test(n))return 'Freidoras';
+    if(/anafe|hornalla/.test(n))return 'Anafes';
+    if(/campana|extractor/.test(n))return 'Campanas';
+    if(/parrilla|grill|panchera/.test(n))return 'Parrillas y grill';
+    if(/horno/.test(n))return 'Hornos';
+    if(/cocina/.test(n))return 'Cocinas';
+  }
+  if(cat==='❄️ Refrigeración'){
+    if(/exhibidor|exhibidora|vidriera/.test(n))return 'Exhibidoras';
+    if(/freezer|congelador/.test(n))return 'Freezers';
+    if(/frigobar|bajo mesada/.test(n))return 'Frigobares';
+    if(/conservadora/.test(n))return 'Conservadoras';
+    if(/heladera/.test(n))return 'Heladeras';
+  }
+  if(cat==='🌡️ Climatización'){
+    if(/aire acond|split/.test(n))return 'Aires acondicionados';
+    if(/caloventor/.test(n))return 'Caloventores';
+    if(/ventilador|turbo|circulador/.test(n))return 'Ventiladores';
+    if(/estufa|calefactor|panel calef|salamandra|tiro balanceado/.test(n))return 'Estufas y calefactores';
+    if(/climatizador/.test(n))return 'Climatizadores';
+    if(/extractor/.test(n))return 'Extractores';
+  }
+  if(cat==='🧺 Lavado'){
+    if(/lavavajilla/.test(n))return 'Lavavajillas';
+    if(/secarrop/.test(n))return 'Secarropas';
+    if(/centrifug/.test(n))return 'Centrífugas';
+    if(/lavarrop/.test(n))return 'Lavarropas';
+  }
+  if(cat==='⚡ Pequeños electro'){
+    if(/pava|hervidor/.test(n))return 'Pavas eléctricas';
+    if(/licuad/.test(n))return 'Licuadoras';
+    if(/cafeter/.test(n))return 'Cafeteras';
+    if(/tostad|sandwich|waflera/.test(n))return 'Tostadoras y sandwicheras';
+    if(/batidor|mixer|multiproces/.test(n))return 'Batidoras y mixers';
+    if(/plancha/.test(n))return 'Planchas';
+    if(/freidora|air fryer/.test(n))return 'Freidoras';
+  }
+  if(cat==='💄 Cuidado personal y salud'){
+    if(/cortapelo|cortabarba|afeitad/.test(n))return 'Cortadoras y afeitadoras';
+    if(/secador de pelo/.test(n))return 'Secadores';
+    if(/planchita|alisad/.test(n))return 'Planchitas';
+    if(/depilad/.test(n))return 'Depiladoras';
+    if(/tensiometro|termometro|oximetro|nebuliz|salud/.test(n))return 'Salud';
+  }
+  if(cat==='🔧 Herramientas'){
+    if(/taladro|atornillador/.test(n))return 'Taladros';
+    if(/amoladora/.test(n))return 'Amoladoras';
+    if(/soldador/.test(n))return 'Soldadoras';
+    if(/motosierra|bordeadora|desmalez|cortacesped/.test(n))return 'Jardín';
+    if(/hidrolav/.test(n))return 'Hidrolavadoras';
+  }
+  if(cat==='🚲 Deportes y movilidad'){
+    if(/bicicleta fija|cinta de correr|pesas|mancuerna/.test(n))return 'Fitness';
+    if(/monopatin|patineta/.test(n))return 'Monopatines';
+    if(/bicicleta/.test(n))return 'Bicicletas';
+  }
+  if(cat==='🔊 Audio'){
+    if(/auricular/.test(n))return 'Auriculares';
+    if(/soundbar|barra de sonido/.test(n))return 'Barras de sonido';
+    if(/parlante|bafle|torre/.test(n))return 'Parlantes';
+  }
+  if(cat==='🛏️ Colchones y sommiers')return /sommier|somier|sonier/.test(n)?'Sommiers':'Colchones';
+  return 'Otros';
+}
 
 // ===== Carga masiva de características de celulares =====
 function tiendaAbrirCarac(){
@@ -2033,7 +2149,7 @@ var tiendaMarcadosSet={};        // productos marcados para tanda
 var tiendaModoSelec=false;       // modo "compartir varios" activo
 var tiendaSelecSet={};           // productos seleccionados para compartir
 var tiendaVista=0;               // 0 = normal (2 col), 1 = grande (1 col), 2 = chica (3 col)
-var tiendaBandejaAdmin='';       // '' | 'nuevos' | 'revision'
+var tiendaBandejaAdmin='';       // '' | 'nuevos' | 'revision' | 'ocultos' | 'sinstock'
 var tiendaFormatoCuota='caja';   // 'caja' = cajita de color (Frávega), 'simple' = precio grande + texto
 var carrito=[];                  // productos en el carrito del cliente {id, nombre, venta, cantidad}
 var cuponAplicado=null;          // cupón activo en el carrito
@@ -2068,12 +2184,29 @@ function bajarPremiosRuletaNube(){
 
 // La tienda arranca en modo PÚBLICO (sin clave). El admin entra con clave.
 function tiendaInit(){
+  _tiendaSincronizacionInicialLista=false;
   // restaurar sesión guardada (admin/revendedor quedan logueados hasta cerrar sesión)
-  if(adminUnlocked){ tiendaEsAdmin=true; if(typeof mostrarPestanasAdmin==='function')mostrarPestanasAdmin(); }
-  else if(revUnlocked){ if(typeof mostrarPestanasRev==='function')mostrarPestanasRev(); }
-  // v16 repara una sola vez los celulares que conservaron fotos viejas con
+  // No reactivar herramientas de administrador mientras se está usando
+  // "Ver como cliente", aunque la contraseña siga recordada en este equipo.
+  if(adminUnlocked && !vistaPreviaCliente){
+    tiendaEsAdmin=true;
+    if(typeof mostrarPestanasAdmin==='function')mostrarPestanasAdmin();
+  }else{
+    tiendaEsAdmin=false;
+    if(revUnlocked && !vistaPreviaCliente && typeof mostrarPestanasRev==='function')mostrarPestanasRev();
+  }
+  // Todos los roles entran a la misma vidriera. Las diferencias del admin
+  // quedan únicamente en sus herramientas y carpetas privadas.
+  tiendaModoPortada=true;
+  if(tiendaModoPortada){
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+    tiendaMostrarTodos=false;
+  }
+  // v25 repara una sola vez los dispositivos que conservaron un catálogo viejo con
   // una versión incremental aparentemente actualizada.
-  var repararCache=tiendaNecesitaReparacionFotosV16();
+  var repararCache=tiendaNecesitaReparacionCacheV25();
   if(repararCache){
     tiendaProductos=[];
     tiendaGuardarVersionIncremental(0);
@@ -2086,6 +2219,7 @@ function tiendaInit(){
   }
   tiendaAplicarModo();
   tiendaRender();
+  tiendaMarcarSincronizacionInicial(true);
   // IndexedDB admite catálogos con muchas fotos, a diferencia de localStorage.
   // Lo recuperamos antes de preguntar por versiones nuevas para no partir de
   // una copia incompleta cuando el catálogo creció demasiado.
@@ -2104,11 +2238,28 @@ function tiendaInit(){
     }
     return true;
   }).catch(function(){return true;});
-  _tiendaCacheInicialPromesa.then(function(){
-    tiendaBajarNube();
-    tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
-    tiendaRestaurarEstadoReciente(0);
-  });
+  _tiendaSincronizacionInicialPromesa=_tiendaCacheInicialPromesa
+    .then(function(){return tiendaEsperarNubeInicial(0);})
+    .then(function(resultadoNube){
+      tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
+      tiendaRestaurarEstadoReciente(0);
+      // Fix 2026-08-26: antes este paso descartaba el resultado de
+      // tiendaEsperarNubeInicial() y devolvía `true` siempre, incluso cuando
+      // esa función se rindió con {sinConexion:true} tras 40 reintentos. Eso
+      // hacía que _tiendaSincronizacionInicialLista quedara en true sin que
+      // Supabase haya confirmado nada, habilitando acciones administrativas
+      // (ocultar/publicar automáticos) sobre una copia local sin verificar.
+      return !(resultadoNube && resultadoNube.sinConexion===true);
+    })
+    .catch(function(){return false;})
+    .then(function(resultado){
+      // Si Supabase no respondió, no habilitamos tareas automáticas capaces de
+      // archivar productos: es preferible conservar el estado remoto anterior.
+      _tiendaSincronizacionInicialLista=(resultado===true);
+      tiendaMarcarSincronizacionInicial(false);
+      tiendaRender();
+      return resultado;
+    });
   // ⚡ ARRANQUE RÁPIDO Y FLUIDO: las descargas secundarias se escalonan de a una
   //    (antes salían 6 juntas y el celular se trababa al abrir). Ahora van espaciadas.
   var _tareasArranque=[
@@ -2139,8 +2290,8 @@ function tiendaInit(){
   if(bmo)bmo.textContent=document.body.classList.contains('oscuro')?'☀️':'🌙';
   // ═══ ABRIR PRODUCTO COMPARTIDO: si el link trae ?prod=ID, abrir ese producto ═══
   // Fix 2026-08-26: antes esperaba 1.8s fijos y se rendía. Ahora espera la
-  // promesa real de sincronización inicial + la bajada de nube, y reintenta
-  // unas veces más por si la nube todavía está resolviendo.
+  // promesa real de sincronización (_tiendaSincronizacionInicialPromesa) y
+  // reintenta unas veces más por si la nube todavía está resolviendo.
   try{
     var mProd=(location.search+location.hash).match(/prod=([A-Za-z0-9_\-]+)/);
     if(mProd && mProd[1] && !window._prodAbiertoDesdeLink){
@@ -2157,11 +2308,9 @@ function tiendaInit(){
         }
         setTimeout(function(){ intentarAbrirProdCompartido(reintentos+1); }, 1500);
       };
-      (_tiendaCacheInicialPromesa||Promise.resolve()).then(function(){
-        return tiendaBajarNube();
-      }).catch(function(){}).then(function(){
+      (window._tiendaSincronizacionInicialPromesa||Promise.resolve()).then(function(){
         intentarAbrirProdCompartido(0);
-      });
+      }).catch(function(){ intentarAbrirProdCompartido(0); });
     }
   }catch(e){}
 }
@@ -2386,15 +2535,219 @@ function tiendaBajarNubeLegacy(intentos){
 var TIENDA_INCREMENTAL_TABLA='tienda_productos_incremental';
 var TIENDA_INCREMENTAL_VERSION_KEY='ae_tienda_incremental_version';
 var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
-var TIENDA_CACHE_FOTOS_VERSION='v16-20260820';
+var TIENDA_CACHE_FOTOS_VERSION='v25-20260825-proveedores-sin-confirmacion-manual';
+var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
+var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
+var TIENDA_MANUALES_ID='catalogo_manuales';
+var TIENDA_REVISION_MANUAL_PREFIJO='revision_manual_';
 
-function tiendaNecesitaReparacionFotosV16(){
+// La aprobación de cada producto manual vive también en una fila pequeña e
+// independiente. Así una pestaña vieja no puede volver a ocultarlo al subir
+// una copia anterior del array completo catalogo_manuales.
+function tiendaRevisionManualId(id){
+  return TIENDA_REVISION_MANUAL_PREFIJO+String(id);
+}
+function tiendaGuardarRevisionManualNube(p){
+  if(!NUBE_OK||!sbCalc||!p||p.id==null||tiendaEsAutomatico(p)||p.esCelu){
+    return Promise.resolve({data:null,error:null});
+  }
+  var actualizadoEn=Number(p.estadoRevisionActualizado)||Date.now();
+  p.estadoRevisionActualizado=actualizadoEn;
+  return sbCalc.from('tienda_catalogo').upsert({
+    id:tiendaRevisionManualId(p.id),
+    datos:{
+      productoId:String(p.id),
+      actualizadoEn:actualizadoEn,
+      visible:p.visible===true,
+      pendienteRevisionManual:p.pendienteRevisionManual===true,
+      precioChequeadoManual:Number(p.precioChequeadoManual)||0,
+      precioActualizado:Number(p.precioActualizado)||0,
+      ocultoManualAdmin:p.ocultoManualAdmin===true
+    },
+    actualizado:new Date(actualizadoEn).toISOString()
+  }).select('actualizado');
+}
+function tiendaAplicarRevisionesManualesNube(filas){
+  if(!Array.isArray(filas)||!filas.length)return false;
+  var porId={};
+  (tiendaProductos||[]).forEach(function(p){
+    if(p&&p.id!=null&&!tiendaEsAutomatico(p)&&!p.esCelu)porId[String(p.id)]=p;
+  });
+  var cambio=false, ahora=Date.now(), vigencia=30*24*60*60*1000;
+  filas.forEach(function(fila){
+    var d=fila&&fila.datos;
+    if(!d||d.productoId==null)return;
+    var p=porId[String(d.productoId)];if(!p)return;
+    var remoto=Number(d.actualizadoEn)||0;
+    var local=Number(p.estadoRevisionActualizado)||0;
+    if(!remoto||remoto<local)return;
+    p.estadoRevisionActualizado=remoto;
+    if(Number(d.precioChequeadoManual)>Number(p.precioChequeadoManual||0)){
+      p.precioChequeadoManual=Number(d.precioChequeadoManual);
+    }
+    if(Number(d.precioActualizado)>Number(p.precioActualizado||0)){
+      p.precioActualizado=Number(d.precioActualizado);
+    }
+    if(d.ocultoManualAdmin===true){
+      p.ocultoManualAdmin=true;p.visible=false;p.pendienteRevisionManual=false;
+      cambio=true;return;
+    }
+    // Una aprobación conserva autoridad durante los mismos 30 días que usa
+    // la regla de revisión de precios. Luego vuelve a revisión normalmente.
+    var confirmado=Number(d.precioChequeadoManual)||0;
+    if(d.pendienteRevisionManual===false&&confirmado>0&&(ahora-confirmado)<vigencia){
+      p.pendienteRevisionManual=false;p.visible=true;
+      delete p.visibleAntesRevisionManual;delete p.ocultoManualAdmin;
+      cambio=true;
+    }
+  });
+  return cambio;
+}
+
+// Estado administrativo liviano. Las filas incrementales vienen de los
+// proveedores y no siempre incluyen un ocultamiento hecho por Angie o Max.
+// Este mapa pequeño evita descargar nuevamente todas las fotos del catálogo.
+function tiendaMapaControlPublicacion(){
+  var mapa={};
+  (tiendaProductos||[]).forEach(function(p){
+    // Los manuales se guardan completos en catalogo_manuales. Incluirlos
+    // también acá generaba dos autoridades y un valor viejo podía volver a
+    // ocultarlos después de aprobar el precio.
+    if(!p || p.id==null || !tiendaEsAutomatico(p))return;
+    mapa[String(p.id)]={
+      visible:p.visible===true,
+      pendienteRevisionManual:p.pendienteRevisionManual===true,
+      ocultoManualProveedor:p.ocultoManualProveedor===true,
+      ocultoPorDuplicado:p.ocultoPorDuplicado===true,
+      motivoOculto:tiendaMotivoOcultoActual(p),
+      duplicadoGrupo:p.duplicadoGrupo||'',
+      duplicadoPreferido:p.duplicadoPreferido===true,
+      duplicadoGrupoIgnorado:p.duplicadoGrupoIgnorado||'',
+      sinStock:p.sinStock===true,
+      estadoProveedor:p.estadoProveedor||''
+    };
+  });
+  return mapa;
+}
+function tiendaAplicarControlPublicacion(mapa){
+  if(!mapa || typeof mapa!=='object')return false;
+  var cambio=false;
+  (tiendaProductos||[]).forEach(function(p){
+    // El control liviano sólo gobierna automáticos. Para manuales manda
+    // exclusivamente la fila catalogo_manuales.
+    if(!p || p.id==null || !tiendaEsAutomatico(p))return;
+    var c=mapa[String(p.id)];if(!c)return;
+    ['visible','pendienteRevisionManual','ocultoManualProveedor','ocultoPorDuplicado',
+     'duplicadoGrupo','duplicadoPreferido','duplicadoGrupoIgnorado','motivoOculto',
+     'sinStock','estadoProveedor'].forEach(function(k){
+      if(Object.prototype.hasOwnProperty.call(c,k) && p[k]!==c[k]){p[k]=c[k];cambio=true;}
+    });
+  });
+  if(cambio){
+    try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+    try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
+  }
+  return cambio;
+}
+function tiendaSubirControlPublicacion(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  return sbCalc.from('tienda_catalogo').upsert({
+    id:TIENDA_CONTROL_PUBLICACION_ID,
+    datos:tiendaMapaControlPublicacion(),
+    actualizado:new Date().toISOString()
+  }).select('actualizado');
+}
+function tiendaSubirManualesNube(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  var manuales=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
+  return sbCalc.from('tienda_catalogo').upsert({
+    id:TIENDA_MANUALES_ID,
+    datos:manuales,
+    actualizado:new Date().toISOString()
+  }).select('actualizado');
+}
+function tiendaGuardarNubeLiviano(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  return Promise.all([tiendaSubirControlPublicacion(),tiendaSubirManualesNube()])
+    .then(function(res){
+      var error=(res[0]&&res[0].error)||(res[1]&&res[1].error);
+      return error?{data:null,error:error}:{data:true,error:null};
+    });
+}
+// Un producto puede disparar varios guardados seguidos (confirmar, renderizar,
+// cambiar de bandeja). Antes esas escrituras completas corrían en paralelo y
+// una solicitud vieja podía terminar última, pisando la confirmación nueva.
+// La cola conserva el orden y cada turno toma el estado más reciente.
+var _tiendaGuardadoNubeCola=Promise.resolve();
+function tiendaEncolarGuardadoNube(){
+  var turno=_tiendaGuardadoNubeCola.catch(function(){return null;}).then(function(){
+    return tiendaGuardarNubeLiviano();
+  }).then(function(r){
+    if(r&&r.error)throw r.error;
+    return r;
+  });
+  _tiendaGuardadoNubeCola=turno;
+  return turno;
+}
+function tiendaPublicarControlAdmin(mostrarAviso){
+  if(!tiendaEsAdmin && !adminUnlocked)return Promise.resolve(false);
+  var lista=(window._tiendaSincronizacionInicialPromesa && typeof window._tiendaSincronizacionInicialPromesa.then==='function')
+    ?window._tiendaSincronizacionInicialPromesa:Promise.resolve(true);
+  return lista.catch(function(){return false;}).then(function(){
+    if(!tiendaProductos || !tiendaProductos.length)throw new Error('El catálogo todavía no terminó de cargar');
+    return tiendaGuardarNubeLiviano();
+  }).then(function(r){
+    if(r&&r.error)throw r.error;
+    if(mostrarAviso && typeof mostrarToast==='function')mostrarToast('✅ Ocultos y manuales sincronizados con clientes');
+    return true;
+  }).catch(function(err){
+    if(mostrarAviso)alert('⚠️ No se pudo sincronizar la lista de productos ocultos con Supabase.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+    return false;
+  });
+}
+function tiendaBajarControlPublicacion(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
+  return Promise.all([
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle(),
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_REVISION_MANUAL_PREFIJO+'%')
+  ]).then(function(res){
+      var r=res[0], rm=res[1], rr=res[2];
+      if(r&&r.error)throw r.error;
+      if(rm&&rm.error)throw rm.error;
+      if(rr&&rr.error)throw rr.error;
+      _tiendaControlPublicacionNubeListo=true;
+      if(rm&&rm.data&&Array.isArray(rm.data.datos)){
+        var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
+        tiendaProductos=automaticos.concat(rm.data.datos);
+      }
+      var cambioRevision=tiendaAplicarRevisionesManualesNube(rr&&Array.isArray(rr.data)?rr.data:[]);
+      if(r&&r.data&&r.data.datos){
+        var cambio=tiendaAplicarControlPublicacion(r.data.datos);
+        try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+        return cambio||cambioRevision;
+      }
+      // La primera vez, el administrador que ya tiene el estado correcto crea
+      // el mapa para que clientes y vendedores lo reciban inmediatamente.
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision;});
+      return cambioRevision;
+    }).catch(function(error){
+      // No silenciar del todo: mantiene el modo lectura (el guard de
+      // tiendaPrepararBandejasAdmin ya bloquea acciones automáticas mientras
+      // esto sea false) pero deja rastro de la causa real en vez de tragarla.
+      console.warn('Control de publicación no disponible; la tienda sigue en modo lectura hasta la próxima sincronización.', error);
+      _tiendaControlPublicacionNubeListo=false;
+      return false;
+    });
+}
+
+function tiendaNecesitaReparacionCacheV25(){
   try{return localStorage.getItem(TIENDA_CACHE_FOTOS_VERSION_KEY)!==TIENDA_CACHE_FOTOS_VERSION;}
   catch(e){return true;}
 }
-function tiendaConfirmarReparacionFotosV16(){
+function tiendaConfirmarReparacionCacheV25(){
   try{localStorage.setItem(TIENDA_CACHE_FOTOS_VERSION_KEY,TIENDA_CACHE_FOTOS_VERSION);}catch(e){}
 }
 
@@ -2457,7 +2810,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   }catch(e){}
   tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
   tiendaGuardarVersionIncremental(maxima);
-  tiendaConfirmarReparacionFotosV16();
+  tiendaConfirmarReparacionCacheV25();
   return maxima;
 }
 function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
@@ -2501,6 +2854,12 @@ function tiendaBajarNube(intentos){
     if(intentos<25)setTimeout(function(){tiendaBajarNube(intentos+1);},200);
     return Promise.resolve(null);
   }
+  if(!TIENDA_USAR_INCREMENTAL){
+    return tiendaBajarNubeLegacy(intentos).then(function(resultado){
+      tiendaRender();
+      return resultado;
+    });
+  }
   if(_tiendaBajarNubeEnCurso)return _tiendaBajarNubeEnCurso;
   var versionLocal=tiendaVersionIncrementalLocal();
   // Además de consultar versiones nuevas, comparamos la cantidad de filas.
@@ -2533,6 +2892,12 @@ function tiendaBajarNube(intentos){
     .catch(function(error){
       console.warn('Catálogo incremental no disponible; usando respaldo.',error);
       return tiendaBajarNubeLegacy(0);
+    })
+    .then(function(resultado){
+      return tiendaBajarControlPublicacion().then(function(){
+        tiendaRender();
+        return resultado;
+      });
     });
   _tiendaBajarNubeEnCurso=proceso;
   proceso.then(function(){_tiendaBajarNubeEnCurso=null;},function(){_tiendaBajarNubeEnCurso=null;});
@@ -2572,7 +2937,10 @@ function tiendaGuardarEstadoReciente(){
     var modalAbierto=!!(modal && window.getComputedStyle(modal).display!=='none');
     var estado={
       ts:Date.now(),
+      modoPortada:!!tiendaModoPortada,
+      mostrarTodos:!!tiendaMostrarTodos,
       categoria:tiendaCategoriaActiva||'',
+      subfiltro:tiendaSubfiltroActivo||'',
       bandejaAdmin:tiendaBandejaAdmin||'',
       marca:tiendaMarcaActiva||'',
       busqueda:buscar?buscar.value:'',
@@ -2604,9 +2972,11 @@ function tiendaRestaurarEstadoReciente(intento){
     return;
   }
   _tiendaReanudacionIntentada=true;
+  tiendaModoPortada=(typeof estado.modoPortada==='boolean')?estado.modoPortada:!(estado.categoria||estado.busqueda||estado.productoId);
+  tiendaMostrarTodos=!!estado.mostrarTodos;
   tiendaCategoriaActiva=estado.categoria||'';
-  // Las bandejas administrativas son filtros temporales y no se restauran.
-  tiendaBandejaAdmin='';
+  tiendaSubfiltroActivo=estado.subfiltro||'';
+  tiendaBandejaAdmin=tiendaEsAdmin?(estado.bandejaAdmin||''):'';
   tiendaMarcaActiva=estado.marca||'';
   verSoloOfertas=!!estado.soloOfertas;
   verSoloFavoritos=!!estado.soloFavoritos;
@@ -2782,13 +3152,30 @@ function tiendaDiagNube(){
 // Si una pestaña vieja todavía tiene sólo los productos manuales, primero
 // recupera los automáticos de la nube y recién después guarda la mezcla.
 function tiendaClaveProveedor(p){
-  if(!p || !p.automaticoProveedor) return '';
+  if(!p || !tiendaEsAutomatico(p)) return '';
   return String(p.proveedorClave||p.proveedor||'')+'|'+String(p.proveedorId||p.id||'');
 }
 function tiendaMezclarAutomaticosNube(datosNube){
   var locales=Array.isArray(tiendaProductos)?tiendaProductos:[];
   var nube=Array.isArray(datosNube)?datosNube:[];
-  var manuales=locales.filter(function(p){ return !p || !p.automaticoProveedor; });
+  // Un dispositivo puede tener una copia parcial o vieja. Antes se tomaban
+  // solamente sus manuales y eso borraba de la nube los que habían cargado
+  // Angie o Max desde otro equipo. Conservamos los remotos y superponemos los
+  // locales por id; así ningún guardado normal pisa manuales ajenos.
+  var manualesPorId={};
+  nube.forEach(function(p,idx){
+    if(!p || tiendaEsAutomatico(p))return;
+    var idValido=p.id!==null && typeof p.id!=='undefined' && String(p.id)!=='' && String(p.id)!=='NaN';
+    var clave=idValido?'id:'+String(p.id):'remoto:'+String(p.nombre||'')+'|'+String(p.creado||idx);
+    manualesPorId[clave]=p;
+  });
+  locales.forEach(function(p,idx){
+    if(!p || tiendaEsAutomatico(p))return;
+    var idValido=p.id!==null && typeof p.id!=='undefined' && String(p.id)!=='' && String(p.id)!=='NaN';
+    var clave=idValido?'id:'+String(p.id):'local:'+String(p.nombre||'')+'|'+String(p.creado||idx);
+    manualesPorId[clave]=p;
+  });
+  var manuales=Object.keys(manualesPorId).map(function(k){return manualesPorId[k];});
   var automaticos={};
 
   // La nube es la red de seguridad cuando la pestaña local está desactualizada.
@@ -2811,7 +3198,7 @@ function tiendaMezclarAutomaticosNube(datosNube){
       'categoriaManualProveedor','categoriaManualFijada',
       'fotoManualProveedor','ocultoManualProveedor',
       'pendienteImagenAdmin','imagenProveedorAprobada',
-      'duplicadoPreferido','duplicadoGrupoIgnorado','ocultoPorDuplicado',
+      'duplicadoPreferido','duplicadoGrupoIgnorado','ocultoPorDuplicado','motivoOculto',
       'destacado','delDia','pocoStock','sinInteres','precioAntes',
       'caracteristicas','mayorista','cotizacionDolarManual'
     ];
@@ -2823,8 +3210,10 @@ function tiendaMezclarAutomaticosNube(datosNube){
       mezclado.categoria=p.categoriaManualProveedor;
       mezclado.categoriaManualFijada=true;
     }
-    if(p.fotoManualProveedor){
-      mezclado.foto=p.fotoManualProveedor;
+    var fotoLocalEsAmarango=tiendaEsFotoAmarango(p);
+    if(fotoLocalEsAmarango){
+      mezclado.foto=p.fotoManualProveedor||p.foto;
+      mezclado.fotoManualProveedor=p.fotoManualProveedor||p.foto;
       delete mezclado.fotoOrigen;
       delete mezclado.fotoCatalogoLogo;
     }
@@ -2863,7 +3252,10 @@ function tiendaSubirNubeUnaVez(){
               ?guardado.data[0].actualizado:fechaEnvio;
             try{ localStorage.setItem('ae_tienda_catalogo_fecha',fechaGuardada); }catch(e){}
           }
-          return guardado;
+          if(guardado && guardado.error)return guardado;
+          return tiendaSubirControlPublicacion().then(function(control){
+            return (control&&control.error)?control:guardado;
+          });
         });
     });
 }
@@ -2922,8 +3314,11 @@ function tiendaLoginAdmin(){
   // si ya se desbloqueó admin (Amara4), entrar directo sin pedir clave de nuevo
   if(adminUnlocked){
     tiendaEsAdmin=true;
+    tiendaModoPortada=true;
+    tiendaBandejaAdmin='';
     tiendaAplicarModo();
     tiendaRender();
+    tiendaPublicarControlAdmin(true);
     return;
   }
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;text-align:center;">🔒 Modo administrador</h3>'
@@ -2944,9 +3339,12 @@ function tiendaConfirmarAdmin(){
     tiendaEsAdmin=true;
     adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin","1");}catch(e){}   // clave correcta = acceso admin total
     revUnlocked=true;
+    tiendaModoPortada=true;
+    tiendaBandejaAdmin='';
     document.getElementById('modal-cuotas').style.display='none';
     tiendaAplicarModo();
     tiendaRender();
+    tiendaPublicarControlAdmin(true);
   }else{
     document.getElementById('tienda-admin-err').style.display='block';
   }
@@ -3089,8 +3487,19 @@ function tiendaSalirAdmin(){
 function toggleVistaCliente(){
   vistaPreviaCliente=!vistaPreviaCliente;
   tiendaEsAdmin = adminUnlocked && !vistaPreviaCliente; // en vista cliente, no mostrar herramientas admin
-  // Al volver a Administración siempre se parte del catálogo completo.
-  if(tiendaEsAdmin)tiendaBandejaAdmin='';
+  if(vistaPreviaCliente){
+    tiendaModoPortada=true;
+    tiendaMostrarTodos=false;
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+    verSoloFavoritos=false;
+    verSoloOfertas=false;
+    var buscarPreview=document.getElementById('tienda-buscar');if(buscarPreview)buscarPreview.value='';
+    var buscarHeaderPreview=document.getElementById('hdr-buscar-input');if(buscarHeaderPreview)buscarHeaderPreview.value='';
+  }else{
+    tiendaModoPortada=false;
+  }
   tiendaAplicarModo();
   tiendaRender();
   var b=document.getElementById('tienda-vistaprev-banner');
@@ -3138,16 +3547,19 @@ function tiendaAplicarModo(){
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
-  // La abeja queda junto al buscador y libera la esquina para Margarita.
+  // La abeja para subir productos vive al lado del buscador. El espacio
+  // flotante queda exclusivamente para la imagen de Margarita.
+  var subirHeader=document.getElementById('tienda-subir-header');
+  if(subirHeader)subirHeader.style.display=tiendaEsAdmin?'flex':'none';
   var cargarFab=document.getElementById('cargar-fab');
   if(cargarFab)cargarFab.style.display='none';
-  var cargarBuscador=document.getElementById('admin-cargar-buscador');
-  if(cargarBuscador)cargarBuscador.style.display=tiendaEsAdmin?'flex':'none';
   var ruletaFab=document.getElementById('ruleta-fab'); if(ruletaFab){ var ruOn=(localStorage.getItem('ae_ruleta_on')==='1'); ruletaFab.style.display=(ruOn && !tiendaEsAdmin)?'flex':'none'; }
   var btnCelus=document.getElementById('tienda-btn-celus'); if(btnCelus)btnCelus.style.display = tiendaEsAdmin?'block':'none';
   var btnCarac=document.getElementById('tienda-btn-carac'); if(btnCarac)btnCarac.style.display = tiendaEsAdmin?'block':'none';
   var btnSubir=document.getElementById('tienda-btn-subir'); if(btnSubir)btnSubir.style.display = tiendaEsAdmin?'block':'none';
   var btnDiag=document.getElementById('tienda-btn-diag'); if(btnDiag)btnDiag.style.display = tiendaEsAdmin?'block':'none';
+  var btnDiagOcultos=document.getElementById('tienda-btn-diag-ocultos'); if(btnDiagOcultos)btnDiagOcultos.style.display = tiendaEsAdmin?'block':'none';
+  var btnRestaurarManuales=document.getElementById('tienda-btn-restaurar-manuales'); if(btnRestaurarManuales)btnRestaurarManuales.style.display = tiendaEsAdmin?'block':'none';
   var btnBanner=document.getElementById('tienda-btn-banner'); if(btnBanner)btnBanner.style.display = tiendaEsAdmin?'block':'none';
   var btnCup=document.getElementById('tienda-btn-cupones'); if(btnCup)btnCup.style.display = tiendaEsAdmin?'block':'none';
   var btnStats=document.getElementById('tienda-btn-stats'); if(btnStats)btnStats.style.display = tiendaEsAdmin?'block':'none';
@@ -3201,12 +3613,15 @@ function tiendaCargarLocal(){
   tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
 }
 function tiendaGuardarLocal(){
+  tiendaActualizarMotivosOcultos();
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
   try{ tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){}); }catch(e){}
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
-  // subir a la nube (para que lo vean todos)
+  // Guardado liviano: no reescribe el JSON gigante del catálogo. Supabase
+  // cancelaba esa operación por statement_timeout. Subimos solamente los
+  // manuales y las decisiones administrativas de publicación.
   if(NUBE_OK && sbCalc){
-    var subida=tiendaSubirNube();
+    var subida=tiendaEncolarGuardadoNube();
     // La mayoría de los botones guardan sin bloquear la interfaz. Marcamos la
     // promesa como atendida, pero la devolvemos para las acciones (como fotos)
     // que necesitan confirmar que la nube terminó bien.
@@ -3350,7 +3765,7 @@ function tiendaCategoria(nombre){
   if(/cargador|cable usb|auricular bluetooth|power ?bank|funda|vidrio templado|soporte celular|adaptador|tarjeta sd|memoria micro/.test(n))return '🔌 Cargadores y accesorios';
   if(/samsung|motorola|xiaomi|iphone|celular|smartphone|tablet/.test(n))return '📱 Celulares';
   if(/freezer|conservadora el[eé]ctric|congelador|cervecer|heladera|frio/.test(n))return '❄️ Refrigeración';
-  if(/\bhorno\b|microonda|air ?fryer|ayrfraier|parrilla|grill|panchera|cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocción';
+  if(/\bhorno\b|microonda|freidora|air ?fryer|ayrfraier|parrilla|grill|panchera|cocina|anafe|campana|hornalla/.test(n))return '🍳 Cocción';
   if(/\btv\b|televis|smart ?tv|tcl|monitor|proyector/.test(n))return '📺 TV y video';
   if(/parlante|bafle|torre de sonido|soundbar|sound bar|barra de sonido|auricular|audio|equipo de m[uú]sica|karaoke|aiwa|jbl/.test(n))return '🔊 Audio';
   if(/aire acond|split|portatil frio|frio.?calor|estufa|calefact|caloventor|calefacc|panel calef|infrarroj|tiro balanceado|salamandra|ventilador|turbo|circulador|extractor|termotanque|calef[oó]n/.test(n))return '🌡️ Climatización';
@@ -3429,6 +3844,9 @@ function catProd(p){
   // Una categoría elegida expresamente por el administrador manda incluso si
   // es "Otros". Los productos viejos sin esta marca siguen siendo reordenables.
   if(p && (p.categoriaManualFijada===true || p.categoriaManualProveedor)) return cat;
+  // Las freidoras que habían quedado clasificadas como pequeño electro pasan
+  // a Cocción, tal como se organiza la nueva navegación.
+  if(cat==='⚡ Pequeños electro' && p && /freidora|air ?fryer|airfryer/i.test(p.nombre||''))return '🍳 Cocción';
   // Si quedó guardado como "Otros" pero el nombre ahora permite reconocerlo,
   // se muestra en el grupo correcto inmediatamente.
   if(cat==='📦 Otros' && p && p.nombre){
@@ -3867,7 +4285,7 @@ function hdrPredictivo(){
   var palabras=q.split(' ').filter(Boolean);
   // juntar productos reales + celulares visibles
   var universo=[];
-  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || p.visible!==false)) universo.push(p); }); }catch(e){}
+  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || tiendaEstaVisibleYConStock(p))) universo.push(p); }); }catch(e){}
   // Primero se muestran únicamente coincidencias exactas de palabra.
   var res=[];
   for(var i=0;i<universo.length;i++){
@@ -3917,6 +4335,7 @@ function hdrBuscarSync(){
   var inp=document.getElementById('tienda-buscar');
   if(!h)return;
   if(inp) inp.value=h.value;
+  if(h.value.trim())tiendaModoPortada=false;
   var x=document.getElementById('hdr-buscar-x');
   if(x) x.style.display=(h.value.trim()?'block':'none');
   hdrPredictivo(); // sugerencias instantáneas mientras escribe
@@ -3924,7 +4343,11 @@ function hdrBuscarSync(){
   _cerrarSugTimer=setTimeout(hdrCerrarSugerencias,1200);
   // si empezó a buscar y estaba parado en una categoría, salir a "Todos" para
   // que la búsqueda global se vea coherente (no atrapada en la categoría).
-  if(h.value.trim() && typeof tiendaCategoriaActiva!=='undefined' && tiendaCategoriaActiva){ tiendaCategoriaActiva=''; }
+  if(h.value.trim() && typeof tiendaCategoriaActiva!=='undefined' && tiendaCategoriaActiva){
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+  }
   // DEBOUNCE: filtrar la grilla completa recién cuando deja de escribir
   if(_buscarTimer) clearTimeout(_buscarTimer);
   _buscarTimer=setTimeout(function(){
@@ -3938,6 +4361,7 @@ function hdrBuscarLimpiar(){
   hdrCerrarSugerencias();
   var inp=document.getElementById('tienda-buscar');
   if(inp) inp.value='';
+  if(!tiendaEsAdmin && !tiendaCategoriaActiva)tiendaModoPortada=true;
   if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
   if(typeof marcarNavActiva==='function') marcarNavActiva('');
   var x=document.getElementById('hdr-buscar-x');
@@ -3965,6 +4389,7 @@ function tiendaToggleLimpiar(){
 function tiendaLimpiarBusqueda(){
   var inp=document.getElementById('tienda-buscar');
   if(inp){ inp.value=''; inp.focus(); }
+  if(!tiendaEsAdmin && !tiendaCategoriaActiva)tiendaModoPortada=true;
   if(typeof verSoloOfertas!=='undefined') verSoloOfertas=false;
   if(typeof marcarNavActiva==='function') marcarNavActiva('');
   tiendaToggleLimpiar();
@@ -4721,60 +5146,319 @@ function tiendaRenderMantenerSector(scrollY, mostrados){
 function tiendaEsAutomatico(p){
   return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
 }
+function tiendaMotivoOcultoActual(p){
+  if(!p)return '';
+  if(tiendaTieneSinStock(p))return 'sin_stock';
+  if(p.ocultoManualProveedor===true || p.ocultoManualAdmin===true)return 'manual';
+  if(p.ocultoPorDuplicado===true)return 'duplicado';
+  if(p.pendienteRevisionManual===true)return 'revision_precio';
+  return p.visible===false?'sin_motivo':'';
+}
+function tiendaActualizarMotivosOcultos(){
+  (tiendaProductos||[]).forEach(function(p){
+    if(!p)return;
+    var motivo=tiendaMotivoOcultoActual(p);
+    if(motivo)p.motivoOculto=motivo;
+    else delete p.motivoOculto;
+  });
+}
+// Cuenta TODOS los productos ocultos/pendientes por motivo real, de una sola
+// vez, para no tener que revisar producto por producto a mano.
+function tiendaDiagnosticoOcultos(){
+  var conteo={manual:0,duplicado:0,sin_stock:0,revision_precio:0,sin_motivo:0};
+  var ejemplos={manual:[],duplicado:[],sin_motivo:[]};
+  (tiendaProductos||[]).forEach(function(p){
+    var motivo=tiendaMotivoOcultoActual(p);
+    if(!motivo)return;
+    conteo[motivo]=(conteo[motivo]||0)+1;
+    if(ejemplos[motivo] && ejemplos[motivo].length<5){
+      ejemplos[motivo].push(p.nombre+' (stock: '+(tiendaLeerStockProveedor(p).informado?tiendaLeerStockProveedor(p).valor:'-')+')');
+    }
+  });
+  var gruposDuplicadosDiag={};
+  (tiendaProductos||[]).forEach(function(p){
+    if(p&&p.duplicadoGrupo)(gruposDuplicadosDiag[String(p.duplicadoGrupo)]=gruposDuplicadosDiag[String(p.duplicadoGrupo)]||[]).push(p);
+  });
+  var totalGrupos=Object.keys(gruposDuplicadosDiag).length;
+  var revisionManualCount=tiendaProductos.filter(tiendaEsPendienteRevisionManual).length;
+  var imagenesPendCount=tiendaProductos.filter(tiendaEsPendienteImagenAdmin).length;
+  var r='📊 Total productos: '+tiendaProductos.length+'\n\n'
+    +'🔒 Con marca manual heredada: '+conteo.manual+'\n'
+    +'🧩 Ocultos por duplicado: '+conteo.duplicado+' (en '+totalGrupos+' grupos detectados)\n'
+    +'📦 Sin stock: '+conteo.sin_stock+'\n'
+    +'🕓 Ocultos por revisión de precio (manuales): '+conteo.revision_precio+'\n'
+    +'⚠️ SIN MOTIVO (bug, deberían estar visibles): '+conteo.sin_motivo+'\n\n'
+    +'Bandeja "Revisar manuales": '+revisionManualCount+'\n'
+    +'Bandeja "Imágenes pendientes": '+imagenesPendCount+'\n';
+  if(ejemplos.sin_motivo.length)r+='\nEjemplos SIN MOTIVO:\n- '+ejemplos.sin_motivo.join('\n- ');
+  if(ejemplos.manual.length)r+='\n\nEjemplos con marca manual heredada:\n- '+ejemplos.manual.join('\n- ');
+  if(ejemplos.duplicado.length)r+='\n\nEjemplos por duplicado:\n- '+ejemplos.duplicado.join('\n- ');
+  alert('🕵️ DIAGNÓSTICO DE OCULTOS:\n\n'+r);
+}
+// Restaura de una sola vez los productos automáticos marcados como "ocultados
+// a mano" en tanda (ej: un "Ocultar marcados" o "Ocultar categoría" aplicado
+// por error a muchos productos). Primero MUESTRA la lista completa y pide
+// confirmación explícita: esta marca significa "decisión humana" y el sistema
+// nunca la debe borrar solo, sin que un admin lo apruebe a propósito.
+function tiendaRestaurarOcultosManuales(){
+  var afectados=(tiendaProductos||[]).filter(function(p){
+    return p && tiendaEsAutomatico(p) && p.ocultoManualProveedor===true && !tiendaTieneSinStock(p);
+  });
+  if(!afectados.length){ alert('✅ No hay productos automáticos ocultados a mano en este momento.'); return; }
+  var muestra=afectados.slice(0,15).map(function(p){return '- '+p.nombre;}).join('\n');
+  var extra=afectados.length>15?'\n... y '+(afectados.length-15)+' más.':'';
+  var ok=confirm('⚠️ Se encontraron '+afectados.length+' productos automáticos marcados como "ocultados a mano":\n\n'
+    +muestra+extra+
+    '\n\n¿Confirmás que ninguno de estos lo ocultaste a propósito y querés VOLVER A MOSTRARLOS a todos?\n\n'
+    +'Esto no toca los que están ocultos por sin stock, duplicado o revisión de precio — solo estos.');
+  if(!ok)return;
+  afectados.forEach(function(p){ p.visible=true; p.ocultoManualProveedor=false; delete p.motivoOculto; });
+  tiendaGuardarLocal();
+  tiendaPublicarControlAdmin(false);
+  tiendaRender();
+  alert('✅ Se restauraron '+afectados.length+' productos. Publicando el cambio a Supabase para que se vea en todos los dispositivos...');
+}
+
+var TIENDA_VARIANTES_DUPLICADO={
+  blanco:1,blanca:1,negro:1,negra:1,gris:1,plata:1,plateado:1,plateada:1,
+  rojo:1,roja:1,azul:1,verde:1,rosa:1,rosado:1,rosada:1,violeta:1,
+  morado:1,morada:1,beige:1,marron:1,dorado:1,dorada:1,celeste:1,
+  turquesa:1,liso:1,lisa:1,estampado:1,estampada:1,rayado:1,rayada:1,
+  floral:1,infantil:1,junior:1,premium:1,gold:1,inox:1,inoxidable:1
+};
+function tiendaDatosVarianteDuplicado(p){
+  var s=String((p&&p.nombre)||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  s=s.replace(/(\d+)\s*(?:lts?|litros?)\b/g,'$1l')
+    .replace(/(\d+)\s*(?:kgs?|kilos?)\b/g,'$1kg')
+    .replace(/(\d+)\s*(?:pulgadas?|pulg)\b/g,'$1p');
+  var tokens=s.match(/[a-z0-9]+/g)||[];
+  var numeros=tokens.filter(function(t){return /\d/.test(t);}).sort();
+  var modelos=tokens.filter(function(t){return t.length>=3&&/[a-z]/.test(t)&&/\d/.test(t);}).sort();
+  var variantes=tokens.filter(function(t){return TIENDA_VARIANTES_DUPLICADO[t];}).sort();
+  return {numeros:numeros,modelos:modelos,variantes:variantes};
+}
+function tiendaPuedenSerDuplicados(a,b){
+  if(!a||!b)return false;
+  if(tiendaEsAutomatico(a)&&tiendaEsAutomatico(b)&&a.proveedorClave&&
+     a.proveedorClave===b.proveedorClave&&String(a.proveedorId||'')!==String(b.proveedorId||''))return false;
+  var da=tiendaDatosVarianteDuplicado(a),db=tiendaDatosVarianteDuplicado(b);
+  var na=da.numeros.join('|'),nb=db.numeros.join('|');
+  if(na&&nb&&na!==nb)return false;
+  if(da.modelos.length&&db.modelos.length&&!da.modelos.some(function(m){return db.modelos.indexOf(m)>=0;}))return false;
+  var va=da.variantes.join('|'),vb=db.variantes.join('|');
+  if(va&&vb&&va!==vb)return false;
+  return true;
+}
+function tiendaEsFotoAmarango(p){
+  if(!p)return false;
+  var foto=String(p.foto||'');
+  return !!p.fotoManualProveedor ||
+    foto.indexOf('/storage/v1/object/public/tienda-fotos/')>=0 ||
+    foto.indexOf('/tienda-fotos/')>=0;
+}
+// Fix 2026-08-26: pendienteRevisionManual es una advertencia administrativa
+// (bandeja "Revisar manuales"), no una causa de exclusión pública. Antes esta
+// función (usada por Margarita para recomendar/mostrar productos) ocultaba
+// productos que seguían visibles en la vidriera solo por tener el precio
+// pendiente de confirmar. Ahora solo excluye por causas comprobables: sin
+// stock, ocultamiento manual del proveedor, o duplicado confirmado.
+function tiendaEstaVisibleYConStock(p){
+  if(!p || p.visible!==true ||
+     p.sinStock===true || p.estadoProveedor==='sin_stock' ||
+     p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true)return false;
+  var stock=tiendaLeerStockProveedor(p);
+  return !(stock.informado && stock.valor<=0);
+}
+function tiendaTieneSinStock(p){
+  if(!p)return false;
+  if(p.sinStock===true || p.estadoProveedor==='sin_stock')return true;
+  var stock=tiendaLeerStockProveedor(p);
+  return !!(stock.informado && stock.valor<=0);
+}
+function tiendaEstaOcultoAdmin(p){
+  // Sin stock tiene prioridad sobre cualquier marca de ocultamiento. Así un
+  // producto agotado no se mezcla con los que requieren una decisión del admin.
+  // Los manuales pendientes pertenecen exclusivamente a "Revisar manuales";
+  // no deben inflar también el contador ni la carpeta de "Ocultos".
+  return !!(p && !tiendaTieneSinStock(p) && !tiendaEsPendienteRevisionManual(p) &&
+    (p.visible===false || p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true));
+}
+function tiendaEstaSinStockAdmin(p){
+  return tiendaTieneSinStock(p);
+}
 function tiendaEsPendienteImagenAdmin(p){
-  // Todo producto automático que todavía usa la foto original del proveedor
-  // queda reunido acá, sin importar cuándo se incorporó al catálogo.
+  // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
+  // Los ocultos/sin stock reaparecen automáticamente si vuelven a estar activos.
   return !!(p && !p.esCelu && tiendaEsAutomatico(p) &&
-    !p.fotoManualProveedor && p.imagenProveedorAprobada!==true);
+    tiendaEstaVisibleYConStock(p) && !tiendaEsFotoAmarango(p) &&
+    p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
-  return !!(p && !p.esCelu && !tiendaEsAutomatico(p) && p.pendienteRevisionManual===true);
+  return !!(p && !p.esCelu && !tiendaEsAutomatico(p) &&
+    !tiendaTieneSinStock(p) && p.pendienteRevisionManual===true);
 }
-// No destructiva a propósito (fix 2026-08-26): solo calcula advertencias y
-// bandejas para el admin. NUNCA debe cambiar `visible` ni llamar a
-// tiendaGuardarLocal()/tiendaSubirNube() — entrar como admin, cambiar de
-// categoría, buscar o "ver más" dispara tiendaRender() constantemente, y
-// antes eso ocultaba productos manuales y publicaba el cambio en Supabase
-// solo por haber renderizado la grilla.
+function tiendaRepararIdsManuales(){
+  var usados={};
+  var maxId=0;
+  tiendaProductos.forEach(function(p){
+    var n=Number(p&&p.id);
+    if(Number.isFinite(n) && n>0){maxId=Math.max(maxId,Math.floor(n));usados[String(Math.floor(n))]=true;}
+  });
+  var cambio=false;
+  tiendaProductos.forEach(function(p){
+    if(!p || tiendaEsAutomatico(p))return;
+    var n=Number(p.id);
+    var invalido=p.id===null || typeof p.id==='undefined' || !Number.isFinite(n) || n<=0;
+    if(invalido){
+      do{maxId++;}while(usados[String(maxId)]);
+      p.id=maxId;usados[String(maxId)]=true;cambio=true;
+    }
+  });
+  return cambio;
+}
 function tiendaPrepararBandejasAdmin(){
-  if(!tiendaEsAdmin)return false;
+  // Nunca transformar ni guardar la copia local mientras todavía se está
+  // descargando el estado autoritativo de Supabase. Ese orden invertido era el
+  // que volvía a ocultar productos ya confirmados desde otro dispositivo.
+  if(!tiendaEsAdmin || !_tiendaSincronizacionInicialLista ||
+     !_tiendaControlPublicacionNubeListo)return false;
+  var cambio=tiendaRepararIdsManuales();
+  var gruposDuplicados={};
+  tiendaProductos.forEach(function(p){
+    if(p&&p.duplicadoGrupo){
+      (gruposDuplicados[String(p.duplicadoGrupo)]=gruposDuplicados[String(p.duplicadoGrupo)]||[]).push(p);
+    }
+  });
+
+  // Si un grupo mezcla colores, medidas, capacidades, modelos o ids distintos
+  // del mismo proveedor, no es un duplicado confiable. Liberamos todo el grupo
+  // para que ninguna variante comercial desaparezca de la tienda.
+  Object.keys(gruposDuplicados).forEach(function(clave){
+    var grupo=gruposDuplicados[clave];
+    var incompatible=false;
+    for(var i=0;i<grupo.length&&!incompatible;i++){
+      for(var j=i+1;j<grupo.length;j++){
+        if(!tiendaPuedenSerDuplicados(grupo[i],grupo[j])){incompatible=true;break;}
+      }
+    }
+    if(!incompatible)return;
+    grupo.forEach(function(p){
+      p.ocultoPorDuplicado=false;
+      p.duplicadoPreferido=false;
+      delete p.duplicadoGrupo;
+      delete p.duplicadoCantidad;
+      delete p.duplicadoSimilitud;
+      if(p.ocultoManualProveedor!==true && !tiendaTieneSinStock(p))p.visible=true;
+    });
+    delete gruposDuplicados[clave];
+    cambio=true;
+  });
+
+  // Un grupo válido nunca puede dejar todos sus productos ocultos. Si una
+  // sincronización anterior perdió el elegido, recuperamos uno que tenga stock.
+  Object.keys(gruposDuplicados).forEach(function(clave){
+    var grupo=gruposDuplicados[clave];
+    if(grupo.length<2)return;
+    var tieneVisible=grupo.some(function(p){return p.visible===true && !tiendaTieneSinStock(p);});
+    if(tieneVisible)return;
+    var elegido=grupo.find(function(p){
+      return !tiendaTieneSinStock(p) && p.ocultoManualProveedor!==true;
+    });
+    if(elegido){
+      elegido.visible=true;
+      elegido.ocultoPorDuplicado=false;
+      elegido.duplicadoPreferido=true;
+      cambio=true;
+    }
+  });
+
   tiendaProductos.forEach(function(p){
     if(!p || p.esCelu)return;
     if(tiendaEsAutomatico(p)){
-      // Todos los automáticos con foto original del proveedor permanecen
-      // publicados, pero quedan en la bandeja hasta reemplazar o aprobarla.
-      if(!p.fotoManualProveedor && p.imagenProveedorAprobada!==true){
-        p.pendienteImagenAdmin=true;
+      var grupo=p.duplicadoGrupo?gruposDuplicados[String(p.duplicadoGrupo)]:null;
+      var duplicadoHuerfano=p.ocultoPorDuplicado===true && (!grupo || grupo.length<2);
+      if(duplicadoHuerfano){
+        // La marca sobrevivió, pero el grupo para revisarla ya no existe.
+        // No hay motivo verificable para mantener el producto escondido.
+        p.ocultoPorDuplicado=false;
+        p.duplicadoPreferido=false;
+        delete p.duplicadoGrupo;
+        if(p.ocultoManualProveedor!==true && !tiendaTieneSinStock(p))p.visible=true;
+        cambio=true;
+      }else if(p.visible===false && p.ocultoManualProveedor!==true &&
+               p.ocultoPorDuplicado!==true && !tiendaTieneSinStock(p)){
+        // visible=false sin una causa persistida era otro residuo del sistema
+        // anterior. Stock disponible vuelve a publicarse de forma segura.
+        p.visible=true;
+        cambio=true;
       }
+      // La bandeja de imágenes es un filtro calculado: abrirla nunca modifica
+      // ni vuelve a guardar cientos de productos automáticos.
       return;
     }
-    // Los manuales sin fecha o con 30+ días quedan marcados como "a revisar"
-    // (advertencia administrativa, bandeja "Revisar manuales"), pero siguen
-    // visibles en la tienda pública hasta que Maxi o Angie los oculten a
-    // propósito o confirmen/actualicen el precio.
+    // Recuperación acotada: si existe una confirmación reciente y el producto
+    // reapareció como pendiente por la carrera de caché anterior, la aprobación
+    // gana. No toca productos que el administrador ocultó deliberadamente.
+    var confirmacion=Number(p.precioChequeadoManual)||0;
+    if(confirmacion>0 && (Date.now()-confirmacion)<30*24*60*60*1000 &&
+       p.pendienteRevisionManual===true){
+      p.pendienteRevisionManual=false;
+      p.visible=true;
+      delete p.visibleAntesRevisionManual;
+      cambio=true;
+      return;
+    }
+    // Los manuales sin fecha o con 30+ días se ocultan para revisar (así lo
+    // pidió Maxi: mejor no mostrarle un precio viejo al cliente) y quedan en
+    // la bandeja "Revisar manuales". Ojo: esto SOLO se dispara la primera vez
+    // que cruza los 30 días (guardado por p.pendienteRevisionManual!==true).
+    // Confirmar el precio (tiendaConfirmarPrecioManual / editar y guardar)
+    // sella precioChequeadoManual, y diasPrecio() ya lo tiene en cuenta —
+    // fix 2026-08-26 — así que una vez confirmado NO vuelve a ocultarse en
+    // el próximo render; antes eso era exactamente lo que fallaba.
     var dias=diasPrecio(p);
     if((dias===null || dias>=30) && p.pendienteRevisionManual!==true){
+      p.visibleAntesRevisionManual=(p.visible!==false);
       p.pendienteRevisionManual=true;
-      if(typeof p.visibleAntesRevisionManual==='undefined'){
-        p.visibleAntesRevisionManual=(p.visible!==false);
-      }
+      p.visible=false;
+      cambio=true;
     }
   });
-  return false;
+  if(cambio){
+    tiendaGuardarLocal();
+    // La reparación de ocultos huérfanos/duplicados incompatibles y el nuevo
+    // ocultamiento por revisión no sirven de nada si se quedan solo en este
+    // dispositivo: hay que publicarlos para que clientes y el resto del
+    // equipo vean lo mismo.
+    tiendaPublicarControlAdmin(false);
+  }
+  return cambio;
 }
 function tiendaActualizarBandejasAdmin(){
   var nuevos=tiendaProductos.filter(tiendaEsPendienteImagenAdmin).length;
   var revision=tiendaProductos.filter(tiendaEsPendienteRevisionManual).length;
+  var ocultos=tiendaProductos.filter(tiendaEstaOcultoAdmin).length;
+  var sinstock=tiendaProductos.filter(tiendaEstaSinStockAdmin).length;
   var cn=document.getElementById('cnt-bandeja-nuevos'); if(cn)cn.textContent=nuevos;
   var cr=document.getElementById('cnt-bandeja-revision'); if(cr)cr.textContent=revision;
+  var co=document.getElementById('cnt-bandeja-ocultos'); if(co)co.textContent=ocultos;
+  var cs=document.getElementById('cnt-bandeja-sinstock'); if(cs)cs.textContent=sinstock;
   var bn=document.getElementById('btn-bandeja-nuevos');
   var br=document.getElementById('btn-bandeja-revision');
+  var bo=document.getElementById('btn-bandeja-ocultos');
+  var bs=document.getElementById('btn-bandeja-sinstock');
+  var bv=document.getElementById('btn-bandeja-volver');
   if(bn){bn.style.boxShadow=tiendaBandejaAdmin==='nuevos'?'0 0 0 3px var(--nar)':'none';}
   if(br){br.style.boxShadow=tiendaBandejaAdmin==='revision'?'0 0 0 3px var(--nar)':'none';}
+  if(bo){bo.style.boxShadow=tiendaBandejaAdmin==='ocultos'?'0 0 0 3px var(--nar)':'none';}
+  if(bs){bs.style.boxShadow=tiendaBandejaAdmin==='sinstock'?'0 0 0 3px var(--nar)':'none';}
+  if(bv){bv.style.display=tiendaBandejaAdmin?'block':'none';}
 }
 function tiendaAbrirBandejaAdmin(tipo){
   if(!tiendaExigirAdmin())return;
   tiendaBandejaAdmin=(tiendaBandejaAdmin===tipo)?'':tipo;
+  tiendaModoPortada=!tiendaBandejaAdmin;
+  tiendaMostrarTodos=false;
   tiendaCategoriaActiva=''; tiendaMarcaActiva='';
   verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
   var b=document.getElementById('tienda-buscar'); if(b)b.value='';
@@ -4782,6 +5466,17 @@ function tiendaAbrirBandejaAdmin(tipo){
   tiendaToggleLimpiar();
   tiendaRender();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+function tiendaSalirBandejaAdmin(){
+  if(!tiendaExigirAdmin())return;
+  tiendaBandejaAdmin='';
+  tiendaModoPortada=true;
+  tiendaMostrarTodos=false;
+  tiendaCategoriaActiva=''; tiendaMarcaActiva=''; tiendaSubfiltroActivo='';
+  verSoloFavoritos=false; verSoloOfertas=false; verSoloPreciosViejos=false;
+  var b=document.getElementById('tienda-buscar');if(b)b.value='';
+  var h=document.getElementById('hdr-buscar-input');if(h)h.value='';
+  tiendaToggleLimpiar();tiendaRender();window.scrollTo({top:0,behavior:'smooth'});
 }
 function tiendaAprobarImagenActual(id){
   if(!tiendaExigirAdmin())return;
@@ -4793,10 +5488,19 @@ function tiendaAprobarImagenActual(id){
   tiendaRender();
   mostrarToast('✅ Imagen aprobada');
 }
-function tiendaLiberarRevisionManual(p){
+function tiendaLiberarRevisionManual(p, publicar){
   if(!p)return;
   p.pendienteRevisionManual=false;
-  if(p.visibleAntesRevisionManual!==false)p.visible=true;
+  // Confirmar o corregir el precio significa aprobar la publicación.
+  // Antes se respetaba un visibleAntes=false y el producto quedaba oculto
+  // aunque el mensaje dijera "publicado".
+  if(publicar===true){
+    p.visible=true;
+    delete p.ocultoManualProveedor;
+    delete p.ocultoManualAdmin;
+  }else if(p.visibleAntesRevisionManual!==false){
+    p.visible=true;
+  }
   delete p.visibleAntesRevisionManual;
 }
 
@@ -4814,6 +5518,67 @@ function tiendaLiberarRevisionManual(p){
   if(document.readyState!=='loading') arranca(); else document.addEventListener('DOMContentLoaded', arranca);
 })();
 
+function tiendaProductoAptoPortada(p){
+  if(!p || !p.foto || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;
+  var stock=tiendaLeerStockProveedor(p);
+  if(stock.informado && stock.valor<=0)return false;
+  // Tener la foto original del proveedor NO oculta el producto. Solamente lo
+  // incorpora a la bandeja privada de "Imágenes pendientes" del administrador.
+  return true;
+}
+function tiendaVerCategoriaPortada(cat){
+  tiendaModoPortada=false;
+  tiendaMostrarTodos=false;
+  tiendaCategoriaActiva=cat;
+  tiendaMarcaActiva='';
+  tiendaSubfiltroActivo='';
+  verSoloFavoritos=false;
+  verSoloOfertas=false;
+  tiendaRender();
+  setTimeout(function(){
+    var destino=document.getElementById('tienda-submarcas')||document.getElementById('tienda-grid');
+    if(destino&&destino.scrollIntoView)destino.scrollIntoView({behavior:'smooth',block:'start'});
+  },60);
+}
+function tiendaRenderPortadaCategorias(universo,cont){
+  var secciones=[
+    {cat:'📱 Celulares',titulo:'📱 Celulares destacados'},
+    {cat:'🍳 Cocción',titulo:'🍳 Cocción para tu hogar'},
+    {cat:'🚲 Deportes y movilidad',titulo:'🚲 Bicicletas y movilidad'},
+    {cat:'❄️ Refrigeración',titulo:'❄️ Refrigeración'},
+    {cat:'🌡️ Climatización',titulo:'🌡️ Climatización'},
+    {cat:'⚡ Pequeños electro',titulo:'⚡ Pequeños electrodomésticos'}
+  ];
+  var html='';
+  secciones.forEach(function(sec){
+    var productos=universo.filter(function(p){return catProd(p)===sec.cat && tiendaProductoAptoPortada(p);});
+    productos.sort(function(a,b){
+      var da=a.destacado?1:0, db=b.destacado?1:0;
+      if(db!==da)return db-da;
+      return Number(b.creado||0)-Number(a.creado||0);
+    });
+    productos=productos.slice(0,4);
+    if(!productos.length)return;
+    var catJs=sec.cat.replace(/'/g,"\\'");
+    html+='<section class="portada-cat-seccion">'
+      +'<div class="portada-cat-cab"><h3>'+sec.titulo+'</h3>'
+      +'<button class="portada-cat-ver" onclick="tiendaVerCategoriaPortada(\''+catJs+'\')">Ver todo ›</button></div>'
+      +'<div class="portada-cat-grid">'+tiendaCardsHtml(productos)+'</div></section>';
+  });
+  if(!html){
+    html='<div style="grid-column:1/-1;background:#fff;border-radius:14px;padding:22px;text-align:center;color:var(--az);font-weight:800;">Estamos preparando la vidriera. Tocá una categoría arriba para ver sus productos.</div>';
+  }else{
+    html='<div style="grid-column:1/-1;color:#fff;font-size:1.15rem;font-weight:900;margin:2px 2px 6px;">Explorá nuestros productos</div>'+html;
+    html+='<div style="grid-column:1/-1;text-align:center;margin:0 0 28px;"><button onclick="tiendaModoPortada=false;tiendaMostrarTodos=true;tiendaRender();" style="background:var(--nar);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(255,122,0,.28);">Ver todos los productos</button></div>';
+  }
+  _tiendaListaFull=[];
+  _tiendaMostrados=0;
+  cont.innerHTML=html;
+  var vm=document.getElementById('tienda-vermas');if(vm)vm.innerHTML='';
+  var cnt=document.getElementById('tienda-contador');if(cnt)cnt.textContent='Elegí una categoría para ver más';
+  tiendaAplicarVistaYAvisos();
+}
+
 function tiendaRender(){
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
@@ -4821,21 +5586,32 @@ function tiendaRender(){
   if(tiendaEsAdmin)tiendaPrepararBandejasAdmin();
   tiendaActualizarBandejasAdmin();
 
-  // en modo público solo se ven los visibles; en admin se ven todos
-  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(function(p){return p.visible;});
+  // La vista principal del admin es la misma vidriera publicada que ven
+  // clientes y vendedores. Lo no publicable vive en carpetas privadas.
+  var universo=tiendaProductos.filter(tiendaEstaVisibleYConStock);
   if(tiendaEsAdmin && tiendaBandejaAdmin==='nuevos'){
     universo=universo.filter(tiendaEsPendienteImagenAdmin);
   }else if(tiendaEsAdmin && tiendaBandejaAdmin==='revision'){
-    universo=universo.filter(tiendaEsPendienteRevisionManual);
+    universo=tiendaProductos.filter(tiendaEsPendienteRevisionManual);
+  }else if(tiendaEsAdmin && tiendaBandejaAdmin==='ocultos'){
+    universo=tiendaProductos.filter(tiendaEstaOcultoAdmin);
+  }else if(tiendaEsAdmin && tiendaBandejaAdmin==='sinstock'){
+    universo=tiendaProductos.filter(tiendaEstaSinStockAdmin);
   }
 
   // 🌟 traer los CELULARES a la tienda como productos de la categoría 📱 Celulares
   var celus=cargarListaCelus();
   celus.forEach(function(c, i){
-    if(tiendaEsAdmin && tiendaBandejaAdmin)return;
+    if(tiendaEsAdmin && tiendaBandejaAdmin){
+      if(tiendaBandejaAdmin==='ocultos' && c && c.ocultoTienda){
+        // continúa para incorporarlo a la carpeta de ocultos
+      }else if(tiendaBandejaAdmin==='sinstock' && c && c.sinStock && !c.ocultoTienda){
+        // continúa para incorporarlo a la carpeta de sin stock
+      }else return;
+    }
     if(!c || !c.precio)return;
-    // si el celu está oculto de la tienda y NO sos admin, no lo mostramos
-    if(c.ocultoTienda && !tiendaEsAdmin)return;
+    // En la vidriera principal no se mezclan celulares ocultos o sin stock.
+    if(!tiendaBandejaAdmin && (c.ocultoTienda || c.sinStock))return;
     universo.push({
       id: 'celu_'+i,           // id especial para distinguirlos
       esCelu: true,
@@ -4859,6 +5635,8 @@ function tiendaRender(){
     vacia.style.display='block';
     if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan imágenes de proveedores pendientes de revisar.';
     else if(tiendaBandejaAdmin==='revision')vacia.innerHTML='✅ No quedan productos manuales pendientes de revisión.';
+    else if(tiendaBandejaAdmin==='ocultos')vacia.innerHTML='✅ No hay productos ocultos.';
+    else if(tiendaBandejaAdmin==='sinstock')vacia.innerHTML='✅ No hay productos sin stock.';
     else vacia.innerHTML='📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.';
     cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML='';
     tiendaAplicarVistaYAvisos();
@@ -4977,20 +5755,55 @@ function tiendaRender(){
     destDiv.style.display='none';
   }
 
-  // sub-chips de MARCA cuando estás en la categoría Celulares
+  // Subfiltros contextuales: marcas en celulares y tipos/pulgadas en las
+  // categorías amplias. Se construyen con el stock visible del momento.
+  var subBox=document.getElementById('tienda-submarcas');
   if(tiendaCategoriaActiva==='📱 Celulares'){
+    tiendaSubfiltroActivo='';
     var marcas={};
     universo.forEach(function(p){ if(catProd(p)==='📱 Celulares'){ var mk=marcaCelu(p.nombre); marcas[mk]=(marcas[mk]||0)+1; } });
-    var mHtml='<div onclick="tiendaFiltrarMarca(\'\')" style="flex:0 0 auto;padding:5px 11px;border-radius:16px;font-size:.66rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(tiendaMarcaActiva===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todas</div>';
+    var mHtml='<div onclick="tiendaFiltrarMarca(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(tiendaMarcaActiva===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
     Object.keys(marcas).sort().forEach(function(mk){
       var on=tiendaMarcaActiva===mk;
-      mHtml+='<div onclick="tiendaFiltrarMarca(\''+mk+'\')" style="flex:0 0 auto;padding:5px 11px;border-radius:16px;font-size:.66rem;font-weight:700;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+mk+' ('+marcas[mk]+')</div>';
+      mHtml+='<div onclick="tiendaFiltrarMarca(\''+mk+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+mk+' ('+marcas[mk]+')</div>';
     });
-    document.getElementById('tienda-submarcas').innerHTML=mHtml;
-    document.getElementById('tienda-submarcas').style.display='flex';
-  }else{
-    document.getElementById('tienda-submarcas').style.display='none';
+    subBox.innerHTML=mHtml;
+    subBox.style.display='flex';
+  }else if(tiendaCategoriaActiva){
     tiendaMarcaActiva='';
+    var subtipos={};
+    universo.forEach(function(p){
+      if(catProd(p)!==tiendaCategoriaActiva)return;
+      var st=tiendaSubtipoProducto(p,tiendaCategoriaActiva);
+      if(st && st!=='Otros')subtipos[st]=(subtipos[st]||0)+1;
+    });
+    var nombresSub=Object.keys(subtipos).sort(function(a,b){
+      if(tiendaCategoriaActiva==='📺 TV y video')return (parseInt(a,10)||999)-(parseInt(b,10)||999);
+      return a.localeCompare(b);
+    });
+    if(nombresSub.length>1){
+      var sHtml='<div onclick="tiendaFiltrarSubtipo(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(tiendaSubfiltroActivo===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
+      nombresSub.forEach(function(st){
+        var on=tiendaSubfiltroActivo===st;
+        sHtml+='<div onclick="tiendaFiltrarSubtipo(\''+st.replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+st+' ('+subtipos[st]+')</div>';
+      });
+      subBox.innerHTML=sHtml;
+      subBox.style.display='flex';
+    }else{
+      tiendaSubfiltroActivo='';
+      subBox.style.display='none';
+    }
+  }else{
+    subBox.style.display='none';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
+  }
+
+  // Clientes, vendedores y administradores comparten la misma portada.
+  var qPortada=(document.getElementById('tienda-buscar').value||'').trim();
+  if(tiendaModoPortada && !tiendaBandejaAdmin && !qPortada){
+    tiendaRenderPortadaCategorias(universo,cont);
+    return;
   }
 
   // filtrar por búsqueda EXACTA + categoría + marca + precio máximo
@@ -5008,13 +5821,14 @@ function tiendaRender(){
     p._pj=pj; // guardo el puntaje para ordenar después
     var okBusq=pj>0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
+    var okSubtipo=!tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
     var okPrecio=!maxPrecio || p.venta<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
     var okViejo=!verSoloPreciosViejos || (!p.esCelu && !tiendaEsAutomatico(p) && ((diasPrecio(p)===null)||(diasPrecio(p)>=30)));
     // filtro "solo ofertas": producto con precio tachado o cuotas sin interés
     var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
-    return okCat && okBusq && okMarca && okPrecio && okFav && okViejo && okOferta;
+    return okCat && okBusq && okMarca && okSubtipo && okPrecio && okFav && okViejo && okOferta;
   });
   // 🧠 registrar qué buscó la gente y si encontró algo
   try{ if(q) registrarBusqueda(q, lista.length); }catch(e){}
@@ -5146,8 +5960,19 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && !p.esCelu){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
       card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
-        +'<input type="checkbox" '+checked2+' onchange="tiendaToggleMarcado('+pid+')"> '
+        +'<input type="checkbox" '+(p.visible?'checked':'')+' onchange="event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+');"> '
         +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
+      // Motivo del ocultamiento visible para el admin: sin esto no había forma
+      // de saber, a simple vista, por qué un producto con stock quedaba oculto.
+      if(!p.visible || tiendaEstaOcultoAdmin(p)){
+        var _motivo=tiendaMotivoOcultoActual(p);
+        var _motivoTexto={manual:'🔒 Ocultado a mano',duplicado:'🧩 Posible duplicado',
+          sin_stock:'📦 Sin stock',revision_precio:'🕓 Revisando precio',
+          sin_motivo:'⚠️ Sin motivo — revisar'}[_motivo]||'';
+        if(_motivoTexto){
+          card+='<div style="font-size:.6rem;font-weight:800;margin-top:2px;color:'+(_motivo==='sin_motivo'?'#B91C1C':'#6b7280')+';">'+_motivoTexto+'</div>';
+        }
+      }
     }
     if(tiendaEsAdmin && p.esCelu){
       card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
@@ -5252,15 +6077,13 @@ function tiendaCardsHtml(sublista){
       if(tiendaEsPendienteRevisionManual(p)){
         card+='<div style="background:#FFF7E6;border:1.5px solid #F0C040;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:#A05200;">🕓 Oculto hasta revisar el precio</div>';
       }
-      // 🕒 antigüedad del precio (solo productos propios; los celulares se editan aparte)
-      if(!p.esCelu){
+      // La antigüedad y confirmación manual se aplican exclusivamente a los
+      // productos cargados a mano. Los automáticos ya son validados en cada
+      // sincronización del proveedor y nunca deben pedir confirmación de precio.
+      if(!p.esCelu && !tiendaEsAutomatico(p)){
         card+=etiquetaFechaPrecio(p);
-        // Los productos manuales no reciben actualizaciones del proveedor:
-        // el admin puede confirmar con un toque que el precio sigue vigente.
-        if(!p.automaticoProveedor){
-          var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
-          card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
-        }
+        var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
+        card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
@@ -5287,7 +6110,7 @@ function tiendaCardsHtml(sublista){
         +(p.foto?'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaQuitarFoto('+pid+')" title="Quitar foto">🚫🖼️</button>':'')
         +(p.esCelu?'':'<button style="font-size:.66rem;padding:8px 9px;background:#fff0f0;color:var(--red);border:1.5px solid #ffd5d5;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaEliminar('+pid+')" title="Eliminar producto">🗑️</button>')
       +'</div>'
-      +(p.automaticoProveedor && p.fotoManualProveedor
+      +(tiendaEsAutomatico(p) && p.fotoManualProveedor
         ?'<button style="width:100%;font-size:.66rem;padding:8px 4px;margin-bottom:5px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaUsarFotoProveedor('+pid+')">↩️ Usar foto del proveedor</button>'
         :'');
     }else{
@@ -5427,7 +6250,7 @@ function tiendaNombreFotoNueva(fid, producto){
   if((''+fid).indexOf('celu_')===0){
     return 'celulares/foto_'+tiendaTokenFoto(fid)+'.jpg';
   }
-  if(producto && producto.automaticoProveedor){
+  if(producto && tiendaEsAutomatico(producto)){
     var identidad=String(producto.proveedorClave||producto.proveedor||'proveedor')
       +'|'+String(producto.proveedorId||producto.id);
     return 'proveedores/'+tiendaTokenFoto(identidad)+'.jpg';
@@ -5527,7 +6350,7 @@ function subirFotoStorageAutenticada(blob, fid){
 function tiendaUsarFotoProveedor(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
-  if(!p || !p.automaticoProveedor) return;
+  if(!p || !tiendaEsAutomatico(p)) return;
   if(!p.fotoProveedor){
     alert('Todavía no tengo guardada la foto original del proveedor. Esperá a la próxima sincronización diaria y volvé a intentar.');
     return;
@@ -5555,7 +6378,7 @@ function tiendaQuitarFoto(id){
   }
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p||!p.foto)return;
-  if(p.automaticoProveedor && p.fotoManualProveedor){
+  if(tiendaEsAutomatico(p) && p.fotoManualProveedor){
     tiendaUsarFotoProveedor(id);
     return;
   }
@@ -5623,7 +6446,7 @@ function tiendaReclasificarOtros(){
   plan.forEach(function(x){
     x.p.categoria=x.cat;
     x.p.categoriaManualFijada=true;
-    if(x.p.automaticoProveedor) x.p.categoriaManualProveedor=x.cat;
+    if(tiendaEsAutomatico(x.p)) x.p.categoriaManualProveedor=x.cat;
   });
   tiendaGuardarLocal();
   tiendaRender();
@@ -5660,7 +6483,7 @@ function tiendaEditarPrecio(id){
     +'<select id="edit-cat" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     + TIENDA_CATEGORIAS.map(function(c){ return '<option value="'+c+'"'+(catProd(p)===c?' selected':'')+'>'+c+'</option>'; }).join('')
     +'</select>'
-    +(p.automaticoProveedor && p.categoriaManualProveedor
+    +(tiendaEsAutomatico(p) && p.categoriaManualProveedor
       ?'<button type="button" onclick="tiendaUsarCategoriaProveedor('+p.id+')" style="width:100%;padding:8px;margin:-4px 0 12px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;">↩️ Usar categoría del proveedor</button>'
       :'')
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">🏪 MAYORISTA</div>'
@@ -5728,15 +6551,19 @@ function tiendaGuardarPrecios(){
       p.costo=Math.round(costo); p.venta=Math.round(venta);
       p.categoria=cat;
       p.categoriaManualFijada=true;
-      if(p.automaticoProveedor) p.categoriaManualProveedor=cat;
+      if(tiendaEsAutomatico(p)) p.categoriaManualProveedor=cat;
       p.caracteristicas=carac;
       p.mayorista=mayorista; // 🏪 mayorista editable
       // Guardar una edición manual también confirma que el precio fue revisado.
-      if(!p.automaticoProveedor){
-        p.precioChequeadoManual=Date.now();
-        if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p); liberoRevision=true; }
+      if(!tiendaEsAutomatico(p)){
+        var ahoraRevision=Date.now();
+        p.precioChequeadoManual=ahoraRevision;
+        p.precioActualizado=ahoraRevision;
+        p.estadoRevisionActualizado=ahoraRevision;
+        if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p,true); liberoRevision=true; }
       }
       tiendaGuardarLocal();
+      if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
     }
   }
   document.getElementById('modal-cuotas').style.display='none';
@@ -5754,21 +6581,43 @@ function tiendaGuardarPrecios(){
 function tiendaConfirmarPrecioManual(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
-  if(!p || p.automaticoProveedor || p.esCelu)return;
+  if(!p || tiendaEsAutomatico(p) || p.esCelu)return;
   var ahora=Date.now();
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
-  tiendaLiberarRevisionManual(p);
-  tiendaGuardarLocal();
+  p.estadoRevisionActualizado=ahora;
+  tiendaLiberarRevisionManual(p,true);
+  // Se guardan dos cosas: el catálogo manual para compatibilidad y una fila
+  // independiente de esta aprobación. Esa fila chica es la autoridad frente
+  // a celulares o pestañas que todavía conservan una copia vieja del catálogo.
+  var guardado=Promise.all([
+    tiendaGuardarLocal(),
+    tiendaGuardarRevisionManualNube(p)
+  ]);
   tiendaRender();
-  mostrarToast('✅ Precio confirmado y producto publicado');
+  mostrarToast('⏳ Guardando y publicando...');
+  Promise.resolve(guardado).then(function(res){
+    var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
+    if(error)throw error;
+    if(!NUBE_OK||!sbCalc)throw new Error('Sin conexión con Supabase');
+    return sbCalc.from('tienda_catalogo').select('datos').eq('id',tiendaRevisionManualId(id)).maybeSingle();
+  }).then(function(remoto){
+    if(remoto&&remoto.error)throw remoto.error;
+    var confirmado=remoto&&remoto.data&&remoto.data.datos;
+    if(!confirmado || String(confirmado.productoId)!==String(id) || confirmado.visible!==true || confirmado.pendienteRevisionManual===true || Number(confirmado.precioChequeadoManual)!==ahora){
+      throw new Error('Supabase no confirmó el producto como visible');
+    }
+    mostrarToast('✅ Precio confirmado y publicación verificada');
+  }).catch(function(err){
+    alert('⚠️ El cambio quedó guardado en este dispositivo, pero no llegó a Supabase.\n\nRevisá la conexión y volvé a confirmar.\n\nDetalle: '+((err&&err.message)||err||'error de guardado'));
+  });
 }
 
 // Quita solamente la elección manual y recupera la categoría automática.
 function tiendaUsarCategoriaProveedor(id){
   if(!tiendaExigirAdmin())return;
   var p=tiendaProductos.find(function(x){return x.id==id;});
-  if(!p || !p.automaticoProveedor) return;
+  if(!p || !tiendaEsAutomatico(p)) return;
   p.categoria=p.categoriaProveedor || tiendaCategoria(p.nombre);
   delete p.categoriaManualProveedor;
   delete p.categoriaManualFijada;
@@ -5796,13 +6645,42 @@ function tiendaToggleMarcado(id){
   if(tiendaMarcadosSet[id]) delete tiendaMarcadosSet[id];
   else tiendaMarcadosSet[id]=true;
 }
+// El interruptor "Oculto/Visible" de cada tarjeta parece un switch directo,
+// pero antes solo marcaba el producto para una acción en tanda posterior
+// ("Ocultar marcados") sin cambiar nada hasta apretar ese otro botón. Eso
+// generó confusión real: alguien tocaba el switch pensando que ocultaba/
+// mostraba al toque, y esos toques se acumulaban silenciosos en el fondo
+// hasta que un "Ocultar marcados" posterior los ocultaba a todos de golpe,
+// sin relación entre sí. Ahora el switch cambia la visibilidad al instante,
+// como visualmente promete, y lo publica enseguida.
+function tiendaToggleVisibilidadDirecta(id){
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  var haciendoVisible=!p.visible;
+  var ahora=Date.now();
+  tiendaSetVisibilidadManual(p,haciendoVisible);
+  // La revisión de precio manda por encima del interruptor simple: si no se
+  // libera acá también, tocar "Visible" podía no mostrar nada y parecer que
+  // el switch no funcionó. Un admin que decide mostrarlo está aprobando todo.
+  if(haciendoVisible && p.pendienteRevisionManual===true){
+    p.precioActualizado=ahora;
+    p.precioChequeadoManual=ahora;
+    tiendaLiberarRevisionManual(p,true);
+  }
+  if(!tiendaEsAutomatico(p) && !p.esCelu)p.estadoRevisionActualizado=ahora;
+  tiendaGuardarLocal();
+  if(!tiendaEsAutomatico(p) && !p.esCelu)tiendaGuardarRevisionManualNube(p).catch(function(){});
+  tiendaRender();
+  tiendaPublicarControlAdmin(false);
+}
 
 // En productos automáticos, además de cambiar la vista guardamos la decisión
 // manual para que una actualización del proveedor no vuelva a mostrarlos.
 function tiendaSetVisibilidadManual(p, visible){
   if(!p)return;
   p.visible=visible;
-  if(p.automaticoProveedor) p.ocultoManualProveedor=!visible;
+  if(tiendaEsAutomatico(p)) p.ocultoManualProveedor=!visible;
+  else p.ocultoManualAdmin=!visible;
 }
 
 // Protección central: aunque un botón viejo quede visible por caché, un vendedor
@@ -5818,11 +6696,18 @@ function tiendaToggleVisibleProd(id){
   if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
-  if(tiendaEsPendienteRevisionManual(p) && !p.visible){
-    alert('Este producto está pendiente de revisión.\n\nConfirmá el mismo precio o editá el precio para publicarlo.');
-    return;
+  var haciendoVisible=!p.visible;
+  var ahora=Date.now();
+  // Si el administrador decide mostrarlo, esa decisión también confirma que
+  // el producto deja de estar pendiente de revisión. Antes este botón se
+  // bloqueaba aquí y nunca llegaba a guardar ni a publicar el cambio.
+  if(haciendoVisible && tiendaEsPendienteRevisionManual(p)){
+    p.precioActualizado=ahora;
+    p.precioChequeadoManual=ahora;
+    tiendaLiberarRevisionManual(p,true);
   }
-  tiendaSetVisibilidadManual(p,!p.visible);
+  tiendaSetVisibilidadManual(p,haciendoVisible);
+  if(!tiendaEsAutomatico(p) && !p.esCelu)p.estadoRevisionActualizado=ahora;
   // guardar según sea celu o producto propio
   try{
     if((''+id).indexOf('celu_')===0){
@@ -5831,10 +6716,14 @@ function tiendaToggleVisibleProd(id){
       if(celus[i]){ celus[i].visible=p.visible; localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }
     } else {
       tiendaGuardarLocal();
+      if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
     }
   }catch(e){}
   if(typeof mostrarToast==='function') mostrarToast(p.visible?'👁️ Producto visible en la tienda':'🙈 Producto oculto de la tienda');
   tiendaRenderYEnfocar(id);
+  // El botón dentro de "Opciones del producto" debe sincronizar igual que el
+  // interruptor principal. Antes sólo cambiaba este dispositivo.
+  tiendaPublicarControlAdmin(false);
 }
 
 // Marcar/desmarcar SIN STOCK manualmente
@@ -6009,7 +6898,7 @@ function tiendaMarcados(accion){
 // ═══ CAJÓN CON TODAS LAS CATEGORÍAS (red de seguridad para el cliente) ═══
 function abrirCajonCats(){
   // armar el universo para contar cuántos productos hay por categoría
-  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(function(p){return p.visible!==false;});
+  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(tiendaEstaVisibleYConStock);
   try{
     var celus=JSON.parse(localStorage.getItem('amarango_celulares')||'[]');
     celus.forEach(function(c,i){
@@ -6049,6 +6938,7 @@ function prepararCajonTools(){
       'tienda-btn-hist','tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
       'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
+      'tienda-btn-diag-ocultos','tienda-btn-restaurar-manuales',
       'tienda-btn-auth-fotos','tienda-btn-auth-fotos-salir','btn-limpiar-dup','btn-reclasificar'
     ];
     ids.forEach(function(id){
@@ -6073,8 +6963,6 @@ function cerrarCajonTools(){
 
 function tiendaFiltrarCat(c, desdeDesplazamiento){
   if(desdeDesplazamiento && tiendaCategoriaActiva===c)return;
-  // Elegir una categoría sale de cualquier bandeja privada activa.
-  if(!desdeDesplazamiento && tiendaEsAdmin)tiendaBandejaAdmin='';
   // Una categoría es una navegación nueva: borra cualquier búsqueda previa
   // tanto del buscador interno como del encabezado.
   var buscador=document.getElementById('tienda-buscar');
@@ -6086,6 +6974,9 @@ function tiendaFiltrarCat(c, desdeDesplazamiento){
   if(typeof _buscarTimer!=='undefined' && _buscarTimer) clearTimeout(_buscarTimer);
   if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
   var estabaActiva=(tiendaCategoriaActiva===c);
+  tiendaModoPortada=(c==='' && !desdeDesplazamiento);
+  tiendaMostrarTodos=false;
+  tiendaSubfiltroActivo='';
   tiendaCategoriaActiva=desdeDesplazamiento?c:(estabaActiva?'':c);
   tiendaRender();
   // si se seleccionó una categoría (no al deseleccionar), bajar a los productos
@@ -6100,6 +6991,11 @@ function tiendaFiltrarCat(c, desdeDesplazamiento){
 var verSoloOfertas=false;
 function navTienda(accion){
   if(accion==='categorias'){
+    tiendaModoPortada=true;
+    tiendaMostrarTodos=false;
+    tiendaCategoriaActiva='';
+    tiendaMarcaActiva='';
+    tiendaSubfiltroActivo='';
     verSoloOfertas=false;
     window.scrollTo({top:0,behavior:'smooth'});
     var chips=document.getElementById('tienda-buscar-wrap');
@@ -6446,7 +7342,7 @@ function tiendaUrlFotoCompartible(p){
   var esFotoAmarango=!!p.fotoManualProveedor ||
     foto.indexOf('/storage/v1/object/public/tienda-fotos/')>=0;
   if(esFotoAmarango) return foto;
-  if(p.automaticoProveedor && /^https:\/\/cdn\.catalog-store\.link\//i.test(foto)){
+  if(tiendaEsAutomatico(p) && /^https:\/\/cdn\.catalog-store\.link\//i.test(foto)){
     return '/api/imagen-proveedor?url='+encodeURIComponent(foto);
   }
   return foto;
@@ -6459,7 +7355,7 @@ function tiendaUrlFotoCompartible(p){
 function tiendaBlobParaCompartir(p){
   if(!p || !p.foto)return Promise.reject(new Error('Producto sin foto'));
   var esCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf' && p.fotoCatalogoLogo);
-  var esProveedor=!!p.automaticoProveedor && !p.fotoManualProveedor;
+  var esProveedor=tiendaEsAutomatico(p) && !p.fotoManualProveedor;
   var necesitaComponer=esCatalogo||esProveedor;
   if(!necesitaComponer){
     return fetch(p.foto).then(function(r){
@@ -6582,6 +7478,10 @@ function tiendaDescargarImagenProducto(id){
 
 // Compartir un producto directamente con el mensaje completo y la foto.
 function compartirProducto(id){
+  if(!_tiendaSincronizacionInicialLista){
+    mostrarToast('🔄 Esperá un momento: estamos actualizando las fotos');
+    return;
+  }
   var p=buscarProd(id);
   if(!p)return;
   var cuotasLines=armarCuotasLines(p.venta, p);
@@ -6953,6 +7853,7 @@ function descargarQR(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
+// Compartir la tienda entera con un mensaje de presentación
 // Modo oscuro: activa/desactiva y recuerda la preferencia
 function toggleModoOscuro(){
   var on=document.body.classList.toggle('oscuro');
@@ -6969,7 +7870,7 @@ function toggleModoOscuro(){
 // Devuelve TODOS los productos (propios + celulares) como universo unificado
 function tiendaTodosLosProductos(soloVisibles){
   var universo = soloVisibles
-    ? tiendaProductos.filter(function(p){return p.visible;})
+    ? tiendaProductos.filter(tiendaEstaVisibleYConStock)
     : tiendaProductos.slice();
   var celus=cargarListaCelus();
   celus.forEach(function(c,i){
@@ -7149,8 +8050,7 @@ function esNuevo(p){
 // precioChequeadoManual (Angie/Max confirmaron el mismo precio sin cambiarlo).
 // Fix 2026-08-26: antes solo miraba precioActualizado, así que confirmar un
 // precio SIN modificar el número no reiniciaba el contador de 30 días y el
-// producto volvía a la bandeja "Revisar manuales" en el próximo render, como
-// si nunca se hubiera confirmado nada.
+// producto volvía a la bandeja "Revisar manuales" en el próximo render.
 function diasPrecio(p){
   if(!p)return null;
   var t=Math.max(p.precioActualizado||0, p.precioChequeadoManual||0) || p.creado;
@@ -8312,14 +9212,14 @@ function abrirPosiblesDuplicados(){
   grupos.forEach(function(g,idx){
     var arr=g.productos.slice().sort(function(a,b){
       return Number(Boolean(b.duplicadoPreferido))-Number(Boolean(a.duplicadoPreferido))
-        || Number(Boolean(a.automaticoProveedor))-Number(Boolean(b.automaticoProveedor))
+        || Number(tiendaEsAutomatico(a))-Number(tiendaEsAutomatico(b))
         || Number(a.venta||Infinity)-Number(b.venta||Infinity);
     });
     html+='<div style="border:1.5px solid var(--bor);border-radius:14px;padding:10px;margin-top:12px;background:#fff;">'
       +'<div style="font-size:.7rem;font-weight:900;color:var(--az);margin-bottom:8px;">Grupo '+(idx+1)+' · '+arr.length+' productos parecidos</div>';
     arr.forEach(function(p){
       var elegido=p.duplicadoPreferido===true && p.visible!==false;
-      var origen=p.automaticoProveedor?(p.proveedor||'Proveedor'):'Carga manual';
+      var origen=tiendaEsAutomatico(p)?(p.proveedor||'Proveedor'):'Carga manual';
       var foto=p.foto?'<img src="'+String(p.foto).replace(/"/g,'&quot;')+'" alt="" style="width:54px;height:54px;object-fit:contain;background:#fff;border:1px solid var(--bor);border-radius:9px;flex:0 0 auto;">'
         :'<div style="width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:9px;font-size:1.4rem;flex:0 0 auto;">📦</div>';
       html+='<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #eef1f5;">'
@@ -8466,7 +9366,13 @@ function tiendaProcesarCarga(){
 
   var lineas=texto.split(/\r?\n/);
   var nuevos=[];
-  var maxId=tiendaProductos.reduce(function(a,p){return Math.max(a,p.id||0);},0);
+  // Los proveedores usan también ids de texto. Math.max con uno de esos ids
+  // devolvía NaN y JSON lo convertía en null; dos cargas manuales podían
+  // terminar con el mismo id. Para manuales usamos sólo ids numéricos válidos.
+  var maxId=tiendaProductos.reduce(function(a,p){
+    var n=Number(p&&p.id);
+    return Number.isFinite(n) && n>0 ? Math.max(a,Math.floor(n)) : a;
+  },0);
   var descartadas=0;
 
   lineas.forEach(function(l){
@@ -8550,7 +9456,8 @@ function tiendaProcesarCarga(){
         tiendaProductos.forEach(function(p){
           var kp=claveProd(p.nombre);
           if(!kp || kp.length<6) return;
-          if(kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1){
+          if((kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1) &&
+             tiendaPuedenSerDuplicados(n,p)){
             var largo=Math.min(kn.length,kp.length);
             if(largo>mejorLen){ mejorLen=largo; mejor=p; }
           }
@@ -9172,7 +10079,7 @@ function tiendaProductoPareceUSD(p){
   var texto=((p.nombre||'')+' '+(p.caracteristicas||'')).toUpperCase();
   if(/(?:^|[^A-Z0-9])(?:USD|U\$S|US\$)(?:$|[^A-Z0-9])/.test(texto))return true;
   if(/\bD[OÓ]LAR(?:ES)?\b/.test(texto))return true;
-  return !p.monedaProveedor && p.automaticoProveedor && Number(p.costo)>0 && Number(p.costo)<1000;
+  return !p.monedaProveedor && tiendaEsAutomatico(p) && Number(p.costo)>0 && Number(p.costo)<1000;
 }
 function tiendaPrecioOriginalUSD(p,cotizacion){
   var original=Number(p&&p.precioProveedorOriginal)||0;
@@ -9217,7 +10124,7 @@ function tiendaConvertirUSD(id){
   p.costo = costoPesos;
   p.venta = ventaPesos;
   p.usdConvertido = true;
-  tiendaGuardarLocal(); try{ tiendaSubirNube(); }catch(e){}
+  tiendaGuardarLocal();
   tiendaRenderYEnfocar(id);
   mostrarToast('✅ Cotización guardada: $'+cotiz.toLocaleString('es-AR'));
 }
@@ -10195,47 +11102,84 @@ try{ tiendaInit(); }catch(e){}
   chequear();
 })();
 </script>
-<!-- Margarita: etapa de prueba exclusiva para Administración.
-     El widget reconoce automáticamente ae_sesion_admin / ae_sesion_rev. -->
-<script>
-window.MARGARITA_SOLO_ADMIN=true;
-window.addEventListener('margarita:buscar',function(event){
-  var detalle=(event&&event.detail)||{};
-  var query=String(detalle.query||'').trim();
-  var id=String(detalle.id||'').trim();
-  if(!query&&!id)return;
 
-  function normalizarMargarita(txt){
-    return String(txt||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-  }
-  var encontrado=null;
-  try{
-    if(id&&typeof buscarProd==='function')encontrado=buscarProd(id);
-    if(!encontrado&&Array.isArray(tiendaProductos)){
-      var objetivo=normalizarMargarita(query);
-      encontrado=tiendaProductos.find(function(p){return normalizarMargarita(p&&p.nombre)===objetivo;})||
-        tiendaProductos.find(function(p){
-          var nombre=normalizarMargarita(p&&p.nombre);
-          return objetivo&&nombre&&(nombre.indexOf(objetivo)>=0||objetivo.indexOf(nombre)>=0);
-        });
-    }
-    if(!encontrado&&typeof cargarListaCelus==='function'){
-      var celulares=cargarListaCelus()||[];
-      var objetivoCelu=normalizarMargarita(query);
-      var indice=celulares.findIndex(function(c){return normalizarMargarita(c&&c.nombre)===objetivoCelu;});
-      if(indice<0)indice=celulares.findIndex(function(c){
-        var nombre=normalizarMargarita(c&&c.nombre);
-        return objetivoCelu&&nombre&&(nombre.indexOf(objetivoCelu)>=0||objetivoCelu.indexOf(nombre)>=0);
-      });
-      if(indice>=0)encontrado=buscarProd('celu_'+indice);
-    }
-    if(encontrado&&typeof tiendaVerDetalle==='function'){
-      if(typeof showTab==='function')showTab('tienda');
-      setTimeout(function(){tiendaVerDetalle(encontrado.id);},120);
-    }
-  }catch(e){}
+<!-- ═══ MARGARITA · ASISTENTE DE VENTAS ═══ -->
+<button id="margarita-fab" onclick="margaritaAbrir()" aria-label="Hablar con Margarita"
+  style="position:fixed;right:18px;bottom:76px;z-index:1420;width:60px;height:60px;padding:0;overflow:hidden;border-radius:50%;background:#fff;border:3px solid #0B2D6B;cursor:pointer;box-shadow:0 0 0 3px #FF7A00,0 5px 18px rgba(11,45,107,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;"><img id="margarita-fab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"></button>
+<div id="margarita-overlay" onclick="if(event.target===this)margaritaCerrar()"
+  style="display:none;position:fixed;inset:0;background:rgba(2,12,46,.5);z-index:3100;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);">
+  <div style="width:100%;max-width:480px;height:min(78vh,680px);background:#ECE5DD;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 30px rgba(0,0,0,.35);">
+    <div style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;padding:12px 15px;display:flex;align-items:center;gap:10px;border-bottom:3px solid #FF7A00;">
+      <div style="width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;"><img id="margarita-cab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;"></div>
+      <div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:1rem;">Margarita</div><div style="font-size:.67rem;opacity:.86;">Asistente de AmarangoElectro · en línea</div></div>
+      <button onclick="margaritaCerrar()" aria-label="Cerrar" style="background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;padding:4px;">×</button>
+    </div>
+    <div id="margarita-msgs" style="flex:1;overflow-y:auto;padding:13px 11px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;"></div>
+    <div style="background:#F0F0F0;padding:9px 10px calc(9px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;border-top:1px solid #ddd;">
+      <input id="margarita-input" type="text" placeholder="¿Qué producto estás buscando?" autocomplete="off" onkeydown="if(event.key==='Enter')margaritaEnviar()" style="flex:1;border:none;border-radius:22px;padding:12px 15px;font-size:.88rem;font-family:inherit;outline:none;background:#fff;">
+      <button onclick="margaritaEnviar()" id="margarita-send" aria-label="Enviar" style="width:44px;height:44px;border-radius:50%;background:#FF7A00;border:none;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">➤</button>
+    </div>
+  </div>
+</div>
+<style>
+.margarita-burb{max-width:82%;padding:9px 13px;border-radius:14px;font-size:.86rem;line-height:1.42;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.margarita-cli{align-self:flex-end;background:#DCF8C6;color:#111;border-bottom-right-radius:4px}.margarita-bot{align-self:flex-start;background:#fff;color:#111;border-bottom-left-radius:4px}.margarita-bot a{color:#0B2D6B;font-weight:800}.margarita-escribe{align-self:flex-start;background:#fff;color:#777;font-size:.78rem;padding:9px 13px;border-radius:14px}
+@media(min-width:800px){#margarita-fab{bottom:20px!important;right:20px!important}}
+</style>
+<script type="module">
+// Conservamos margarita-ui.js y todos sus módulos internos, pero el avatar
+// visible usa siempre la foto oficial elegida por Angie.
+import './margarita-ui.js';
+const MARGARITA_AVATAR='./margarita-avatar-oficial.jpeg?v=20260823';
+var mf=document.getElementById('margarita-fab-img');if(mf)mf.src=MARGARITA_AVATAR;
+var mc=document.getElementById('margarita-cab-img');if(mc)mc.src=MARGARITA_AVATAR;
+// Si un módulo visual anterior intenta reponer un avatar viejo después de
+// cargar, conservamos la foto oficial en ambos círculos.
+[mf,mc].forEach(function(img){
+  if(!img)return;
+  new MutationObserver(function(){
+    if(img.getAttribute('src')!==MARGARITA_AVATAR)img.setAttribute('src',MARGARITA_AVATAR);
+  }).observe(img,{attributes:true,attributeFilter:['src']});
 });
 </script>
-<script src="https://amara.max-huracan73.workers.dev/widget.js" defer></script>
+<script>
+var _margaritaHist=[],_margaritaCargando=false;
+function margaritaAbrir(){
+  document.getElementById('margarita-overlay').style.display='flex';
+  if(!_margaritaHist.length)margaritaPintar('margarita','¡Hola! Soy Margarita 🐝 ¿Qué estás buscando? Te hago unas preguntas cortitas y te ayudo a elegir la mejor opción.');
+  setTimeout(function(){var i=document.getElementById('margarita-input');if(i)i.focus();},250);
+}
+function margaritaCerrar(){document.getElementById('margarita-overlay').style.display='none';}
+function margaritaPintar(quien,texto){
+  var cont=document.getElementById('margarita-msgs'),d=document.createElement('div');
+  d.className='margarita-burb '+(quien==='cliente'?'margarita-cli':'margarita-bot');
+  var seguro=String(texto||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  d.innerHTML=seguro.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">Ver producto</a>');
+  cont.appendChild(d);cont.scrollTop=cont.scrollHeight;
+}
+function margaritaEscribiendo(on){
+  var cont=document.getElementById('margarita-msgs'),d=document.getElementById('margarita-escribiendo');
+  if(on&&!d){d=document.createElement('div');d.id='margarita-escribiendo';d.className='margarita-escribe';d.textContent='Margarita está escribiendo…';cont.appendChild(d);cont.scrollTop=cont.scrollHeight;}else if(!on&&d)d.remove();
+}
+function margaritaProductosPara(texto){
+  var palabras=normTxt(texto).split(/\s+/).filter(function(w){return w.length>2;});
+  return (tiendaProductos||[]).filter(tiendaEstaVisibleYConStock).map(function(p){
+    var n=normTxt((p.nombre||'')+' '+catProd(p)+' '+(p.caracteristicas||'')),puntos=0;
+    palabras.forEach(function(w){if(n.indexOf(w)>=0)puntos+=3;});
+    return {p:p,puntos:puntos+(p.destacado?1:0)};
+  }).filter(function(x){return !palabras.length||x.puntos>0;}).sort(function(a,b){return b.puntos-a.puntos;}).slice(0,30).map(function(x){
+    var p=x.p,base=location.origin+location.pathname.replace(/\/[^\/]*$/,'/');
+    return {id:String(p.id),nombre:p.nombre,categoria:catProd(p),precio:Number(p.venta)||0,caracteristicas:String(p.caracteristicas||'').slice(0,240),url:base+'?prod='+encodeURIComponent(p.id)};
+  });
+}
+function margaritaEnviar(){
+  if(_margaritaCargando)return;
+  var inp=document.getElementById('margarita-input'),texto=(inp.value||'').trim();if(!texto)return;
+  margaritaPintar('cliente',texto);_margaritaHist.push({rol:'usuario',texto:texto});inp.value='';_margaritaCargando=true;margaritaEscribiendo(true);
+  fetch('/api/margarita',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mensajes:_margaritaHist.slice(-10),productos:margaritaProductosPara(texto)})})
+  .then(function(r){return r.json();}).then(function(data){margaritaEscribiendo(false);var resp=data.respuesta||'No pude responderte ahora 🐝 Probá nuevamente en un ratito.';margaritaPintar('margarita',resp);_margaritaHist.push({rol:'margarita',texto:resp});_margaritaCargando=false;})
+  .catch(function(){margaritaEscribiendo(false);margaritaPintar('margarita','No pude conectarme 🐝 Probá de nuevo o consultanos por WhatsApp.');_margaritaCargando=false;});
+}
+</script>
 </body>
 </html>
