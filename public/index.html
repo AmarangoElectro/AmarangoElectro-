@@ -6574,11 +6574,15 @@ function tiendaToggleVisibleProd(id){
   if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
-  if(tiendaEsPendienteRevisionManual(p) && !p.visible){
-    alert('Este producto está pendiente de revisión.\n\nConfirmá el mismo precio o editá el precio para publicarlo.');
-    return;
+  var haciendoVisible=!p.visible;
+  // Si el administrador decide mostrarlo, esa decisión también confirma que
+  // el producto deja de estar pendiente de revisión. Antes este botón se
+  // bloqueaba aquí y nunca llegaba a guardar ni a publicar el cambio.
+  if(haciendoVisible && tiendaEsPendienteRevisionManual(p)){
+    p.pendienteRevisionManual=false;
+    delete p.visibleAntesRevisionManual;
   }
-  tiendaSetVisibilidadManual(p,!p.visible);
+  tiendaSetVisibilidadManual(p,haciendoVisible);
   // guardar según sea celu o producto propio
   try{
     if((''+id).indexOf('celu_')===0){
@@ -6591,6 +6595,9 @@ function tiendaToggleVisibleProd(id){
   }catch(e){}
   if(typeof mostrarToast==='function') mostrarToast(p.visible?'👁️ Producto visible en la tienda':'🙈 Producto oculto de la tienda');
   tiendaRenderYEnfocar(id);
+  // El botón dentro de "Opciones del producto" debe sincronizar igual que el
+  // interruptor principal. Antes sólo cambiaba este dispositivo.
+  tiendaPublicarControlAdmin(false);
 }
 
 // Marcar/desmarcar SIN STOCK manualmente
@@ -6805,6 +6812,7 @@ function prepararCajonTools(){
       'tienda-btn-hist','tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
       'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
+      'tienda-btn-diag-ocultos','tienda-btn-restaurar-manuales',
       'tienda-btn-auth-fotos','tienda-btn-auth-fotos-salir','btn-limpiar-dup','btn-reclasificar'
     ];
     ids.forEach(function(id){
