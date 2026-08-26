@@ -5091,7 +5091,7 @@ function tiendaDiagnosticoOcultos(){
   var revisionManualCount=tiendaProductos.filter(tiendaEsPendienteRevisionManual).length;
   var imagenesPendCount=tiendaProductos.filter(tiendaEsPendienteImagenAdmin).length;
   var r='📊 Total productos: '+tiendaProductos.length+'\n\n'
-    +'🔒 Ocultados a mano: '+conteo.manual+'\n'
+    +'🔒 Con marca manual heredada: '+conteo.manual+'\n'
     +'🧩 Ocultos por duplicado: '+conteo.duplicado+' (en '+totalGrupos+' grupos detectados)\n'
     +'📦 Sin stock: '+conteo.sin_stock+'\n'
     +'🕓 Ocultos por revisión de precio (manuales): '+conteo.revision_precio+'\n'
@@ -5099,7 +5099,7 @@ function tiendaDiagnosticoOcultos(){
     +'Bandeja "Revisar manuales": '+revisionManualCount+'\n'
     +'Bandeja "Imágenes pendientes": '+imagenesPendCount+'\n';
   if(ejemplos.sin_motivo.length)r+='\nEjemplos SIN MOTIVO:\n- '+ejemplos.sin_motivo.join('\n- ');
-  if(ejemplos.manual.length)r+='\n\nEjemplos ocultados a mano:\n- '+ejemplos.manual.join('\n- ');
+  if(ejemplos.manual.length)r+='\n\nEjemplos con marca manual heredada:\n- '+ejemplos.manual.join('\n- ');
   if(ejemplos.duplicado.length)r+='\n\nEjemplos por duplicado:\n- '+ejemplos.duplicado.join('\n- ');
   alert('🕵️ DIAGNÓSTICO DE OCULTOS:\n\n'+r);
 }
@@ -5180,7 +5180,9 @@ function tiendaTieneSinStock(p){
 function tiendaEstaOcultoAdmin(p){
   // Sin stock tiene prioridad sobre cualquier marca de ocultamiento. Así un
   // producto agotado no se mezcla con los que requieren una decisión del admin.
-  return !!(p && !tiendaTieneSinStock(p) &&
+  // Los manuales pendientes pertenecen exclusivamente a "Revisar manuales";
+  // no deben inflar también el contador ni la carpeta de "Ocultos".
+  return !!(p && !tiendaTieneSinStock(p) && !tiendaEsPendienteRevisionManual(p) &&
     (p.visible===false || p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true));
 }
 function tiendaEstaSinStockAdmin(p){
