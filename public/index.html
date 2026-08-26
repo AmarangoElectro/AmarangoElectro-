@@ -2677,6 +2677,7 @@ function tiendaSubirControlPublicacion(){
 function tiendaMarcaTiempoProducto(p){
   if(!p)return 0;
   return Math.max(
+    Number(p.eliminadoActualizado)||0,
     Number(p.estadoRevisionActualizado)||0,
     Number(p.precioChequeadoManual)||0,
     Number(p.precioActualizado)||0,
@@ -2713,19 +2714,23 @@ function tiendaOlvidarEliminacionManual(id){
 function tiendaSubirManualesNube(){
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
   var manualesLocal=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
-  var eliminadosRecientes=tiendaCargarEliminadosRecientes();
   return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
     .then(function(res){
       var manualesServidor=(res && !res.error && res.data && Array.isArray(res.data.datos))?res.data.datos:[];
       var porId={};
+      // Fix 2026-08-26 (v2): antes, si ESTE dispositivo tenía registrado un
+      // borrado reciente para un ID, se saltaba directamente la versión del
+      // servidor para ese producto — incluso cuando el servidor YA tenía el
+      // borrado (eliminado=true) más nuevo que cualquier otra cosa. Eso
+      // dejaba un hueco: como el servidor nunca se cargaba en porId, la
+      // copia local (aunque fuera vieja y sin el borrado) entraba sin
+      // competir en el paso siguiente. Ahora el servidor siempre se carga
+      // acá, y todo se decide por fecha (tiendaMarcaTiempoProducto, que ya
+      // incluye eliminadoActualizado) en el mismo paso de abajo — sin casos
+      // especiales.
       manualesServidor.forEach(function(p){
         if(!p || p.id==null)return;
-        var clave=String(p.id);
-        var borradoEn=eliminadosRecientes[clave];
-        // Si este dispositivo borró este producto DESPUÉS de la última vez
-        // que el servidor lo tocó, el borrado gana: no se vuelve a agregar.
-        if(borradoEn && borradoEn>=tiendaMarcaTiempoProducto(p))return;
-        porId[clave]=p;
+        porId[String(p.id)]=p;
       });
       manualesLocal.forEach(function(pLocal){
         if(pLocal==null || pLocal.id==null)return;
@@ -3814,7 +3819,18 @@ function tiendaPapeleraRestaurar(idx){
   var it=pap[idx];
   if(!it)return;
   if(it.tipo==='producto'){
-    tiendaProductos.push(it.dato);
+    // Fix 2026-08-26: los manuales ahora se "borran" quedándose en memoria
+    // con eliminado=true (para que el borrado se sincronice entre
+    // dispositivos), no sacándose del array. Si ya existe esa entrada,
+    // hay que revivir ESA en vez de agregar una copia nueva al lado.
+    var existente=it.dato && it.dato.id!=null ? tiendaProductos.find(function(x){return x.id===it.dato.id;}) : null;
+    if(existente){
+      delete existente.eliminado;
+      delete existente.eliminadoActualizado;
+      existente.visible=(it.dato.visible!==false);
+    }else{
+      tiendaProductos.push(it.dato);
+    }
     if(it.dato && !tiendaEsAutomatico(it.dato)) tiendaOlvidarEliminacionManual(it.dato.id);
     tiendaGuardarLocal();
   }else if(it.tipo==='celular'){
@@ -4365,7 +4381,7 @@ function hdrPredictivo(){
   var palabras=q.split(' ').filter(Boolean);
   // juntar productos reales + celulares visibles
   var universo=[];
-  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && (tiendaEsAdmin || tiendaEstaVisibleYConStock(p))) universo.push(p); }); }catch(e){}
+  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && p.eliminado!==true && (tiendaEsAdmin || tiendaEstaVisibleYConStock(p))) universo.push(p); }); }catch(e){}
   // Primero se muestran únicamente coincidencias exactas de palabra.
   var res=[];
   for(var i=0;i<universo.length;i++){
@@ -5359,8 +5375,9 @@ function tiendaEstaOcultoAdmin(p){
   // Sin stock tiene prioridad sobre cualquier marca de ocultamiento. Así un
   // producto agotado no se mezcla con los que requieren una decisión del admin.
   // Los manuales pendientes pertenecen exclusivamente a "Revisar manuales";
-  // no deben inflar también el contador ni la carpeta de "Ocultos".
-  return !!(p && !tiendaTieneSinStock(p) && !tiendaEsPendienteRevisionManual(p) &&
+  // no deben inflar también el contador ni la carpeta de "Ocultos". Un
+  // producto borrado (papelera) tampoco: vive en su propia sección.
+  return !!(p && p.eliminado!==true && !tiendaTieneSinStock(p) && !tiendaEsPendienteRevisionManual(p) &&
     (p.visible===false || p.ocultoManualProveedor===true || p.ocultoPorDuplicado===true));
 }
 function tiendaEstaSinStockAdmin(p){
@@ -6738,12 +6755,23 @@ function tiendaEliminar(id){
   if(!p)return;
   if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)+'\n\n(Va a la 🗑️ Papelera por si te arrepentís)'))return;
   papeleraAgregar('producto', p);
-  // Fix 2026-08-26: si es manual, hay que dejar constancia del borrado para
-  // que no vuelva a aparecer solo (ver tiendaRegistrarEliminacionManual).
-  // Los automaticos de proveedor no la necesitan: si el proveedor lo sigue
-  // mandando, es correcto que reaparezca.
-  if(!tiendaEsAutomatico(p)) tiendaRegistrarEliminacionManual(id);
-  tiendaProductos=tiendaProductos.filter(function(x){return x.id!=id;});
+  // Fix 2026-08-26 (v2): sacarlo del array (tiendaProductos=filter(...))
+  // hacía que, apenas OTRO dispositivo con una copia local un poco vieja
+  // guardara cualquier cosa, lo volviera a subir — ese dispositivo nunca se
+  // enteró del borrado porque no había ningún rastro compartido de que
+  // pasó. Ahora el producto se marca eliminado (queda en memoria, oculto en
+  // todos lados) y esa marca viaja con el resto de la sincronización, así
+  // CUALQUIER dispositivo que la vea respeta el borrado, no solo el que lo
+  // hizo. El registro local (tiendaRegistrarEliminacionManual) queda como
+  // resguardo extra para el ratito antes de la primera sincronización.
+  if(!tiendaEsAutomatico(p)){
+    tiendaRegistrarEliminacionManual(id);
+    p.eliminado=true;
+    p.eliminadoActualizado=Date.now();
+    p.visible=false;
+  }else{
+    tiendaProductos=tiendaProductos.filter(function(x){return x.id!=id;});
+  }
   delete tiendaMarcadosSet[id];
   tiendaGuardarLocal(); tiendaRender();
   mostrarToast('🗑️ Movido a la papelera');
@@ -7007,7 +7035,10 @@ function tiendaMarcados(accion){
 // ═══ CAJÓN CON TODAS LAS CATEGORÍAS (red de seguridad para el cliente) ═══
 function abrirCajonCats(){
   // armar el universo para contar cuántos productos hay por categoría
-  var universo=tiendaEsAdmin ? tiendaProductos.slice() : tiendaProductos.filter(tiendaEstaVisibleYConStock);
+  // Los productos borrados (papelera) siguen existiendo en memoria para que
+  // el borrado se sincronice bien entre dispositivos, pero nunca deben verse
+  // en la grilla de nadie, ni siquiera la del admin.
+  var universo=tiendaEsAdmin ? tiendaProductos.filter(function(p){return p && p.eliminado!==true;}) : tiendaProductos.filter(tiendaEstaVisibleYConStock);
   try{
     var celus=JSON.parse(localStorage.getItem('amarango_celulares')||'[]');
     celus.forEach(function(c,i){
