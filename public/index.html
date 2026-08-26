@@ -2520,6 +2520,70 @@ var TIENDA_INCREMENTAL_LOTE=500;
 var _tiendaBajarNubeEnCurso=null;
 var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
 var TIENDA_MANUALES_ID='catalogo_manuales';
+var TIENDA_REVISION_MANUAL_PREFIJO='revision_manual_';
+
+// La aprobación de cada producto manual vive también en una fila pequeña e
+// independiente. Así una pestaña vieja no puede volver a ocultarlo al subir
+// una copia anterior del array completo catalogo_manuales.
+function tiendaRevisionManualId(id){
+  return TIENDA_REVISION_MANUAL_PREFIJO+String(id);
+}
+function tiendaGuardarRevisionManualNube(p){
+  if(!NUBE_OK||!sbCalc||!p||p.id==null||tiendaEsAutomatico(p)||p.esCelu){
+    return Promise.resolve({data:null,error:null});
+  }
+  var actualizadoEn=Number(p.estadoRevisionActualizado)||Date.now();
+  p.estadoRevisionActualizado=actualizadoEn;
+  return sbCalc.from('tienda_catalogo').upsert({
+    id:tiendaRevisionManualId(p.id),
+    datos:{
+      productoId:String(p.id),
+      actualizadoEn:actualizadoEn,
+      visible:p.visible===true,
+      pendienteRevisionManual:p.pendienteRevisionManual===true,
+      precioChequeadoManual:Number(p.precioChequeadoManual)||0,
+      precioActualizado:Number(p.precioActualizado)||0,
+      ocultoManualAdmin:p.ocultoManualAdmin===true
+    },
+    actualizado:new Date(actualizadoEn).toISOString()
+  }).select('actualizado');
+}
+function tiendaAplicarRevisionesManualesNube(filas){
+  if(!Array.isArray(filas)||!filas.length)return false;
+  var porId={};
+  (tiendaProductos||[]).forEach(function(p){
+    if(p&&p.id!=null&&!tiendaEsAutomatico(p)&&!p.esCelu)porId[String(p.id)]=p;
+  });
+  var cambio=false, ahora=Date.now(), vigencia=30*24*60*60*1000;
+  filas.forEach(function(fila){
+    var d=fila&&fila.datos;
+    if(!d||d.productoId==null)return;
+    var p=porId[String(d.productoId)];if(!p)return;
+    var remoto=Number(d.actualizadoEn)||0;
+    var local=Number(p.estadoRevisionActualizado)||0;
+    if(!remoto||remoto<local)return;
+    p.estadoRevisionActualizado=remoto;
+    if(Number(d.precioChequeadoManual)>Number(p.precioChequeadoManual||0)){
+      p.precioChequeadoManual=Number(d.precioChequeadoManual);
+    }
+    if(Number(d.precioActualizado)>Number(p.precioActualizado||0)){
+      p.precioActualizado=Number(d.precioActualizado);
+    }
+    if(d.ocultoManualAdmin===true){
+      p.ocultoManualAdmin=true;p.visible=false;p.pendienteRevisionManual=false;
+      cambio=true;return;
+    }
+    // Una aprobación conserva autoridad durante los mismos 30 días que usa
+    // la regla de revisión de precios. Luego vuelve a revisión normalmente.
+    var confirmado=Number(d.precioChequeadoManual)||0;
+    if(d.pendienteRevisionManual===false&&confirmado>0&&(ahora-confirmado)<vigencia){
+      p.pendienteRevisionManual=false;p.visible=true;
+      delete p.visibleAntesRevisionManual;delete p.ocultoManualAdmin;
+      cambio=true;
+    }
+  });
+  return cambio;
+}
 
 // Estado administrativo liviano. Las filas incrementales vienen de los
 // proveedores y no siempre incluyen un ocultamiento hecho por Angie o Max.
@@ -2626,25 +2690,28 @@ function tiendaBajarControlPublicacion(){
   if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
   return Promise.all([
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
-    sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle(),
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_REVISION_MANUAL_PREFIJO+'%')
   ]).then(function(res){
-      var r=res[0], rm=res[1];
+      var r=res[0], rm=res[1], rr=res[2];
       if(r&&r.error)throw r.error;
       if(rm&&rm.error)throw rm.error;
+      if(rr&&rr.error)throw rr.error;
       _tiendaControlPublicacionNubeListo=true;
       if(rm&&rm.data&&Array.isArray(rm.data.datos)){
         var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
         tiendaProductos=automaticos.concat(rm.data.datos);
       }
+      var cambioRevision=tiendaAplicarRevisionesManualesNube(rr&&Array.isArray(rr.data)?rr.data:[]);
       if(r&&r.data&&r.data.datos){
         var cambio=tiendaAplicarControlPublicacion(r.data.datos);
         try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
-        return cambio;
+        return cambio||cambioRevision;
       }
       // La primera vez, el administrador que ya tiene el estado correcto crea
       // el mapa para que clientes y vendedores lo reciban inmediatamente.
-      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return false;});
-      return false;
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision;});
+      return cambioRevision;
     }).catch(function(){
       _tiendaControlPublicacionNubeListo=false;
       return false;
@@ -6451,10 +6518,14 @@ function tiendaGuardarPrecios(){
       p.mayorista=mayorista; // 🏪 mayorista editable
       // Guardar una edición manual también confirma que el precio fue revisado.
       if(!tiendaEsAutomatico(p)){
-        p.precioChequeadoManual=Date.now();
+        var ahoraRevision=Date.now();
+        p.precioChequeadoManual=ahoraRevision;
+        p.precioActualizado=ahoraRevision;
+        p.estadoRevisionActualizado=ahoraRevision;
         if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p,true); liberoRevision=true; }
       }
       tiendaGuardarLocal();
+      if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
     }
   }
   document.getElementById('modal-cuotas').style.display='none';
@@ -6476,19 +6547,26 @@ function tiendaConfirmarPrecioManual(id){
   var ahora=Date.now();
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
+  p.estadoRevisionActualizado=ahora;
   tiendaLiberarRevisionManual(p,true);
-  var guardado=tiendaGuardarLocal();
+  // Se guardan dos cosas: el catálogo manual para compatibilidad y una fila
+  // independiente de esta aprobación. Esa fila chica es la autoridad frente
+  // a celulares o pestañas que todavía conservan una copia vieja del catálogo.
+  var guardado=Promise.all([
+    tiendaGuardarLocal(),
+    tiendaGuardarRevisionManualNube(p)
+  ]);
   tiendaRender();
   mostrarToast('⏳ Guardando y publicando...');
   Promise.resolve(guardado).then(function(res){
-    if(res && res.error)throw res.error;
+    var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
+    if(error)throw error;
     if(!NUBE_OK||!sbCalc)throw new Error('Sin conexión con Supabase');
-    return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle();
+    return sbCalc.from('tienda_catalogo').select('datos').eq('id',tiendaRevisionManualId(id)).maybeSingle();
   }).then(function(remoto){
     if(remoto&&remoto.error)throw remoto.error;
-    var lista=(remoto&&remoto.data&&Array.isArray(remoto.data.datos))?remoto.data.datos:[];
-    var confirmado=lista.find(function(x){return String(x.id)===String(id);});
-    if(!confirmado || confirmado.visible!==true || confirmado.pendienteRevisionManual===true){
+    var confirmado=remoto&&remoto.data&&remoto.data.datos;
+    if(!confirmado || String(confirmado.productoId)!==String(id) || confirmado.visible!==true || confirmado.pendienteRevisionManual===true || Number(confirmado.precioChequeadoManual)!==ahora){
       throw new Error('Supabase no confirmó el producto como visible');
     }
     mostrarToast('✅ Precio confirmado y publicación verificada');
@@ -6541,15 +6619,19 @@ function tiendaToggleVisibilidadDirecta(id){
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
   if(!p)return;
   var haciendoVisible=!p.visible;
+  var ahora=Date.now();
   tiendaSetVisibilidadManual(p,haciendoVisible);
   // La revisión de precio manda por encima del interruptor simple: si no se
   // libera acá también, tocar "Visible" podía no mostrar nada y parecer que
   // el switch no funcionó. Un admin que decide mostrarlo está aprobando todo.
   if(haciendoVisible && p.pendienteRevisionManual===true){
-    p.pendienteRevisionManual=false;
-    delete p.visibleAntesRevisionManual;
+    p.precioActualizado=ahora;
+    p.precioChequeadoManual=ahora;
+    tiendaLiberarRevisionManual(p,true);
   }
+  if(!tiendaEsAutomatico(p) && !p.esCelu)p.estadoRevisionActualizado=ahora;
   tiendaGuardarLocal();
+  if(!tiendaEsAutomatico(p) && !p.esCelu)tiendaGuardarRevisionManualNube(p).catch(function(){});
   tiendaRender();
   tiendaPublicarControlAdmin(false);
 }
@@ -6577,14 +6659,17 @@ function tiendaToggleVisibleProd(id){
   var p=buscarProd(id);
   if(!p)return;
   var haciendoVisible=!p.visible;
+  var ahora=Date.now();
   // Si el administrador decide mostrarlo, esa decisión también confirma que
   // el producto deja de estar pendiente de revisión. Antes este botón se
   // bloqueaba aquí y nunca llegaba a guardar ni a publicar el cambio.
   if(haciendoVisible && tiendaEsPendienteRevisionManual(p)){
-    p.pendienteRevisionManual=false;
-    delete p.visibleAntesRevisionManual;
+    p.precioActualizado=ahora;
+    p.precioChequeadoManual=ahora;
+    tiendaLiberarRevisionManual(p,true);
   }
   tiendaSetVisibilidadManual(p,haciendoVisible);
+  if(!tiendaEsAutomatico(p) && !p.esCelu)p.estadoRevisionActualizado=ahora;
   // guardar según sea celu o producto propio
   try{
     if((''+id).indexOf('celu_')===0){
@@ -6593,6 +6678,7 @@ function tiendaToggleVisibleProd(id){
       if(celus[i]){ celus[i].visible=p.visible; localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }
     } else {
       tiendaGuardarLocal();
+      if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
     }
   }catch(e){}
   if(typeof mostrarToast==='function') mostrarToast(p.visible?'👁️ Producto visible en la tienda':'🙈 Producto oculto de la tienda');
