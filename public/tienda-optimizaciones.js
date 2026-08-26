@@ -356,7 +356,15 @@ let intentos = 0;
 function instalar() {
   const a = instalarFotoProxy();
   const b = instalarZoomProxy();
-  const c = instalarCatalogoCache();
+  // Fix 2026-08-26: /api/catalogo-cache no existe en el Worker (src/worker.mjs
+  // no define esa ruta) y siempre fallaba (401/502). Peor: si algún día
+  // respondiera, su camino de éxito pisa tiendaProductos directo desde el
+  // cache SIN aplicar control_publicacion/catalogo_manuales/revision_manual_*,
+  // pudiendo revivir productos ocultos o manuales sin confirmar. Se
+  // desactiva la ruta rápida hasta que exista un endpoint real que aplique
+  // esas capas; la sincronización confiable (tiendaBajarNube original) sigue
+  // funcionando igual, solo sin el intento fallido de por medio.
+  const c = true;
   const d = instalarCacheUploads();
   const e = instalarVisibilidadAdminPersistente();
   const f = instalarProteccionClienteYCompartir();
