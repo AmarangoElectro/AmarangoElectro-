@@ -2738,6 +2738,8 @@ function tiendaSubirControlPublicacion(){
 function tiendaMarcaTiempoProducto(p){
   if(!p)return 0;
   return Math.max(
+    Number(p.estadoManualActualizado)||0,
+    Number(p.fotoActualizadaManual)||0,
     Number(p.eliminadoActualizado)||0,
     Number(p.estadoRevisionActualizado)||0,
     Number(p.precioChequeadoManual)||0,
@@ -3173,12 +3175,18 @@ window.addEventListener('pagehide',tiendaGuardarEstadoReciente);
 window.addEventListener('beforeunload',tiendaGuardarEstadoReciente);
 
 // HISTORIAL DE PEDIDOS + ranking (solo admin)
-function tiendaHistorial(){
+async function tiendaHistorial(){
   if(!adminUnlocked){ alert('🔒 Esta sección es exclusiva para administradores.'); return; }
   var hist=cargarHistorial();
+  // Cada vez que Angie o Maxi abren el sector, se consultan las ventas
+  // individuales de los asesores. Así no dependen de la copia de este celular.
+  if(typeof mostrarToast==='function')mostrarToast('🔄 Actualizando pedidos y ventas…');
+  try{ hist=await cargarHistorialCompletoNube(); }catch(e){
+    if(typeof mostrarToast==='function')mostrarToast('⚠️ Mostrando la última copia disponible');
+  }
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">📋 Pedidos y ventas</h3>';
   if(!hist.length){
-    html+='<p style="font-size:.78rem;color:var(--sub);margin:12px 0;">Todavía no hay pedidos registrados. Cuando alguien haga un pedido desde el carrito, aparece acá.</p>';
+    html+='<p style="font-size:.78rem;color:var(--sub);margin:12px 0;">Todavía no hay pedidos ni ventas registradas. Cuando un asesor guarde una venta, aparecerá acá.</p>';
   }else{
     // ranking de lo más pedido
     var ranking={};
@@ -3206,8 +3214,8 @@ function tiendaHistorial(){
       html+='</div>';
     }
 
-    html+='<div style="font-size:.8rem;font-weight:900;color:var(--az);margin-bottom:6px;">Últimos pedidos</div>';
-    hist.slice(0,20).forEach(function(p,idx){
+    html+='<div style="font-size:.8rem;font-weight:900;color:var(--az);margin-bottom:6px;">Últimos pedidos y ventas</div>';
+    hist.slice(0,100).forEach(function(p,idx){
       var f=new Date(p.fecha);
       var fstr=f.getDate()+'/'+(f.getMonth()+1)+' '+('0'+f.getHours()).slice(-2)+':'+('0'+f.getMinutes()).slice(-2);
       var esc=function(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
@@ -3241,13 +3249,23 @@ function tiendaHistorial(){
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
 }
-function borrarHistorial(){
+async function borrarHistorial(){
   if(!confirm('⚠️ DATOS DELICADOS\n\n¿Borrar TODO el historial de pedidos?'))return;
   if(!confirm('Última confirmación:\n\nEsto NO se puede deshacer y no va a la papelera.\n\n¿Seguro que querés borrar el historial?'))return;
-  try{ localStorage.removeItem('ae_historial'); }catch(e){}
-  if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({id:'historial',datos:[],actualizado:new Date().toISOString()}).then(function(){}).catch(function(){}); }
-  document.getElementById('modal-cuotas').style.display='none';
-  alert('✅ Historial borrado.');
+  if(!NUBE_OK||!sbCalc){alert('⚠️ Sin conexión. No se borró nada.');return;}
+  try{
+    var resultados=await Promise.all([
+      Promise.resolve(sbCalc.from('tienda_catalogo').upsert({id:'historial',datos:[],actualizado:new Date().toISOString()})),
+      Promise.resolve(sbCalc.from('tienda_catalogo').delete().like('id',VENTAS_VENDEDOR_PREFIJO+'%'))
+    ]);
+    var error=(resultados[0]&&resultados[0].error)||(resultados[1]&&resultados[1].error);
+    if(error)throw error;
+    try{ localStorage.removeItem('ae_historial'); }catch(e){}
+    document.getElementById('modal-cuotas').style.display='none';
+    alert('✅ Historial borrado.');
+  }catch(err){
+    alert('❌ No se pudo borrar el historial completo.\n\n'+((err&&err.message)||err));
+  }
 }
 
 // ESTADÍSTICAS del negocio (solo admin)
@@ -3735,7 +3753,8 @@ function tiendaAplicarModo(){
   if(navIc) navIc.textContent=tiendaEsAdmin?'🧰':(esAsesorNav?'🧾':'🛒');
   if(navLbl) navLbl.textContent=tiendaEsAdmin?'Herramientas':(esAsesorNav?'Cargar pedido':'Carrito');
   var navFav=document.getElementById('nav-favoritos-btn'); if(navFav)navFav.style.display=esAsesorNav?'none':'flex';
-  var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display = tiendaEsAdmin?'block':'none';
+  // "Pedidos y ventas" queda únicamente en el menú lateral de las tres líneas.
+  var btnHist=document.getElementById('tienda-btn-hist'); if(btnHist)btnHist.style.display='none';
   var btnCli=document.getElementById('tienda-btn-clientes'); if(btnCli)btnCli.style.display = tiendaEsAdmin?'block':'none';
   var btnBk=document.getElementById('tienda-btn-backup'); if(btnBk)btnBk.style.display = tiendaEsAdmin?'block':'none';
   var btnPdf=document.getElementById('tienda-btn-pdf'); if(btnPdf)btnPdf.style.display = tiendaEsAdmin?'block':'none';
@@ -4689,6 +4708,9 @@ function borrarClienteAgenda(i){
 
 function abrirPedido(){
   if(!esEquipo()){ alert('🔒 Herramienta para el equipo de AmarangoElectro.'); return; }
+  var nombreAsesor='';
+  try{nombreAsesor=localStorage.getItem('ae_nombre_asesor')||'';}catch(e){}
+  var nombreAsesorHtml=String(nombreAsesor).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
   // 📇 solo los clientes que cargó el equipo en esta tienda (rápido, sin descargas)
   var lista = agendaClientes();
   window._listaClientes = lista;
@@ -4703,9 +4725,11 @@ function abrirPedido(){
   var html=''
     +'<div style="text-align:center;margin-bottom:14px;">'
     +'  <div style="font-size:2.2rem;">🧾</div>'
-    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Agregar pedido</h2>'
-    +'  <div style="color:var(--sub);font-size:.74rem;font-weight:600;">Cargá el cliente y su pedido. Se envía listo para el sistema.</div>'
+    +'  <h2 style="color:var(--az);font-size:1.15rem;font-weight:900;margin:6px 0 2px;">Cargar venta</h2>'
+    +'  <div style="color:var(--sub);font-size:.74rem;font-weight:600;">Completá los datos. La venta quedará guardada para administración.</div>'
     +'</div>'
+
+    +'<div class="pd-campo"><label>Vendedor *</label><input id="pd-vendedor" value="'+nombreAsesorHtml+'" placeholder="Tu nombre"></div>'
 
     +'<div style="background:#EEF4FF;border-radius:12px;padding:12px;margin-bottom:14px;">'
     +'  <div style="font-size:.64rem;font-weight:800;color:var(--az);letter-spacing:.4px;margin-bottom:6px;">👤 CLIENTE</div>'
@@ -4740,7 +4764,7 @@ function abrirPedido(){
     +'<div class="pd-campo"><label>Notas <span style="color:var(--sub);font-weight:400;">(opcional)</span></label><input id="pd-notas" placeholder="Ej: entregar el sábado"></div>'
     +'<div id="pd-resumen" style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:11px;padding:12px;margin:12px 0;display:none;"></div>'
 
-    +'<button class="calc-btn" style="width:100%;background:#25D366;color:#fff;font-weight:900;padding:15px;" onclick="guardarYEnviarPedidoCliente()">📲 Enviar pedido por WhatsApp</button>'
+    +'<button id="pd-btn-guardar-venta" class="calc-btn" style="width:100%;background:#16A34A;color:#fff;font-weight:900;padding:15px;" onclick="guardarYEnviarPedidoCliente()">💾 Guardar venta</button>'
     +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cancelar</button>';
 
   document.getElementById('modal-cuotas-body').innerHTML=html;
@@ -4854,7 +4878,8 @@ function borrarClienteSeleccionado(){
   borrarClienteAgenda(parseInt(sel.value,10));
 }
 
-function guardarYEnviarPedidoCliente(){
+async function guardarYEnviarPedidoCliente(){
+  if(window._ventaVendedorGuardando){ mostrarToast('⏳ La venta ya se está guardando…'); return; }
   var nombre=(document.getElementById('pd-nombre').value||'').trim();
   var dni=(document.getElementById('pd-dni').value||'').trim();
   var tel=(document.getElementById('pd-tel').value||'').trim();
@@ -4876,12 +4901,14 @@ function guardarYEnviarPedidoCliente(){
   var _g=function(id){ var e=document.getElementById(id); return e?(e.value||'').trim():''; };
   guardarClienteAgenda({nombre:nombre, dni:dni, tel:tel, dir:dir, mail:_g('pd-mail'), loc:_g('pd-loc')});
 
-  var quien='';
-  try{ quien=localStorage.getItem('ae_nombre_asesor')||''; }catch(e){}
+  var campoVendedor=document.getElementById('pd-vendedor');
+  var quien=campoVendedor?(campoVendedor.value||'').trim():'';
   if(!quien){
-    quien=(prompt('¿Cómo te llamás? (queda guardado para los próximos pedidos)')||'').trim();
-    if(quien){ try{ localStorage.setItem('ae_nombre_asesor', quien); }catch(e){} }
+    alert('Completá el nombre del vendedor para guardar la venta.');
+    if(campoVendedor)campoVendedor.focus();
+    return;
   }
+  try{ localStorage.setItem('ae_nombre_asesor', quien); }catch(e){}
 
   var cuota=0, total=0;
   if(n>0){ total=calcularTotalPlan(precio,n); cuota=Math.round(total/n/1000)*1000; }
@@ -4912,9 +4939,15 @@ function guardarYEnviarPedidoCliente(){
   m+='Fecha: '+new Date().toLocaleDateString('es-AR')+'\n';
 
   var totalVenta=n>0?(cuota*n):precio;
-  guardarPedidoHistorial(totalVenta,nombre,[{nombre:prod,cantidad:1,venta:precio}],{
+  var ventaId='v'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);
+  var venta={
+    id:ventaId,
+    fecha:new Date().toISOString(),
+    total:totalVenta,
+    destinatario:nombre,
+    items:[{nombre:prod,cantidad:1,venta:precio}],
     origen:'vendedor',
-    vendedor:quien||'Vendedor',
+    vendedor:quien,
     plan:n>0?n+' cuotas':'Contado',
     dni:dni,
     telefono:tel,
@@ -4926,12 +4959,29 @@ function guardarYEnviarPedidoCliente(){
     cantidadCuotas:n,
     valorCuota:cuota,
     senia:senia,
-    notas:notas
-  });
-  window.open('https://wa.me/'+WA_PEDIDOS+'?text='+encodeURIComponent(m),'_blank');
-  setTimeout(function(){
-    mostrarPasoCompra('<div style="text-align:center;padding:12px 2px;"><div style="font-size:2.8rem;">✅</div><h2 style="color:var(--az);font-size:1.12rem;margin:8px 0;">Pedido cargado correctamente</h2><p style="font-size:.78rem;color:var(--sub);line-height:1.55;margin:0 0 18px;">Recibimos los datos del cliente y del producto solicitado. Angie o Maxi se comunicarán con vos a la brevedad para confirmar la disponibilidad y continuar con la gestión de la venta.</p><button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="abrirPedido()">Cargar otro pedido</button><button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarModalCompra()">Volver a la tienda</button></div>');
-  },350);
+    notas:notas,
+    estado:'pendiente'
+  };
+
+  window._ventaVendedorGuardando=true;
+  var boton=document.getElementById('pd-btn-guardar-venta');
+  if(boton){boton.disabled=true;boton.textContent='⏳ Guardando venta…';}
+  try{
+    await guardarVentaVendedorNube(venta);
+    window._ultimaVentaWhatsApp=m;
+    mostrarPasoCompra('<div style="text-align:center;padding:12px 2px;"><div style="font-size:2.8rem;">✅</div><h2 style="color:var(--az);font-size:1.12rem;margin:8px 0;">Venta guardada correctamente</h2><p style="font-size:.78rem;color:var(--sub);line-height:1.55;margin:0 0 18px;">La venta ya quedó registrada en la web. Angie y Maxi podrán verla en <b>Administración → Pedidos y ventas</b>.</p><button class="calc-btn" style="width:100%;background:#25D366;margin-bottom:8px;" onclick="avisarUltimaVentaWhatsApp()">💬 Avisar también por WhatsApp</button><button class="calc-btn" style="width:100%;background:var(--az);margin-bottom:8px;" onclick="abrirPedido()">Cargar otra venta</button><button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="cerrarModalCompra()">Volver a la tienda</button></div>');
+  }catch(err){
+    alert('❌ La venta no quedó guardada en la web. El formulario sigue abierto para que puedas reintentar.\n\nDetalle: '+((err&&err.message)||err||'Error desconocido'));
+    if(boton){boton.disabled=false;boton.textContent='💾 Guardar venta';}
+  }finally{
+    window._ventaVendedorGuardando=false;
+  }
+}
+
+function avisarUltimaVentaWhatsApp(){
+  var mensaje=window._ultimaVentaWhatsApp||'';
+  if(!mensaje){alert('No encontré la última venta para enviar.');return;}
+  abrirWhatsAppMsgTel(WA_PEDIDOS,mensaje);
 }
 
 /* ═══ HEADER FIJO ═══
@@ -5477,6 +5527,39 @@ function tiendaEstaOcultoAdmin(p){
 }
 function tiendaEstaSinStockAdmin(p){
   return !!(p && p.eliminado!==true && tiendaTieneSinStock(p));
+}
+
+// Confirma leyendo nuevamente la fila autoritativa. La interfaz no debe decir
+// "guardado" sólo porque el producto quedó en la memoria de este dispositivo.
+function tiendaVerificarManualesNube(ids, fotoEsperada){
+  ids=(ids||[]).map(String);
+  if(!ids.length)return Promise.resolve(true);
+  if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión a Supabase'));
+  return Promise.resolve(sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle())
+    .then(function(res){
+      if(res&&res.error)throw res.error;
+      var lista=(res&&res.data&&Array.isArray(res.data.datos))?res.data.datos:[];
+      var porId={};
+      lista.forEach(function(p){if(p&&p.id!=null)porId[String(p.id)]=p;});
+      var faltan=ids.filter(function(id){return !porId[id];});
+      if(faltan.length)throw new Error('Supabase no confirmó '+faltan.length+' producto(s) manual(es)');
+      ids.forEach(function(id){
+        var remoto=porId[id];
+        var local=(tiendaProductos||[]).find(function(p){return p&&String(p.id)===id;});
+        if(!local)return;
+        if(String(remoto.nombre||'')!==String(local.nombre||'') || Number(remoto.venta||0)!==Number(local.venta||0)){
+          throw new Error('Supabase devolvió una versión anterior de '+(local.nombre||'un producto'));
+        }
+        if(Number(remoto.estadoManualActualizado||0)<Number(local.estadoManualActualizado||0)){
+          throw new Error('Supabase todavía no confirmó la última edición de '+(local.nombre||'un producto'));
+        }
+      });
+      if(fotoEsperada){
+        var producto=porId[ids[0]];
+        if(!producto||producto.foto!==fotoEsperada)throw new Error('Supabase no confirmó la foto del producto manual');
+      }
+      return true;
+    });
 }
 function tiendaEsPendienteImagenAdmin(p){
   // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
@@ -6522,6 +6605,18 @@ function subirFotoStorageAutenticada(blob, fid){
       }else{
         var p=tiendaProductos.find(function(x){return x.id==fid;});
         if(p){
+          // Los manuales viven en catalogo_manuales; la RPC histórica modifica
+          // el catálogo general y no es su autoridad. Guardamos la URL en la
+          // fila correcta y luego la volvemos a leer para confirmarla.
+          if(!tiendaEsAutomatico(p)){
+            p.foto=url;
+            p.fotoActualizadaManual=Date.now();
+            p.estadoManualActualizado=p.fotoActualizadaManual;
+            return tiendaGuardarLocal().then(function(r){
+              if(r&&r.error)throw r.error;
+              return tiendaVerificarManualesNube([p.id],url);
+            }).then(function(){return url;});
+          }
           return tiendaGuardarSoloFotoProducto(fid,url).then(function(){return url;});
         }
         throw new Error('No encontré el producto luego de subir la foto');
@@ -7171,7 +7266,7 @@ function prepararCajonTools(){
     var ids=[
       'tienda-btn-cargar','tienda-btn-celus','tienda-btn-carac',
       'tienda-btn-subir','tienda-btn-banner','tienda-btn-cupones','tienda-btn-stats',
-      'tienda-btn-hist','tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
+      'tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
       'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
       'tienda-btn-diag-ocultos','tienda-btn-restaurar-manuales',
@@ -9211,6 +9306,62 @@ function cargarHistorial(){
   return [];
 }
 
+// Las ventas de vendedores se guardan una por fila. Una lista compartida podía
+// ser sobrescrita si dos asesores cargaban casi al mismo tiempo.
+var VENTAS_VENDEDOR_PREFIJO='venta_vendedor_';
+function historialClave(reg){
+  if(reg&&reg.id)return 'id:'+String(reg.id);
+  return 'legacy:'+String((reg&&reg.fecha)||'')+'|'+String((reg&&reg.destinatario)||'')+'|'+String((reg&&reg.total)||0)+'|'+String((reg&&reg.vendedor)||'');
+}
+function historialFusionar(listas){
+  var mapa={};
+  (listas||[]).forEach(function(lista){
+    (Array.isArray(lista)?lista:[]).forEach(function(reg){
+      if(!reg)return;
+      var clave=historialClave(reg);
+      if(!mapa[clave])mapa[clave]=reg;
+    });
+  });
+  return Object.keys(mapa).map(function(k){return mapa[k];})
+    .sort(function(a,b){return String(b.fecha||'').localeCompare(String(a.fecha||''));})
+    .slice(0,500);
+}
+function guardarVentaVendedorNube(venta){
+  if(!venta||!venta.id)return Promise.reject(new Error('La venta no tiene identificador'));
+  if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión a Supabase'));
+  var filaId=VENTAS_VENDEDOR_PREFIJO+venta.id;
+  return Promise.resolve(sbCalc.from('tienda_catalogo').upsert({
+    id:filaId,
+    datos:venta,
+    actualizado:venta.fecha||new Date().toISOString()
+  }).select('datos')).then(function(res){
+    if(res&&res.error)throw res.error;
+    var confirmado=res&&res.data&&res.data[0]&&res.data[0].datos;
+    if(!confirmado||String(confirmado.id)!==String(venta.id)){
+      throw new Error('Supabase no confirmó la venta');
+    }
+    var hist=historialFusionar([[confirmado],cargarHistorial()]);
+    try{localStorage.setItem('ae_historial',JSON.stringify(hist));}catch(e){}
+    return confirmado;
+  });
+}
+function cargarHistorialCompletoNube(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve(cargarHistorial());
+  return Promise.all([
+    Promise.resolve(sbCalc.from('tienda_catalogo').select('datos').eq('id','historial').maybeSingle()),
+    Promise.resolve(sbCalc.from('tienda_catalogo').select('id,datos,actualizado').like('id',VENTAS_VENDEDOR_PREFIJO+'%').order('actualizado',{ascending:false}).limit(1000))
+  ]).then(function(res){
+    var legado=res[0], ventas=res[1];
+    if(legado&&legado.error)throw legado.error;
+    if(ventas&&ventas.error)throw ventas.error;
+    var listaLegado=(legado&&legado.data&&Array.isArray(legado.data.datos))?legado.data.datos:[];
+    var listaVentas=(ventas&&Array.isArray(ventas.data))?ventas.data.map(function(f){return f&&f.datos;}).filter(Boolean):[];
+    var fusionado=historialFusionar([listaVentas,listaLegado,cargarHistorial()]);
+    try{localStorage.setItem('ae_historial',JSON.stringify(fusionado));}catch(e){}
+    return fusionado;
+  });
+}
+
 // ═══════════ 👥 CLIENTES DE LA TIENDA ═══════════
 // Se guardan localmente y se sincronizan con la nube (id 'clientes_tienda').
 function cargarClientesTienda(){
@@ -9317,8 +9468,8 @@ function tiendaClientesRender(){
 }
 function bajarHistorialNube(){
   if(!NUBE_OK||!sbCalc)return;
-  sbCalc.from('tienda_catalogo').select('datos').eq('id','historial').maybeSingle()
-    .then(function(r){ if(r&&r.data&&r.data.datos){ try{localStorage.setItem('ae_historial',JSON.stringify(r.data.datos));}catch(e){} } })
+  cargarHistorialCompletoNube()
+    .then(function(){})
     .catch(function(){});
 }
 
@@ -9582,9 +9733,19 @@ function tiendaLimpiarDuplicados(){
   try{ tiendaRender(); }catch(e){}
   alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
 }
-function tiendaProcesarCarga(){
+async function tiendaProcesarCarga(){
  if(!tiendaExigirAdmin())return;
+ if(window._tiendaCargaManualEnCurso){mostrarToast('⏳ Ya se está guardando el producto…');return;}
+ window._tiendaCargaManualEnCurso=true;
  try{
+  // No crear sobre una copia local todavía incompleta. Antes el formulario
+  // cerraba y decía "Listo" aunque Supabase aún no estuviera disponible.
+  var sincronizada=await ((window._tiendaSincronizacionInicialPromesa&&typeof window._tiendaSincronizacionInicialPromesa.then==='function')
+    ?window._tiendaSincronizacionInicialPromesa:Promise.resolve(false));
+  if(!sincronizada||!NUBE_OK||!sbCalc){
+    alert('⚠️ La nube todavía no terminó de cargar. Esperá unos segundos y volvé a tocar Guardar.');
+    return;
+  }
   var texto=document.getElementById('carga-texto').value||'';
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
   var esUSD=(cargaModo==='usd');
@@ -9609,7 +9770,13 @@ function tiendaProcesarCarga(){
     var n=Number(p&&p.id);
     return Number.isFinite(n) && n>0 ? Math.max(a,Math.floor(n)) : a;
   },0);
+  // Cada dispositivo debe poder crear sin reutilizar el mismo ID que otro.
+  // Seguimos usando números para no romper botones históricos que esperan IDs
+  // numéricos, pero el valor combina tiempo y azar y es seguro en JavaScript.
+  maxId=Math.max(maxId,Date.now()*1000+Math.floor(Math.random()*1000));
   var descartadas=0;
+  var idsManualesTocados=[];
+  var primerProductoCarga=null;
 
   lineas.forEach(function(l){
     l=(l||'').trim(); if(!l)return;
@@ -9635,10 +9802,12 @@ function tiendaProcesarCarga(){
       costo = num;                // costo directo
       venta = markupVentaCRM(costo); // fórmula Amarango
     }
+    var ahoraManual=Date.now();
     var _prod={
       id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta,
-      creado:Date.now(), precioActualizado:Date.now(), visible:false,
-      pendienteRevisionManual:true, visibleAntesRevisionManual:true
+      creado:ahoraManual, precioActualizado:ahoraManual, precioChequeadoManual:ahoraManual,
+      estadoManualActualizado:ahoraManual, estadoRevisionActualizado:ahoraManual,
+      visible:true, pendienteRevisionManual:false
     };
     // 🏷️ categoría y características elegidas en el formulario
     if(_cargaCat) _prod.categoria=_cargaCat;
@@ -9654,6 +9823,8 @@ function tiendaProcesarCarga(){
 
   if(reemplazar){
     tiendaProductos=nuevos;
+    idsManualesTocados=nuevos.map(function(p){return p.id;});
+    primerProductoCarga=nuevos[0]||null;
   }else{
     // CARGA INTELIGENTE v3: emparejar reconociendo PARECIDOS con más fuerza. Conserva fotos, avisa dudas.
     function claveProd(nom){
@@ -9701,33 +9872,60 @@ function tiendaProcesarCarga(){
         if(mejor){ existe=mejor; esParecido=true; }
       }
       if(existe){
+        if(!primerProductoCarga)primerProductoCarga=existe;
         if(Math.round(existe.venta)!==Math.round(n.venta) || Math.round(existe.costo||0)!==Math.round(n.costo||0)){
           existe.precioActualizado=Date.now();
         }
         existe.costo=n.costo; existe.venta=n.venta;
+        if(!tiendaEsAutomatico(existe)){
+          var ahoraControlManual=Date.now();
+          // Volver a cargar su precio cuenta como controlarlo hoy, aunque el
+          // número sea el mismo. Recién volverá a revisión dentro de 30 días.
+          existe.precioActualizado=ahoraControlManual;
+          existe.precioChequeadoManual=ahoraControlManual;
+          existe.estadoRevisionActualizado=ahoraControlManual;
+          existe.estadoManualActualizado=ahoraControlManual;
+          existe.pendienteRevisionManual=false;
+          delete existe.visibleAntesRevisionManual;
+          if(existe.eliminado!==true && !tiendaTieneSinStock(existe) &&
+             existe.ocultoManualAdmin!==true && existe.ocultoManualProveedor!==true){
+            existe.visible=true;
+          }
+          idsManualesTocados.push(existe.id);
+        }
         actualizados++;
         if(esParecido){ dudas.push({nuevo:n.nombre, viejo:existe.nombre}); }
       }else{
-        // Los manuales nuevos se archivan primero: no se publican hasta que
-        // Angie o Max confirmen/corrijan el precio desde la bandeja.
-        n.visible=false;
-        n.pendienteRevisionManual=true;
-        n.visibleAntesRevisionManual=true;
+        // El precio recién cargado ya fue controlado hoy: se publica ahora y
+        // recién pasa a "Revisar manuales" si cumple 30 días sin control.
+        n.visible=true;
+        n.pendienteRevisionManual=false;
+        delete n.visibleAntesRevisionManual;
         tiendaProductos.push(n);
+        if(!primerProductoCarga)primerProductoCarga=n;
+        idsManualesTocados.push(n.id);
         agregados++;
       }
     });
     window._cargaResumen={actualizados:actualizados, agregados:agregados, dudas:dudas};
   }
 
-  tiendaGuardarLocal();
+  var resultadoGuardado=await tiendaGuardarLocal();
+  if(resultadoGuardado&&resultadoGuardado.error)throw resultadoGuardado.error;
+  await tiendaVerificarManualesNube(idsManualesTocados);
   // Si se eligió una foto, asignarla al PRIMER producto nuevo cargado
-  if(window._cargaFotoData && nuevos.length){
+  var avisoFotoCarga='';
+  if(window._cargaFotoData && primerProductoCarga){
     try{
-      var primer=nuevos[0];
       var blob=dataURLaBlob(window._cargaFotoData);
-      if(blob){ subirFotoStorage(blob, primer.id); }
-    }catch(e){}
+      if(blob){
+        var resultadoFoto=await subirFotoStorage(blob, primerProductoCarga.id);
+        if(resultadoFoto&&resultadoFoto.error)throw resultadoFoto.error;
+        if(resultadoFoto&&resultadoFoto.authRequerida)avisoFotoCarga='\n\n📷 El producto quedó guardado. Falta iniciar la sesión de fotos para terminar de subir la imagen.';
+      }
+    }catch(e){
+      avisoFotoCarga='\n\n⚠️ El producto quedó guardado, pero la foto no pudo confirmarse: '+(e.message||e);
+    }
     window._cargaFotoData=null;
     var prev=document.getElementById('carga-foto-preview'); if(prev) prev.innerHTML='';
   }
@@ -9738,7 +9936,7 @@ function tiendaProcesarCarga(){
   if(window._cargaResumen){
     var r=window._cargaResumen;
     msg='✅ Listo:\n\n• '+r.actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+r.agregados+' producto(s) nuevo(s)';
-    if(r.agregados>0)msg+='\n\n🕓 Los nuevos quedaron OCULTOS en "Revisar manuales". Se publican al confirmar o corregir el precio.';
+    if(r.agregados>0)msg+='\n\n👁️ Los productos nuevos quedaron publicados. Pasarán a "Revisar manuales" recién después de 30 días sin controlar el precio.';
     if(r.dudas && r.dudas.length){
       msg+='\n\n⚠️ REVISÁ ESTOS '+r.dudas.length+' (los emparejé por parecido, no idéntico):\n';
       msg+=r.dudas.slice(0,12).map(function(d){return '• "'+d.nuevo+'" → lo tomé como "'+d.viejo+'"';}).join('\n');
@@ -9750,10 +9948,13 @@ function tiendaProcesarCarga(){
     msg='✅ Se cargaron '+nuevos.length+' productos (reemplazó todo el catálogo).';
   }
   msg+='\n\nTotal en la tienda: '+tiendaProductos.length;
+  msg+=avisoFotoCarga;
   if(descartadas>0)msg+='\n\n('+descartadas+' líneas no se entendieron y se saltearon)';
   alert(msg);
  }catch(err){
-  alert('❌ Error al cargar: '+(err.message||err)+'\n\nMandale esta captura a Claude.');
+  alert('❌ No se pudo confirmar el producto en la nube. El formulario quedó abierto para que puedas reintentar.\n\nDetalle: '+(err.message||err));
+ }finally{
+  window._tiendaCargaManualEnCurso=false;
  }
 }
 
