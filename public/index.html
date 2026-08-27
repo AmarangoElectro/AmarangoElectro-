@@ -5382,6 +5382,46 @@ function tiendaRenderMantenerSector(scrollY, mostrados){
   },80);
 }
 
+// Conserva una tarjeta visible como "ancla". Es más exacto que recordar sólo
+// los píxeles de scroll cuando el producto confirmado/borrado desaparece de la
+// bandeja y todas las tarjetas siguientes cambian de lugar.
+function tiendaCapturarPosicionLista(idQueDesaparece){
+  var tarjetas=Array.prototype.slice.call(document.querySelectorAll('#tienda-grid .prod-card'));
+  var header=document.querySelector('.header');
+  var limite=header?header.getBoundingClientRect().bottom+6:6;
+  var visibles=tarjetas.filter(function(card){return card.getBoundingClientRect().bottom>limite;});
+  var ancla=visibles[0]||tarjetas[0]||null;
+  if(ancla && idQueDesaparece!=null && ancla.id==='card-'+idQueDesaparece){
+    var indice=tarjetas.indexOf(ancla);
+    ancla=tarjetas[indice+1]||tarjetas[indice-1]||null;
+  }
+  return {
+    anclaId:ancla?ancla.id:'',
+    anclaTop:ancla?ancla.getBoundingClientRect().top:0,
+    scrollY:window.scrollY||window.pageYOffset||0,
+    mostrados:_tiendaMostrados
+  };
+}
+function tiendaRenderMantenerPosicion(estado){
+  estado=estado||{};
+  tiendaRender();
+  var cantidad=Math.max(0,Number(estado.mostrados)||0);
+  while(_tiendaMostrados<cantidad && _tiendaMostrados<_tiendaListaFull.length)tiendaVerMas();
+  function restaurar(){
+    var ancla=estado.anclaId?document.getElementById(estado.anclaId):null;
+    if(ancla){
+      var diferencia=ancla.getBoundingClientRect().top-Number(estado.anclaTop||0);
+      if(Math.abs(diferencia)>1)window.scrollBy({top:diferencia,left:0,behavior:'auto'});
+    }else{
+      var maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+      window.scrollTo({top:Math.min(Math.max(0,Number(estado.scrollY)||0),maxY),behavior:'auto'});
+    }
+  }
+  requestAnimationFrame(function(){requestAnimationFrame(restaurar);});
+  setTimeout(restaurar,100);
+  setTimeout(restaurar,240);
+}
+
 // ═══ BANDEJAS PRIVADAS DE CONTROL ADMINISTRATIVO ═══
 function tiendaEsAutomatico(p){
   return !!(p && (p.automaticoProveedor || p.proveedorClave || p.proveedorId));
@@ -6753,6 +6793,7 @@ function tiendaEditarPrecio(id){
   window._tiendaEditCategoriaOriginal=catProd(p);
   window._tiendaEditScrollY=window.scrollY||window.pageYOffset||0;
   window._tiendaEditMostrados=_tiendaMostrados;
+  window._tiendaEditPosicion=tiendaCapturarPosicionLista(null);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">🖍️ Editar producto</h3>'
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin:10px 0 4px;">NOMBRE</div>'
     +'<input id="edit-nombre" value="'+(p.nombre||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-weight:700;margin-bottom:12px;">'
@@ -6869,13 +6910,13 @@ function tiendaGuardarPrecios(){
     // Fix 2026-08-26: mismo problema que en tiendaConfirmarPrecioManual —
     // tiendaRender() a secas mandaba el scroll arriba de todo al confirmar
     // desde el diálogo de edición.
-    tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
+    tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
     mostrarToast('✅ Precio corregido y producto publicado');
   }else if(cambioCategoria){
-    tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
+    tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
     mostrarToast('✅ Guardado');
   }else{
-    tiendaRenderYEnfocar(window._tiendaEditId);
+    tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
     mostrarToast('✅ Guardado');
   }
 }
@@ -6891,8 +6932,7 @@ function tiendaConfirmarPrecioManual(id){
   // obligaba a bajar de nuevo cada vez. tiendaRenderMantenerSector() repone
   // el scroll y la cantidad de tarjetas ya cargadas, como ya se hace en
   // otras acciones (cambiar categoría, etc.).
-  var scrollPrevio=window.scrollY;
-  var mostradosPrevios=_tiendaMostrados;
+  var posicionPrevia=tiendaCapturarPosicionLista(id);
   var ahora=Date.now();
   p.precioActualizado=ahora;
   p.precioChequeadoManual=ahora;
@@ -6905,7 +6945,7 @@ function tiendaConfirmarPrecioManual(id){
     tiendaGuardarLocal(),
     tiendaGuardarRevisionManualNube(p)
   ]);
-  tiendaRenderMantenerSector(scrollPrevio, mostradosPrevios);
+  tiendaRenderMantenerPosicion(posicionPrevia);
   mostrarToast('⏳ Guardando y publicando...');
   Promise.resolve(guardado).then(function(res){
     var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
@@ -6944,6 +6984,7 @@ function tiendaEliminar(id){
   var p=tiendaProductos.find(function(x){return x.id==id;});
   if(!p)return;
   if(!confirm('¿Quitar este producto de la tienda?\n\n'+p.nombre+'\n'+fmt(p.venta)+'\n\n(Va a la 🗑️ Papelera por si te arrepentís)'))return;
+  var posicionPrevia=tiendaCapturarPosicionLista(id);
   papeleraAgregar('producto', p);
   // Tanto los manuales como los automáticos permanecen como una lápida
   // invisible. Si se quitara el automático del array, el proveedor lo
@@ -6957,7 +6998,7 @@ function tiendaEliminar(id){
   p.visible=false;
   delete tiendaMarcadosSet[id];
   var guardado=Promise.all([tiendaGuardarLocal(),tiendaGuardarEliminacionNube(p,true)]);
-  tiendaRender();
+  tiendaRenderMantenerPosicion(posicionPrevia);
   mostrarToast('⏳ Borrando y sincronizando...');
   guardado.then(function(res){
     var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
