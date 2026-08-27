@@ -2543,6 +2543,7 @@ var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
 var TIENDA_MANUALES_ID='catalogo_manuales';
 var TIENDA_REVISION_MANUAL_PREFIJO='revision_manual_';
 var TIENDA_ELIMINACION_PREFIJO='eliminacion_producto_';
+var TIENDA_VISIBILIDAD_ADMIN_PREFIJO='visibilidad_admin_';
 
 // El borrado se guarda en una fila independiente por producto. No alcanza
 // con sacarlo del array local: los automáticos vuelven a llegar desde el
@@ -2598,6 +2599,84 @@ function tiendaAplicarEliminacionesNube(filas){
     try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
     try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
   }
+  return cambio;
+}
+
+// Cada decisión explícita de visibilidad del administrador se guarda en una
+// fila independiente. El mapa general y catalogo_manuales siguen siendo útiles
+// como catálogo, pero ya no pueden pisar después un Visible/Oculto más nuevo.
+function tiendaVisibilidadAdminId(id){
+  return TIENDA_VISIBILIDAD_ADMIN_PREFIJO+String(id);
+}
+function tiendaGuardarVisibilidadAdminNube(p){
+  if(!NUBE_OK||!sbCalc||!p||p.id==null||p.esCelu){
+    return Promise.resolve({data:null,error:null});
+  }
+  var actualizadoEn=Number(p.estadoVisibilidadAdminActualizado)||Date.now();
+  p.estadoVisibilidadAdminActualizado=actualizadoEn;
+  return Promise.resolve(sbCalc.from('tienda_catalogo').upsert({
+    id:tiendaVisibilidadAdminId(p.id),
+    datos:{
+      productoId:String(p.id),
+      actualizadoEn:actualizadoEn,
+      visible:p.visible===true,
+      ocultoManualProveedor:p.ocultoManualProveedor===true,
+      ocultoManualAdmin:p.ocultoManualAdmin===true,
+      ocultoPorDuplicado:p.ocultoPorDuplicado===true,
+      pendienteRevisionManual:p.pendienteRevisionManual===true,
+      precioChequeadoManual:Number(p.precioChequeadoManual)||0,
+      precioActualizado:Number(p.precioActualizado)||0
+    },
+    actualizado:new Date(actualizadoEn).toISOString()
+  }).select('datos'));
+}
+function tiendaGuardarVisibilidadesAdminNube(productos){
+  var unicos={}, lista=[];
+  (productos||[]).forEach(function(p){
+    if(!p||p.id==null||p.esCelu||unicos[String(p.id)])return;
+    unicos[String(p.id)]=true;lista.push(p);
+  });
+  return Promise.all(lista.map(tiendaGuardarVisibilidadAdminNube));
+}
+function tiendaAplicarVisibilidadesAdminNube(filas){
+  if(!Array.isArray(filas)||!filas.length)return false;
+  var porId={};
+  (tiendaProductos||[]).forEach(function(p){if(p&&p.id!=null)porId[String(p.id)]=p;});
+  var cambio=false;
+  filas.forEach(function(fila){
+    var d=fila&&fila.datos;
+    if(!d||d.productoId==null)return;
+    var p=porId[String(d.productoId)];if(!p||p.eliminado===true)return;
+    var remoto=Number(d.actualizadoEn)||0;
+    var local=Number(p.estadoVisibilidadAdminActualizado)||0;
+    if(!remoto||remoto<local)return;
+    p.estadoVisibilidadAdminActualizado=remoto;
+    p.visible=d.visible===true;
+    if(p.visible){
+      delete p.ocultoManualProveedor;
+      delete p.ocultoManualAdmin;
+      p.ocultoPorDuplicado=false;
+      delete p.duplicadoGrupo;
+      delete p.duplicadoCantidad;
+      delete p.duplicadoSimilitud;
+      delete p.duplicadoPreferido;
+      p.pendienteRevisionManual=false;
+      delete p.visibleAntesRevisionManual;
+      if(Number(d.precioChequeadoManual)>Number(p.precioChequeadoManual||0))p.precioChequeadoManual=Number(d.precioChequeadoManual);
+      if(Number(d.precioActualizado)>Number(p.precioActualizado||0))p.precioActualizado=Number(d.precioActualizado);
+    }else{
+      p.pendienteRevisionManual=d.pendienteRevisionManual===true;
+      p.ocultoPorDuplicado=d.ocultoPorDuplicado===true;
+      if(tiendaEsAutomatico(p)){
+        p.ocultoManualProveedor=d.ocultoManualProveedor!==false && !p.ocultoPorDuplicado;
+        delete p.ocultoManualAdmin;
+      }else{
+        p.ocultoManualAdmin=d.ocultoManualAdmin!==false && !p.pendienteRevisionManual;
+        delete p.ocultoManualProveedor;
+      }
+    }
+    cambio=true;
+  });
   return cambio;
 }
 
@@ -2741,6 +2820,7 @@ function tiendaMarcaTiempoProducto(p){
     Number(p.estadoManualActualizado)||0,
     Number(p.fotoActualizadaManual)||0,
     Number(p.eliminadoActualizado)||0,
+    Number(p.estadoVisibilidadAdminActualizado)||0,
     Number(p.estadoRevisionActualizado)||0,
     Number(p.precioChequeadoManual)||0,
     Number(p.precioActualizado)||0,
@@ -2860,13 +2940,15 @@ function tiendaBajarControlPublicacion(){
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle(),
     sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_REVISION_MANUAL_PREFIJO+'%'),
-    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_ELIMINACION_PREFIJO+'%')
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_ELIMINACION_PREFIJO+'%'),
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_VISIBILIDAD_ADMIN_PREFIJO+'%')
   ]).then(function(res){
-      var r=res[0], rm=res[1], rr=res[2], re=res[3];
+      var r=res[0], rm=res[1], rr=res[2], re=res[3], rv=res[4];
       if(r&&r.error)throw r.error;
       if(rm&&rm.error)throw rm.error;
       if(rr&&rr.error)throw rr.error;
       if(re&&re.error)throw re.error;
+      if(rv&&rv.error)throw rv.error;
       _tiendaControlPublicacionNubeListo=true;
       if(rm&&rm.data&&Array.isArray(rm.data.datos)){
         var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
@@ -2875,17 +2957,21 @@ function tiendaBajarControlPublicacion(){
       var cambioRevision=tiendaAplicarRevisionesManualesNube(rr&&Array.isArray(rr.data)?rr.data:[]);
       if(r&&r.data&&r.data.datos){
         var cambio=tiendaAplicarControlPublicacion(r.data.datos);
+        // La decisión manual individual se aplica después de las listas
+        // compartidas. Sólo una decisión manual posterior puede reemplazarla.
+        var cambioVisibilidad=tiendaAplicarVisibilidadesAdminNube(rv&&Array.isArray(rv.data)?rv.data:[]);
         // Debe aplicarse último: ni una revisión de precio vieja ni el estado
         // del proveedor pueden revivir algo que está en la papelera.
         var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
         try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
-        return cambio||cambioRevision||cambioEliminacion;
+        return cambio||cambioRevision||cambioVisibilidad||cambioEliminacion;
       }
       // La primera vez, el administrador que ya tiene el estado correcto crea
       // el mapa para que clientes y vendedores lo reciban inmediatamente.
+      var cambioVisibilidad=tiendaAplicarVisibilidadesAdminNube(rv&&Array.isArray(rv.data)?rv.data:[]);
       var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
-      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision||cambioEliminacion;});
-      return cambioRevision||cambioEliminacion;
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision||cambioVisibilidad||cambioEliminacion;});
+      return cambioRevision||cambioVisibilidad||cambioEliminacion;
     }).catch(function(error){
       // No silenciar del todo: mantiene el modo lectura (el guard de
       // tiendaPrepararBandejasAdmin ya bloquea acciones automáticas mientras
@@ -5509,9 +5595,9 @@ function tiendaRestaurarOcultosManuales(){
     '\n\n¿Confirmás que ninguno de estos lo ocultaste a propósito y querés VOLVER A MOSTRARLOS a todos?\n\n'
     +'Esto no toca los que están ocultos por sin stock, duplicado o revisión de precio — solo estos.');
   if(!ok)return;
-  afectados.forEach(function(p){ p.visible=true; p.ocultoManualProveedor=false; delete p.motivoOculto; });
+  afectados.forEach(function(p){ tiendaSetVisibilidadManual(p,true); delete p.motivoOculto; });
   tiendaGuardarLocal();
-  tiendaPublicarControlAdmin(false);
+  tiendaGuardarVisibilidadesAdminNube(afectados).catch(function(){});
   tiendaRender();
   alert('✅ Se restauraron '+afectados.length+' productos. Publicando el cambio a Supabase para que se vea en todos los dispositivos...');
 }
@@ -5730,6 +5816,13 @@ function tiendaPrepararBandejasAdmin(){
     // Recuperación acotada: si existe una confirmación reciente y el producto
     // reapareció como pendiente por la carrera de caché anterior, la aprobación
     // gana. No toca productos que el administrador ocultó deliberadamente.
+    // Ocultar a mano también es una decisión final: no debe convertirse luego
+    // en "revisión de precio" ni aparecer en otra bandeja.
+    if(p.ocultoManualAdmin===true){
+      p.visible=false;
+      p.pendienteRevisionManual=false;
+      return;
+    }
     var confirmacion=Number(p.precioChequeadoManual)||0;
     if(confirmacion>0 && (Date.now()-confirmacion)<30*24*60*60*1000 &&
        p.pendienteRevisionManual===true){
@@ -7067,9 +7160,10 @@ function tiendaToggleMarcado(id){
 function tiendaToggleVisibilidadDirecta(id){
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
   if(!p)return;
+  var posicionPrevia=tiendaCapturarPosicionLista(id);
   var haciendoVisible=!p.visible;
   var ahora=Date.now();
-  tiendaSetVisibilidadManual(p,haciendoVisible);
+  tiendaSetVisibilidadManual(p,haciendoVisible,ahora);
   // La revisión de precio manda por encima del interruptor simple: si no se
   // libera acá también, tocar "Visible" podía no mostrar nada y parecer que
   // el switch no funcionó. Un admin que decide mostrarlo está aprobando todo.
@@ -7079,19 +7173,47 @@ function tiendaToggleVisibilidadDirecta(id){
     tiendaLiberarRevisionManual(p,true);
   }
   if(!tiendaEsAutomatico(p) && !p.esCelu)p.estadoRevisionActualizado=ahora;
-  tiendaGuardarLocal();
-  if(!tiendaEsAutomatico(p) && !p.esCelu)tiendaGuardarRevisionManualNube(p).catch(function(){});
-  tiendaRender();
-  tiendaPublicarControlAdmin(false);
+  var tareas=[tiendaGuardarLocal(),tiendaGuardarVisibilidadAdminNube(p)];
+  if(!tiendaEsAutomatico(p) && !p.esCelu)tareas.push(tiendaGuardarRevisionManualNube(p));
+  tiendaRenderMantenerPosicion(posicionPrevia);
+  mostrarToast('⏳ Guardando decisión del administrador...');
+  Promise.all(tareas).then(function(res){
+    var conError=(res||[]).find(function(x){return x&&x.error;});
+    if(conError)throw conError.error;
+    mostrarToast(haciendoVisible?'👁️ Visible guardado para todos':'🙈 Oculto guardado para todos');
+  }).catch(function(err){
+    alert('⚠️ El cambio quedó en este dispositivo, pero Supabase no lo confirmó.\n\nVolvé a intentarlo con conexión.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+  });
 }
 
 // En productos automáticos, además de cambiar la vista guardamos la decisión
 // manual para que una actualización del proveedor no vuelva a mostrarlos.
-function tiendaSetVisibilidadManual(p, visible){
+function tiendaSetVisibilidadManual(p, visible, actualizadoEn){
   if(!p)return;
-  p.visible=visible;
-  if(tiendaEsAutomatico(p)) p.ocultoManualProveedor=!visible;
-  else p.ocultoManualAdmin=!visible;
+  var ahora=Number(actualizadoEn)||Date.now();
+  p.estadoVisibilidadAdminActualizado=ahora;
+  p.visible=visible===true;
+  if(p.visible){
+    delete p.ocultoManualProveedor;
+    delete p.ocultoManualAdmin;
+    p.ocultoPorDuplicado=false;
+    delete p.duplicadoGrupo;
+    delete p.duplicadoCantidad;
+    delete p.duplicadoSimilitud;
+    delete p.duplicadoPreferido;
+    p.pendienteRevisionManual=false;
+    delete p.visibleAntesRevisionManual;
+    if(!tiendaEsAutomatico(p)&&!p.esCelu){
+      p.precioChequeadoManual=ahora;
+      p.precioActualizado=Math.max(Number(p.precioActualizado)||0,ahora);
+    }
+  }else if(tiendaEsAutomatico(p)){
+    p.ocultoManualProveedor=true;
+    p.ocultoPorDuplicado=false;
+  }else{
+    p.ocultoManualAdmin=true;
+    p.pendienteRevisionManual=false;
+  }
 }
 
 // Protección central: aunque un botón viejo quede visible por caché, un vendedor
@@ -7107,6 +7229,12 @@ function tiendaToggleVisibleProd(id){
   if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
   if(!p)return;
+  // Productos del catálogo usan exactamente el mismo guardado autoritativo
+  // que el interruptor principal. Los celulares conservan su circuito propio.
+  if(!p.esCelu && String(id).indexOf('celu_')!==0){
+    tiendaToggleVisibilidadDirecta(id);
+    return;
+  }
   var haciendoVisible=!p.visible;
   var ahora=Date.now();
   // Si el administrador decide mostrarlo, esa decisión también confirma que
@@ -7287,10 +7415,10 @@ function tiendaMarcados(accion){
   var ids=Object.keys(tiendaMarcadosSet);
   if(!ids.length){ alert('Primero marcá los productos (tocá la casilla arriba de cada uno).'); return; }
   var vis=(accion==='mostrar');
-  var cont=0;
+  var cont=0, afectados=[];
   // productos propios
   tiendaProductos.forEach(function(p){
-    if(tiendaMarcadosSet[p.id]){ tiendaSetVisibilidadManual(p,vis); cont++; }
+    if(tiendaMarcadosSet[p.id]){ tiendaSetVisibilidadManual(p,vis); afectados.push(p); cont++; }
   });
   // celulares (usan ocultoTienda porque su "visible" es siempre true)
   var celus=cargarListaCelus(), tocoCelu=false;
@@ -7302,7 +7430,9 @@ function tiendaMarcados(accion){
   });
   if(tocoCelu){ try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
   tiendaMarcadosSet={};
-  tiendaGuardarLocal(); tiendaRender();
+  tiendaGuardarLocal();
+  tiendaGuardarVisibilidadesAdminNube(afectados).catch(function(){});
+  tiendaRender();
   alert('✅ '+cont+' producto(s) '+(vis?'ahora VISIBLES en la tienda':'ahora OCULTOS de la tienda (siguen guardados en admin)')+'.');
 }
 
@@ -8118,9 +8248,9 @@ function tiendaOcultarVarios(ocultar){
   var ids=Object.keys(tiendaSelecSet);
   if(!ids.length){ alert('Primero tocá "Seleccionar" en los productos que querés '+(ocultar?'ocultar':'mostrar')+'.'); return; }
   var vis=!ocultar;
-  var cont=0;
+  var cont=0, afectados=[];
   // productos propios
-  tiendaProductos.forEach(function(p){ if(tiendaSelecSet[p.id]){ tiendaSetVisibilidadManual(p,vis); cont++; } });
+  tiendaProductos.forEach(function(p){ if(tiendaSelecSet[p.id]){ tiendaSetVisibilidadManual(p,vis); afectados.push(p); cont++; } });
   // celulares (usan ocultoTienda)
   var celus=cargarListaCelus(), tocoCelu=false;
   ids.forEach(function(id){
@@ -8132,6 +8262,7 @@ function tiendaOcultarVarios(ocultar){
   if(tocoCelu){ try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){} subirCelusNube(celus); }
   tiendaCancelarSelec();
   tiendaGuardarLocal();
+  tiendaGuardarVisibilidadesAdminNube(afectados).catch(function(){});
   tiendaRender();
   mostrarToast('✅ '+cont+' producto'+(cont===1?'':'s')+(ocultar?' ocultado'+(cont===1?'':'s')+' (siguen en admin)':' visible'+(cont===1?'':'s')+' de nuevo'));
 }
@@ -8140,8 +8271,8 @@ function tiendaOcultarVarios(ocultar){
 function tiendaOcultarCategoria(cat, ocultar){
   if(!tiendaEsAdmin){ alert('🔒 Solo el admin puede ocultar categorías.'); return; }
   var vis=!ocultar;
-  var cont=0;
-  tiendaProductos.forEach(function(p){ if(catProd(p)===cat){ tiendaSetVisibilidadManual(p,vis); cont++; } });
+  var cont=0, afectados=[];
+  tiendaProductos.forEach(function(p){ if(catProd(p)===cat){ tiendaSetVisibilidadManual(p,vis); afectados.push(p); cont++; } });
   // celulares si la categoría es Celulares
   if(cat==='📱 Celulares'){
     var celus=cargarListaCelus();
@@ -8150,6 +8281,7 @@ function tiendaOcultarCategoria(cat, ocultar){
     subirCelusNube(celus);
   }
   tiendaGuardarLocal();
+  tiendaGuardarVisibilidadesAdminNube(afectados).catch(function(){});
   cerrarCajonCats(); tiendaRender();
   mostrarToast('✅ Categoría "'+cat+'": '+cont+' producto'+(cont===1?'':'s')+(ocultar?' ocultado'+(cont===1?'':'s'):' visible'+(cont===1?'':'s')));
 }
