@@ -2544,6 +2544,7 @@ var TIENDA_MANUALES_ID='catalogo_manuales';
 var TIENDA_REVISION_MANUAL_PREFIJO='revision_manual_';
 var TIENDA_ELIMINACION_PREFIJO='eliminacion_producto_';
 var TIENDA_VISIBILIDAD_ADMIN_PREFIJO='visibilidad_admin_';
+var TIENDA_CATEGORIA_ADMIN_PREFIJO='categoria_admin_';
 
 // El borrado se guarda en una fila independiente por producto. No alcanza
 // con sacarlo del array local: los automáticos vuelven a llegar desde el
@@ -2678,6 +2679,114 @@ function tiendaAplicarVisibilidadesAdminNube(filas){
     cambio=true;
   });
   return cambio;
+}
+
+// La categoría elegida por Angie o Max vive en una fila independiente por
+// producto. Las sincronizaciones del proveedor pueden actualizar precio,
+// stock o descripción, pero ya no pueden devolverlo a su categoría anterior.
+function tiendaCategoriaAdminId(id){
+  return TIENDA_CATEGORIA_ADMIN_PREFIJO+String(id);
+}
+function tiendaFijarCategoriaAdmin(p, categoria){
+  if(!p)return;
+  var cat=tiendaNormalizarCategoria(categoria||'📦 Otros');
+  if(tiendaEsAutomatico(p) && !p.categoriaProveedor){
+    p.categoriaProveedor=p.categoria||tiendaCategoria(p.nombre);
+  }
+  p.categoria=cat;
+  p.categoriaManualFijada=true;
+  if(tiendaEsAutomatico(p))p.categoriaManualProveedor=cat;
+  p.categoriaAdminActualizada=Date.now();
+}
+function tiendaGuardarCategoriaAdminNube(p, usarProveedor){
+  if(!NUBE_OK||!sbCalc||!p||p.id==null||p.esCelu){
+    return Promise.resolve({data:null,error:null});
+  }
+  var actualizadoEn=Number(p.categoriaAdminActualizada)||Date.now();
+  p.categoriaAdminActualizada=actualizadoEn;
+  return Promise.resolve(sbCalc.from('tienda_catalogo').upsert({
+    id:tiendaCategoriaAdminId(p.id),
+    datos:{
+      productoId:String(p.id),
+      actualizadoEn:actualizadoEn,
+      usarProveedor:usarProveedor===true,
+      categoria:tiendaNormalizarCategoria(p.categoria||tiendaCategoria(p.nombre)),
+      categoriaProveedor:tiendaNormalizarCategoria(p.categoriaProveedor||tiendaCategoria(p.nombre))
+    },
+    actualizado:new Date(actualizadoEn).toISOString()
+  }).select('datos'));
+}
+function tiendaGuardarCategoriasAdminNube(productos){
+  var unicos={}, lista=[];
+  (productos||[]).forEach(function(p){
+    if(!p||p.id==null||p.esCelu||unicos[String(p.id)])return;
+    unicos[String(p.id)]=true;lista.push(p);
+  });
+  return Promise.all(lista.map(function(p){return tiendaGuardarCategoriaAdminNube(p,false);}));
+}
+function tiendaAplicarCategoriasAdminNube(filas){
+  if(!Array.isArray(filas)||!filas.length)return false;
+  var porId={};
+  (tiendaProductos||[]).forEach(function(p){if(p&&p.id!=null)porId[String(p.id)]=p;});
+  var cambio=false;
+  filas.forEach(function(fila){
+    var d=fila&&fila.datos;
+    if(!d||d.productoId==null)return;
+    var p=porId[String(d.productoId)];if(!p||p.eliminado===true)return;
+    var remoto=Number(d.actualizadoEn)||0;
+    var local=Number(p.categoriaAdminActualizada)||0;
+    if(!remoto||remoto<local)return;
+    p.categoriaAdminActualizada=remoto;
+    if(d.categoriaProveedor)p.categoriaProveedor=tiendaNormalizarCategoria(d.categoriaProveedor);
+    if(d.usarProveedor===true){
+      delete p.categoriaManualProveedor;
+      delete p.categoriaManualFijada;
+      p.categoria=tiendaNormalizarCategoria(p.categoriaProveedor||p.categoria||tiendaCategoria(p.nombre));
+    }else{
+      p.categoria=tiendaNormalizarCategoria(d.categoria||'📦 Otros');
+      p.categoriaManualFijada=true;
+      if(tiendaEsAutomatico(p))p.categoriaManualProveedor=p.categoria;
+    }
+    cambio=true;
+  });
+  return cambio;
+}
+function tiendaMigrarCategoriasAdminNube(filasExistentes){
+  if((!tiendaEsAdmin&&!adminUnlocked)||!NUBE_OK||!sbCalc||window._tiendaMigracionCategoriasLanzada){
+    return Promise.resolve(false);
+  }
+  window._tiendaMigracionCategoriasLanzada=true;
+  var ya={};
+  (filasExistentes||[]).forEach(function(f){
+    var d=f&&f.datos;if(d&&d.productoId!=null)ya[String(d.productoId)]=true;
+  });
+  var ahora=Date.now(), registros=[];
+  (tiendaProductos||[]).forEach(function(p,idx){
+    if(!p||p.id==null||p.esCelu||ya[String(p.id)])return;
+    if(p.categoriaManualFijada!==true&&!p.categoriaManualProveedor)return;
+    if(tiendaEsAutomatico(p)&&!p.categoriaProveedor)p.categoriaProveedor=tiendaCategoria(p.nombre);
+    p.categoriaAdminActualizada=Number(p.categoriaAdminActualizada)||ahora+idx;
+    registros.push({
+      id:tiendaCategoriaAdminId(p.id),
+      datos:{
+        productoId:String(p.id),
+        actualizadoEn:p.categoriaAdminActualizada,
+        usarProveedor:false,
+        categoria:tiendaNormalizarCategoria(p.categoriaManualProveedor||p.categoria||'📦 Otros'),
+        categoriaProveedor:tiendaNormalizarCategoria(p.categoriaProveedor||tiendaCategoria(p.nombre))
+      },
+      actualizado:new Date(p.categoriaAdminActualizada).toISOString()
+    });
+  });
+  if(!registros.length)return Promise.resolve(false);
+  return Promise.resolve(sbCalc.from('tienda_catalogo').upsert(registros)).then(function(res){
+    if(res&&res.error)throw res.error;
+    return true;
+  }).catch(function(err){
+    window._tiendaMigracionCategoriasLanzada=false;
+    console.warn('No se pudieron migrar las categorías manuales anteriores.',err);
+    return false;
+  });
 }
 
 // La aprobación de cada producto manual vive también en una fila pequeña e
@@ -2821,6 +2930,7 @@ function tiendaMarcaTiempoProducto(p){
     Number(p.fotoActualizadaManual)||0,
     Number(p.eliminadoActualizado)||0,
     Number(p.estadoVisibilidadAdminActualizado)||0,
+    Number(p.categoriaAdminActualizada)||0,
     Number(p.estadoRevisionActualizado)||0,
     Number(p.precioChequeadoManual)||0,
     Number(p.precioActualizado)||0,
@@ -2941,14 +3051,16 @@ function tiendaBajarControlPublicacion(){
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle(),
     sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_REVISION_MANUAL_PREFIJO+'%'),
     sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_ELIMINACION_PREFIJO+'%'),
-    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_VISIBILIDAD_ADMIN_PREFIJO+'%')
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_VISIBILIDAD_ADMIN_PREFIJO+'%'),
+    sbCalc.from('tienda_catalogo').select('id,datos').like('id',TIENDA_CATEGORIA_ADMIN_PREFIJO+'%')
   ]).then(function(res){
-      var r=res[0], rm=res[1], rr=res[2], re=res[3], rv=res[4];
+      var r=res[0], rm=res[1], rr=res[2], re=res[3], rv=res[4], rc=res[5];
       if(r&&r.error)throw r.error;
       if(rm&&rm.error)throw rm.error;
       if(rr&&rr.error)throw rr.error;
       if(re&&re.error)throw re.error;
       if(rv&&rv.error)throw rv.error;
+      if(rc&&rc.error)throw rc.error;
       _tiendaControlPublicacionNubeListo=true;
       if(rm&&rm.data&&Array.isArray(rm.data.datos)){
         var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
@@ -2957,6 +3069,8 @@ function tiendaBajarControlPublicacion(){
       var cambioRevision=tiendaAplicarRevisionesManualesNube(rr&&Array.isArray(rr.data)?rr.data:[]);
       if(r&&r.data&&r.data.datos){
         var cambio=tiendaAplicarControlPublicacion(r.data.datos);
+        var cambioCategoria=tiendaAplicarCategoriasAdminNube(rc&&Array.isArray(rc.data)?rc.data:[]);
+        tiendaMigrarCategoriasAdminNube(rc&&Array.isArray(rc.data)?rc.data:[]);
         // La decisión manual individual se aplica después de las listas
         // compartidas. Sólo una decisión manual posterior puede reemplazarla.
         var cambioVisibilidad=tiendaAplicarVisibilidadesAdminNube(rv&&Array.isArray(rv.data)?rv.data:[]);
@@ -2964,14 +3078,16 @@ function tiendaBajarControlPublicacion(){
         // del proveedor pueden revivir algo que está en la papelera.
         var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
         try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
-        return cambio||cambioRevision||cambioVisibilidad||cambioEliminacion;
+        return cambio||cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion;
       }
       // La primera vez, el administrador que ya tiene el estado correcto crea
       // el mapa para que clientes y vendedores lo reciban inmediatamente.
+      var cambioCategoria=tiendaAplicarCategoriasAdminNube(rc&&Array.isArray(rc.data)?rc.data:[]);
+      tiendaMigrarCategoriasAdminNube(rc&&Array.isArray(rc.data)?rc.data:[]);
       var cambioVisibilidad=tiendaAplicarVisibilidadesAdminNube(rv&&Array.isArray(rv.data)?rv.data:[]);
       var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
-      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision||cambioVisibilidad||cambioEliminacion;});
-      return cambioRevision||cambioVisibilidad||cambioEliminacion;
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion;});
+      return cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion;
     }).catch(function(error){
       // No silenciar del todo: mantiene el modo lectura (el guard de
       // tiendaPrepararBandejasAdmin ya bloquea acciones automáticas mientras
@@ -6906,11 +7022,10 @@ function tiendaReclasificarOtros(){
   if(!confirm(msg)) return;
   try{ tiendaBackupAuto(); }catch(e){}
   plan.forEach(function(x){
-    x.p.categoria=x.cat;
-    x.p.categoriaManualFijada=true;
-    if(tiendaEsAutomatico(x.p)) x.p.categoriaManualProveedor=x.cat;
+    tiendaFijarCategoriaAdmin(x.p,x.cat);
   });
   tiendaGuardarLocal();
+  tiendaGuardarCategoriasAdminNube(plan.map(function(x){return x.p;})).catch(function(){});
   tiendaRender();
   mostrarToast('✅ '+plan.length+' producto'+(plan.length===1?'':'s')+' reordenado'+(plan.length===1?'':'s'));
 }
@@ -7012,9 +7127,7 @@ function tiendaGuardarPrecios(){
         p.precioActualizado=Date.now();
       }
       p.costo=Math.round(costo); p.venta=Math.round(venta);
-      p.categoria=cat;
-      p.categoriaManualFijada=true;
-      if(tiendaEsAutomatico(p)) p.categoriaManualProveedor=cat;
+      tiendaFijarCategoriaAdmin(p,cat);
       p.caracteristicas=carac;
       p.mayorista=mayorista; // 🏪 mayorista editable
       // Guardar una edición manual también confirma que el precio fue revisado.
@@ -7026,6 +7139,11 @@ function tiendaGuardarPrecios(){
         if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p,true); liberoRevision=true; }
       }
       tiendaGuardarLocal();
+      tiendaGuardarCategoriaAdminNube(p,false).then(function(res){
+        if(res&&res.error)throw res.error;
+      }).catch(function(err){
+        alert('⚠️ El producto se guardó, pero Supabase no confirmó la categoría.\n\nVolvé a guardar con conexión.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+      });
       if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
     }
   }
@@ -7107,10 +7225,18 @@ function tiendaUsarCategoriaProveedor(id){
   p.categoria=p.categoriaProveedor || tiendaCategoria(p.nombre);
   delete p.categoriaManualProveedor;
   delete p.categoriaManualFijada;
-  tiendaGuardarLocal();
+  p.categoriaAdminActualizada=Date.now();
+  var guardado=Promise.all([tiendaGuardarLocal(),tiendaGuardarCategoriaAdminNube(p,true)]);
   document.getElementById('modal-cuotas').style.display='none';
   tiendaRenderMantenerSector(window._tiendaEditScrollY,window._tiendaEditMostrados);
-  mostrarToast('↩️ Categoría del proveedor restaurada');
+  mostrarToast('⏳ Restaurando categoría del proveedor...');
+  guardado.then(function(res){
+    var error=(res&&res[0]&&res[0].error)||(res&&res[1]&&res[1].error);
+    if(error)throw error;
+    mostrarToast('↩️ Categoría del proveedor restaurada');
+  }).catch(function(err){
+    alert('⚠️ El cambio quedó en este dispositivo, pero Supabase no lo confirmó.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+  });
 }
 
 // QUITAR producto (solo admin)
@@ -10025,7 +10151,7 @@ async function tiendaProcesarCarga(){
       visible:true, pendienteRevisionManual:false
     };
     // 🏷️ categoría y características elegidas en el formulario
-    if(_cargaCat) _prod.categoria=_cargaCat;
+    if(_cargaCat){ _prod.categoria=_cargaCat; _prod.categoriaManualFijada=true; }
     if(_cargaCarac) _prod.caracteristicas=_cargaCarac;
     if(_cargaMayorista) _prod.mayorista=_cargaMayorista; // 🏪 de qué mayorista es
     nuevos.push(_prod);
