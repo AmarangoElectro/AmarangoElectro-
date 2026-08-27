@@ -3142,6 +3142,7 @@ function tiendaRestaurarEstadoReciente(intento){
   tiendaCategoriaActiva=estado.categoria||'';
   tiendaSubfiltroActivo=estado.subfiltro||'';
   tiendaBandejaAdmin=tiendaEsAdmin?(estado.bandejaAdmin||''):'';
+  window._tiendaMantenerPosicionHastaSalir=!!tiendaBandejaAdmin;
   tiendaMarcaActiva=estado.marca||'';
   verSoloOfertas=!!estado.soloOfertas;
   verSoloFavoritos=!!estado.soloFavoritos;
@@ -5371,7 +5372,9 @@ function tiendaRenderYEnfocar(id){
 // que el administrador estaba revisando. También repone los lotes que ya
 // estaban cargados para no volver al comienzo de la lista.
 function tiendaRenderMantenerSector(scrollY, mostrados){
-  tiendaRender();
+  window._tiendaPosicionAutomaticaPendiente=null;
+  window._tiendaSuspenderConservacionAutomatica=true;
+  try{tiendaRender();}finally{window._tiendaSuspenderConservacionAutomatica=false;}
   var cantidad=Math.max(0, Number(mostrados)||0);
   while(_tiendaMostrados<cantidad && _tiendaMostrados<_tiendaListaFull.length){
     tiendaVerMas();
@@ -5404,7 +5407,13 @@ function tiendaCapturarPosicionLista(idQueDesaparece){
 }
 function tiendaRenderMantenerPosicion(estado){
   estado=estado||{};
-  tiendaRender();
+  window._tiendaPosicionAutomaticaPendiente=null;
+  window._tiendaSuspenderConservacionAutomatica=true;
+  try{tiendaRender();}finally{window._tiendaSuspenderConservacionAutomatica=false;}
+  tiendaRestaurarPosicionLista(estado);
+}
+function tiendaRestaurarPosicionLista(estado){
+  estado=estado||{};
   var cantidad=Math.max(0,Number(estado.mostrados)||0);
   while(_tiendaMostrados<cantidad && _tiendaMostrados<_tiendaListaFull.length)tiendaVerMas();
   function restaurar(){
@@ -5421,6 +5430,13 @@ function tiendaRenderMantenerPosicion(estado){
   setTimeout(restaurar,100);
   setTimeout(restaurar,240);
 }
+
+// Mientras Angie/Max sigan dentro de una bandeja administrativa, cualquier
+// actualización automática conserva el lugar. Se desactiva al salir o cambiar
+// de bandeja.
+window._tiendaMantenerPosicionHastaSalir=false;
+window._tiendaSuspenderConservacionAutomatica=false;
+window._tiendaPosicionAutomaticaPendiente=null;
 
 // ═══ BANDEJAS PRIVADAS DE CONTROL ADMINISTRATIVO ═══
 function tiendaEsAutomatico(p){
@@ -5771,6 +5787,8 @@ function tiendaActualizarBandejasAdmin(){
 }
 function tiendaAbrirBandejaAdmin(tipo){
   if(!tiendaExigirAdmin())return;
+  window._tiendaMantenerPosicionHastaSalir=false;
+  window._tiendaPosicionAutomaticaPendiente=null;
   tiendaBandejaAdmin=(tiendaBandejaAdmin===tipo)?'':tipo;
   tiendaModoPortada=!tiendaBandejaAdmin;
   tiendaMostrarTodos=false;
@@ -5781,9 +5799,14 @@ function tiendaAbrirBandejaAdmin(tipo){
   tiendaToggleLimpiar();
   tiendaRender();
   window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(function(){
+    window._tiendaMantenerPosicionHastaSalir=!!tiendaBandejaAdmin;
+  },350);
 }
 function tiendaSalirBandejaAdmin(){
   if(!tiendaExigirAdmin())return;
+  window._tiendaMantenerPosicionHastaSalir=false;
+  window._tiendaPosicionAutomaticaPendiente=null;
   tiendaBandejaAdmin='';
   tiendaModoPortada=true;
   tiendaMostrarTodos=false;
@@ -5895,6 +5918,21 @@ function tiendaRenderPortadaCategorias(universo,cont){
 }
 
 function tiendaRender(){
+  var conservarAutomaticamente=window._tiendaMantenerPosicionHastaSalir && tiendaEsAdmin && tiendaBandejaAdmin && !window._tiendaSuspenderConservacionAutomatica;
+  if(conservarAutomaticamente && !window._tiendaPosicionAutomaticaPendiente){
+    window._tiendaPosicionAutomaticaPendiente=tiendaCapturarPosicionLista(null);
+  }
+  var posicionAutomatica=conservarAutomaticamente?window._tiendaPosicionAutomaticaPendiente:null;
+  function finalizarRender(){
+    if(posicionAutomatica){
+      tiendaRestaurarPosicionLista(posicionAutomatica);
+      setTimeout(function(){
+        if(window._tiendaPosicionAutomaticaPendiente===posicionAutomatica){
+          window._tiendaPosicionAutomaticaPendiente=null;
+        }
+      },420);
+    }
+  }
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
 
@@ -5955,6 +5993,7 @@ function tiendaRender(){
     else vacia.innerHTML='📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.';
     cont.innerHTML=''; document.getElementById('tienda-chips').innerHTML='';
     tiendaAplicarVistaYAvisos();
+    finalizarRender();
     return;
   }
   vacia.style.display='none';
@@ -6118,6 +6157,7 @@ function tiendaRender(){
   var qPortada=(document.getElementById('tienda-buscar').value||'').trim();
   if(tiendaModoPortada && !tiendaBandejaAdmin && !qPortada){
     tiendaRenderPortadaCategorias(universo,cont);
+    finalizarRender();
     return;
   }
 
@@ -6205,6 +6245,7 @@ function tiendaRender(){
     }
     cont.innerHTML=vacioHtml;
     tiendaAplicarVistaYAvisos();
+    finalizarRender();
     return;
   }
 
@@ -6219,6 +6260,7 @@ function tiendaRender(){
   cont.innerHTML = tiendaCardsHtml(lista.slice(0, _tiendaMostrados));
   tiendaPintarVerMas();
   tiendaAplicarVistaYAvisos();
+  finalizarRender();
 }
 
 // genera el HTML de un lote de cards (se llama por lotes para no trabar)
