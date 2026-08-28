@@ -1,0 +1,36 @@
+name: Validar módulo Asesores
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'public/asesores-*.js'
+      - 'public/margarita-simulador-*.js'
+      - 'wrangler.jsonc'
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Validar Worker
+        run: npm run check
+      - name: Revisar JS Asesores
+        run: |
+          node --check public/asesores-centro.js
+          node --check public/asesores-registro.js
+          node --check public/asesores-coach-auth.js
+          node --check public/asesores-app-dialogs.js
+          node --check public/margarita-simulador-admin.js
+          node --check public/margarita-simulador-key.js
