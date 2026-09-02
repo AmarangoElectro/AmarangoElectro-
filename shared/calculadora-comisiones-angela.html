@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Calculadora de Comisiones AmarangoElectro — Para Ángela</title>
+<style>
+:root{
+ --bg:#f4f7fb;--s:#fff;--s2:#f8fafc;--line:#dde5ee;--ink:#101828;--muted:#5f6b7a;
+ --blue:#0b4fa3;--orange:#f47b20;--green:#128a58;--red:#d92d20;--shadow:0 12px 32px rgba(16,24,40,.08)
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit}
+.wrap{width:min(1040px,calc(100% - 18px));margin:14px auto 44px}
+.hero{border-radius:24px;background:linear-gradient(135deg,#072b5d,#0b4fa3);padding:20px;color:#fff;box-shadow:var(--shadow)}
+.hero small{font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.hero h1{font-size:28px;line-height:1.05;margin:6px 0 6px}
+.hero p{font-size:12px;line-height:1.5;margin:0;color:#edf4ff;max-width:760px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.panel{background:var(--s);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.panel h2{font-size:18px;margin:0;color:#061a37}.panel p{font-size:11px;color:var(--muted);line-height:1.45;margin:5px 0 0}
+.tiers{display:grid;gap:7px;margin-top:12px}
+.tier{display:grid;grid-template-columns:1.2fr .65fr .65fr;gap:7px;align-items:center;background:var(--s2);border:1px solid var(--line);border-radius:13px;padding:9px}
+.tier b{font-size:11px}.tier small{display:block;font-size:9px;color:var(--muted);margin-top:2px}
+.pct{background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px}
+.pct label{display:block;font-size:8px;font-weight:900;color:var(--muted);text-transform:uppercase}
+.pct input{width:100%;border:0;outline:0;font-size:17px;color:var(--orange);font-weight:950;margin-top:2px}
+.inputs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+.field{background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:8px}
+.field label{display:block;font-size:9px;font-weight:900;color:var(--muted)}
+.field input{width:100%;border:0;background:transparent;outline:0;font-size:14px;font-weight:900;margin-top:4px;color:var(--ink)}
+.method{display:flex;gap:6px;margin-top:9px}.method button{height:36px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted);font-size:9px;font-weight:900;cursor:pointer}.method button.on{background:var(--orange);border-color:var(--orange);color:#fff}
+.results{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:10px}
+.res{border:1px solid var(--line);border-radius:12px;background:var(--s2);padding:10px}.res small{display:block;font-size:8px;color:var(--muted);text-transform:uppercase;font-weight:900}.res b{display:block;font-size:18px;margin-top:4px}.res.rev b{color:var(--orange)}.res.biz b{color:var(--green)}
+.compare{display:grid;gap:6px;margin-top:10px}.row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:11px;background:var(--s2);padding:9px}.row b{font-size:9px}.row span{font-size:8px;color:var(--muted)}.row strong{font-size:10px;color:var(--orange)}
+.alert{margin-top:10px;border-left:4px solid var(--green);background:#eefaf4;border-radius:0 12px 12px 0;padding:10px;font-size:10px;line-height:1.5;color:#315447}
+.alert.warn{border-left-color:var(--orange);background:#fff7ed;color:#704214}.alert.bad{border-left-color:var(--red);background:#fff1f1;color:#7a271a}
+.explain{margin-top:10px}.explain section{background:var(--s);border:1px solid var(--line);border-radius:18px;padding:15px;margin-top:9px;box-shadow:var(--shadow)}.explain h3{margin:0;font-size:17px;color:#061a37}.explain p{font-size:11px;color:var(--muted);line-height:1.6;margin:7px 0 0}.explain strong{color:var(--ink)}
+.example{margin-top:10px;background:#fff8f2;border:1px solid #ffd8b8;border-radius:15px;padding:12px}.example b{color:#9a4c0b}.example p{margin:4px 0 0}
+.notes textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:11px;resize:vertical;outline:0;margin-top:9px}
+.footer{font-size:9px;color:var(--muted);text-align:center;margin-top:16px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.tier{grid-template-columns:1fr 1fr}.tier>div:first-child{grid-column:1/-1}}
+@media(max-width:430px){.inputs,.results{grid-template-columns:1fr}.hero h1{font-size:24px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero">
+ <small>AmarangoElectro · Evaluación interna</small>
+ <h1>Calculadora de comisiones para revendedores</h1>
+ <p>La idea es probar distintos porcentajes antes de cambiar nada. Podés editar todos los tramos y ver inmediatamente cuánto cobra el revendedor y cuánto queda en AmarangoElectro.</p>
+</section>
+
+<div class="grid">
+<section class="panel">
+ <h2>1. Editá la escala</h2>
+ <p>Estos valores son una propuesta para analizar, no una decisión tomada.</p>
+ <div class="tiers">
+  <div class="tier"><div><b>Hasta $100.000 de costo</b><small>Productos con margen alto</small></div><div class="pct"><label>Contado %</label><input class="cash" value="10"></div><div class="pct"><label>Cuotas %</label><input class="fin" value="15"></div></div>
+  <div class="tier"><div><b>$100.001 – $250.000</b><small>Ejemplo bicicleta</small></div><div class="pct"><label>Contado %</label><input class="cash" value="8"></div><div class="pct"><label>Cuotas %</label><input class="fin" value="12"></div></div>
+  <div class="tier"><div><b>$250.001 – $350.000</b></div><div class="pct"><label>Contado %</label><input class="cash" value="7"></div><div class="pct"><label>Cuotas %</label><input class="fin" value="11"></div></div>
+  <div class="tier"><div><b>$350.001 – $500.000</b></div><div class="pct"><label>Contado %</label><input class="cash" value="6"></div><div class="pct"><label>Cuotas %</label><input class="fin" value="10"></div></div>
+  <div class="tier"><div><b>$500.001 – $700.000</b></div><div class="pct"><label>Contado %</label><input class="cash" value="5"></div><div class="pct"><label>Cuotas %</label><input class="fin" value="9"></div></div>
+  <div class="tier"><div><b>Más de $700.000</b></div><div class="pct"><label>Contado %</label><input class="cash" value="4"></div><div class="pct"><label>Cuotas %</label><input class="fin" value="8"></div></div>
+ </div>
+</section>
+
+<section class="panel">
+ <h2>2. Probá una venta</h2>
+ <p>Ingresá costo, venta y gasto de logística. La calculadora toma automáticamente el tramo correspondiente.</p>
+ <div class="inputs">
+  <div class="field"><label>Costo del producto</label><input id="cost" value="220000"></div>
+  <div class="field"><label>Precio de venta contado</label><input id="sale" value="329999"></div>
+  <div class="field"><label>Envío/logística que paga Amarango</label><input id="shipping" value="10000"></div>
+  <div class="field"><label>Cantidad de socios</label><input id="partners" value="3"></div>
+ </div>
+ <div class="method"><button id="cashBtn" class="on">Venta contado</button><button id="finBtn">Venta financiada</button></div>
+
+ <div class="results">
+  <div class="res rev"><small>Revendedor</small><b id="revOut">—</b></div>
+  <div class="res biz"><small>Queda en Amarango</small><b id="bizOut">—</b></div>
+  <div class="res"><small>Referencia / socio</small><b id="partnerOut">—</b></div>
+  <div class="res"><small>Comisión aplicada</small><b id="pctOut">—</b></div>
+ </div>
+
+ <div class="compare">
+  <div class="row"><b>Sistema viejo</b><span id="oldPctLabel">10%</span><strong id="oldRev">—</strong></div>
+  <div class="row"><b>Escala que estás probando</b><span id="newPctLabel">—</span><strong id="newRev">—</strong></div>
+  <div class="row"><b>Diferencia que recupera Amarango</b><span>por venta</span><strong id="saved">—</strong></div>
+ </div>
+ <div class="alert" id="alert"></div>
+</section>
+</div>
+
+<div class="explain">
+<section>
+ <h3>¿Por qué estamos revisando las comisiones?</h3>
+ <p>Hasta ahora se trabajó con una comisión plana: <strong>10% en contado y 15% en ventas financiadas</strong>. El problema es que el margen de AmarangoElectro no crece en la misma proporción en todos los productos. En productos más caros, Amarango pone mucho más capital y normalmente trabaja con un margen porcentual más bajo. Si la comisión sigue siendo siempre el mismo porcentaje de la venta, puede comerse una parte demasiado grande de lo que realmente queda para la empresa.</p>
+</section>
+
+<section>
+ <h3>La idea de la escala</h3>
+ <p>En productos chicos se puede mantener una comisión más alta porque Amarango tiene más margen relativo. A medida que sube el costo del producto, la comisión baja de forma gradual. El revendedor sigue ganando una suma interesante en pesos, pero Amarango conserva mejor el capital que necesita para comprar, entregar, cubrir riesgos y seguir creciendo.</p>
+</section>
+
+<section>
+ <h3>Ejemplo bicicleta</h3>
+ <div class="example">
+  <b>Costo aproximado: $220.000</b>
+  <p>Precio contado aproximado: $329.999. Con el viejo 10%, el revendedor cobra cerca de $33.000. Con un 8%, cobra cerca de $26.400. Si además Amarango absorbió $10.000 de logística, la reducción del 10% al 8% recupera alrededor de $6.600 para la empresa en una sola operación.</p>
+ </div>
+</section>
+
+<section>
+ <h3>Importante: “lo que queda en Amarango” no es automáticamente ganancia de los socios</h3>
+ <p>Ese monto todavía puede tener que cubrir impuestos, combustible, entregas, garantías, mora, pérdidas, herramientas, publicidad y reinversión. Por eso la cifra “por socio” aparece solamente como <strong>referencia matemática</strong>. La recomendación es que primero AmarangoElectro conserve una parte para operar y crecer, y recién después se distribuya la utilidad que realmente se decida repartir entre los propietarios.</p>
+</section>
+
+<section>
+ <h3>¿Qué tendría que decidir Ángela?</h3>
+ <p>Probar ventas reales de distintos tamaños y observar dos cosas: <strong>si la comisión sigue siendo atractiva para el revendedor</strong> y <strong>si Amarango conserva suficiente margen para justificar capital, logística y riesgo</strong>. Los porcentajes de arriba se pueden cambiar libremente hasta encontrar un esquema que les cierre.</p>
+</section>
+
+<section class="notes">
+ <h3>Notas / propuesta de Ángela</h3>
+ <p>Podés escribir acá lo que cambiarías y después pasárselo a Maxi.</p>
+ <textarea placeholder="Ejemplo: dejaría 10% hasta $100.000, 8% hasta $250.000, bajaría a 5% arriba de $500.000..."></textarea>
+</section>
+</div>
+<div class="footer">Herramienta de simulación interna · No modifica ventas ni comisiones reales.</div>
+</main>
+
+<script>
+let financed=false;
+const cashInputs=[...document.querySelectorAll('.cash')],finInputs=[...document.querySelectorAll('.fin')];
+const cost=document.getElementById('cost'),sale=document.getElementById('sale'),shipping=document.getElementById('shipping'),partners=document.getElementById('partners');
+function n(v){return Number(String(v).replace(/\./g,'').replace(/,/g,''))||0}
+function ars(v){return '$'+Math.round(v).toLocaleString('es-AR')}
+function idx(c){if(c<=100000)return 0;if(c<=250000)return 1;if(c<=350000)return 2;if(c<=500000)return 3;if(c<=700000)return 4;return 5}
+function render(){
+ const c=n(cost.value),s=n(sale.value),ship=n(shipping.value),p=Math.max(1,n(partners.value));
+ const i=idx(c),pct=Number((financed?finInputs:cashInputs)[i].value)||0;
+ const oldPct=financed?15:10;
+ const rev=Math.round(s*pct/100),oldRevVal=Math.round(s*oldPct/100);
+ const biz=s-c-ship-rev;
+ revOut.textContent=ars(rev);bizOut.textContent=ars(biz);partnerOut.textContent=ars(Math.max(0,biz)/p);pctOut.textContent=pct+'%';
+ oldRev.textContent=ars(oldRevVal);newRev.textContent=ars(rev);saved.textContent=ars(oldRevVal-rev);
+ oldPctLabel.textContent=oldPct+'%';newPctLabel.textContent=pct+'%';
+ const el=document.getElementById('alert');
+ el.className='alert '+(biz<=0?'bad':biz<rev?'bad':biz<rev*1.5?'warn':'');
+ el.textContent=biz<=0?'⚠️ Esta operación no deja contribución positiva para AmarangoElectro.':
+ biz<rev?'⚠️ El revendedor termina cobrando más que lo que queda en Amarango. Revisar precio, comisión o costos.':
+ biz<rev*1.5?'⚠️ Amarango gana más, pero con poco margen de diferencia. Conviene revisar la operación.':
+ '✓ La operación deja a Amarango una contribución claramente superior a la comisión del revendedor.';
+}
+[cost,sale,shipping,partners,...cashInputs,...finInputs].forEach(x=>x.oninput=render);
+cashBtn.onclick=()=>{financed=false;cashBtn.classList.add('on');finBtn.classList.remove('on');render()};
+finBtn.onclick=()=>{financed=true;finBtn.classList.add('on');cashBtn.classList.remove('on');render()};
+render();
+</script>
+</body></html>
