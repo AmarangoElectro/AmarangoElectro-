@@ -1,0 +1,10 @@
+{
+  "name":"Mi Balance — un regalo de Amarango",
+  "short_name":"Mi Balance",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#07182f",
+  "theme_color":"#07182f",
+  "description":"Controlá tu plata sin complicarte.",
+  "icons":[{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
