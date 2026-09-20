@@ -1,44 +1,82 @@
-import type { CatalogAdapter, CatalogQuery } from "./types";
+import type { CatalogAdapter, CatalogQuery, Product } from "./types";
 import { V411AuditedPilotCatalogAdapter } from "./audited-pilot-adapter";
 import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
+import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
 
-// V4.11 usa la única evidencia comercial sanitizada incluida en el checkpoint.
-// No se afirma que sea un snapshot de producción: el reporte del gate conserva
-// el bloqueo hasta recibir URL + publishable/anon key + recurso/RLS auditados.
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
-
-// V16 REAL CATALOG COHORT 0 — SAFE INTEGRATION GATE (2026-09-12).
-// Composición mínima y aislada: agrega los 9 productos de Cohort 0 (evidencia
-// congelada, ver lib/catalog/cohort0-frozen-adapter.ts) a la salida de la
-// fuente primaria, sin reemplazarla ni tocar su lógica. No consulta Supabase,
-// no usa credenciales, no escribe nada.
-// ROLLBACK: reemplazar el bloque `catalog` de abajo por
-// `export const catalog: CatalogAdapter = primaryCatalog;` y opcionalmente
-// borrar cohort0-frozen-adapter.ts + fixtures/v16-real-catalog-cohort-0-frozen.json.
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
+const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
 
-class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
+function productKey(product: Product) {
+  return [
+    product.category,
+    product.subcategory ?? "",
+    product.brand,
+    product.model ?? "",
+    product.name,
+    product.price?.amount ?? "",
+  ]
+    .join("|")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function mergeUnique(...groups: Product[][]) {
+  const seen = new Set<string>();
+  const merged: Product[] = [];
+
+  for (const group of groups) {
+    for (const product of group) {
+      const key = productKey(product);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(product);
+    }
+  }
+
+  return merged;
+}
+
+/**
+ * Catálogo compuesto V16.
+ *
+ * - primaryCatalog: evidencia histórica mínima ya integrada.
+ * - cohort0Catalog: cohorte real congelada previa.
+ * - electroCatalog: snapshot real sanitizado de electrodomésticos, copiado
+ *   en modo read-only desde Supabase y versionado en GitHub.
+ *
+ * Ninguna de estas fuentes escribe sobre la tienda legacy ni sobre Supabase.
+ */
+class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
+      electroCatalog.listProducts(query),
     ]);
-    return [...primaryResults, ...cohort0Results];
+
+    return mergeUnique(primaryResults, cohort0Results, electroResults);
   }
 
   async getProductBySlug(slug: string) {
     const primaryMatch = await primaryCatalog.getProductBySlug(slug);
     if (primaryMatch) return primaryMatch;
-    return cohort0Catalog.getProductBySlug(slug);
+
+    const cohort0Match = await cohort0Catalog.getProductBySlug(slug);
+    if (cohort0Match) return cohort0Match;
+
+    return electroCatalog.getProductBySlug(slug);
   }
 }
 
-export const catalog: CatalogAdapter = new Cohort0CompositeCatalogAdapter();
+export const catalog: CatalogAdapter = new V16CompositeCatalogAdapter();
 
 export { LegacyCatalogAdapter } from "./legacy/legacy-catalog-adapter";
 export type { LegacyCatalogSnapshot } from "./legacy/legacy-catalog-adapter";
 export type { Product, CatalogQuery, CatalogAdapter } from "./types";
 export { v411CatalogEvidence } from "./audited-pilot-adapter";
 export { cohort0CatalogEvidence } from "./cohort0-frozen-adapter";
+export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
