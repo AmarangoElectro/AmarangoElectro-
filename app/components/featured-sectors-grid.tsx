@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "./store-link";
-import { getCategory, type CategoryDefinition } from "@/lib/catalog/categories";
+import { getCategory } from "@/lib/catalog/categories";
 import { openSectorsSheet } from "@/lib/ux/sectors-sheet";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
@@ -17,12 +17,10 @@ const FEATURED_SECTORS = [
 ] as const;
 
 export function FeaturedSectorsGrid() {
-  const featured = FEATURED_SECTORS
-    .map(({ slug, subtitle }) => {
-      const category = getCategory(slug);
-      return category ? { category, subtitle } : null;
-    })
-    .filter((item): item is { category: CategoryDefinition; subtitle: string } => Boolean(item));
+  const featured = FEATURED_SECTORS.flatMap(({ slug, subtitle }) => {
+    const category = getCategory(slug);
+    return category ? [{ category, subtitle }] : [];
+  });
 
   if (featured.length === 0) return null;
 
