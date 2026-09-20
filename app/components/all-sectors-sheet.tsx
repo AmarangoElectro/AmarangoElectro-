@@ -86,10 +86,10 @@ export function AllSectorsSheet() {
                   </span>
                   <span className="sectors-sheet-row-shade" aria-hidden="true" />
                   <span className="sectors-sheet-row-copy">
-                    <small>{category.eyebrow}</small>
-                    <strong>{category.title}</strong>
+                    <small className="sectors-sheet-row-category">{category.eyebrow}</small>
+                    <strong className="sectors-sheet-row-name">{category.title}</strong>
                   </span>
-                  <span className="sectors-sheet-row-toggle" aria-hidden="true"><ChevronDown size={18} /></span>
+                  <span className="sectors-sheet-row-toggle" aria-hidden="true"><ChevronDown size={18} strokeWidth={2.4} /></span>
                 </button>
                 {expanded && (
                   <div className="sectors-sheet-row-panel" id={panelId}>

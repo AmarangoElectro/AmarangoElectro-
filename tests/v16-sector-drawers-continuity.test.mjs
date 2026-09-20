@@ -21,7 +21,18 @@ test("the all-sector selector behaves as an accessible tap-to-toggle drawer", ()
   assert.match(sheet, /aria-expanded=\{expanded\}/);
   assert.match(sheet, /aria-controls=\{panelId\}/);
   assert.match(sheet, /current === category\.id \? null : category\.id/);
+  assert.match(sheet, /sectors-sheet-row-category/);
+  assert.match(sheet, /sectors-sheet-row-name/);
+  assert.match(sheet, /sectors-sheet-row-toggle/);
   assert.match(sheet, /Entrar al sector/);
+});
+
+test("sector rows keep artwork, category, name and arrow in a stable foreground stack", () => {
+  assert.match(css, /\.sectors-sheet-row \{[\s\S]*grid-template-columns: minmax\(0,1fr\) 36px;/);
+  assert.match(css, /\.sectors-sheet-row-art \{ z-index: 0; pointer-events: none; \}/);
+  assert.match(css, /\.sectors-sheet-row-shade \{[\s\S]*z-index: 1;/);
+  assert.match(css, /\.sectors-sheet-row-copy \{ position: relative; z-index: 2;/);
+  assert.match(css, /\.sectors-sheet-row-toggle \{[\s\S]*z-index: 2;/);
 });
 
 test("dark mobile scrolling and route changes cannot fall back to white", () => {
