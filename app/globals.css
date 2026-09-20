@@ -6540,7 +6540,8 @@ html[data-theme="dark"] { color-scheme: dark; }
 .sectors-sheet-row {
   position: relative;
   width: 100%;
-  min-height: 94px;
+  min-height: 112px;
+  aspect-ratio: 3 / 1;
   padding: 16px 18px;
   display: grid;
   grid-template-columns: minmax(0,1fr) 36px;
@@ -6549,7 +6550,7 @@ html[data-theme="dark"] { color-scheme: dark; }
   border: 0;
   overflow: hidden;
   isolation: isolate;
-  border-radius: 999px;
+  border-radius: 29px;
   background: #07162c;
   color: #fff;
   font: inherit;
@@ -6727,7 +6728,7 @@ html[data-theme="dark"] { color-scheme: dark; }
 .sector-editorial-gaming .sector-editorial-copy p { max-width: 470px; color: rgba(255,255,255,.78); }
 
 @media (max-width: 760px) {
-  .sectors-sheet-row { min-height: 88px; padding: 14px 17px; grid-template-columns: minmax(0,1fr) 36px; }
+  .sectors-sheet-row { min-height: 112px; padding: 16px 18px; grid-template-columns: minmax(0,1fr) 36px; }
   .sectors-sheet-row-copy strong { font-size: 15px; }
   .brand-product-accordion { width: calc(100% - 28px); margin: 22px auto 54px; }
   .brand-product-accordion-intro { align-items: flex-start; flex-direction: column; gap: 10px; }

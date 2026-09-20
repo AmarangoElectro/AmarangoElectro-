@@ -29,6 +29,8 @@ test("the all-sector selector behaves as an accessible tap-to-toggle drawer", ()
 
 test("sector rows keep artwork, category, name and arrow in a stable foreground stack", () => {
   assert.match(css, /\.sectors-sheet-row \{[\s\S]*grid-template-columns: minmax\(0,1fr\) 36px;/);
+  assert.match(css, /\.sectors-sheet-row \{[\s\S]*aspect-ratio: 3 \/ 1;/);
+  assert.match(css, /@media \(max-width: 760px\) \{[\s\S]*\.sectors-sheet-row \{ min-height: 112px;/);
   assert.match(css, /\.sectors-sheet-row-art \{ z-index: 0; pointer-events: none; \}/);
   assert.match(css, /\.sectors-sheet-row-shade \{[\s\S]*z-index: 1;/);
   assert.match(css, /\.sectors-sheet-row-copy \{ position: relative; z-index: 2;/);
