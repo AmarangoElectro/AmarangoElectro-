@@ -2,6 +2,7 @@
 
 import Link from "./store-link";
 import { getCategory } from "@/lib/catalog/categories";
+import { retailCategories } from "@/lib/catalog/retail-categories";
 import { openSectorsSheet } from "@/lib/ux/sectors-sheet";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
@@ -19,7 +20,8 @@ const FEATURED_SECTORS = [
 export function FeaturedSectorsGrid() {
   const featured = FEATURED_SECTORS.flatMap(({ slug, subtitle }) => {
     const category = getCategory(slug);
-    return category ? [{ category, subtitle }] : [];
+    const artwork = retailCategories.find((item) => item.id === slug)?.image;
+    return category ? [{ category, subtitle, artwork }] : [];
   });
 
   if (featured.length === 0) return null;
@@ -44,15 +46,15 @@ export function FeaturedSectorsGrid() {
       </div>
 
       <div className="featured-sectors-grid">
-        {featured.map(({ category, subtitle }) => (
+        {featured.map(({ category, subtitle, artwork }) => (
           <Link
             key={category.slug}
             href={`/categoria/${category.slug}`}
             className="featured-sector-card"
             aria-label={`Entrar a ${category.title}`}
           >
-            {category.image ? (
-              <img src={category.image} alt="" loading="lazy" decoding="async" />
+            {artwork || category.image ? (
+              <img src={artwork ?? category.image} alt="" loading="lazy" decoding="async" />
             ) : category.bannerImage ? (
               <img src={category.bannerImage} alt="" loading="lazy" decoding="async" />
             ) : null}

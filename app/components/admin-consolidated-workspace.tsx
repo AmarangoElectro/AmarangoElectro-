@@ -78,13 +78,13 @@ export function AdminConsolidatedWorkspace() {
         <div className="admin-command-hero-status"><ShieldCheck /><strong>MODO SEGURO</strong><span>Los cambios productivos requieren autorización</span></div>
       </section>
       <nav className="admin-workspace-tabs" aria-label="Módulos administrativos" data-guide-target="admin-workspace-tabs">
-        <button aria-pressed={tab === "catalog"} onClick={() => setTab("catalog")}><LayoutGrid /> Catálogo</button>
-        <button aria-pressed={tab === "storefront"} onClick={() => setTab("storefront")}><ShieldCheck /> Revisión de tienda</button>
-        <button aria-pressed={tab === "cellphones90"} onClick={() => setTab("cellphones90")}><Smartphone /> 90 Celulares · revisión</button>
-        <button aria-pressed={tab === "calculator"} onClick={() => setTab("calculator")}><ListFilter /> Calculadora</button>
-        <button aria-pressed={tab === "plates"} onClick={() => setTab("plates")}><Sparkles /> Placas</button>
+        <button aria-pressed={tab === "catalog"} onClick={() => setTab("catalog")}><LayoutGrid /><span><small>PRODUCTOS</small><strong>Catálogo</strong></span></button>
+        <button aria-pressed={tab === "storefront"} onClick={() => setTab("storefront")}><ShieldCheck /><span><small>CONTROL VISUAL</small><strong>Revisión de tienda</strong></span></button>
+        <button aria-pressed={tab === "cellphones90"} onClick={() => setTab("cellphones90")}><Smartphone /><span><small>COHORTE ACTUAL</small><strong>90 Celulares · revisión</strong></span></button>
+        <button aria-pressed={tab === "calculator"} onClick={() => setTab("calculator")}><ListFilter /><span><small>PRECIOS</small><strong>Calculadora</strong></span></button>
+        <button aria-pressed={tab === "plates"} onClick={() => setTab("plates")}><Sparkles /><span><small>CONTENIDO</small><strong>Placas</strong></span></button>
         <details className="admin-workspace-more">
-          <summary><MoreHorizontal /> Más áreas</summary>
+          <summary><MoreHorizontal /><span><small>OPERACIÓN</small><strong>Más áreas</strong></span></summary>
           <div>
             <button aria-pressed={tab === "crm"} onClick={() => { setCrmInitialClientId(null); setCrmInstanceKey((key) => key + 1); setTab("crm"); }}><Users /> Clientes / CRM</button>
             <button aria-pressed={tab === "collections"} onClick={() => setTab("collections")}><Wallet /> Cobranzas</button>
