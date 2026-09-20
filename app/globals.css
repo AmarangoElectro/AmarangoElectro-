@@ -6954,6 +6954,16 @@ html[data-theme="dark"] { color-scheme: dark; }
 .sectors-sheet-category-label small { color: var(--orange); font-size: 7px; font-weight: 950; letter-spacing: 1.35px; }
 .sectors-sheet-category-label strong { font-size: 18px; letter-spacing: -.45px; }
 .sectors-sheet-category-label > svg { color: color-mix(in srgb,var(--orange) 74%,var(--muted-foreground)); }
+.sectors-sheet-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-auto-rows: max-content;
+  align-content: start;
+}
+.sectors-sheet-item { min-height: max-content; }
+@media (min-width: 780px) {
+  .sectors-sheet-row { aspect-ratio: 4.5 / 1; }
+}
 
 .featured-sectors-grid { gap: 11px; }
 .featured-sector-card {
