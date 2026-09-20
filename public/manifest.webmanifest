@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "AmarangoElectro",
+  "short_name": "Amarango",
+  "description": "Tecnología para tu vida. Personas para acompañarte.",
+  "lang": "es-AR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#071426",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/icons/app-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/app-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/app-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/app-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

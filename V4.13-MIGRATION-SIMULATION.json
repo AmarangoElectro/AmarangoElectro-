@@ -1,0 +1,4840 @@
+{
+  "schemaVersion": "v4.13-cellphones-migration-simulation-v1",
+  "mode": "lab_read_only",
+  "source": "public.celulares_lista/id=lista",
+  "canonicalMaster": "public.tienda_catalogo/id=catalogo",
+  "writeEnabled": false,
+  "identityStrategy": "future_mapping_table",
+  "identityContract": "legacyCellphoneKey -> canonicalProductId",
+  "counts": {
+    "source": 92,
+    "ready": 90,
+    "review": 2,
+    "conflict": 0,
+    "probableDuplicates": 0,
+    "variantClusters": 20,
+    "productsInVariantClusters": 45,
+    "reviewQueue": 2,
+    "masterMatches": {
+      "strong_match": 0,
+      "probable_match": 0,
+      "no_match": 92,
+      "conflict": 0
+    }
+  },
+  "duplicateClusters": [],
+  "variantClusters": [
+    {
+      "classification": "real_variants",
+      "tuple": "apple|iphone 16 e",
+      "brand": "Apple",
+      "modelFamily": "iPhone 16 E",
+      "variants": [
+        {
+          "legacyPosition": 1,
+          "name": "IPHONE 16 “E” 128GB",
+          "memory": "128 GB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 2,
+          "name": "IPHONE 16 “E” 256GB",
+          "memory": "256 GB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 3,
+          "name": "IPHONE 16 “E” 512GB",
+          "memory": "512 GB",
+          "ram": null
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "apple|iphone 16 pro",
+      "brand": "Apple",
+      "modelFamily": "iPhone 16 PRO",
+      "variants": [
+        {
+          "legacyPosition": 6,
+          "name": "IPHONE 16 PRO 128GB",
+          "memory": "128 GB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 7,
+          "name": "IPHONE 16 Pro 512GB",
+          "memory": "512 GB",
+          "ram": null
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "apple|iphone 17 pro",
+      "brand": "Apple",
+      "modelFamily": "iPhone 17 PRO",
+      "variants": [
+        {
+          "legacyPosition": 10,
+          "name": "IPHONE 17 PRO 256GB",
+          "memory": "256 GB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 11,
+          "name": "IPHONE 17 PRO 512GB",
+          "memory": "512 GB",
+          "ram": null
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "apple|iphone 17 pro max",
+      "brand": "Apple",
+      "modelFamily": "iPhone 17 PRO MAX",
+      "variants": [
+        {
+          "legacyPosition": 12,
+          "name": "IPHONE 17 PRO MAX 256GB",
+          "memory": "256 GB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 13,
+          "name": "IPHONE 17 PRO MAX 512GB",
+          "memory": "512 GB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 14,
+          "name": "IPHONE 17 PRO MAX 1TB - Silver-orange-blue",
+          "memory": "1 TB",
+          "ram": null
+        },
+        {
+          "legacyPosition": 15,
+          "name": "IPHONE 17 PRO MAX 2TB - Orange",
+          "memory": "2 TB",
+          "ram": null
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "samsung|samsung a17",
+      "brand": "Samsung",
+      "modelFamily": "Samsung A17",
+      "variants": [
+        {
+          "legacyPosition": 19,
+          "name": "Samsung A17 128/4gb",
+          "memory": "128 GB",
+          "ram": "4 GB"
+        },
+        {
+          "legacyPosition": 20,
+          "name": "Samsung A17 256/8gb",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "samsung|samsung a56",
+      "brand": "Samsung",
+      "modelFamily": "Samsung A56",
+      "variants": [
+        {
+          "legacyPosition": 25,
+          "name": "Samsung A56 5G 256/8gb",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 26,
+          "name": "Samsung A56 5G 256/12gb",
+          "memory": "256 GB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "samsung|samsung s25 ultra",
+      "brand": "Samsung",
+      "modelFamily": "Samsung S25 Ultra",
+      "variants": [
+        {
+          "legacyPosition": 28,
+          "name": "Samsung s25 ultra 256/12gb",
+          "memory": "256 GB",
+          "ram": "12 GB"
+        },
+        {
+          "legacyPosition": 29,
+          "name": "Samsung s25 ultra 1tb/12gb",
+          "memory": "1 TB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "samsung|samsung s26",
+      "brand": "Samsung",
+      "modelFamily": "Samsung S26",
+      "variants": [
+        {
+          "legacyPosition": 30,
+          "name": "Samsung s26 256/12gb",
+          "memory": "256 GB",
+          "ram": "12 GB"
+        },
+        {
+          "legacyPosition": 31,
+          "name": "Samsung s26 512/12gb",
+          "memory": "512 GB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "samsung|samsung s26 ultra",
+      "brand": "Samsung",
+      "modelFamily": "Samsung S26 Ultra",
+      "variants": [
+        {
+          "legacyPosition": 32,
+          "name": "Samsung s26 ultra 256/12gb",
+          "memory": "256 GB",
+          "ram": "12 GB"
+        },
+        {
+          "legacyPosition": 33,
+          "name": "Samsung s26 ultra 512/12gb",
+          "memory": "512 GB",
+          "ram": "12 GB"
+        },
+        {
+          "legacyPosition": 34,
+          "name": "Samsung s26 ultra 1tb/12gb",
+          "memory": "1 TB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "motorola|moto g06",
+      "brand": "Motorola",
+      "modelFamily": "Moto G06",
+      "variants": [
+        {
+          "legacyPosition": 41,
+          "name": "Moto G06 128/4gb",
+          "memory": "128 GB",
+          "ram": "4 GB"
+        },
+        {
+          "legacyPosition": 42,
+          "name": "Moto G06 256/4gb",
+          "memory": "256 GB",
+          "ram": "4 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "motorola|moto g15",
+      "brand": "Motorola",
+      "modelFamily": "Moto G15",
+      "variants": [
+        {
+          "legacyPosition": 44,
+          "name": "Moto G15 128/4gb",
+          "memory": "128 GB",
+          "ram": "4 GB"
+        },
+        {
+          "legacyPosition": 46,
+          "name": "Moto G15 512/4gb",
+          "memory": "512 GB",
+          "ram": "4 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "motorola|moto g86",
+      "brand": "Motorola",
+      "modelFamily": "Moto G86",
+      "variants": [
+        {
+          "legacyPosition": 53,
+          "name": "Moto G86 5G 256/8gb",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 55,
+          "name": "Moto G86 5G 512/8gb",
+          "memory": "512 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "redmi|redmi 15c",
+      "brand": "Redmi",
+      "modelFamily": "Redmi 15c",
+      "variants": [
+        {
+          "legacyPosition": 62,
+          "name": "REDMI 15C 128/4GB",
+          "memory": "128 GB",
+          "ram": "4 GB"
+        },
+        {
+          "legacyPosition": 63,
+          "name": "REDMI 15C 256/4GB",
+          "memory": "256 GB",
+          "ram": "4 GB"
+        },
+        {
+          "legacyPosition": 64,
+          "name": "REDMI 15C 256/8GB",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "xiaomi|xiaomi note 15 pro",
+      "brand": "Xiaomi",
+      "modelFamily": "Xiaomi NOTE 15 PRO",
+      "variants": [
+        {
+          "legacyPosition": 70,
+          "name": "Xiaomi Note 15 pro 256/8gb",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 71,
+          "name": "Xiaomi Note 15 pro 512/8gb",
+          "memory": "512 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "xiaomi|xiaomi note 15 pro plus",
+      "brand": "Xiaomi",
+      "modelFamily": "Xiaomi NOTE 15 PRO PLUS",
+      "variants": [
+        {
+          "legacyPosition": 72,
+          "name": "Xiaomi Note 15 pro PLUS 5g 256/8gb",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 73,
+          "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
+          "memory": "512 GB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "poco|poco m8",
+      "brand": "POCO",
+      "modelFamily": "POCO M8",
+      "variants": [
+        {
+          "legacyPosition": 74,
+          "name": "Poco M8 5G 256/8GB",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 75,
+          "name": "Poco M8 5G 512/8GB",
+          "memory": "512 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "poco|poco m8 pro",
+      "brand": "POCO",
+      "modelFamily": "POCO M8 PRO",
+      "variants": [
+        {
+          "legacyPosition": 76,
+          "name": "Poco M8 Pro 5G 256/8GB",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 77,
+          "name": "Poco M8 Pro 5G 512/12GB",
+          "memory": "512 GB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "poco|poco x7 pro",
+      "brand": "POCO",
+      "modelFamily": "POCO X7 PRO",
+      "variants": [
+        {
+          "legacyPosition": 78,
+          "name": "Poco X7 Pro 5G 256/8GB",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 79,
+          "name": "Poco X7 Pro 5G 512/8GB",
+          "memory": "512 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "poco|poco x8 pro",
+      "brand": "POCO",
+      "modelFamily": "POCO X8 PRO",
+      "variants": [
+        {
+          "legacyPosition": 80,
+          "name": "Poco X8 Pro 5g 256/8GB",
+          "memory": "256 GB",
+          "ram": "8 GB"
+        },
+        {
+          "legacyPosition": 81,
+          "name": "Poco X8 Pro 5g 512/8GB",
+          "memory": "512 GB",
+          "ram": "8 GB"
+        }
+      ],
+      "autoMerge": false
+    },
+    {
+      "classification": "real_variants",
+      "tuple": "poco|poco x8 pro max",
+      "brand": "POCO",
+      "modelFamily": "POCO X8 PRO MAX",
+      "variants": [
+        {
+          "legacyPosition": 82,
+          "name": "Poco X8 Pro Max 5G 256/12GB",
+          "memory": "256 GB",
+          "ram": "12 GB"
+        },
+        {
+          "legacyPosition": 83,
+          "name": "Poco X8 Pro max 5G 512/12GB",
+          "memory": "512 GB",
+          "ram": "12 GB"
+        }
+      ],
+      "autoMerge": false
+    }
+  ],
+  "reviewQueue": [
+    {
+      "legacyPosition": 10,
+      "legacyCellphoneKey": "lcfp-v1-3eb0627615c676f54bea",
+      "name": "IPHONE 17 PRO 256GB",
+      "status": "review",
+      "problems": [
+        "truncated_characteristics"
+      ],
+      "suggestion": "Validar el dato ambiguo y aprobar explícitamente el mapping.",
+      "alternatives": [
+        "aprobar_como_nuevo",
+        "vincular_a_master",
+        "mantener_pendiente"
+      ],
+      "risk": "medium",
+      "humanActionRequired": true
+    },
+    {
+      "legacyPosition": 91,
+      "legacyCellphoneKey": "lcfp-v1-69c2222f2843d920a9b1",
+      "name": "INFINIX GT 30 PRO NFC 512/12GB dark flare+ kit gamer shadow",
+      "status": "review",
+      "problems": [
+        "bundle_or_color_suffix_requires_review"
+      ],
+      "suggestion": "Validar el dato ambiguo y aprobar explícitamente el mapping.",
+      "alternatives": [
+        "aprobar_como_nuevo",
+        "vincular_a_master",
+        "mantener_pendiente"
+      ],
+      "risk": "medium",
+      "humanActionRequired": true
+    }
+  ],
+  "products": [
+    {
+      "legacyPosition": 0,
+      "legacyCellphoneKey": "lcfp-v1-67899da449f159749eb5",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-67899da449f159749eb5",
+      "name": "IPHONE 15 128GB",
+      "normalizedName": "iphone 15 128gb",
+      "brand": "Apple",
+      "model": "iPhone 15",
+      "modelFamily": "iPhone 15",
+      "memory": "128 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1784428078833.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1784428078833.jpg"
+      ],
+      "cashPriceARS": 1469500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Black",
+        "Blue",
+        "Pink"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 1,
+      "legacyCellphoneKey": "lcfp-v1-22a83d670f0d4dd18c0e",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-22a83d670f0d4dd18c0e",
+      "name": "IPHONE 16 “E” 128GB",
+      "normalizedName": "iphone 16 e 128gb",
+      "brand": "Apple",
+      "model": "iPhone 16 E",
+      "modelFamily": "iPhone 16 E",
+      "memory": "128 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_1_ogz1ay.jpg?v=1787258126821",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_1_ogz1ay.jpg?v=1787258126821"
+      ],
+      "cashPriceARS": 1265500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Black"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 2,
+      "legacyCellphoneKey": "lcfp-v1-2d296ef0b3789df6b472",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-2d296ef0b3789df6b472",
+      "name": "IPHONE 16 “E” 256GB",
+      "normalizedName": "iphone 16 e 256gb",
+      "brand": "Apple",
+      "model": "iPhone 16 E",
+      "modelFamily": "iPhone 16 E",
+      "memory": "256 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_2_o6zflz.jpg?v=1787258799095",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_2_o6zflz.jpg?v=1787258799095"
+      ],
+      "cashPriceARS": 1326500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "White"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 3,
+      "legacyCellphoneKey": "lcfp-v1-eeb01f7799713591d3f1",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-eeb01f7799713591d3f1",
+      "name": "IPHONE 16 “E” 512GB",
+      "normalizedName": "iphone 16 e 512gb",
+      "brand": "Apple",
+      "model": "iPhone 16 E",
+      "modelFamily": "iPhone 16 E",
+      "memory": "512 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_3_nwztx0.jpg?v=1787259066167",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_3_nwztx0.jpg?v=1787259066167"
+      ],
+      "cashPriceARS": 1388000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "White",
+        "Black"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 4,
+      "legacyCellphoneKey": "lcfp-v1-b805a844ed4319f3aae4",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-b805a844ed4319f3aae4",
+      "name": "IPHONE 16 128GB",
+      "normalizedName": "iphone 16 128gb",
+      "brand": "Apple",
+      "model": "iPhone 16",
+      "modelFamily": "iPhone 16",
+      "memory": "128 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_1_1784428280123.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_1_1784428280123.jpg"
+      ],
+      "cashPriceARS": 1694000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Black",
+        "Teal",
+        "Ultra",
+        "Pink",
+        "White"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 5,
+      "legacyCellphoneKey": "lcfp-v1-c2b70154fa95349118ad",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-c2b70154fa95349118ad",
+      "name": "IPHONE 16 PLUS 128GB",
+      "normalizedName": "iphone 16 plus 128gb",
+      "brand": "Apple",
+      "model": "iPhone 16 PLUS",
+      "modelFamily": "iPhone 16 PLUS",
+      "memory": "128 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_5_nd0mj2.jpg?v=1787259312642",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_5_nd0mj2.jpg?v=1787259312642"
+      ],
+      "cashPriceARS": 1714500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Black"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 6,
+      "legacyCellphoneKey": "lcfp-v1-9649ad8e7524c95cb86a",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-9649ad8e7524c95cb86a",
+      "name": "IPHONE 16 PRO 128GB",
+      "normalizedName": "iphone 16 pro 128gb",
+      "brand": "Apple",
+      "model": "iPhone 16 PRO",
+      "modelFamily": "iPhone 16 PRO",
+      "memory": "128 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_6_n310u3.jpg?v=1787260656570",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_6_n310u3.jpg?v=1787260656570"
+      ],
+      "cashPriceARS": 2020500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Black",
+        "Desert"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 7,
+      "legacyCellphoneKey": "lcfp-v1-15a745e8c7491c6564d1",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-15a745e8c7491c6564d1",
+      "name": "IPHONE 16 Pro 512GB",
+      "normalizedName": "iphone 16 pro 512gb",
+      "brand": "Apple",
+      "model": "iPhone 16 PRO",
+      "modelFamily": "iPhone 16 PRO",
+      "memory": "512 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_7_mt1f54.jpg?v=1787261094908",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_7_mt1f54.jpg?v=1787261094908"
+      ],
+      "cashPriceARS": 2490000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Natural"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 8,
+      "legacyCellphoneKey": "lcfp-v1-4a37a290171b75b25876",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-4a37a290171b75b25876",
+      "name": "IPHONE 16 PRO MAX 512GB",
+      "normalizedName": "iphone 16 pro max 512gb",
+      "brand": "Apple",
+      "model": "iPhone 16 PRO MAX",
+      "modelFamily": "iPhone 16 PRO MAX",
+      "memory": "512 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_76_1783482459689.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_76_1783482459689.jpg"
+      ],
+      "cashPriceARS": 2694000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Black",
+        "Desert"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 9,
+      "legacyCellphoneKey": "lcfp-v1-ae6234220e69af30b82b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-ae6234220e69af30b82b",
+      "name": "IPHONE 17 256GB",
+      "normalizedName": "iphone 17 256gb",
+      "brand": "Apple",
+      "model": "iPhone 17",
+      "modelFamily": "iPhone 17",
+      "memory": "256 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1783484339522.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1783484339522.jpg"
+      ],
+      "cashPriceARS": 1898000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Silver",
+        "Blue",
+        "Orange"
+      ],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 10,
+      "legacyCellphoneKey": "lcfp-v1-3eb0627615c676f54bea",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-3eb0627615c676f54bea",
+      "name": "IPHONE 17 PRO 256GB",
+      "normalizedName": "iphone 17 pro 256gb",
+      "brand": "Apple",
+      "model": "iPhone 17 PRO",
+      "modelFamily": "iPhone 17 PRO",
+      "memory": "256 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg"
+      ],
+      "cashPriceARS": 2490000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Blue",
+        "Orange",
+        "Silver"
+      ],
+      "features": [
+        "Pantalla ProMotion 120 Hz.",
+        "Chip A19 Pro.",
+        "Triple cámara profesional con zoom óptico de hasta 8x.",
+        "Estructura de aluminio forjado y Ceramic Shield 2.",
+        "Apple Intelligence, WiFi 7 y USB-"
+      ],
+      "updatedAt": null,
+      "migrationStatus": "review",
+      "reviewReasons": [
+        "truncated_characteristics"
+      ],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "explicit",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 11,
+      "legacyCellphoneKey": "lcfp-v1-f7be17b541c0c41016a7",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-f7be17b541c0c41016a7",
+      "name": "IPHONE 17 PRO 512GB",
+      "normalizedName": "iphone 17 pro 512gb",
+      "brand": "Apple",
+      "model": "iPhone 17 PRO",
+      "modelFamily": "iPhone 17 PRO",
+      "memory": "512 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_80_1783484510100.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_80_1783484510100.jpg"
+      ],
+      "cashPriceARS": 2898000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Orange",
+        "Blue",
+        "Silver"
+      ],
+      "features": [
+        "Pantalla ProMotion 120 Hz.",
+        "Chip A19 Pro.",
+        "Triple cámara profesional con zoom óptico de hasta 8x.",
+        "Estructura de aluminio forjado y Ceramic Shield 2.",
+        "Apple Intelligence, WiFi 7 y USB-C."
+      ],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "explicit",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 12,
+      "legacyCellphoneKey": "lcfp-v1-d3145a58de5412d2d6f5",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-d3145a58de5412d2d6f5",
+      "name": "IPHONE 17 PRO MAX 256GB",
+      "normalizedName": "iphone 17 pro max 256gb",
+      "brand": "Apple",
+      "model": "iPhone 17 PRO MAX",
+      "modelFamily": "iPhone 17 PRO MAX",
+      "memory": "256 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_82_1783483487460.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_82_1783483487460.jpg"
+      ],
+      "cashPriceARS": 2673500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Blue",
+        "Silver",
+        "Orange"
+      ],
+      "features": [
+        "Pantalla ProMotion 120 Hz.",
+        "Chip A19 Pro.",
+        "Triple cámara profesional con zoom óptico de hasta 8x.",
+        "Estructura de aluminio forjado y Ceramic Shield 2.",
+        "Apple Intelligence, WiFi 7 y USB-C."
+      ],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "explicit",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 13,
+      "legacyCellphoneKey": "lcfp-v1-226a933daffd778d712c",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-226a933daffd778d712c",
+      "name": "IPHONE 17 PRO MAX 512GB",
+      "normalizedName": "iphone 17 pro max 512gb",
+      "brand": "Apple",
+      "model": "iPhone 17 PRO MAX",
+      "modelFamily": "iPhone 17 PRO MAX",
+      "memory": "512 GB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1784433718628.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1784433718628.jpg"
+      ],
+      "cashPriceARS": 3102500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Orange",
+        "Blue"
+      ],
+      "features": [
+        "Pantalla ProMotion 120 Hz.",
+        "Chip A19 Pro.",
+        "Triple cámara profesional con zoom óptico de hasta 8x.",
+        "Estructura de aluminio forjado y Ceramic Shield 2.",
+        "Apple Intelligence, WiFi 7 y USB-C."
+      ],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "explicit",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "explicit",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 14,
+      "legacyCellphoneKey": "lcfp-v1-a1bd7fab3a40419aa44a",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-a1bd7fab3a40419aa44a",
+      "name": "IPHONE 17 PRO MAX 1TB - Silver-orange-blue",
+      "normalizedName": "iphone 17 pro max 1tb silver orange blue",
+      "brand": "Apple",
+      "model": "iPhone 17 PRO MAX",
+      "modelFamily": "iPhone 17 PRO MAX",
+      "memory": "1 TB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1784432137817.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1784432137817.jpg"
+      ],
+      "cashPriceARS": 3469500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Silver",
+        "Orange",
+        "Blue"
+      ],
+      "features": [
+        "Pantalla ProMotion 120 Hz.",
+        "Chip A19 Pro.",
+        "Triple cámara profesional con zoom óptico de hasta 8x.",
+        "Estructura de aluminio forjado y Ceramic Shield 2.",
+        "Apple Intelligence, WiFi 7 y USB-C."
+      ],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "parsed_from_name",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "explicit",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 15,
+      "legacyCellphoneKey": "lcfp-v1-b0db6d1be640ab2875f4",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-b0db6d1be640ab2875f4",
+      "name": "IPHONE 17 PRO MAX 2TB - Orange",
+      "normalizedName": "iphone 17 pro max 2tb orange",
+      "brand": "Apple",
+      "model": "iPhone 17 PRO MAX",
+      "modelFamily": "iPhone 17 PRO MAX",
+      "memory": "2 TB",
+      "ram": null,
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_86_1783484125999.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_86_1783484125999.jpg"
+      ],
+      "cashPriceARS": 4204500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [
+        "Orange"
+      ],
+      "features": [
+        "Pantalla ProMotion 120 Hz.",
+        "Chip A19 Pro.",
+        "Triple cámara profesional con zoom óptico de hasta 8x.",
+        "Estructura de aluminio forjado y Ceramic Shield 2.",
+        "Apple Intelligence, WiFi 7 y USB-C."
+      ],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "unknown",
+        "colors": "parsed_from_name",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "explicit",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 16,
+      "legacyCellphoneKey": "lcfp-v1-fc7ebc2c9a07f0d5eb9f",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-fc7ebc2c9a07f0d5eb9f",
+      "name": "Samsung A06 64/4gb",
+      "normalizedName": "samsung a06 64 4gb",
+      "brand": "Samsung",
+      "model": "Samsung A06",
+      "modelFamily": "Samsung A06",
+      "memory": "64 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1783479809957.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1783479809957.jpg"
+      ],
+      "cashPriceARS": 282500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 17,
+      "legacyCellphoneKey": "lcfp-v1-c82e0b186b7493fb4c93",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-c82e0b186b7493fb4c93",
+      "name": "Samsung A07 128/4gb",
+      "normalizedName": "samsung a07 128 4gb",
+      "brand": "Samsung",
+      "model": "Samsung A07",
+      "modelFamily": "Samsung A07",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_3_1783479912825.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_3_1783479912825.jpg"
+      ],
+      "cashPriceARS": 329500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 18,
+      "legacyCellphoneKey": "lcfp-v1-152f6d1dec13e9590979",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-152f6d1dec13e9590979",
+      "name": "Samsung A16 128/4gb",
+      "normalizedName": "samsung a16 128 4gb",
+      "brand": "Samsung",
+      "model": "Samsung A16",
+      "modelFamily": "Samsung A16",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg"
+      ],
+      "cashPriceARS": 351500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 19,
+      "legacyCellphoneKey": "lcfp-v1-0af4491085beaf6f122c",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-0af4491085beaf6f122c",
+      "name": "Samsung A17 128/4gb",
+      "normalizedName": "samsung a17 128 4gb",
+      "brand": "Samsung",
+      "model": "Samsung A17",
+      "modelFamily": "Samsung A17",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_5_1783479961929.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_5_1783479961929.jpg"
+      ],
+      "cashPriceARS": 395500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 20,
+      "legacyCellphoneKey": "lcfp-v1-44bd404ac49cc56b5de9",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-44bd404ac49cc56b5de9",
+      "name": "Samsung A17 256/8gb",
+      "normalizedName": "samsung a17 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A17",
+      "modelFamily": "Samsung A17",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_6_1783480024984.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_6_1783480024984.jpg"
+      ],
+      "cashPriceARS": 520500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 21,
+      "legacyCellphoneKey": "lcfp-v1-890c0f8f88839e01c5a4",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-890c0f8f88839e01c5a4",
+      "name": "Samsung A26 5G 256/8gb",
+      "normalizedName": "samsung a26 5g 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A26 5G",
+      "modelFamily": "Samsung A26",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1783480046356.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1783480046356.jpg"
+      ],
+      "cashPriceARS": 602000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 22,
+      "legacyCellphoneKey": "lcfp-v1-a94008f1a42879457dfe",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-a94008f1a42879457dfe",
+      "name": "Samsung A27 5G 256/8gb",
+      "normalizedName": "samsung a27 5g 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A27 5G",
+      "modelFamily": "Samsung A27",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_17_1784431722727.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_17_1784431722727.jpg"
+      ],
+      "cashPriceARS": 735000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 23,
+      "legacyCellphoneKey": "lcfp-v1-4cf1915b2cc3d6a6bbdf",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-4cf1915b2cc3d6a6bbdf",
+      "name": "Samsung A36 5G 256/8gb",
+      "normalizedName": "samsung a36 5g 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A36 5G",
+      "modelFamily": "Samsung A36",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1783480101809.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1783480101809.jpg"
+      ],
+      "cashPriceARS": 673500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 24,
+      "legacyCellphoneKey": "lcfp-v1-b05444ec1a034635a398",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-b05444ec1a034635a398",
+      "name": "Samsung A37 5G 256/8gb",
+      "normalizedName": "samsung a37 5g 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A37 5G",
+      "modelFamily": "Samsung A37",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_9_1783480233490.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_9_1783480233490.jpg"
+      ],
+      "cashPriceARS": 775500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 25,
+      "legacyCellphoneKey": "lcfp-v1-bfea61db838bb92016ae",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-bfea61db838bb92016ae",
+      "name": "Samsung A56 5G 256/8gb",
+      "normalizedName": "samsung a56 5g 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A56 5G",
+      "modelFamily": "Samsung A56",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_10_1783481068345.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_10_1783481068345.jpg"
+      ],
+      "cashPriceARS": 847000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 26,
+      "legacyCellphoneKey": "lcfp-v1-11d9804579e2659d36a0",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-11d9804579e2659d36a0",
+      "name": "Samsung A56 5G 256/12gb",
+      "normalizedName": "samsung a56 5g 256 12gb",
+      "brand": "Samsung",
+      "model": "Samsung A56 5G",
+      "modelFamily": "Samsung A56",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_11_1783480976482.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_11_1783480976482.jpg"
+      ],
+      "cashPriceARS": 867500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 27,
+      "legacyCellphoneKey": "lcfp-v1-3b0e8dcd71b2da306a0e",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-3b0e8dcd71b2da306a0e",
+      "name": "Samsung A57 5G 256/8gb",
+      "normalizedName": "samsung a57 5g 256 8gb",
+      "brand": "Samsung",
+      "model": "Samsung A57 5G",
+      "modelFamily": "Samsung A57",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_21_g6cp4y.jpg?v=1787097676710",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_21_g6cp4y.jpg?v=1787097676710"
+      ],
+      "cashPriceARS": 877500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 28,
+      "legacyCellphoneKey": "lcfp-v1-b51fb454f68e5d10f05f",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-b51fb454f68e5d10f05f",
+      "name": "Samsung s25 ultra 256/12gb",
+      "normalizedName": "samsung s25 ultra 256 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S25 Ultra",
+      "modelFamily": "Samsung S25 Ultra",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_22_1784429808162.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_22_1784429808162.jpg"
+      ],
+      "cashPriceARS": 1735000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 29,
+      "legacyCellphoneKey": "lcfp-v1-e64a5b76dd76eb77e7be",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-e64a5b76dd76eb77e7be",
+      "name": "Samsung s25 ultra 1tb/12gb",
+      "normalizedName": "samsung s25 ultra 1tb 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S25 Ultra",
+      "modelFamily": "Samsung S25 Ultra",
+      "memory": "1 TB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_14_1783480732315.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_14_1783480732315.jpg"
+      ],
+      "cashPriceARS": 2041000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 30,
+      "legacyCellphoneKey": "lcfp-v1-6a662de46e41931deab5",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-6a662de46e41931deab5",
+      "name": "Samsung s26 256/12gb",
+      "normalizedName": "samsung s26 256 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S26",
+      "modelFamily": "Samsung S26",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_25_1784430688397.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_25_1784430688397.jpg"
+      ],
+      "cashPriceARS": 1561500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 31,
+      "legacyCellphoneKey": "lcfp-v1-3c5fabdbef193b853a38",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-3c5fabdbef193b853a38",
+      "name": "Samsung s26 512/12gb",
+      "normalizedName": "samsung s26 512 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S26",
+      "modelFamily": "Samsung S26",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_15_1783480707604.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_15_1783480707604.jpg"
+      ],
+      "cashPriceARS": 1837000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 32,
+      "legacyCellphoneKey": "lcfp-v1-1cc35b9127c114f1b679",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-1cc35b9127c114f1b679",
+      "name": "Samsung s26 ultra 256/12gb",
+      "normalizedName": "samsung s26 ultra 256 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S26 Ultra",
+      "modelFamily": "Samsung S26 Ultra",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_18_1783480574567.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_18_1783480574567.jpg"
+      ],
+      "cashPriceARS": 2000000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 33,
+      "legacyCellphoneKey": "lcfp-v1-46a971e5ec56e12c7f31",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-46a971e5ec56e12c7f31",
+      "name": "Samsung s26 ultra 512/12gb",
+      "normalizedName": "samsung s26 ultra 512 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S26 Ultra",
+      "modelFamily": "Samsung S26 Ultra",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1784430874033.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1784430874033.jpg"
+      ],
+      "cashPriceARS": 2367500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 34,
+      "legacyCellphoneKey": "lcfp-v1-442eef619c3d4ba748c7",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-442eef619c3d4ba748c7",
+      "name": "Samsung s26 ultra 1tb/12gb",
+      "normalizedName": "samsung s26 ultra 1tb 12gb",
+      "brand": "Samsung",
+      "model": "Samsung S26 Ultra",
+      "modelFamily": "Samsung S26 Ultra",
+      "memory": "1 TB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1784431175083.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1784431175083.jpg"
+      ],
+      "cashPriceARS": 2898000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 35,
+      "legacyCellphoneKey": "lcfp-v1-911a8f43f3b56cadbfda",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-911a8f43f3b56cadbfda",
+      "name": "Samsung ZFlip 8 ultra 512/12gb",
+      "normalizedName": "samsung zflip 8 ultra 512 12gb",
+      "brand": "Samsung",
+      "model": "Samsung Zflip 8 Ultra",
+      "modelFamily": "Samsung Zflip 8 Ultra",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_35_1dgvn9v.jpg?v=1787263106330",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_35_1dgvn9v.jpg?v=1787263106330"
+      ],
+      "cashPriceARS": 2694000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 36,
+      "legacyCellphoneKey": "lcfp-v1-cc983a5953683235950d",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-cc983a5953683235950d",
+      "name": "Moto E22 64/4gb",
+      "normalizedName": "moto e22 64 4gb",
+      "brand": "Motorola",
+      "model": "Moto E22",
+      "modelFamily": "Moto E22",
+      "memory": "64 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_29_ie9ioq.jpg?v=1786861232292",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_29_ie9ioq.jpg?v=1786861232292"
+      ],
+      "cashPriceARS": 235500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 37,
+      "legacyCellphoneKey": "lcfp-v1-54cc62467f2e3f6305f9",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-54cc62467f2e3f6305f9",
+      "name": "Moto G04 64/4gb",
+      "normalizedName": "moto g04 64 4gb",
+      "brand": "Motorola",
+      "model": "Moto G04",
+      "modelFamily": "Moto G04",
+      "memory": "64 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_30_1eaugcs.jpg?v=1786889400408",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_30_1eaugcs.jpg?v=1786889400408"
+      ],
+      "cashPriceARS": 259000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 38,
+      "legacyCellphoneKey": "lcfp-v1-593e53e3ee47e440acb9",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-593e53e3ee47e440acb9",
+      "name": "Moto G14 128/4gb",
+      "normalizedName": "moto g14 128 4gb",
+      "brand": "Motorola",
+      "model": "Moto G14",
+      "modelFamily": "Moto G14",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_31_1eku21r.jpg?v=1786862006622",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_31_1eku21r.jpg?v=1786862006622"
+      ],
+      "cashPriceARS": 306000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 39,
+      "legacyCellphoneKey": "lcfp-v1-4a4554fc7b6dece3834b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-4a4554fc7b6dece3834b",
+      "name": "Moto E15 64/2gb",
+      "normalizedName": "moto e15 64 2gb",
+      "brand": "Motorola",
+      "model": "Moto E15",
+      "modelFamily": "Moto E15",
+      "memory": "64 GB",
+      "ram": "2 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_19_1783481423033.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_19_1783481423033.jpg"
+      ],
+      "cashPriceARS": 259000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 40,
+      "legacyCellphoneKey": "lcfp-v1-3acc7b551fd05f5df800",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-3acc7b551fd05f5df800",
+      "name": "Moto G05 128/4gb",
+      "normalizedName": "moto g05 128 4gb",
+      "brand": "Motorola",
+      "model": "Moto G05",
+      "modelFamily": "Moto G05",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_21_1783481408191.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_21_1783481408191.jpg"
+      ],
+      "cashPriceARS": 341500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 41,
+      "legacyCellphoneKey": "lcfp-v1-01a0e91222684d290909",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-01a0e91222684d290909",
+      "name": "Moto G06 128/4gb",
+      "normalizedName": "moto g06 128 4gb",
+      "brand": "Motorola",
+      "model": "Moto G06",
+      "modelFamily": "Moto G06",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_23_1783481583785.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_23_1783481583785.jpg"
+      ],
+      "cashPriceARS": 294500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 42,
+      "legacyCellphoneKey": "lcfp-v1-141575a71b8ce06fdb43",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-141575a71b8ce06fdb43",
+      "name": "Moto G06 256/4gb",
+      "normalizedName": "moto g06 256 4gb",
+      "brand": "Motorola",
+      "model": "Moto G06",
+      "modelFamily": "Moto G06",
+      "memory": "256 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_24_1783481558474.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_24_1783481558474.jpg"
+      ],
+      "cashPriceARS": 362500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 25
+      }
+    },
+    {
+      "legacyPosition": 43,
+      "legacyCellphoneKey": "lcfp-v1-223ea585f68476015d1b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-223ea585f68476015d1b",
+      "name": "Moto G06 Power256/4gb",
+      "normalizedName": "moto g06 power256 4gb",
+      "brand": "Motorola",
+      "model": "Moto G06 POWER",
+      "modelFamily": "Moto G06 POWER",
+      "memory": "256 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_36_1dqv8yu.jpg?v=1786862230633",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_36_1dqv8yu.jpg?v=1786862230633"
+      ],
+      "cashPriceARS": 351500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 25
+      }
+    },
+    {
+      "legacyPosition": 44,
+      "legacyCellphoneKey": "lcfp-v1-6678c4600c37c8932220",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-6678c4600c37c8932220",
+      "name": "Moto G15 128/4gb",
+      "normalizedName": "moto g15 128 4gb",
+      "brand": "Motorola",
+      "model": "Moto G15",
+      "modelFamily": "Moto G15",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg"
+      ],
+      "cashPriceARS": 351500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 45,
+      "legacyCellphoneKey": "lcfp-v1-7aa4de4b51b701c76d00",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-7aa4de4b51b701c76d00",
+      "name": "Moto G15 POWER 256/8gb",
+      "normalizedName": "moto g15 power 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G15 POWER",
+      "modelFamily": "Moto G15 POWER",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg"
+      ],
+      "cashPriceARS": 395500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 46,
+      "legacyCellphoneKey": "lcfp-v1-38914b70e02ed363f855",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-38914b70e02ed363f855",
+      "name": "Moto G15 512/4gb",
+      "normalizedName": "moto g15 512 4gb",
+      "brand": "Motorola",
+      "model": "Moto G15",
+      "modelFamily": "Moto G15",
+      "memory": "512 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1783481847093.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1783481847093.jpg"
+      ],
+      "cashPriceARS": 428500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 47,
+      "legacyCellphoneKey": "lcfp-v1-82f1b50d9849ac4a69ec",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-82f1b50d9849ac4a69ec",
+      "name": "Moto G17 256/4gb",
+      "normalizedName": "moto g17 256 4gb",
+      "brand": "Motorola",
+      "model": "Moto G17",
+      "modelFamily": "Moto G17",
+      "memory": "256 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1783482083909.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1783482083909.jpg"
+      ],
+      "cashPriceARS": 450500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 25
+      }
+    },
+    {
+      "legacyPosition": 48,
+      "legacyCellphoneKey": "lcfp-v1-a838a4f6301520e3207a",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-a838a4f6301520e3207a",
+      "name": "Moto G35 256/4gb",
+      "normalizedName": "moto g35 256 4gb",
+      "brand": "Motorola",
+      "model": "Moto G35",
+      "modelFamily": "Moto G35",
+      "memory": "256 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_39_1gsqvlj.jpg?v=1785771219162",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_39_1gsqvlj.jpg?v=1785771219162"
+      ],
+      "cashPriceARS": 428500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 25
+      }
+    },
+    {
+      "legacyPosition": 49,
+      "legacyCellphoneKey": "lcfp-v1-de7e93f95676150f5854",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-de7e93f95676150f5854",
+      "name": "Moto G56 5G 256/8gb",
+      "normalizedName": "moto g56 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G56 5G",
+      "modelFamily": "Moto G56",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_33_1783510366146.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_33_1783510366146.jpg"
+      ],
+      "cashPriceARS": 541000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 50,
+      "legacyCellphoneKey": "lcfp-v1-113bb541d0418d1c316d",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-113bb541d0418d1c316d",
+      "name": "Moto G57 256/8gb",
+      "normalizedName": "moto g57 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G57",
+      "modelFamily": "Moto G57",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_43_1cwtady.jpg?v=1786898005626",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_43_1cwtady.jpg?v=1786898005626"
+      ],
+      "cashPriceARS": 520500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 51,
+      "legacyCellphoneKey": "lcfp-v1-8f23a180423e7948c6a8",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-8f23a180423e7948c6a8",
+      "name": "Moto G57 POWER 256/12gb",
+      "normalizedName": "moto g57 power 256 12gb",
+      "brand": "Motorola",
+      "model": "Moto G57 POWER",
+      "modelFamily": "Moto G57 POWER",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_44_1dqs3gv.jpg?v=1786898019952",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_44_1dqs3gv.jpg?v=1786898019952"
+      ],
+      "cashPriceARS": 561500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 25
+      }
+    },
+    {
+      "legacyPosition": 52,
+      "legacyCellphoneKey": "lcfp-v1-1e01ce049c84f79abaf6",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-1e01ce049c84f79abaf6",
+      "name": "Moto G77 5G 256/8gb",
+      "normalizedName": "moto g77 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G77 5G",
+      "modelFamily": "Moto G77",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1783599538658.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1783599538658.jpg"
+      ],
+      "cashPriceARS": 592000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 53,
+      "legacyCellphoneKey": "lcfp-v1-83a3d540078347b65619",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-83a3d540078347b65619",
+      "name": "Moto G86 5G 256/8gb",
+      "normalizedName": "moto g86 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G86 5G",
+      "modelFamily": "Moto G86",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_36_1783600344108.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_36_1783600344108.jpg"
+      ],
+      "cashPriceARS": 602000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 54,
+      "legacyCellphoneKey": "lcfp-v1-b56a7fef26b3ece0c73d",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-b56a7fef26b3ece0c73d",
+      "name": "Moto G86 POWER 5G 256/8gb",
+      "normalizedName": "moto g86 power 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G86 POWER 5G",
+      "modelFamily": "Moto G86 POWER",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_45_1784433206665.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_45_1784433206665.jpg"
+      ],
+      "cashPriceARS": 581500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 55,
+      "legacyCellphoneKey": "lcfp-v1-8cef3728e6c8f273b569",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-8cef3728e6c8f273b569",
+      "name": "Moto G86 5G 512/8gb",
+      "normalizedName": "moto g86 5g 512 8gb",
+      "brand": "Motorola",
+      "model": "Moto G86 5G",
+      "modelFamily": "Moto G86",
+      "memory": "512 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1784433058590.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1784433058590.jpg"
+      ],
+      "cashPriceARS": 622500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 20
+      }
+    },
+    {
+      "legacyPosition": 56,
+      "legacyCellphoneKey": "lcfp-v1-1886b50d8fc14b040b47",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-1886b50d8fc14b040b47",
+      "name": "Moto G MAX 5G 256/8gb NUEVO",
+      "normalizedName": "moto g max 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto G MAX 5G",
+      "modelFamily": "Moto G MAX",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_46_1earaut.jpg?v=1786415373266",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_46_1earaut.jpg?v=1786415373266"
+      ],
+      "cashPriceARS": 714500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 57,
+      "legacyCellphoneKey": "lcfp-v1-06b0d71dc1f54221027e",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-06b0d71dc1f54221027e",
+      "name": "Moto EDGE 60 Fusion 5g 256/8gb",
+      "normalizedName": "moto edge 60 fusion 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto EDGE 60 FUSION 5G",
+      "modelFamily": "Moto EDGE 60 FUSION",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_39_1783482338949.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_39_1783482338949.jpg"
+      ],
+      "cashPriceARS": 592000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 58,
+      "legacyCellphoneKey": "lcfp-v1-10da017dfc1bddc74cb1",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-10da017dfc1bddc74cb1",
+      "name": "Moto EDGE 60 5g 256/12gb",
+      "normalizedName": "moto edge 60 5g 256 12gb",
+      "brand": "Motorola",
+      "model": "Moto EDGE 60 5G",
+      "modelFamily": "Moto EDGE 60",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_51_1k4fsx9.jpg?v=1786898037618",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_51_1k4fsx9.jpg?v=1786898037618"
+      ],
+      "cashPriceARS": 592000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 25
+      }
+    },
+    {
+      "legacyPosition": 59,
+      "legacyCellphoneKey": "lcfp-v1-55228bffdd3db5ab073e",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-55228bffdd3db5ab073e",
+      "name": "Moto EDGE 70 Fusion 5g 256/8gb",
+      "normalizedName": "moto edge 70 fusion 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto EDGE 70 FUSION 5G",
+      "modelFamily": "Moto EDGE 70 FUSION",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_48_1euqi8r.jpg?v=1786497719343",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_48_1euqi8r.jpg?v=1786497719343"
+      ],
+      "cashPriceARS": 888000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 60,
+      "legacyCellphoneKey": "lcfp-v1-00bdb3cae679a473a0ee",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-00bdb3cae679a473a0ee",
+      "name": "Moto EDGE 70 5g 256/8gb",
+      "normalizedName": "moto edge 70 5g 256 8gb",
+      "brand": "Motorola",
+      "model": "Moto EDGE 70 5G",
+      "modelFamily": "Moto EDGE 70",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_49_1ekqwjs.jpg?v=1786497736420",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_49_1ekqwjs.jpg?v=1786497736420"
+      ],
+      "cashPriceARS": 928500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 30
+      }
+    },
+    {
+      "legacyPosition": 61,
+      "legacyCellphoneKey": "lcfp-v1-89d59f37d444712a4119",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-89d59f37d444712a4119",
+      "name": "REDMI A5 128/4",
+      "normalizedName": "redmi a5 128 4",
+      "brand": "Redmi",
+      "model": "Redmi A5",
+      "modelFamily": "Redmi A5",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_48_1784433508282.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_48_1784433508282.jpg"
+      ],
+      "cashPriceARS": 341500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 62,
+      "legacyCellphoneKey": "lcfp-v1-8c9d74eae8e4dc80f82f",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-8c9d74eae8e4dc80f82f",
+      "name": "REDMI 15C 128/4GB",
+      "normalizedName": "redmi 15c 128 4gb",
+      "brand": "Redmi",
+      "model": "Redmi 15c",
+      "modelFamily": "Redmi 15c",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_42_1783990427348.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_42_1783990427348.jpg"
+      ],
+      "cashPriceARS": 351500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 63,
+      "legacyCellphoneKey": "lcfp-v1-5070d6b23ecef0f8d71b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-5070d6b23ecef0f8d71b",
+      "name": "REDMI 15C 256/4GB",
+      "normalizedName": "redmi 15c 256 4gb",
+      "brand": "Redmi",
+      "model": "Redmi 15c",
+      "modelFamily": "Redmi 15c",
+      "memory": "256 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_43_1783990374711.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_43_1783990374711.jpg"
+      ],
+      "cashPriceARS": 395500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 64,
+      "legacyCellphoneKey": "lcfp-v1-66117a5e5afe219aaa7b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-66117a5e5afe219aaa7b",
+      "name": "REDMI 15C 256/8GB",
+      "normalizedName": "redmi 15c 256 8gb",
+      "brand": "Redmi",
+      "model": "Redmi 15c",
+      "modelFamily": "Redmi 15c",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1783990470083.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1783990470083.jpg"
+      ],
+      "cashPriceARS": 417500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 65,
+      "legacyCellphoneKey": "lcfp-v1-bef4fbe1cdf5b5a8a6a6",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-bef4fbe1cdf5b5a8a6a6",
+      "name": "REDMI 17 256/6GB ‼NOVEDAD",
+      "normalizedName": "redmi 17 256 6gb",
+      "brand": "Redmi",
+      "model": "Redmi 17",
+      "modelFamily": "Redmi 17",
+      "memory": "256 GB",
+      "ram": "6 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_58_1hmjdoi.jpg?v=1786891828619",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_58_1hmjdoi.jpg?v=1786891828619"
+      ],
+      "cashPriceARS": 520500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 66,
+      "legacyCellphoneKey": "lcfp-v1-2fa78c52646063925ebe",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-2fa78c52646063925ebe",
+      "name": "Xiaomi Note 14 256/8gb",
+      "normalizedName": "xiaomi note 14 256 8gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 14",
+      "modelFamily": "Xiaomi NOTE 14",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_52_1784434560089.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_52_1784434560089.jpg"
+      ],
+      "cashPriceARS": 459000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 67,
+      "legacyCellphoneKey": "lcfp-v1-8da81fa384076befb16e",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-8da81fa384076befb16e",
+      "name": "Xiaomi Note 15 256/8gb",
+      "normalizedName": "xiaomi note 15 256 8gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 15",
+      "modelFamily": "Xiaomi NOTE 15",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_54_1784435024036.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_54_1784435024036.jpg"
+      ],
+      "cashPriceARS": 490000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 68,
+      "legacyCellphoneKey": "lcfp-v1-f7909534dc707891bdef",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-f7909534dc707891bdef",
+      "name": "Poco C81 PRO 128/4GB",
+      "normalizedName": "poco c81 pro 128 4gb",
+      "brand": "POCO",
+      "model": "POCO C81 PRO",
+      "modelFamily": "POCO C81 PRO",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_55_1784435060367.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_55_1784435060367.jpg"
+      ],
+      "cashPriceARS": 362500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 69,
+      "legacyCellphoneKey": "lcfp-v1-792ca36a2061b540cdfb",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-792ca36a2061b540cdfb",
+      "name": "Xiaomi Note 14 pro Plus 5g 512/12gb",
+      "normalizedName": "xiaomi note 14 pro plus 5g 512 12gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 14 PRO PLUS 5G",
+      "modelFamily": "Xiaomi NOTE 14 PRO PLUS",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_60_1784435879654.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_60_1784435879654.jpg"
+      ],
+      "cashPriceARS": 867500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 70,
+      "legacyCellphoneKey": "lcfp-v1-1f6faf5c4f9214520e5b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-1f6faf5c4f9214520e5b",
+      "name": "Xiaomi Note 15 pro 256/8gb",
+      "normalizedName": "xiaomi note 15 pro 256 8gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 15 PRO",
+      "modelFamily": "Xiaomi NOTE 15 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_56_1783990673695.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_56_1783990673695.jpg"
+      ],
+      "cashPriceARS": 632500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 71,
+      "legacyCellphoneKey": "lcfp-v1-907280b6bc756427427f",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-907280b6bc756427427f",
+      "name": "Xiaomi Note 15 pro 512/8gb",
+      "normalizedName": "xiaomi note 15 pro 512 8gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 15 PRO",
+      "modelFamily": "Xiaomi NOTE 15 PRO",
+      "memory": "512 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_65_jht3uy.jpg?v=1786501305674",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_65_jht3uy.jpg?v=1786501305674"
+      ],
+      "cashPriceARS": 724500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 5
+      }
+    },
+    {
+      "legacyPosition": 72,
+      "legacyCellphoneKey": "lcfp-v1-6e8532cc9a3fc4d18476",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-6e8532cc9a3fc4d18476",
+      "name": "Xiaomi Note 15 pro PLUS 5g 256/8gb",
+      "normalizedName": "xiaomi note 15 pro plus 5g 256 8gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 15 PRO PLUS 5G",
+      "modelFamily": "Xiaomi NOTE 15 PRO PLUS",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1786501333265",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1786501333265"
+      ],
+      "cashPriceARS": 816500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 73,
+      "legacyCellphoneKey": "lcfp-v1-c0690aedbb677bb1925d",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-c0690aedbb677bb1925d",
+      "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
+      "normalizedName": "xiaomi note 15 pro plus 5g 512 12gb",
+      "brand": "Xiaomi",
+      "model": "Xiaomi NOTE 15 PRO PLUS 5G",
+      "modelFamily": "Xiaomi NOTE 15 PRO PLUS",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg"
+      ],
+      "cashPriceARS": 918500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 74,
+      "legacyCellphoneKey": "lcfp-v1-0f74cb1d9c1140fe132b",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-0f74cb1d9c1140fe132b",
+      "name": "Poco M8 5G 256/8GB",
+      "normalizedName": "poco m8 5g 256 8gb",
+      "brand": "POCO",
+      "model": "POCO M8 5G",
+      "modelFamily": "POCO M8",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_65_1784437186765.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_65_1784437186765.jpg"
+      ],
+      "cashPriceARS": 510500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 75,
+      "legacyCellphoneKey": "lcfp-v1-d65d111e70f74b1bd57a",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-d65d111e70f74b1bd57a",
+      "name": "Poco M8 5G 512/8GB",
+      "normalizedName": "poco m8 5g 512 8gb",
+      "brand": "POCO",
+      "model": "POCO M8 5G",
+      "modelFamily": "POCO M8",
+      "memory": "512 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_66_1784437313028.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_66_1784437313028.jpg"
+      ],
+      "cashPriceARS": 571500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 5
+      }
+    },
+    {
+      "legacyPosition": 76,
+      "legacyCellphoneKey": "lcfp-v1-98f97cb649581762e0a7",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-98f97cb649581762e0a7",
+      "name": "Poco M8 Pro 5G 256/8GB",
+      "normalizedName": "poco m8 pro 5g 256 8gb",
+      "brand": "POCO",
+      "model": "POCO M8 PRO 5G",
+      "modelFamily": "POCO M8 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_67_1784437557792.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_67_1784437557792.jpg"
+      ],
+      "cashPriceARS": 612500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 77,
+      "legacyCellphoneKey": "lcfp-v1-a8a2d41d41ef719e7a72",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-a8a2d41d41ef719e7a72",
+      "name": "Poco M8 Pro 5G 512/12GB",
+      "normalizedName": "poco m8 pro 5g 512 12gb",
+      "brand": "POCO",
+      "model": "POCO M8 PRO 5G",
+      "modelFamily": "POCO M8 PRO",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_68_1784437624730.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_68_1784437624730.jpg"
+      ],
+      "cashPriceARS": 775500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 78,
+      "legacyCellphoneKey": "lcfp-v1-c595faee6f07326ba170",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-c595faee6f07326ba170",
+      "name": "Poco X7 Pro 5G 256/8GB",
+      "normalizedName": "poco x7 pro 5g 256 8gb",
+      "brand": "POCO",
+      "model": "POCO X7 PRO 5G",
+      "modelFamily": "POCO X7 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_69_1784437875463.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_69_1784437875463.jpg"
+      ],
+      "cashPriceARS": 755000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 79,
+      "legacyCellphoneKey": "lcfp-v1-1a0eb5810e322268ce81",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-1a0eb5810e322268ce81",
+      "name": "Poco X7 Pro 5G 512/8GB",
+      "normalizedName": "poco x7 pro 5g 512 8gb",
+      "brand": "POCO",
+      "model": "POCO X7 PRO 5G",
+      "modelFamily": "POCO X7 PRO",
+      "memory": "512 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_70_1784438413481.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_70_1784438413481.jpg"
+      ],
+      "cashPriceARS": 826500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 5
+      }
+    },
+    {
+      "legacyPosition": 80,
+      "legacyCellphoneKey": "lcfp-v1-e1ff89e581d5539b2fcf",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-e1ff89e581d5539b2fcf",
+      "name": "Poco X8 Pro 5g 256/8GB",
+      "normalizedName": "poco x8 pro 5g 256 8gb",
+      "brand": "POCO",
+      "model": "POCO X8 PRO 5G",
+      "modelFamily": "POCO X8 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1784438559279.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1784438559279.jpg"
+      ],
+      "cashPriceARS": 847000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 81,
+      "legacyCellphoneKey": "lcfp-v1-ff8b861129359dc02a21",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-ff8b861129359dc02a21",
+      "name": "Poco X8 Pro 5g 512/8GB",
+      "normalizedName": "poco x8 pro 5g 512 8gb",
+      "brand": "POCO",
+      "model": "POCO X8 PRO 5G",
+      "modelFamily": "POCO X8 PRO",
+      "memory": "512 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1784438924500.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1784438924500.jpg"
+      ],
+      "cashPriceARS": 898000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 5
+      }
+    },
+    {
+      "legacyPosition": 82,
+      "legacyCellphoneKey": "lcfp-v1-4e61c74d10bbeedbd6e4",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-4e61c74d10bbeedbd6e4",
+      "name": "Poco X8 Pro Max 5G 256/12GB",
+      "normalizedName": "poco x8 pro max 5g 256 12gb",
+      "brand": "POCO",
+      "model": "POCO X8 PRO MAX 5G",
+      "modelFamily": "POCO X8 PRO MAX",
+      "memory": "256 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_73_1784439470457.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_73_1784439470457.jpg"
+      ],
+      "cashPriceARS": 1030500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 10
+      }
+    },
+    {
+      "legacyPosition": 83,
+      "legacyCellphoneKey": "lcfp-v1-9dd38a8046f2d12a8dd3",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-9dd38a8046f2d12a8dd3",
+      "name": "Poco X8 Pro max 5G 512/12GB",
+      "normalizedName": "poco x8 pro max 5g 512 12gb",
+      "brand": "POCO",
+      "model": "POCO X8 PRO MAX 5G",
+      "modelFamily": "POCO X8 PRO MAX",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_74_1784439773608.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_74_1784439773608.jpg"
+      ],
+      "cashPriceARS": 1224500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 84,
+      "legacyCellphoneKey": "lcfp-v1-478560fcb0a9d10a7192",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-478560fcb0a9d10a7192",
+      "name": "INFINIX SMART 8 PRO 8/256 GB",
+      "normalizedName": "infinix smart 8 pro 8 256 gb",
+      "brand": "Infinix",
+      "model": "Infinix SMART 8 PRO",
+      "modelFamily": "Infinix SMART 8 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_75_1784440085367.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_75_1784440085367.jpg"
+      ],
+      "cashPriceARS": 384500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 85,
+      "legacyCellphoneKey": "lcfp-v1-1fc7f91662d89b553909",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-1fc7f91662d89b553909",
+      "name": "INFINIX SMART 10 4/128 GB",
+      "normalizedName": "infinix smart 10 4 128 gb",
+      "brand": "Infinix",
+      "model": "Infinix SMART 10",
+      "modelFamily": "Infinix SMART 10",
+      "memory": "128 GB",
+      "ram": "4 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_79_f1wb9f.jpg?v=1786576539549",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_79_f1wb9f.jpg?v=1786576539549"
+      ],
+      "cashPriceARS": 306000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    },
+    {
+      "legacyPosition": 86,
+      "legacyCellphoneKey": "lcfp-v1-6fe06a54207d3954a85c",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-6fe06a54207d3954a85c",
+      "name": "INFINIX HOT 60i 8/256 GB",
+      "normalizedName": "infinix hot 60i 8 256 gb",
+      "brand": "Infinix",
+      "model": "Infinix HOT 60i",
+      "modelFamily": "Infinix HOT 60i",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1783481166370.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1783481166370.jpg"
+      ],
+      "cashPriceARS": 406500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 87,
+      "legacyCellphoneKey": "lcfp-v1-3a90a215bc5908accfd8",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-3a90a215bc5908accfd8",
+      "name": "INFINIX HOT 60 PRO NFC 8/256 GB",
+      "normalizedName": "infinix hot 60 pro nfc 8 256 gb",
+      "brand": "Infinix",
+      "model": "Infinix HOT 60 PRO NFC",
+      "modelFamily": "Infinix HOT 60 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg"
+      ],
+      "cashPriceARS": 459000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 88,
+      "legacyCellphoneKey": "lcfp-v1-192ae2180d61210f2d6d",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-192ae2180d61210f2d6d",
+      "name": "INFINIX HOT 60 PRO PLUS NFC 8/256 GB",
+      "normalizedName": "infinix hot 60 pro plus nfc 8 256 gb",
+      "brand": "Infinix",
+      "model": "Infinix HOT 60 PRO PLUS NFC",
+      "modelFamily": "Infinix HOT 60 PRO PLUS",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1784440260045.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1784440260045.jpg"
+      ],
+      "cashPriceARS": 530500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 89,
+      "legacyCellphoneKey": "lcfp-v1-e79b5da04f60e599ff0c",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-e79b5da04f60e599ff0c",
+      "name": "INFINIX HOT 70 8/256 GB",
+      "normalizedName": "infinix hot 70 8 256 gb",
+      "brand": "Infinix",
+      "model": "Infinix HOT 70",
+      "modelFamily": "Infinix HOT 70",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1784440565263.jpg",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1784440565263.jpg"
+      ],
+      "cashPriceARS": 459000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 90,
+      "legacyCellphoneKey": "lcfp-v1-32b4f5fdea65d88441e8",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-32b4f5fdea65d88441e8",
+      "name": "INFINIX NOTE 50 PRO NFC 8/256 GB",
+      "normalizedName": "infinix note 50 pro nfc 8 256 gb",
+      "brand": "Infinix",
+      "model": "Infinix NOTE 50 PRO NFC",
+      "modelFamily": "Infinix NOTE 50 PRO",
+      "memory": "256 GB",
+      "ram": "8 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_84_e7ucoj.jpg?v=1786895125184",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_84_e7ucoj.jpg?v=1786895125184"
+      ],
+      "cashPriceARS": 602000,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "ready",
+      "reviewReasons": [],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 15
+      }
+    },
+    {
+      "legacyPosition": 91,
+      "legacyCellphoneKey": "lcfp-v1-69c2222f2843d920a9b1",
+      "canonicalProductId": null,
+      "stableId": null,
+      "slug": "cellphone-lab-69c2222f2843d920a9b1",
+      "name": "INFINIX GT 30 PRO NFC 512/12GB dark flare+ kit gamer shadow",
+      "normalizedName": "infinix gt 30 pro nfc 512 12gb dark flare kit gamer shadow",
+      "brand": "Infinix",
+      "model": "Infinix GT 30 PRO NFC",
+      "modelFamily": "Infinix GT 30 PRO",
+      "memory": "512 GB",
+      "ram": "12 GB",
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_91_dxrlhl.jpg?v=1787257174892",
+      "images": [
+        "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_91_dxrlhl.jpg?v=1787257174892"
+      ],
+      "cashPriceARS": 867500,
+      "financing": [],
+      "availability": "unknown",
+      "visibility": "pending",
+      "colors": [],
+      "features": [],
+      "updatedAt": null,
+      "migrationStatus": "review",
+      "reviewReasons": [
+        "bundle_or_color_suffix_requires_review"
+      ],
+      "provenance": {
+        "name": "explicit",
+        "brand": "parsed_from_name",
+        "model": "parsed_from_name",
+        "memory": "parsed_from_name",
+        "ram": "parsed_from_name",
+        "colors": "unknown",
+        "price": "explicit",
+        "image": "explicit",
+        "features": "unknown",
+        "visibility": "unknown",
+        "availability": "unknown",
+        "updatedAt": "unknown"
+      },
+      "masterCrosscheck": {
+        "level": "no_match",
+        "score": 0
+      }
+    }
+  ]
+}

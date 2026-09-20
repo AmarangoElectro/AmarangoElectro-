@@ -1,0 +1,14 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs";
+const workspace=fs.readFileSync("app/components/admin-consolidated-workspace.tsx","utf8");
+const platform=fs.readFileSync("app/plataforma/page.tsx","utf8");
+const storefront=fs.readFileSync("components/internal/admin/v418b-storefront-admin-preview.tsx","utf8");
+const quick=fs.readFileSync("components/internal/admin/v418a-quick-actions-sheet.tsx","utf8");
+const phones=fs.readFileSync("components/internal/admin/v16-90-cellphones-preview.tsx","utf8");
+const panels=["providers-panel.tsx","advisors-panel.tsx","crm-client-360-panel.tsx","collections-panel.tsx","reports-panel.tsx","payment-history-panel.tsx","deliveries-panel.tsx","provider-inbox-panel.tsx","cash-panel.tsx","crm-clients-panel.tsx"].map(x=>fs.readFileSync("components/internal/admin/"+x,"utf8")).join("\n");
+test("admin primary chrome has production-facing labels",()=>{assert.match(workspace,/CENTRO DE ADMINISTRACIÓN/);assert.match(workspace,/MODO SEGURO/);for(const x of ["ADMIN ACCELERATOR V4.11","READ ONLY","OFERTAS & OUTLET V4.7"]) assert.ok(!workspace.includes(x),x);});
+test("platform page no longer exposes checkpoint/version language",()=>{for(const x of ["TOUR UNIFICADO V4.9","READ ONLY EN ESTE CHECKPOINT"]) assert.ok(!platform.includes(x),x);assert.match(platform,/ACCESO SEGÚN PERMISOS/);});
+test("admin storefront and quick actions hide lab/recovery/version copy",()=>{for(const x of ["LAB INTERNO","ADMIN LAB","RECOVERY","WRITE GATE · SIMULADO","V4.18A ·","V4.18B ·"]) assert.ok(!(storefront+quick).includes(x),x);});
+test("90 phones surface is framed as review, not technical preview chrome",()=>{assert.match(phones,/CATÁLOGO EN REVISIÓN/);assert.ok(!phones.includes("PREVIEW TÉCNICA"));});
+test("disconnected internal panels use professional fail-closed copy",()=>{assert.match(panels,/Conexión requerida/);assert.ok(!panels.includes("Datos no conectados en este entorno"));});
+test("admin inventory keeps all core modules",()=>{for(const label of ["Catálogo","Revisión de tienda","90 Celulares · revisión","Clientes / CRM","Cobranzas","Reportes","Proveedores","Caja","Entregas","Asesores","Calculadora","Placas","Ofertas · borrador"]) assert.ok(workspace.includes(label),label);});
+test("admin workspace still imports operational modules",()=>{for(const mod of ["CrmClientsPanel","CollectionsPanel","ReportsPanel","ProvidersAreaPanel","CashPanel","DeliveriesPanel","AdvisorsPanel","AmarangoCalculatorPanel","PlatesPanel"]) assert.ok(workspace.includes(mod),mod);});

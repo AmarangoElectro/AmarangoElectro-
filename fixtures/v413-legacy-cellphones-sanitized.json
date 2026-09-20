@@ -1,0 +1,722 @@
+{
+  "schemaVersion": "v4.13-legacy-cellphones-sanitized-v1",
+  "source": "public.celulares_lista/id=lista",
+  "capturedReadOnlyAt": "2026-08-30T15:50:57.781Z",
+  "sourceUpdatedAt": "2026-08-24T19:39:51.325+00:00",
+  "recordCount": 92,
+  "allowlistedFields": [
+    "legacyPosition",
+    "name",
+    "cashPriceARS",
+    "image",
+    "colors",
+    "features"
+  ],
+  "excludedPrivateFields": [
+    "usd",
+    "cotizUsada",
+    "rawLegacyJson",
+    "cost",
+    "supplier",
+    "wholesaler"
+  ],
+  "phones": [
+    {
+      "name": "IPHONE 15 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1784428078833.jpg",
+      "colors": [
+        "black",
+        "Blue",
+        "Pink"
+      ],
+      "features": "",
+      "cashPriceARS": 1469500,
+      "legacyPosition": 0
+    },
+    {
+      "name": "IPHONE 16 “E” 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_1_ogz1ay.jpg?v=1787258126821",
+      "colors": [
+        "black"
+      ],
+      "cashPriceARS": 1265500,
+      "legacyPosition": 1
+    },
+    {
+      "name": "IPHONE 16 “E” 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_2_o6zflz.jpg?v=1787258799095",
+      "colors": [
+        "White"
+      ],
+      "cashPriceARS": 1326500,
+      "legacyPosition": 2
+    },
+    {
+      "name": "IPHONE 16 “E” 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_3_nwztx0.jpg?v=1787259066167",
+      "colors": [
+        "White",
+        "black"
+      ],
+      "cashPriceARS": 1388000,
+      "legacyPosition": 3
+    },
+    {
+      "name": "IPHONE 16 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_1_1784428280123.jpg",
+      "colors": [
+        "black",
+        "teal",
+        "ultra",
+        "pink",
+        "white"
+      ],
+      "cashPriceARS": 1694000,
+      "legacyPosition": 4
+    },
+    {
+      "name": "IPHONE 16 PLUS 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_5_nd0mj2.jpg?v=1787259312642",
+      "colors": [
+        "black"
+      ],
+      "cashPriceARS": 1714500,
+      "legacyPosition": 5
+    },
+    {
+      "name": "IPHONE 16 PRO 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_6_n310u3.jpg?v=1787260656570",
+      "colors": [
+        "black",
+        "desert"
+      ],
+      "cashPriceARS": 2020500,
+      "legacyPosition": 6
+    },
+    {
+      "name": "IPHONE 16 Pro 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_7_mt1f54.jpg?v=1787261094908",
+      "colors": [
+        "Natural"
+      ],
+      "cashPriceARS": 2490000,
+      "legacyPosition": 7
+    },
+    {
+      "name": "IPHONE 16 PRO MAX 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_76_1783482459689.jpg",
+      "colors": [
+        "Black",
+        "desert"
+      ],
+      "cashPriceARS": 2694000,
+      "legacyPosition": 8
+    },
+    {
+      "name": "IPHONE 17 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1783484339522.jpg",
+      "colors": [
+        "Silver",
+        "Blue",
+        "Orange"
+      ],
+      "cashPriceARS": 1898000,
+      "legacyPosition": 9
+    },
+    {
+      "name": "IPHONE 17 PRO 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg",
+      "colors": [
+        "blue",
+        "orange",
+        "silver"
+      ],
+      "features": "Características principales:\n• Pantalla ProMotion 120 Hz.\n• Chip A19 Pro.\n• Triple cámara profesional con zoom óptico de hasta 8x.\n• Estructura de aluminio forjado y Ceramic Shield 2.\n• Apple Intelligence, WiFi 7 y USB-",
+      "cashPriceARS": 2490000,
+      "legacyPosition": 10
+    },
+    {
+      "name": "IPHONE 17 PRO 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_80_1783484510100.jpg",
+      "colors": [
+        "orange",
+        "blue",
+        "silver"
+      ],
+      "features": "Características principales:\n• Pantalla ProMotion 120 Hz.\n• Chip A19 Pro.\n• Triple cámara profesional con zoom óptico de hasta 8x.\n• Estructura de aluminio forjado y Ceramic Shield 2.\n• Apple Intelligence, WiFi 7 y USB-C.",
+      "cashPriceARS": 2898000,
+      "legacyPosition": 11
+    },
+    {
+      "name": "IPHONE 17 PRO MAX 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_82_1783483487460.jpg",
+      "colors": [
+        "blue",
+        "silver",
+        "orange"
+      ],
+      "features": "Características principales:\n• Pantalla ProMotion 120 Hz.\n• Chip A19 Pro.\n• Triple cámara profesional con zoom óptico de hasta 8x.\n• Estructura de aluminio forjado y Ceramic Shield 2.\n• Apple Intelligence, WiFi 7 y USB-C.",
+      "cashPriceARS": 2673500,
+      "legacyPosition": 12
+    },
+    {
+      "name": "IPHONE 17 PRO MAX 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1784433718628.jpg",
+      "colors": [
+        "Orange",
+        "blue"
+      ],
+      "features": "Características principales:\n• Pantalla ProMotion 120 Hz.\n• Chip A19 Pro.\n• Triple cámara profesional con zoom óptico de hasta 8x.\n• Estructura de aluminio forjado y Ceramic Shield 2.\n• Apple Intelligence, WiFi 7 y USB-C.",
+      "cashPriceARS": 3102500,
+      "legacyPosition": 13
+    },
+    {
+      "name": "IPHONE 17 PRO MAX 1TB - Silver-orange-blue",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1784432137817.jpg",
+      "colors": [],
+      "features": "Características principales:\n• Pantalla ProMotion 120 Hz.\n• Chip A19 Pro.\n• Triple cámara profesional con zoom óptico de hasta 8x.\n• Estructura de aluminio forjado y Ceramic Shield 2.\n• Apple Intelligence, WiFi 7 y USB-C.",
+      "cashPriceARS": 3469500,
+      "legacyPosition": 14
+    },
+    {
+      "name": "IPHONE 17 PRO MAX 2TB - Orange",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_86_1783484125999.jpg",
+      "colors": [],
+      "features": "Características principales:\n• Pantalla ProMotion 120 Hz.\n• Chip A19 Pro.\n• Triple cámara profesional con zoom óptico de hasta 8x.\n• Estructura de aluminio forjado y Ceramic Shield 2.\n• Apple Intelligence, WiFi 7 y USB-C.",
+      "cashPriceARS": 4204500,
+      "legacyPosition": 15
+    },
+    {
+      "name": "Samsung A06 64/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1783479809957.jpg",
+      "colors": [],
+      "cashPriceARS": 282500,
+      "legacyPosition": 16
+    },
+    {
+      "name": "Samsung A07 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_3_1783479912825.jpg",
+      "colors": [],
+      "cashPriceARS": 329500,
+      "legacyPosition": 17
+    },
+    {
+      "name": "Samsung A16 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
+      "colors": [],
+      "cashPriceARS": 351500,
+      "legacyPosition": 18
+    },
+    {
+      "name": "Samsung A17 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_5_1783479961929.jpg",
+      "colors": [],
+      "cashPriceARS": 395500,
+      "legacyPosition": 19
+    },
+    {
+      "name": "Samsung A17 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_6_1783480024984.jpg",
+      "colors": [],
+      "cashPriceARS": 520500,
+      "legacyPosition": 20
+    },
+    {
+      "name": "Samsung A26 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1783480046356.jpg",
+      "colors": [],
+      "cashPriceARS": 602000,
+      "legacyPosition": 21
+    },
+    {
+      "name": "Samsung A27 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_17_1784431722727.jpg",
+      "colors": [],
+      "cashPriceARS": 735000,
+      "legacyPosition": 22
+    },
+    {
+      "name": "Samsung A36 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1783480101809.jpg",
+      "colors": [],
+      "cashPriceARS": 673500,
+      "legacyPosition": 23
+    },
+    {
+      "name": "Samsung A37 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_9_1783480233490.jpg",
+      "colors": [],
+      "cashPriceARS": 775500,
+      "legacyPosition": 24
+    },
+    {
+      "name": "Samsung A56 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_10_1783481068345.jpg",
+      "colors": [],
+      "cashPriceARS": 847000,
+      "legacyPosition": 25
+    },
+    {
+      "name": "Samsung A56 5G 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_11_1783480976482.jpg",
+      "colors": [],
+      "cashPriceARS": 867500,
+      "legacyPosition": 26
+    },
+    {
+      "name": "Samsung A57 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_21_g6cp4y.jpg?v=1787097676710",
+      "colors": [],
+      "cashPriceARS": 877500,
+      "legacyPosition": 27
+    },
+    {
+      "name": "Samsung s25 ultra 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_22_1784429808162.jpg",
+      "colors": [],
+      "cashPriceARS": 1735000,
+      "legacyPosition": 28
+    },
+    {
+      "name": "Samsung s25 ultra 1tb/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_14_1783480732315.jpg",
+      "colors": [],
+      "cashPriceARS": 2041000,
+      "legacyPosition": 29
+    },
+    {
+      "name": "Samsung s26 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_25_1784430688397.jpg",
+      "colors": [],
+      "cashPriceARS": 1561500,
+      "legacyPosition": 30
+    },
+    {
+      "name": "Samsung s26 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_15_1783480707604.jpg",
+      "colors": [],
+      "cashPriceARS": 1837000,
+      "legacyPosition": 31
+    },
+    {
+      "name": "Samsung s26 ultra 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_18_1783480574567.jpg",
+      "colors": [],
+      "cashPriceARS": 2000000,
+      "legacyPosition": 32
+    },
+    {
+      "name": "Samsung s26 ultra 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1784430874033.jpg",
+      "colors": [],
+      "cashPriceARS": 2367500,
+      "legacyPosition": 33
+    },
+    {
+      "name": "Samsung s26 ultra 1tb/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1784431175083.jpg",
+      "colors": [],
+      "cashPriceARS": 2898000,
+      "legacyPosition": 34
+    },
+    {
+      "name": "Samsung ZFlip 8 ultra 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_35_1dgvn9v.jpg?v=1787263106330",
+      "colors": [],
+      "cashPriceARS": 2694000,
+      "legacyPosition": 35
+    },
+    {
+      "name": "Moto E22 64/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_29_ie9ioq.jpg?v=1786861232292",
+      "colors": [],
+      "cashPriceARS": 235500,
+      "legacyPosition": 36
+    },
+    {
+      "name": "Moto G04 64/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_30_1eaugcs.jpg?v=1786889400408",
+      "colors": [],
+      "cashPriceARS": 259000,
+      "legacyPosition": 37
+    },
+    {
+      "name": "Moto G14 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_31_1eku21r.jpg?v=1786862006622",
+      "colors": [],
+      "cashPriceARS": 306000,
+      "legacyPosition": 38
+    },
+    {
+      "name": "Moto E15 64/2gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_19_1783481423033.jpg",
+      "colors": [],
+      "cashPriceARS": 259000,
+      "legacyPosition": 39
+    },
+    {
+      "name": "Moto G05 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_21_1783481408191.jpg",
+      "colors": [],
+      "cashPriceARS": 341500,
+      "legacyPosition": 40
+    },
+    {
+      "name": "Moto G06 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_23_1783481583785.jpg",
+      "colors": [],
+      "cashPriceARS": 294500,
+      "legacyPosition": 41
+    },
+    {
+      "name": "Moto G06 256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_24_1783481558474.jpg",
+      "colors": [],
+      "cashPriceARS": 362500,
+      "legacyPosition": 42
+    },
+    {
+      "name": "Moto G06 Power256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_36_1dqv8yu.jpg?v=1786862230633",
+      "colors": [],
+      "cashPriceARS": 351500,
+      "legacyPosition": 43
+    },
+    {
+      "name": "Moto G15 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg",
+      "colors": [],
+      "cashPriceARS": 351500,
+      "legacyPosition": 44
+    },
+    {
+      "name": "Moto G15 POWER 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg",
+      "colors": [],
+      "cashPriceARS": 395500,
+      "legacyPosition": 45
+    },
+    {
+      "name": "Moto G15 512/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1783481847093.jpg",
+      "colors": [],
+      "cashPriceARS": 428500,
+      "legacyPosition": 46
+    },
+    {
+      "name": "Moto G17 256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1783482083909.jpg",
+      "colors": [],
+      "cashPriceARS": 450500,
+      "legacyPosition": 47
+    },
+    {
+      "name": "Moto G35 256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_39_1gsqvlj.jpg?v=1785771219162",
+      "colors": [],
+      "cashPriceARS": 428500,
+      "legacyPosition": 48
+    },
+    {
+      "name": "Moto G56 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_33_1783510366146.jpg",
+      "colors": [],
+      "cashPriceARS": 541000,
+      "legacyPosition": 49
+    },
+    {
+      "name": "Moto G57 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_43_1cwtady.jpg?v=1786898005626",
+      "colors": [],
+      "cashPriceARS": 520500,
+      "legacyPosition": 50
+    },
+    {
+      "name": "Moto G57 POWER 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_44_1dqs3gv.jpg?v=1786898019952",
+      "colors": [],
+      "cashPriceARS": 561500,
+      "legacyPosition": 51
+    },
+    {
+      "name": "Moto G77 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1783599538658.jpg",
+      "colors": [],
+      "cashPriceARS": 592000,
+      "legacyPosition": 52
+    },
+    {
+      "name": "Moto G86 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_36_1783600344108.jpg",
+      "colors": [],
+      "cashPriceARS": 602000,
+      "legacyPosition": 53
+    },
+    {
+      "name": "Moto G86 POWER 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_45_1784433206665.jpg",
+      "colors": [],
+      "cashPriceARS": 581500,
+      "legacyPosition": 54
+    },
+    {
+      "name": "Moto G86 5G 512/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1784433058590.jpg",
+      "colors": [],
+      "cashPriceARS": 622500,
+      "legacyPosition": 55
+    },
+    {
+      "name": "Moto G MAX 5G 256/8gb NUEVO",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_46_1earaut.jpg?v=1786415373266",
+      "colors": [],
+      "cashPriceARS": 714500,
+      "legacyPosition": 56
+    },
+    {
+      "name": "Moto EDGE 60 Fusion 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_39_1783482338949.jpg",
+      "colors": [],
+      "cashPriceARS": 592000,
+      "legacyPosition": 57
+    },
+    {
+      "name": "Moto EDGE 60 5g 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_51_1k4fsx9.jpg?v=1786898037618",
+      "colors": [],
+      "cashPriceARS": 592000,
+      "legacyPosition": 58
+    },
+    {
+      "name": "Moto EDGE 70 Fusion 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_48_1euqi8r.jpg?v=1786497719343",
+      "colors": [],
+      "cashPriceARS": 888000,
+      "legacyPosition": 59
+    },
+    {
+      "name": "Moto EDGE 70 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_49_1ekqwjs.jpg?v=1786497736420",
+      "colors": [],
+      "cashPriceARS": 928500,
+      "legacyPosition": 60
+    },
+    {
+      "name": "REDMI A5 128/4",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_48_1784433508282.jpg",
+      "colors": [],
+      "cashPriceARS": 341500,
+      "legacyPosition": 61
+    },
+    {
+      "name": "REDMI 15C 128/4GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_42_1783990427348.jpg",
+      "colors": [],
+      "cashPriceARS": 351500,
+      "legacyPosition": 62
+    },
+    {
+      "name": "REDMI 15C 256/4GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_43_1783990374711.jpg",
+      "colors": [],
+      "cashPriceARS": 395500,
+      "legacyPosition": 63
+    },
+    {
+      "name": "REDMI 15C 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1783990470083.jpg",
+      "colors": [],
+      "cashPriceARS": 417500,
+      "legacyPosition": 64
+    },
+    {
+      "name": "REDMI 17 256/6GB ‼NOVEDAD",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_58_1hmjdoi.jpg?v=1786891828619",
+      "colors": [],
+      "cashPriceARS": 520500,
+      "legacyPosition": 65
+    },
+    {
+      "name": "Xiaomi Note 14 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_52_1784434560089.jpg",
+      "colors": [],
+      "cashPriceARS": 459000,
+      "legacyPosition": 66
+    },
+    {
+      "name": "Xiaomi Note 15 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_54_1784435024036.jpg",
+      "colors": [],
+      "cashPriceARS": 490000,
+      "legacyPosition": 67
+    },
+    {
+      "name": "Poco C81 PRO 128/4GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_55_1784435060367.jpg",
+      "colors": [],
+      "cashPriceARS": 362500,
+      "legacyPosition": 68
+    },
+    {
+      "name": "Xiaomi Note 14 pro Plus 5g 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_60_1784435879654.jpg",
+      "colors": [],
+      "cashPriceARS": 867500,
+      "legacyPosition": 69
+    },
+    {
+      "name": "Xiaomi Note 15 pro 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_56_1783990673695.jpg",
+      "colors": [],
+      "cashPriceARS": 632500,
+      "legacyPosition": 70
+    },
+    {
+      "name": "Xiaomi Note 15 pro 512/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_65_jht3uy.jpg?v=1786501305674",
+      "colors": [],
+      "cashPriceARS": 724500,
+      "legacyPosition": 71
+    },
+    {
+      "name": "Xiaomi Note 15 pro PLUS 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1786501333265",
+      "colors": [],
+      "cashPriceARS": 816500,
+      "legacyPosition": 72
+    },
+    {
+      "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg",
+      "colors": [],
+      "cashPriceARS": 918500,
+      "legacyPosition": 73
+    },
+    {
+      "name": "Poco M8 5G 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_65_1784437186765.jpg",
+      "colors": [],
+      "cashPriceARS": 510500,
+      "legacyPosition": 74
+    },
+    {
+      "name": "Poco M8 5G 512/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_66_1784437313028.jpg",
+      "colors": [],
+      "cashPriceARS": 571500,
+      "legacyPosition": 75
+    },
+    {
+      "name": "Poco M8 Pro 5G 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_67_1784437557792.jpg",
+      "colors": [],
+      "cashPriceARS": 612500,
+      "legacyPosition": 76
+    },
+    {
+      "name": "Poco M8 Pro 5G 512/12GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_68_1784437624730.jpg",
+      "colors": [],
+      "cashPriceARS": 775500,
+      "legacyPosition": 77
+    },
+    {
+      "name": "Poco X7 Pro 5G 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_69_1784437875463.jpg",
+      "colors": [],
+      "cashPriceARS": 755000,
+      "legacyPosition": 78
+    },
+    {
+      "name": "Poco X7 Pro 5G 512/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_70_1784438413481.jpg",
+      "colors": [],
+      "cashPriceARS": 826500,
+      "legacyPosition": 79
+    },
+    {
+      "name": "Poco X8 Pro 5g 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1784438559279.jpg",
+      "colors": [],
+      "cashPriceARS": 847000,
+      "legacyPosition": 80
+    },
+    {
+      "name": "Poco X8 Pro 5g 512/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1784438924500.jpg",
+      "colors": [],
+      "cashPriceARS": 898000,
+      "legacyPosition": 81
+    },
+    {
+      "name": "Poco X8 Pro Max 5G 256/12GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_73_1784439470457.jpg",
+      "colors": [],
+      "cashPriceARS": 1030500,
+      "legacyPosition": 82
+    },
+    {
+      "name": "Poco X8 Pro max 5G 512/12GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_74_1784439773608.jpg",
+      "colors": [],
+      "cashPriceARS": 1224500,
+      "legacyPosition": 83
+    },
+    {
+      "name": "INFINIX SMART 8 PRO 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_75_1784440085367.jpg",
+      "colors": [],
+      "cashPriceARS": 384500,
+      "legacyPosition": 84
+    },
+    {
+      "name": "INFINIX SMART 10 4/128 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_79_f1wb9f.jpg?v=1786576539549",
+      "colors": [],
+      "cashPriceARS": 306000,
+      "legacyPosition": 85
+    },
+    {
+      "name": "INFINIX HOT 60i 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1783481166370.jpg",
+      "colors": [],
+      "cashPriceARS": 406500,
+      "legacyPosition": 86
+    },
+    {
+      "name": "INFINIX HOT 60 PRO NFC 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg",
+      "colors": [],
+      "cashPriceARS": 459000,
+      "legacyPosition": 87
+    },
+    {
+      "name": "INFINIX HOT 60 PRO PLUS NFC 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1784440260045.jpg",
+      "colors": [],
+      "cashPriceARS": 530500,
+      "legacyPosition": 88
+    },
+    {
+      "name": "INFINIX HOT 70 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1784440565263.jpg",
+      "colors": [],
+      "cashPriceARS": 459000,
+      "legacyPosition": 89
+    },
+    {
+      "name": "INFINIX NOTE 50 PRO NFC 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_84_e7ucoj.jpg?v=1786895125184",
+      "colors": [],
+      "cashPriceARS": 602000,
+      "legacyPosition": 90
+    },
+    {
+      "name": "INFINIX GT 30 PRO NFC 512/12GB dark flare+ kit gamer shadow ",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_91_dxrlhl.jpg?v=1787257174892",
+      "colors": [],
+      "cashPriceARS": 867500,
+      "legacyPosition": 91
+    }
+  ]
+}

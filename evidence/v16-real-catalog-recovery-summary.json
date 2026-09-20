@@ -1,0 +1,41 @@
+{
+  "status": "RECOVERED_EVIDENCE_NOT_ACTIVATED",
+  "sourceSnapshot": "catalog-source-snapshot.sanitized.json",
+  "snapshotSha256": "b3e1183dabc38d7e8b2e4be26b5c0679dfbd28794862eba73abbb5205515270b",
+  "capturedAtUtc": "2026-09-09T19:32:06.10358Z",
+  "mode": "read_only",
+  "writeEnabled": false,
+  "sourceMaster": "public.tienda_catalogo/catalogo",
+  "sourceIncremental": "public.tienda_productos_incremental",
+  "sourceCellphones": "public.celulares_lista/lista",
+  "snapshotCounts": {
+    "masterTotal": 1488,
+    "masterVisible": 590,
+    "masterNotVisible": 898,
+    "tombstones": 48,
+    "cellphones": 92,
+    "imageUrls": 1311,
+    "publicationGate": 496,
+    "brandDemonstratedSnapshot": 308,
+    "productContractReadyProvisional": 128,
+    "productContractReadyWithImageByMetadata": 113
+  },
+  "strictAuditFromRecoveredWorkbook": {
+    "master": 1488,
+    "visible": 590,
+    "notVisible": 898,
+    "tombstones": 48,
+    "brandDemonstrated": 304,
+    "productV16Compatible": 127,
+    "productV16CompatibleWithStorageImage": 112,
+    "readyV16LiveHttpCertified": 0,
+    "headAlignment": "NOT_VERIFIED_CURRENT_HEAD_FFE77535",
+    "cohort0ConditionalCandidates": 9
+  },
+  "activation": false,
+  "reasonNotActivated": [
+    "Recovered workbook states 0 products are READY under current live HTTP certification.",
+    "Snapshot alignment with the referenced visual HEAD is NOT_VERIFIED.",
+    "The active app catalog still uses the V4.11/Cohort0 composite and is left unchanged by this gate."
+  ]
+}

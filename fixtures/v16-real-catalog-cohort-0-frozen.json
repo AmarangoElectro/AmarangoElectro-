@@ -1,0 +1,107 @@
+{
+  "evidence_status": "cohort_0_frozen_handoff",
+  "source_reference": "Control Maestro — reconciliación LIVE read-only de Supabase (public.tienda_catalogo / public.tienda_productos_incremental / public.celulares_lista / public.productos), entregada como evidencia congelada. Claude Code no ejecutó ninguna consulta directa contra Supabase: no dispone de credenciales.",
+  "production_catalog_verified": false,
+  "captured_at": "2026-09-11",
+  "products": [
+    {
+      "id": "-78",
+      "name": "Torre Sony ULT POWER SOUND",
+      "brand": "Sony",
+      "category": "audio",
+      "subcategory": null,
+      "sale": 2143000,
+      "provider": "Mega Electro",
+      "provider_stock": 1,
+      "storage_object": "proveedores/mega_myaqdlaivp_pnfhbl.jpg"
+    },
+    {
+      "id": "-29",
+      "name": "BALANZA DIGITAL XIAOMI SCALE 2 150kg",
+      "brand": "Xiaomi",
+      "category": "cuidado-personal-salud",
+      "subcategory": null,
+      "sale": 70000,
+      "provider": "Mega Electro",
+      "provider_stock": 1,
+      "storage_object": "proveedores/mega_h9w8bg3iel_am5x2j.jpg"
+    },
+    {
+      "id": "-53",
+      "name": "Hidrolavadora inalámbrica Xiaomi",
+      "brand": "Xiaomi",
+      "category": "electrodomesticos",
+      "subcategory": "limpieza",
+      "sale": 253500,
+      "provider": "Mega Electro",
+      "provider_stock": 2,
+      "storage_object": "proveedores/mega_yljioqydak_x1d8m8.jpg"
+    },
+    {
+      "id": "-23",
+      "name": "JOYSTICK PLAYSTATION 5 DUAL SENSE BLACK",
+      "brand": "PlayStation",
+      "category": "gaming",
+      "subcategory": null,
+      "sale": 200000,
+      "provider": "Mega Electro",
+      "provider_stock": 2,
+      "storage_object": "proveedores/mega_utx9yjaxzg_15wxy3m.jpg"
+    },
+    {
+      "id": "-190",
+      "name": "LIJADORA ORBITAL KANJI TOOLS Kjt-lo2302gb",
+      "brand": "Kanji",
+      "category": "herramientas",
+      "subcategory": null,
+      "sale": 74500,
+      "provider": "Mega Electro",
+      "provider_stock": 4,
+      "storage_object": "proveedores/mega_z9ttzjgtmt_dhs3aq.jpg"
+    },
+    {
+      "id": "-671",
+      "name": "Set de Ollas Kanjihome Gourmet Beige",
+      "brand": "Kanji",
+      "category": "hogar",
+      "subcategory": "bazar-y-mesa",
+      "sale": 125000,
+      "provider": "Electro Impacto",
+      "provider_stock": 2,
+      "storage_object": "proveedores/impacto_rionoi39ba_z9gqlp.jpg"
+    },
+    {
+      "id": "-833",
+      "name": "Cortadora De Fiambre Pro Slice Telefunken",
+      "brand": "Telefunken",
+      "category": "otros",
+      "subcategory": null,
+      "sale": 152000,
+      "provider": "Electro Impacto",
+      "provider_stock": 2,
+      "storage_object": "proveedores/impacto_pmmebj4cav_1v84zl3.jpg"
+    },
+    {
+      "id": "-104",
+      "name": "SMART TV SAMSUNG 85” NEO QLED",
+      "brand": "Samsung",
+      "category": "smart-tv",
+      "subcategory": null,
+      "sale": 10010000,
+      "provider": "Mega Electro",
+      "provider_stock": 1,
+      "storage_object": "proveedores/mega_sezdamym4s_1pzhb52.jpg"
+    },
+    {
+      "id": "-306",
+      "name": "CARGADOR DE VEHÍCULO PARA CELULAR XIAOMI 20w",
+      "brand": "Xiaomi",
+      "category": "tecnologia-accesorios",
+      "subcategory": "cargadores-y-accesorios",
+      "sale": 112000,
+      "provider": "Mega Electro",
+      "provider_stock": 4,
+      "storage_object": "proveedores/mega_p1c5azldgd_279vgy.jpg"
+    }
+  ]
+}

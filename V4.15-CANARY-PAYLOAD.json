@@ -1,0 +1,470 @@
+{
+  "schemaVersion": "v4.15-canary-payload-v1",
+  "mode": "controlled_migration_readiness_read_only",
+  "sourceCheckpoint": "V4.14 Photo Intelligence + Migration Preflight",
+  "writeEnabled": false,
+  "canarySize": 5,
+  "sourceEvidenceHash": "sha256:e2dab117363411c42d88e95d8ad56832c85119ab50611c5393b262bba8949bc1",
+  "rollbackBatchIdentifier": "v415-canary-5-e2dab1173634",
+  "preWriteMasterSnapshotHash": null,
+  "preWriteMappingSnapshotHash": null,
+  "products": [
+    {
+      "canarySlot": 1,
+      "representedBrand": "Apple",
+      "legacyCellphoneKey": "lcfp-v1-3eb0627615c676f54bea",
+      "legacyPosition": 10,
+      "futureCanonicalProductId": null,
+      "canonicalIdStrategy": "allocate_new_persistent_id_only_after_human_write_authorization",
+      "productV16": {
+        "stableId": null,
+        "slug": "cellphone-lab-3eb0627615c676f54bea",
+        "name": "IPHONE 17 PRO 256GB",
+        "brand": "Apple",
+        "model": "iPhone 17 Pro",
+        "memory": "256 GB",
+        "ram": null,
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg"
+        ],
+        "cashPriceARS": 2490000,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [
+          "Blue",
+          "Orange",
+          "Silver"
+        ],
+        "features": [
+          "Super Retina XDR OLED de 6,3 pulgadas con ProMotion 120 Hz",
+          "Chip A19 Pro",
+          "Sistema de cámaras Pro 48 MP + 48 MP + 12 MP",
+          "Carga rápida USB-C"
+        ],
+        "featureDetails": [
+          {
+            "label": "Pantalla",
+            "value": "Super Retina XDR OLED de 6,3 pulgadas con ProMotion 120 Hz",
+            "provenance": "ocr_extracted",
+            "confidence": 0.99
+          },
+          {
+            "label": "Procesador",
+            "value": "Chip A19 Pro",
+            "provenance": "ocr_extracted",
+            "confidence": 0.99
+          },
+          {
+            "label": "Cámaras",
+            "value": "Sistema de cámaras Pro 48 MP + 48 MP + 12 MP",
+            "provenance": "ocr_extracted",
+            "confidence": 0.98
+          },
+          {
+            "label": "Carga",
+            "value": "Carga rápida USB-C",
+            "provenance": "ocr_extracted",
+            "confidence": 0.99
+          }
+        ],
+        "updatedAt": null
+      },
+      "masterPayload": {
+        "stableId": null,
+        "slug": "cellphone-lab-3eb0627615c676f54bea",
+        "name": "IPHONE 17 PRO 256GB",
+        "brand": "Apple",
+        "model": "iPhone 17 Pro",
+        "memory": "256 GB",
+        "ram": null,
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1783484044946.jpg"
+        ],
+        "cashPriceARS": 2490000,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [
+          "Blue",
+          "Orange",
+          "Silver"
+        ],
+        "features": [
+          "Super Retina XDR OLED de 6,3 pulgadas con ProMotion 120 Hz",
+          "Chip A19 Pro",
+          "Sistema de cámaras Pro 48 MP + 48 MP + 12 MP",
+          "Carga rápida USB-C"
+        ],
+        "featureDetails": [
+          {
+            "label": "Pantalla",
+            "value": "Super Retina XDR OLED de 6,3 pulgadas con ProMotion 120 Hz",
+            "provenance": "ocr_extracted",
+            "confidence": 0.99
+          },
+          {
+            "label": "Procesador",
+            "value": "Chip A19 Pro",
+            "provenance": "ocr_extracted",
+            "confidence": 0.99
+          },
+          {
+            "label": "Cámaras",
+            "value": "Sistema de cámaras Pro 48 MP + 48 MP + 12 MP",
+            "provenance": "ocr_extracted",
+            "confidence": 0.98
+          },
+          {
+            "label": "Carga",
+            "value": "Carga rápida USB-C",
+            "provenance": "ocr_extracted",
+            "confidence": 0.99
+          }
+        ],
+        "updatedAt": null,
+        "id": null,
+        "legacyMappingKey": "lcfp-v1-3eb0627615c676f54bea"
+      },
+      "mapping": {
+        "legacyCellphoneKey": "lcfp-v1-3eb0627615c676f54bea",
+        "canonicalProductId": null,
+        "status": "planned_not_written"
+      },
+      "rollbackIdentifier": "v415-canary-5-e2dab1173634:1",
+      "validation": {
+        "idUnassignedUntilAuthorization": true,
+        "imageHttps": true,
+        "positivePriceARS": true,
+        "categoryValidated": true,
+        "mappingUnique": true,
+        "privateFieldsExcluded": true,
+        "duplicateDetected": false,
+        "openHumanReview": false
+      },
+      "mutationExecuted": false
+    },
+    {
+      "canarySlot": 2,
+      "representedBrand": "Samsung",
+      "legacyCellphoneKey": "lcfp-v1-152f6d1dec13e9590979",
+      "legacyPosition": 18,
+      "futureCanonicalProductId": null,
+      "canonicalIdStrategy": "allocate_new_persistent_id_only_after_human_write_authorization",
+      "productV16": {
+        "stableId": null,
+        "slug": "cellphone-lab-152f6d1dec13e9590979",
+        "name": "Samsung A16 128/4gb",
+        "brand": "Samsung",
+        "model": "Samsung A16",
+        "memory": "128 GB",
+        "ram": "4 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg"
+        ],
+        "cashPriceARS": 351500,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null
+      },
+      "masterPayload": {
+        "stableId": null,
+        "slug": "cellphone-lab-152f6d1dec13e9590979",
+        "name": "Samsung A16 128/4gb",
+        "brand": "Samsung",
+        "model": "Samsung A16",
+        "memory": "128 GB",
+        "ram": "4 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg"
+        ],
+        "cashPriceARS": 351500,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null,
+        "id": null,
+        "legacyMappingKey": "lcfp-v1-152f6d1dec13e9590979"
+      },
+      "mapping": {
+        "legacyCellphoneKey": "lcfp-v1-152f6d1dec13e9590979",
+        "canonicalProductId": null,
+        "status": "planned_not_written"
+      },
+      "rollbackIdentifier": "v415-canary-5-e2dab1173634:2",
+      "validation": {
+        "idUnassignedUntilAuthorization": true,
+        "imageHttps": true,
+        "positivePriceARS": true,
+        "categoryValidated": true,
+        "mappingUnique": true,
+        "privateFieldsExcluded": true,
+        "duplicateDetected": false,
+        "openHumanReview": false
+      },
+      "mutationExecuted": false
+    },
+    {
+      "canarySlot": 3,
+      "representedBrand": "Motorola",
+      "legacyCellphoneKey": "lcfp-v1-7aa4de4b51b701c76d00",
+      "legacyPosition": 45,
+      "futureCanonicalProductId": null,
+      "canonicalIdStrategy": "allocate_new_persistent_id_only_after_human_write_authorization",
+      "productV16": {
+        "stableId": null,
+        "slug": "cellphone-lab-7aa4de4b51b701c76d00",
+        "name": "Moto G15 POWER 256/8gb",
+        "brand": "Motorola",
+        "model": "Moto G15 POWER",
+        "memory": "256 GB",
+        "ram": "8 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg"
+        ],
+        "cashPriceARS": 395500,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null
+      },
+      "masterPayload": {
+        "stableId": null,
+        "slug": "cellphone-lab-7aa4de4b51b701c76d00",
+        "name": "Moto G15 POWER 256/8gb",
+        "brand": "Motorola",
+        "model": "Moto G15 POWER",
+        "memory": "256 GB",
+        "ram": "8 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg"
+        ],
+        "cashPriceARS": 395500,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null,
+        "id": null,
+        "legacyMappingKey": "lcfp-v1-7aa4de4b51b701c76d00"
+      },
+      "mapping": {
+        "legacyCellphoneKey": "lcfp-v1-7aa4de4b51b701c76d00",
+        "canonicalProductId": null,
+        "status": "planned_not_written"
+      },
+      "rollbackIdentifier": "v415-canary-5-e2dab1173634:3",
+      "validation": {
+        "idUnassignedUntilAuthorization": true,
+        "imageHttps": true,
+        "positivePriceARS": true,
+        "categoryValidated": true,
+        "mappingUnique": true,
+        "privateFieldsExcluded": true,
+        "duplicateDetected": false,
+        "openHumanReview": false
+      },
+      "mutationExecuted": false
+    },
+    {
+      "canarySlot": 4,
+      "representedBrand": "Xiaomi",
+      "legacyCellphoneKey": "lcfp-v1-c0690aedbb677bb1925d",
+      "legacyPosition": 73,
+      "futureCanonicalProductId": null,
+      "canonicalIdStrategy": "allocate_new_persistent_id_only_after_human_write_authorization",
+      "productV16": {
+        "stableId": null,
+        "slug": "cellphone-lab-c0690aedbb677bb1925d",
+        "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
+        "brand": "Xiaomi",
+        "model": "Xiaomi NOTE 15 PRO PLUS 5G",
+        "memory": "512 GB",
+        "ram": "12 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg"
+        ],
+        "cashPriceARS": 918500,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null
+      },
+      "masterPayload": {
+        "stableId": null,
+        "slug": "cellphone-lab-c0690aedbb677bb1925d",
+        "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
+        "brand": "Xiaomi",
+        "model": "Xiaomi NOTE 15 PRO PLUS 5G",
+        "memory": "512 GB",
+        "ram": "12 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg"
+        ],
+        "cashPriceARS": 918500,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null,
+        "id": null,
+        "legacyMappingKey": "lcfp-v1-c0690aedbb677bb1925d"
+      },
+      "mapping": {
+        "legacyCellphoneKey": "lcfp-v1-c0690aedbb677bb1925d",
+        "canonicalProductId": null,
+        "status": "planned_not_written"
+      },
+      "rollbackIdentifier": "v415-canary-5-e2dab1173634:4",
+      "validation": {
+        "idUnassignedUntilAuthorization": true,
+        "imageHttps": true,
+        "positivePriceARS": true,
+        "categoryValidated": true,
+        "mappingUnique": true,
+        "privateFieldsExcluded": true,
+        "duplicateDetected": false,
+        "openHumanReview": false
+      },
+      "mutationExecuted": false
+    },
+    {
+      "canarySlot": 5,
+      "representedBrand": "Infinix",
+      "legacyCellphoneKey": "lcfp-v1-3a90a215bc5908accfd8",
+      "legacyPosition": 87,
+      "futureCanonicalProductId": null,
+      "canonicalIdStrategy": "allocate_new_persistent_id_only_after_human_write_authorization",
+      "productV16": {
+        "stableId": null,
+        "slug": "cellphone-lab-3a90a215bc5908accfd8",
+        "name": "INFINIX HOT 60 PRO NFC 8/256 GB",
+        "brand": "Infinix",
+        "model": "Infinix HOT 60 PRO NFC",
+        "memory": "256 GB",
+        "ram": "8 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg"
+        ],
+        "cashPriceARS": 459000,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null
+      },
+      "masterPayload": {
+        "stableId": null,
+        "slug": "cellphone-lab-3a90a215bc5908accfd8",
+        "name": "INFINIX HOT 60 PRO NFC 8/256 GB",
+        "brand": "Infinix",
+        "model": "Infinix HOT 60 PRO NFC",
+        "memory": "256 GB",
+        "ram": "8 GB",
+        "category": "celulares",
+        "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg",
+        "images": [
+          "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1783481204093.jpg"
+        ],
+        "cashPriceARS": 459000,
+        "financing": [],
+        "availability": "unknown",
+        "visibility": "pending",
+        "colors": [],
+        "features": [],
+        "featureDetails": [],
+        "updatedAt": null,
+        "id": null,
+        "legacyMappingKey": "lcfp-v1-3a90a215bc5908accfd8"
+      },
+      "mapping": {
+        "legacyCellphoneKey": "lcfp-v1-3a90a215bc5908accfd8",
+        "canonicalProductId": null,
+        "status": "planned_not_written"
+      },
+      "rollbackIdentifier": "v415-canary-5-e2dab1173634:5",
+      "validation": {
+        "idUnassignedUntilAuthorization": true,
+        "imageHttps": true,
+        "positivePriceARS": true,
+        "categoryValidated": true,
+        "mappingUnique": true,
+        "privateFieldsExcluded": true,
+        "duplicateDetected": false,
+        "openHumanReview": false
+      },
+      "mutationExecuted": false
+    }
+  ],
+  "acceptanceGate": {
+    "recommendation": "GO_TO_REQUEST_HUMAN_AUTHORIZATION",
+    "executionStatus": "NO_GO_UNTIL_AUTHORIZED_IDS_AND_BACKUP_ARE_VERIFIED",
+    "idsValidNow": 0,
+    "idsRequiredAtExecution": 5,
+    "imagesValidated": 5,
+    "pricesValidated": 5,
+    "categoriesValidated": 5,
+    "mappingsPlanned": 5,
+    "privateFieldLeaks": 0,
+    "duplicates": 0,
+    "incorrectlyMergedVariants": 0,
+    "clientPass": true,
+    "advisorPass": true,
+    "adminReadOnlyPass": true,
+    "rollbackPrepared": true,
+    "backupVerifiedNow": false
+  },
+  "blockedFromCanary": {
+    "legacyPosition": 91,
+    "name": "INFINIX GT 30 PRO NFC 512/12GB dark flare + kit gamer shadow",
+    "reasons": [
+      "exact_color_name_not_visually_confirmed",
+      "gamer_kit_bundle_not_visible"
+    ]
+  },
+  "mutations": {
+    "insert": 0,
+    "update": 0,
+    "delete": 0,
+    "upsert": 0,
+    "rpcWrite": 0,
+    "storageWrite": 0
+  }
+}

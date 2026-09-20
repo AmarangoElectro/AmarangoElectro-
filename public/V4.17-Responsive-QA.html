@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>V4.17 Responsive QA — Navegación contextual</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#eef2f6;color:#12233a;font:14px system-ui,sans-serif}header{padding:22px;background:#08295f;color:#fff}header p{margin:6px 0 0;color:#bfd2ed}.controls{padding:14px;display:flex;flex-wrap:wrap;gap:8px;background:#fff;border-bottom:1px solid #dce3eb;position:sticky;top:0;z-index:3}button{min-height:38px;padding:8px 12px;border:1px solid #ced8e4;border-radius:999px;background:#fff;color:#17304f;font-weight:800;cursor:pointer}button.active{background:#f2751a;border-color:#f2751a;color:#fff}.status{margin-left:auto;display:flex;align-items:center;font-weight:800}.stage{padding:20px;overflow:auto}.viewport{box-sizing:content-box;margin:auto;border:3px solid #102844;border-radius:18px;background:#fff;box-shadow:0 18px 50px #132a4933}.metrics{padding:10px 14px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;background:#0c1d33;color:#fff;font-size:11px}.metrics b{display:block;color:#86b7ff;font-size:13px}.demo{overflow:clip}.context{padding:12px 8px 10px;border-bottom:1px solid #e1e7ee}.context small{display:flex;justify-content:space-between;color:#f2751a;font-size:8px;font-weight:900;letter-spacing:1px}.track{margin-top:8px;padding:2px 0 7px;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;scrollbar-width:none}.track a{flex:0 0 auto;min-height:40px;padding:9px 12px;display:flex;align-items:center;gap:6px;border:1px solid #dce3eb;border-radius:999px;color:#26364a;text-decoration:none;font-size:10px;font-weight:900;scroll-snap-align:start}.track a.current{background:#0b2b5f;color:#fff;border-color:#0b5ce1}.hero{margin:10px;padding:25px 18px;min-height:190px;overflow:hidden;border-radius:20px;background:linear-gradient(135deg,#fff,#dce8fb)}.hero h1{margin:4px 0;font-size:clamp(38px,12vw,64px);letter-spacing:-3px;overflow-wrap:anywhere}.catalog{padding:12px 16px}.catalog h2{margin:0;font-size:clamp(34px,10.5vw,40px);letter-spacing:-2.2px;overflow-wrap:anywhere}.recent{margin:14px;padding:14px;overflow:hidden;contain:layout paint;border:1px solid #e1e7ee;border-radius:18px}.recent-track{display:flex;gap:8px;overflow-x:auto}.card{flex:0 0 210px;padding:12px;border-radius:14px;background:#f2f5f8}.empty{display:none}.wide .context{padding-inline:5vw}.wide .track{flex-wrap:wrap;overflow:visible}.wide .hero{min-height:260px;padding:50px}.wide .metrics{font-size:12px}@media(max-width:700px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.status{width:100%;margin-left:0}}
+  </style>
+</head>
+<body>
+  <header><strong>V4.17 · Responsive QA portable</strong><p>Harness no productivo: mide el viewport interno, overflow root, scroll local, escenarios y coexistencia V4.16.</p></header>
+  <div class="controls" aria-label="Controles QA">
+    <span id="widths">
+      <button data-width="320">320</button><button data-width="360">360</button><button data-width="390">390</button><button data-width="412">412</button><button data-width="768">768</button><button data-width="1440">1440</button>
+    </span>
+    <button id="scenario-many">Muchas</button><button id="scenario-few">Pocas</button><button id="scenario-none">Ninguna</button>
+    <button id="history-full">V4.16 lleno</button><button id="history-empty">V4.16 vacío</button>
+    <span class="status" id="status">Preparando medición…</span>
+  </div>
+  <main class="stage">
+    <section class="viewport" id="viewport">
+      <div class="metrics">
+        <span>Objetivo<b id="target">320</b></span><span>window.innerWidth<b id="inner">—</b></span><span>documentElement.clientWidth<b id="client">—</b></span><span>documentElement.scrollWidth<b id="scroll">—</b></span><span>Track local<b id="track">—</b></span>
+      </div>
+      <div class="demo" id="demo">
+        <nav class="context" id="context" aria-label="Explorar Electrodomésticos"><small><b>ESTÁS EN ELECTRODOMÉSTICOS</b><span>6 opciones</span></small><div class="track" id="context-track"></div></nav>
+        <section class="hero"><small>PARA TU DÍA A DÍA</small><h1>Electrodomésticos</h1><p>La navegación contextual aparece antes del hero y usa enlaces HTML reales.</p></section>
+        <section class="catalog"><h2>Explorá electrodomésticos.</h2><p>La tipografía se adapta sin ocultar overflow global.</p></section>
+        <section class="recent" id="recent"><strong>Seguí mirando</strong><div class="recent-track"><div class="card">Heladera · vista reciente</div><div class="card">Lavarropas · vista reciente</div><div class="card">Secarropas · vista reciente</div></div></section>
+      </div>
+    </section>
+  </main>
+  <script>
+    const options={many:[["✦","Todo"],["❄️","Refrigeración"],["🌬️","Climatización"],["🍳","Cocción"],["🫧","Lavado"],["☕","Pequeños electrodomésticos"],["🧹","Limpieza"]],few:[["✦","Todo"],["🌙","Colchones y sommiers"]],none:[]};
+    const viewport=document.querySelector("#viewport"),demo=document.querySelector("#demo"),context=document.querySelector("#context"),track=document.querySelector("#context-track"),recent=document.querySelector("#recent");
+    let target=320,scenario="many";
+    function render(){
+      viewport.style.width=target+"px"; demo.classList.toggle("wide",target>700);
+      context.hidden=scenario==="none"; track.innerHTML=options[scenario].map((item,index)=>`<a class="${index===3?'current':''}" ${index===3?'aria-current="page"':''} href="?sector=${encodeURIComponent(item[1].toLowerCase())}#sector-activo"><span>${item[0]}</span>${item[1]}</a>`).join("");
+      requestAnimationFrame(measure);
+    }
+    function measure(){
+      const client=demo.clientWidth,scroll=demo.scrollWidth,local=track.scrollWidth>track.clientWidth;
+      document.querySelector("#target").textContent=target;document.querySelector("#inner").textContent=viewport.clientWidth;document.querySelector("#client").textContent=client;document.querySelector("#scroll").textContent=scroll;document.querySelector("#track").textContent=context.hidden?"N/A":`${track.clientWidth}/${track.scrollWidth}${local?' ✓':''}`;
+      const pass=scroll<=client;document.querySelector("#status").textContent=pass?"PASS · sin overflow root":"FAIL · overflow root";document.querySelector("#status").style.color=pass?"#187b43":"#b42318";
+    }
+    document.querySelectorAll("[data-width]").forEach(button=>button.onclick=()=>{target=Number(button.dataset.width);document.querySelectorAll("[data-width]").forEach(item=>item.classList.toggle("active",item===button));render()});
+    document.querySelector("#scenario-many").onclick=()=>{scenario="many";render()};document.querySelector("#scenario-few").onclick=()=>{scenario="few";render()};document.querySelector("#scenario-none").onclick=()=>{scenario="none";render()};
+    document.querySelector("#history-full").onclick=()=>{recent.classList.remove("empty");measure()};document.querySelector("#history-empty").onclick=()=>{recent.classList.add("empty");measure()};
+    addEventListener("resize",measure);document.querySelector('[data-width="320"]').classList.add("active");render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>V4.14 Responsive QA Harness</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#111827;color:#fff;font-family:system-ui,sans-serif}header{position:sticky;top:0;z-index:2;padding:16px 20px;background:rgba(17,24,39,.96);border-bottom:1px solid #334155}h1{font-size:20px;margin:0}p{color:#cbd5e1;margin:5px 0 0;font-size:12px}.board{display:flex;align-items:flex-start;gap:22px;padding:22px;overflow:auto}.case{flex:none}.case h2{font-size:13px;margin:0 0 8px;color:#f8fafc}.frame{height:820px;border:1px solid #475569;border-radius:18px;background:#fff;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35)}iframe{width:100%;height:100%;border:0}.w320{width:320px}.w360{width:360px}.w390{width:390px}.w412{width:412px}.w768{width:768px}.w1440{width:1440px}
+  </style>
+</head>
+<body>
+  <header><h1>AmarangoElectro V4.14 · Responsive QA</h1><p>Harness técnico; el standalone entregable no usa iframe.</p></header>
+  <main class="board">
+    <section class="case"><h2>320 px</h2><div class="frame w320"><iframe title="QA 320" src="AmarangoElectro-V16-V4.14-Photo-Intelligence-Preflight-Standalone-Android.html"></iframe></div></section>
+    <section class="case"><h2>360 px</h2><div class="frame w360"><iframe title="QA 360" src="AmarangoElectro-V16-V4.14-Photo-Intelligence-Preflight-Standalone-Android.html"></iframe></div></section>
+    <section class="case"><h2>390 px</h2><div class="frame w390"><iframe title="QA 390" src="AmarangoElectro-V16-V4.14-Photo-Intelligence-Preflight-Standalone-Android.html"></iframe></div></section>
+    <section class="case"><h2>412 px</h2><div class="frame w412"><iframe title="QA 412" src="AmarangoElectro-V16-V4.14-Photo-Intelligence-Preflight-Standalone-Android.html"></iframe></div></section>
+    <section class="case"><h2>768 px</h2><div class="frame w768"><iframe title="QA 768" src="AmarangoElectro-V16-V4.14-Photo-Intelligence-Preflight-Standalone-Android.html"></iframe></div></section>
+    <section class="case"><h2>1440 px</h2><div class="frame w1440"><iframe title="QA 1440" src="AmarangoElectro-V16-V4.14-Photo-Intelligence-Preflight-Standalone-Android.html"></iframe></div></section>
+  </main>
+  <script>
+    const single = new URLSearchParams(location.search).get("single");
+    if (single) {
+      document.querySelectorAll(".case").forEach((item) => {
+        if (!item.querySelector("h2").textContent.startsWith(single)) item.remove();
+      });
+    }
+  </script>
+</body>
+</html>

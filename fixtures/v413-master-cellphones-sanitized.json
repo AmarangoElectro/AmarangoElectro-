@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "v4.13-master-cellphones-sanitized-v1",
+  "source": "public.tienda_catalogo/id=catalogo",
+  "capturedReadOnlyAt": "2026-08-30T15:50:57.781Z",
+  "recordCount": 1,
+  "phones": [
+    {
+      "id": 89,
+      "name": "MOTOROLA G75 256/8*",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_89_1784566812712.jpg",
+      "visible": false,
+      "category": "📱 Celulares",
+      "outOfStock": false,
+      "cashPriceARS": 476500
+    }
+  ]
+}

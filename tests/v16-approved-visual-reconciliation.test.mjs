@@ -1,0 +1,6 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs";
+const r=fs.readFileSync("lib/theme/brand-locale.ts","utf8"), h=fs.readFileSync("app/components/brand-locale-hero.tsx","utf8"), c=fs.readFileSync("app/categoria/[slug]/page.tsx","utf8"), css=fs.readFileSync("app/globals.css","utf8");
+test("registry contains approved locale families and theme tokens",()=>{for(const x of ["Apple","Samsung","Motorola","Xiaomi","Infinix","TCL","JBL","Sony","PlayStation","Kanjihome","Kanji","Kanji Tools","Telefunken","Ken Brown"]) assert.ok(r.includes(`brand: "${x}"`)); for(const x of ["background","darkBackground","accent","wordmark"]) assert.ok(r.includes(x));});
+test("hero is sector-aware",()=>{assert.match(h,/getBrandLocalesForSector\(sectorSlug, availableBrands\)/);assert.match(h,/\/categoria\/\$\{sectorSlug\}/);assert.doesNotMatch(h,/href="\/categoria\/celulares/);});
+test("category passes real sector context",()=>{assert.match(c,/sectorSlug=\{slug\}/);assert.match(c,/sectorTitle=\{category\.title\}/);assert.match(c,/availableBrands=\{availableBrands\}/);});
+test("premium shell coexists with sector banners and real catalog",()=>{assert.match(css,/brand-locale/i);assert.match(c,/SubcategoryBannerCard/);assert.match(c,/<CatalogClient/);});

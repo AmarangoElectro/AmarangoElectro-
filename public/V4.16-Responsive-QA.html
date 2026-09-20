@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AmarangoElectro V4.16 — Responsive QA</title>
+  <style>
+    :root{font-family:Inter,system-ui,sans-serif;color:#132b45;background:#eef3f7}*{box-sizing:border-box}body{margin:0;padding:28px}.qa{max-width:1204px;margin:auto}.status{display:inline-block;padding:7px 11px;border-radius:99px;background:#dff7e8;color:#126334;font-weight:800;font-size:12px}.rail{margin-top:20px;padding:28px;overflow:hidden;contain:layout paint;border:1px solid #e0e7ed;border-radius:28px;background:#fff}.head{display:flex;align-items:end;justify-content:space-between;gap:20px}.head h1{margin:4px 0;font-size:clamp(28px,4vw,48px)}.head p{margin:0;color:#74808d;font-size:11px}.track{margin-top:20px;padding-bottom:5px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:10px;overflow-x:auto}.card{min-height:112px;padding:11px;display:grid;grid-template-columns:82px minmax(0,1fr) 18px;align-items:center;gap:10px;border:1px solid #e3e8ed;border-radius:20px}.media{width:82px;height:88px;display:grid;place-items:center;border-radius:14px;background:#091a2e;color:#fff;font-weight:900}.copy{min-width:0;display:grid;gap:4px}.copy small{color:#ed7b22;font-weight:900}.copy strong,.copy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.copy span{font-size:11px;color:#778390}.copy .price{color:#132b45;font-weight:900}.checklist{margin-top:22px;padding:20px;border-radius:20px;background:#132b45;color:#fff;line-height:1.7}@media(max-width:760px){body{padding:14px}.rail{padding:20px 16px;border-radius:24px}.head{align-items:start}.head h1{font-size:31px}.track{margin-inline:-2px;padding:2px 2px 7px;display:flex;gap:9px;scroll-snap-type:x mandatory;scrollbar-width:none}.track::-webkit-scrollbar{display:none}.card{flex:0 0 min(78vw,270px);min-height:104px;grid-template-columns:72px minmax(0,1fr) 18px;scroll-snap-align:start}.media{width:72px;height:80px}}
+  </style>
+</head>
+<body>
+  <main class="qa">
+    <span class="status">HARNESS LOCAL · SIN PRODUCCIÓN</span>
+    <section class="rail" aria-labelledby="title">
+      <div class="head"><div><small>CONTINUIDAD LOCAL</small><h1 id="title">Seguí mirando</h1><p>Guardado solo en este dispositivo. No se envía ni se usa para rastrearte.</p></div><button>Limpiar</button></div>
+      <div class="track">
+        <article class="card"><span class="media">SA</span><span class="copy"><small>SAMSUNG</small><strong>Galaxy A25 5G 128 GB</strong><span class="price">$ 529.999</span><span>Disponible</span></span><b>→</b></article>
+        <article class="card"><span class="media">MO</span><span class="copy"><small>MOTOROLA</small><strong>Moto G85 5G</strong><span class="price">$ 619.999</span><span>Disponible</span></span><b>→</b></article>
+        <article class="card"><span class="media">XI</span><span class="copy"><small>XIAOMI</small><strong>Redmi Note 14 Pro</strong><span class="price">$ 584.999</span><span>Disponibilidad a confirmar</span></span><b>→</b></article>
+        <article class="card"><span class="media">NO</span><span class="copy"><small>NOBLEX</small><strong>Smart TV 50 pulgadas</strong><span class="price">Precio a consultar</span><span>Disponible</span></span><b>→</b></article>
+      </div>
+    </section>
+    <section class="checklist"><strong>Viewports del gate:</strong> 320 · 360 · 390 · 412 · 768 · 1440 px<br>Verificar: una fila, indicio de siguiente tarjeta en mobile, snap obligatorio, sin overflow global y sección ausente cuando el historial está vacío.</section>
+  </main>
+</body>
+</html>

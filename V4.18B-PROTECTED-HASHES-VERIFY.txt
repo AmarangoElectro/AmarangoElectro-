@@ -1,0 +1,16 @@
+lib/catalog/index.ts: OK
+lib/catalog/types.ts: OK
+lib/catalog/audited-pilot-adapter.ts: OK
+fixtures/v411-catalog-evidence-public.json: OK
+lib/catalog/categories.ts: OK
+.openai/hosting.json: OK
+app/components/product-card.tsx: OK
+lib/commerce/recently-viewed-store.ts: OK
+app/components/recently-viewed-recorder.tsx: OK
+app/components/recently-viewed-rail.tsx: OK
+lib/internal/admin/v418a-quick-actions.ts: OK
+components/internal/admin/v418a-quick-actions-sheet.tsx: OK
+components/internal/admin/admin-product-card.tsx: OK
+components/internal/admin/admin-product-grid.tsx: OK
+lib/navigation/subcategory-context.ts: OK
+app/components/subcategory-context-navigation.tsx: OK

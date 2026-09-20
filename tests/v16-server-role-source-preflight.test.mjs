@@ -1,0 +1,10 @@
+import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs";
+const roles=fs.readFileSync("lib/internal/auth/roles.ts","utf8");
+const crm=fs.readFileSync("lib/crm/client-crm-contract.ts","utf8");
+const reports=fs.readFileSync("lib/reports/reports-contract.ts","utf8");
+const payments=fs.readFileSync("lib/payments/payment-history-contract.ts","utf8");
+const advisors=fs.readFileSync("lib/advisors/advisors-contract.ts","utf8");
+test("client role matrix is policy only and explicitly requires server enforcement",()=>{assert.match(roles,/serverSideEnforcementRequired: true/);assert.match(roles,/authorizationRequired: true/);});
+test("recovered RPC contracts state server-side identity/capability enforcement",()=>{assert.match(crm,/identity\/capability layer server-side/);assert.match(reports,/owner\/admin only in the current server rule/);assert.match(payments,/Owner\/Admin via `collections\.read`/);});
+test("advisor scope is server-authoritative and must not be derived in frontend",()=>{assert.match(advisors,/server-only helper/);assert.match(advisors,/must never derive advisor[\s\S]*from `ventas\.responsable`/);});
+test("no recovered frontend contract exposes a trustworthy role-resolution RPC",()=>{const all=crm+reports+payments+advisors;assert.ok(!/v16_(?:get|resolve|current)_(?:user_)?role/i.test(all));});

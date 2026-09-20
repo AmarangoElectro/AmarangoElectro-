@@ -1,6 +1,0 @@
-# AmarangoElectro: index.html es la única tienda principal.
-# El signo ! obliga la redirección aunque todavía exista el archivo antiguo.
-/calculadora.html   /   301!
-/calculadora        /   301!
-/index.html         /   301!
-/tienda             /   301!

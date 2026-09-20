@@ -1,0 +1,20 @@
+{
+  "project": "AmarangoElectro V16",
+  "materialized_at": "2026-09-17",
+  "branch_local": "master",
+  "head": "3f7ef7408b75fb6007b66fe7031837a93490f67b",
+  "tree": "47ecf3fd72717f365d6ffb4917409012927fa58c",
+  "working_tree": "CLEAN",
+  "home_sha256": "7ee05b586ff4700eccaa75537195d95a6839ed5e5911056221d97fdd3676637f",
+  "tracked_file_count": 634,
+  "rules": {
+    "home_frozen": true,
+    "main_untouched": true,
+    "production_untouched": true,
+    "cloudflare_untouched": true,
+    "supabase_untouched": true,
+    "source_of_truth": "this ZIP + MASTER STATE file"
+  },
+  "zip_sha256": "6b4247ada9827870efa4d5e5976e7b4d48641326b454b05ff400cec1d90fac18",
+  "zip_size_bytes": 14268629
+}

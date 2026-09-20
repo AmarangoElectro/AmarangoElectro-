@@ -1,0 +1,68 @@
+{
+  "evidence_status": "laboratory_snapshot_only",
+  "source_reference": "Amarango OS CRM Lab V2.1 · ARS",
+  "production_catalog_verified": false,
+  "captured_at": "2026-08-28",
+  "products": [
+    {
+      "id": "a16-128",
+      "name": "Samsung Galaxy A16 128 GB",
+      "brand": "Samsung",
+      "model": "A16",
+      "memory": "128 GB",
+      "category": "celulares",
+      "subcategory": "samsung",
+      "sale": 510000,
+      "updated": "2026-08-28",
+      "stock_label": "A confirmar",
+      "availability": "unknown",
+      "visible": true,
+      "image": null
+    },
+    {
+      "id": "a16-256",
+      "name": "Samsung Galaxy A16 256 GB",
+      "brand": "Samsung",
+      "model": "A16",
+      "memory": "256 GB",
+      "category": "celulares",
+      "subcategory": "samsung",
+      "sale": 585000,
+      "updated": "2026-08-28",
+      "stock_label": "Disponible",
+      "availability": "available",
+      "visible": true,
+      "image": null
+    },
+    {
+      "id": "g15-256",
+      "name": "Motorola Moto G15 256 GB",
+      "brand": "Motorola",
+      "model": "G15",
+      "memory": "256 GB",
+      "category": "celulares",
+      "subcategory": "motorola",
+      "sale": 430000,
+      "updated": "2026-08-28",
+      "stock_label": "Disponible",
+      "availability": "available",
+      "visible": true,
+      "image": null
+    },
+    {
+      "id": "sec-65",
+      "name": "Codini Secarropas 6.5 KG",
+      "brand": "Codini",
+      "model": null,
+      "memory": null,
+      "category": "electrodomesticos",
+      "subcategory": "lavado",
+      "sale": 221999,
+      "updated": "2026-08-28",
+      "stock_label": "A confirmar",
+      "availability": "unknown",
+      "visible": true,
+      "image": null
+    }
+  ]
+}
