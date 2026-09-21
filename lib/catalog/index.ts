@@ -5,6 +5,7 @@ import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter
 import { V16MediaSnapshotCatalogAdapter } from "./v16-media-snapshot-adapter";
 import { V16ToolsCareSnapshotCatalogAdapter } from "./v16-tools-care-snapshot-adapter";
 import { V16HomeSnapshotCatalogAdapter } from "./v16-home-snapshot-adapter";
+import { V16GamingTechOutdoorSnapshotCatalogAdapter } from "./v16-gaming-tech-outdoor-snapshot-adapter";
 
 // V4.11 usa la única evidencia comercial sanitizada incluida en el checkpoint.
 // No se afirma que sea un snapshot de producción: el reporte del gate conserva
@@ -24,21 +25,23 @@ const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
 const mediaCatalog = new V16MediaSnapshotCatalogAdapter();
 const toolsCareCatalog = new V16ToolsCareSnapshotCatalogAdapter();
 const homeCatalog = new V16HomeSnapshotCatalogAdapter();
+const gamingTechOutdoorCatalog = new V16GamingTechOutdoorSnapshotCatalogAdapter();
 
 class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, mediaResults, toolsCareResults, homeResults] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, mediaResults, toolsCareResults, homeResults, gamingTechOutdoorResults] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
       mediaCatalog.listProducts(query),
       toolsCareCatalog.listProducts(query),
       homeCatalog.listProducts(query),
+      gamingTechOutdoorCatalog.listProducts(query),
     ]);
     const seen = new Set<string>();
-    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults, ...toolsCareResults, ...homeResults].filter((product) => {
+    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults, ...toolsCareResults, ...homeResults, ...gamingTechOutdoorResults].filter((product) => {
       const key = [
         product.category,
         product.subcategory ?? "",
@@ -64,7 +67,9 @@ class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
     if (mediaMatch) return mediaMatch;
     const toolsCareMatch = await toolsCareCatalog.getProductBySlug(slug);
     if (toolsCareMatch) return toolsCareMatch;
-    return homeCatalog.getProductBySlug(slug);
+    const homeMatch = await homeCatalog.getProductBySlug(slug);
+    if (homeMatch) return homeMatch;
+    return gamingTechOutdoorCatalog.getProductBySlug(slug);
   }
 }
 
@@ -83,3 +88,5 @@ export { v16MediaSnapshotEvidence } from "./v16-media-snapshot-adapter";
 export { v16ToolsCareSnapshotEvidence } from "./v16-tools-care-snapshot-adapter";
 
 export { v16HomeSnapshotEvidence } from "./v16-home-snapshot-adapter";
+
+export { v16GamingTechOutdoorSnapshotEvidence } from "./v16-gaming-tech-outdoor-snapshot-adapter";
