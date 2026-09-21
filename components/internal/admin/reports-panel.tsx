@@ -81,7 +81,7 @@ export function ReportsPanel() {
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura · vía RPC segura (`v16_reports_sales_summary` / `..._by_month` / `..._by_responsible`) · sin acceso directo a `public.ventas`
+        Conexión segura · reportes construidos únicamente con datos reales disponibles
       </div>
 
       <div className="reports-filters" data-guide-target="reports-filters">
