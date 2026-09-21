@@ -7295,3 +7295,195 @@ html[data-theme="dark"] .internal-privacy-note {
   background: #0c211a;
   color: #91cbb1;
 }
+
+
+/* V16 Herramientas — logo-free oval banners */
+.category-subcategories[data-category="Herramientas"] .subcategory-banner-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.category-subcategories[data-category="Herramientas"] .tools-subcategory-banner,
+.category-subcategories[data-category="Herramientas"] .subcategory-banner:nth-child(3) {
+  width: 100%;
+  min-height: 0;
+  aspect-ratio: 3.5 / 1;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  border-radius: 999px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 50%, rgba(255,255,255,.94), rgba(255,255,255,.86) 44%, rgba(255,255,255,.18) 70%),
+    #f7f9fc;
+  box-shadow: 0 12px 30px rgba(8,25,45,.08);
+}
+.tools-subcategory-banner {
+  position: relative;
+  isolation: isolate;
+}
+.tools-subcategory-banner-copy {
+  position: absolute;
+  z-index: 3;
+  inset: 0 auto 0 0;
+  width: 57%;
+  padding: clamp(9px,1.8vw,20px) clamp(16px,2.5vw,34px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: #081a33;
+}
+.tools-subcategory-banner-copy > small {
+  color: #f06b20;
+  font-size: clamp(6px,.7vw,9px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .16em;
+}
+.tools-subcategory-banner-copy > strong {
+  margin-top: clamp(2px,.35vw,5px);
+  font-size: clamp(20px,3.1vw,42px);
+  line-height: .96;
+  letter-spacing: -.045em;
+  color: #08234d;
+}
+.tools-subcategory-banner-tags {
+  margin-top: clamp(3px,.6vw,8px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  color: #102b50;
+  font-size: clamp(8px,1.05vw,14px);
+  font-weight: 800;
+  line-height: 1.15;
+}
+.tools-subcategory-banner-tags b {
+  font-weight: 800;
+}
+.tools-subcategory-banner-tags b + b::before {
+  content: "•";
+  margin: 0 .55em;
+  color: #f06b20;
+}
+.tools-subcategory-banner-supporting {
+  margin-top: clamp(2px,.5vw,7px);
+  color: #6a7482;
+  font-size: clamp(7px,.82vw,11px);
+  line-height: 1.25;
+}
+.tools-subcategory-banner-media {
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 0 44%;
+  overflow: hidden;
+}
+.tools-subcategory-banner-media > img {
+  object-fit: cover;
+  object-position: 82% 50%;
+  filter: saturate(.92) contrast(1.02) brightness(1.03);
+  transform: scale(1.02);
+}
+.tools-subcategory-banner-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #f7f9fc 0%, rgba(247,249,252,.90) 10%, rgba(247,249,252,.28) 34%, transparent 62%);
+}
+.tools-subcategory-banner-enter {
+  position: absolute;
+  z-index: 4;
+  right: clamp(8px,1.8vw,22px);
+  bottom: 50%;
+  transform: translateY(50%);
+  min-height: clamp(34px,4.4vw,54px);
+  padding: 0 clamp(14px,2.2vw,28px);
+  display: inline-flex;
+  align-items: center;
+  gap: .65em;
+  border-radius: 999px;
+  background: #06224b;
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(4,25,54,.16);
+  font-size: clamp(7px,.95vw,12px);
+  font-weight: 900;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.tools-subcategory-banner-enter b {
+  color: #ff7a1a;
+  font-size: 1.2em;
+}
+.tools-subcategory-banner:hover .tools-subcategory-banner-media > img {
+  transform: scale(1.045);
+}
+html[data-theme="dark"] .category-subcategories[data-category="Herramientas"] .tools-subcategory-banner {
+  border-color: #243349;
+  background:
+    radial-gradient(circle at 14% 50%, rgba(13,25,43,.98), rgba(8,17,31,.97) 48%, rgba(8,17,31,.42) 72%),
+    #08111f;
+  box-shadow: 0 14px 34px rgba(0,0,0,.28);
+}
+html[data-theme="dark"] .tools-subcategory-banner-copy {
+  color: #f5f8fc;
+}
+html[data-theme="dark"] .tools-subcategory-banner-copy > strong {
+  color: #fff;
+}
+html[data-theme="dark"] .tools-subcategory-banner-tags {
+  color: #e9eef5;
+}
+html[data-theme="dark"] .tools-subcategory-banner-supporting {
+  color: #aeb9c7;
+}
+html[data-theme="dark"] .tools-subcategory-banner-media > img {
+  filter: saturate(.95) contrast(1.08) brightness(.64);
+}
+html[data-theme="dark"] .tools-subcategory-banner-media::after {
+  background: linear-gradient(90deg, #08111f 0%, rgba(8,17,31,.94) 13%, rgba(8,17,31,.36) 38%, transparent 66%);
+}
+html[data-theme="dark"] .tools-subcategory-banner-enter {
+  background: #ff7417;
+  color: #071321;
+  box-shadow: 0 10px 22px rgba(0,0,0,.24);
+}
+html[data-theme="dark"] .tools-subcategory-banner-enter b {
+  color: #071321;
+}
+@media (max-width: 760px) {
+  .category-subcategories[data-category="Herramientas"] .tools-subcategory-banner {
+    aspect-ratio: 3.5 / 1;
+    border-radius: 999px;
+  }
+  .tools-subcategory-banner-copy {
+    width: 61%;
+    padding: 8px 16px;
+  }
+  .tools-subcategory-banner-copy > strong {
+    font-size: clamp(18px,5.5vw,25px);
+  }
+  .tools-subcategory-banner-supporting {
+    max-width: 90%;
+    font-size: 7px;
+  }
+  .tools-subcategory-banner-media {
+    left: 43%;
+  }
+  .tools-subcategory-banner-enter {
+    right: 8px;
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 7px;
+  }
+}
+@media (max-width: 390px) {
+  .tools-subcategory-banner-supporting {
+    display: none;
+  }
+  .tools-subcategory-banner-copy {
+    width: 59%;
+    padding-left: 14px;
+  }
+  .tools-subcategory-banner-enter {
+    min-height: 31px;
+    padding-inline: 10px;
+  }
+}
