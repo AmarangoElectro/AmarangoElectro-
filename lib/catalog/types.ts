@@ -8,7 +8,8 @@ export type CatalogSource =
   | "v16-cellphones-90-materialized"
   | "v16-electro-sanitized-snapshot"
   | "v16-media-sanitized-snapshot"
-  | "v16-tools-care-sanitized-snapshot";
+  | "v16-tools-care-sanitized-snapshot"
+  | "v16-home-sanitized-snapshot";
 
 export type Availability = "available" | "unavailable" | "unknown";
 export type StockStatus = "in_stock" | "out_of_stock" | "unknown";
