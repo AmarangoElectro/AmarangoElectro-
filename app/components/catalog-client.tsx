@@ -24,7 +24,6 @@ import {
   subscribeCompare,
 } from "@/lib/commerce/compare-store";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
-import { consumeCatalogScrollRestore } from "@/lib/ux/navigation-memory";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-banner";
 
 const brandProfiles = {
@@ -149,16 +148,6 @@ export function CatalogClient({
     () => (filtered.length === 0 && deferredSearch.trim() ? suggestCatalogCorrection(products, deferredSearch) : null),
     [deferredSearch, filtered.length, products],
   );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const scrollY = consumeCatalogScrollRestore();
-    if (scrollY === null) return;
-    const frame = window.requestAnimationFrame(() => {
-      window.scrollTo({ top: scrollY, behavior: "auto" });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
 
   useEffect(() => {
     const validIds = compareIds.filter((id) => productById.has(id));
