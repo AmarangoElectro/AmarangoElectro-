@@ -48,9 +48,9 @@ export function RecentlyViewedRail({ products, excludeId }: { products: Product[
     <section className="recently-viewed" aria-labelledby="recently-viewed-title">
       <div className="recently-viewed-heading">
         <div>
-          <p className="eyebrow orange"><Clock3 size={14} aria-hidden="true" /> CONTINUIDAD LOCAL</p>
+          <p className="eyebrow orange"><Clock3 size={14} aria-hidden="true" /> VISTOS RECIENTEMENTE</p>
           <h2 id="recently-viewed-title">Seguí mirando</h2>
-          <p>Guardado solo en este dispositivo. No se envía ni se usa para rastrearte.</p>
+          <p>Guardado en este dispositivo para que puedas retomar productos que ya viste.</p>
         </div>
         <button type="button" aria-label="Limpiar vistos recientemente" onClick={() => { clearRecentlyViewed(); playSonicCue("tap"); }}>
           <X size={15} aria-hidden="true" /> Limpiar
