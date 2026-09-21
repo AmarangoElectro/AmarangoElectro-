@@ -62,18 +62,18 @@ export function ProvidersPanel() {
         <div>
           <p className="eyebrow orange">ADMINISTRACIÓN</p>
           <h2 id="providers-panel-title">Proveedores</h2>
-          <span>Registro canónico de proveedores y su mapeo de datos.</span>
+          <span>Proveedores disponibles y relación con los productos de la tienda.</span>
         </div>
       </header>
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura · vía RPC segura (`v16_providers_list`) · sin acceso directo a tablas legacy
+        Conexión segura · proveedores reales · sin datos de prueba
       </div>
 
       {unmapped.status === "ok" && (
         <div className={unmapped.data.length === 0 ? "crm-status-banner" : "crm-empty-state crm-empty-state--warn"} data-guide-target="providers-data-quality">
-          {unmapped.data.length === 0 ? "Mapeo de proveedores: completo" : <><b>Labels sin mapear</b><p>{unmapped.data.length} etiqueta{unmapped.data.length === 1 ? "" : "s"} legacy sin alias aprobado.</p></>}
+          {unmapped.data.length === 0 ? "Mapeo de proveedores: completo" : <><b>Nombres pendientes de unificar</b><p>{unmapped.data.length} nombre{unmapped.data.length === 1 ? "" : "s"} pendiente{unmapped.data.length === 1 ? "" : "s"} de asociar.</p></>}
         </div>
       )}
 
