@@ -54,10 +54,11 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
       }).format(product.price.amount)
     : null;
   const financingLabel = product.financing[0]?.label;
-  const sixInstallments = product.financing.find((plan) => plan.installments === 6 && plan.installmentAmount);
-  const sixInstallmentsLabel = sixInstallments?.installmentAmount
-    ? `6 cuotas fijas de ${new Intl.NumberFormat("es-AR", { style: "currency", currency: sixInstallments.installmentAmount.currency, maximumFractionDigits: 0 }).format(sixInstallments.installmentAmount.amount)}`
-    : financingLabel;
+  const installmentOptions = [2, 4, 6].flatMap((installments) => {
+    const plan = product.financing.find((candidate) => candidate.installments === installments && candidate.installmentAmount);
+    return plan?.installmentAmount ? [{ installments, label: `${installments} cuotas de ${new Intl.NumberFormat("es-AR", { style: "currency", currency: plan.installmentAmount.currency, maximumFractionDigits: 0 }).format(plan.installmentAmount.amount)}` }] : [];
+  });
+  const hasInstallments = installmentOptions.length > 0 || Boolean(financingLabel);
 
   function toggleFavorite() {
     try {
@@ -118,8 +119,8 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         {product.features.length > 0 ? <div className="feature-chips">{product.features.slice(0, 3).map((feature) => <span key={feature}>{feature}</span>)}</div> : null}
         <div className={`product-card-commerce ${priceLabel ? "has-price" : "price-pending"}`}>
           {priceLabel ? <strong className="product-card-price">{priceLabel}</strong> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
-          {sixInstallmentsLabel ? <span className="product-card-installments">{sixInstallmentsLabel}</span> : priceLabel ? <span className="product-card-installments">Consultá opciones de pago y disponibilidad</span> : null}
-          {priceLabel && sixInstallmentsLabel ? <small className="product-card-cash">Contado: {priceLabel}</small> : null}
+          {installmentOptions.length > 0 ? <span className="product-card-installments" aria-label="Opciones de cuotas">{installmentOptions.map((option) => <b key={option.installments}>{option.label}</b>)}</span> : financingLabel ? <span className="product-card-installments">{financingLabel}</span> : priceLabel ? <span className="product-card-installments">Consultá opciones de pago y disponibilidad</span> : null}
+          {priceLabel && hasInstallments ? <small className="product-card-cash">Contado: {priceLabel}</small> : null}
           <span className={`product-card-availability ${product.stock.status === "in_stock" ? "is-positive" : ""}`}><span className="sr-only">Disponibilidad</span>{product.stock.label ?? "Consultar disponibilidad"}</span>
         </div>
         <Link className="catalog-card-link" href={href} onClick={() => playSonicCue("navigate")}>Ver producto <span aria-hidden="true">→</span></Link>

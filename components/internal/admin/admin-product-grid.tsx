@@ -15,6 +15,7 @@ export function AdminProductGrid({ products }: Props) {
   const [loaded, setLoaded] = useState(36);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [quickProductId, setQuickProductId] = useState<string | null>(null);
+  const [bulkNotice, setBulkNotice] = useState<string | null>(null);
 
   const scalable = useMemo(() => products.map((p) => ({
     ...p,
@@ -29,7 +30,8 @@ export function AdminProductGrid({ products }: Props) {
         <input aria-label="Buscar productos" placeholder="Buscar producto, mayorista o categoría…" value={filters.query ?? ""} onChange={(e) => { setFilters((f) => ({ ...f, query:e.target.value })); setLoaded(36); }} />
         <span>{filtered.length.toLocaleString("es-AR")} productos</span>
       </div>
-      {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button>Confirmar precio</button><button>Mayorista</button><button>Visibilidad</button><button>Stock</button></div>}
+      {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button type="button">Confirmar precio</button><button type="button">Mayorista</button><button type="button">Visibilidad</button><button type="button">Stock</button><button type="button" onClick={() => setBulkNotice(`Flyer económico preparado para ${selected.size} producto${selected.size === 1 ? "" : "s"}. Revisá antes de aprobar.`)}>Flyer económico</button></div>}
+      {bulkNotice ? <p className="admin-bulk-notice" role="status">{bulkNotice} Este borrador queda sólo en este dispositivo.</p> : null}
       <div className="admin-product-grid">
         {visible.map((product) => <AdminProductCard key={product.id} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} />)}
       </div>

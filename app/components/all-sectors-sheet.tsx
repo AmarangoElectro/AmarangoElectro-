@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight, ChevronDown, Search, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, ChevronDown, LayoutGrid, Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "./store-link";
 import { retailCategories } from "@/lib/catalog/retail-categories";
@@ -10,7 +10,6 @@ import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
 export function AllSectorsSheet() {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const [openSectorId, setOpenSectorId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,7 +17,6 @@ export function AllSectorsSheet() {
       const next = isSectorsSheetOpen();
       setOpen(next);
       if (!next) {
-        setQuery("");
         setOpenSectorId(null);
       }
     };
@@ -35,14 +33,6 @@ export function AllSectorsSheet() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [open]);
 
-  const filtered = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return retailCategories;
-    return retailCategories.filter((category) =>
-      category.title.toLowerCase().includes(term) || category.eyebrow.toLowerCase().includes(term),
-    );
-  }, [query]);
-
   return (
     <div className={`sectors-sheet-layer ${open ? "open" : ""}`} aria-hidden={!open}>
       <button className="sectors-sheet-scrim" type="button" tabIndex={open ? 0 : -1} aria-label="Cerrar" onClick={() => closeSectorsSheet()} />
@@ -54,18 +44,13 @@ export function AllSectorsSheet() {
           </div>
           <button type="button" aria-label="Cerrar" onClick={() => closeSectorsSheet()}><X size={20} /></button>
         </header>
-        <div className="sectors-sheet-search">
-          <Search size={16} aria-hidden="true" />
-          <input
-            type="search"
-            placeholder="Buscar un sector…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            tabIndex={open ? 0 : -1}
-          />
+        <div className="sectors-sheet-category-label" aria-label="Categorías disponibles">
+          <span><LayoutGrid size={17} aria-hidden="true" /></span>
+          <div><small>EXPLORÁ AMARANGO</small><strong>Categorías</strong></div>
+          <Sparkles size={17} aria-hidden="true" />
         </div>
         <div className="sectors-sheet-list">
-          {filtered.map((category) => {
+          {retailCategories.map((category) => {
             const expanded = openSectorId === category.id;
             const panelId = `sector-drawer-${category.id}`;
             return (
@@ -106,7 +91,6 @@ export function AllSectorsSheet() {
               </article>
             );
           })}
-          {filtered.length === 0 && <p className="sectors-sheet-empty">Sin resultados para “{query}”.</p>}
         </div>
       </aside>
     </div>

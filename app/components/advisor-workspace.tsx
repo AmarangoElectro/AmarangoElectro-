@@ -60,7 +60,10 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <div className="advisor-catalog-heading" data-guide-target="advisor-catalog-search"><div><p className="eyebrow orange">CATÁLOGO MAESTRO</p><h2 id="advisor-catalog-title">Productos oficiales</h2></div><label><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nombre, modelo, marca…" /></label></div>
         <div className="advisor-product-grid">
           {filtered.map((product) => {
-            const sixPlan = product.financing.find((plan) => plan.installments === 6 && plan.installmentAmount);
+            const installmentOptions = [2, 4, 6].flatMap((installments) => {
+              const plan = product.financing.find((candidate) => candidate.installments === installments && candidate.installmentAmount);
+              return plan?.installmentAmount ? [`${installments} cuotas de ${money(plan.installmentAmount.amount)}`] : [];
+            });
             const supplier = product.specifications.Proveedor?.trim().toLocaleLowerCase("es-AR") ?? "";
             const hasLiveStock = liveStockSuppliers.has(supplier);
             const stockText = hasLiveStock
@@ -76,7 +79,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
               <div className="advisor-product-card__copy">
                 <small>{product.brand} · {product.category}</small><h3>{product.name}</h3>
                 <strong className="advisor-product-price">{money(product.price?.amount)}</strong>
-                <p>{sixPlan?.installmentAmount ? `6 cuotas de ${money(sixPlan.installmentAmount.amount)}` : product.price ? "Consultá opciones de pago" : "Consultá precio y opciones de pago"}</p>
+                <p className="advisor-installment-options">{installmentOptions.length > 0 ? installmentOptions.map((option) => <span key={option}>{option}</span>) : product.price ? "Consultá opciones de pago" : "Consultá precio y opciones de pago"}</p>
                 <span className={`advisor-availability ${hasLiveStock ? "is-live" : "needs-check"}`}>{stockText}</span>
               </div>
               <div className="advisor-product-card__actions"><Link href={`/producto/${product.slug}`}>Ver producto</Link><button type="button" onClick={() => share(product)}><Share2 size={16} /> Publicar</button></div>

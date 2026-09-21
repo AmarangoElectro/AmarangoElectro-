@@ -37,6 +37,7 @@ export function AdminProductCard({ product, selected = false, onSelect, onAction
 
       <div className="admin-product-card__media">
         {product.imageUrl ? <Image src={product.imageUrl} alt="" width={480} height={360} loading="lazy" unoptimized /> : <div className="admin-product-card__noimage">📷<small>Sin foto</small></div>}
+        {product.supplierImageUrl && product.imageUrl === product.supplierImageUrl ? <span className="admin-product-card__source">Foto del mayorista</span> : null}
         <span className={`admin-product-card__stock stock-${product.stockState}`}>{stockLabel}</span>
       </div>
 

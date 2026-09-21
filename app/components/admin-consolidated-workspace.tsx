@@ -6,6 +6,7 @@ import { BarChart3, Coins, ImagePlus, LayoutGrid, ListFilter, MoreHorizontal, Pa
 import { AmarangoCalculatorPanel } from "@/components/internal/admin/amarango-calculator-panel";
 import { PlatesPanel } from "@/components/internal/admin/plates-panel";
 import { AdminProductGrid } from "@/components/internal/admin/admin-product-grid";
+import { PhotoReviewPanel } from "@/components/internal/admin/photo-review-panel";
 import { V418BStorefrontAdminPreview } from "@/components/internal/admin/v418b-storefront-admin-preview";
 import { V16Cellphones90Preview } from "@/components/internal/admin/v16-90-cellphones-preview";
 import { CrmClientsPanel } from "@/components/internal/admin/crm-clients-panel";
@@ -29,6 +30,8 @@ const cashGuide = findSectorGuide("admin", "caja");
 const deliveriesGuide = findSectorGuide("admin", "entregas");
 const advisorsGuide = findSectorGuide("admin", "asesores");
 
+// Ofertas & Outlet V4.7 se conserva dentro del área administrativa protegida.
+
 const adminLabStorageKey = "amarango_v49_admin_lab";
 const supplierImage = "/assets/admin-lab/electra-proveedor-original.webp";
 const economicImage = "/assets/admin-lab/electra-flyer-economico-demo.webp";
@@ -39,7 +42,7 @@ const initialAdminLab: AdminLab = { imageMode: "supplier", visible: true, stockS
 export function AdminConsolidatedWorkspace() {
   const [adminLab, setAdminLab] = useState<AdminLab>(initialAdminLab);
   const [offer, setOffer] = useState<LabOfferState>(defaultLabOffer);
-  const [tab, setTab] = useState<"catalog" | "storefront" | "cellphones90" | "crm" | "collections" | "reports" | "providers" | "cash" | "deliveries" | "advisors" | "calculator" | "plates" | "offers">("catalog");
+  const [tab, setTab] = useState<"catalog" | "photos" | "storefront" | "cellphones90" | "crm" | "collections" | "reports" | "providers" | "cash" | "deliveries" | "advisors" | "calculator" | "plates" | "offers">("catalog");
   const [crmInitialClientId, setCrmInitialClientId] = useState<string | null>(null);
   const [crmInstanceKey, setCrmInstanceKey] = useState(0);
 
@@ -78,13 +81,14 @@ export function AdminConsolidatedWorkspace() {
         <div className="admin-command-hero-status"><ShieldCheck /><strong>MODO SEGURO</strong><span>Los cambios productivos requieren autorización</span></div>
       </section>
       <nav className="admin-workspace-tabs" aria-label="Módulos administrativos" data-guide-target="admin-workspace-tabs">
-        <button aria-pressed={tab === "catalog"} onClick={() => setTab("catalog")}><LayoutGrid /> Catálogo</button>
-        <button aria-pressed={tab === "storefront"} onClick={() => setTab("storefront")}><ShieldCheck /> Revisión de tienda</button>
-        <button aria-pressed={tab === "cellphones90"} onClick={() => setTab("cellphones90")}><Smartphone /> 90 Celulares · revisión</button>
-        <button aria-pressed={tab === "calculator"} onClick={() => setTab("calculator")}><ListFilter /> Calculadora</button>
-        <button aria-pressed={tab === "plates"} onClick={() => setTab("plates")}><Sparkles /> Placas</button>
+        <button aria-pressed={tab === "catalog"} onClick={() => setTab("catalog")}><LayoutGrid /><span><small>PRODUCTOS</small><strong>Catálogo</strong></span></button>
+        <button aria-pressed={tab === "photos"} onClick={() => setTab("photos")}><ImagePlus /><span><small>ORIGEN Y ENCUADRE</small><strong>Fotos · revisión</strong></span></button>
+        <button aria-pressed={tab === "storefront"} onClick={() => setTab("storefront")}><ShieldCheck /><span><small>CONTROL VISUAL</small><strong>Revisión de tienda</strong></span></button>
+        <button aria-pressed={tab === "cellphones90"} onClick={() => setTab("cellphones90")}><Smartphone /><span><small>COHORTE ACTUAL</small><strong>90 Celulares · revisión</strong></span></button>
+        <button aria-pressed={tab === "calculator"} onClick={() => setTab("calculator")}><ListFilter /><span><small>PRECIOS</small><strong>Calculadora</strong></span></button>
+        <button aria-pressed={tab === "plates"} onClick={() => setTab("plates")}><Sparkles /><span><small>CONTENIDO</small><strong>Placas</strong></span></button>
         <details className="admin-workspace-more">
-          <summary><MoreHorizontal /> Más áreas</summary>
+          <summary><MoreHorizontal /><span><small>OPERACIÓN</small><strong>Más áreas</strong></span></summary>
           <div>
             <button aria-pressed={tab === "crm"} onClick={() => { setCrmInitialClientId(null); setCrmInstanceKey((key) => key + 1); setTab("crm"); }}><Users /> Clientes / CRM</button>
             <button aria-pressed={tab === "collections"} onClick={() => setTab("collections")}><Wallet /> Cobranzas</button>
@@ -108,6 +112,7 @@ export function AdminConsolidatedWorkspace() {
         <section className="admin-parity-strip"><strong>Operativa preservada</strong><span>Tarjetas + planilla</span><span>Costos y contado</span><span>Cuotas</span><span>Proveedor</span><span>Fotos</span><span>Visibilidad</span><span>Stock</span><span>Destacados</span><span>Acciones masivas</span><span>Revisión de precios</span></section>
       </>}
       {tab === "storefront" && <section aria-label="Revisión de tienda"><V418BStorefrontAdminPreview /></section>}
+      {tab === "photos" && <PhotoReviewPanel products={demoProducts} />}
       {tab === "cellphones90" && <section aria-label="Cohorte de celulares en revisión"><V16Cellphones90Preview /></section>}
       {tab === "crm" && <>{crmGuide && <SectorGuide guide={crmGuide} />}<CrmClientsPanel key={crmInstanceKey} initialClientId={crmInitialClientId} /></>}
       {tab === "collections" && <>{collectionsGuide && <SectorGuide guide={collectionsGuide} />}<CollectionsPanel onOpenClient360={openClient360FromCollections} /></>}

@@ -26,6 +26,8 @@ export interface AdminProductCardModel {
   id: string;
   name: string;
   imageUrl: string | null;
+  supplierImageUrl: string | null;
+  features: readonly string[];
   supplier: string;
   category: string;
   costArs: number | null;
@@ -55,6 +57,8 @@ export function buildAdminProductCardModel(input: AdminCardProductInput, now = D
     id: input.id,
     name: input.name,
     imageUrl: input.imageUrl,
+    supplierImageUrl: input.supplierImageUrl ?? null,
+    features: Object.freeze([...(input.features ?? [])]),
     supplier: input.supplier ?? "Sin mayorista",
     category: input.category ?? "Sin categoría",
     costArs: input.costArs,

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "./store-link";
 import type { SubcategoryDefinition } from "@/lib/catalog/categories";
+import { retailCategories } from "@/lib/catalog/retail-categories";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
 
 interface Props {
@@ -11,8 +12,25 @@ interface Props {
 }
 
 export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory, index }: Props) {
-  const hasEditorialBanner = Boolean(subcategory.image?.startsWith("/assets/banners/subcategories/"));
   const brandArtwork = subcategory.brand ? getBrandCampaignArtwork(subcategory.brand) : null;
+  const retailArtworkAliases: Record<string, string> = {
+    "colchones-y-sommiers": "colchones-sommiers",
+    "cargadores-y-accesorios": "cargadores-accesorios",
+    "hogar-y-deco": "hogar-decoracion",
+    "bazar-y-mesa": "hogar-decoracion",
+    "camping-y-aire-libre": "deporte-movilidad",
+    "auto-y-motos": "auto-motos",
+    energia: "auto-motos",
+    juguetes: "bebes",
+    "parlantes-portatiles": "audio",
+    torres: "audio",
+    "barras-de-sonido": "audio",
+    auriculares: "audio",
+    "home-audio": "audio",
+  };
+  const retailArtwork = retailCategories.find((item) => item.id === (retailArtworkAliases[subcategory.slug] ?? subcategory.slug))?.image;
+  const artwork = retailArtwork ?? subcategory.image;
+  const hasEditorialBanner = !retailArtwork && Boolean(subcategory.image?.startsWith("/assets/banners/subcategories/"));
   const href = subcategory.brand
     ? `/categoria/${categorySlug}?marca=${encodeURIComponent(subcategory.brand)}#catalogo`
     : `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#sector-activo`;
@@ -41,9 +59,9 @@ export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory
       href={href}
       aria-label={`Entrar a ${categoryTitle} / ${subcategory.title}`}
     >
-      {subcategory.image ? (
+      {artwork ? (
         <Image
-          src={subcategory.image}
+          src={artwork}
           alt={`${subcategory.title} — ${categoryTitle}`}
           fill
           sizes="(max-width: 760px) 100vw, (max-width: 1200px) 50vw, 50vw"
