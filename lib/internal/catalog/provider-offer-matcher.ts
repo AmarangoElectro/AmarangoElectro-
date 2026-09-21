@@ -1,5 +1,6 @@
 import evidence from "@/fixtures/v16-internal-provider-offers-20260920.json";
 import { z } from "zod";
+import { inferCanonicalBrandFromName } from "@/lib/catalog/brand-normalization";
 
 const offerSchema = z.object({
   sourceProductId: z.string().min(1),
@@ -87,11 +88,6 @@ function jaccard(left: string, right: string) {
   return intersection / new Set([...a, ...b]).size;
 }
 
-function inferredBrand(value: string) {
-  const normalized = normalize(value);
-  return KNOWN_BRANDS.find((brand) => normalized.includes(brand)) ?? null;
-}
-
 function modelTokens(value: string) {
   return normalize(value)
     .split(" ")
@@ -143,8 +139,8 @@ function numericConflict(left: string, right: string) {
 
 function candidateScore(left: InternalProviderOffer, right: InternalProviderOffer) {
   const nameSimilarity = jaccard(left.name, right.name);
-  const leftBrand = inferredBrand(left.name);
-  const rightBrand = inferredBrand(right.name);
+  const leftBrand = inferCanonicalBrandFromName(left.name);
+  const rightBrand = inferCanonicalBrandFromName(right.name);
   const sameBrand = Boolean(leftBrand && rightBrand && leftBrand === rightBrand);
   const leftModels = modelTokens(left.name);
   const rightModels = modelTokens(right.name);
