@@ -13,7 +13,6 @@ const BRAND_RULES = [
   { brand: "Milenial Venezia", patterns: [/\bmilenial\s+venezia\b/i] },
   { brand: "Usman Win", patterns: [/\busman\s+win\b/i] },
   { brand: "Eurotech", patterns: [/\beurotech\b/i] },
-  { brand: "Westinghouse", patterns: [/\bwestinghouse\b/i, /\bwestinhouse\b/i] },
   { brand: "Fedders", patterns: [/\bfedders\b/i, /\bfedeers\b/i] },
   { brand: "Kanji", patterns: [/\bkanji\b/i] },
   { brand: "LG", patterns: [/(?:^|[^a-z0-9])lg(?:$|[^a-z0-9])/i] },
