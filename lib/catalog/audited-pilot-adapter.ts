@@ -39,11 +39,13 @@ const parsedEvidence = evidenceSchema.parse(evidence);
  * fixtures/v413-legacy-cellphones-sanitized.json
  * - Samsung A16: legacyPosition 18
  * - Motorola G15: legacyPosition 44
+ * - Codini Secarropas 6.5 kg: imagen sanitizada del registro Codini AD61 (6.5 kg)
  */
 const verifiedImageByPilotId: Readonly<Record<string, string>> = Object.freeze({
   "a16-128": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
   "a16-256": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
   "g15-256": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg",
+  "sec-65": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_192_1784861449239.jpg",
 });
 
 function slugPart(value: string) {
