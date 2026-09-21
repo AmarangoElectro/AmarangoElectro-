@@ -286,13 +286,13 @@ export function DeliveriesPanel() {
         <div>
           <p className="eyebrow orange">ADMINISTRACIÓN</p>
           <h2 id="deliveries-panel-title">Entregas</h2>
-          <span>Registro canónico del ciclo de vida de entregas V16, por venta.</span>
+          <span>Seguimiento de cada entrega desde la coordinación hasta la confirmación final.</span>
         </div>
       </header>
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura/escritura vía RPC segura · nunca usa ni modifica el estado de ventas legacy
+        Conexión segura · cada entrega conserva su propio estado y seguimiento
       </div>
 
       <div className="collections-actions">
@@ -320,7 +320,7 @@ export function DeliveriesPanel() {
       {deliveries.status !== "ok" && <StatusNotice result={deliveries} />}
       {deliveries.status === "ok" && rows.length === 0 && (
         <div className="crm-empty-state" data-guide-target="deliveries-empty">
-          <b>Todavía no hay entregas registradas en V16.</b>
+          <b>Todavía no hay entregas registradas.</b>
           <p>Las próximas entregas coordinadas aparecerán acá automáticamente.</p>
         </div>
       )}
