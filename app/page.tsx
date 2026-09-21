@@ -8,12 +8,17 @@ import { HomeProductsPreview } from "./components/home-products-preview";
 import { AllSectorsSheet } from "./components/all-sectors-sheet";
 import { OffersShowcase } from "./components/offers-showcase";
 import { catalog } from "@/lib/catalog";
+import { getChatGPTUser } from "@/app/chatgpt-auth";
 
 export default async function Home() {
-  const recentCandidates = await catalog.listProducts({ visibleOnly: true });
+  const [recentCandidates, internalUser] = await Promise.all([
+    catalog.listProducts({ visibleOnly: true }),
+    getChatGPTUser(),
+  ]);
+  const internalUserName = internalUser?.fullName?.split(/\s+/)[0] ?? internalUser?.email.split("@")[0] ?? null;
   return (
     <>
-      <SiteHeader />
+      <SiteHeader internalUserName={internalUserName} />
       <main>
         <HeroSlider />
 
