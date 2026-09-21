@@ -6,6 +6,7 @@ import { ClipboardList, Search, Share2, UsersRound, WalletCards } from "lucide-r
 import type { Product } from "@/lib/catalog/types";
 import { normalizeCatalogText } from "@/lib/catalog/search";
 import { OffersShowcase } from "./offers-showcase";
+import { AdvisorSaleDraftPanel } from "./advisor-sale-draft-panel";
 import { SectorGuide } from "./sector-guide";
 import { findSectorGuide } from "@/lib/onboarding/sector-guides";
 import { toast } from "sonner";
@@ -52,14 +53,16 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
       </section>
       <nav className="advisor-section-nav" aria-label="Navegación de Mi Amarango">
         <a href="#advisor-tools">Resumen</a>
+        <a href="#advisor-sale-draft">Nueva venta</a>
         <a href="#advisor-offers">Ofertas</a>
         <a href="#advisor-catalog">Catálogo</a>
       </nav>
       <section id="advisor-tools" className="advisor-quick-grid" aria-label="Accesos rápidos" data-guide-target="advisor-quick-grid">
         <article><UsersRound /><span><small>CLIENTES</small><strong>Seguimiento en preparación</strong></span></article>
         <article><WalletCards /><span><small>CUOTAS</small><strong>Consulta en preparación</strong></span></article>
-        <article><ClipboardList /><span><small>NUEVA VENTA</small><strong>Disponible al habilitar ventas</strong></span></article>
+        <a className="advisor-quick-card advisor-quick-card--sale" href="#advisor-sale-draft"><ClipboardList /><span><small>NUEVA VENTA</small><strong>Preparar operación</strong></span></a>
       </section>
+      <AdvisorSaleDraftPanel products={products} />
       <div id="advisor-offers" className="advisor-offers-anchor"><OffersShowcase advisor /></div>
       <section id="advisor-catalog" className="advisor-catalog" aria-labelledby="advisor-catalog-title">
         <div className="advisor-catalog-heading" data-guide-target="advisor-catalog-search"><div><p className="eyebrow orange">CATÁLOGO MAESTRO</p><h2 id="advisor-catalog-title">Productos oficiales</h2></div><label><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nombre, modelo, marca…" /></label></div>
