@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `ca5fcf25beb096d9653991535a380321080a5b1f`
+- Minimum app-code HEAD covered by this handoff: `212f59c5c50f5b84a164e56bcd2efe78ca5cd04f`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -181,3 +181,18 @@ Prepared on the same branch without changing approved banners or Home order:
 - drawer respects bottom safe-area and uses larger touch targets;
 - sticky-header anchor offsets prevent linked sections from opening underneath the header;
 - regression test: `tests/v16-home-header-navigation-regression.test.mjs`.
+
+
+### Category / sector / favorites continuity
+Prepared on the same branch:
+- global Favorites in the header is backed by `/buscar?favoritos=1` and the composite catalog favorites store;
+- Home/retail sector links that use `#sector-activo` now land on a real anchor;
+- searching from an active non-brand sector preserves the `sector` parameter instead of widening silently to the whole category;
+- contextual subcategory navigation uses the storefront Link wrapper instead of full-page anchors;
+- brand-locale navigation uses the same storefront navigation path;
+- `#sector-activo` and `#catalogo` have sticky-header offsets;
+- subcategory/context/filter controls have 44 px mobile touch targets;
+- catalog search/price/sort controls keep 16 px mobile text sizing;
+- Audio/Hogar showroom copy no longer restores retired slogans;
+- Admin catalog overlay copy uses `Acciones rápidas / Vista de revisión` instead of draft/version labels;
+- regression test: `tests/v16-category-favorites-navigation-regression.test.mjs`.
