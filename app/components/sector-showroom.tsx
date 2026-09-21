@@ -38,14 +38,14 @@ const editorial: Record<string, Editorial> = {
   },
   audio: {
     eyebrow: "AUDIO",
-    title: "Sentí cada momento.",
+    title: "Audio para cada ambiente.",
     copy: "Sonido, energía y entretenimiento en una atmósfera propia.",
     image: "/assets/v16-final/main/audio.png",
     imagePosition: "center 32%",
   },
   hogar: {
     eyebrow: "HOGAR & ESTILO",
-    title: "Tu espacio. Tu estilo.",
+    title: "Diseñá tu espacio a tu manera.",
     copy: "Muebles, deco y detalles para sentirte en casa.",
     image: "/assets/v16-final/main/hogar.png",
     imagePosition: "center 34%",
