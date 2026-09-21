@@ -8866,3 +8866,48 @@ html[data-theme="dark"] .advisor-sale-draft__actions button:first-child {
     padding-block: 4px;
   }
 }
+
+
+/* V16 Home/header mobile navigation polish */
+#productos,
+#ofertas,
+#experiencia,
+#financiacion {
+  scroll-margin-top: 112px;
+}
+
+.store-drawer {
+  padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 16px));
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 760px) {
+  #productos,
+  #ofertas,
+  #experiencia,
+  #financiacion {
+    scroll-margin-top: 86px;
+  }
+
+  .header-search input {
+    font-size: 16px;
+  }
+
+  .store-drawer > header button,
+  .store-drawer-settings button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .store-drawer nav a,
+  .store-drawer nav button,
+  .authorized-access > a {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 390px) {
+  .header-search input {
+    font-size: 15px;
+  }
+}
