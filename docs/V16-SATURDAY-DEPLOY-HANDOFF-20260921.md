@@ -53,7 +53,7 @@ Prepared on the same branch:
 - the global Claro / Auto / Oscuro selector is now available from the internal-space header;
 - Mi Amarango has local in-page navigation for Resumen / Ofertas / Catálogo only;
 - Mi Amarango still does not link to Administration or Amarango OS;
-- Administration keeps its module context in the URL hash (for example `#crm`, `#collections`, `#cash`);
+- Administration keeps its module context in readable URL hashes (for example `#crm`, `#cobranzas`, `#caja`, `#entregas`);
 - primary Administration shell surfaces have explicit dark-mode parity;
 - mobile Administration tabs are horizontally scrollable without compressing module labels;
 - regression test: `tests/v16-internal-spaces-theme-navigation-regression.test.mjs`.
