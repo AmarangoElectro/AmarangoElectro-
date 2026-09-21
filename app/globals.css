@@ -7925,3 +7925,177 @@ html[data-theme="dark"] .crm-search input::placeholder { color: var(--muted-fore
   .collections-actions { display: grid; grid-template-columns: 1fr; }
   .collections-actions .crm-open { width: 100%; }
 }
+
+
+/* V16 Administration — Providers, Calculator and Plates mobile polish */
+.providers-area {
+  width: 100%;
+  max-width: 1460px;
+  margin-inline: auto;
+  min-width: 0;
+}
+.providers-area > .crm-tabs {
+  margin-top: 0;
+}
+.crm-search textarea {
+  min-width: 0;
+  width: 100%;
+  outline: none;
+}
+.admin-finance-tool,
+.admin-finance-tool-grid,
+.admin-finance-controls,
+.admin-finance-result,
+.admin-plate-result {
+  min-width: 0;
+}
+.admin-finance-field input,
+.admin-plates-input textarea {
+  min-width: 0;
+}
+.admin-result-primary strong,
+.admin-plate-price,
+.admin-installment-grid article strong,
+.admin-plate-result .admin-plate-installments span {
+  overflow-wrap: anywhere;
+}
+.admin-discount-control > div {
+  flex-wrap: wrap;
+}
+.admin-plate-copy {
+  min-height: 44px;
+}
+
+html[data-theme="dark"] .admin-finance-field > div,
+html[data-theme="dark"] .admin-plates-input textarea,
+html[data-theme="dark"] .admin-calculator-modes,
+html[data-theme="dark"] .admin-discount-control button,
+html[data-theme="dark"] .admin-result-metrics > div,
+html[data-theme="dark"] .admin-installment-grid article {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+@media (max-width: 760px) {
+  .providers-area { gap: 10px; }
+  .providers-area > .crm-tabs {
+    margin-bottom: 2px;
+    padding: 3px;
+  }
+  .providers-area > .crm-tabs button {
+    flex: 1 0 auto;
+    min-height: 44px;
+  }
+
+  .crm-search textarea {
+    font-size: 16px !important;
+    line-height: 1.45;
+  }
+
+  .admin-finance-tool {
+    border-radius: 20px;
+  }
+  .admin-finance-tool-header {
+    padding: 16px;
+    align-items: flex-start;
+  }
+  .admin-finance-tool-title {
+    min-width: 0;
+    gap: 10px;
+  }
+  .admin-finance-tool-title > span {
+    width: 38px;
+    height: 38px;
+  }
+  .admin-finance-tool-title h2 {
+    font-size: 21px;
+    line-height: 1.05;
+  }
+  .admin-finance-tool-title p {
+    font-size: 9px;
+    line-height: 1.4;
+  }
+  .admin-finance-controls,
+  .admin-finance-result {
+    padding: 16px;
+  }
+
+  .admin-calculator-modes button,
+  .admin-discount-control button,
+  .admin-plate-copy {
+    min-height: 44px;
+  }
+
+  .admin-finance-field > div {
+    min-height: 48px;
+  }
+  .admin-finance-field input,
+  .admin-plates-input textarea {
+    font-size: 16px;
+  }
+  .admin-plates-input textarea {
+    min-height: 126px;
+  }
+
+  .admin-result-primary {
+    padding: 17px;
+  }
+  .admin-result-primary strong {
+    font-size: clamp(27px, 9vw, 38px);
+  }
+  .admin-installment-grid {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 6px;
+  }
+  .admin-installment-grid article {
+    padding: 10px 8px;
+  }
+
+  .admin-plate-result {
+    margin: 14px;
+    padding: 22px 17px;
+  }
+  .admin-plate-result h3 {
+    margin-top: 14px;
+    font-size: 24px;
+  }
+  .admin-plate-price {
+    font-size: clamp(30px, 10vw, 44px);
+  }
+  .admin-plate-result .admin-plate-installments {
+    gap: 6px;
+  }
+  .admin-plate-result .admin-plate-installments p {
+    padding: 10px 8px;
+  }
+  .admin-plate-copy {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .admin-finance-tool-header { padding: 14px; }
+  .admin-finance-controls,
+  .admin-finance-result { padding: 14px; }
+
+  .admin-calculator-modes {
+    grid-template-columns: 1fr;
+  }
+  .admin-calculator-modes button {
+    min-height: 42px;
+  }
+
+  .admin-installment-grid,
+  .admin-plate-installments {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-plate-result {
+    margin: 10px;
+    padding: 19px 14px;
+  }
+  .admin-plate-price {
+    font-size: 34px;
+  }
+}
