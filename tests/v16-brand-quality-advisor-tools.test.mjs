@@ -49,3 +49,48 @@ test("advisor sales assistant is provider-safe and supports comparison, WhatsApp
   assert.doesNotMatch(advisorSource, /specifications\.Proveedor|supplierCode|mayorista|costo/i);
   assert.match(advisorSource, /Consultame y te confirmo disponibilidad antes de cerrar el pedido/);
 });
+
+
+test("model extraction raises structured model coverage without using provider codes", () => {
+  const fixturePaths = [
+    "fixtures/v16-electrodomesticos-sanitized-20260920.json",
+    "fixtures/v16-smart-tv-audio-sanitized-20260920.json",
+    "fixtures/v16-tools-care-sanitized-20260920.json",
+    "fixtures/v16-home-sanitized-20260920.json",
+    "fixtures/v16-gaming-tech-outdoor-sanitized-20260920.json",
+    "fixtures/v16-sports-toys-it-sanitized-20260920.json",
+    "fixtures/v16-rest-others-sanitized-20260920.json",
+    "fixtures/v16-uncategorized-sanitized-20260920.json",
+  ];
+  const products = fixturePaths.flatMap((path) => JSON.parse(fs.readFileSync(path, "utf8")).products);
+  const withModel = products.filter((product) => product.model);
+  assert.equal(products.length, 553);
+  assert.ok(withModel.length >= 128);
+
+  const modelSource = fs.readFileSync("lib/catalog/model-normalization.ts", "utf8");
+  assert.match(modelSource, /source: "product-name-only"/);
+  assert.match(modelSource, /providerCodeUsedAsModel: false/);
+  assert.match(modelSource, /dimensionsUsedAsModel: false/);
+  assert.match(modelSource, /capacitiesUsedAsModel: false/);
+});
+
+test("externally verified unresolved products now have brand/model identity", () => {
+  const electro = JSON.parse(fs.readFileSync("fixtures/v16-electrodomesticos-sanitized-20260920.json", "utf8"));
+  const tools = JSON.parse(fs.readFileSync("fixtures/v16-tools-care-sanitized-20260920.json", "utf8"));
+  const gaming = JSON.parse(fs.readFileSync("fixtures/v16-gaming-tech-outdoor-sanitized-20260920.json", "utf8"));
+
+  const expected = [
+    [electro, "-632", "Telefunken", "Smart Wash 550"],
+    [electro, "-112", "Oryx", "OR-SA01"],
+    [tools, "-429", "Ultracomb", "SC4622"],
+    [tools, "-14", "Gamma", "G12417AR"],
+    [tools, "-219", "Konan", "KGH253"],
+    [gaming, "44", "3o3", "SG NR 01"],
+  ];
+
+  for (const [fixture, id, brand, model] of expected) {
+    const product = fixture.products.find((row) => String(row.id) === id);
+    assert.equal(product?.brand, brand);
+    assert.equal(product?.model, model);
+  }
+});
