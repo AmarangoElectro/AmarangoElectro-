@@ -1,6 +1,6 @@
 {
   "evidence_status": "v16_cellphones_90_materialized_local",
-  "source_reference": "V16-90-CELLPHONES-CANONICAL-MAPPING-FINAL.csv + V4.13-MIGRATION-SIMULATION.json",
+  "source_reference": "V16-90-CELLPHONES-CANONICAL-MAPPING-FINAL.csv + V4.13-MIGRATION-SIMULATION.json + public.celulares_lista read-only photo bank",
   "production_catalog_verified": false,
   "captured_at": "2026-09-14",
   "products": [
@@ -13,7 +13,8 @@
       "name": "Moto EDGE 70 5g 256/8gb",
       "brand": "Motorola",
       "model": "Moto EDGE 70 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_49_1ekqwjs.jpg?v=1786497736420"
     },
     {
       "legacyPosition": 41,
@@ -24,7 +25,8 @@
       "name": "Moto G06 128/4gb",
       "brand": "Motorola",
       "model": "Moto G06",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_23_1783481583785.jpg"
     },
     {
       "legacyPosition": 57,
@@ -35,7 +37,8 @@
       "name": "Moto EDGE 60 Fusion 5g 256/8gb",
       "brand": "Motorola",
       "model": "Moto EDGE 60 FUSION 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_39_1783482338949.jpg"
     },
     {
       "legacyPosition": 19,
@@ -46,7 +49,8 @@
       "name": "Samsung A17 128/4gb",
       "brand": "Samsung",
       "model": "Samsung A17",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_5_1783479961929.jpg"
     },
     {
       "legacyPosition": 74,
@@ -57,7 +61,8 @@
       "name": "Poco M8 5G 256/8GB",
       "brand": "POCO",
       "model": "POCO M8 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_65_1784437186765.jpg"
     },
     {
       "legacyPosition": 58,
@@ -68,7 +73,8 @@
       "name": "Moto EDGE 60 5g 256/12gb",
       "brand": "Motorola",
       "model": "Moto EDGE 60 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_51_1k4fsx9.jpg?v=1786898037618"
     },
     {
       "legacyPosition": 50,
@@ -79,7 +85,8 @@
       "name": "Moto G57 256/8gb",
       "brand": "Motorola",
       "model": "Moto G57",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_43_1cwtady.jpg?v=1786898005626"
     },
     {
       "legacyPosition": 26,
@@ -90,7 +97,8 @@
       "name": "Samsung A56 5G 256/12gb",
       "brand": "Samsung",
       "model": "Samsung A56 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_11_1783480976482.jpg"
     },
     {
       "legacyPosition": 42,
@@ -101,7 +109,8 @@
       "name": "Moto G06 256/4gb",
       "brand": "Motorola",
       "model": "Moto G06",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_24_1783481558474.jpg"
     },
     {
       "legacyPosition": 18,
@@ -112,7 +121,8 @@
       "name": "Samsung A16 128/4gb",
       "brand": "Samsung",
       "model": "Samsung A16",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg"
     },
     {
       "legacyPosition": 7,
@@ -123,7 +133,8 @@
       "name": "IPHONE 16 Pro 512GB",
       "brand": "Apple",
       "model": "iPhone 16 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_7_mt1f54.jpg?v=1787261094908"
     },
     {
       "legacyPosition": 56,
@@ -134,7 +145,8 @@
       "name": "Moto G MAX 5G 256/8gb NUEVO",
       "brand": "Motorola",
       "model": "Moto G MAX 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_46_1earaut.jpg?v=1786415373266"
     },
     {
       "legacyPosition": 88,
@@ -145,7 +157,8 @@
       "name": "INFINIX HOT 60 PRO PLUS NFC 8/256 GB",
       "brand": "Infinix",
       "model": "Infinix HOT 60 PRO PLUS NFC",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1784440260045.jpg"
     },
     {
       "legacyPosition": 79,
@@ -156,7 +169,8 @@
       "name": "Poco X7 Pro 5G 512/8GB",
       "brand": "POCO",
       "model": "POCO X7 PRO 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_70_1784438413481.jpg"
     },
     {
       "legacyPosition": 32,
@@ -167,7 +181,8 @@
       "name": "Samsung s26 ultra 256/12gb",
       "brand": "Samsung",
       "model": "Samsung S26 Ultra",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_18_1783480574567.jpg"
     },
     {
       "legacyPosition": 52,
@@ -178,7 +193,8 @@
       "name": "Moto G77 5G 256/8gb",
       "brand": "Motorola",
       "model": "Moto G77 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1783599538658.jpg"
     },
     {
       "legacyPosition": 70,
@@ -189,7 +205,8 @@
       "name": "Xiaomi Note 15 pro 256/8gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 15 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_56_1783990673695.jpg"
     },
     {
       "legacyPosition": 85,
@@ -200,7 +217,8 @@
       "name": "INFINIX SMART 10 4/128 GB",
       "brand": "Infinix",
       "model": "Infinix SMART 10",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_79_f1wb9f.jpg?v=1786576539549"
     },
     {
       "legacyPosition": 43,
@@ -211,7 +229,8 @@
       "name": "Moto G06 Power256/4gb",
       "brand": "Motorola",
       "model": "Moto G06 POWER",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_36_1dqv8yu.jpg?v=1786862230633"
     },
     {
       "legacyPosition": 13,
@@ -222,7 +241,8 @@
       "name": "IPHONE 17 PRO MAX 512GB",
       "brand": "Apple",
       "model": "iPhone 17 PRO MAX",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1784433718628.jpg"
     },
     {
       "legacyPosition": 1,
@@ -233,7 +253,8 @@
       "name": "IPHONE 16 “E” 128GB",
       "brand": "Apple",
       "model": "iPhone 16 E",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_1_ogz1ay.jpg?v=1787258126821"
     },
     {
       "legacyPosition": 2,
@@ -244,7 +265,8 @@
       "name": "IPHONE 16 “E” 256GB",
       "brand": "Apple",
       "model": "iPhone 16 E",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_2_o6zflz.jpg?v=1787258799095"
     },
     {
       "legacyPosition": 66,
@@ -255,7 +277,8 @@
       "name": "Xiaomi Note 14 256/8gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 14",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1788888043419"
     },
     {
       "legacyPosition": 90,
@@ -266,7 +289,8 @@
       "name": "INFINIX NOTE 50 PRO NFC 8/256 GB",
       "brand": "Infinix",
       "model": "Infinix NOTE 50 PRO NFC",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_84_e7ucoj.jpg?v=1786895125184"
     },
     {
       "legacyPosition": 46,
@@ -277,7 +301,8 @@
       "name": "Moto G15 512/4gb",
       "brand": "Motorola",
       "model": "Moto G15",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1783481847093.jpg"
     },
     {
       "legacyPosition": 87,
@@ -288,7 +313,8 @@
       "name": "INFINIX HOT 60 PRO NFC 8/256 GB",
       "brand": "Infinix",
       "model": "Infinix HOT 60 PRO NFC",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_87_ehtydi.jpg?v=1789071873372"
     },
     {
       "legacyPosition": 40,
@@ -299,7 +325,8 @@
       "name": "Moto G05 128/4gb",
       "brand": "Motorola",
       "model": "Moto G05",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_21_1783481408191.jpg"
     },
     {
       "legacyPosition": 27,
@@ -310,7 +337,8 @@
       "name": "Samsung A57 5G 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A57 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_21_g6cp4y.jpg?v=1787097676710"
     },
     {
       "legacyPosition": 31,
@@ -321,7 +349,8 @@
       "name": "Samsung s26 512/12gb",
       "brand": "Samsung",
       "model": "Samsung S26",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_15_1783480707604.jpg"
     },
     {
       "legacyPosition": 34,
@@ -332,7 +361,8 @@
       "name": "Samsung s26 ultra 1tb/12gb",
       "brand": "Samsung",
       "model": "Samsung S26 Ultra",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1784431175083.jpg"
     },
     {
       "legacyPosition": 20,
@@ -343,7 +373,8 @@
       "name": "Samsung A17 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A17",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_6_1783480024984.jpg"
     },
     {
       "legacyPosition": 33,
@@ -354,7 +385,8 @@
       "name": "Samsung s26 ultra 512/12gb",
       "brand": "Samsung",
       "model": "Samsung S26 Ultra",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1784430874033.jpg"
     },
     {
       "legacyPosition": 84,
@@ -365,7 +397,8 @@
       "name": "INFINIX SMART 8 PRO 8/256 GB",
       "brand": "Infinix",
       "model": "Infinix SMART 8 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_75_1784440085367.jpg"
     },
     {
       "legacyPosition": 8,
@@ -376,7 +409,8 @@
       "name": "IPHONE 16 PRO MAX 512GB",
       "brand": "Apple",
       "model": "iPhone 16 PRO MAX",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_76_1783482459689.jpg"
     },
     {
       "legacyPosition": 39,
@@ -387,7 +421,8 @@
       "name": "Moto E15 64/2gb",
       "brand": "Motorola",
       "model": "Moto E15",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_19_1783481423033.jpg"
     },
     {
       "legacyPosition": 23,
@@ -398,7 +433,8 @@
       "name": "Samsung A36 5G 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A36 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1783480101809.jpg"
     },
     {
       "legacyPosition": 82,
@@ -409,7 +445,8 @@
       "name": "Poco X8 Pro Max 5G 256/12GB",
       "brand": "POCO",
       "model": "POCO X8 PRO MAX 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_73_1784439470457.jpg"
     },
     {
       "legacyPosition": 63,
@@ -420,7 +457,8 @@
       "name": "REDMI 15C 256/4GB",
       "brand": "Redmi",
       "model": "Redmi 15c",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_43_1783990374711.jpg"
     },
     {
       "legacyPosition": 37,
@@ -431,7 +469,8 @@
       "name": "Moto G04 64/4gb",
       "brand": "Motorola",
       "model": "Moto G04",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_30_1eaugcs.jpg?v=1786889400408"
     },
     {
       "legacyPosition": 59,
@@ -442,7 +481,8 @@
       "name": "Moto EDGE 70 Fusion 5g 256/8gb",
       "brand": "Motorola",
       "model": "Moto EDGE 70 FUSION 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_48_1euqi8r.jpg?v=1786497719343"
     },
     {
       "legacyPosition": 38,
@@ -453,7 +493,8 @@
       "name": "Moto G14 128/4gb",
       "brand": "Motorola",
       "model": "Moto G14",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_31_1eku21r.jpg?v=1786862006622"
     },
     {
       "legacyPosition": 64,
@@ -464,7 +505,8 @@
       "name": "REDMI 15C 256/8GB",
       "brand": "Redmi",
       "model": "Redmi 15c",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1783990470083.jpg"
     },
     {
       "legacyPosition": 44,
@@ -475,7 +517,8 @@
       "name": "Moto G15 128/4gb",
       "brand": "Motorola",
       "model": "Moto G15",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg"
     },
     {
       "legacyPosition": 0,
@@ -486,7 +529,8 @@
       "name": "IPHONE 15 128GB",
       "brand": "Apple",
       "model": "iPhone 15",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1784428078833.jpg"
     },
     {
       "legacyPosition": 30,
@@ -497,7 +541,8 @@
       "name": "Samsung s26 256/12gb",
       "brand": "Samsung",
       "model": "Samsung S26",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_25_1784430688397.jpg"
     },
     {
       "legacyPosition": 72,
@@ -508,7 +553,8 @@
       "name": "Xiaomi Note 15 pro PLUS 5g 256/8gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 15 PRO PLUS 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1786501333265"
     },
     {
       "legacyPosition": 86,
@@ -519,7 +565,8 @@
       "name": "INFINIX HOT 60i 8/256 GB",
       "brand": "Infinix",
       "model": "Infinix HOT 60i",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1783481166370.jpg"
     },
     {
       "legacyPosition": 69,
@@ -530,7 +577,8 @@
       "name": "Xiaomi Note 14 pro Plus 5g 512/12gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 14 PRO PLUS 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_60_1784435879654.jpg"
     },
     {
       "legacyPosition": 45,
@@ -541,7 +589,8 @@
       "name": "Moto G15 POWER 256/8gb",
       "brand": "Motorola",
       "model": "Moto G15 POWER",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg"
     },
     {
       "legacyPosition": 47,
@@ -552,7 +601,8 @@
       "name": "Moto G17 256/4gb",
       "brand": "Motorola",
       "model": "Moto G17",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1783482083909.jpg"
     },
     {
       "legacyPosition": 53,
@@ -563,7 +613,8 @@
       "name": "Moto G86 5G 256/8gb",
       "brand": "Motorola",
       "model": "Moto G86 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_36_1783600344108.jpg"
     },
     {
       "legacyPosition": 21,
@@ -574,7 +625,8 @@
       "name": "Samsung A26 5G 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A26 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1783480046356.jpg"
     },
     {
       "legacyPosition": 61,
@@ -585,7 +637,8 @@
       "name": "REDMI A5 128/4",
       "brand": "Redmi",
       "model": "Redmi A5",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_48_1784433508282.jpg"
     },
     {
       "legacyPosition": 62,
@@ -596,7 +649,8 @@
       "name": "REDMI 15C 128/4GB",
       "brand": "Redmi",
       "model": "Redmi 15c",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_42_1783990427348.jpg"
     },
     {
       "legacyPosition": 55,
@@ -607,7 +661,8 @@
       "name": "Moto G86 5G 512/8gb",
       "brand": "Motorola",
       "model": "Moto G86 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1784433058590.jpg"
     },
     {
       "legacyPosition": 67,
@@ -618,7 +673,8 @@
       "name": "Xiaomi Note 15 256/8gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 15",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_54_1784435024036.jpg"
     },
     {
       "legacyPosition": 51,
@@ -629,7 +685,8 @@
       "name": "Moto G57 POWER 256/12gb",
       "brand": "Motorola",
       "model": "Moto G57 POWER",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_44_1dqs3gv.jpg?v=1786898019952"
     },
     {
       "legacyPosition": 71,
@@ -640,7 +697,8 @@
       "name": "Xiaomi Note 15 pro 512/8gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 15 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_65_jht3uy.jpg?v=1786501305674"
     },
     {
       "legacyPosition": 35,
@@ -651,7 +709,8 @@
       "name": "Samsung ZFlip 8 ultra 512/12gb",
       "brand": "Samsung",
       "model": "Samsung Zflip 8 Ultra",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_35_1dgvn9v.jpg?v=1787263106330"
     },
     {
       "legacyPosition": 6,
@@ -662,7 +721,8 @@
       "name": "IPHONE 16 PRO 128GB",
       "brand": "Apple",
       "model": "iPhone 16 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_6_n310u3.jpg?v=1787260656570"
     },
     {
       "legacyPosition": 76,
@@ -673,7 +733,8 @@
       "name": "Poco M8 Pro 5G 256/8GB",
       "brand": "POCO",
       "model": "POCO M8 PRO 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_67_1784437557792.jpg"
     },
     {
       "legacyPosition": 83,
@@ -684,7 +745,8 @@
       "name": "Poco X8 Pro max 5G 512/12GB",
       "brand": "POCO",
       "model": "POCO X8 PRO MAX 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_74_1784439773608.jpg"
     },
     {
       "legacyPosition": 14,
@@ -695,7 +757,8 @@
       "name": "IPHONE 17 PRO MAX 1TB - Silver-orange-blue",
       "brand": "Apple",
       "model": "iPhone 17 PRO MAX",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1784432137817.jpg"
     },
     {
       "legacyPosition": 48,
@@ -706,7 +769,8 @@
       "name": "Moto G35 256/4gb",
       "brand": "Motorola",
       "model": "Moto G35",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_39_1gsqvlj.jpg?v=1785771219162"
     },
     {
       "legacyPosition": 77,
@@ -717,7 +781,8 @@
       "name": "Poco M8 Pro 5G 512/12GB",
       "brand": "POCO",
       "model": "POCO M8 PRO 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_68_1784437624730.jpg"
     },
     {
       "legacyPosition": 22,
@@ -728,7 +793,8 @@
       "name": "Samsung A27 5G 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A27 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_17_1784431722727.jpg"
     },
     {
       "legacyPosition": 9,
@@ -739,7 +805,8 @@
       "name": "IPHONE 17 256GB",
       "brand": "Apple",
       "model": "iPhone 17",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1783484339522.jpg"
     },
     {
       "legacyPosition": 24,
@@ -750,7 +817,8 @@
       "name": "Samsung A37 5G 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A37 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_9_1783480233490.jpg"
     },
     {
       "legacyPosition": 15,
@@ -761,7 +829,8 @@
       "name": "IPHONE 17 PRO MAX 2TB - Orange",
       "brand": "Apple",
       "model": "iPhone 17 PRO MAX",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_86_1783484125999.jpg"
     },
     {
       "legacyPosition": 28,
@@ -772,7 +841,8 @@
       "name": "Samsung s25 ultra 256/12gb",
       "brand": "Samsung",
       "model": "Samsung S25 Ultra",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_22_1784429808162.jpg"
     },
     {
       "legacyPosition": 54,
@@ -783,7 +853,8 @@
       "name": "Moto G86 POWER 5G 256/8gb",
       "brand": "Motorola",
       "model": "Moto G86 POWER 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_45_1784433206665.jpg"
     },
     {
       "legacyPosition": 4,
@@ -794,7 +865,8 @@
       "name": "IPHONE 16 128GB",
       "brand": "Apple",
       "model": "iPhone 16",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_1_1784428280123.jpg"
     },
     {
       "legacyPosition": 65,
@@ -805,7 +877,8 @@
       "name": "REDMI 17 256/6GB ‼NOVEDAD",
       "brand": "Redmi",
       "model": "Redmi 17",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_58_1hmjdoi.jpg?v=1786891828619"
     },
     {
       "legacyPosition": 25,
@@ -816,7 +889,8 @@
       "name": "Samsung A56 5G 256/8gb",
       "brand": "Samsung",
       "model": "Samsung A56 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_10_1783481068345.jpg"
     },
     {
       "legacyPosition": 73,
@@ -827,7 +901,8 @@
       "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
       "brand": "Xiaomi",
       "model": "Xiaomi NOTE 15 PRO PLUS 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg"
     },
     {
       "legacyPosition": 5,
@@ -838,7 +913,8 @@
       "name": "IPHONE 16 PLUS 128GB",
       "brand": "Apple",
       "model": "iPhone 16 PLUS",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_5_nd0mj2.jpg?v=1787259312642"
     },
     {
       "legacyPosition": 78,
@@ -849,7 +925,8 @@
       "name": "Poco X7 Pro 5G 256/8GB",
       "brand": "POCO",
       "model": "POCO X7 PRO 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_69_1784437875463.jpg"
     },
     {
       "legacyPosition": 17,
@@ -860,7 +937,8 @@
       "name": "Samsung A07 128/4gb",
       "brand": "Samsung",
       "model": "Samsung A07",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_3_1783479912825.jpg"
     },
     {
       "legacyPosition": 36,
@@ -871,7 +949,8 @@
       "name": "Moto E22 64/4gb",
       "brand": "Motorola",
       "model": "Moto E22",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_29_ie9ioq.jpg?v=1786861232292"
     },
     {
       "legacyPosition": 12,
@@ -882,7 +961,8 @@
       "name": "IPHONE 17 PRO MAX 256GB",
       "brand": "Apple",
       "model": "iPhone 17 PRO MAX",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_82_1783483487460.jpg"
     },
     {
       "legacyPosition": 75,
@@ -893,7 +973,8 @@
       "name": "Poco M8 5G 512/8GB",
       "brand": "POCO",
       "model": "POCO M8 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_66_1784437313028.jpg"
     },
     {
       "legacyPosition": 49,
@@ -904,7 +985,8 @@
       "name": "Moto G56 5G 256/8gb",
       "brand": "Motorola",
       "model": "Moto G56 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_33_1783510366146.jpg"
     },
     {
       "legacyPosition": 80,
@@ -915,7 +997,8 @@
       "name": "Poco X8 Pro 5g 256/8GB",
       "brand": "POCO",
       "model": "POCO X8 PRO 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1784438559279.jpg"
     },
     {
       "legacyPosition": 29,
@@ -926,7 +1009,8 @@
       "name": "Samsung s25 ultra 1tb/12gb",
       "brand": "Samsung",
       "model": "Samsung S25 Ultra",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_14_1783480732315.jpg"
     },
     {
       "legacyPosition": 89,
@@ -937,7 +1021,8 @@
       "name": "INFINIX HOT 70 8/256 GB",
       "brand": "Infinix",
       "model": "Infinix HOT 70",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1784440565263.jpg"
     },
     {
       "legacyPosition": 3,
@@ -948,7 +1033,8 @@
       "name": "IPHONE 16 “E” 512GB",
       "brand": "Apple",
       "model": "iPhone 16 E",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_3_nwztx0.jpg?v=1787259066167"
     },
     {
       "legacyPosition": 68,
@@ -959,7 +1045,8 @@
       "name": "Poco C81 PRO 128/4GB",
       "brand": "POCO",
       "model": "POCO C81 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_55_1784435060367.jpg"
     },
     {
       "legacyPosition": 11,
@@ -970,7 +1057,8 @@
       "name": "IPHONE 17 PRO 512GB",
       "brand": "Apple",
       "model": "iPhone 17 PRO",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_80_1783484510100.jpg"
     },
     {
       "legacyPosition": 16,
@@ -981,7 +1069,8 @@
       "name": "Samsung A06 64/4gb",
       "brand": "Samsung",
       "model": "Samsung A06",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1783479809957.jpg"
     },
     {
       "legacyPosition": 81,
@@ -992,7 +1081,14 @@
       "name": "Poco X8 Pro 5g 512/8GB",
       "brand": "POCO",
       "model": "POCO X8 PRO 5G",
-      "category": "celulares"
+      "category": "celulares",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1784438924500.jpg"
     }
-  ]
+  ],
+  "photo_materialization": {
+    "status": "complete",
+    "count": 90,
+    "source_write": false,
+    "public_activation": false
+  }
 }
