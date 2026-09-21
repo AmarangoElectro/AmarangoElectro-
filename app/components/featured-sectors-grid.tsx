@@ -15,13 +15,38 @@ const FEATURED_SECTORS = [
   { slug: "hogar", subtitle: "Tu espacio. Tu estilo." },
   { slug: "descanso", subtitle: "Mejor sueño, mejores días." },
   { slug: "herramientas", subtitle: "Hacé realidad tus proyectos." },
+  { slug: "refrigeracion", subtitle: "Heladeras, freezers y frío para tu hogar." },
+  { slug: "climatizacion", subtitle: "Confort para todo el año." },
+  { slug: "coccion", subtitle: "Todo para cocinar y disfrutar." },
+  { slug: "lavado", subtitle: "Cuidado práctico para tu ropa." },
 ] as const;
 
 export function FeaturedSectorsGrid() {
   const featured = FEATURED_SECTORS.flatMap(({ slug, subtitle }) => {
     const category = getCategory(slug);
-    const artwork = retailCategories.find((item) => item.id === slug)?.image;
-    return category ? [{ category, subtitle, artwork }] : [];
+    const retail = retailCategories.find((item) => item.id === slug);
+
+    if (category) {
+      return [{
+        key: category.slug,
+        title: category.title,
+        href: `/categoria/${category.slug}`,
+        subtitle,
+        artwork: retail?.image ?? category.image ?? category.bannerImage ?? null,
+      }];
+    }
+
+    if (retail) {
+      return [{
+        key: retail.id,
+        title: retail.title,
+        href: retail.href,
+        subtitle,
+        artwork: retail.image,
+      }];
+    }
+
+    return [];
   });
 
   if (featured.length === 0) return null;
@@ -46,21 +71,17 @@ export function FeaturedSectorsGrid() {
       </div>
 
       <div className="featured-sectors-grid">
-        {featured.map(({ category, subtitle, artwork }) => (
+        {featured.map(({ key, title, href, subtitle, artwork }) => (
           <Link
-            key={category.slug}
-            href={`/categoria/${category.slug}`}
+            key={key}
+            href={href}
             className="featured-sector-card"
-            aria-label={`Entrar a ${category.title}`}
+            aria-label={`Entrar a ${title}`}
           >
-            {artwork || category.image ? (
-              <img src={artwork ?? category.image} alt="" loading="lazy" decoding="async" />
-            ) : category.bannerImage ? (
-              <img src={category.bannerImage} alt="" loading="lazy" decoding="async" />
-            ) : null}
+            {artwork ? <img src={artwork} alt="" loading="lazy" decoding="async" /> : null}
             <span className="featured-sector-shade" aria-hidden="true" />
             <span className="featured-sector-copy">
-              <strong>{category.title}</strong>
+              <strong>{title}</strong>
               <small>{subtitle}</small>
             </span>
             <span className="featured-sector-arrow" aria-hidden="true">→</span>
