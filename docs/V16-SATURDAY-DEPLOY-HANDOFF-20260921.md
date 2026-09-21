@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `83e1c57b0d327af67ab6e12a8bec79f522facf8d`
+- Minimum app-code HEAD covered by this handoff: `496d2dc6c13beadbe8b4fedf18c0b04dc8d2f145`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -161,3 +161,9 @@ Prepared on the same branch:
 - mobile product-card tools, detail actions, compare controls and sector bottom navigation have reinforced touch targets;
 - offline page was reviewed and preserved unchanged because its copy, safe-area viewport and retry action are already appropriate;
 - regression tests: `tests/v16-human-facing-copy-regression.test.mjs` and `tests/v16-public-search-touch-regression.test.mjs`.
+
+
+### Test-compatibility cleanup
+- existing customer-safe fallback test now expects `FOTO EN ACTUALIZACIÓN`;
+- advisor internal-navigation test now expects the current Amarango Operaciones metadata;
+- no production behavior was changed by these test updates.
