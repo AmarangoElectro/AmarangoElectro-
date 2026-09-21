@@ -4,12 +4,14 @@ import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
 import { V16Cellphones90PublicCatalogAdapter } from "./v16-cellphones-90-public-adapter";
 import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter";
+import { V16CatalogExpansion5V412Adapter } from "./v16-catalog-expansion-5-v412-adapter";
 
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
 const cellphoneSnapshotCatalog = new V16Cellphones90PublicCatalogAdapter();
 const catalogExpansion63 = new V16CatalogExpansion63Adapter();
+const catalogExpansion5 = new V16CatalogExpansion5V412Adapter();
 
 function productKey(product: Product) {
   return [
@@ -56,17 +58,18 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
       cellphoneSnapshotCatalog.listProducts(query),
       catalogExpansion63.listProducts(query),
+      catalogExpansion5.listProducts(query),
     ]);
 
     const primaryWithoutLegacyCellphones = primaryResults.filter((product) => product.category !== "celulares");
 
-    return mergeUnique(primaryWithoutLegacyCellphones, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results);
+    return mergeUnique(primaryWithoutLegacyCellphones, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results);
   }
 
   async getProductBySlug(slug: string) {
@@ -82,7 +85,10 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
     const cellphoneMatch = await cellphoneSnapshotCatalog.getProductBySlug(slug);
     if (cellphoneMatch) return cellphoneMatch;
 
-    return catalogExpansion63.getProductBySlug(slug);
+    const expansion63Match = await catalogExpansion63.getProductBySlug(slug);
+    if (expansion63Match) return expansion63Match;
+
+    return catalogExpansion5.getProductBySlug(slug);
   }
 }
 
@@ -96,3 +102,4 @@ export { cohort0CatalogEvidence } from "./cohort0-frozen-adapter";
 export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
 export { v16Cellphones90PublicEvidence } from "./v16-cellphones-90-public-adapter";
 export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapter";
+export { v16CatalogExpansion5Evidence } from "./v16-catalog-expansion-5-v412-adapter";
