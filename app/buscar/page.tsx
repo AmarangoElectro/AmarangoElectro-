@@ -1,7 +1,7 @@
 import { CatalogClient } from "@/app/components/catalog-client";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
-import { catalog, v411CatalogEvidence } from "@/lib/catalog";
+import { catalog } from "@/lib/catalog";
 
 type SearchParams = {
   q?: string | string[];
@@ -29,7 +29,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <p className="eyebrow orange">BUSCADOR</p>
         <h1>Un catálogo.<br /><span>Todas las coincidencias disponibles.</span></h1>
         <p>Nombre, modelo, marca y categoría, todo sobre el mismo catálogo.</p>
-        <div className="catalog-evidence-notice"><strong>Catálogo en incorporación</strong><span>{v411CatalogEvidence.productCount} productos disponibles por ahora — seguimos sumando el resto del catálogo.</span></div>
+        <div className="catalog-evidence-notice"><strong>Catálogo AmarangoElectro</strong><span>{products.length} productos disponibles para buscar, filtrar y comparar.</span></div>
       </section>
       <CatalogClient
         products={products}
@@ -40,7 +40,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         initialFavoritesOnly={values.favoritos === "1"}
         initialMaxPrice={Number.isFinite(parsedMaxPrice) && parsedMaxPrice > 0 ? parsedMaxPrice : null}
         initialAvailableOnly={values.disponible === "1"}
-        categoryTitle="la muestra disponible"
+        categoryTitle="Catálogo AmarangoElectro"
         showCategoryFilter
       />
     </main>
