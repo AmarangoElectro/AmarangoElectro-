@@ -51,14 +51,14 @@ export function V418BStorefrontAdminPreview() {
           onClick={() => changeMode(!adminMode)}
         >
           {adminMode ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
-          <span><small>HERRAMIENTAS ADMIN</small><strong>{adminMode ? "ON" : "OFF · Vista cliente"}</strong></span>
+          <span><small>HERRAMIENTAS ADMIN</small><strong>{adminMode ? "ACTIVAS" : "OCULTAS · Vista cliente"}</strong></span>
         </button>
       </header>
 
       <div className={`v418b-storefront-lab__status status-${projection}`} role="status">
         <ShieldCheck size={16} aria-hidden="true" />
         {projection === "admin-overlay"
-          ? "Herramientas administrativas activas · cambios productivos deshabilitados"
+          ? "Herramientas administrativas activas · edición real bloqueada en esta vista"
           : "Herramientas administrativas ocultas · vista cliente"}
       </div>
 
