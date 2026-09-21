@@ -15,21 +15,21 @@ export function SiteFooter() {
         </div>
         <div>
           <h3>Descubrir</h3>
-          <Link href="/buscar">Productos</Link>
-          <Link href="/buscar">Categorías</Link>
+          <Link href="/#productos">Productos</Link>
+          <Link href="/buscar">Catálogo completo</Link>
           <Link href="/categoria/celulares">Celulares</Link>
         </div>
         <div>
           <h3>Ayuda</h3>
-          <Link href="/#como-comprar">Cómo comprar</Link>
+          <Link href="/#experiencia">Atención y compra</Link>
           <Link href="/#financiacion">Financiación</Link>
           <span>Entregas</span>
         </div>
         <div>
           <h3>Empresa</h3>
-          <Link href="/#experiencia">Nosotros</Link>
+          <Link href="/#experiencia">Nuestra atención</Link>
           <span>Contacto</span>
-          <span>Área asesores</span>
+          <Link href="/mi-amarango">Área asesores</Link>
         </div>
       </div>
       <div className="footer-legal">
