@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `b835cad3664dd3c647dfc69642f935015d6e56c0`
+- Minimum app-code HEAD covered by this handoff: `83e1c57b0d327af67ab6e12a8bec79f522facf8d`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -150,3 +150,14 @@ Prepared on the same branch:
 - existing bottom navigation safe-area handling remains preserved;
 - PWA service worker remains shell-only and does not cache live catalog pages;
 - regression coverage extended in `tests/v16-step7h-continuity-pwa.test.mjs`.
+
+
+### Human-facing copy / public search / mobile touch
+Prepared on the same branch:
+- Plataforma, Propietarios, Gestión de categorías and Amarango Operaciones no longer expose lab/V16/fixture/legacy/Supabase wording in visible UI;
+- public search now shows the current `products.length` from the composite catalog instead of the old pilot evidence count;
+- public search no longer says `Catálogo en incorporación` or `la muestra disponible`;
+- missing product photography now reads `FOTO EN ACTUALIZACIÓN`;
+- mobile product-card tools, detail actions, compare controls and sector bottom navigation have reinforced touch targets;
+- offline page was reviewed and preserved unchanged because its copy, safe-area viewport and retry action are already appropriate;
+- regression tests: `tests/v16-human-facing-copy-regression.test.mjs` and `tests/v16-public-search-touch-regression.test.mjs`.
