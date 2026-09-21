@@ -28,6 +28,22 @@ The old advisor flow established these useful requirements:
 
 The old implementation also contained direct table/local-storage fallbacks. Those mechanisms are NOT approved for V16 and must not be restored.
 
+
+## Historical Mis Ventas finding
+
+The reviewed historical advisor branches do not provide a safe advisor-scoped `Mis Ventas` read model.
+
+The recovered sale flow wrote into a shared/global history and included fallbacks to `tienda_catalogo` plus local storage. That history cannot be treated as the authenticated advisor's portfolio in V16.
+
+Therefore V16 must NOT:
+
+- filter the old global history in the browser by a seller name;
+- trust a browser/local-storage `advisor_id`;
+- reuse Admin-wide reports as `Mis Ventas`;
+- restore the old direct `tienda_catalogo` read/write path.
+
+A real `Mis Ventas` surface waits for server-derived advisor identity and server-side advisor scoping.
+
 ## Current hard boundary
 
 The current secure RPC bridge allowlist has no capability to:
