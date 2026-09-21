@@ -19,6 +19,8 @@ const FEATURED_SECTORS = [
   { slug: "climatizacion", subtitle: "Confort para todo el año." },
   { slug: "coccion", subtitle: "Todo para cocinar y disfrutar." },
   { slug: "lavado", subtitle: "Cuidado práctico para tu ropa." },
+  { slug: "pequenos-electrodomesticos", subtitle: "Soluciones prácticas para todos los días." },
+  { slug: "limpieza", subtitle: "Equipos para cuidar cada espacio." },
 ] as const;
 
 export function FeaturedSectorsGrid() {
