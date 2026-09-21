@@ -198,7 +198,7 @@ export function PurchaseIntentFlow() {
               <div className="purchase-intent-section-heading">
                 <small>PASO 3</small>
                 <h2 id="purchase-intent-review-title">Todo claro antes de continuar.</h2>
-                <p>Este resumen usa solamente la información pública disponible del producto. Lo que V16 no sabe queda como “A confirmar”.</p>
+                <p>Este resumen usa solamente la información disponible del producto. Si falta algún dato, queda marcado como “A confirmar”.</p>
               </div>
 
               <dl className="purchase-intent-review-grid">
@@ -218,7 +218,7 @@ export function PurchaseIntentFlow() {
                 <button type="button" className="purchase-intent-primary" onClick={copySummary}><Copy size={17} /> Copiar consulta</button>
                 <button type="button" className="purchase-intent-secondary" onClick={() => setReviewing(false)}>Editar</button>
               </div>
-              <p className="purchase-intent-handoff-note">El canal definitivo se conectará en una etapa posterior. Este checkpoint no transmite ni guarda la consulta.</p>
+              <p className="purchase-intent-handoff-note">Copiá la consulta para compartirla con nuestro equipo por el canal que uses. Nada se envía ni se guarda automáticamente.</p>
             </section>
           )}
         </div>
