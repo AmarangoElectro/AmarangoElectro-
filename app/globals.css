@@ -8324,3 +8324,494 @@ html[data-theme="dark"] .admin-product-card__media {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* V16 Mi Amarango — safe Nueva Venta preparation */
+.advisor-quick-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  color: inherit;
+  box-shadow: 0 12px 30px rgba(8,25,45,.06);
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+.advisor-quick-card > svg {
+  width: 22px;
+  height: 22px;
+  color: var(--blue);
+  flex: 0 0 auto;
+}
+.advisor-quick-card span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.advisor-quick-card small {
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+.advisor-quick-card strong {
+  color: var(--foreground);
+  font-size: 13px;
+}
+.advisor-quick-card:hover,
+.advisor-quick-card:focus-visible {
+  border-color: color-mix(in srgb, var(--blue) 55%, var(--line));
+  transform: translateY(-1px);
+  outline: none;
+}
+
+#advisor-sale-draft { scroll-margin-top: 92px; }
+.advisor-sale-draft {
+  max-width: 1460px;
+  margin: 0 auto 22px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: 0 18px 44px rgba(8,25,45,.07);
+}
+.advisor-sale-draft__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+.advisor-sale-draft__header h2 {
+  margin: 2px 0 5px;
+  color: var(--foreground);
+  font-size: clamp(24px,3vw,38px);
+  line-height: 1.02;
+}
+.advisor-sale-draft__header > div > p:last-child {
+  margin: 0;
+  max-width: 720px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.advisor-sale-draft__safe {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #e2b65b;
+  border-radius: 999px;
+  background: #fff8e7;
+  color: #8a5b00;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  font-weight: 900;
+}
+.advisor-sale-draft__grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 14px;
+}
+.advisor-sale-draft__card {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--soft);
+}
+.advisor-sale-draft__section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+.advisor-sale-draft__section-title > span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #071a39;
+  color: #fff;
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 950;
+}
+.advisor-sale-draft__section-title > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.advisor-sale-draft__section-title small {
+  color: var(--orange);
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+.advisor-sale-draft__section-title strong {
+  color: var(--foreground);
+  font-size: 14px;
+}
+.advisor-sale-fields {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 9px;
+}
+.advisor-sale-fields label,
+.advisor-sale-deposit {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+.advisor-sale-fields label.full { grid-column: 1 / -1; }
+.advisor-sale-fields label > span,
+.advisor-sale-deposit > span {
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-weight: 850;
+}
+.advisor-sale-fields input,
+.advisor-sale-product-search,
+.advisor-sale-deposit > div {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+.advisor-sale-fields input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 12px;
+  color: var(--foreground);
+  outline: none;
+}
+.advisor-sale-fields input:focus,
+.advisor-sale-product-search:focus-within,
+.advisor-sale-deposit > div:focus-within {
+  border-color: color-mix(in srgb, var(--blue) 62%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 10%, transparent);
+}
+.advisor-sale-product-search {
+  min-width: 0;
+  padding: 0 7px 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.advisor-sale-product-search > svg {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+}
+.advisor-sale-product-search input {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  outline: none;
+}
+.advisor-sale-product-search button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: #071a39;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 900;
+}
+.advisor-sale-suggestions {
+  margin-top: 7px;
+  display: grid;
+  gap: 6px;
+}
+.advisor-sale-suggestions button {
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+}
+.advisor-sale-suggestions button > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.advisor-sale-suggestions strong,
+.advisor-sale-suggestions small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.advisor-sale-suggestions strong { font-size: 11px; }
+.advisor-sale-suggestions small { color: var(--muted-foreground); font-size: 9px; }
+.advisor-sale-suggestions b { flex: 0 0 auto; color: var(--blue); font-size: 10px; }
+
+.advisor-sale-selected {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--blue) 42%, var(--line));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--blue) 6%, var(--card));
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 9px;
+}
+.advisor-sale-selected > span {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--blue) 14%, var(--card));
+  color: var(--blue);
+  display: grid;
+  place-items: center;
+}
+.advisor-sale-selected > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.advisor-sale-selected small { color: var(--muted-foreground); font-size: 8px; font-weight: 900; }
+.advisor-sale-selected strong {
+  overflow: hidden;
+  color: var(--foreground);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.advisor-sale-selected p { margin: 0; color: var(--muted-foreground); font-size: 9px; }
+.advisor-sale-selected button {
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 9px;
+  font-weight: 850;
+}
+.advisor-sale-plan {
+  margin-top: 10px;
+  padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--card);
+}
+.advisor-sale-plan button {
+  min-height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-weight: 900;
+}
+.advisor-sale-plan button[aria-pressed="true"] {
+  background: #071a39;
+  color: #fff;
+}
+.advisor-sale-quote {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 7px;
+}
+.advisor-sale-quote > div {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  display: grid;
+  gap: 3px;
+}
+.advisor-sale-quote small { color: var(--muted-foreground); font-size: 8px; font-weight: 900; }
+.advisor-sale-quote strong { color: var(--foreground); font-size: 16px; overflow-wrap: anywhere; }
+.advisor-sale-quote > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #fff8e7;
+  color: #8a5b00;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.advisor-sale-deposit { margin-top: 10px; }
+.advisor-sale-deposit > div {
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.advisor-sale-deposit b { color: var(--muted-foreground); }
+.advisor-sale-deposit input {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  outline: none;
+}
+.advisor-sale-balance {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted-foreground);
+  font-size: 9px;
+}
+.advisor-sale-balance strong { color: var(--foreground); font-size: 13px; }
+
+.advisor-sale-draft__footer {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.advisor-sale-draft__footer > div:first-child {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--muted-foreground);
+}
+.advisor-sale-draft__footer > div:first-child > svg { flex: 0 0 auto; margin-top: 1px; }
+.advisor-sale-draft__footer p { margin: 0; display: grid; gap: 2px; }
+.advisor-sale-draft__footer p strong { color: var(--foreground); font-size: 10px; }
+.advisor-sale-draft__footer p span { font-size: 9px; line-height: 1.4; }
+.advisor-sale-draft__actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 7px;
+}
+.advisor-sale-draft__actions button {
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+  color: var(--foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 9px;
+  font-weight: 900;
+}
+.advisor-sale-draft__actions button:first-child {
+  border-color: #071a39;
+  background: #071a39;
+  color: #fff;
+}
+.advisor-sale-draft__actions button:disabled {
+  opacity: .46;
+  cursor: not-allowed;
+}
+
+html[data-theme="dark"] .advisor-quick-card,
+html[data-theme="dark"] .advisor-sale-draft,
+html[data-theme="dark"] .advisor-sale-draft__card,
+html[data-theme="dark"] .advisor-sale-fields input,
+html[data-theme="dark"] .advisor-sale-product-search,
+html[data-theme="dark"] .advisor-sale-deposit > div,
+html[data-theme="dark"] .advisor-sale-suggestions button,
+html[data-theme="dark"] .advisor-sale-selected button,
+html[data-theme="dark"] .advisor-sale-plan,
+html[data-theme="dark"] .advisor-sale-quote > div,
+html[data-theme="dark"] .advisor-sale-draft__actions button {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .advisor-sale-draft__card { background: var(--soft); }
+html[data-theme="dark"] .advisor-sale-draft__safe,
+html[data-theme="dark"] .advisor-sale-quote > p {
+  border-color: #594718;
+  background: #2c220b;
+  color: #f3c96f;
+}
+html[data-theme="dark"] .advisor-sale-selected {
+  border-color: color-mix(in srgb, var(--blue) 44%, var(--line));
+  background: color-mix(in srgb, var(--blue) 12%, var(--card));
+}
+html[data-theme="dark"] .advisor-sale-product-search button,
+html[data-theme="dark"] .advisor-sale-plan button[aria-pressed="true"],
+html[data-theme="dark"] .advisor-sale-draft__actions button:first-child {
+  border-color: color-mix(in srgb, var(--blue) 70%, var(--line));
+  background: color-mix(in srgb, var(--blue) 35%, #071a39);
+  color: #fff;
+}
+
+@media (max-width: 760px) {
+  #advisor-sale-draft { scroll-margin-top: 78px; }
+  .advisor-sale-draft {
+    margin-bottom: 16px;
+    padding: 14px;
+    border-radius: 20px;
+  }
+  .advisor-sale-draft__header {
+    display: grid;
+    gap: 10px;
+  }
+  .advisor-sale-draft__safe { justify-self: start; }
+  .advisor-sale-draft__grid { grid-template-columns: 1fr; }
+  .advisor-sale-fields input,
+  .advisor-sale-product-search input,
+  .advisor-sale-deposit input { font-size: 16px; }
+  .advisor-sale-product-search button { min-height: 38px; }
+  .advisor-sale-draft__footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .advisor-sale-draft__actions {
+    width: 100%;
+  }
+  .advisor-sale-draft__actions button {
+    flex: 1 1 0;
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 390px) {
+  .advisor-sale-fields { grid-template-columns: 1fr; }
+  .advisor-sale-fields label.full { grid-column: auto; }
+
+  .advisor-sale-product-search button span { display: none; }
+  .advisor-sale-product-search button { width: 38px; padding: 0; justify-content: center; }
+
+  .advisor-sale-selected {
+    grid-template-columns: auto minmax(0,1fr);
+  }
+  .advisor-sale-selected > button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .advisor-sale-plan { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .advisor-sale-quote { grid-template-columns: 1fr; }
+  .advisor-sale-quote > p { grid-column: auto; }
+
+  .advisor-sale-draft__actions { flex-direction: column; }
+}
