@@ -240,7 +240,7 @@ export function CashPanel() {
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura/escritura vía RPC segura · ledger operativo V16 · valores registrados, no cifras financieras derivadas
+        Conexión segura · movimientos reales de caja · sólo importes efectivamente registrados
       </div>
 
       <SummaryCards summary={summary} />
@@ -288,7 +288,7 @@ export function CashPanel() {
       {movements.status !== "ok" && <StatusNotice result={movements} />}
       {movements.status === "ok" && rows.length === 0 && (
         <div className="crm-empty-state" data-guide-target="cash-empty">
-          <b>Todavía no hay movimientos registrados en Caja V16.</b>
+          <b>Todavía no hay movimientos registrados en Caja.</b>
           <p>Los próximos movimientos operativos registrados aparecerán acá automáticamente.</p>
         </div>
       )}
