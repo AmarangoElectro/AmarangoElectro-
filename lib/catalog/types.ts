@@ -11,7 +11,8 @@ export type CatalogSource =
   | "v16-catalog-expansion-63"
   | "v16-cellphones-90-public"
   | "v16-catalog-expansion-5-v412"
-  | "v16-catalog-expansion-31-known-brand";
+  | "v16-catalog-expansion-31-known-brand"
+  | "v16-catalog-expansion-48-explicit-brand";
 
 export type Availability = "available" | "unavailable" | "unknown";
 export type StockStatus = "in_stock" | "out_of_stock" | "unknown";
