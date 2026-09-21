@@ -7,7 +7,8 @@ export type CatalogSource =
   | "cohort-0-frozen-evidence"
   | "v16-electro-sanitized-snapshot"
   | "v16-cellphones-90-materialized"
-  | "v16-cellphones-sanitized-snapshot";
+  | "v16-cellphones-sanitized-snapshot"
+  | "v16-catalog-expansion-63";
 
 export type Availability = "available" | "unavailable" | "unknown";
 export type StockStatus = "in_stock" | "out_of_stock" | "unknown";
