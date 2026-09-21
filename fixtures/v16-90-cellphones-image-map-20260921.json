@@ -1,0 +1,461 @@
+{
+  "evidence_status": "v16_cellphones_90_existing_photo_mapping",
+  "source_reference": "public.celulares_lista lista + banco_fotos (read-only)",
+  "captured_at": "2026-09-21",
+  "product_count": 90,
+  "mapped_count": 90,
+  "unmapped_count": 0,
+  "visibility_changed": false,
+  "mappings": [
+    {
+      "canonicalProductId": 1,
+      "name": "Moto EDGE 70 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_49_1ekqwjs.jpg?v=1786497736420"
+    },
+    {
+      "canonicalProductId": 2,
+      "name": "Moto G06 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_23_1783481583785.jpg"
+    },
+    {
+      "canonicalProductId": 3,
+      "name": "Moto EDGE 60 Fusion 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_39_1783482338949.jpg"
+    },
+    {
+      "canonicalProductId": 4,
+      "name": "Samsung A17 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_5_1783479961929.jpg"
+    },
+    {
+      "canonicalProductId": 5,
+      "name": "Poco M8 5G 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_65_1784437186765.jpg"
+    },
+    {
+      "canonicalProductId": 6,
+      "name": "Moto EDGE 60 5g 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_51_1k4fsx9.jpg?v=1786898037618"
+    },
+    {
+      "canonicalProductId": 7,
+      "name": "Moto G57 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_43_1cwtady.jpg?v=1786898005626"
+    },
+    {
+      "canonicalProductId": 8,
+      "name": "Samsung A56 5G 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_11_1783480976482.jpg"
+    },
+    {
+      "canonicalProductId": 9,
+      "name": "Moto G06 256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_24_1783481558474.jpg"
+    },
+    {
+      "canonicalProductId": 10,
+      "name": "Samsung A16 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg"
+    },
+    {
+      "canonicalProductId": 11,
+      "name": "IPHONE 16 Pro 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_7_mt1f54.jpg?v=1787261094908"
+    },
+    {
+      "canonicalProductId": 12,
+      "name": "Moto G MAX 5G 256/8gb NUEVO",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_46_1earaut.jpg?v=1786415373266"
+    },
+    {
+      "canonicalProductId": 13,
+      "name": "INFINIX HOT 60 PRO PLUS NFC 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1784440260045.jpg"
+    },
+    {
+      "canonicalProductId": 14,
+      "name": "Poco X7 Pro 5G 512/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_70_1784438413481.jpg"
+    },
+    {
+      "canonicalProductId": 15,
+      "name": "Samsung s26 ultra 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_18_1783480574567.jpg"
+    },
+    {
+      "canonicalProductId": 16,
+      "name": "Moto G77 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1783599538658.jpg"
+    },
+    {
+      "canonicalProductId": 17,
+      "name": "Xiaomi Note 15 pro 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_56_1783990673695.jpg"
+    },
+    {
+      "canonicalProductId": 18,
+      "name": "INFINIX SMART 10 4/128 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_79_f1wb9f.jpg?v=1786576539549"
+    },
+    {
+      "canonicalProductId": 19,
+      "name": "Moto G06 Power256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_36_1dqv8yu.jpg?v=1786862230633"
+    },
+    {
+      "canonicalProductId": 20,
+      "name": "IPHONE 17 PRO MAX 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1784433718628.jpg"
+    },
+    {
+      "canonicalProductId": 21,
+      "name": "IPHONE 16 “E” 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_1_ogz1ay.jpg?v=1787258126821"
+    },
+    {
+      "canonicalProductId": 22,
+      "name": "IPHONE 16 “E” 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_2_o6zflz.jpg?v=1787258799095"
+    },
+    {
+      "canonicalProductId": 23,
+      "name": "Xiaomi Note 14 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1788888043419"
+    },
+    {
+      "canonicalProductId": 24,
+      "name": "INFINIX NOTE 50 PRO NFC 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_84_e7ucoj.jpg?v=1786895125184"
+    },
+    {
+      "canonicalProductId": 25,
+      "name": "Moto G15 512/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1783481847093.jpg"
+    },
+    {
+      "canonicalProductId": 26,
+      "name": "INFINIX HOT 60 PRO NFC 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_87_ehtydi.jpg?v=1789071873372"
+    },
+    {
+      "canonicalProductId": 27,
+      "name": "Moto G05 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_21_1783481408191.jpg"
+    },
+    {
+      "canonicalProductId": 28,
+      "name": "Samsung A57 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_21_g6cp4y.jpg?v=1787097676710"
+    },
+    {
+      "canonicalProductId": 29,
+      "name": "Samsung s26 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_15_1783480707604.jpg"
+    },
+    {
+      "canonicalProductId": 30,
+      "name": "Samsung s26 ultra 1tb/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1784431175083.jpg"
+    },
+    {
+      "canonicalProductId": 31,
+      "name": "Samsung A17 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_6_1783480024984.jpg"
+    },
+    {
+      "canonicalProductId": 32,
+      "name": "Samsung s26 ultra 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_27_1784430874033.jpg"
+    },
+    {
+      "canonicalProductId": 33,
+      "name": "INFINIX SMART 8 PRO 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_75_1784440085367.jpg"
+    },
+    {
+      "canonicalProductId": 34,
+      "name": "IPHONE 16 PRO MAX 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_76_1783482459689.jpg"
+    },
+    {
+      "canonicalProductId": 35,
+      "name": "Moto E15 64/2gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_19_1783481423033.jpg"
+    },
+    {
+      "canonicalProductId": 36,
+      "name": "Samsung A36 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1783480101809.jpg"
+    },
+    {
+      "canonicalProductId": 37,
+      "name": "Poco X8 Pro Max 5G 256/12GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_73_1784439470457.jpg"
+    },
+    {
+      "canonicalProductId": 38,
+      "name": "REDMI 15C 256/4GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_43_1783990374711.jpg"
+    },
+    {
+      "canonicalProductId": 39,
+      "name": "Moto G04 64/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_30_1eaugcs.jpg?v=1786889400408"
+    },
+    {
+      "canonicalProductId": 40,
+      "name": "Moto EDGE 70 Fusion 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_48_1euqi8r.jpg?v=1786497719343"
+    },
+    {
+      "canonicalProductId": 41,
+      "name": "Moto G14 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_31_1eku21r.jpg?v=1786862006622"
+    },
+    {
+      "canonicalProductId": 42,
+      "name": "REDMI 15C 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1783990470083.jpg"
+    },
+    {
+      "canonicalProductId": 43,
+      "name": "Moto G15 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg"
+    },
+    {
+      "canonicalProductId": 44,
+      "name": "IPHONE 15 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1784428078833.jpg"
+    },
+    {
+      "canonicalProductId": 45,
+      "name": "Samsung s26 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_25_1784430688397.jpg"
+    },
+    {
+      "canonicalProductId": 46,
+      "name": "Xiaomi Note 15 pro PLUS 5g 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_66_j7ti5z.jpg?v=1786501333265"
+    },
+    {
+      "canonicalProductId": 47,
+      "name": "INFINIX HOT 60i 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1783481166370.jpg"
+    },
+    {
+      "canonicalProductId": 48,
+      "name": "Xiaomi Note 14 pro Plus 5g 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_60_1784435879654.jpg"
+    },
+    {
+      "canonicalProductId": 49,
+      "name": "Moto G15 POWER 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_26_1783481813873.jpg"
+    },
+    {
+      "canonicalProductId": 50,
+      "name": "Moto G17 256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_28_1783482083909.jpg"
+    },
+    {
+      "canonicalProductId": 51,
+      "name": "Moto G86 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_36_1783600344108.jpg"
+    },
+    {
+      "canonicalProductId": 52,
+      "name": "Samsung A26 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_7_1783480046356.jpg"
+    },
+    {
+      "canonicalProductId": 53,
+      "name": "REDMI A5 128/4",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_48_1784433508282.jpg"
+    },
+    {
+      "canonicalProductId": 54,
+      "name": "REDMI 15C 128/4GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_42_1783990427348.jpg"
+    },
+    {
+      "canonicalProductId": 55,
+      "name": "Moto G86 5G 512/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_44_1784433058590.jpg"
+    },
+    {
+      "canonicalProductId": 56,
+      "name": "Xiaomi Note 15 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_54_1784435024036.jpg"
+    },
+    {
+      "canonicalProductId": 57,
+      "name": "Moto G57 POWER 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_44_1dqs3gv.jpg?v=1786898019952"
+    },
+    {
+      "canonicalProductId": 58,
+      "name": "Xiaomi Note 15 pro 512/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_65_jht3uy.jpg?v=1786501305674"
+    },
+    {
+      "canonicalProductId": 59,
+      "name": "Samsung ZFlip 8 ultra 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_35_1dgvn9v.jpg?v=1787263106330"
+    },
+    {
+      "canonicalProductId": 60,
+      "name": "IPHONE 16 PRO 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_6_n310u3.jpg?v=1787260656570"
+    },
+    {
+      "canonicalProductId": 61,
+      "name": "Poco M8 Pro 5G 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_67_1784437557792.jpg"
+    },
+    {
+      "canonicalProductId": 62,
+      "name": "Poco X8 Pro max 5G 512/12GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_74_1784439773608.jpg"
+    },
+    {
+      "canonicalProductId": 63,
+      "name": "IPHONE 17 PRO MAX 1TB - Silver-orange-blue",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_8_1784432137817.jpg"
+    },
+    {
+      "canonicalProductId": 64,
+      "name": "Moto G35 256/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_39_1gsqvlj.jpg?v=1785771219162"
+    },
+    {
+      "canonicalProductId": 65,
+      "name": "Poco M8 Pro 5G 512/12GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_68_1784437624730.jpg"
+    },
+    {
+      "canonicalProductId": 66,
+      "name": "Samsung A27 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_17_1784431722727.jpg"
+    },
+    {
+      "canonicalProductId": 67,
+      "name": "IPHONE 17 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_78_1783484339522.jpg"
+    },
+    {
+      "canonicalProductId": 68,
+      "name": "Samsung A37 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_9_1783480233490.jpg"
+    },
+    {
+      "canonicalProductId": 69,
+      "name": "IPHONE 17 PRO MAX 2TB - Orange",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_86_1783484125999.jpg"
+    },
+    {
+      "canonicalProductId": 70,
+      "name": "Samsung s25 ultra 256/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_22_1784429808162.jpg"
+    },
+    {
+      "canonicalProductId": 71,
+      "name": "Moto G86 POWER 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_45_1784433206665.jpg"
+    },
+    {
+      "canonicalProductId": 72,
+      "name": "IPHONE 16 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_1_1784428280123.jpg"
+    },
+    {
+      "canonicalProductId": 73,
+      "name": "REDMI 17 256/6GB ‼NOVEDAD",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_58_1hmjdoi.jpg?v=1786891828619"
+    },
+    {
+      "canonicalProductId": 74,
+      "name": "Samsung A56 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_10_1783481068345.jpg"
+    },
+    {
+      "canonicalProductId": 75,
+      "name": "Xiaomi Note 15 pro plus 5g 512/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_64_1784436881064.jpg"
+    },
+    {
+      "canonicalProductId": 76,
+      "name": "IPHONE 16 PLUS 128GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_5_nd0mj2.jpg?v=1787259312642"
+    },
+    {
+      "canonicalProductId": 77,
+      "name": "Poco X7 Pro 5G 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_69_1784437875463.jpg"
+    },
+    {
+      "canonicalProductId": 78,
+      "name": "Samsung A07 128/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_3_1783479912825.jpg"
+    },
+    {
+      "canonicalProductId": 79,
+      "name": "Moto E22 64/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_29_ie9ioq.jpg?v=1786861232292"
+    },
+    {
+      "canonicalProductId": 80,
+      "name": "IPHONE 17 PRO MAX 256GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_82_1783483487460.jpg"
+    },
+    {
+      "canonicalProductId": 81,
+      "name": "Poco M8 5G 512/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_66_1784437313028.jpg"
+    },
+    {
+      "canonicalProductId": 82,
+      "name": "Moto G56 5G 256/8gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_33_1783510366146.jpg"
+    },
+    {
+      "canonicalProductId": 83,
+      "name": "Poco X8 Pro 5g 256/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_71_1784438559279.jpg"
+    },
+    {
+      "canonicalProductId": 84,
+      "name": "Samsung s25 ultra 1tb/12gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_14_1783480732315.jpg"
+    },
+    {
+      "canonicalProductId": 85,
+      "name": "INFINIX HOT 70 8/256 GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_79_1784440565263.jpg"
+    },
+    {
+      "canonicalProductId": 86,
+      "name": "IPHONE 16 “E” 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/celulares/foto_celu_3_nwztx0.jpg?v=1787259066167"
+    },
+    {
+      "canonicalProductId": 87,
+      "name": "Poco C81 PRO 128/4GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_55_1784435060367.jpg"
+    },
+    {
+      "canonicalProductId": 88,
+      "name": "IPHONE 17 PRO 512GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_80_1783484510100.jpg"
+    },
+    {
+      "canonicalProductId": 89,
+      "name": "Samsung A06 64/4gb",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_0_1783479809957.jpg"
+    },
+    {
+      "canonicalProductId": 90,
+      "name": "Poco X8 Pro 5g 512/8GB",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_72_1784438924500.jpg"
+    }
+  ]
+}
