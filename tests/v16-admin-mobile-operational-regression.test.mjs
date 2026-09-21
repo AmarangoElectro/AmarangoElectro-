@@ -17,16 +17,17 @@ const operationalPanels = [
 
 test("Administration operational panels keep human-facing status copy", async () => {
   const contents = await Promise.all(operationalPanels.map(source));
-  const rendered = contents.join("\n").replace(/\\/\\*[\\s\\S]*?\\*\\//g, "").replace(/(^|\\n)\\s*\\/\\/.*(?=\\n|$)/g, "$1");
+  const rendered = contents.join("\n");
 
   for (const oldCopy of [
-    "Solo lectura · vía RPC segura",
-    "Solo lectura/escritura vía RPC segura",
-    "ledger canónico",
-    "ledger operativo V16",
-    "responsable legacy",
-    "Registro canónico del ciclo de vida",
-    "Cartera canónica V16 por asesor",
+    "Solo lectura · vía RPC segura (`v16_crm_list_clients`)",
+    "Solo lectura · vía RPC segura (`v16_collections_list` / `v16_collections_summary`)",
+    "Solo lectura/escritura vía RPC segura · ledger operativo V16",
+    "Solo lectura/escritura vía RPC segura · nunca usa ni modifica el estado de ventas legacy",
+    "Solo lectura/escritura vía RPC segura · cartera scoped por asesor",
+    "Eventos registrados en el ledger canónico",
+    "Registro canónico del ciclo de vida de entregas V16, por venta.",
+    "Cartera canónica V16 por asesor — nunca inferida desde el responsable de venta.",
   ]) {
     assert.ok(!rendered.includes(oldCopy), oldCopy);
   }
