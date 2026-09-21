@@ -53,7 +53,7 @@ export function CrmClientsPanel({ initialClientId = null }: { initialClientId?: 
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura · vía RPC segura (`v16_crm_list_clients`) · sin acceso directo a `public.clientes`
+        Conexión segura · datos reales de clientes · sin información de prueba
       </div>
 
       <label className="crm-search" data-guide-target="crm-search">
