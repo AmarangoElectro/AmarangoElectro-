@@ -16,7 +16,7 @@ import styles from "./propietarios.module.css";
 
 export const metadata: Metadata = {
   title: "Propietarios · AmarangoElectro",
-  description: "Centro de control de propietarios, suscriptores y marca blanca.",
+  description: "Centro de control de propietarios, suscriptores e identidad de tienda.",
 };
 
 const modules = [
@@ -43,10 +43,10 @@ const modules = [
   },
   {
     icon: Store,
-    title: "Tiendas / workspaces",
+    title: "Tiendas y espacios",
     description:
-      "Cada negocio vive en su propio espacio aislado: branding, miembros, asesores y permisos.",
-    status: "Aislamiento por workspace",
+      "Cada negocio vive en su propio espacio: identidad, miembros, asesores y permisos.",
+    status: "Datos separados por tienda",
   },
   {
     icon: BadgeCheck,
@@ -72,20 +72,19 @@ export default async function PropietariosPage() {
       <InternalSpaceHeader
         eyebrow="CONTROL DE PLATAFORMA"
         title="Propietarios"
-        badge="Módulo nuevo · aislado"
+        badge="Acceso de propietarios"
       />
 
       <main className={styles.workspace}>
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <p className={styles.kicker}>AMARANGO PLATFORM</p>
+            <p className={styles.kicker}>AMARANGO · PROPIETARIOS</p>
             <h1>
               Suscriptores, identidad y permisos.
               <span> Sin tocar la tienda aprobada.</span>
             </h1>
             <p>
-              Este espacio nace separado del storefront. Primero se construye y valida acá;
-              recién después se conectan las acciones reales.
+              Este espacio reúne la gestión de suscriptores, identidad y permisos sin alterar la experiencia pública de la tienda.
             </p>
           </div>
 
@@ -93,7 +92,7 @@ export default async function PropietariosPage() {
             <LockKeyhole aria-hidden="true" />
             <div>
               <strong>MODO SEGURO</strong>
-              <span>Sin escrituras productivas en esta primera etapa.</span>
+              <span>Los cambios sensibles permanecen protegidos hasta su confirmación.</span>
             </div>
           </div>
         </section>
@@ -101,12 +100,12 @@ export default async function PropietariosPage() {
         <section className={styles.guardrails} aria-label="Reglas de trabajo">
           <div>
             <Settings2 aria-hidden="true" />
-            <strong>Storefront congelado</strong>
-            <span>No modifica Home, catálogo visual, tarjetas ni navegación pública.</span>
+            <strong>Tienda protegida</strong>
+            <span>No modifica Home, catálogo visual, tarjetas ni navegación pública sin confirmación.</span>
           </div>
           <div>
             <Store aria-hidden="true" />
-            <strong>Todo por workspace</strong>
+            <strong>Todo por tienda</strong>
             <span>Cada suscriptor tendrá identidad, miembros y datos separados.</span>
           </div>
           <div>
@@ -121,7 +120,7 @@ export default async function PropietariosPage() {
             <p>PRIMER BLOQUE</p>
             <h2 id="owner-modules-title">Centro de propietarios</h2>
             <span>
-              La interfaz queda preparada antes de habilitar altas, bajas o cambios persistentes.
+              La gestión se habilita por etapas y siempre mantiene separados los datos de cada tienda.
             </span>
           </div>
 
@@ -143,13 +142,11 @@ export default async function PropietariosPage() {
 
         <section className={styles.nextGate}>
           <div>
-            <p>SIGUIENTE GATE</p>
-            <h2>Suscriptores · lectura real primero</h2>
+            <p>PRÓXIMO PASO</p>
+            <h2>Suscriptores · información real y segura</h2>
           </div>
           <p>
-            El próximo paso conecta este módulo a la capa segura existente para listar
-            workspaces, planes y estado de suscripción. La escritura queda bloqueada hasta
-            validar la pantalla y los permisos de propietario.
+            El próximo paso es mostrar suscriptores, planes y estado de cada tienda desde la conexión segura. Los cambios seguirán protegidos por permisos de propietario.
           </p>
         </section>
       </main>
