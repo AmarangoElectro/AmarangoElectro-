@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `a5763baf404785071f0477a9ce0b937b737476d9`
+- Minimum app-code HEAD covered by this handoff: `ce20a5b33f71818b269f19809f2185628405d225`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -47,6 +47,17 @@ Contract:
 ### Navigation continuity
 Existing centralized `RouteScrollReset` + `navigation-memory` flow remains the single source of truth for catalog-return scroll restoration. Do not add a second restoration layer.
 
+
+### Internal spaces
+Prepared on the same branch:
+- the global Claro / Auto / Oscuro selector is now available from the internal-space header;
+- Mi Amarango has local in-page navigation for Resumen / Ofertas / Catálogo only;
+- Mi Amarango still does not link to Administration or Amarango OS;
+- Administration keeps its module context in the URL hash (for example `#crm`, `#collections`, `#cash`);
+- primary Administration shell surfaces have explicit dark-mode parity;
+- mobile Administration tabs are horizontally scrollable without compressing module labels;
+- regression test: `tests/v16-internal-spaces-theme-navigation-regression.test.mjs`.
+
 ## Known deployment gap
 
 The public preview was last externally observed in an older state:
@@ -75,5 +86,8 @@ The Angie Work space reported BLOCKED because it could inspect the public previe
    - light/dark;
    - 320 / 360 / 390 / 412 px;
    - full-banner tap and sector route;
-   - catalog → product → return position.
+   - catalog → product → return position;
+   - internal Claro / Auto / Oscuro selector;
+   - Mi Amarango section navigation and dark parity;
+   - Administration module hash navigation and dark/mobile parity.
 5. Return `PASS_DEPLOY` or `BLOCKED_DEPLOY` + published HEAD + preview URL + real visible product count + STOP.
