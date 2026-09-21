@@ -9,11 +9,11 @@ export function HomeProductsPreview({ products }: { products: Product[] }) {
   if (preview.length === 0) return null;
 
   return (
-    <section className="home-products-preview" aria-labelledby="home-products-title">
+    <section id="productos" className="home-products-preview" aria-labelledby="home-products-title">
       <div className="section-intro split">
         <div>
           <p className="eyebrow orange">PRODUCTOS</p>
-          <h2 id="home-products-title">Lo que estamos mostrando ahora.</h2>
+          <h2 id="home-products-title">Productos para descubrir hoy.</h2>
         </div>
         <Link href="/buscar" className="featured-sectors-all">
           Ver más productos <span aria-hidden="true">→</span>
