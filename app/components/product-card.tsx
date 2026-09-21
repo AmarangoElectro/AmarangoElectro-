@@ -39,6 +39,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
   const href = `/producto/${product.slug}`;
   const initials = useMemo(() => product.brand.slice(0, 2).toUpperCase(), [product.brand]);
   const visualTheme = useMemo(() => getProductCardVisualTheme(product.category, product.brand, visualContext), [product.brand, product.category, visualContext]);
+  const imageFraming = product.category === "celulares" ? "product-photo" : "full-composition";
   const cardStyle: ProductCardStyle = {
     "--card-sector-accent": visualTheme.sectorAccent,
     "--card-sector-soft": visualTheme.sectorSoft,
@@ -93,7 +94,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
       data-brand-theme={visualTheme.brandId}
       data-visual-context={visualContext}
     >
-      <div className="product-visual">
+      <div className="product-visual" data-image-framing={imageFraming}>
         <span className="product-card-watermark" aria-hidden="true">{visualTheme.watermarkLabel}</span>
         {product.image ? (
           <Image className="product-image" src={product.image.src} alt={product.image.alt} fill sizes="(max-width: 680px) 50vw, (max-width: 1100px) 50vw, 33vw" loading="lazy" unoptimized />
