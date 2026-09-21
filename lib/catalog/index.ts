@@ -64,12 +64,14 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
       catalogExpansion63.listProducts(query),
     ]);
 
-    return mergeUnique(primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results);
+    const primaryWithoutLegacyCellphones = primaryResults.filter((product) => product.category !== "celulares");
+
+    return mergeUnique(primaryWithoutLegacyCellphones, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results);
   }
 
   async getProductBySlug(slug: string) {
     const primaryMatch = await primaryCatalog.getProductBySlug(slug);
-    if (primaryMatch) return primaryMatch;
+    if (primaryMatch && primaryMatch.category !== "celulares") return primaryMatch;
 
     const cohort0Match = await cohort0Catalog.getProductBySlug(slug);
     if (cohort0Match) return cohort0Match;
