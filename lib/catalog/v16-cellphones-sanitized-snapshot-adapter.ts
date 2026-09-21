@@ -32,7 +32,7 @@ const evidenceSchema = z.object({
 
 const parsedEvidence = evidenceSchema.parse(evidence);
 
-const APPROVED_POSITIONS = new Set([0, 4, 16, 17, 44, 45]);
+const APPROVED_POSITIONS = new Set([0, 1, 2, 4, 5, 6, 16, 17, 19, 20, 21, 22, 23, 24, 25, 44, 45, 46]);
 
 function slugPart(value: string) {
   return value
