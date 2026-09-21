@@ -21,6 +21,8 @@ const FEATURED_SECTORS = [
   { slug: "lavado", subtitle: "Cuidado práctico para tu ropa." },
   { slug: "pequenos-electrodomesticos", subtitle: "Soluciones prácticas para todos los días." },
   { slug: "limpieza", subtitle: "Equipos para cuidar cada espacio." },
+  { slug: "colchones-sommiers", subtitle: "Confort para renovar tu descanso." },
+  { slug: "blanqueria", subtitle: "Textiles para vestir cada ambiente." },
 ] as const;
 
 export function FeaturedSectorsGrid() {
