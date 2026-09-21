@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `4af25975841f632d771aff7a0e707dea12a0717c`
+- Minimum app-code HEAD covered by this handoff: `61e1f617c240b8d18de3f8ed21a51d1341b045b5`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -71,6 +71,17 @@ Prepared without changing adapters, RPC contracts or Supabase:
 - Calculadora / Placas: touch targets, inputs, results and installment cards hardened for mobile and dark mode;
 - regression test: `tests/v16-admin-mobile-operational-regression.test.mjs`.
 
+
+### Administration review surfaces
+Prepared on the same branch:
+- Storefront review uses human-facing Admin ON/OFF language and explicit review-only status;
+- the 90-cellphone internal surface is framed as a complete review matrix and no longer implies that the whole public cellphone category is disabled;
+- Quick Actions availability labels are in Spanish and preview-photo copy no longer exposes Storage/technical language;
+- unimplemented bulk catalog actions are visibly disabled instead of looking executable;
+- Storefront review, Quick Actions, 90-cellphone review and Admin product grid have explicit dark/mobile parity;
+- Admin product grid becomes one column on narrow phones to preserve controls;
+- regression test: `tests/v16-admin-review-surfaces-regression.test.mjs`.
+
 ## Known deployment gap
 
 The public preview was last externally observed in an older state:
@@ -105,5 +116,8 @@ The Angie Work space reported BLOCKED because it could inspect the public previe
    - Administration module hash navigation and dark/mobile parity;
    - CRM / Cobranzas / Caja / Entregas / Asesores at 320 / 360 / 390 / 412 px;
    - Proveedores / Bandeja operational copy and mobile flow;
-   - Calculadora / Placas mobile touch targets and dark-mode surfaces.
+   - Calculadora / Placas mobile touch targets and dark-mode surfaces;
+   - Storefront Admin review and Quick Actions in light/dark;
+   - 90-cellphone review copy and 320 / 360 / 390 / 412 px layout;
+   - Admin product grid single-column narrow-phone behavior and disabled bulk actions.
 5. Return `PASS_DEPLOY` or `BLOCKED_DEPLOY` + published HEAD + preview URL + real visible product count + STOP.
