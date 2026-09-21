@@ -1,5 +1,6 @@
 import test from "node:test"; import assert from "node:assert/strict"; import fs from "node:fs";
 const advisor=fs.readFileSync("app/components/advisor-workspace.tsx","utf8");
+const saleDraft=fs.readFileSync("app/components/advisor-sale-draft-panel.tsx","utf8");
 const mi=fs.readFileSync("app/mi-amarango/page.tsx","utf8");
 const platform=fs.readFileSync("app/plataforma/page.tsx","utf8");
 const os=fs.readFileSync("app/amarango-os/page.tsx","utf8");
@@ -12,7 +13,9 @@ test("all internal routes require authenticated user",()=> {
 test("advisor surface does not expose lab Product Bridge as operational sale flow",()=> {
   assert.ok(!advisor.includes('href="/amarango-os"'));
   assert.ok(!advisor.includes("Abrir Product Bridge"));
-  assert.match(advisor,/Disponible al habilitar ventas/);
+  assert.match(advisor,/AdvisorSaleDraftPanel/);
+  assert.match(saleDraft,/La venta todavía no se guarda/);
+  assert.match(saleDraft,/<button type="button" disabled>Registrar venta<\/button>/);
 });
 test("advisor commerce fallbacks are professional and truthful",()=> {
   assert.ok(!advisor.includes("Cuotas no validadas"));
