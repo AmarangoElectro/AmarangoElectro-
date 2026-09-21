@@ -164,6 +164,7 @@ export function SectorShowroom({ category, activeSector, activeBrand, availableB
         <label className="sr-only" htmlFor="sector-search">Buscar en este sector</label>
         <input id="sector-search" type="search" name="q" placeholder="Buscar en este sector" autoComplete="off" />
         {activeBrand ? <input type="hidden" name="marca" value={activeBrand} /> : null}
+        {activeSector && !activeSector.brand ? <input type="hidden" name="sector" value={activeSector.slug} /> : null}
       </form>}
 
       {!compactBrandView ? <nav className="sector-showroom-tabs" aria-label="Cambiar de sector">
