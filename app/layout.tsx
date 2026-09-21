@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";
@@ -7,11 +7,15 @@ import { PwaManager } from "./components/pwa-manager";
 import { ScrollQualityManager } from "./components/scroll-quality-manager";
 import { themeInitScript } from "@/lib/ux/theme-preference";
 
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  themeColor: "#071426",
+};
+
 export const metadata: Metadata = {
-  title: "AmarangoElectro V16 · Amarango OS V3 Product Bridge",
+  title: "AmarangoElectro",
   description: "Tecnología para tu vida. Personas para acompañarte.",
   manifest: "/manifest.webmanifest",
-  themeColor: "#071426",
   appleWebApp: { capable: true, title: "AmarangoElectro", statusBarStyle: "black-translucent" },
   icons: {
     icon: "/favicon.svg",
