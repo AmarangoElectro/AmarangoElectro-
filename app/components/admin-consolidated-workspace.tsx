@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Coins, ImagePlus, LayoutGrid, ListFilter, MoreHorizontal, PackageCheck, Save, ShieldCheck, Smartphone, Sparkles, Tag, Truck, UserCog, Users, Wallet } from "lucide-react";
+import { BarChart3, Coins, Crown, ImagePlus, LayoutGrid, ListFilter, MoreHorizontal, PackageCheck, Save, ShieldCheck, Smartphone, Sparkles, Tag, Truck, UserCog, Users, Wallet } from "lucide-react";
 import { AmarangoCalculatorPanel } from "@/components/internal/admin/amarango-calculator-panel";
 import { PlatesPanel } from "@/components/internal/admin/plates-panel";
 import { AdminProductGrid } from "@/components/internal/admin/admin-product-grid";
 import { PhotoReviewPanel } from "@/components/internal/admin/photo-review-panel";
 import { V418BStorefrontAdminPreview } from "@/components/internal/admin/v418b-storefront-admin-preview";
+import { AdminTeamPresence } from "@/components/internal/admin/admin-team-presence";
+import { OwnerControlCenter } from "@/components/internal/admin/owner-control-center";
 import { V16Cellphones90Preview } from "@/components/internal/admin/v16-90-cellphones-preview";
 import { CrmClientsPanel } from "@/components/internal/admin/crm-clients-panel";
 import { CollectionsPanel } from "@/components/internal/admin/collections-panel";
@@ -42,7 +44,7 @@ const initialAdminLab: AdminLab = { imageMode: "supplier", visible: true, stockS
 export function AdminConsolidatedWorkspace() {
   const [adminLab, setAdminLab] = useState<AdminLab>(initialAdminLab);
   const [offer, setOffer] = useState<LabOfferState>(defaultLabOffer);
-  const [tab, setTab] = useState<"catalog" | "photos" | "storefront" | "cellphones90" | "crm" | "collections" | "reports" | "providers" | "cash" | "deliveries" | "advisors" | "calculator" | "plates" | "offers">("catalog");
+  const [tab, setTab] = useState<"catalog" | "photos" | "storefront" | "owner" | "cellphones90" | "crm" | "collections" | "reports" | "providers" | "cash" | "deliveries" | "advisors" | "calculator" | "plates" | "offers">("catalog");
   const [crmInitialClientId, setCrmInitialClientId] = useState<string | null>(null);
   const [crmInstanceKey, setCrmInstanceKey] = useState(0);
 
@@ -80,10 +82,12 @@ export function AdminConsolidatedWorkspace() {
         <div className="admin-command-hero-copy"><p className="eyebrow orange">CENTRO DE ADMINISTRACIÓN</p><h1>Administración central.<br /><span>Operativa, ordenada y segura.</span></h1>{adminGuide && <SectorGuide guide={adminGuide} />}</div>
         <div className="admin-command-hero-status"><ShieldCheck /><strong>MODO SEGURO</strong><span>Los cambios productivos requieren autorización</span></div>
       </section>
+      <AdminTeamPresence />
       <nav className="admin-workspace-tabs" aria-label="Módulos administrativos" data-guide-target="admin-workspace-tabs">
         <button aria-pressed={tab === "catalog"} onClick={() => setTab("catalog")}><LayoutGrid /><span><small>PRODUCTOS</small><strong>Catálogo</strong></span></button>
         <button aria-pressed={tab === "photos"} onClick={() => setTab("photos")}><ImagePlus /><span><small>ORIGEN Y ENCUADRE</small><strong>Fotos · revisión</strong></span></button>
         <button aria-pressed={tab === "storefront"} onClick={() => setTab("storefront")}><ShieldCheck /><span><small>CONTROL VISUAL</small><strong>Revisión de tienda</strong></span></button>
+        <button aria-pressed={tab === "owner"} onClick={() => setTab("owner")}><Crown /><span><small>SUSCRIPCIÓN</small><strong>Propietario</strong></span></button>
         <button aria-pressed={tab === "cellphones90"} onClick={() => setTab("cellphones90")}><Smartphone /><span><small>COHORTE ACTUAL</small><strong>90 Celulares · revisión</strong></span></button>
         <button aria-pressed={tab === "calculator"} onClick={() => setTab("calculator")}><ListFilter /><span><small>PRECIOS</small><strong>Calculadora</strong></span></button>
         <button aria-pressed={tab === "plates"} onClick={() => setTab("plates")}><Sparkles /><span><small>CONTENIDO</small><strong>Placas</strong></span></button>
@@ -112,6 +116,7 @@ export function AdminConsolidatedWorkspace() {
         <section className="admin-parity-strip"><strong>Operativa preservada</strong><span>Tarjetas + planilla</span><span>Costos y contado</span><span>Cuotas</span><span>Proveedor</span><span>Fotos</span><span>Visibilidad</span><span>Stock</span><span>Destacados</span><span>Acciones masivas</span><span>Revisión de precios</span></section>
       </>}
       {tab === "storefront" && <section aria-label="Revisión de tienda"><V418BStorefrontAdminPreview /></section>}
+      {tab === "owner" && <OwnerControlCenter />}
       {tab === "photos" && <PhotoReviewPanel products={demoProducts} />}
       {tab === "cellphones90" && <section aria-label="Cohorte de celulares en revisión"><V16Cellphones90Preview /></section>}
       {tab === "crm" && <>{crmGuide && <SectorGuide guide={crmGuide} />}<CrmClientsPanel key={crmInstanceKey} initialClientId={crmInitialClientId} /></>}

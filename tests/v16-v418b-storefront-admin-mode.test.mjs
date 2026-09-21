@@ -13,8 +13,8 @@ async function runTs(script) {
 }
 
 test("V4.18B projection is fail-closed by role and context", async () => {
-  const result = await runTs(`import {resolveV418BStorefrontProjection} from './lib/internal/admin/v418b-storefront-admin-mode.ts';const f=(role,internalLabContext,adminMode)=>resolveV418BStorefrontProjection({role,internalLabContext,adminMode});process.stdout.write(JSON.stringify({client:f('client',true,true),advisor:f('advisor',true,true),adminPublic:f('admin',false,true),adminOff:f('admin',true,false),adminOn:f('admin',true,true)}));`);
-  assert.deepEqual(result,{client:"client",advisor:"advisor",adminPublic:"client",adminOff:"client",adminOn:"admin-overlay"});
+  const result = await runTs(`import {resolveV418BStorefrontProjection} from './lib/internal/admin/v418b-storefront-admin-mode.ts';const f=(role,internalLabContext,adminMode)=>resolveV418BStorefrontProjection({role,internalLabContext,adminMode});process.stdout.write(JSON.stringify({client:f('client',true,true),advisor:f('advisor',true,true),adminPublic:f('admin',false,true),adminOff:f('admin',true,false),adminOn:f('admin',true,true),ownerPublic:f('owner',false,true),ownerOff:f('owner',true,false),ownerOn:f('owner',true,true)}));`);
+  assert.deepEqual(result,{client:"client",advisor:"advisor",adminPublic:"client",adminOff:"client",adminOn:"admin-overlay",ownerPublic:"client",ownerOff:"client",ownerOn:"owner-overlay"});
 });
 
 test("V4.18B activation contract cannot be enabled from public, URL or persistence", async () => {
@@ -36,10 +36,10 @@ test("V4.18B public Client and Advisor surfaces do not receive Admin Mode contro
 
 test("V4.18B activation exists only in the internal Administration LAB surface", async () => {
   const [admin,workspace,preview]=await Promise.all([source("app/administracion/page.tsx"),source("app/components/admin-consolidated-workspace.tsx"),source("components/internal/admin/v418b-storefront-admin-preview.tsx")]);
-  assert.match(admin,/V4\.18B · LAB/);
+  assert.match(admin,/requireChatGPTUser\("\/administracion"\)/);
   assert.match(workspace,/V418BStorefrontAdminPreview/);
-  assert.match(workspace,/Tienda Admin/);
-  assert.match(preview,/role: "admin", internalLabContext: true/);
+  assert.match(workspace,/Revisión de tienda/);
+  assert.match(preview,/internalLabContext: true, adminMode/);
 });
 
 test("V4.18B Admin Mode OFF returns the unchanged Customer card path", async () => {
@@ -66,11 +66,13 @@ test("V4.18B mode and selected product remain ephemeral React state", async () =
   assert.doesNotMatch(preview,/localStorage|sessionStorage|indexedDB|document\.cookie|URLSearchParams|location\.search/);
 });
 
-test("V4.18B overlay does not render sensitive Admin financial fields", async () => {
+test("V4.18B keeps sensitive fields out of Advisor and exposes them only to privileged previews", async () => {
   const [preview,catalog]=await Promise.all([source("components/internal/admin/v418b-storefront-admin-preview.tsx"),source("app/components/catalog-client.tsx")]);
-  assert.doesNotMatch([preview,catalog].join("\n"),/>\s*(?:Costo|Margen|USD|Inversi[oó]n|Proveedor interno)\s*</i);
-  assert.match(preview,/costArs: null/);
-  assert.match(preview,/supplier: null/);
+  assert.match(preview,/COSTO \/ MAYORISTA/);
+  assert.match(preview,/className="is-hidden"/);
+  assert.match(preview,/v411PilotAdminProducts/);
+  assert.match(preview,/privilegedProjection/);
+  assert.doesNotMatch(catalog,/administrativeById|v411PilotAdminProducts/);
 });
 
 test("V4.18B toggle OFF closes Quick Actions and cannot mutate the catalog", async () => {

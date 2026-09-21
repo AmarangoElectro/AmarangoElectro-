@@ -16,6 +16,7 @@ import { AllSectorsSheet } from "@/app/components/all-sectors-sheet";
 import { BrandProductAccordion } from "@/app/components/brand-product-accordion";
 import { getBrandLocale, getBrandLocalesForSector } from "@/lib/theme/brand-locale";
 import { deriveSubcategoryContext } from "@/lib/navigation/subcategory-context";
+import { getV16BrandCampaigns } from "@/app/data/v16-brand-campaigns";
 
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
@@ -47,8 +48,9 @@ export default async function CategoryPage({ params, searchParams }: { params: P
     }),
     catalog.listProducts({ visibleOnly: true }),
   ]);
+  const campaignBrands = getV16BrandCampaigns(slug);
   const availableBrands = new Set(categoryProducts.map((product) => product.brand));
-  const knownBrands = new Set([...category.brands, ...category.subcategories.flatMap((item) => item.brand ? [item.brand] : [])]);
+  const knownBrands = new Set([...category.brands, ...category.subcategories.flatMap((item) => item.brand ? [item.brand] : []), ...campaignBrands.flatMap((item) => item.brand ? [item.brand] : [])]);
   const requestedBrand = rawRequestedBrand && availableBrands.has(rawRequestedBrand) ? rawRequestedBrand : undefined;
   const requestedCampaignBrand = requestedBrand ?? (rawRequestedBrand
     ? [...knownBrands].find((brand) => brand.toLocaleLowerCase("es-AR") === rawRequestedBrand.toLocaleLowerCase("es-AR"))
@@ -66,12 +68,14 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const initialMaxPrice = Number.isFinite(parsedMaxPrice) && parsedMaxPrice > 0 ? parsedMaxPrice : null;
   const initialAvailableOnly = disponible === "1";
   const activeSubcategories = getActiveSubcategories(category);
+  const brandSubcategories = [...activeSubcategories.filter((subcategory) => Boolean(subcategory.brand)), ...campaignBrands];
+  const sectorSubcategories = activeSubcategories.filter((subcategory) => !subcategory.brand);
   const plannedSubcategories = getPlannedSubcategories(category);
   const subcategoryContext = deriveSubcategoryContext(category, {
     sector: requestedSector,
     brand: requestedCampaignBrand,
   });
-  const phoneAccordionMode = slug === "celulares"
+  const phoneAccordionMode = brandSubcategories.length > 0
     && !requestedCampaignBrand
     && !activeSector
     && !initialSearch
@@ -96,7 +100,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
         <div id="catalogo">
           {activeSector && <section className="catalog-sector-context"><div><small>SECTOR ACTIVO</small><strong>{activeSector.title}</strong><span>{activeSector.description}</span></div><Link href={`/categoria/${slug}#catalogo`}>Ver todo {category.title} ×</Link></section>}
           {phoneAccordionMode ? (
-            <BrandProductAccordion categorySlug={category.slug} products={categoryProducts} brands={activeSubcategories.filter((subcategory) => Boolean(subcategory.brand))} />
+            <BrandProductAccordion categorySlug={category.slug} products={categoryProducts} brands={brandSubcategories} />
           ) : products.length > 0 ? (
             <CatalogClient
               products={products}
@@ -120,14 +124,14 @@ export default async function CategoryPage({ params, searchParams }: { params: P
           )}
         </div>
 
-        {!phoneAccordionMode ? <section className={`category-subcategories ${slug === "celulares" ? "phone-generic-subcategories" : ""}`} aria-labelledby="subcategories-title" data-category={category.title}>
+        {(sectorSubcategories.length > 0 || plannedSubcategories.length > 0 || category.isFallback) ? <section className={`category-subcategories ${slug === "celulares" ? "phone-generic-subcategories" : ""}`} aria-labelledby="subcategories-title" data-category={category.title}>
           <div className="section-intro split">
             <div><p className="eyebrow orange">EXPLORÁ POR CATEGORÍA</p><h2 id="subcategories-title">Encontrá lo que buscás.</h2></div>
             <p>La navegación está separada del catálogo para que cada sector pueda crecer sin mezclar interfaz, datos y lógica comercial.</p>
           </div>
-          {activeSubcategories.length ? (
+          {sectorSubcategories.length ? (
             <div className="subcategory-banner-grid">
-              {activeSubcategories.map((subcategory, index) => (
+              {sectorSubcategories.map((subcategory, index) => (
                 <SubcategoryBannerCard key={subcategory.slug} categorySlug={category.slug} categoryTitle={category.title} subcategory={subcategory} index={index} />
               ))}
             </div>

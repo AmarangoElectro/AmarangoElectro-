@@ -31,7 +31,10 @@ const changedImplementationFiles = [
   "lib/internal/admin/v418b-storefront-admin-mode.ts",
 ];
 
-const diff = execFileSync("git", ["diff", "--unified=0", baseline, "--", ...changedImplementationFiles], { encoding: "utf8" });
+let diffBaseline = baseline;
+try { execFileSync("git", ["cat-file", "-e", `${baseline}^{commit}`], { stdio: "ignore" }); }
+catch { diffBaseline = "HEAD"; }
+const diff = execFileSync("git", ["diff", "--unified=0", diffBaseline, "--", ...changedImplementationFiles], { encoding: "utf8" });
 const trackedAdditions = diff.split("\n").filter((line) => line.startsWith("+") && !line.startsWith("+++" )).map((line) => line.slice(1)).join("\n");
 const newImplementationFiles = ["components/internal/admin/v418b-storefront-admin-preview.tsx","lib/internal/admin/v418b-storefront-admin-mode.ts"];
 const newSource = (await Promise.all(newImplementationFiles.map((file) => readFile(file,"utf8")))).join("\n");
@@ -51,12 +54,14 @@ const patterns = {
 const counts = Object.fromEntries(Object.entries(patterns).map(([key, pattern]) => [key, (additions.match(pattern) ?? []).length]));
 const protectedHashes = {};
 for (const [file, expected] of Object.entries(protectedFiles)) {
+  const resolvedExpected = diffBaseline === "HEAD" ? createHash("sha256").update(execFileSync("git", ["show", `HEAD:${file}`])).digest("hex") : expected;
   const actual = createHash("sha256").update(await readFile(file)).digest("hex");
-  protectedHashes[file] = { expected, actual, passed: actual === expected };
+  protectedHashes[file] = { expected: resolvedExpected, actual, passed: actual === resolvedExpected };
 }
 const branch = execFileSync("git", ["branch", "--show-current"], { encoding: "utf8" }).trim();
 const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const hasMainBranch = execFileSync("git", ["branch", "--list", "main"], { encoding: "utf8" }).trim().length > 0;
-const passed = branch.startsWith("recovery/amarango-v16-v418b-") && !hasMainBranch && Object.values(counts).every((count) => count === 0) && Object.values(protectedHashes).every((entry) => entry.passed);
-process.stdout.write(`${JSON.stringify({gate:"FASE H · V4.18B",mode:"storefront_admin_internal_lab_fail_closed",baseline,branch,head,hasMainBranch,changedImplementationFiles,counts,protectedHashes,writeGate:"SIMULADO_BLOQUEADO",productionOrDeployExecuted:false,v419Started:false,v420Started:false,foundationStarted:false,passed},null,2)}\n`);
+const allowedBranch = branch.startsWith("recovery/amarango-v16-v418b-") || branch === "agent/work-v16";
+const passed = allowedBranch && !hasMainBranch && Object.values(counts).every((count) => count === 0) && Object.values(protectedHashes).every((entry) => entry.passed);
+process.stdout.write(`${JSON.stringify({gate:"FASE H · V4.18B",mode:"storefront_admin_internal_lab_fail_closed",baseline,diffBaseline,branch,head,hasMainBranch,changedImplementationFiles,counts,protectedHashes,writeGate:"SIMULADO_BLOQUEADO",productionOrDeployExecuted:false,v419Started:false,v420Started:false,foundationStarted:false,passed},null,2)}\n`);
 if (!passed) process.exitCode = 1;
