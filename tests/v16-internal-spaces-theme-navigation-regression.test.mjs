@@ -27,6 +27,7 @@ test("Administration persists module context in the hash without role or data wr
   assert.match(admin, /history\.replaceState/);
   assert.match(admin, /window\.location\.hash\.slice\(1\)/);
   assert.match(admin, /hashchange/);
+  for (const hash of ["cobranzas", "caja", "entregas", "asesores", "calculadora", "placas"]) assert.ok(admin.includes(`"${hash}"`), hash);
   assert.doesNotMatch(admin, /email\s*===|email\.includes|auth\.admin/);
 });
 
