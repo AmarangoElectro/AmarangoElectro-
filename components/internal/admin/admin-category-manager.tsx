@@ -7,7 +7,7 @@ export function AdminCategoryManager() {
   return (
     <section className="admin-category-manager" aria-label="Arquitectura de categorías">
       <header>
-        <div><small>CATEGORÍAS V16</small><h2>Arquitectura preparada para catálogo grande</h2><p>Administrá sectores y banners sin convertir “Otros” en una lista interminable.</p></div>
+        <div><small>CATEGORÍAS</small><h2>Arquitectura preparada para catálogo grande</h2><p>Administrá sectores y banners sin convertir “Otros” en una lista interminable.</p></div>
         <div><strong>{overview.categoryCount}</strong><span>universos</span><strong>{overview.subcategoryCount}</strong><span>sectores</span></div>
       </header>
       <div className="admin-category-manager-grid">
@@ -21,7 +21,7 @@ export function AdminCategoryManager() {
           </article>;
         })}
       </div>
-      <footer><span>{slots.filter((slot) => slot.imageStatus === "awaiting-image").length} imágenes reemplazables pendientes · {compatibilityCategories.length} rutas V16 preservadas</span><b>{adminCategoryManagementContract.minimumCatalogScale.toLocaleString("es-AR")}+ productos</b></footer>
+      <footer><span>{slots.filter((slot) => slot.imageStatus === "awaiting-image").length} imágenes reemplazables pendientes · {compatibilityCategories.length} accesos compatibles preservados</span><b>{adminCategoryManagementContract.minimumCatalogScale.toLocaleString("es-AR")}+ productos</b></footer>
     </section>
   );
 }
