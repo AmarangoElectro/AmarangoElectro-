@@ -61,3 +61,20 @@ test("V16 90-cellphones preview: /administracion renders successfully with the n
   assert.doesNotMatch(homeHtml, /v16-cell:\d+/);
   assert.doesNotMatch(homeHtml, /90 Celulares \(Preview\)/);
 });
+
+
+test("V16 90-cellphones preview: all 90 isolated phones have HTTPS photos and remain non-public", async () => {
+  const fixture = JSON.parse(await source("fixtures/v16-90-cellphones-materialized.json"));
+  assert.equal(fixture.products.length, 90);
+  assert.equal(fixture.photo_materialization.status, "complete");
+  assert.equal(fixture.photo_materialization.count, 90);
+  assert.equal(fixture.photo_materialization.public_activation, false);
+  assert.ok(fixture.products.every((product) => /^https:\/\//.test(product.image)));
+
+  const adapter = await source("lib/catalog/v16-cellphones-90-materialized-adapter.ts");
+  assert.match(adapter, /image: \{ src: row\.image, alt: row\.name \}/);
+  assert.match(adapter, /visible: false/);
+
+  const index = await source("lib/catalog/index.ts");
+  assert.doesNotMatch(index, /new V16Cellphones90MaterializedCatalogAdapter\(\)/);
+});
