@@ -1,0 +1,64 @@
+{
+  "evidence_status": "v412_sanitized_catalog_expansion",
+  "source_reference": "V4.12-SANITIZED-SNAPSHOT-25.json",
+  "production_catalog_verified": false,
+  "captured_at": "2026-08-30",
+  "product_count": 5,
+  "products": [
+    {
+      "id": "-854",
+      "name": "HELADERA SIDE BY SIDE LG 418LTS INSTA VIEW INVERTER GM57SXM BLACK",
+      "brand": "LG",
+      "model": null,
+      "category": "electrodomesticos",
+      "subcategory": "refrigeracion",
+      "sale": 4017000,
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_ocdamngp9n_vkxfur.jpg?v=1788042500579",
+      "availability": "available"
+    },
+    {
+      "id": "-847",
+      "name": "AIRE ACONDICIONADO ELECTRA 5300W INVERTER FRIO/CALOR",
+      "brand": "Electra",
+      "model": null,
+      "category": "electrodomesticos",
+      "subcategory": "climatizacion",
+      "sale": 1118000,
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_ew9iuucfjf_ptbnpk.jpg?v=1787928039656",
+      "availability": "available"
+    },
+    {
+      "id": "-517",
+      "name": "Parlante Telefunken",
+      "brand": "Telefunken",
+      "model": null,
+      "category": "audio",
+      "subcategory": null,
+      "sale": 152000,
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/impacto_mkp9o6uf4t_8oijhp.jpg?v=1786685982365",
+      "availability": "available"
+    },
+    {
+      "id": "-511",
+      "name": "Barra de sonido Polaris 700 Telefunken",
+      "brand": "Telefunken",
+      "model": null,
+      "category": "audio",
+      "subcategory": null,
+      "sale": 232500,
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/impacto_ghv1ivwwju_kgul0q.jpg?v=1786685498250",
+      "availability": "available"
+    },
+    {
+      "id": "-860",
+      "name": "LAVASECARROPAS PHILCO 11/6KG 94PHLS116-7GN*",
+      "brand": "Philco",
+      "model": null,
+      "category": "electrodomesticos",
+      "subcategory": "lavado",
+      "sale": 973500,
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_cxy9he4gtu_1uuj5gh.jpg?v=1788044906731",
+      "availability": "available"
+    }
+  ]
+}
