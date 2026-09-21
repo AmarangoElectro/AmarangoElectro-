@@ -2,13 +2,13 @@ import type { CatalogAdapter, CatalogQuery, Product } from "./types";
 import { V411AuditedPilotCatalogAdapter } from "./audited-pilot-adapter";
 import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
-import { V16CellphonesSanitizedSnapshotCatalogAdapter } from "./v16-cellphones-sanitized-snapshot-adapter";
+import { V16Cellphones90PublicCatalogAdapter } from "./v16-cellphones-90-public-adapter";
 import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter";
 
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
-const cellphoneSnapshotCatalog = new V16CellphonesSanitizedSnapshotCatalogAdapter();
+const cellphoneSnapshotCatalog = new V16Cellphones90PublicCatalogAdapter();
 const catalogExpansion63 = new V16CatalogExpansion63Adapter();
 
 function productKey(product: Product) {
@@ -92,5 +92,5 @@ export type { Product, CatalogQuery, CatalogAdapter } from "./types";
 export { v411CatalogEvidence } from "./audited-pilot-adapter";
 export { cohort0CatalogEvidence } from "./cohort0-frozen-adapter";
 export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
-export { v16CellphonesSanitizedSnapshotEvidence } from "./v16-cellphones-sanitized-snapshot-adapter";
+export { v16Cellphones90PublicEvidence } from "./v16-cellphones-90-public-adapter";
 export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapter";
