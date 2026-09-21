@@ -10,7 +10,7 @@ export default async function CatalogMatchReviewPage() {
 
   return (
     <>
-      <InternalSpaceHeader eyebrow="CATÁLOGO INTERNO" title="Coincidencias de productos" badge={`Sesión: ${friendlyName}`} />
+      <InternalSpaceHeader eyebrow="CATÁLOGO INTERNO" title="Coincidencias de productos" badge="Revisión humana" userName={friendlyName} />
       <CatalogMatchReview candidates={candidates} />
     </>
   );
