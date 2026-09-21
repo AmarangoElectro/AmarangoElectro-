@@ -8815,3 +8815,54 @@ html[data-theme="dark"] .advisor-sale-draft__actions button:first-child {
 
   .advisor-sale-draft__actions { flex-direction: column; }
 }
+
+
+/* V16 public mobile touch-target pass */
+@media (max-width: 760px) {
+  .category-page .card-tools button,
+  .product-actions button,
+  .compare-dock-product button,
+  .compare-dock-actions button,
+  .product-compare-toggle,
+  .catalog-correction,
+  .catalog-empty-reset {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .category-page .card-tools button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .product-actions {
+    gap: 8px;
+  }
+
+  .product-actions > button:not(.consult-button) {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+  }
+
+  .compare-dock-product {
+    padding-right: 42px;
+  }
+
+  .compare-dock-product button {
+    right: 4px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .compare-dock-actions button {
+    min-height: 44px;
+  }
+
+  .sector-bottom-navigation > a,
+  .sector-bottom-navigation > button,
+  .sector-bottom-navigation > span {
+    min-height: 52px;
+    padding-block: 4px;
+  }
+}
