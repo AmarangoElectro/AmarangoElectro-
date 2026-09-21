@@ -254,13 +254,13 @@ export function AdvisorsPanel() {
         <div>
           <p className="eyebrow orange">ADMINISTRACIÓN</p>
           <h2 id="advisors-panel-title">Asesores</h2>
-          <span>Cartera canónica V16 por asesor — nunca inferida desde el responsable de venta.</span>
+          <span>Clientes asignados, historial de cartera y seguimiento de cada asesor.</span>
         </div>
       </header>
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura/escritura vía RPC segura · cartera scoped por asesor, nunca por responsable legacy
+        Conexión segura · cada asesor ve y gestiona únicamente su cartera asignada
       </div>
 
       <div className="collections-actions">
@@ -275,7 +275,7 @@ export function AdvisorsPanel() {
       {summary.status !== "ok" && <StatusNotice result={summary} />}
       {summary.status === "ok" && filteredRows.length === 0 && (
         <div className="crm-empty-state" data-guide-target="advisors-empty">
-          <b>Todavía no hay asesores disponibles en la cartera V16.</b>
+          <b>Todavía no hay asesores disponibles.</b>
         </div>
       )}
       {summary.status === "ok" && filteredRows.length > 0 && (
