@@ -58,8 +58,8 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <a href="#advisor-catalog">Catálogo</a>
       </nav>
       <section id="advisor-tools" className="advisor-quick-grid" aria-label="Accesos rápidos" data-guide-target="advisor-quick-grid">
-        <article><UsersRound /><span><small>CLIENTES</small><strong>Seguimiento en preparación</strong></span></article>
-        <article><WalletCards /><span><small>CUOTAS</small><strong>Consulta en preparación</strong></span></article>
+        <article><UsersRound /><span><small>CLIENTES</small><strong>Conexión segura pendiente</strong></span></article>
+        <article><WalletCards /><span><small>CUOTAS</small><strong>Conexión segura pendiente</strong></span></article>
         <a className="advisor-quick-card advisor-quick-card--sale" href="#advisor-sale-draft"><ClipboardList /><span><small>NUEVA VENTA</small><strong>Preparar operación</strong></span></a>
       </section>
       <AdvisorSaleDraftPanel products={products} />
