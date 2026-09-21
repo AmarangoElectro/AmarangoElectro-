@@ -1,4 +1,8 @@
 const BRAND_RULES = [
+  { brand: "3o3", patterns: [/\b3o3\b/i, /\bsg\s*nr\s*01\b/i] },
+  { brand: "Telefunken", patterns: [/\btelefunken\b/i, /\bsmart\s*wash\s*550\b/i] },
+  { brand: "Ultracomb", patterns: [/\bultracomb\b/i, /\bsc4622\b/i] },
+  { brand: "Gamma", patterns: [/\bgamma\b/i, /\bg12417ar\b/i] },
   { brand: "Kanji Tools", patterns: [/\bkanji\s*tools\b/i, /\bkanjitools\b/i, /\bkjt[-\s]/i] },
   { brand: "Kanjihome", patterns: [/\bkanji\s*home\b/i, /\bkanjihome\b/i, /\bkanihome\b/i] },
   { brand: "Lusqtoff", patterns: [/\blusqtoff\b/i, /\bl[üu]qstoff\b/i] },
