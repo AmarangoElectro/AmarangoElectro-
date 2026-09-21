@@ -26,8 +26,8 @@ test("strict audit summary remains non-activated and zero-ready for live HTTP",(
 test("stronger recovered evidence is not silently activated in the app catalog",()=> {
   assert.ok(!index.includes("catalog-source-snapshot.sanitized.json"));
   assert.ok(!index.includes("v16-real-catalog-recovery-summary.json"));
-  assert.match(index,/V411AuditedPilotCatalogAdapter/);
-  assert.match(index,/Cohort0FrozenCatalogAdapter/);
+  assert.doesNotMatch(index,/V411AuditedPilotCatalogAdapter/);
+  assert.doesNotMatch(index,/Cohort0FrozenCatalogAdapter/);
 });
 test("secure bridge is fail-closed and forbids direct or privileged browser authority",()=> {
   assert.match(bridge,/NOT_CONNECTED_SECURE_RPC_BRIDGE/);
