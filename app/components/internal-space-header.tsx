@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "./store-link";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 
 export function InternalSpaceHeader({ eyebrow, title, badge }: { eyebrow: string; title: string; badge: string }) {
   return (
@@ -10,6 +11,7 @@ export function InternalSpaceHeader({ eyebrow, title, badge }: { eyebrow: string
         <span><small>{eyebrow}</small><strong>{title}</strong></span>
       </Link>
       <div className="internal-space-actions">
+        <div className="internal-space-theme"><ThemeToggle /></div>
         <span className="internal-space-badge"><ShieldCheck size={15} /> {badge}</span>
         <Link href="/"><ArrowLeft size={16} /> Tienda</Link>
       </div>
