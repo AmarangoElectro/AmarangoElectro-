@@ -17,7 +17,7 @@ const navigation = [
   { href: "/#experiencia", label: "Nuestra forma de atender" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ internalUserName = null }: { internalUserName?: string | null } = {}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -79,13 +79,13 @@ export function SiteHeader() {
             <SoundToggle />
             <ThemeToggle />
           </section>
-          <section className="authorized-access" aria-label="Acceso autorizado">
-            <div><ShieldCheck size={18} /><span><small>ACCESO AUTORIZADO</small><strong>Espacios internos preparados</strong></span></div>
+          {internalUserName ? <section className="authorized-access" aria-label="Acceso autorizado">
+            <div><ShieldCheck size={18} /><span><small>SESIÓN RECONOCIDA</small><strong>Hola, {internalUserName}</strong></span></div>
             <Link href="/mi-amarango" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><UsersRound size={18} /> Mi Amarango · Asesores</Link>
             <Link href="/administracion" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><ShieldCheck size={18} /> Administración</Link>
             <Link href="/plataforma" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><Store size={18} /> Ver conexión de espacios</Link>
-            <p>Login, perfiles Maxi/Angie y sesión persistente quedan reservados para el bloque de identidad aprobado.</p>
-          </section>
+            <p>La sesión ya está identificada en este dispositivo.</p>
+          </section> : null}
         </aside>
       </div>
     </>
