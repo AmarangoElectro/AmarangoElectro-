@@ -289,6 +289,24 @@ export const categories: CategoryDefinition[] = [
     ],
   },
   {
+    slug: "deportes-movilidad",
+    title: "Deportes & Movilidad",
+    eyebrow: "MOVIMIENTO & FITNESS",
+    description: "Bicicletas, entrenamiento y movilidad personal para moverte a tu manera.",
+    icon: "🚲",
+    heroTagline: "Movimiento, entrenamiento y movilidad organizados para encontrar rápido lo que necesitás.",
+    imageStatus: "awaiting-image",
+    brands: [],
+    homePlacement: "more",
+    homePriority: 8,
+    legacyAliases: ["deportes", "deportes y movilidad", "movilidad", "bicicletas", "fitness", "monopatin"],
+    subcategories: [
+      sub("bicicletas", "Bicicletas", "Rodados para paseo, ciudad y distintos terrenos.", "🚲", { legacyAliases: ["bicicleta", "bicicletas", "bici"] }),
+      sub("fitness", "Fitness", "Equipamiento para entrenamiento y actividad física.", "🏋️", { legacyAliases: ["fitness", "cinta", "multigym", "gimnasio", "barra", "push up"] }),
+      sub("movilidad-personal", "Movilidad personal", "Monopatines y alternativas para moverte de forma práctica.", "🛴", { legacyAliases: ["monopatin", "monopatín", "patin", "patines", "patineta"] }),
+    ],
+  },
+  {
     slug: "auto-motos-energia",
     title: "Auto, Motos & Energía",
     eyebrow: "MOVILIDAD & RESPALDO",
@@ -298,7 +316,7 @@ export const categories: CategoryDefinition[] = [
     imageStatus: "awaiting-image",
     brands: [],
     homePlacement: "more",
-    homePriority: 8,
+    homePriority: 9,
     legacyAliases: ["auto", "motos", "energia", "baterias"],
     subcategories: [
       sub("auto-y-motos", "Auto y motos", "Accesorios y soluciones para movilidad.", "🏍️", { legacyAliases: ["auto", "autos", "motos", "automotor"] }),
@@ -315,7 +333,7 @@ export const categories: CategoryDefinition[] = [
     imageStatus: "awaiting-image",
     brands: [],
     homePlacement: "more",
-    homePriority: 9,
+    homePriority: 10,
     legacyAliases: ["camping", "aire libre", "mascotas"],
     subcategories: [
       sub("camping-y-aire-libre", "Camping y aire libre", "Equipo y accesorios para disfrutar afuera.", "🏕️", { legacyAliases: ["camping", "aire libre", "exterior"] }),
