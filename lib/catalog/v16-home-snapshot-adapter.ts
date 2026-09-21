@@ -1,6 +1,7 @@
 import evidence from "@/fixtures/v16-home-sanitized-20260920.json";
 import { z } from "zod";
 import { rankProductsForSearch } from "./search";
+import { buildFixedInstallments } from "./financing";
 import type { CatalogAdapter, CatalogQuery, Product } from "./types";
 
 const rowSchema = z.object({
@@ -54,7 +55,7 @@ const products = Object.freeze(parsed.products.map((row): Product => Object.free
   subcategory: row.subcategory,
   image: row.image ? { src: row.image, alt: `${row.name} — AmarangoElectro` } : null,
   price: { amount: row.sale, currency: "ARS" },
-  financing: [],
+  financing: buildFixedInstallments(row.sale),
   availability: row.availability,
   stock: {
     status: row.availability === "available" ? "in_stock" : "out_of_stock",
