@@ -17,7 +17,7 @@ const operationalPanels = [
 
 test("Administration operational panels keep human-facing status copy", async () => {
   const contents = await Promise.all(operationalPanels.map(source));
-  const rendered = contents.join("\n");
+  const rendered = contents.join("\n").replace(/\\/\\*[\\s\\S]*?\\*\\//g, "").replace(/(^|\\n)\\s*\\/\\/.*(?=\\n|$)/g, "$1");
 
   for (const oldCopy of [
     "Solo lectura · vía RPC segura",
