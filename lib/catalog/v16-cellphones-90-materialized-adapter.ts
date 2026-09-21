@@ -53,6 +53,7 @@ const rowSchema = z.object({
   model: z.string().trim().min(1).nullable(),
   category: z.string().trim().min(1),
   image: z.string().url().startsWith("https://"),
+  photoReviewStatus: z.enum(["source-mapping-verified","needs-human-visual-review"]),
 }).strict();
 
 const evidenceSchema = z.object({
@@ -66,6 +67,14 @@ const evidenceSchema = z.object({
     count: z.literal(90),
     source_write: z.literal(false),
     public_activation: z.literal(false),
+  }).strict(),
+  photo_review: z.object({
+    status: z.literal("pending-human-review"),
+    source_mapping_verified_count: z.number().int().nonnegative(),
+    needs_human_visual_review_count: z.number().int().nonnegative(),
+    flagged_canonical_product_ids: z.array(z.number().int().positive()),
+    visibility_changed: z.literal(false),
+    note: z.string().min(1),
   }).strict(),
 }).strict();
 
@@ -141,6 +150,10 @@ export const v16Cellphones90MaterializedEvidence = Object.freeze({
   capturedAt: parsedEvidence.captured_at,
   productCount: products.length,
   canonicalProductIds: Object.freeze(parsedEvidence.products.map((row) => row.canonicalProductId).sort((a, b) => a - b)),
+  photoReviewStatus: parsedEvidence.photo_review.status,
+  sourceMappingVerifiedCount: parsedEvidence.photo_review.source_mapping_verified_count,
+  needsHumanVisualReviewCount: parsedEvidence.photo_review.needs_human_visual_review_count,
+  flaggedCanonicalProductIds: Object.freeze([...parsedEvidence.photo_review.flagged_canonical_product_ids]),
 });
 
 /**
