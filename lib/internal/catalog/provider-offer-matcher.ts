@@ -107,6 +107,15 @@ function importantNumbers(value: string) {
     .filter((value) => value >= 10);
 }
 
+function variantTokens(value: string) {
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-AR");
+  return [...normalized.matchAll(/\b\d+(?:[.,]\d+)?\s*(?:kg|gb|tb|l|lt|lts|cm|mm|pulgadas?|\")\b/g)]
+    .map((match) => match[0].replace(/\s+/g, "").replace(",", "."));
+}
+
 function supplierCodeSimilarity(left: string | null, right: string | null) {
   if (!left || !right) return 0;
   const a = normalize(left).replace(/\s/g, "");
@@ -119,6 +128,13 @@ function supplierCodeSimilarity(left: string | null, right: string | null) {
 }
 
 function numericConflict(left: string, right: string) {
+  const leftVariants = variantTokens(left);
+  const rightVariants = variantTokens(right);
+  if (leftVariants.length && rightVariants.length) {
+    const sharedVariant = leftVariants.some((value) => rightVariants.includes(value));
+    if (!sharedVariant) return true;
+  }
+
   const a = importantNumbers(left);
   const b = importantNumbers(right);
   if (!a.length || !b.length) return false;
