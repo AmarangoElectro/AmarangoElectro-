@@ -4,7 +4,8 @@ import { InternalSpaceHeader } from "@/app/components/internal-space-header";
 import { AdvisorWorkspace } from "@/app/components/advisor-workspace";
 
 export default async function MiAmarangoPage() {
-  await requireChatGPTUser("/mi-amarango");
+  const user = await requireChatGPTUser("/mi-amarango");
   const products = await catalog.listProducts({ visibleOnly: true });
-  return <><InternalSpaceHeader eyebrow="ESPACIO AUTORIZADO" title="Mi Amarango" badge="Vista Asesor" /><AdvisorWorkspace products={products} /></>;
+  const friendlyName = user.fullName?.split(/\s+/)[0] ?? user.email.split("@")[0];
+  return <><InternalSpaceHeader eyebrow="ESPACIO AUTORIZADO" title="Mi Amarango" badge="Vista Asesor" userName={friendlyName} /><AdvisorWorkspace products={products} /></>;
 }
