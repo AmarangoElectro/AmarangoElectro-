@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `212f59c5c50f5b84a164e56bcd2efe78ca5cd04f`
+- Minimum app-code HEAD covered by this handoff: `32948864f8e5f877847e6f95537e6d9e555efe50`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -196,3 +196,16 @@ Prepared on the same branch:
 - Audio/Hogar showroom copy no longer restores retired slogans;
 - Admin catalog overlay copy uses `Acciones rápidas / Vista de revisión` instead of draft/version labels;
 - regression test: `tests/v16-category-favorites-navigation-regression.test.mjs`.
+
+
+### Product detail / comparison / recently viewed / consultation flow
+Prepared on the same branch:
+- product-detail missing-photo copy is customer-facing;
+- purchase-intent review no longer exposes V16/checkpoint/stage language;
+- copied consultation remains a local/manual handoff; nothing is transmitted or stored automatically;
+- Recently Viewed now uses customer-facing `VISTOS RECIENTEMENTE` language;
+- purchase-intent and comparison surfaces have explicit dark-mode parity;
+- mobile purchase-intent/compare sheets respect bottom safe-area;
+- return/clear/close/review actions have reinforced 44 px touch targets;
+- comparison now traps keyboard focus inside its modal and still supports Escape;
+- regression test: `tests/v16-product-decision-flow-regression.test.mjs`.
