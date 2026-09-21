@@ -3,11 +3,13 @@ import { V411AuditedPilotCatalogAdapter } from "./audited-pilot-adapter";
 import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
 import { V16CellphonesSanitizedSnapshotCatalogAdapter } from "./v16-cellphones-sanitized-snapshot-adapter";
+import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter";
 
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
 const cellphoneSnapshotCatalog = new V16CellphonesSanitizedSnapshotCatalogAdapter();
+const catalogExpansion63 = new V16CatalogExpansion63Adapter();
 
 function productKey(product: Product) {
   return [
@@ -54,14 +56,15 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
       cellphoneSnapshotCatalog.listProducts(query),
+      catalogExpansion63.listProducts(query),
     ]);
 
-    return mergeUnique(primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults);
+    return mergeUnique(primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results);
   }
 
   async getProductBySlug(slug: string) {
@@ -74,7 +77,10 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
     const electroMatch = await electroCatalog.getProductBySlug(slug);
     if (electroMatch) return electroMatch;
 
-    return cellphoneSnapshotCatalog.getProductBySlug(slug);
+    const cellphoneMatch = await cellphoneSnapshotCatalog.getProductBySlug(slug);
+    if (cellphoneMatch) return cellphoneMatch;
+
+    return catalogExpansion63.getProductBySlug(slug);
   }
 }
 
@@ -87,3 +93,4 @@ export { v411CatalogEvidence } from "./audited-pilot-adapter";
 export { cohort0CatalogEvidence } from "./cohort0-frozen-adapter";
 export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
 export { v16CellphonesSanitizedSnapshotEvidence } from "./v16-cellphones-sanitized-snapshot-adapter";
+export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapter";
