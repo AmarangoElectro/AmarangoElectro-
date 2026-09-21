@@ -459,7 +459,7 @@ export function CatalogClient({
             <div key={product.id} className="v418b-storefront-card-shell" data-v418b-admin-control="true">
               {customerCard}
               <button type="button" className="v418b-storefront-quick-action" onClick={() => adminOverlay.onQuickActions(product)}>
-                <span aria-hidden="true">⚡</span><strong>Quick Actions</strong><small>V4.18A · draft</small>
+                <span aria-hidden="true">⚡</span><strong>Acciones rápidas</strong><small>Vista de revisión</small>
               </button>
             </div>
           );
