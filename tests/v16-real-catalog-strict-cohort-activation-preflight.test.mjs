@@ -35,6 +35,6 @@ test("cohort 0 remains conditional and not authorized for publication",()=> {
 test("neither recovered projection is activated in the public catalog",()=> {
   assert.ok(!index.includes("v16-strict-product-projection-127.json"));
   assert.ok(!index.includes("v16-cohort0-conditional-9.json"));
-  assert.match(index,/V411AuditedPilotCatalogAdapter/);
-  assert.match(index,/Cohort0FrozenCatalogAdapter/);
+  assert.doesNotMatch(index,/V411AuditedPilotCatalogAdapter/);
+  assert.doesNotMatch(index,/Cohort0FrozenCatalogAdapter/);
 });
