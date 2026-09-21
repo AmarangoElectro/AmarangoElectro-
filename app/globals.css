@@ -8099,3 +8099,228 @@ html[data-theme="dark"] .admin-installment-grid article {
     font-size: 34px;
   }
 }
+
+
+/* V16 Administration — Storefront review, 90-cellphone review and admin catalog polish */
+.v16-cellphones-90-preview {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.v16-cellphones-90-preview__chrome {
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+.v16-cellphones-90-preview__chrome p {
+  margin: 0 0 5px;
+  color: var(--orange);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+.v16-cellphones-90-preview__chrome h2 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: clamp(20px,2.4vw,31px);
+  line-height: 1.05;
+}
+.v16-cellphones-90-preview__chrome span {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.v16-cellphones-90-preview__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 850;
+}
+.v16-cellphones-90-preview__status svg { flex: 0 0 auto; }
+
+html[data-theme="dark"] .v418b-storefront-lab__chrome,
+html[data-theme="dark"] .v418b-storefront-lab__projection {
+  border-color: var(--line);
+  background: var(--card);
+}
+html[data-theme="dark"] .v418b-storefront-lab__chrome h2 { color: var(--foreground); }
+html[data-theme="dark"] .v418b-storefront-lab__chrome > div > span { color: var(--muted-foreground); }
+html[data-theme="dark"] .v418b-storefront-lab__chrome > button {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .v418b-storefront-lab__chrome > button.is-on {
+  border-color: color-mix(in srgb, var(--orange) 68%, var(--line));
+  background: color-mix(in srgb, var(--orange) 15%, var(--card));
+  color: #ffb079;
+}
+html[data-theme="dark"] .v418b-storefront-lab__status {
+  background: color-mix(in srgb, var(--blue) 14%, var(--card));
+  color: #a8c9f4;
+}
+html[data-theme="dark"] .v418b-storefront-lab__status.status-admin-overlay {
+  background: color-mix(in srgb, var(--orange) 14%, var(--card));
+  color: #ffc08f;
+}
+
+html[data-theme="dark"] .v418a-sheet {
+  background: var(--background) !important;
+  color: var(--foreground);
+}
+html[data-theme="dark"] .v418a-action-list button,
+html[data-theme="dark"] .v418a-editor,
+html[data-theme="dark"] .v418a-editor input,
+html[data-theme="dark"] .v418a-editor select,
+html[data-theme="dark"] .v418a-sheet__footer {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .v418a-action-list button[aria-pressed="true"],
+html[data-theme="dark"] .v418a-visibility {
+  border-color: color-mix(in srgb, var(--blue) 64%, var(--line));
+  background: color-mix(in srgb, var(--blue) 18%, var(--card));
+  color: #c9ddff;
+}
+html[data-theme="dark"] .v418a-editor label,
+html[data-theme="dark"] .v418a-taxonomy,
+html[data-theme="dark"] .v418a-editor small,
+html[data-theme="dark"] .v418a-sheet__footer small {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .v418a-placeholder {
+  background: color-mix(in srgb, var(--orange) 13%, var(--card));
+  color: #ffc08f;
+}
+html[data-theme="dark"] .v418a-gate-message {
+  background: #2c220b;
+  color: #f7cc78;
+}
+
+html[data-theme="dark"] .admin-product-grid-shell,
+html[data-theme="dark"] .admin-product-card,
+html[data-theme="dark"] .admin-product-grid-toolbar input,
+html[data-theme="dark"] .admin-product-card__actions button,
+html[data-theme="dark"] .admin-product-card__more button,
+html[data-theme="dark"] .admin-product-card__prices > div {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .admin-product-grid-toolbar input {
+  background: var(--soft);
+}
+html[data-theme="dark"] .admin-product-grid-toolbar span,
+html[data-theme="dark"] .admin-product-card__select,
+html[data-theme="dark"] .admin-product-card__prices small,
+html[data-theme="dark"] .admin-product-card__more summary {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .admin-product-card__body h3,
+html[data-theme="dark"] .admin-product-card__prices strong {
+  color: var(--foreground);
+}
+html[data-theme="dark"] .admin-product-card__media {
+  background: linear-gradient(145deg,#111b2d,#0d1526);
+}
+.admin-bulk-tray small {
+  flex: 1 1 220px;
+  color: #b8c7d9;
+  font-size: 9px;
+}
+.admin-bulk-tray button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .v16-cellphones-90-preview__chrome {
+    padding: 15px;
+    border-radius: 16px;
+  }
+  .v16-cellphones-90-preview__chrome h2 { font-size: 22px; }
+  .v16-cellphones-90-preview__status {
+    align-items: flex-start;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .v418b-storefront-lab__status {
+    align-items: flex-start;
+    line-height: 1.4;
+  }
+
+  .v418a-sheet__header {
+    padding: 18px 16px 15px !important;
+  }
+  .v418a-sheet__header [data-slot="sheet-title"] {
+    font-size: 25px;
+  }
+  .v418a-sheet__body {
+    padding: 14px;
+  }
+  .v418a-action-list {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .v418a-action-list button {
+    min-height: 46px;
+  }
+  .v418a-editor {
+    padding: 13px;
+  }
+  .v418a-editor input,
+  .v418a-editor select {
+    min-height: 48px;
+    font-size: 16px;
+  }
+  .v418a-taxonomy {
+    grid-template-columns: 1fr;
+  }
+  .v418a-sheet__footer {
+    padding: 14px !important;
+  }
+  .v418a-sheet__footer button {
+    min-height: 44px;
+  }
+
+  .admin-product-grid-toolbar input {
+    min-height: 48px;
+    font-size: 16px;
+  }
+  .admin-bulk-tray {
+    align-items: stretch;
+  }
+  .admin-bulk-tray strong,
+  .admin-bulk-tray small {
+    flex-basis: 100%;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-product-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-product-card__actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 390px) {
+  .v418a-action-list {
+    grid-template-columns: 1fr;
+  }
+  .admin-product-card__actions {
+    grid-template-columns: 1fr;
+  }
+}
