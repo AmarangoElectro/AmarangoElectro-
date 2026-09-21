@@ -5,59 +5,57 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 const source = (file) => readFile(new URL(file, root), "utf8");
 
-async function render(path) {
-  const workerUrl = new URL(`../dist/server/index.js?v16cell90=${process.pid}-${Date.now()}-${encodeURIComponent(path)}`, import.meta.url);
-  const { default: worker } = await import(workerUrl.href);
-  const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
-  const ctx = { waitUntil() {}, passThroughOnException() {} };
-  return worker.fetch(new Request(`http://preview.local${path}`, { headers: { accept: "text/html" } }), env, ctx);
-}
-
-function renderedProductIds(html) {
-  return [...html.matchAll(/<article class="catalog-card[^"]*"[^>]*data-product-id="([^"]+)"/g)].map((match) => match[1]);
-}
-
-test("V16 90-cellphones preview: isolated in /administracion, not wired to the active storefront composite", async () => {
-  const previewComponent = await source("components/internal/admin/v16-90-cellphones-preview.tsx");
-  assert.match(previewComponent, /v16Cellphones90MaterializedProducts/);
-  assert.doesNotMatch(previewComponent, /from ["']@\/lib\/catalog["']/, "must not read from the active production composite");
-  assert.doesNotMatch(previewComponent, /fetch\s*\(|createClient|service_role|secret[_-]?key/i);
-  assert.doesNotMatch(previewComponent, /\.(?:insert|upsert|update|delete|rpc)\s*\(/i);
-
+test("90-cellphone Admin preview remains isolated from the active public adapter", async () => {
+  const preview = await source("components/internal/admin/v16-90-cellphones-preview.tsx");
   const index = await source("lib/catalog/index.ts");
-  assert.doesNotMatch(index, /v16-cellphones-90-materialized-adapter|V16Cellphones90MaterializedCatalogAdapter/i);
 
-  const workspace = await source("app/components/admin-consolidated-workspace.tsx");
-  assert.match(workspace, /V16Cellphones90Preview/);
-  assert.match(workspace, /cellphones90/);
+  assert.match(preview, /v16Cellphones90MaterializedProducts/);
+  assert.doesNotMatch(preview, /from ["']@\/lib\/catalog["']/);
+  assert.doesNotMatch(preview, /fetch\s*\(|createClient|service_role|secret[_-]?key/i);
+  assert.doesNotMatch(preview, /\.(?:insert|upsert|update|delete|rpc)\s*\(/i);
 
-  const home = await source("app/page.tsx");
-  assert.doesNotMatch(home, /v16Cellphones90MaterializedProducts|V16Cellphones90Preview|v16-cellphones-90-materialized/i);
+  assert.match(index, /V16Cellphones90PublicCatalogAdapter/);
+  assert.doesNotMatch(index, /V16Cellphones90MaterializedCatalogAdapter/);
 });
 
-test("V16 90-cellphones preview: production routes are byte-for-byte unaffected", async () => {
-  const cases = [
-    ["/buscar?q=A16", 2],
-    ["/categoria/celulares?marca=Samsung&q=A16", 2],
-  ];
-  for (const [path, count] of cases) {
-    const response = await render(path);
-    assert.equal(response.status, 200, path);
-    const html = await response.text();
-    assert.equal(renderedProductIds(html).length, count, path);
-    assert.doesNotMatch(html, /v16-cell:\d+/, `${path} must not surface materialized cohort ids`);
+test("public 90-cellphone adapter joins canonical identity with sanitized public fields", async () => {
+  const adapter = await source("lib/catalog/v16-cellphones-90-public-adapter.ts");
+
+  assert.match(adapter, /v16-90-cellphones-materialized\.json/);
+  assert.match(adapter, /v413-legacy-cellphones-sanitized\.json/);
+  assert.match(adapter, /EXCLUDED_LEGACY_POSITIONS = new Set\(\[10, 91\]\)/);
+  assert.match(adapter, /id: row\.id/);
+  assert.match(adapter, /price: \{ amount: publicRow\.cashPriceARS/);
+  assert.match(adapter, /image: \{ src: publicRow\.image/);
+  assert.match(adapter, /visible: true/);
+  assert.match(adapter, /source: "v16-cellphones-90-public"/);
+  assert.doesNotMatch(adapter, /cost|costo|markup|proveedor|supplier|usd/i);
+  assert.doesNotMatch(adapter, /fetch\s*\(|createClient|service_role|secret[_-]?key/i);
+  assert.doesNotMatch(adapter, /\.(?:insert|upsert|update|delete|rpc)\s*\(/i);
+});
+
+test("all 90 canonical rows have matching sanitized price and image evidence", async () => {
+  const canonical = JSON.parse(await source("fixtures/v16-90-cellphones-materialized.json"));
+  const legacy = JSON.parse(await source("fixtures/v413-legacy-cellphones-sanitized.json"));
+  const byPosition = new Map(legacy.phones.map((row) => [row.legacyPosition, row]));
+
+  assert.equal(canonical.products.length, 90);
+  const positions = canonical.products.map((row) => row.legacyPosition);
+  assert.ok(!positions.includes(10));
+  assert.ok(!positions.includes(91));
+
+  for (const row of canonical.products) {
+    const publicRow = byPosition.get(row.legacyPosition);
+    assert.ok(publicRow, `missing public row at position ${row.legacyPosition}`);
+    assert.ok(Number(publicRow.cashPriceARS) > 0, `invalid price at ${row.legacyPosition}`);
+    assert.match(publicRow.image, /^https:\/\//, `invalid image at ${row.legacyPosition}`);
   }
 });
 
-test("V16 90-cellphones preview: /administracion renders successfully with the new tab present, Home markup untouched", async () => {
-  const response = await render("/administracion");
-  assert.equal(response.status, 200);
-  const html = await response.text();
-  assert.match(html, /90 Celulares \(Preview\)/);
+test("legacy pilot cellphones are excluded once canonical 90 are active", async () => {
+  const index = await source("lib/catalog/index.ts");
 
-  const homeResponse = await render("/");
-  assert.equal(homeResponse.status, 200);
-  const homeHtml = await homeResponse.text();
-  assert.doesNotMatch(homeHtml, /v16-cell:\d+/);
-  assert.doesNotMatch(homeHtml, /90 Celulares \(Preview\)/);
+  assert.match(index, /primaryWithoutLegacyCellphones/);
+  assert.match(index, /product\.category !== "celulares"/);
+  assert.match(index, /primaryMatch && primaryMatch\.category !== "celulares"/);
 });
