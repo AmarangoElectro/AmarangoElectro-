@@ -8956,3 +8956,119 @@ html[data-theme="dark"] .advisor-sale-draft__actions button:first-child {
     font-size: 16px;
   }
 }
+
+
+/* V16 product decision flow — mobile, safe-area and dark parity */
+html[data-theme="dark"] .purchase-intent-sheet,
+html[data-theme="dark"] .compare-panel {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .purchase-intent-header,
+html[data-theme="dark"] .compare-panel-header,
+html[data-theme="dark"] .compare-panel-footer,
+html[data-theme="dark"] .purchase-intent-sheet__footer {
+  border-color: var(--line);
+  background: var(--card);
+}
+html[data-theme="dark"] .purchase-intent-product,
+html[data-theme="dark"] .purchase-intent-options > button,
+html[data-theme="dark"] .purchase-intent-note textarea,
+html[data-theme="dark"] .purchase-intent-review-grid,
+html[data-theme="dark"] .purchase-intent-review-grid > div,
+html[data-theme="dark"] .purchase-intent-summary,
+html[data-theme="dark"] .purchase-intent-secondary,
+html[data-theme="dark"] .compare-mode-row,
+html[data-theme="dark"] .compare-table,
+html[data-theme="dark"] .compare-cell,
+html[data-theme="dark"] .compare-row-label,
+html[data-theme="dark"] .compare-differences-toggle {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .purchase-intent-product p,
+html[data-theme="dark"] .purchase-intent-section-heading p,
+html[data-theme="dark"] .purchase-intent-note span,
+html[data-theme="dark"] .purchase-intent-note small,
+html[data-theme="dark"] .purchase-intent-handoff-note,
+html[data-theme="dark"] .compare-panel-header p,
+html[data-theme="dark"] .compare-panel-footer p,
+html[data-theme="dark"] .compare-product-head > span {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .purchase-intent-options > button.active {
+  border-color: color-mix(in srgb, var(--blue) 68%, var(--line));
+  background: color-mix(in srgb, var(--blue) 16%, var(--card));
+}
+html[data-theme="dark"] .purchase-intent-summary pre {
+  color: var(--foreground);
+}
+html[data-theme="dark"] .compare-row.is-different .compare-row-label,
+html[data-theme="dark"] .compare-row.is-different .compare-cell {
+  background: color-mix(in srgb, var(--orange) 10%, var(--card));
+}
+
+@media (max-width: 760px) {
+  .return-to-results,
+  .recently-viewed-heading > button,
+  .compare-close,
+  .purchase-intent-header > button,
+  .compare-panel-footer button,
+  .purchase-intent-review-actions button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .recently-viewed-heading > button {
+    width: 44px;
+    min-width: 44px;
+  }
+
+  .purchase-intent-sheet {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .purchase-intent-body {
+    padding-bottom: max(30px, calc(env(safe-area-inset-bottom) + 22px));
+  }
+
+  .compare-panel {
+    max-height: calc(100dvh - env(safe-area-inset-top) - 12px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .compare-table-scroll {
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .product-return-row .return-to-results {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 390px) {
+  .purchase-intent-header strong {
+    font-size: 18px;
+  }
+
+  .purchase-intent-progress {
+    font-size: 7px;
+  }
+
+  .compare-panel-header h2 {
+    font-size: 27px;
+  }
+
+  .compare-panel-footer {
+    gap: 10px;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .compare-panel-footer button {
+    width: 100%;
+  }
+}
