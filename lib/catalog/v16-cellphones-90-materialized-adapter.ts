@@ -21,9 +21,10 @@ import type { CatalogAdapter, CatalogQuery, Product } from "./types";
  *   nunca placeholder.
  * - Posiciones 10 y 91 (revisión manual, excluidas por decisión del dueño)
  *   no aparecen en la evidencia fuente de este adapter.
- * - Campos sin evidencia certificada por este gate (precio, financiación,
- *   stock, disponibilidad, imagen, features, descripción, garantía,
- *   proveedor) quedan en su estado nullable/unknown/vacío ya soportado
+ * - Las imágenes se materializan desde `public.celulares_lista` en lectura,
+ *   sin activar estos productos públicamente. Precio, financiación, stock,
+ *   disponibilidad, features, descripción, garantía y proveedor quedan
+ *   nullable/unknown/vacío ya soportado
  *   por el contrato `Product` — nada se inventa.
  * - No se escribe Supabase, no se lee ninguna credencial.
  *
@@ -49,6 +50,7 @@ const rowSchema = z.object({
   brand: z.string().trim().min(1),
   model: z.string().trim().min(1).nullable(),
   category: z.string().trim().min(1),
+  image: z.string().url().startsWith("https://"),
 }).strict();
 
 const evidenceSchema = z.object({
@@ -57,6 +59,12 @@ const evidenceSchema = z.object({
   production_catalog_verified: z.literal(false),
   captured_at: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   products: z.array(rowSchema).length(90),
+  photo_materialization: z.object({
+    status: z.literal("complete"),
+    count: z.literal(90),
+    source_write: z.literal(false),
+    public_activation: z.literal(false),
+  }).strict(),
 }).strict();
 
 const parsedEvidence = evidenceSchema.parse(evidence);
@@ -107,7 +115,7 @@ const products = Object.freeze(parsedEvidence.products.map((row): Product => fre
   model: row.model,
   category: row.category,
   subcategory: null,
-  image: null,
+  image: { src: row.image, alt: row.name },
   price: null,
   financing: [],
   availability: "unknown",
