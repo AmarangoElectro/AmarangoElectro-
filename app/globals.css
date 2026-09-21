@@ -6902,3 +6902,34 @@ html[data-theme="dark"] { color-scheme: dark; }
   .catalog-match-review__suggestion { width: 100%; }
   .catalog-match-review__compare { grid-template-columns: 1fr; }
 }
+
+
+/* V16 — product image framing hard gate.
+   Keep the complete source image visible; never crop supplier flyers or phone photos. */
+.product-card-premium .product-image,
+.home-products-grid .product-card-premium .product-image,
+.category-page .product-card-premium .product-image {
+  object-fit: contain !important;
+  object-position: center center !important;
+  padding: clamp(6px, 2.4vw, 14px) !important;
+  transform: none !important;
+}
+.catalog-card:hover .product-image,
+.product-card-premium:hover .product-image {
+  transform: none !important;
+}
+
+@media (max-width: 680px) {
+  .product-card-premium .product-visual,
+  .home-products-grid .product-card-premium .product-visual,
+  .category-page .product-card-premium .product-visual {
+    aspect-ratio: 3 / 4;
+    height: auto;
+    min-height: 0;
+  }
+  .product-card-premium .product-image,
+  .home-products-grid .product-card-premium .product-image,
+  .category-page .product-card-premium .product-image {
+    padding: 5px !important;
+  }
+}
