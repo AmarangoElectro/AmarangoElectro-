@@ -89,10 +89,10 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
 
   return (
     <main className="os-page">
-      <aside className="os-sidebar" aria-label="Navegación Amarango OS">
+      <aside className="os-sidebar" aria-label="Navegación Amarango Operaciones">
         <div className="os-brand">
           <Image src="/logo-320.webp" alt="AmarangoElectro" width={52} height={52} unoptimized />
-          <span><strong>AMARANGO OS</strong><small>CONTROL CENTER · V3 LAB</small></span>
+          <span><strong>AMARANGO</strong><small>CENTRO DE OPERACIONES</small></span>
         </div>
         <nav className="os-nav">
           {navItems.map(({ label, icon: Icon, active }) => (
@@ -103,25 +103,25 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
         </nav>
         <div className="os-safety-card">
           <ShieldCheck aria-hidden="true" />
-          <span><small>MODO LABORATORIO</small><strong>Lectura únicamente</strong><b>Sin datos reales ni guardado</b></span>
+          <span><small>MODO REVISIÓN</small><strong>Lectura únicamente</strong><b>Sin confirmaciones ni guardado</b></span>
         </div>
       </aside>
 
       <section className="os-workspace">
         <header className="os-topbar">
-          <div><small>AMARANGO OS / OPERACIONES</small><h1>Nueva venta inteligente</h1></div>
-          <span className="os-readonly-badge"><Database aria-hidden="true" /> Integración de catálogo · READ ONLY</span>
+          <div><small>AMARANGO / OPERACIONES</small><h1>Nueva venta inteligente</h1></div>
+          <span className="os-readonly-badge"><Database aria-hidden="true" /> Catálogo de referencia · solo lectura</span>
         </header>
 
         <div className="os-content">
           <div className="os-lab-notice">
             <ShieldCheck aria-hidden="true" />
-            <p><strong>Piloto técnico aislado.</strong> Los cuatro productos pertenecen al fixture recuperado de CRM Lab V2.1. No representan una lectura actual de producción y ninguna acción guarda información.</p>
+            <p><strong>Vista de demostración.</strong> Los productos de esta pantalla son una muestra interna y ninguna acción confirma ni guarda información real.</p>
           </div>
 
           <section className="os-heading">
-            <div><span>PRODUCT BRIDGE V3</span><h2>Elegí el producto desde la fuente V16.</h2></div>
-            <p>Amarango OS recibe un contrato normalizado. El CRM no mantiene una segunda lista de productos y los campos privados solo aparecen para Administración.</p>
+            <div><span>CATÁLOGO DE REFERENCIA</span><h2>Elegí un producto para preparar la operación.</h2></div>
+            <p>La operación parte del catálogo oficial y mantiene protegidos los datos privados de Administración.</p>
           </section>
 
           <div className="os-sale-grid">
@@ -130,7 +130,7 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
                 <div className="os-panel-heading">
                   <span className="os-step">1</span>
                   <div><small>CATÁLOGO OFICIAL</small><h3>Buscar producto</h3></div>
-                  <span className="os-source-pill">Fixture V2.1</span>
+                  <span className="os-source-pill">Muestra interna</span>
                 </div>
 
                 <label className="os-search-field">
@@ -140,7 +140,7 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Nombre, modelo, memoria, categoría o marca…"
                     autoComplete="off"
-                    aria-label="Buscar producto en el catálogo V16"
+                    aria-label="Buscar producto en el catálogo"
                   />
                   {query && <button type="button" onClick={() => setQuery("")}>Limpiar</button>}
                 </label>
@@ -188,7 +188,7 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
               <article className="os-panel">
                 <div className="os-panel-heading">
                   <span className="os-step">2</span>
-                  <div><small>COMPATIBILIDAD LEGACY</small><h3>Condiciones de la operación</h3></div>
+                  <div><small>OPERACIÓN</small><h3>Condiciones de la operación</h3></div>
                 </div>
                 <div className="os-form-grid">
                   <label className="os-field"><span>Cliente</span><input placeholder="Buscar o crear más adelante" disabled /></label>
@@ -212,7 +212,7 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
                 </div></div>
 
                 <div className="os-investment-box">
-                  <div><small>INVERSIÓN Y REPARTO</small><h4>Contrato preparado, reglas pendientes</h4><p>Porcentajes, capital a invertir, reparto de ganancias y solicitud de inversión se conservan como dominio propio. V3 no calcula ni confirma sin auditar el CRM Legacy.</p></div>
+                  <div><small>INVERSIÓN Y REPARTO</small><h4>Reglas pendientes de confirmación</h4><p>Porcentajes, capital a invertir y reparto de ganancias permanecen sin cálculo automático hasta definir las reglas finales.</p></div>
                   <div className="os-investor-grid">
                     <label><span>Inversor 1</span><input placeholder="Nombre" /></label>
                     <label><span>Participación</span><input placeholder="0%" inputMode="decimal" /></label>
@@ -225,7 +225,7 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
 
             <aside className="os-summary-column">
               <article className="os-panel os-selection-card">
-                <div className="os-panel-heading compact"><div><small>PRODUCTO SELECCIONADO</small><h3>Snapshot de venta</h3></div><FileCheck2 aria-hidden="true" /></div>
+                <div className="os-panel-heading compact"><div><small>PRODUCTO SELECCIONADO</small><h3>Resumen de la operación</h3></div><FileCheck2 aria-hidden="true" /></div>
                 {selected ? <>
                   <div className="os-selected-product">
                     <span>{selected.imageUrl ? <Image src={selected.imageUrl} alt="" fill sizes="72px" unoptimized /> : <PackageCheck aria-hidden="true" />}</span>
@@ -241,13 +241,13 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
                   </dl>
                   {selected.missingFields.length > 0 && <div className="os-missing"><strong>Campos pendientes:</strong> {selected.missingFields.join(", ")}.</div>}
                   <button type="button" className="os-preview-button" onClick={previewSnapshot} disabled={selected.currentPriceArs === null}>
-                    <ClipboardCheck aria-hidden="true" /> Preparar snapshot — sin guardar
+                    <ClipboardCheck aria-hidden="true" /> Preparar vista previa — sin guardar
                   </button>
                 </> : <div className="os-empty-state compact"><Boxes /><strong>Elegí un producto</strong></div>}
               </article>
 
               {snapshot && <article className="os-panel os-snapshot-card">
-                <small>VISTA PREVIA INMUTABLE</small>
+                <small>VISTA PREVIA</small>
                 <strong>{snapshot.productName}</strong>
                 <code>{snapshot.snapshotVersion}</code>
                 <dl>
@@ -260,8 +260,8 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
               </article>}
 
               <article className="os-panel os-safety-list">
-                <small>V3 BLOQUEA ESCRITURAS</small>
-                {["Catálogo consultado por adaptador", "Costos protegidos por rol", "Venta histórica desacoplada", "Sin clientes ni datos reales", "Sin Supabase productivo"].map((item) => <span key={item}><Check aria-hidden="true" />{item}</span>)}
+                <small>CAMBIOS BLOQUEADOS</small>
+                {["Catálogo de referencia", "Costos protegidos por rol", "Sin confirmación de venta", "Sin clientes reales", "Sin guardado productivo"].map((item) => <span key={item}><Check aria-hidden="true" />{item}</span>)}
                 <button type="button" disabled><CircleDollarSign aria-hidden="true" /> Confirmar venta — bloqueado</button>
               </article>
             </aside>
@@ -273,7 +273,7 @@ export function AmarangoOsProductBridge({ initialProducts }: AmarangoOsProductBr
         </div>
       </section>
 
-      <nav className="os-mobile-nav" aria-label="Navegación móvil Amarango OS">
+      <nav className="os-mobile-nav" aria-label="Navegación móvil Amarango Operaciones">
         {navItems.slice(0, 5).map(({ label, icon: Icon, active }) => <button key={label} type="button" className={active ? "active" : ""} aria-disabled={!active}><Icon /><span>{label.replace(" 360", "")}</span></button>)}
       </nav>
     </main>
