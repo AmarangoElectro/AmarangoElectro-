@@ -54,6 +54,9 @@ test("PWA foundation is installable without caching live catalog pages", async (
   assert.ok(manifest.icons.some((icon) => icon.sizes === "512x512"));
   assert.ok(manifest.icons.some((icon) => icon.purpose === "maskable"));
   assert.match(layout, /manifest: "\/manifest\.webmanifest"/);
+  assert.match(layout, /viewportFit: "cover"/);
+  assert.match(layout, /title: "AmarangoElectro"/);
+  assert.doesNotMatch(layout, /Product Bridge|Amarango OS V3/);
   assert.match(manager, /serviceWorker\.register\("\/sw\.js"/);
   assert.match(manager, /beforeinstallprompt/);
   assert.match(serviceWorker, /event\.request\.mode === "navigate"/);
@@ -76,4 +79,12 @@ test("Step 7H intent-prefetch stays conservative and protected commerce layers r
   assert.match(index, /new V411AuditedPilotCatalogAdapter\(\)/);
   assert.doesNotMatch(combined, /SUPABASE_URL|NEXT_PUBLIC_SUPABASE|service_role|WhatsApp|webhook|margarita-ui|amara\.js/i);
   assert.doesNotMatch(combined, /\.(?:insert|upsert|update|rpc)\s*\(/i);
+});
+
+
+test("public menu keeps internal-access copy human-facing", async () => {
+  const header = await source("app/components/site-header.tsx");
+  assert.match(header, /Estos espacios requieren una sesión autorizada/);
+  assert.match(header, />Espacios internos<\/Link>/);
+  assert.doesNotMatch(header, /perfiles Maxi\/Angie|bloque de identidad aprobado|Ver conexión de espacios/);
 });
