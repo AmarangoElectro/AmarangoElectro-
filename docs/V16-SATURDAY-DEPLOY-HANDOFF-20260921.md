@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `496d2dc6c13beadbe8b4fedf18c0b04dc8d2f145`
+- Minimum app-code HEAD covered by this handoff: `ca5fcf25beb096d9653991535a380321080a5b1f`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -167,3 +167,17 @@ Prepared on the same branch:
 - existing customer-safe fallback test now expects `FOTO EN ACTUALIZACIÓN`;
 - advisor internal-navigation test now expects the current Amarango Operaciones metadata;
 - no production behavior was changed by these test updates.
+
+
+### Home / header / menu / mobile search
+Prepared on the same branch without changing approved banners or Home order:
+- Home anchors are now real and stable: `#productos`, `#ofertas`, `#experiencia`, `#financiacion`;
+- header menu no longer points to the removed `#como-comprar` anchor;
+- header favorites now opens favorites across the whole searchable catalog instead of only Celulares;
+- internal-platform link copy is now `Espacios internos`;
+- footer routes to real Home anchors and links `Área asesores` to `/mi-amarango`;
+- retired Home sector slogans were removed from Audio, Gaming and Hogar;
+- mobile header search remains visible at 320-412 px and gets readable input sizing;
+- drawer respects bottom safe-area and uses larger touch targets;
+- sticky-header anchor offsets prevent linked sections from opening underneath the header;
+- regression test: `tests/v16-home-header-navigation-regression.test.mjs`.
