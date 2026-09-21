@@ -2,10 +2,12 @@ import type { CatalogAdapter, CatalogQuery, Product } from "./types";
 import { V411AuditedPilotCatalogAdapter } from "./audited-pilot-adapter";
 import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
+import { V16CellphonesSanitizedSnapshotCatalogAdapter } from "./v16-cellphones-sanitized-snapshot-adapter";
 
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
+const cellphoneSnapshotCatalog = new V16CellphonesSanitizedSnapshotCatalogAdapter();
 
 function productKey(product: Product) {
   return [
@@ -52,13 +54,14 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
+      cellphoneSnapshotCatalog.listProducts(query),
     ]);
 
-    return mergeUnique(primaryResults, cohort0Results, electroResults);
+    return mergeUnique(primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults);
   }
 
   async getProductBySlug(slug: string) {
@@ -68,7 +71,10 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
     const cohort0Match = await cohort0Catalog.getProductBySlug(slug);
     if (cohort0Match) return cohort0Match;
 
-    return electroCatalog.getProductBySlug(slug);
+    const electroMatch = await electroCatalog.getProductBySlug(slug);
+    if (electroMatch) return electroMatch;
+
+    return cellphoneSnapshotCatalog.getProductBySlug(slug);
   }
 }
 
@@ -80,3 +86,4 @@ export type { Product, CatalogQuery, CatalogAdapter } from "./types";
 export { v411CatalogEvidence } from "./audited-pilot-adapter";
 export { cohort0CatalogEvidence } from "./cohort0-frozen-adapter";
 export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
+export { v16CellphonesSanitizedSnapshotEvidence } from "./v16-cellphones-sanitized-snapshot-adapter";
