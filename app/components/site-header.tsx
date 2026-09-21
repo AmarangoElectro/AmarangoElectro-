@@ -84,7 +84,7 @@ export function SiteHeader() {
             <Link href="/mi-amarango" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><UsersRound size={18} /> Mi Amarango · Asesores</Link>
             <Link href="/administracion" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><ShieldCheck size={18} /> Administración</Link>
             <Link href="/plataforma" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><Store size={18} /> Ver conexión de espacios</Link>
-            <p>Login, perfiles Maxi/Angie y sesión persistente quedan reservados para el bloque de identidad aprobado.</p>
+            <p>Estos espacios requieren una sesión autorizada.</p>
           </section>
         </aside>
       </div>
