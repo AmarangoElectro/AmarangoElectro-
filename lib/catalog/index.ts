@@ -8,6 +8,7 @@ import { V16HomeSnapshotCatalogAdapter } from "./v16-home-snapshot-adapter";
 import { V16GamingTechOutdoorSnapshotCatalogAdapter } from "./v16-gaming-tech-outdoor-snapshot-adapter";
 import { V16SportsToysItSnapshotCatalogAdapter } from "./v16-sports-toys-it-snapshot-adapter";
 import { V16RestOthersSnapshotCatalogAdapter } from "./v16-rest-others-snapshot-adapter";
+import { V16UncategorizedSnapshotCatalogAdapter } from "./v16-uncategorized-snapshot-adapter";
 
 // V4.11 usa la única evidencia comercial sanitizada incluida en el checkpoint.
 // No se afirma que sea un snapshot de producción: el reporte del gate conserva
@@ -30,12 +31,13 @@ const homeCatalog = new V16HomeSnapshotCatalogAdapter();
 const gamingTechOutdoorCatalog = new V16GamingTechOutdoorSnapshotCatalogAdapter();
 const sportsToysItCatalog = new V16SportsToysItSnapshotCatalogAdapter();
 const restOthersCatalog = new V16RestOthersSnapshotCatalogAdapter();
+const uncategorizedCatalog = new V16UncategorizedSnapshotCatalogAdapter();
 
 class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, mediaResults, toolsCareResults, homeResults, gamingTechOutdoorResults, sportsToysItResults, restOthersResults] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, mediaResults, toolsCareResults, homeResults, gamingTechOutdoorResults, sportsToysItResults, restOthersResults, uncategorizedResults] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
@@ -45,9 +47,10 @@ class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
       gamingTechOutdoorCatalog.listProducts(query),
       sportsToysItCatalog.listProducts(query),
       restOthersCatalog.listProducts(query),
+      uncategorizedCatalog.listProducts(query),
     ]);
     const seen = new Set<string>();
-    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults, ...toolsCareResults, ...homeResults, ...gamingTechOutdoorResults, ...sportsToysItResults, ...restOthersResults].filter((product) => {
+    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults, ...toolsCareResults, ...homeResults, ...gamingTechOutdoorResults, ...sportsToysItResults, ...restOthersResults, ...uncategorizedResults].filter((product) => {
       const key = [
         product.category,
         product.subcategory ?? "",
@@ -79,7 +82,9 @@ class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
     if (gamingTechOutdoorMatch) return gamingTechOutdoorMatch;
     const sportsToysItMatch = await sportsToysItCatalog.getProductBySlug(slug);
     if (sportsToysItMatch) return sportsToysItMatch;
-    return restOthersCatalog.getProductBySlug(slug);
+    const restOthersMatch = await restOthersCatalog.getProductBySlug(slug);
+    if (restOthersMatch) return restOthersMatch;
+    return uncategorizedCatalog.getProductBySlug(slug);
   }
 }
 
@@ -104,3 +109,5 @@ export { v16GamingTechOutdoorSnapshotEvidence } from "./v16-gaming-tech-outdoor-
 export { v16SportsToysItSnapshotEvidence } from "./v16-sports-toys-it-snapshot-adapter";
 
 export { v16RestOthersSnapshotEvidence } from "./v16-rest-others-snapshot-adapter";
+
+export { v16UncategorizedSnapshotEvidence } from "./v16-uncategorized-snapshot-adapter";
