@@ -238,7 +238,7 @@
     {
       "id": "-52",
       "name": "Contadora de billetes OSR",
-      "brand": "Varios",
+      "brand": "OSR",
       "model": null,
       "sale": 94500,
       "category": "otros",
@@ -418,7 +418,7 @@
     {
       "id": "-989",
       "name": "PARAGUAS TRENDY 29000",
-      "brand": "Varios",
+      "brand": "Trendy",
       "model": null,
       "sale": 18000,
       "category": "otros",
@@ -554,7 +554,7 @@
       "id": "-1058",
       "name": "SOPLADOR X9",
       "brand": "Varios",
-      "model": null,
+      "model": "X9",
       "sale": 43000,
       "category": "otros",
       "subcategory": null,
