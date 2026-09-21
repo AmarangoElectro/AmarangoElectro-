@@ -58,3 +58,19 @@ test("all 229 electro products are assigned to supported V16 subcategories", () 
   assert.match(router, /failClosed: true/);
   assert.match(router, /sourceWrite: false/);
 });
+
+
+test("binary integrity audit isolates only cross-model photo conflict", () => {
+  const audit = JSON.parse(fs.readFileSync("fixtures/v16-90-cellphones-photo-integrity-audit-20260921.json", "utf8"));
+  assert.equal(audit.summary.products, 90);
+  assert.equal(audit.summary.missing_storage_metadata, 0);
+  assert.equal(audit.summary.non_image_mimetype_count, 0);
+  assert.equal(audit.summary.duplicate_binary_groups, 6);
+  assert.equal(audit.summary.same_model_variant_reuse_groups, 5);
+  assert.equal(audit.summary.cross_model_conflict_groups, 1);
+
+  const conflict = audit.duplicateBinaryGroups.find((group) => group.type === "cross-model-conflict");
+  assert.ok(conflict);
+  assert.deepEqual(conflict.products.map((product) => product.canonicalProductId).sort((a,b) => a-b), [23, 46]);
+  assert.equal(conflict.requiresHumanVisualReview, true);
+});
