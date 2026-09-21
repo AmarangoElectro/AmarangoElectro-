@@ -53,6 +53,24 @@ const adminTabIds = [
 ] as const;
 type AdminTab = (typeof adminTabIds)[number];
 const moreAdminTabs: readonly AdminTab[] = ["crm", "collections", "reports", "providers", "cash", "deliveries", "advisors", "offers"];
+const adminTabHash: Record<AdminTab, string> = {
+  catalog: "catalogo",
+  storefront: "tienda",
+  cellphones90: "celulares",
+  crm: "crm",
+  collections: "cobranzas",
+  reports: "reportes",
+  providers: "proveedores",
+  cash: "caja",
+  deliveries: "entregas",
+  advisors: "asesores",
+  calculator: "calculadora",
+  plates: "placas",
+  offers: "ofertas",
+};
+const adminHashTab = Object.fromEntries(
+  Object.entries(adminTabHash).map(([tabId, hash]) => [hash, tabId]),
+) as Record<string, AdminTab>;
 
 export function AdminConsolidatedWorkspace() {
   const [adminLab, setAdminLab] = useState<AdminLab>(initialAdminLab);
@@ -64,7 +82,7 @@ export function AdminConsolidatedWorkspace() {
   function openAdminTab(next: AdminTab) {
     setTab(next);
     if (typeof window === "undefined") return;
-    const nextUrl = `${window.location.pathname}${window.location.search}#${next}`;
+    const nextUrl = `${window.location.pathname}${window.location.search}#${adminTabHash[next]}`;
     window.history.replaceState(window.history.state, "", nextUrl);
   }
 
@@ -85,8 +103,8 @@ export function AdminConsolidatedWorkspace() {
 
   useEffect(() => {
     const syncFromHash = () => {
-      const candidate = window.location.hash.slice(1);
-      if ((adminTabIds as readonly string[]).includes(candidate)) setTab(candidate as AdminTab);
+      const candidate = adminHashTab[window.location.hash.slice(1)];
+      if (candidate) setTab(candidate);
     };
     syncFromHash();
     window.addEventListener("hashchange", syncFromHash);
