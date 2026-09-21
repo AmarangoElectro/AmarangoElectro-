@@ -465,7 +465,7 @@ export function CatalogClient({
           );
         })}</div>
       ) : (
-        <div className="catalog-empty">
+        <div className="catalog-empty" role="status" aria-live="polite">
           <strong>No encontramos coincidencias.</strong>
           <span>{favoritesOnly ? "Todavía no guardaste productos que coincidan con estos filtros." : "Probá otra marca o una búsqueda más general."}</span>
           {correction && !favoritesOnly && (
