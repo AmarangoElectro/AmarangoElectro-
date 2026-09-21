@@ -4,8 +4,8 @@ import { AmarangoOsProductBridge } from "@/app/components/amarango-os-product-br
 import { amarangoOsLabProductBridge } from "@/lib/integration/product-bridge-lab";
 
 export const metadata: Metadata = {
-  title: "Amarango OS · Integración de catálogo",
-  description: "Herramienta interna de integración de catálogo en modo de solo lectura.",
+  title: "Amarango Operaciones",
+  description: "Herramienta interna de operaciones y revisión de catálogo.",
 };
 
 export default async function AmarangoOsPage() {
