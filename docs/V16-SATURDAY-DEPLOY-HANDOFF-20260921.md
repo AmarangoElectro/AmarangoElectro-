@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `61e1f617c240b8d18de3f8ed21a51d1341b045b5`
+- Minimum app-code HEAD covered by this handoff: `3be68809d1806384242c2e24c0e6e86ca3eb9130`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -82,6 +82,22 @@ Prepared on the same branch:
 - Admin product grid becomes one column on narrow phones to preserve controls;
 - regression test: `tests/v16-admin-review-surfaces-regression.test.mjs`.
 
+
+### Mi Amarango — Nueva Venta preparation
+Prepared without enabling an unsafe write path:
+- recovered the useful advisor sale UX into `app/components/advisor-sale-draft-panel.tsx`;
+- client data: name, WhatsApp, address, locality; DNI/activity become required for financed preparation;
+- product search and paste helper use only the V16 catalog passed to Mi Amarango;
+- payment choices: Contado / 2 / 4 / 6;
+- installment amount is shown only when a validated financing option already exists on the product;
+- optional seña / entrega and estimated balance;
+- active action: copy a complete review summary;
+- `Registrar venta` remains disabled because V16 has no secure advisor sale-create capability yet;
+- `Mis Ventas` is intentionally not fabricated from Admin-wide reports;
+- no direct Supabase write and no Admin-only pricing policy import;
+- security regression: `tests/v16-advisor-sale-draft-security-regression.test.mjs`;
+- activation preflight: `docs/V16-ADVISOR-SALES-SECURE-WRITE-PREFLIGHT.md`.
+
 ## Known deployment gap
 
 The public preview was last externally observed in an older state:
@@ -119,5 +135,8 @@ The Angie Work space reported BLOCKED because it could inspect the public previe
    - Calculadora / Placas mobile touch targets and dark-mode surfaces;
    - Storefront Admin review and Quick Actions in light/dark;
    - 90-cellphone review copy and 320 / 360 / 390 / 412 px layout;
-   - Admin product grid single-column narrow-phone behavior and disabled bulk actions.
+   - Admin product grid single-column narrow-phone behavior and disabled bulk actions;
+   - Mi Amarango Nueva Venta preparation on 320 / 360 / 390 / 412 px;
+   - paste/search product helper, Contado / 2 / 4 / 6 and copy-summary flow;
+   - confirm that Registrar venta stays disabled until the secure sales backend gate is implemented.
 5. Return `PASS_DEPLOY` or `BLOCKED_DEPLOY` + published HEAD + preview URL + real visible product count + STOP.
