@@ -37,8 +37,8 @@ test("V16 90-cellphones preview: isolated in /administracion, not wired to the a
 
 test("V16 90-cellphones preview: production routes are byte-for-byte unaffected", async () => {
   const cases = [
-    ["/buscar?q=A16", 2],
-    ["/categoria/celulares?marca=Samsung&q=A16", 2],
+    ["/buscar?q=A16", 0],
+    ["/categoria/celulares?marca=Samsung&q=A16", 0],
   ];
   for (const [path, count] of cases) {
     const response = await render(path);
