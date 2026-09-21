@@ -7,6 +7,7 @@ import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter
 import { V16CatalogExpansion5V412Adapter } from "./v16-catalog-expansion-5-v412-adapter";
 import { V16CatalogExpansion31KnownBrandAdapter } from "./v16-catalog-expansion-31-known-brand-adapter";
 import { V16CatalogExpansion48ExplicitBrandAdapter } from "./v16-catalog-expansion-48-explicit-brand-adapter";
+import { V16CatalogExpansion99CuratedBrandAdapter } from "./v16-catalog-expansion-99-curated-brand-adapter";
 
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
@@ -16,6 +17,7 @@ const catalogExpansion63 = new V16CatalogExpansion63Adapter();
 const catalogExpansion5 = new V16CatalogExpansion5V412Adapter();
 const catalogExpansion31 = new V16CatalogExpansion31KnownBrandAdapter();
 const catalogExpansion48 = new V16CatalogExpansion48ExplicitBrandAdapter();
+const catalogExpansion99 = new V16CatalogExpansion99CuratedBrandAdapter();
 
 function productKey(product: Product) {
   return [
@@ -62,7 +64,7 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results, expansion31Results, expansion48Results] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results, expansion31Results, expansion48Results, expansion99Results] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
@@ -71,11 +73,12 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
       catalogExpansion5.listProducts(query),
       catalogExpansion31.listProducts(query),
       catalogExpansion48.listProducts(query),
+      catalogExpansion99.listProducts(query),
     ]);
 
     const primaryWithoutLegacyCellphones = primaryResults.filter((product) => product.category !== "celulares");
 
-    return mergeUnique(primaryWithoutLegacyCellphones, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results, expansion31Results, expansion48Results);
+    return mergeUnique(primaryWithoutLegacyCellphones, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results, expansion31Results, expansion48Results, expansion99Results);
   }
 
   async getProductBySlug(slug: string) {
@@ -100,7 +103,10 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
     const expansion31Match = await catalogExpansion31.getProductBySlug(slug);
     if (expansion31Match) return expansion31Match;
 
-    return catalogExpansion48.getProductBySlug(slug);
+    const expansion48Match = await catalogExpansion48.getProductBySlug(slug);
+    if (expansion48Match) return expansion48Match;
+
+    return catalogExpansion99.getProductBySlug(slug);
   }
 }
 
@@ -117,3 +123,4 @@ export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapte
 export { v16CatalogExpansion5Evidence } from "./v16-catalog-expansion-5-v412-adapter";
 export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-known-brand-adapter";
 export { v16CatalogExpansion48Evidence } from "./v16-catalog-expansion-48-explicit-brand-adapter";
+export { v16CatalogExpansion99Evidence } from "./v16-catalog-expansion-99-curated-brand-adapter";
