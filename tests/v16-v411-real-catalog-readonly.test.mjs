@@ -32,7 +32,7 @@ test("V4.11 catalog boundary is offline, fail-closed and has no write surface", 
   const adapter = await source("lib/catalog/audited-pilot-adapter.ts");
   const index = await source("lib/catalog/index.ts");
   const combined = `${adapter}\n${index}`;
-  assert.match(index, /new V411AuditedPilotCatalogAdapter\(\)/);
+  assert.doesNotMatch(index, /new V411AuditedPilotCatalogAdapter\(\)/);
   assert.match(adapter, /visible !== true/);
   assert.match(adapter, /Object\.freeze/);
   assert.doesNotMatch(combined, /fetch\s*\(|createClient|service_role|secret[_-]?key/i);
@@ -40,46 +40,37 @@ test("V4.11 catalog boundary is offline, fail-closed and has no write surface", 
   assert.doesNotMatch(combined, /method\s*:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i);
 });
 
-test("V4.11 uses the same stable Product V16 IDs across customer, advisor and admin", async () => {
+test("V4.11 keeps stable evidence IDs for QA but is not a public catalog source", async () => {
   const fixture = JSON.parse(await source("fixtures/v411-catalog-evidence-public.json"));
   const adapter = await source("lib/catalog/audited-pilot-adapter.ts");
-  const advisor = await source("app/mi-amarango/page.tsx");
-  const category = await source("app/categoria/[slug]/page.tsx");
+  const index = await source("lib/catalog/index.ts");
   const admin = await source("components/internal/admin/v411-pilot-products.ts");
   for (const row of fixture.products) {
     assert.match(adapter, /`v411-evidence:\$\{row\.id\}`/);
     assert.match(admin, /v411PilotProducts/);
     assert.ok(row.id.length > 0);
   }
-  assert.match(advisor, /catalog\.listProducts/);
-  assert.match(category, /catalog\.listProducts/);
-  assert.doesNotMatch(advisor, /cost|supplier|proveedor|margen|comisi[oó]n|USD/i);
+  assert.doesNotMatch(index, /new V411AuditedPilotCatalogAdapter\(\)/);
 });
 
-test("V4.11 search and category routes return only evidence-backed matches", async () => {
+test("V4.11 laboratory rows are absent from public search and category routes", async () => {
   const cases = [
-    ["/buscar?q=A16", 2],
-    ["/buscar?q=Samsung%20A16", 2],
-    ["/buscar?q=TV%2050", 0],
-    ["/buscar?q=parlante", 0],
-    ["/buscar?q=heladera", 0],
-    ["/categoria/celulares?marca=Samsung&q=A16", 2],
-    ["/categoria/electrodomesticos?sector=lavado", 1],
+    "/buscar?q=A16",
+    "/buscar?q=Samsung%20A16",
+    "/categoria/celulares?marca=Samsung&q=A16",
   ];
-  for (const [path, count] of cases) {
+  for (const path of cases) {
     const response = await render(path);
     assert.equal(response.status, 200, path);
     const html = await response.text();
-    assert.equal(renderedProductIds(html).length, count, path);
+    assert.equal(renderedProductIds(html).filter((id) => id.startsWith("v411-evidence:")).length, 0, path);
   }
 });
 
-test("V4.11 product routes, commercial cards and role views preserve field boundaries", async () => {
+test("V4.11 historical product routes are not public; current role boundaries remain preserved", async () => {
   for (const slug of ["samsung-galaxy-a16-128-gb-a16-128", "motorola-moto-g15-256-gb-g15-256", "codini-secarropas-6-5-kg-sec-65"]) {
     const response = await render(`/producto/${slug}`);
-    assert.equal(response.status, 200, slug);
-    const html = await response.text();
-    assert.match(html, /Dato pendiente del catálogo|A confirmar|Disponible/);
+    assert.equal(response.status, 404, slug);
   }
   const customer = await source("app/components/product-card.tsx");
   const advisor = await source("app/components/advisor-workspace.tsx");
