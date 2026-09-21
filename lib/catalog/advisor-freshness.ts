@@ -5,7 +5,7 @@ import type { Product } from "./types";
 const rowSchema = z.object({
   sourceProductId: z.string().min(1),
   priceUpdatedAt: z.string().min(1),
-  stockConfirmedAt: z.string().nullable(),
+  stockSourceUpdatedAt: z.string().nullable(),
   stockVerificationMode: z.enum(["automatic","manual","unknown"]),
 }).strict();
 
@@ -68,7 +68,7 @@ export function getAdvisorFreshness(product: Product, now = new Date()) {
   }
 
   const priceDays = freshnessDays(row.priceUpdatedAt, now);
-  const stockDays = freshnessDays(row.stockConfirmedAt, now);
+  const stockDays = freshnessDays(row.stockSourceUpdatedAt, now);
 
   return {
     priceDays,
@@ -77,7 +77,7 @@ export function getAdvisorFreshness(product: Product, now = new Date()) {
     stockDays,
     stockTone: freshnessTone(stockDays),
     stockLabel: row.stockVerificationMode === "automatic"
-      ? `Stock verificado ${humanFreshness(stockDays)}`
+      ? `Fuente automática de stock actualizada ${humanFreshness(stockDays)}`
       : "Stock sin confirmación automática",
     verificationMode: row.stockVerificationMode,
   };
