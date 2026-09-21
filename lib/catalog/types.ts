@@ -6,7 +6,8 @@ export type CatalogSource =
   | "supabase-readonly"
   | "cohort-0-frozen-evidence"
   | "v16-cellphones-90-materialized"
-  | "v16-electro-sanitized-snapshot";
+  | "v16-electro-sanitized-snapshot"
+  | "v16-media-sanitized-snapshot";
 
 export type Availability = "available" | "unavailable" | "unknown";
 export type StockStatus = "in_stock" | "out_of_stock" | "unknown";
