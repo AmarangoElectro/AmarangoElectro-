@@ -81,10 +81,12 @@ test("externally verified unresolved products now have brand/model identity", ()
 
   const expected = [
     [electro, "-632", "Telefunken", "Smart Wash 550"],
+    [electro, "-489", "Ultracomb", "FR-8700G"],
     [electro, "-112", "Oryx", "OR-SA01"],
     [tools, "-429", "Ultracomb", "SC4622"],
     [tools, "-14", "Gamma", "G12417AR"],
     [tools, "-219", "Konan", "KGH253"],
+    [tools, "-953", "Gamma", "G12600AR"],
     [gaming, "44", "3o3", "SG NR 01"],
   ];
 
