@@ -10,9 +10,9 @@ import { SectorGuide } from "./sector-guide";
 import { findSectorGuide } from "@/lib/onboarding/sector-guides";
 import { toast } from "sonner";
 import Image from "next/image";
+import { getAdvisorFreshness } from "@/lib/catalog/advisor-freshness";
 
 const advisorGuide = findSectorGuide("asesor", "mi-amarango");
-const liveStockSuppliers = new Set(["mega electro", "electro impacto"]);
 
 function money(value: number | null | undefined) {
   return value ? `$${Math.round(value).toLocaleString("es-AR")}` : "A confirmar";
@@ -61,15 +61,10 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <div className="advisor-product-grid">
           {filtered.map((product) => {
             const sixPlan = product.financing.find((plan) => plan.installments === 6 && plan.installmentAmount);
-            const supplier = product.specifications.Proveedor?.trim().toLocaleLowerCase("es-AR") ?? "";
-            const hasLiveStock = liveStockSuppliers.has(supplier);
-            const stockText = hasLiveStock
-              ? product.stock.status === "out_of_stock"
-                ? "Sin stock"
-                : product.stock.quantity !== null
-                  ? `Stock disponible: ${product.stock.quantity}`
-                  : "Stock disponible"
-              : "Consultar a Administración por stock";
+            const freshness = getAdvisorFreshness(product);
+            const stockText = product.stock.status === "out_of_stock"
+              ? "Sin stock"
+              : freshness.stockLabel;
             return <article key={product.id} className="advisor-product-card">
               <div className="advisor-product-card__tools"><span>VENTA</span><button type="button" onClick={() => share(product)} aria-label={`Publicar ${product.name}`}><Share2 size={16} /></button></div>
               {product.image ? <div className="advisor-product-placeholder advisor-product-image"><Image src={product.image.src} alt={product.image.alt} fill sizes="(max-width: 760px) 100vw, 33vw" loading="lazy" unoptimized /></div> : <div className="advisor-product-placeholder">{product.brand.slice(0, 1)}</div>}
@@ -77,7 +72,10 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
                 <small>{product.brand} · {product.category}</small><h3>{product.name}</h3>
                 <strong className="advisor-product-price">{money(product.price?.amount)}</strong>
                 <p>{sixPlan?.installmentAmount ? `6 cuotas de ${money(sixPlan.installmentAmount.amount)}` : product.price ? "Consultá opciones de pago" : "Consultá precio y opciones de pago"}</p>
-                <span className={`advisor-availability ${hasLiveStock ? "is-live" : "needs-check"}`}>{stockText}</span>
+                <div className="advisor-freshness-stack">
+                  <span className={`advisor-freshness price-${freshness.priceTone}`}>{freshness.priceLabel}</span>
+                  <span className={`advisor-availability stock-${freshness.stockTone}`}>{stockText}</span>
+                </div>
               </div>
               <div className="advisor-product-card__actions"><Link href={`/producto/${product.slug}`}>Ver producto</Link><button type="button" onClick={() => share(product)}><Share2 size={16} /> Publicar</button></div>
             </article>;
