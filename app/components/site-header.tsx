@@ -12,9 +12,9 @@ import { openSectorsSheet } from "@/lib/ux/sectors-sheet";
 import { useEffect, useState } from "react";
 
 const navigation = [
+  { href: "/#productos", label: "Productos" },
   { href: "/#ofertas", label: "Ofertas & Outlet" },
-  { href: "/#como-comprar", label: "Cómo comprar" },
-  { href: "/#experiencia", label: "Nuestra forma de atender" },
+  { href: "/#experiencia", label: "Atención y compra" },
 ];
 
 export function SiteHeader() {
@@ -47,10 +47,10 @@ export function SiteHeader() {
         </form>
         <div className="header-actions">
           <ShareStoreButton compact />
-          <Link className="header-help-link" href="/#como-comprar" aria-label="Ayuda para comprar" onClick={() => playSonicCue("navigate")}>
+          <Link className="header-help-link" href="/#experiencia" aria-label="Ayuda para comprar" onClick={() => playSonicCue("navigate")}>
             <HelpCircle size={20} strokeWidth={1.8} />
           </Link>
-          <Link className="header-favorites-link" href="/categoria/celulares?favoritos=1#catalogo" aria-label="Ver favoritos guardados en este dispositivo" onClick={() => playSonicCue("navigate")}>
+          <Link className="header-favorites-link" href="/buscar?favoritos=1#catalogo" aria-label="Ver favoritos guardados en este dispositivo" onClick={() => playSonicCue("navigate")}>
             <Heart size={20} strokeWidth={1.8} />
           </Link>
           <button
@@ -83,7 +83,7 @@ export function SiteHeader() {
             <div><ShieldCheck size={18} /><span><small>ACCESO AUTORIZADO</small><strong>Espacios internos preparados</strong></span></div>
             <Link href="/mi-amarango" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><UsersRound size={18} /> Mi Amarango · Asesores</Link>
             <Link href="/administracion" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><ShieldCheck size={18} /> Administración</Link>
-            <Link href="/plataforma" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><Store size={18} /> Ver conexión de espacios</Link>
+            <Link href="/plataforma" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><Store size={18} /> Espacios internos</Link>
             <p>Estos espacios requieren una sesión autorizada.</p>
           </section>
         </aside>
