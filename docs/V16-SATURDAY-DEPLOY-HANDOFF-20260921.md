@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `b683e01dc62c73fc0c48952c5500bbce57e78745`
+- Minimum app-code HEAD covered by this handoff: `b835cad3664dd3c647dfc69642f935015d6e56c0`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -140,3 +140,13 @@ The Angie Work space reported BLOCKED because it could inspect the public previe
    - paste/search product helper, Contado / 2 / 4 / 6 and copy-summary flow;
    - confirm that Registrar venta stays disabled until the secure sales backend gate is implemented.
 5. Return `PASS_DEPLOY` or `BLOCKED_DEPLOY` + published HEAD + preview URL + real visible product count + STOP.
+
+
+### PWA / public-shell cleanup
+Prepared on the same branch:
+- public metadata title is now simply `AmarangoElectro` (no V16 / Product Bridge wording);
+- PWA viewport uses `viewport-fit=cover` for installed Android/iOS safe areas;
+- public menu no longer exposes identity-block / profile implementation language;
+- existing bottom navigation safe-area handling remains preserved;
+- PWA service worker remains shell-only and does not cache live catalog pages;
+- regression coverage extended in `tests/v16-step7h-continuity-pwa.test.mjs`.
