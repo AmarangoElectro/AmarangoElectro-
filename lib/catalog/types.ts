@@ -12,7 +12,8 @@ export type CatalogSource =
   | "v16-home-sanitized-snapshot"
   | "v16-gaming-tech-outdoor-snapshot"
   | "v16-sports-toys-it-snapshot"
-  | "v16-rest-others-snapshot";
+  | "v16-rest-others-snapshot"
+  | "v16-uncategorized-snapshot";
 
 export type Availability = "available" | "unavailable" | "unknown";
 export type StockStatus = "in_stock" | "out_of_stock" | "unknown";
