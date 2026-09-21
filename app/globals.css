@@ -9072,3 +9072,99 @@ html[data-theme="dark"] .compare-row.is-different .compare-cell {
     width: 100%;
   }
 }
+
+
+/* V16 recovery/loading states — dark parity and mobile accessibility */
+.error-state-actions {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+.error-state-actions button,
+.error-state-actions a {
+  margin-top: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.error-state-actions a:last-child {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+html[data-theme="dark"] .error-state h1 {
+  color: var(--foreground);
+}
+html[data-theme="dark"] .error-state > p:last-of-type {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .error-state button {
+  background: var(--foreground);
+  color: var(--background);
+}
+html[data-theme="dark"] .error-state-actions a:last-child {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+html[data-theme="dark"] .skeleton-surface,
+html[data-theme="dark"] .skeleton-line {
+  background: #172235;
+}
+html[data-theme="dark"] .skeleton-surface::after,
+html[data-theme="dark"] .skeleton-line::after {
+  background: linear-gradient(100deg, transparent 18%, rgba(255,255,255,.08) 45%, transparent 72%);
+}
+html[data-theme="dark"] .route-skeleton-category-hero,
+html[data-theme="dark"] .route-skeleton-product-shell {
+  border-color: var(--line);
+  background: var(--card);
+}
+html[data-theme="dark"] .route-skeleton-home-hero {
+  background: #060f20;
+}
+
+@media (max-width: 760px) {
+  .error-state {
+    min-height: 100dvh;
+    padding:
+      max(72px, calc(env(safe-area-inset-top) + 48px))
+      20px
+      max(32px, calc(env(safe-area-inset-bottom) + 24px));
+  }
+  .error-state h1 {
+    font-size: clamp(38px, 13vw, 58px);
+    letter-spacing: -2.5px;
+  }
+  .error-state-actions {
+    width: 100%;
+  }
+  .error-state-actions button,
+  .error-state-actions a {
+    flex: 1 1 150px;
+  }
+
+  .route-skeleton-card-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 10px;
+  }
+  .route-skeleton-card {
+    height: 460px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 390px) {
+  .error-state-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .error-state-actions button,
+  .error-state-actions a {
+    width: 100%;
+  }
+}
