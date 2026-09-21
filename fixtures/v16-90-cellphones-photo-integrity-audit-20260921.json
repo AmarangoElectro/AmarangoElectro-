@@ -1,0 +1,195 @@
+{
+  "evidence_status": "v16_cellphones_90_photo_integrity_audit",
+  "captured_at": "2026-09-21",
+  "source_reference": "storage.objects metadata + isolated 90-cellphone fixture (read-only)",
+  "safety": {
+    "supabase_written": false,
+    "public_activation": false
+  },
+  "summary": {
+    "products": 90,
+    "unique_storage_objects": 89,
+    "storage_objects_found": 89,
+    "missing_storage_metadata": 0,
+    "non_image_mimetype_count": 0,
+    "duplicate_binary_groups": 6,
+    "same_model_variant_reuse_groups": 5,
+    "cross_model_conflict_groups": 1
+  },
+  "duplicateBinaryGroups": [
+    {
+      "group": 1,
+      "type": "same-model-variant-reuse",
+      "requiresHumanVisualReview": false,
+      "products": [
+        {
+          "canonicalProductId": 8,
+          "name": "Samsung A56 5G 256/12gb",
+          "brand": "Samsung",
+          "model": "Samsung A56 5G",
+          "imagePath": "foto_celu_11_1783480976482.jpg",
+          "etag": "\"2eee45946770da5d98bf188a4d6ed0c1\"",
+          "bytes": 105844,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        },
+        {
+          "canonicalProductId": 74,
+          "name": "Samsung A56 5G 256/8gb",
+          "brand": "Samsung",
+          "model": "Samsung A56 5G",
+          "imagePath": "foto_celu_10_1783481068345.jpg",
+          "etag": "\"2eee45946770da5d98bf188a4d6ed0c1\"",
+          "bytes": 105844,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        }
+      ]
+    },
+    {
+      "group": 2,
+      "type": "same-model-variant-reuse",
+      "requiresHumanVisualReview": false,
+      "products": [
+        {
+          "canonicalProductId": 20,
+          "name": "IPHONE 17 PRO MAX 512GB",
+          "brand": "Apple",
+          "model": "iPhone 17 PRO MAX",
+          "imagePath": "foto_celu_7_1784433718628.jpg",
+          "etag": "\"a056294d61f2e62ba7a9f4e902f994f3\"",
+          "bytes": 104396,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        },
+        {
+          "canonicalProductId": 80,
+          "name": "IPHONE 17 PRO MAX 256GB",
+          "brand": "Apple",
+          "model": "iPhone 17 PRO MAX",
+          "imagePath": "foto_celu_82_1783483487460.jpg",
+          "etag": "\"a056294d61f2e62ba7a9f4e902f994f3\"",
+          "bytes": 104396,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        }
+      ]
+    },
+    {
+      "group": 3,
+      "type": "cross-model-conflict",
+      "requiresHumanVisualReview": true,
+      "products": [
+        {
+          "canonicalProductId": 23,
+          "name": "Xiaomi Note 14 256/8gb",
+          "brand": "Xiaomi",
+          "model": "Xiaomi NOTE 14",
+          "imagePath": "celulares/foto_celu_66_j7ti5z.jpg",
+          "etag": "\"af591664d9f8e1161ec49f915e6082eb\"",
+          "bytes": 244434,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "needs-human-visual-review"
+        },
+        {
+          "canonicalProductId": 46,
+          "name": "Xiaomi Note 15 pro PLUS 5g 256/8gb",
+          "brand": "Xiaomi",
+          "model": "Xiaomi NOTE 15 PRO PLUS 5G",
+          "imagePath": "celulares/foto_celu_66_j7ti5z.jpg",
+          "etag": "\"af591664d9f8e1161ec49f915e6082eb\"",
+          "bytes": 244434,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "needs-human-visual-review"
+        }
+      ]
+    },
+    {
+      "group": 4,
+      "type": "same-model-variant-reuse",
+      "requiresHumanVisualReview": false,
+      "products": [
+        {
+          "canonicalProductId": 29,
+          "name": "Samsung s26 512/12gb",
+          "brand": "Samsung",
+          "model": "Samsung S26",
+          "imagePath": "foto_celu_15_1783480707604.jpg",
+          "etag": "\"587aabe8ffc35c3f048a0611f33868da\"",
+          "bytes": 106833,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        },
+        {
+          "canonicalProductId": 45,
+          "name": "Samsung s26 256/12gb",
+          "brand": "Samsung",
+          "model": "Samsung S26",
+          "imagePath": "foto_celu_25_1784430688397.jpg",
+          "etag": "\"587aabe8ffc35c3f048a0611f33868da\"",
+          "bytes": 106833,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        }
+      ]
+    },
+    {
+      "group": 5,
+      "type": "same-model-variant-reuse",
+      "requiresHumanVisualReview": false,
+      "products": [
+        {
+          "canonicalProductId": 38,
+          "name": "REDMI 15C 256/4GB",
+          "brand": "Redmi",
+          "model": "Redmi 15c",
+          "imagePath": "foto_celu_43_1783990374711.jpg",
+          "etag": "\"f3a252cd6f6c1d767a8f3cc581e7d421\"",
+          "bytes": 127855,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        },
+        {
+          "canonicalProductId": 42,
+          "name": "REDMI 15C 256/8GB",
+          "brand": "Redmi",
+          "model": "Redmi 15c",
+          "imagePath": "foto_celu_44_1783990470083.jpg",
+          "etag": "\"f3a252cd6f6c1d767a8f3cc581e7d421\"",
+          "bytes": 127855,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        }
+      ]
+    },
+    {
+      "group": 6,
+      "type": "same-model-variant-reuse",
+      "requiresHumanVisualReview": false,
+      "products": [
+        {
+          "canonicalProductId": 61,
+          "name": "Poco M8 Pro 5G 256/8GB",
+          "brand": "POCO",
+          "model": "POCO M8 PRO 5G",
+          "imagePath": "foto_celu_67_1784437557792.jpg",
+          "etag": "\"a7bde3d51871aaae51d76dc2d9e54568\"",
+          "bytes": 87941,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        },
+        {
+          "canonicalProductId": 65,
+          "name": "Poco M8 Pro 5G 512/12GB",
+          "brand": "POCO",
+          "model": "POCO M8 PRO 5G",
+          "imagePath": "foto_celu_68_1784437624730.jpg",
+          "etag": "\"a7bde3d51871aaae51d76dc2d9e54568\"",
+          "bytes": 87941,
+          "mimetype": "image/jpeg",
+          "photoReviewStatus": "source-mapping-verified"
+        }
+      ]
+    }
+  ]
+}
