@@ -7487,3 +7487,206 @@ html[data-theme="dark"] .tools-subcategory-banner-enter b {
     padding-inline: 10px;
   }
 }
+
+
+/* V16 internal spaces — theme control, local navigation and Admin dark parity */
+.internal-space-theme {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+.internal-space-theme .theme-toggle { margin: 0; }
+
+.advisor-section-nav {
+  max-width: 1460px;
+  margin: -6px auto 18px;
+  padding: 5px;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  scrollbar-width: none;
+}
+.advisor-section-nav::-webkit-scrollbar { display: none; }
+.advisor-section-nav a {
+  min-height: 38px;
+  padding: 0 17px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-weight: 900;
+}
+.advisor-section-nav a:hover,
+.advisor-section-nav a:focus-visible {
+  background: var(--soft);
+  color: var(--foreground);
+  outline: none;
+}
+#advisor-tools,
+#advisor-offers,
+#advisor-catalog { scroll-margin-top: 92px; }
+.advisor-offers-anchor { max-width: 1460px; margin-inline: auto; }
+.advisor-offers-anchor .offers-showcase { margin-inline: 0; }
+
+.admin-workspace-more[data-active="true"] > summary {
+  background: linear-gradient(135deg,#061a39,#0b4a90);
+  color: #fff;
+}
+
+html[data-theme="dark"] .internal-space-badge {
+  border-color: #244636 !important;
+  background: #0c211a !important;
+  color: #8bd0ac !important;
+}
+html[data-theme="dark"] .admin-workspace-tabs {
+  border-color: var(--line);
+  background: var(--card);
+}
+html[data-theme="dark"] .admin-workspace-tabs > button,
+html[data-theme="dark"] .admin-workspace-more > summary {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .admin-workspace-tabs > button[aria-pressed="true"],
+html[data-theme="dark"] .admin-workspace-more[open] > summary,
+html[data-theme="dark"] .admin-workspace-more[data-active="true"] > summary {
+  background: linear-gradient(135deg,#0b2d5a,#145aa8);
+  color: #fff;
+}
+html[data-theme="dark"] .admin-workspace-more > div {
+  border-color: var(--line);
+  background: var(--card);
+  box-shadow: 0 24px 70px rgba(0,0,0,.34);
+}
+html[data-theme="dark"] .admin-workspace-more > div button {
+  background: var(--soft);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .admin-workspace-more > div button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--blue) 34%, var(--card));
+  color: #fff;
+}
+html[data-theme="dark"] .flyer-lab,
+html[data-theme="dark"] .offer-admin-editor,
+html[data-theme="dark"] .admin-local-controls,
+html[data-theme="dark"] .admin-workspace .admin-product-grid-shell {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .flyer-lab-copy h2,
+html[data-theme="dark"] .offer-admin-editor h2 {
+  color: var(--foreground);
+}
+html[data-theme="dark"] .flyer-lab-copy > p,
+html[data-theme="dark"] .offer-admin-editor > div > p,
+html[data-theme="dark"] .admin-local-controls {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .flyer-lab-preview {
+  background: var(--soft);
+}
+html[data-theme="dark"] .flyer-lab-actions button {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .flyer-lab-actions button.primary {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: #071321;
+}
+html[data-theme="dark"] .admin-local-controls select,
+html[data-theme="dark"] .offer-admin-form input,
+html[data-theme="dark"] .offer-admin-form select {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .offer-admin-form label { color: var(--muted-foreground); }
+html[data-theme="dark"] .offer-admin-form .toggle-row { background: var(--soft); }
+
+html[data-theme="dark"] .platform-flow article {
+  border-color: var(--line);
+  background: var(--card);
+}
+html[data-theme="dark"] .platform-flow h2 { color: var(--foreground); }
+html[data-theme="dark"] .platform-flow p { color: var(--muted-foreground); }
+html[data-theme="dark"] .platform-flow a { color: var(--blue); }
+
+@media (max-width: 760px) {
+  .internal-space-actions { gap: 5px; }
+  .internal-space-theme .theme-toggle { gap: 1px; padding: 2px; }
+  .internal-space-theme .theme-toggle button {
+    width: 32px;
+    min-height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  .internal-space-theme .theme-toggle button span { display: none; }
+
+  .advisor-section-nav {
+    margin: -4px 0 14px;
+    padding: 4px;
+    border-radius: 18px;
+  }
+  .advisor-section-nav a {
+    min-height: 36px;
+    padding-inline: 14px;
+  }
+  #advisor-tools,
+  #advisor-offers,
+  #advisor-catalog { scroll-margin-top: 78px; }
+
+  .admin-workspace-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+  .admin-workspace-tabs::-webkit-scrollbar { display: none; }
+  .admin-workspace-tabs > button,
+  .admin-workspace-more {
+    min-width: 128px;
+    flex: 0 0 128px;
+    scroll-snap-align: start;
+  }
+  .admin-workspace-tabs > button {
+    min-height: 58px;
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+  .admin-workspace-tabs > button svg { display: block; }
+  .admin-workspace-more > summary {
+    min-height: 58px;
+    justify-content: flex-start;
+    padding-inline: 12px;
+  }
+  .admin-workspace-more > div {
+    position: fixed;
+    z-index: 120;
+    top: 76px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    max-height: calc(100dvh - 96px);
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 390px) {
+  .internal-space-brand small { display: none; }
+  .internal-space-brand img { width: 44px; height: 44px; }
+  .internal-space-brand strong { max-width: 88px; font-size: 13px; }
+  .internal-space-actions > a { width: 36px; height: 36px; }
+  .internal-space-theme .theme-toggle button { width: 29px; min-height: 29px; }
+  .admin-workspace-tabs > button,
+  .admin-workspace-more { min-width: 116px; flex-basis: 116px; }
+}
