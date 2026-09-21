@@ -36,17 +36,42 @@ const economicImage = "/assets/admin-lab/electra-flyer-economico-demo.webp";
 type AdminLab = { imageMode: "supplier" | "economic"; visible: boolean; stockState: "in_stock" | "low_stock" | "out_of_stock"; featured: boolean };
 const initialAdminLab: AdminLab = { imageMode: "supplier", visible: true, stockState: "in_stock", featured: false };
 
+const adminTabIds = [
+  "catalog",
+  "storefront",
+  "cellphones90",
+  "crm",
+  "collections",
+  "reports",
+  "providers",
+  "cash",
+  "deliveries",
+  "advisors",
+  "calculator",
+  "plates",
+  "offers",
+] as const;
+type AdminTab = (typeof adminTabIds)[number];
+const moreAdminTabs: readonly AdminTab[] = ["crm", "collections", "reports", "providers", "cash", "deliveries", "advisors", "offers"];
+
 export function AdminConsolidatedWorkspace() {
   const [adminLab, setAdminLab] = useState<AdminLab>(initialAdminLab);
   const [offer, setOffer] = useState<LabOfferState>(defaultLabOffer);
-  const [tab, setTab] = useState<"catalog" | "storefront" | "cellphones90" | "crm" | "collections" | "reports" | "providers" | "cash" | "deliveries" | "advisors" | "calculator" | "plates" | "offers">("catalog");
+  const [tab, setTab] = useState<AdminTab>("catalog");
   const [crmInitialClientId, setCrmInitialClientId] = useState<string | null>(null);
   const [crmInstanceKey, setCrmInstanceKey] = useState(0);
+
+  function openAdminTab(next: AdminTab) {
+    setTab(next);
+    if (typeof window === "undefined") return;
+    const nextUrl = `${window.location.pathname}${window.location.search}#${next}`;
+    window.history.replaceState(window.history.state, "", nextUrl);
+  }
 
   function openClient360FromCollections(clientId: string) {
     setCrmInitialClientId(clientId);
     setCrmInstanceKey((key) => key + 1);
-    setTab("crm");
+    openAdminTab("crm");
   }
 
   useEffect(() => {
@@ -56,6 +81,16 @@ export function AdminConsolidatedWorkspace() {
       setOffer(parseLabOffer(window.localStorage.getItem("amarango_v49_offer_lab")));
     });
     return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const candidate = window.location.hash.slice(1);
+      if ((adminTabIds as readonly string[]).includes(candidate)) setTab(candidate as AdminTab);
+    };
+    syncFromHash();
+    window.addEventListener("hashchange", syncFromHash);
+    return () => window.removeEventListener("hashchange", syncFromHash);
   }, []);
 
   function saveAdmin(next: AdminLab) {
@@ -78,22 +113,22 @@ export function AdminConsolidatedWorkspace() {
         <div className="admin-command-hero-status"><ShieldCheck /><strong>MODO SEGURO</strong><span>Los cambios productivos requieren autorización</span></div>
       </section>
       <nav className="admin-workspace-tabs" aria-label="Módulos administrativos" data-guide-target="admin-workspace-tabs">
-        <button aria-pressed={tab === "catalog"} onClick={() => setTab("catalog")}><LayoutGrid /><span><small>PRODUCTOS</small><strong>Catálogo</strong></span></button>
-        <button aria-pressed={tab === "storefront"} onClick={() => setTab("storefront")}><ShieldCheck /><span><small>CONTROL VISUAL</small><strong>Revisión de tienda</strong></span></button>
-        <button aria-pressed={tab === "cellphones90"} onClick={() => setTab("cellphones90")}><Smartphone /><span><small>COHORTE ACTUAL</small><strong>90 Celulares · revisión</strong></span></button>
-        <button aria-pressed={tab === "calculator"} onClick={() => setTab("calculator")}><ListFilter /><span><small>PRECIOS</small><strong>Calculadora</strong></span></button>
-        <button aria-pressed={tab === "plates"} onClick={() => setTab("plates")}><Sparkles /><span><small>CONTENIDO</small><strong>Placas</strong></span></button>
-        <details className="admin-workspace-more">
+        <button aria-pressed={tab === "catalog"} onClick={() => openAdminTab("catalog")}><LayoutGrid /><span><small>PRODUCTOS</small><strong>Catálogo</strong></span></button>
+        <button aria-pressed={tab === "storefront"} onClick={() => openAdminTab("storefront")}><ShieldCheck /><span><small>CONTROL VISUAL</small><strong>Revisión de tienda</strong></span></button>
+        <button aria-pressed={tab === "cellphones90"} onClick={() => openAdminTab("cellphones90")}><Smartphone /><span><small>COHORTE ACTUAL</small><strong>90 Celulares · revisión</strong></span></button>
+        <button aria-pressed={tab === "calculator"} onClick={() => openAdminTab("calculator")}><ListFilter /><span><small>PRECIOS</small><strong>Calculadora</strong></span></button>
+        <button aria-pressed={tab === "plates"} onClick={() => openAdminTab("plates")}><Sparkles /><span><small>CONTENIDO</small><strong>Placas</strong></span></button>
+        <details className="admin-workspace-more" data-active={moreAdminTabs.includes(tab) ? "true" : "false"}>
           <summary><MoreHorizontal /><span><small>OPERACIÓN</small><strong>Más áreas</strong></span></summary>
           <div>
-            <button aria-pressed={tab === "crm"} onClick={() => { setCrmInitialClientId(null); setCrmInstanceKey((key) => key + 1); setTab("crm"); }}><Users /> Clientes / CRM</button>
-            <button aria-pressed={tab === "collections"} onClick={() => setTab("collections")}><Wallet /> Cobranzas</button>
-            <button aria-pressed={tab === "reports"} onClick={() => setTab("reports")}><BarChart3 /> Reportes</button>
-            <button aria-pressed={tab === "providers"} onClick={() => setTab("providers")}><Truck /> Proveedores</button>
-            <button aria-pressed={tab === "cash"} onClick={() => setTab("cash")}><Coins /> Caja</button>
-            <button aria-pressed={tab === "deliveries"} onClick={() => setTab("deliveries")}><PackageCheck /> Entregas</button>
-            <button aria-pressed={tab === "advisors"} onClick={() => setTab("advisors")}><UserCog /> Asesores</button>
-            <button aria-pressed={tab === "offers"} onClick={() => setTab("offers")}><Tag /> Ofertas · borrador</button>
+            <button aria-pressed={tab === "crm"} onClick={() => { setCrmInitialClientId(null); setCrmInstanceKey((key) => key + 1); openAdminTab("crm"); }}><Users /> Clientes / CRM</button>
+            <button aria-pressed={tab === "collections"} onClick={() => openAdminTab("collections")}><Wallet /> Cobranzas</button>
+            <button aria-pressed={tab === "reports"} onClick={() => openAdminTab("reports")}><BarChart3 /> Reportes</button>
+            <button aria-pressed={tab === "providers"} onClick={() => openAdminTab("providers")}><Truck /> Proveedores</button>
+            <button aria-pressed={tab === "cash"} onClick={() => openAdminTab("cash")}><Coins /> Caja</button>
+            <button aria-pressed={tab === "deliveries"} onClick={() => openAdminTab("deliveries")}><PackageCheck /> Entregas</button>
+            <button aria-pressed={tab === "advisors"} onClick={() => openAdminTab("advisors")}><UserCog /> Asesores</button>
+            <button aria-pressed={tab === "offers"} onClick={() => openAdminTab("offers")}><Tag /> Ofertas · borrador</button>
           </div>
         </details>
       </nav>
