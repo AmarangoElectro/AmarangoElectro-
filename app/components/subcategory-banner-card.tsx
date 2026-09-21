@@ -31,6 +31,7 @@ export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory
   const retailArtwork = retailCategories.find((item) => item.id === (retailArtworkAliases[subcategory.slug] ?? subcategory.slug))?.image;
   const artwork = retailArtwork ?? subcategory.image;
   const hasEditorialBanner = !retailArtwork && Boolean(subcategory.image?.startsWith("/assets/banners/subcategories/"));
+  const showEditorialLogo = hasEditorialBanner && categorySlug !== "herramientas";
   const href = subcategory.brand
     ? `/categoria/${categorySlug}?marca=${encodeURIComponent(subcategory.brand)}#catalogo`
     : `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#sector-activo`;
@@ -76,10 +77,12 @@ export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory
 
       {hasEditorialBanner ? (
         <>
-          <span className="subcategory-banner-logo-patch" aria-hidden="true">
-            <Image src="/logo-320.webp" alt="" fill sizes="150px" unoptimized />
-            <i className="subcategory-logo-bee" aria-hidden="true">🐝</i>
-          </span>
+          {showEditorialLogo ? (
+            <span className="subcategory-banner-logo-patch" aria-hidden="true">
+              <Image src="/logo-320.webp" alt="" fill sizes="150px" unoptimized />
+              <i className="subcategory-logo-bee" aria-hidden="true">🐝</i>
+            </span>
+          ) : null}
           <span className="subcategory-banner-enter">Entrar al sector <b aria-hidden="true">→</b></span>
         </>
       ) : (
