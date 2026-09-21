@@ -27,7 +27,7 @@ export function OffersShowcase({ advisor = false }: { advisor?: boolean }) {
   }
 
   return (
-    <section className={`offers-showcase ${advisor ? "offers-advisor" : ""}`} aria-labelledby={advisor ? "advisor-offer-title" : "store-offer-title"}>
+    <section id={advisor ? undefined : "ofertas"} className={`offers-showcase ${advisor ? "offers-advisor" : ""}`} aria-labelledby={advisor ? "advisor-offer-title" : "store-offer-title"}>
       <div className="offers-showcase-media">
         <Image src={offer.imageSrc} alt={offer.productName} fill sizes="(max-width: 760px) 100vw, 50vw" unoptimized />
       </div>
