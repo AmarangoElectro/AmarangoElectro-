@@ -26,6 +26,8 @@ import type { CatalogAdapter, CatalogQuery, Product } from "./types";
  *   disponibilidad, features, descripción, garantía y proveedor quedan
  *   nullable/unknown/vacío ya soportado
  *   por el contrato `Product` — nada se inventa.
+ * - Las fotos existentes se enlazan desde el banco histórico de celulares
+ *   read-only; esto NO activa visibilidad pública.
  * - No se escribe Supabase, no se lee ninguna credencial.
  *
  * NO ACTIVACIÓN: este archivo no se importa desde `lib/catalog/index.ts`
