@@ -221,7 +221,7 @@ function CreateThreadForm({ providers, onCreated, onCancel }: { providers: V16Pr
   return (
     <section className="crm-360" data-guide-target="inbox-create-thread">
       <button type="button" className="crm-back" onClick={onCancel}>← Cancelar</button>
-      <h2>Nuevo hilo</h2>
+      <h2>Nuevo seguimiento</h2>
       <div className="reports-filters">
         <label>
           <small>PROVEEDOR</small>
@@ -245,7 +245,7 @@ function CreateThreadForm({ providers, onCreated, onCancel }: { providers: V16Pr
       {result && result.status !== "ok" && <StatusNotice result={result} />}
       <div className="collections-actions">
         <button type="button" className="crm-open" onClick={submit} disabled={submitting || !providerId || !subject.trim()}>
-          {submitting ? "Creando…" : "Crear hilo"}
+          {submitting ? "Creando…" : "Crear seguimiento"}
         </button>
       </div>
     </section>
@@ -296,11 +296,11 @@ export function ProviderInboxPanel() {
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura/escritura vía RPC segura · sin acceso directo a tablas legacy · notas operativas registradas manualmente
+        Conexión segura · seguimientos reales con proveedores · notas registradas por el equipo
       </div>
 
       <div className="collections-actions">
-        <button type="button" className="crm-open" onClick={() => setView({ mode: "create" })}><Plus size={14} aria-hidden="true" style={{ display: "inline", verticalAlign: "middle" }} /> Nuevo hilo</button>
+        <button type="button" className="crm-open" onClick={() => setView({ mode: "create" })}><Plus size={14} aria-hidden="true" style={{ display: "inline", verticalAlign: "middle" }} /> Nuevo seguimiento</button>
       </div>
 
       <div className="collections-filters" data-guide-target="inbox-filters">
@@ -360,7 +360,7 @@ export function ProviderInboxPanel() {
                 <div className="box"><small>ABIERTO</small><b>{thread.opened_at ?? "No disponible"}</b></div>
               </div>
               <div className="collections-actions">
-                <button type="button" className="crm-open" onClick={() => setView({ mode: "detail", threadId: thread.thread_id })}>Abrir hilo →</button>
+                <button type="button" className="crm-open" onClick={() => setView({ mode: "detail", threadId: thread.thread_id })}>Abrir seguimiento →</button>
               </div>
             </article>
           ))}
