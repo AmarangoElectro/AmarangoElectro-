@@ -4,6 +4,7 @@ import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
 import { V16MediaSnapshotCatalogAdapter } from "./v16-media-snapshot-adapter";
 import { V16ToolsCareSnapshotCatalogAdapter } from "./v16-tools-care-snapshot-adapter";
+import { V16HomeSnapshotCatalogAdapter } from "./v16-home-snapshot-adapter";
 
 // V4.11 usa la única evidencia comercial sanitizada incluida en el checkpoint.
 // No se afirma que sea un snapshot de producción: el reporte del gate conserva
@@ -22,20 +23,22 @@ const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
 const mediaCatalog = new V16MediaSnapshotCatalogAdapter();
 const toolsCareCatalog = new V16ToolsCareSnapshotCatalogAdapter();
+const homeCatalog = new V16HomeSnapshotCatalogAdapter();
 
 class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, mediaResults, toolsCareResults] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, mediaResults, toolsCareResults, homeResults] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
       mediaCatalog.listProducts(query),
       toolsCareCatalog.listProducts(query),
+      homeCatalog.listProducts(query),
     ]);
     const seen = new Set<string>();
-    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults, ...toolsCareResults].filter((product) => {
+    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults, ...toolsCareResults, ...homeResults].filter((product) => {
       const key = [
         product.category,
         product.subcategory ?? "",
@@ -59,7 +62,9 @@ class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
     if (electroMatch) return electroMatch;
     const mediaMatch = await mediaCatalog.getProductBySlug(slug);
     if (mediaMatch) return mediaMatch;
-    return toolsCareCatalog.getProductBySlug(slug);
+    const toolsCareMatch = await toolsCareCatalog.getProductBySlug(slug);
+    if (toolsCareMatch) return toolsCareMatch;
+    return homeCatalog.getProductBySlug(slug);
   }
 }
 
@@ -76,3 +81,5 @@ export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
 export { v16MediaSnapshotEvidence } from "./v16-media-snapshot-adapter";
 
 export { v16ToolsCareSnapshotEvidence } from "./v16-tools-care-snapshot-adapter";
+
+export { v16HomeSnapshotEvidence } from "./v16-home-snapshot-adapter";
