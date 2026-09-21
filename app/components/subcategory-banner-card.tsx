@@ -11,6 +11,21 @@ interface Props {
   index: number;
 }
 
+const toolsBannerMeta: Readonly<Record<string, { tags: string[]; supporting: string }>> = Object.freeze({
+  taladros: {
+    tags: ["Percutores", "Atornilladores", "Batería"],
+    supporting: "Potencia y precisión para cada trabajo.",
+  },
+  amoladoras: {
+    tags: ["Corte", "Desbaste", "Terminación"],
+    supporting: "Rendimiento firme para uso profesional y diario.",
+  },
+  sierras: {
+    tags: ["Caladoras", "Circulares", "Banco"],
+    supporting: "Cortes precisos para cada proyecto.",
+  },
+});
+
 export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory, index }: Props) {
   const brandArtwork = subcategory.brand ? getBrandCampaignArtwork(subcategory.brand) : null;
   const retailArtworkAliases: Record<string, string> = {
@@ -35,6 +50,35 @@ export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory
   const href = subcategory.brand
     ? `/categoria/${categorySlug}?marca=${encodeURIComponent(subcategory.brand)}#catalogo`
     : `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#sector-activo`;
+
+  const toolsMeta = categorySlug === "herramientas" ? toolsBannerMeta[subcategory.slug] : undefined;
+
+  if (toolsMeta && artwork) {
+    return (
+      <Link
+        className={`subcategory-banner tools-subcategory-banner tools-subcategory-banner-${subcategory.slug}`}
+        href={href}
+        aria-label={`Entrar a ${categoryTitle} / ${subcategory.title}`}
+      >
+        <span className="tools-subcategory-banner-copy">
+          <small>HERRAMIENTAS</small>
+          <strong>{subcategory.title}</strong>
+          <span className="tools-subcategory-banner-tags">
+            {toolsMeta.tags.map((tag) => <b key={tag}>{tag}</b>)}
+          </span>
+          <span className="tools-subcategory-banner-supporting">{toolsMeta.supporting}</span>
+        </span>
+
+        <span className="tools-subcategory-banner-media" aria-hidden="true">
+          <Image src={artwork} alt="" fill sizes="(max-width: 760px) 55vw, 48vw" unoptimized />
+        </span>
+
+        <span className="tools-subcategory-banner-enter">
+          Entrar al sector <b aria-hidden="true">→</b>
+        </span>
+      </Link>
+    );
+  }
 
   if (subcategory.brand && brandArtwork) {
     return (
