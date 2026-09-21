@@ -11,7 +11,7 @@ const rowSchema = z.object({
   model: z.string().nullable(),
   sale: z.number().positive(),
   category: z.enum(["tecnologia-accesorios","bebes-juguetes","deportes-movilidad"]),
-  subcategory: z.enum(["juguetes"]).nullable(),
+  subcategory: z.enum(["juguetes","bicicletas","fitness","movilidad-personal"]).nullable(),
   source_category: z.string().min(1),
   image: z.string().url().startsWith("https://").nullable(),
   availability: z.enum(["available","unavailable"]),
