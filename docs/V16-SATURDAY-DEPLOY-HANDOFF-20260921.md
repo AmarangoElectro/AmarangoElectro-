@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `ce20a5b33f71818b269f19809f2185628405d225`
+- Minimum app-code HEAD covered by this handoff: `4af25975841f632d771aff7a0e707dea12a0717c`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -58,6 +58,19 @@ Prepared on the same branch:
 - mobile Administration tabs are horizontally scrollable without compressing module labels;
 - regression test: `tests/v16-internal-spaces-theme-navigation-regression.test.mjs`.
 
+
+### Administration mobile operational polish
+Prepared without changing adapters, RPC contracts or Supabase:
+- CRM / Cliente 360: mobile-safe rows, metrics, tabs and actions;
+- Cobranzas / Historial de pagos: 2-column mobile metrics, safe wrapping and full-width actions on narrow screens;
+- Caja: mobile-safe filters/forms and human operational copy;
+- Entregas: mobile-safe status cards/actions and human operational copy;
+- Asesores: portfolio/detail/create flows retain safe adapter boundaries and use human operational copy;
+- Reportes: mobile filters and table sizing hardened for 320-412 px;
+- Proveedores / Bandeja: technical UI labels replaced by human-facing operational language; Provider Inbox remains adapter-backed;
+- Calculadora / Placas: touch targets, inputs, results and installment cards hardened for mobile and dark mode;
+- regression test: `tests/v16-admin-mobile-operational-regression.test.mjs`.
+
 ## Known deployment gap
 
 The public preview was last externally observed in an older state:
@@ -89,5 +102,8 @@ The Angie Work space reported BLOCKED because it could inspect the public previe
    - catalog → product → return position;
    - internal Claro / Auto / Oscuro selector;
    - Mi Amarango section navigation and dark parity;
-   - Administration module hash navigation and dark/mobile parity.
+   - Administration module hash navigation and dark/mobile parity;
+   - CRM / Cobranzas / Caja / Entregas / Asesores at 320 / 360 / 390 / 412 px;
+   - Proveedores / Bandeja operational copy and mobile flow;
+   - Calculadora / Placas mobile touch targets and dark-mode surfaces.
 5. Return `PASS_DEPLOY` or `BLOCKED_DEPLOY` + published HEAD + preview URL + real visible product count + STOP.
