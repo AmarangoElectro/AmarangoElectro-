@@ -29,6 +29,23 @@ const evidenceSchema = z.object({
 
 const parsedEvidence = evidenceSchema.parse(evidence);
 
+
+/**
+ * Imágenes verificadas contra el snapshot sanitizado V4.13 de celulares.
+ * Solo se reutiliza la foto pública del mismo modelo; no se alteran precio,
+ * stock, disponibilidad ni ningún otro dato comercial del piloto V4.11.
+ *
+ * Fuente documental:
+ * fixtures/v413-legacy-cellphones-sanitized.json
+ * - Samsung A16: legacyPosition 18
+ * - Motorola G15: legacyPosition 44
+ */
+const verifiedImageByPilotId: Readonly<Record<string, string>> = Object.freeze({
+  "a16-128": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
+  "a16-256": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_4_1783479948252.jpg",
+  "g15-256": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/foto_celu_35_1784431401215.jpg",
+});
+
 function slugPart(value: string) {
   return value
     .normalize("NFD")
@@ -56,7 +73,7 @@ const products = Object.freeze(parsedEvidence.products.map((row): Product => fre
   model: row.model,
   category: row.category,
   subcategory: row.subcategory,
-  image: row.image ? { src: row.image, alt: `${row.name} — AmarangoElectro` } : null,
+  image: (row.image ?? verifiedImageByPilotId[row.id]) ? { src: row.image ?? verifiedImageByPilotId[row.id], alt: `${row.name} — AmarangoElectro` } : null,
   price: { amount: row.sale, currency: "ARS" },
   financing: [],
   availability: row.availability,
