@@ -94,7 +94,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
         <div className="category-context-navigation"><SubcategoryContextNavigation categoryTitle={category.title} items={subcategoryContext} /></div>
 
         <div id="catalogo">
-          {activeSector && <section className="catalog-sector-context"><div><small>SECTOR ACTIVO</small><strong>{activeSector.title}</strong><span>{activeSector.description}</span></div><Link href={`/categoria/${slug}#catalogo`}>Ver todo {category.title} ×</Link></section>}
+          {activeSector && <section id="sector-activo" className="catalog-sector-context"><div><small>SECTOR ACTIVO</small><strong>{activeSector.title}</strong><span>{activeSector.description}</span></div><Link href={`/categoria/${slug}#catalogo`}>Ver todo {category.title} ×</Link></section>}
           {phoneAccordionMode ? (
             <BrandProductAccordion categorySlug={category.slug} products={categoryProducts} brands={activeSubcategories.filter((subcategory) => Boolean(subcategory.brand))} />
           ) : products.length > 0 ? (
@@ -148,7 +148,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
             <p className="safe-empty">Este universo ya tiene su banner principal. Las subdivisiones adicionales se incorporarán solo cuando aporten una navegación realmente más rápida.</p>
           )}
           {plannedSubcategories.length > 0 && <div className="category-planned-sectors"><div><small>PREPARADO PARA CRECER</small><strong>Próximos sectores</strong></div><div>{plannedSubcategories.map((subcategory) => <span key={subcategory.slug}>{subcategory.title}</span>)}</div></div>}
-          {publishableBrandLocales.length > 0 && <div className="category-brands"><div><small>LOCALES DE MARCA</small><strong>Entrá al local.</strong></div><div>{publishableBrandLocales.map((locale) => <a key={locale.key} href={`?marca=${encodeURIComponent(locale.brand)}#catalogo`}>{locale.tabLabel}<span aria-hidden="true">→</span></a>)}</div></div>}
+          {publishableBrandLocales.length > 0 && <div className="category-brands"><div><small>LOCALES DE MARCA</small><strong>Entrá al local.</strong></div><div>{publishableBrandLocales.map((locale) => <Link key={locale.key} href={`?marca=${encodeURIComponent(locale.brand)}#catalogo`}>{locale.tabLabel}<span aria-hidden="true">→</span></Link>)}</div></div>}
         </section> : null}
 
         {slug === "descanso" ? <DescansoBrandGallery /> : null}
