@@ -24,19 +24,17 @@ export function V16Cellphones90Preview() {
     <section className="v16-cellphones-90-preview" aria-labelledby="v16-cellphones-90-preview-title">
       <header className="v16-cellphones-90-preview__chrome">
         <div>
-          <p>90 CELULARES · CATÁLOGO EN REVISIÓN</p>
-          <h2 id="v16-cellphones-90-preview-title">Revisión de la cohorte de celulares</h2>
+          <p>90 CELULARES · MATRIZ DE REVISIÓN</p>
+          <h2 id="v16-cellphones-90-preview-title">Revisión completa de celulares</h2>
           <span>
-            {v16Cellphones90MaterializedEvidence.productCount} productos con canonicalProductId real
-            (v16-cell:1 .. v16-cell:{Math.max(...v16Cellphones90MaterializedEvidence.canonicalProductIds)}).
-            No visible en Storefront, no publicado.
+            {v16Cellphones90MaterializedEvidence.productCount} registros preparados para revisión interna. La visibilidad pública se controla por separado y este panel no publica cambios.
           </span>
         </div>
       </header>
 
       <div className="v16-cellphones-90-preview__status" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura · sin impacto en la tienda publicada
+        Revisión interna · este panel no modifica la tienda publicada
       </div>
 
       <CatalogClient products={[...products]} categoryTitle="la cohorte de 90 celulares" showCategoryFilter />
