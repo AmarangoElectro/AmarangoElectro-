@@ -72,8 +72,8 @@
     {
       "id": "-138",
       "name": "☕ *CAFETERA DE FILTRO WESTINHOUSE RETRO CMF1000SO",
-      "brand": "Varios",
-      "model": null,
+      "brand": "Westinghouse",
+      "model": "CMF1000SO",
       "sale": 83500,
       "category": "electrodomesticos",
       "subcategory": "pequenos-electrodomesticos",
@@ -702,7 +702,7 @@
     {
       "id": "-1015",
       "name": "Multiprocesadora Kanjihome blanca",
-      "brand": "Kanji",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 112000,
       "category": "electrodomesticos",
@@ -867,7 +867,7 @@
     {
       "id": "-94",
       "name": "RALLADOR MANUAL KANJI HOME",
-      "brand": "Kanji",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 42500,
       "category": "electrodomesticos",
@@ -1182,7 +1182,7 @@
     {
       "id": "-662",
       "name": "Frigobar Kanjihome 50 Silver",
-      "brand": "Kanji",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 345000,
       "category": "electrodomesticos",
@@ -1797,7 +1797,7 @@
     {
       "id": "-900",
       "name": "AIRE ACONDICIONADO 6200W FEDEERS FRÍO/CALOR",
-      "brand": "Varios",
+      "brand": "Fedders",
       "model": null,
       "sale": 1248000,
       "category": "electrodomesticos",
@@ -2142,7 +2142,7 @@
     {
       "id": "-208",
       "name": "VENTILADOR _Martin & Martin_ MYM INDUSTRIAL 26” PULGADAS",
-      "brand": "LG",
+      "brand": "Martin & Martin",
       "model": null,
       "sale": 182500,
       "category": "electrodomesticos",
@@ -2172,7 +2172,7 @@
     {
       "id": "-162",
       "name": "VENTILADOR DUAVF 3 EN 1 18\"",
-      "brand": "Varios",
+      "brand": "Duavf",
       "model": null,
       "sale": 56500,
       "category": "electrodomesticos",
@@ -2367,7 +2367,7 @@
     {
       "id": "-1062",
       "name": "Cocina Industrial Usman Win Compact Multigas 52Cm*",
-      "brand": "Varios",
+      "brand": "Usman Win",
       "model": null,
       "sale": 474500,
       "category": "electrodomesticos",
@@ -2397,7 +2397,7 @@
     {
       "id": "-1014",
       "name": "Horno Electrico 100L Kanjihome",
-      "brand": "Kanji",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 330000,
       "category": "electrodomesticos",
@@ -2412,7 +2412,7 @@
     {
       "id": "-1013",
       "name": "Horno Eléctrico 70L Kanihome",
-      "brand": "Kanihome",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 255000,
       "category": "electrodomesticos",
@@ -2862,7 +2862,7 @@
     {
       "id": "-180",
       "name": "SOPLADORA/ASPIRADORA OMAHA ELÉCTRICA",
-      "brand": "Varios",
+      "brand": "Omaha",
       "model": null,
       "sale": 94500,
       "category": "electrodomesticos",
@@ -3102,7 +3102,7 @@
     {
       "id": "-659",
       "name": "Lavarropas Kanjihome 4KG C/SUP",
-      "brand": "Kanji",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 420000,
       "category": "electrodomesticos",
@@ -3297,7 +3297,7 @@
     {
       "id": "-748",
       "name": "Lavasecarropas Kanjihome C/Superior 6KG",
-      "brand": "Kanji",
+      "brand": "Kanjihome",
       "model": null,
       "sale": 520000,
       "category": "electrodomesticos",
@@ -3327,8 +3327,8 @@
     {
       "id": "-455",
       "name": "Secarropas Axel Ax3000",
-      "brand": "Varios",
-      "model": null,
+      "brand": "Axel",
+      "model": "AX3000",
       "sale": 180000,
       "category": "electrodomesticos",
       "subcategory": "lavado",
