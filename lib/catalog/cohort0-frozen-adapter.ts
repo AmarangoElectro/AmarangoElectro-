@@ -14,9 +14,9 @@ import type { CatalogAdapter, CatalogQuery, Product } from "./types";
  * Reglas duras respetadas:
  * - Ningún dato inventado: nombre, marca, categoría, precio y proveedor
  *   provienen literalmente de la evidencia entregada.
- * - `image` es siempre `null`: no se recibió URL pública real de Storage,
- *   solo la ruta del objeto (documental). Un `null` es un estado válido
- *   del contrato Product V16 — se prefiere null antes que inventar una URL.
+ * - `image` usa únicamente URLs públicas reconciliadas en la evidencia sanitizada.
+ * - `provider` y `provider_stock` se conservan sólo como evidencia congelada y NO se
+ *   proyectan a la ficha pública.
  * - `financing`, `features`, `specifications`, `description`, `warranty`:
  *   no hay evidencia -> valores vacíos/null, nunca inventados.
  *
@@ -34,6 +34,7 @@ const rowSchema = z.object({
   provider: z.string().trim().min(1),
   provider_stock: z.number().int().positive(),
   storage_object: z.string().trim().min(1),
+  image: z.string().url().startsWith("https://"),
 }).strict();
 
 const evidenceSchema = z.object({
@@ -75,17 +76,17 @@ const products = Object.freeze(parsedEvidence.products.map((row): Product => fre
   model: null,
   category: row.category,
   subcategory: row.subcategory,
-  image: null,
+  image: { src: row.image, alt: `${row.name} — AmarangoElectro` },
   price: { amount: row.sale, currency: "ARS" },
   financing: [],
   availability: "available",
   stock: {
     status: "in_stock",
-    quantity: row.provider_stock,
-    label: `Stock del proveedor: ${row.provider_stock} unidad${row.provider_stock === 1 ? "" : "es"}`,
+    quantity: null,
+    label: "Disponible",
   },
   features: [],
-  specifications: { Proveedor: row.provider },
+  specifications: {},
   description: null,
   warranty: null,
   visible: true,
