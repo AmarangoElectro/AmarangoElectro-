@@ -6933,3 +6933,40 @@ html[data-theme="dark"] { color-scheme: dark; }
     padding: 5px !important;
   }
 }
+
+
+/* V16 — definitive product image framing owned by ChatGPT.
+   Supplier/editorial artwork must remain complete inside 2-up mobile cards.
+   Phone product photos use centered contain. No source asset is cropped. */
+.product-card-premium .product-visual[data-image-framing="full-composition"] {
+  background: #f5f7fa;
+}
+.product-card-premium .product-visual[data-image-framing="full-composition"] .product-image {
+  object-fit: contain !important;
+  object-position: center top !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+.product-card-premium .product-visual[data-image-framing="product-photo"] .product-image {
+  object-fit: contain !important;
+  object-position: center center !important;
+  padding: clamp(8px, 4%, 18px) !important;
+  transform: none !important;
+}
+.product-card-premium:hover .product-visual[data-image-framing] .product-image {
+  transform: none !important;
+}
+
+@media (max-width: 680px) {
+  .product-card-premium .product-visual[data-image-framing] {
+    aspect-ratio: 3 / 4 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .product-card-premium .product-visual[data-image-framing="full-composition"] .product-image {
+    padding: 0 !important;
+  }
+  .product-card-premium .product-visual[data-image-framing="product-photo"] .product-image {
+    padding: 5px !important;
+  }
+}
