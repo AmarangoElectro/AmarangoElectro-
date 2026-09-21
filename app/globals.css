@@ -7216,3 +7216,82 @@ html[data-theme="dark"] .featured-sector-shade {
   .admin-command-hero-status svg { width: 18px; }
   .admin-product-card__select span { display: none; }
 }
+
+
+/* V16 Mi Amarango — dark mode parity */
+html[data-theme="dark"] .internal-space-header {
+  border-bottom-color: var(--line);
+  background: rgba(6, 10, 18, .96);
+}
+html[data-theme="dark"] .internal-space-brand strong { color: var(--foreground); }
+html[data-theme="dark"] .internal-space-actions > span,
+html[data-theme="dark"] .internal-space-actions > a {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .internal-workspace {
+  background: var(--background);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .advisor-quick-grid article {
+  border-color: var(--line);
+  background: var(--card);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+}
+html[data-theme="dark"] .advisor-quick-grid article > svg { color: var(--blue); }
+html[data-theme="dark"] .advisor-quick-grid strong { color: var(--foreground); }
+
+html[data-theme="dark"] .advisor-catalog {
+  border-color: var(--line);
+  background: var(--card);
+}
+html[data-theme="dark"] .advisor-catalog-heading h2 { color: var(--foreground); }
+html[data-theme="dark"] .advisor-catalog-heading label {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .advisor-catalog-heading input {
+  background: transparent;
+  color: var(--foreground);
+}
+html[data-theme="dark"] .advisor-catalog-heading input::placeholder { color: var(--muted-foreground); }
+
+html[data-theme="dark"] .advisor-product-card {
+  border-color: var(--line);
+  background: var(--card);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .22);
+}
+html[data-theme="dark"] .advisor-product-placeholder {
+  background: linear-gradient(145deg, #111b2d, #0d1526);
+  color: var(--blue);
+}
+html[data-theme="dark"] .advisor-product-card h3,
+html[data-theme="dark"] .advisor-product-price { color: var(--foreground); }
+html[data-theme="dark"] .advisor-product-card p,
+html[data-theme="dark"] .advisor-product-card small { color: var(--muted-foreground); }
+html[data-theme="dark"] .advisor-product-card__copy > small { color: var(--orange); }
+html[data-theme="dark"] .advisor-product-card a,
+html[data-theme="dark"] .advisor-product-card button {
+  border-color: var(--line);
+  background: var(--soft);
+  color: var(--foreground);
+}
+html[data-theme="dark"] .advisor-product-card a {
+  border-color: color-mix(in srgb, var(--blue) 72%, var(--line));
+  background: color-mix(in srgb, var(--blue) 28%, var(--card));
+  color: #f8fbff;
+}
+html[data-theme="dark"] .advisor-product-card__tools button {
+  border-color: rgba(255,255,255,.18);
+  background: rgba(13,21,38,.92);
+  color: #fff;
+}
+html[data-theme="dark"] .advisor-availability { color: #e2bd78; }
+html[data-theme="dark"] .advisor-availability.is-live { color: #78d6a8; }
+html[data-theme="dark"] .internal-empty { color: var(--muted-foreground); }
+html[data-theme="dark"] .internal-privacy-note {
+  background: #0c211a;
+  color: #91cbb1;
+}
