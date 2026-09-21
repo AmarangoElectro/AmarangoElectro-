@@ -8911,3 +8911,48 @@ html[data-theme="dark"] .advisor-sale-draft__actions button:first-child {
     font-size: 15px;
   }
 }
+
+
+/* V16 category/filters mobile continuity */
+#sector-activo,
+#catalogo {
+  scroll-margin-top: 112px;
+}
+
+@media (max-width: 760px) {
+  #sector-activo,
+  #catalogo {
+    scroll-margin-top: 86px;
+  }
+
+  .subcategory-context-track a,
+  .sector-showroom-brands a,
+  .catalog-advanced-filters button,
+  .catalog-advanced-filters select,
+  .catalog-advanced-filters input,
+  .catalog-clear {
+    min-height: 44px;
+  }
+
+  .subcategory-context-track a {
+    padding: 9px 13px;
+  }
+
+  .catalog-search input,
+  .catalog-price-filter input,
+  .catalog-sort select {
+    font-size: 16px;
+  }
+
+  .catalog-active-filters .catalog-clear {
+    padding-inline: 12px;
+  }
+}
+
+@media (max-width: 390px) {
+  .catalog-search input,
+  .catalog-price-filter input,
+  .catalog-sort select {
+    font-size: 16px;
+  }
+}
