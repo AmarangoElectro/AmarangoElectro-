@@ -26,7 +26,7 @@ test("advisor commerce fallbacks are professional and truthful",()=> {
 test("Amarango OS metadata no longer advertises a lab/version surface",()=> {
   assert.ok(!os.includes("Amarango OS V3"));
   assert.ok(!os.includes("Laboratorio de integración"));
-  assert.match(os,/Herramienta interna de integración de catálogo/);
+  assert.match(os,/Herramienta interna de operaciones y revisión de catálogo/);
 });
 test("advisor surface renders no private admin product fields",()=> {
   for (const x of [".costArs",".supplier","service_role","auth.admin"]) assert.ok(!advisor.includes(x),x);
