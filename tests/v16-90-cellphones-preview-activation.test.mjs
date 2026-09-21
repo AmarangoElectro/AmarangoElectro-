@@ -69,7 +69,13 @@ test("V16 90-cellphones preview: all 90 isolated phones have HTTPS photos and re
   assert.equal(fixture.photo_materialization.status, "complete");
   assert.equal(fixture.photo_materialization.count, 90);
   assert.equal(fixture.photo_materialization.public_activation, false);
+  assert.equal(fixture.photo_review.status, "pending-human-review");
+  assert.equal(fixture.photo_review.source_mapping_verified_count, 88);
+  assert.equal(fixture.photo_review.needs_human_visual_review_count, 2);
+  assert.deepEqual(fixture.photo_review.flagged_canonical_product_ids, [23, 46]);
+  assert.equal(fixture.photo_review.visibility_changed, false);
   assert.ok(fixture.products.every((product) => /^https:\/\//.test(product.image)));
+  assert.equal(fixture.products.filter((product) => product.photoReviewStatus === "needs-human-visual-review").length, 2);
 
   const adapter = await source("lib/catalog/v16-cellphones-90-materialized-adapter.ts");
   assert.match(adapter, /image: \{ src: row\.image, alt: row\.name \}/);
@@ -77,4 +83,12 @@ test("V16 90-cellphones preview: all 90 isolated phones have HTTPS photos and re
 
   const index = await source("lib/catalog/index.ts");
   assert.doesNotMatch(index, /new V16Cellphones90MaterializedCatalogAdapter\(\)/);
+});
+
+
+test("V16 90-cellphones preview: photo review queue is surfaced before activation", async () => {
+  const previewComponent = await source("components/internal/admin/v16-90-cellphones-preview.tsx");
+  assert.match(previewComponent, /REVISIÓN HUMANA OBLIGATORIA/);
+  assert.match(previewComponent, /flaggedCanonicalProductIds/);
+  assert.match(previewComponent, /No se publicará ninguno de estos productos/);
 });
