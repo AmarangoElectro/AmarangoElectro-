@@ -102,7 +102,7 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Solo lectura · vía RPC segura (`v16_collections_list` / `v16_collections_summary`) · sin acceso directo a `public.ventas`
+        Conexión segura · cobranzas reales · sin datos de prueba
       </div>
 
       {summaryData && (
@@ -145,7 +145,7 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
 
       {list.status !== "ok" && <StatusNotice result={list} />}
       {list.status === "ok" && rows.length === 0 && (
-        <div className="crm-empty-state"><b>Sin resultados</b><p>No encontramos cobranzas para este filtro/búsqueda.</p></div>
+        <div className="crm-empty-state"><b>Sin resultados</b><p>No encontramos cobranzas para este filtro o búsqueda.</p></div>
       )}
 
       {list.status === "ok" && rows.length > 0 && (
