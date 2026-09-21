@@ -72,7 +72,7 @@ export function PaymentHistoryPanel({ clientId = null, saleId = null }: { client
     <section className="payment-history" aria-labelledby="payment-history-title" data-guide-target="payment-history">
       <div className="crm-notes">
         <small>HISTORIAL DE PAGOS</small>
-        <h3 id="payment-history-title" style={{ margin: "6px 0" }}>Eventos registrados en el ledger canónico</h3>
+        <h3 id="payment-history-title" style={{ margin: "6px 0" }}>Pagos y reversas registrados</h3>
       </div>
 
       {summaryData && (
@@ -98,8 +98,8 @@ export function PaymentHistoryPanel({ clientId = null, saleId = null }: { client
 
       {list.status === "ok" && rows.length === 0 && (
         <div className="crm-empty-state" data-guide-target="payments-empty">
-          <b>Todavía no hay pagos registrados en el historial V16.</b>
-          <p>Los próximos pagos confirmados aparecerán acá automáticamente. El historial V16 comienza con los eventos registrados en el nuevo sistema — las cuotas históricas no fueron reconstruidas automáticamente.</p>
+          <b>Todavía no hay pagos registrados en el historial.</b>
+          <p>Los próximos pagos confirmados aparecerán acá automáticamente. Las cuotas anteriores que no fueron registradas en este sistema no se reconstruyen de forma automática.</p>
         </div>
       )}
 
