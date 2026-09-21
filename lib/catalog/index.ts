@@ -2,6 +2,7 @@ import type { CatalogAdapter, CatalogQuery } from "./types";
 import { V411AuditedPilotCatalogAdapter } from "./audited-pilot-adapter";
 import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
+import { V16MediaSnapshotCatalogAdapter } from "./v16-media-snapshot-adapter";
 
 // V4.11 usa la única evidencia comercial sanitizada incluida en el checkpoint.
 // No se afirma que sea un snapshot de producción: el reporte del gate conserva
@@ -18,18 +19,20 @@ const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 // borrar cohort0-frozen-adapter.ts + fixtures/v16-real-catalog-cohort-0-frozen.json.
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
+const mediaCatalog = new V16MediaSnapshotCatalogAdapter();
 
 class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults] = await Promise.all([
+    const [primaryResults, cohort0Results, electroResults, mediaResults] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
+      mediaCatalog.listProducts(query),
     ]);
     const seen = new Set<string>();
-    return [...primaryResults, ...cohort0Results, ...electroResults].filter((product) => {
+    return [...primaryResults, ...cohort0Results, ...electroResults, ...mediaResults].filter((product) => {
       const key = [
         product.category,
         product.subcategory ?? "",
@@ -49,7 +52,9 @@ class Cohort0CompositeCatalogAdapter implements CatalogAdapter {
     if (primaryMatch) return primaryMatch;
     const cohort0Match = await cohort0Catalog.getProductBySlug(slug);
     if (cohort0Match) return cohort0Match;
-    return electroCatalog.getProductBySlug(slug);
+    const electroMatch = await electroCatalog.getProductBySlug(slug);
+    if (electroMatch) return electroMatch;
+    return mediaCatalog.getProductBySlug(slug);
   }
 }
 
@@ -62,3 +67,5 @@ export { v411CatalogEvidence } from "./audited-pilot-adapter";
 export { cohort0CatalogEvidence } from "./cohort0-frozen-adapter";
 
 export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
+
+export { v16MediaSnapshotEvidence } from "./v16-media-snapshot-adapter";
