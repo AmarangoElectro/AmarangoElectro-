@@ -32,3 +32,11 @@ test("advisor surface renders no private admin product fields",()=> {
   for (const x of [".costArs",".supplier","service_role","auth.admin"]) assert.ok(!advisor.includes(x),x);
   assert.ok(!advisor.includes('href="/administracion"'));
 });
+
+test("advisor surface does not bind Admin-scoped data adapters into Mi Amarango",()=> {
+  for (const token of ["createAdvisorsAdapter","createCollectionsReadOnlyAdapter","createCrmReadOnlyAdapter","v16_advisor_portfolio_list","v16_collections_list"]) {
+    assert.ok(!advisor.includes(token),token);
+  }
+  assert.match(advisor,/CLIENTES[\s\S]*Conexión segura pendiente/);
+  assert.match(advisor,/CUOTAS[\s\S]*Conexión segura pendiente/);
+});
