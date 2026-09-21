@@ -71,7 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <span className="detail-watermark" aria-hidden="true">{product.brand}</span>
                 <div className="detail-monogram" aria-hidden="true"><span>{product.brand.slice(0, 2).toUpperCase()}</span></div>
                 <div className="detail-visual-caption" aria-hidden="true"><small>AMARANGO SELECT</small><strong>{product.name}</strong></div>
-                <p className="detail-image-note">La fotografía oficial se mostrará desde el catálogo</p>
+                <p className="detail-image-note">La fotografía se mostrará cuando esté disponible</p>
               </>
             )}
           </div>
