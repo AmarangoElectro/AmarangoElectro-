@@ -12,3320 +12,3320 @@
     {
       "sourceProductId": "-100",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1000",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1001",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1002",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1003",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1004",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1005",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1006",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1007",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1008",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-101",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1010",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1011",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1012",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1013",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1014",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1015",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1016",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1018",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1019",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-102",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1022",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1024",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1028",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1029",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1030",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1031",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1032",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1034",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1036",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1037",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1038",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-104",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1042",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1043",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1044",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1046",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1048",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1049",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1050",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1051",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1052",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1053",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1054",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1055",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1057",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1058",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1059",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-106",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1060",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1061",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1062",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1063",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1064",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-1065",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-107",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-110",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-112",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-113",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-114",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-116",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-12",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-122",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-125",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-126",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-128",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-133",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-134",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-135",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-138",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-14",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-140",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-143",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-144",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-145",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-146",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-147",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-148",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-152",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-154",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-155",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-156",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-159",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-160",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-162",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-164",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-165",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-166",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-167",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-17",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-174",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-175",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-179",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-180",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-184",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-185",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-186",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-187",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-188",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-190",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-192",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-193",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-195",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-196",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-197",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-199",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-200",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-203",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-206",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-208",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-211",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-213",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-218",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-219",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-220",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-221",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-224",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-225",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-227",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-228",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-23",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-231",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-232",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-233",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-237",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-242",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-243",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-25",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-256",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-257",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-258",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-259",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-260",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-262",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-27",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-28",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-282",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-283",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-288",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-289",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-290",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-305",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-306",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-307",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-31",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-311",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-312",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-32",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-322",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-324",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-325",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-326",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-328",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-329",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-33",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-331",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-334",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-337",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-338",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-34",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-342",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-343",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-346",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-347",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-349",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-352",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-354",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-356",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-359",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-360",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-361",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-362",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-363",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-365",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-366",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-367",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-37",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-372",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-373",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-378",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-386",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-387",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-388",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-389",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-39",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-390",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-394",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-395",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-397",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-4",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-401",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-402",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-403",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-404",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-406",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-407",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-408",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-409",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-410",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-411",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-414",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-415",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-416",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-417",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-418",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-419",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-420",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-421",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-422",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-423",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-424",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-425",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-428",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-429",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-430",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-431",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-435",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-437",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-438",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-439",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-440",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-441",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-445",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-447",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-454",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-455",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-457",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-458",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-459",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-46",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-460",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-465",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-468",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-47",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-475",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-477",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-478",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-480",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-481",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-483",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-485",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-487",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-489",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-490",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-495",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-496",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-497",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-499",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-503",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-508",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-509",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-510",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-515",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-516",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-518",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-52",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-520",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-523",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-524",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-528",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-53",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-534",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-535",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-536",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-539",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-540",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-543",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-548",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-55",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-56",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-566",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-567",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-57",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-575",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-579",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-58",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-581",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-586",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-591",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-592",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-6",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-60",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-601",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-602",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-603",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-604",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-605",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-606",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-607",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-61",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-610",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-611",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-612",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-614",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-616",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-618",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-625",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-626",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-63",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-632",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-633",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-635",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-652",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-655",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-657",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-658",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-659",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-66",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-662",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-663",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-664",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-67",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-671",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-676",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-678",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-681",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-682",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-686",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-69",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-690",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-694",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-699",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-70",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-701",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-702",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-705",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-71",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-713",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-714",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-718",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-719",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-72",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-721",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-725",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-727",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-73",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-730",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-731",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-736",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-74",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-741",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-746",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-748",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-75",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-751",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-753",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-755",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-76",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-762",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-763",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-765",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-774",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-775",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-778",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-78",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-780",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-781",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-782",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-786",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-789",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-79",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-792",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-793",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-795",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-796",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-797",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-798",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-8",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-80",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-801",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-802",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-803",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-804",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-809",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-81",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-810",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-812",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-813",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-816",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-818",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-819",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-82",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-820",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-825",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-826",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-828",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-829",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-830",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-836",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-837",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-838",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-839",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-84",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-840",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-844",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-849",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-85",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-850",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-851",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-852",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-855",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-856",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-857",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-859",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-86",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-862",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-864",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-865",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-87",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-871",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-874",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-875",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-876",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-878",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-879",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-880",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-881",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-882",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-883",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-888",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-889",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-890",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-892",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-893",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-895",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-896",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-897",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-899",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-9",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-90",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-900",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-905",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-906",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-908",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-909",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-91",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-910",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-912",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-914",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-916",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-918",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-92",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-920",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-923",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-925",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-926",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-927",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-928",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-929",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-93",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-931",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-932",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-933",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-934",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-936",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-939",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-94",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-941",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-942",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-944",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-945",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-946",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-947",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-948",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-950",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-952",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-953",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-955",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-956",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-957",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-960",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-961",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-963",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-965",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-967",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-968",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-97",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-970",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-971",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-972",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-973",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-974",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-975",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-977",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-978",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-979",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-981",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-982",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-983",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-986",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-987",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-989",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-990",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-992",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-993",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-994",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-995",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "-999",
       "priceUpdatedAt": "2026-09-20 11:15:29.656926+00",
-      "stockConfirmedAt": "2026-09-20 11:15:29.656926+00",
-      "stockVerificationMode": "automatic"
+      "stockVerificationMode": "automatic",
+      "stockSourceUpdatedAt": "2026-09-20 11:15:29.656926+00"
     },
     {
       "sourceProductId": "10",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "103",
       "priceUpdatedAt": "2026-08-26 18:06:39.208455+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "11",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "12",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "124",
       "priceUpdatedAt": "2026-08-27 11:15:58.349806+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "13",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "14",
       "priceUpdatedAt": "2026-08-26 18:11:35.11149+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "15",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "157",
       "priceUpdatedAt": "2026-09-17 11:15:46.904802+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "16",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "17",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "170",
       "priceUpdatedAt": "2026-09-10 11:15:32.710338+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "179",
       "priceUpdatedAt": "2026-08-26 18:06:58.601061+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "18",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "180",
       "priceUpdatedAt": "2026-08-26 18:07:10.496743+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "187",
       "priceUpdatedAt": "2026-08-26 18:07:32.954006+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "19",
       "priceUpdatedAt": "2026-08-27 11:15:58.349806+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "198",
       "priceUpdatedAt": "2026-08-27 11:15:58.349806+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "2",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "20",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "204",
       "priceUpdatedAt": "2026-08-27 11:15:58.349806+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "206",
       "priceUpdatedAt": "2026-08-26 18:07:49.289663+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "207",
       "priceUpdatedAt": "2026-08-26 18:07:49.289663+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "210",
       "priceUpdatedAt": "2026-08-26 18:07:44.486162+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "219",
       "priceUpdatedAt": "2026-08-27 11:15:58.349806+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "3",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "35",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "4",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "44",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "49",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "5",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "50",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "51",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "52",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "53",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "54",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "55",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "56",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "57",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "6",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "604",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "687",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "7",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "741",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "771",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "772",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "773",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "774",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "775",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "776",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "79",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "84",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "9",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "manual"
+      "stockVerificationMode": "manual",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "91",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     },
     {
       "sourceProductId": "92",
       "priceUpdatedAt": "2026-08-26 18:06:25.336156+00",
-      "stockConfirmedAt": null,
-      "stockVerificationMode": "unknown"
+      "stockVerificationMode": "unknown",
+      "stockSourceUpdatedAt": null
     }
   ]
 }
