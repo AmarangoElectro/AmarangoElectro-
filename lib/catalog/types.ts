@@ -5,7 +5,8 @@ export type CatalogSource =
   | "v412-canonical-audit"
   | "supabase-readonly"
   | "cohort-0-frozen-evidence"
-  | "v16-cellphones-90-materialized";
+  | "v16-cellphones-90-materialized"
+  | "v16-electro-sanitized-snapshot";
 
 export type Availability = "available" | "unavailable" | "unknown";
 export type StockStatus = "in_stock" | "out_of_stock" | "unknown";
