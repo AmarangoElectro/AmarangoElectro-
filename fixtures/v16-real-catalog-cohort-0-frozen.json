@@ -1,6 +1,6 @@
 {
   "evidence_status": "cohort_0_frozen_handoff",
-  "source_reference": "Control Maestro — reconciliación LIVE read-only de Supabase (public.tienda_catalogo / public.tienda_productos_incremental / public.celulares_lista / public.productos), entregada como evidencia congelada. Claude Code no ejecutó ninguna consulta directa contra Supabase: no dispone de credenciales.",
+  "source_reference": "Control Maestro — reconciliación LIVE read-only de Supabase (public.tienda_catalogo / public.tienda_productos_incremental / public.celulares_lista / public.productos), entregada como evidencia congelada. Claude Code no ejecutó ninguna consulta directa contra Supabase: no dispone de credenciales. Public image URLs were later reconciled from evidence/catalog-source-snapshot.sanitized.json; provider identity/stock remain evidence-only and must not be exposed by the public adapter.",
   "production_catalog_verified": false,
   "captured_at": "2026-09-11",
   "products": [
@@ -13,7 +13,8 @@
       "sale": 2143000,
       "provider": "Mega Electro",
       "provider_stock": 1,
-      "storage_object": "proveedores/mega_myaqdlaivp_pnfhbl.jpg"
+      "storage_object": "proveedores/mega_myaqdlaivp_pnfhbl.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_myaqdlaivp_pnfhbl.jpg"
     },
     {
       "id": "-29",
@@ -24,7 +25,8 @@
       "sale": 70000,
       "provider": "Mega Electro",
       "provider_stock": 1,
-      "storage_object": "proveedores/mega_h9w8bg3iel_am5x2j.jpg"
+      "storage_object": "proveedores/mega_h9w8bg3iel_am5x2j.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_h9w8bg3iel_am5x2j.jpg"
     },
     {
       "id": "-53",
@@ -35,7 +37,8 @@
       "sale": 253500,
       "provider": "Mega Electro",
       "provider_stock": 2,
-      "storage_object": "proveedores/mega_yljioqydak_x1d8m8.jpg"
+      "storage_object": "proveedores/mega_yljioqydak_x1d8m8.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_yljioqydak_x1d8m8.jpg"
     },
     {
       "id": "-23",
@@ -46,7 +49,8 @@
       "sale": 200000,
       "provider": "Mega Electro",
       "provider_stock": 2,
-      "storage_object": "proveedores/mega_utx9yjaxzg_15wxy3m.jpg"
+      "storage_object": "proveedores/mega_utx9yjaxzg_15wxy3m.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_utx9yjaxzg_15wxy3m.jpg?v=1786584688122"
     },
     {
       "id": "-190",
@@ -57,7 +61,8 @@
       "sale": 74500,
       "provider": "Mega Electro",
       "provider_stock": 4,
-      "storage_object": "proveedores/mega_z9ttzjgtmt_dhs3aq.jpg"
+      "storage_object": "proveedores/mega_z9ttzjgtmt_dhs3aq.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_z9ttzjgtmt_dhs3aq.jpg"
     },
     {
       "id": "-671",
@@ -68,7 +73,8 @@
       "sale": 125000,
       "provider": "Electro Impacto",
       "provider_stock": 2,
-      "storage_object": "proveedores/impacto_rionoi39ba_z9gqlp.jpg"
+      "storage_object": "proveedores/impacto_rionoi39ba_z9gqlp.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/impacto_rionoi39ba_z9gqlp.jpg"
     },
     {
       "id": "-833",
@@ -79,7 +85,8 @@
       "sale": 152000,
       "provider": "Electro Impacto",
       "provider_stock": 2,
-      "storage_object": "proveedores/impacto_pmmebj4cav_1v84zl3.jpg"
+      "storage_object": "proveedores/impacto_pmmebj4cav_1v84zl3.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/impacto_pmmebj4cav_1v84zl3.jpg?v=1787866450825"
     },
     {
       "id": "-104",
@@ -90,7 +97,8 @@
       "sale": 10010000,
       "provider": "Mega Electro",
       "provider_stock": 1,
-      "storage_object": "proveedores/mega_sezdamym4s_1pzhb52.jpg"
+      "storage_object": "proveedores/mega_sezdamym4s_1pzhb52.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_sezdamym4s_1pzhb52.jpg"
     },
     {
       "id": "-306",
@@ -101,7 +109,8 @@
       "sale": 112000,
       "provider": "Mega Electro",
       "provider_stock": 4,
-      "storage_object": "proveedores/mega_p1c5azldgd_279vgy.jpg"
+      "storage_object": "proveedores/mega_p1c5azldgd_279vgy.jpg",
+      "image": "https://zctaukyrhsmpjkcddcqq.supabase.co/storage/v1/object/public/tienda-fotos/proveedores/mega_p1c5azldgd_279vgy.jpg"
     }
   ]
 }
