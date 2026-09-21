@@ -1,3 +1,4 @@
+import Link from "./store-link";
 import type { SubcategoryContextItem } from "@/lib/navigation/subcategory-context";
 
 export function SubcategoryContextNavigation({
@@ -17,7 +18,7 @@ export function SubcategoryContextNavigation({
       </div>
       <div className="subcategory-context-track" data-v417-local-scroll>
         {items.map((item) => (
-          <a
+          <Link
             key={item.slug}
             className={item.selected ? "is-selected" : undefined}
             href={item.href}
@@ -25,7 +26,7 @@ export function SubcategoryContextNavigation({
           >
             <span aria-hidden="true">{item.icon}</span>
             <strong>{item.title}</strong>
-          </a>
+          </Link>
         ))}
       </div>
     </nav>
