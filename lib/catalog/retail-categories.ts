@@ -32,7 +32,7 @@ const backgroundArtwork = {
  * universos: traduce las 22 entradas comerciales aprobadas a sus rutas V16.
  */
 export const retailCategories: readonly RetailCategoryEntry[] = [
-  { id: "celulares", title: "Celulares", eyebrow: "TECNOLOGÍA PERSONAL", description: "Modelos premium, innovación y potencia para cada estilo.", href: categoryHref("celulares"), icon: "📱", image: sectorArt("celulares"), mobileImage: sectorArt("celulares"), size: "hero", ...backgroundArtwork },
+  { id: "celulares", title: "Celulares", eyebrow: "TECNOLOGÍA PERSONAL", description: "Modelos premium, innovación y potencia para cada estilo.", href: categoryHref("celulares"), icon: "📱", image: "/assets/mobile/celulares.webp", mobileImage: "/assets/mobile/celulares.webp", size: "hero", ...backgroundArtwork },
   { id: "smart-tv", title: "Smart TV", eyebrow: "IMAGEN & ENTRETENIMIENTO", description: "Cine, profundidad y conectividad en gran escala.", href: categoryHref("smart-tv"), icon: "📺", image: sectorArt("smart-tv"), mobileImage: sectorArt("smart-tv"), size: "hero", ...backgroundArtwork },
   { id: "audio", title: "Audio", eyebrow: "SONIDO & ENTRETENIMIENTO", description: "Parlantes, barras y auriculares que se sienten.", href: categoryHref("audio"), icon: "🔊", image: sectorArt("audio"), mobileImage: sectorArt("audio"), size: "hero", ...backgroundArtwork },
   { id: "refrigeracion", title: "Refrigeración", eyebrow: "ELECTRODOMÉSTICOS", description: "Heladeras, freezers y frigobares.", href: categoryHref("electrodomesticos", "refrigeracion"), icon: "❄️", image: sectorArt("refrigeracion"), mobileImage: sectorArt("refrigeracion"), size: "wide", ...backgroundArtwork },
