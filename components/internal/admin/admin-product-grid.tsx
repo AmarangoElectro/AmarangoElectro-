@@ -29,7 +29,7 @@ export function AdminProductGrid({ products }: Props) {
         <input aria-label="Buscar productos" placeholder="Buscar producto, mayorista o categoría…" value={filters.query ?? ""} onChange={(e) => { setFilters((f) => ({ ...f, query:e.target.value })); setLoaded(36); }} />
         <span>{filtered.length.toLocaleString("es-AR")} productos</span>
       </div>
-      {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button>Confirmar precio</button><button>Mayorista</button><button>Visibilidad</button><button>Stock</button></div>}
+      {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><small>Edición real bloqueada en esta vista.</small><button type="button" disabled>Confirmar precio</button><button type="button" disabled>Mayorista</button><button type="button" disabled>Visibilidad</button><button type="button" disabled>Stock</button></div>}
       <div className="admin-product-grid">
         {visible.map((product) => <AdminProductCard key={product.id} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} />)}
       </div>
