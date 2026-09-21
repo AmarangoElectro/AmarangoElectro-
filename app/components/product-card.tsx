@@ -100,7 +100,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         ) : (
           <>
             <div className="product-monogram" aria-hidden="true"><span>{initials}</span></div>
-            <span className="image-status">IMAGEN NO DISPONIBLE</span>
+            <span className="image-status">FOTO EN ACTUALIZACIÓN</span>
           </>
         )}
         <div className="card-tools">
