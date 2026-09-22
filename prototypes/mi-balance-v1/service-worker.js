@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v18-long-goals-currency-trash-feedback';
+const CACHE='mi-balance-v19-monthly-edit-backup';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
