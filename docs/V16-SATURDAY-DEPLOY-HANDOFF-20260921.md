@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `32948864f8e5f877847e6f95537e6d9e555efe50`
+- Minimum app-code HEAD covered by this handoff: `cdd106240545c7d80897b5a0b066004b9655e47a`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -209,3 +209,17 @@ Prepared on the same branch:
 - return/clear/close/review actions have reinforced 44 px touch targets;
 - comparison now traps keyboard focus inside its modal and still supports Escape;
 - regression test: `tests/v16-product-decision-flow-regression.test.mjs`.
+
+
+### Catalog expansion — 422 visible unique products
+Prepared on the same branch:
+- active composite catalog reconstructs to 422 visible unique products;
+- 90 canonical cellphones are the sole public cellphone source, with canonical `v16-cell:*` IDs plus sanitized price/image data;
+- legacy pilot cellphone rows are excluded from the active composite to avoid price/model conflicts;
+- 63-product strict projection expansion is active;
+- 5 additional V4.12 sanitized products are active;
+- 31 additional Electrodomésticos are active through a strict literal-brand rule constrained to brands already known in the same category;
+- duplicate Drean HDR370 short row `-463` is excluded in favor of the richer `-43` record;
+- current reconstructed category counts include 282 Electrodomésticos, 90 Celulares, 20 Smart TV and 10 Audio;
+- 410/422 reconstructed products have an image; missing-photo states remain fail-closed/customer-safe;
+- regression coverage: `tests/v16-catalog-expansion-391-regression.test.mjs` and the updated 90-cellphone activation coverage.
