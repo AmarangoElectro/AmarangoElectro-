@@ -2,8 +2,28 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07182f"><link rel="manifest" href="./manifest.json">
-<title>Mi Balance — un regalo de Amarango</title>
+<meta name="theme-color" content="#07182f">
+<meta name="description" content="Controlá tu plata sin complicarte. Mi Balance es gratis, privada y guarda tus datos cifrados en tu dispositivo. Un regalo de Amarango.">
+<link rel="canonical" href="https://mibalance-amarango.netlify.app/">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/.netlify/images?url=/icon-maskable.svg&amp;w=180&amp;h=180&amp;fit=cover&amp;fm=png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mi Balance">
+<meta property="og:title" content="Mi Balance — Un regalo de Amarango">
+<meta property="og:description" content="Controlá tu plata sin complicarte. Gratis, privada e instalable.">
+<meta property="og:url" content="https://mibalance-amarango.netlify.app/">
+<meta property="og:image" content="https://mibalance-amarango.netlify.app/.netlify/images?url=/social-preview-v2.svg&amp;w=1200&amp;h=630&amp;fit=cover&amp;fm=png">
+<meta property="og:image:secure_url" content="https://mibalance-amarango.netlify.app/.netlify/images?url=/social-preview-v2.svg&amp;w=1200&amp;h=630&amp;fit=cover&amp;fm=png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Mi Balance — Un regalo de Amarango">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mi Balance — Un regalo de Amarango">
+<meta name="twitter:description" content="Controlá tu plata sin complicarte. Gratis, privada e instalable.">
+<meta name="twitter:image" content="https://mibalance-amarango.netlify.app/.netlify/images?url=/social-preview-v2.svg&amp;w=1200&amp;h=630&amp;fit=cover&amp;fm=png">
+<title>Mi Balance — Un regalo de Amarango</title>
 <style>
 :root{--navy:#07182f;--navy2:#0e2b4e;--panel:#12355e;--orange:#ff7a1a;--text:#f7f9fc;--muted:#aebed3;--green:#41d98a;--line:rgba(255,255,255,.11)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#061426,#0b2140 62%,#07182f);color:var(--text);min-height:100vh}
@@ -22,18 +42,40 @@ button,input,select{font:inherit}.app{max-width:520px;margin:auto;min-height:100
 .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}.cat{background:white;border:1px solid #dce6ef;border-radius:15px;padding:9px;text-align:center}.cat.on{outline:2px solid var(--orange);background:#fff4ea}.cat b{display:block;font-size:11px;margin-top:3px}
 input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:white;padding:13px 14px;color:#111;outline:none}.primary{width:100%;border:0;border-radius:16px;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:white;padding:14px;font-weight:950;margin-top:13px}.secondary{width:100%;border:1px solid #dce6ef;border-radius:16px;background:white;color:#111;padding:13px;font-weight:850;margin-top:9px}
 .lock{position:fixed;inset:0;background:linear-gradient(180deg,#07182f,#0b2343);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}.lockBox{width:min(410px,100%);text-align:center}.lockBox h2{font-size:32px;margin:14px 0 6px}.lockBox p{color:#b9c8db}.panel{padding:18px;border-radius:22px;background:#0e2b4e;border:1px solid var(--line);margin-top:18px}.tiny{font-size:12px;line-height:1.45;color:#93a8c1}.hidden{display:none!important}
+
+.installOnboard,.installCard{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:linear-gradient(145deg,#11355f,#0a2647);border-radius:20px;padding:12px}
+.installOnboard{margin-top:14px;text-align:left}.installCard{margin:0 18px 10px}
+.installIcon{width:52px;height:52px;border-radius:15px;flex:0 0 auto;box-shadow:0 8px 20px rgba(0,0,0,.22)}
+.installCopy{flex:1;min-width:0}.installCopy b{display:block;font-size:14px}.installCopy span{display:block;color:#b9c8db;font-size:11px;line-height:1.35;margin-top:3px}
+.installBtn{border:0;border-radius:14px;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:white;padding:11px 13px;font-size:12px;font-weight:950;white-space:nowrap;box-shadow:0 8px 18px rgba(255,122,26,.2)}
+.installBtn:active{transform:translateY(1px)}
+.installHelpLogo{width:72px;height:72px;border-radius:20px;display:block;margin:0 auto 14px}
+@media(max-width:390px){.installCard{align-items:flex-start;flex-wrap:wrap}.installCard .installCopy{min-width:calc(100% - 68px)}.installCard .installBtn{width:100%}}
+
 </style>
 </head>
 <body>
 <div id="lock" class="lock"><div class="lockBox"><div class="mark" style="margin:auto;width:65px;height:65px;border-radius:21px"><i></i><i></i><i></i></div><h2>Mi Balance</h2><p>Un regalo de Amarango</p><div class="panel">
 <div id="setup"><b>Protegé tus datos con un PIN</b><p class="tiny">Tus movimientos se cifran y quedan guardados en este dispositivo. Amarango no recibe tus gastos.</p><input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN de 4 a 8 números"><button class="primary" onclick="createVault()">Crear mi espacio</button></div>
 <div id="unlock" class="hidden"><b>Ingresá tu PIN</b><p class="tiny">Tus datos siguen cifrados en este dispositivo.</p><input id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><button class="primary" onclick="unlockVault()">Entrar</button><button class="secondary" onclick="resetVault()">Borrar datos locales</button></div>
-</div></div></div>
+</div>
+<div id="installOnboarding" class="installOnboard">
+<img class="installIcon" src="./icon.svg" alt="Ícono de Mi Balance">
+<div class="installCopy"><b>Instalá Mi Balance</b><span>Queda como una app en tu celular. Gratis y sin Play Store.</span></div>
+<button class="installBtn" type="button" onclick="installApp()">Instalar app</button>
+</div>
+</div></div>
 
 <div class="app">
 <header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de Amarango</span></div></div><div style="font-size:12px;color:#b8c7d8">🔒 Solo tuyos</div></header>
 
 <section class="hero"><div class="heroCard"><div class="ey">Tu mes, más claro</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Registrá lo que entra, lo que gastás y lo que decidís guardar para vos.</p><div class="privacy">🔐 Guardado local y cifrado.</div></div></section>
+
+<div id="installCard" class="installCard">
+<img class="installIcon" src="./icon.svg" alt="Ícono de Mi Balance">
+<div class="installCopy"><b>Tené Mi Balance en tu pantalla</b><span>Instalala y abrila como cualquier app.</span></div>
+<button class="installBtn" type="button" onclick="installApp()">Instalar app</button>
+</div>
 
 <section class="grid">
 <div class="card wide"><div class="lab">Ingresos del mes</div><div id="incomeV" class="val green">$ 0</div><button class="btn2" onclick="openIncome()">Editar ingreso</button></div>
@@ -63,6 +105,8 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 
 <div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3>Tu objetivo</h3><input id="goalName" placeholder="Ej: fondo de emergencia"><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo" style="margin-top:9px"><button class="primary" onclick="saveGoal()">Guardar objetivo</button><button class="secondary" onclick="closeM('goalModal')">Cancelar</button></div></div>
 
+<div id="installHelpModal" class="modal" onclick="backdrop(event,'installHelpModal')"><div class="sheet" style="text-align:center"><img class="installHelpLogo" src="./icon.svg" alt=""><h3>Instalar Mi Balance</h3><div id="installHelpBody" style="color:#44546a;line-height:1.55;text-align:left"></div><button class="secondary" onclick="closeM('installHelpModal')">Cerrar</button></div></div>
+
 <div id="summaryModal" class="modal" onclick="backdrop(event,'summaryModal')"><div class="sheet"><h3>Resumen del mes</h3><div id="summary"></div><button class="secondary" onclick="closeM('summaryModal')">Cerrar</button></div></div>
 
 <script>
@@ -83,6 +127,31 @@ async function persist(){if(!vaultKey)return;const iv=crypto.getRandomValues(new
 async function createVault(){const p=newPin.value.trim();if(!/^\d{4,8}$/.test(p))return alert("Usá un PIN de 4 a 8 números.");const salt=crypto.getRandomValues(new Uint8Array(16));localStorage.setItem("mb_salt",b64(salt));vaultKey=await derive(p,salt);await persist();lock.style.display="none";render()}
 async function unlockVault(){try{const salt=new Uint8Array(unb64(localStorage.getItem("mb_salt"))),k=await derive(pin.value.trim(),salt),o=JSON.parse(localStorage.getItem("mb_vault")),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},k,unb64(o.data));state=JSON.parse(dec.decode(plain));vaultKey=k;lock.style.display="none";render()}catch(e){alert("PIN incorrecto o datos dañados.")}}
 function resetVault(){if(confirm("Esto borra los datos guardados en este dispositivo. ¿Continuar?")){localStorage.removeItem("mb_vault");localStorage.removeItem("mb_salt");location.reload()}}
-if(localStorage.getItem("mb_salt")){setup.classList.add("hidden");unlock.classList.remove("hidden")}renderCats();render();if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+let deferredInstallPrompt=null;
+function appIsInstalled(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true}
+function syncInstallUI(){const hide=appIsInstalled();["installOnboarding","installCard"].forEach(id=>{const el=$(id);if(el)el.classList.toggle("hidden",hide)})}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;syncInstallUI()});
+window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;syncInstallUI()});
+async function installApp(){
+  if(appIsInstalled()){syncInstallUI();return}
+  if(deferredInstallPrompt){
+    const p=deferredInstallPrompt;deferredInstallPrompt=null;
+    p.prompt();
+    try{await p.userChoice}catch(e){}
+    syncInstallUI();
+    return;
+  }
+  const ua=navigator.userAgent||"",ios=/iphone|ipad|ipod/i.test(ua);
+  const body=$("installHelpBody");
+  if(body){
+    body.innerHTML=ios
+      ? '<p><b>En iPhone o iPad</b>, Safari no permite abrir la instalación automática. Tocá <b>Compartir</b> y después <b>Agregar a pantalla de inicio</b>.</p>'
+      : '<p><b>Usá Chrome en Android.</b> Si el botón de instalación nativo todavía no apareció, esperá unos segundos y volvé a tocar <b>Instalar app</b>. Como alternativa, Chrome también ofrece <b>Instalar aplicación</b> desde su menú.</p>';
+  }
+  openM("installHelpModal");
+}
+if(localStorage.getItem("mb_salt")){setup.classList.add("hidden");unlock.classList.remove("hidden")}
+renderCats();render();syncInstallUI();
+if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
 </script>
 </body></html>
