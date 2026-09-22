@@ -445,7 +445,54 @@ function openSummary(){
   openM("summaryModal")
 }
 const enc=new TextEncoder(),dec=new TextDecoder();
+const SESSION_DB_NAME="mi-balance-session-v1",SESSION_STORE="session";
 function b64(x){return btoa(String.fromCharCode(...new Uint8Array(x)))}function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0)).buffer}
+function openSessionDb(){
+  return new Promise((resolve,reject)=>{
+    if(!("indexedDB" in window))return reject(new Error("indexeddb unavailable"));
+    const req=indexedDB.open(SESSION_DB_NAME,1);
+    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(SESSION_STORE))db.createObjectStore(SESSION_STORE,{keyPath:"id"})};
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error("indexeddb error"))
+  })
+}
+async function saveActiveSession(){
+  if(!vaultKey||!currentProfileId||!currentEmail)return;
+  try{
+    const db=await openSessionDb();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(SESSION_STORE,"readwrite");
+      tx.objectStore(SESSION_STORE).put({id:"active",profileId:currentProfileId,email:currentEmail,key:vaultKey,savedAt:Date.now()});
+      tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)
+    });
+    db.close()
+  }catch(e){}
+}
+async function clearActiveSession(){
+  try{
+    const db=await openSessionDb();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(SESSION_STORE,"readwrite");
+      tx.objectStore(SESSION_STORE).delete("active");
+      tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)
+    });
+    db.close()
+  }catch(e){}
+}
+async function restoreActiveSession(){
+  try{
+    const db=await openSessionDb();
+    const rec=await new Promise((resolve,reject)=>{
+      const tx=db.transaction(SESSION_STORE,"readonly"),req=tx.objectStore(SESSION_STORE).get("active");
+      req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)
+    });
+    db.close();
+    if(!rec||!rec.profileId||!rec.email||!rec.key)return false;
+    const raw=localStorage.getItem("mb_vault_v2_"+rec.profileId);if(!raw){await clearActiveSession();return false}
+    const o=JSON.parse(raw),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},rec.key,unb64(o.data));
+    state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=rec.key;currentProfileId=rec.profileId;currentEmail=normEmail(rec.email);
+    rememberProfileEmail(currentEmail);lock.style.display="none";render();return true
+  }catch(e){await clearActiveSession();return false}
+}
 function normEmail(v){return String(v||"").trim().toLowerCase()}
 function emailOk(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail(v))}
 function profiles(){try{return JSON.parse(localStorage.getItem("mb_profiles_v2")||"[]")}catch(e){return []}}
@@ -488,7 +535,7 @@ async function createVault(){
   if(list.some(x=>x.id===id)){notify("Ese correo ya tiene un espacio en este dispositivo. Elegí “Ya tengo un espacio”.","warn");return;}
   const salt=crypto.getRandomValues(new Uint8Array(16));
   vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;state=EMPTY_STATE();
-  list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);rememberProfileEmail(e);await persist();
+  list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);rememberProfileEmail(e);await persist();await saveActiveSession();
   lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500)
 }
 async function unlockLegacy(e,p){
@@ -499,7 +546,7 @@ async function unlockLegacy(e,p){
     const id=await profileId(e),salt=crypto.getRandomValues(new Uint8Array(16)),list=profiles();
     vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;
     if(!list.some(x=>x.id===id)){list.push({id,email:e,salt:b64(salt),createdAt:Date.now(),migrated:true});saveProfiles(list)}
-    rememberProfileEmail(e);await persist();localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");return true
+    rememberProfileEmail(e);await persist();await saveActiveSession();localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");return true
   }catch(err){return false}
 }
 async function unlockVault(){
@@ -513,17 +560,17 @@ async function unlockVault(){
     const k=await derive(e+"|"+p,new Uint8Array(unb64(prof.salt))),o=JSON.parse(localStorage.getItem("mb_vault_v2_"+id)||"null");
     if(!o)throw new Error("missing vault");
     const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},k,unb64(o.data));
-    state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=k;currentProfileId=id;currentEmail=e;rememberProfileEmail(e);lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500)
+    state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=k;currentProfileId=id;currentEmail=e;rememberProfileEmail(e);await saveActiveSession();lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500)
   }catch(err){notify("Correo o PIN incorrecto, o los datos están dañados.","error")}
 }
-function logoutVault(){
-  const remembered=currentEmail;closeM("accountModal");finishGuide(false);
+async function logoutVault(){
+  const remembered=currentEmail;closeM("accountModal");finishGuide(false);await clearActiveSession();
   vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();
   if(remembered)rememberProfileEmail(remembered);
   lock.style.display="flex";showLogin();render();notify("Sesión cerrada. Tus datos siguen guardados.","success")
 }
 function resetAllVaults(){openM("resetConfirmModal")}
-function confirmResetAllVaults(){profiles().forEach(p=>localStorage.removeItem("mb_vault_v2_"+p.id));localStorage.removeItem("mb_profiles_v2");localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");closeM("resetConfirmModal");location.reload()}
+async function confirmResetAllVaults(){await clearActiveSession();profiles().forEach(p=>localStorage.removeItem("mb_vault_v2_"+p.id));localStorage.removeItem("mb_profiles_v2");localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");closeM("resetConfirmModal");location.reload()}
 let soundEnabled=localStorage.getItem("mb_sound")!=="off",audioCtx=null;
 function appClickSound(){
   if(!soundEnabled)return;
@@ -617,9 +664,14 @@ async function installApp(){
   }
   openM("installHelpModal");
 }
-applyTheme(localStorage.getItem("mb_theme")||"dark");syncSoundUI();
-if(profiles().length||localStorage.getItem("mb_salt"))showLogin();else showSetup();
-renderCats();render();syncInstallUI();
+async function bootApp(){
+  applyTheme(localStorage.getItem("mb_theme")||"dark");syncSoundUI();renderCats();render();syncInstallUI();
+  const resumed=await restoreActiveSession();
+  if(resumed){lock.style.display="none";setTimeout(()=>maybeStartGuide(),450);return}
+  lock.style.display="flex";
+  if(profiles().length||localStorage.getItem("mb_salt"))showLogin();else showSetup()
+}
+bootApp();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
 </script>
 </body></html>
