@@ -130,11 +130,19 @@ body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
 
 /* Guided tour */
 .guideLayer{position:fixed;inset:0;z-index:900;display:none;pointer-events:none}
-.guideLayer.show{display:block}.guideSpot{position:fixed;border:2px solid #ff9a49;border-radius:20px;box-shadow:0 0 0 9999px rgba(1,8,17,.76),0 0 0 5px rgba(255,122,26,.14),0 0 28px rgba(255,122,26,.5);transition:all .24s ease;pointer-events:none}
-.guideCard{position:fixed;left:14px;right:14px;max-width:480px;margin:auto;padding:16px;border-radius:21px;background:linear-gradient(145deg,#123b68,#091f39);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.42);color:#fff;pointer-events:auto}
-.guideCard.top{top:18px}.guideCard.bottom{bottom:calc(18px + env(safe-area-inset-bottom))}
-.guideStep{color:#ffad6d;font-size:10px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.guideCard h3{margin:6px 0;font-size:20px}.guideCard p{margin:0;color:#d1ddeb;font-size:13px;line-height:1.45}.guideButtons{display:grid;grid-template-columns:auto 1fr;gap:9px;margin-top:13px}.guideSkip,.guideNext{border-radius:13px;padding:10px 12px;font-weight:900}.guideSkip{border:1px solid rgba(255,255,255,.15);background:transparent;color:#d5dfeb}.guideNext{border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff}
-.guideHint{margin-top:8px!important;font-size:10px!important;color:#8fa6c0!important}
+.guideLayer.show{display:block}
+.guideSpot{position:fixed;border:2px solid #ff9a49;border-radius:22px;box-shadow:0 0 0 9999px rgba(1,8,17,.78),0 0 0 5px rgba(255,122,26,.14),0 0 30px rgba(255,122,26,.55);transition:all .24s ease;pointer-events:none}
+.guideCard{position:fixed;left:50%;right:auto;width:min(330px,calc(100vw - 28px));max-width:330px;min-height:230px;transform:translateX(-50%);display:flex;flex-direction:column;padding:18px;border-radius:24px;background:linear-gradient(155deg,#123b68,#091f39 68%);border:1px solid rgba(255,255,255,.16);box-shadow:0 20px 54px rgba(0,0,0,.48);color:#fff;pointer-events:auto;overflow:hidden}
+.guideCard.top{top:18px;bottom:auto}.guideCard.bottom{top:auto;bottom:calc(18px + env(safe-area-inset-bottom))}
+.guideStep{color:#ffad6d;font-size:10px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
+.guideCard h3{margin:8px 0 7px;font-size:21px;line-height:1.12}
+.guideCard p{margin:0;color:#d1ddeb;font-size:13px;line-height:1.48}
+.guideHint{margin-top:9px!important;font-size:10px!important;color:#8fa6c0!important}
+.guideButtons{display:grid;grid-template-columns:88px 1fr;gap:9px;margin-top:auto;padding-top:16px}
+.guideSkip,.guideNext{min-height:44px;border-radius:14px;padding:10px 12px;font-weight:950;font-size:13px}
+.guideSkip{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);color:#d5dfeb}
+.guideNext{border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff;box-shadow:0 8px 18px rgba(255,122,26,.24)}
+@media(max-height:650px){.guideCard{min-height:205px;max-height:44vh;overflow:auto}.guideButtons{position:sticky;bottom:-18px;background:linear-gradient(180deg,transparent,#091f39 26%);padding-top:18px;padding-bottom:4px}}
 
 /* Footer */
 .appFooter{margin:24px 18px 12px;padding:18px 12px 28px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.55}.appFooter b{color:var(--text);font-size:12px}
@@ -313,7 +321,7 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
     <h3 id="guideTitle">Bienvenido a Mi Balance</h3>
     <p id="guideText">Te mostramos lo esencial en menos de un minuto.</p>
     <p class="guideHint">La parte iluminada es la que estamos explicando.</p>
-    <div class="guideButtons"><button class="guideSkip" onclick="finishGuide()">Salir</button><button id="guideNext" class="guideNext" onclick="nextGuide()">Siguiente</button></div>
+    <div class="guideButtons"><button class="guideSkip" onclick="finishGuide()">Cerrar guía</button><button id="guideNext" class="guideNext" onclick="nextGuide()">Siguiente →</button></div>
   </div>
 </div>
 
@@ -535,14 +543,12 @@ function openAccount(){if($("accountEmail"))$("accountEmail").textContent=curren
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
-  {sel:"#financialPulse",title:"Tu pulso financiero",text:"Este monitor traduce tus números en una señal visual. No es médico: cuanto más exigido está tu presupuesto, cambia el ritmo y el color."},
-  {sel:"#incomeCard",title:"Empezá por tu ingreso",text:"Cargá cuánto entra por mes y cuánto querés separar para vos. Con eso Mi Balance calcula el resto."},
-  {sel:"#quickExpenses",title:"Gastos en segundos",text:"Esto está pensado para usarlo todo el día. Café, kiosco, transporte o cualquier gasto: tocás, ponés el monto y listo."},
-  {sel:"#microInsight",title:"Descubrí los microgastos",text:"Mi Balance junta esos gastos chicos que parecen nada y te muestra cuánto representan en el mes y en el año."},
-  {sel:"#goalsCard",title:"Poné una meta concreta",text:"Podés crear una meta semanal, mensual o anual y comparar cuánto necesitás separar con tu ritmo actual."},
-  {sel:"#shareCard",title:"Ayudá a otra persona",text:"Si a alguien le puede servir ordenar sus números, compartile Mi Balance desde acá."},
-  {sel:"#helpBtn",title:"Volvé a esta guía cuando quieras",text:"El botón ? queda siempre arriba. También podés abrir Tu espacio para cerrar sesión o activar y silenciar los sonidos."}
-];
+  {sel:"#financialPulse",title:"Tu pulso financiero",text:"Acá ves de un vistazo cómo vienen tus números. El color y el ritmo cambian según qué tan exigido esté tu presupuesto."},
+  {sel:"#incomeCard",title:"Primero: cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance empieza a calcular todo."},
+  {sel:"#quickExpenses",title:"Después: anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos café, kiosco, transporte o cualquier gasto del día."},
+  {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."},
+  {sel:"#goalsCard",title:"Terminá con una meta",text:"Elegí algo concreto que quieras lograr y comparalo con tu ritmo de ahorro. Después podés tocar ? cuando quieras volver a ver esta guía."}
+]
 let guideIndex=0,guideForce=false,guideTimer=null;
 function tourSeenKey(){return currentProfileId?"mb_tour_seen_v2_"+currentProfileId:"mb_tour_seen_v2_guest"}
 function maybeStartGuide(){if(!localStorage.getItem(tourSeenKey()))startGuide(false)}
@@ -559,8 +565,11 @@ function showGuideStep(){
     spot.style.left=Math.max(6,r.left-pad)+"px";spot.style.top=Math.max(6,r.top-pad)+"px";
     spot.style.width=Math.min(innerWidth-12,r.width+pad*2)+"px";spot.style.height=Math.min(innerHeight-12,r.height+pad*2)+"px";
     $("guideStep").textContent="PASO "+(guideIndex+1)+" DE "+GUIDE_STEPS.length;$("guideTitle").textContent=step.title;$("guideText").textContent=step.text;
-    $("guideNext").textContent=guideIndex===GUIDE_STEPS.length-1?"Listo":"Siguiente";
-    card.classList.remove("top","bottom");card.classList.add(r.top>innerHeight*.48?"top":"bottom")
+    $("guideNext").textContent=guideIndex===GUIDE_STEPS.length-1?"Finalizar":"Siguiente →";
+    card.classList.remove("top","bottom");
+    const targetLow=r.top>innerHeight*.50;
+    card.classList.add(targetLow?"top":"bottom");
+    requestAnimationFrame(()=>{const cr=card.getBoundingClientRect();if(cr.top<8){card.classList.remove("top");card.classList.add("bottom")}else if(cr.bottom>innerHeight-8){card.classList.remove("bottom");card.classList.add("top")}})
   },320)
 }
 function nextGuide(){if(guideIndex>=GUIDE_STEPS.length-1){finishGuide();return}guideIndex++;showGuideStep()}
