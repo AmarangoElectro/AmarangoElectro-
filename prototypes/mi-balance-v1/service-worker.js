@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v3-financial-pulse';
+const CACHE='mi-balance-v4-private-profiles-quick-goals';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
