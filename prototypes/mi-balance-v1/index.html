@@ -441,7 +441,7 @@ body[data-theme="light"] .goalRemoveBtn{background:#f3f6f8;color:#5f7185;border-
 
 <div id="profileNameModal" class="modal" onclick="backdrop(event,'profileNameModal')"><div class="sheet"><h3>¿Cómo querés que te saludemos?</h3><p style="color:#56677b;line-height:1.5">Es opcional. Se guarda cifrado junto con tus datos en este dispositivo.</p><input id="profileNameInput" maxlength="24" placeholder="Ej: Maxi"><button class="primary" onclick="saveProfileName()">Guardar saludo</button><button class="secondary" onclick="closeM('profileNameModal')">Cancelar</button></div></div>
 
-<div id="quickPresetModal" class="modal" onclick="backdrop(event,'quickPresetModal')"><div class="sheet"><h3>⚡ Tus gastos de siempre</h3><p style="color:#56677b;line-height:1.5">Guardá un importe habitual. Después el botón <b>+1</b> lo suma sin pedirte nada.</p><label class="fieldLabel">Gasto</label><select id="presetCategory"></select><label class="fieldLabel">Importe habitual</label><input id="presetAmount" type="number" inputmode="decimal" placeholder="Ej: 3500"><button class="primary" onclick="saveQuickPreset()">Guardar gasto de siempre</button><div id="presetList" class="presetList"></div><button class="secondary" onclick="closeM('quickPresetModal')">Cerrar</button></div></div>
+<div id="quickPresetModal" class="modal" onclick="backdrop(event,'quickPresetModal')"><div class="sheet"><h3>⚡ Tus gastos de siempre</h3><p style="color:#56677b;line-height:1.5">Guardá un importe habitual. Después el botón <b>+1</b> lo suma sin pedirte nada.</p><label class="fieldLabel">Gasto</label><select id="presetCategory" onchange="loadPresetCategory()"></select><label class="fieldLabel">Importe habitual</label><input id="presetAmount" type="number" inputmode="decimal" placeholder="Ej: 3500"><button class="primary" onclick="saveQuickPreset()">Guardar gasto de siempre</button><div id="presetList" class="presetList"></div><button class="secondary" onclick="closeM('quickPresetModal')">Cerrar</button></div></div>
 
 <div id="removeGoalModal" class="modal" onclick="backdrop(event,'removeGoalModal')"><div class="sheet"><h3>Quitar esta meta</h3><p style="color:#56677b;line-height:1.5">La sacamos de tus metas activas, pero queda anotada en tu historial para que no pierdas el recorrido.</p><button class="dangerBtn" onclick="confirmRemoveGoal()">Quitar de mis metas</button><button class="secondary" onclick="closeM('removeGoalModal')">Cancelar</button></div></div>
 
@@ -465,7 +465,7 @@ let state=EMPTY_STATE(), selected="Otros", quickContext=null, pendingGoalPeriod=
 const $=id=>document.getElementById(id), fmt=n=>"$ "+Math.round(Number(n||0)).toLocaleString("es-AR");
 function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.goals=x.goals&&typeof x.goals==="object"?x.goals:{week:null,month:null,year:null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
 function monthExpenses(){const n=new Date();return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()})}
-function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Golosinas","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
+function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
 function categoryEmoji(name){return (cats.find(c=>c[1]===name)||["🧾"])[0]}
 function monthCategoryCount(cat){return monthExpenses().filter(e=>e.category===cat).length}
@@ -488,9 +488,9 @@ function quickAddUsual(cat){
 function openQuickPresetManager(){
   presetCategory.innerHTML=cats.filter(c=>c[1]!=="Otros").map(c=>'<option value="'+escapeHtml(c[1])+'">'+c[0]+' '+escapeHtml(c[1])+'</option>').join("");
   const first=Object.keys(state.quickPresets||{})[0];if(first)presetCategory.value=first;
-  presetAmount.value=first?Number(state.quickPresets[first]?.amount)||"":"";
-  renderPresetList();openM("quickPresetModal")
+  loadPresetCategory();renderPresetList();openM("quickPresetModal")
 }
+function loadPresetCategory(){const cat=presetCategory.value;presetAmount.value=cat?Number(state.quickPresets?.[cat]?.amount)||"":""}
 function renderPresetList(){
   const box=$("presetList");if(!box)return;const entries=Object.entries(state.quickPresets||{}).filter(([,p])=>Number(p?.amount)>0);
   box.innerHTML=entries.length?entries.map(([cat,p])=>'<div class="presetRow"><div><b>'+categoryEmoji(cat)+' '+escapeHtml(cat)+'</b><small>'+fmt(p.amount)+' por unidad · '+monthCategoryCount(cat)+' este mes</small></div><button class="presetDelete" onclick="deleteQuickPreset(\''+escapeHtml(cat)+'\')">Quitar</button></div>').join(""):'<div class="goalHint">Todavía no guardaste gastos de siempre.</div>'
