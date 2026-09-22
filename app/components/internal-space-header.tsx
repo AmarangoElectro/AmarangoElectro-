@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "./store-link";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, LogOut, ShieldCheck } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+import { chatGPTSignOutPath } from "@/app/chatgpt-auth";
 
 export function InternalSpaceHeader({ eyebrow, title, badge }: { eyebrow: string; title: string; badge: string }) {
   return (
@@ -14,8 +15,9 @@ export function InternalSpaceHeader({ eyebrow, title, badge }: { eyebrow: string
         <div className="internal-space-theme"><ThemeToggle /></div>
         <span className="internal-space-badge"><ShieldCheck size={15} /> {badge}</span>
         <Link href="/"><ArrowLeft size={16} /> Tienda</Link>
+        <a className="internal-space-signout" href={chatGPTSignOutPath("/")}><LogOut size={16} /> Cerrar sesión</a>
       </div>
-      <p className="identity-contract">Zona reservada para login, perfiles Maxi/Angie y sesión persistente.</p>
+      <p className="identity-contract">Sesión activa. Mientras el acceso siga vigente, podés volver a este espacio sin iniciar sesión de nuevo.</p>
     </header>
   );
 }
