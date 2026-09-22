@@ -186,10 +186,10 @@ body[data-theme="light"] .goalCelebration{background:#edf9f3;border-color:#bde8d
 body[data-theme="light"] .goalCelebration p{color:#3d6653}
 body[data-theme="light"] .lab,body[data-theme="light"] .meta small,body[data-theme="light"] .quickHead small{color:#5f7185}
 body[data-theme="light"] .val,body[data-theme="light"] .quickHead b,body[data-theme="light"] .goalsCard b,body[data-theme="light"] .insightCard b,body[data-theme="light"] .shareCard b,body[data-theme="light"] .storeCard b{color:#112848}
-body[data-theme="light"] .pulseCard{background:radial-gradient(circle at 85% 10%,color-mix(in srgb,var(--pulse) 10%,transparent),transparent 28%),linear-gradient(145deg,#071a30,#0b2949);color:#f7f9fc}
-body[data-theme="light"] .pulseMsg{color:#c9d6e5}
+body[data-theme="light"] .pulseCard{background:radial-gradient(circle at 85% 10%,color-mix(in srgb,var(--pulse) 10%,transparent),transparent 28%),linear-gradient(145deg,#ffffff,#f2f6f8);color:#112848}
+body[data-theme="light"] .pulseMsg{color:#51657a}
 body[data-theme="light"] .pulseMonitorTop{color:#7f99b6}
-body[data-theme="light"] .pulseTitle{color:#f7f9fc}
+body[data-theme="light"] .pulseTitle{color:#112848}
 body[data-theme="light"] .healthBadge{background:#f2f5f8}
 body[data-theme="light"] .sheet p,body[data-theme="light"] .accountEmail,body[data-theme="light"] .accountLine{color:#4f6277!important}
 body[data-theme="light"] input::placeholder{color:#7d8996}
@@ -232,6 +232,85 @@ body[data-theme="light"] .goalHistoryHead b,body[data-theme="light"] .historyGoa
 body[data-theme="light"] .historyGoal{background:#f5f7f9;border-color:#dce4ea}
 body[data-theme="light"] .goalRemoveBtn{background:#f3f6f8;color:#5f7185;border-color:#dce4eb}
 @media(max-width:390px){.quickItem{min-width:90px}.quickItem .quickChip{min-width:90px}}
+
+/* Strict dark/light consistency */
+body[data-theme="dark"] .sheet{background:#091f39;color:#f7f9fc;border-top:1px solid rgba(255,255,255,.08)}
+body[data-theme="dark"] .sheet p,body[data-theme="dark"] .accountEmail,body[data-theme="dark"] .accountLine{color:#aebed3!important}
+body[data-theme="dark"] .sheet input,body[data-theme="dark"] .sheet select,body[data-theme="dark"] .amount,body[data-theme="dark"] .cat,body[data-theme="dark"] .secondary{background:#0e2b4e;color:#f7f9fc;border-color:rgba(255,255,255,.12)}
+body[data-theme="dark"] .amount input{background:transparent!important;color:#fff!important;border:0!important}
+body[data-theme="dark"] input::placeholder{color:#8fa4bd}
+body[data-theme="dark"] .cat.on{background:#173c68;outline-color:#ff7a1a}
+body[data-theme="dark"] .goalSuggest,body[data-theme="dark"] .presetRow,body[data-theme="dark"] .accountAction,body[data-theme="dark"] .exitGo{background:#0e2b4e;color:#f7f9fc;border-color:rgba(255,255,255,.12)}
+body[data-theme="dark"] .rememberRow{background:#0e2b4e;color:#cbd7e6;border:1px solid rgba(255,255,255,.10)}
+body[data-theme="dark"] .logoutBtn{background:#351b24;color:#ff9b9b;border-color:#5c2a36}
+body[data-theme="dark"] .dangerBtn{background:linear-gradient(145deg,#7d2727,#a43b3b)}
+body[data-theme="dark"] .modal{background:rgba(0,5,14,.72)}
+body[data-theme="dark"] .shareFallbackUrl{background:#0e2b4e;color:#f7f9fc;border-color:rgba(255,255,255,.12)}
+body[data-theme="dark"] .goalDoneBtn{color:#70e6ae}
+body[data-theme="dark"] .goalRemoveBtn{background:#102f53;color:#aebed3}
+body[data-theme="light"] .pulseCard{background:radial-gradient(circle at 85% 10%,color-mix(in srgb,var(--pulse) 10%,transparent),transparent 28%),linear-gradient(145deg,#ffffff,#f2f6f8);color:#112848;border-color:#d7e1e8;box-shadow:0 9px 24px rgba(31,49,70,.07)}
+body[data-theme="light"] .pulseTitle{color:#112848}
+body[data-theme="light"] .pulseMsg{color:#51657a}
+body[data-theme="light"] .pulseMonitorTop{color:#6f8297}
+body[data-theme="light"] .pulseScreen{background:#edf3f5;border-color:#d6e2e7;box-shadow:inset 0 0 18px rgba(31,49,70,.05)}
+body[data-theme="light"] .pulseScreen:before{background-image:linear-gradient(rgba(25,77,72,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(25,77,72,.07) 1px,transparent 1px)}
+body[data-theme="light"] .pulseLine{filter:drop-shadow(0 0 3px color-mix(in srgb,var(--pulse) 35%,transparent))}
+body[data-theme="light"] .installOnboard{background:#fff;color:#112848;border-color:#d9e2ea}
+body[data-theme="light"] .installCard{background:linear-gradient(180deg,#fff,#faf7f1);color:#112848}
+body[data-theme="light"] .tip{background:#fff;color:#112848;border-color:#d9e2ea}
+body[data-theme="light"] .tip p{color:#52667a}
+body[data-theme="light"] .quickUsual{color:#fff}
+body[data-theme="light"] .exitStay{color:#fff}
+
+/* Quick-entry drawer from the + button */
+.dailySheet{padding-top:14px}
+.dailyHandle{width:42px;height:5px;border-radius:99px;background:#c4ced8;margin:0 auto 12px;opacity:.65}
+.dailyHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.dailyHead h3{margin:0}.dailyHead p{margin:4px 0 0;color:#66788c;font-size:12px;line-height:1.35}.dailyClose{width:38px;height:38px;border-radius:13px;border:1px solid #dce6ef;background:#fff;color:#20354d;font-size:20px;font-weight:900}
+.dailyGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
+.dailyCard{position:relative;min-height:105px;border:1px solid #dce6ef;border-radius:18px;background:#fff;color:#142a43;padding:13px;text-align:left;overflow:hidden}
+.dailyCard .dailyEmoji{font-size:25px;display:block}.dailyCard b{display:block;margin-top:6px;font-size:13px}.dailyCard small{display:block;margin-top:3px;color:#748398;font-size:10px}
+.dailyCard.hasPreset{padding-bottom:40px}.dailyPlus{position:absolute;left:9px;right:9px;bottom:8px;height:29px;border:0;border-radius:11px;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff;font-size:10px;font-weight:950}
+.dailyAlt{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.dailyAlt button{border-radius:14px;padding:11px;border:1px solid #dce6ef;background:#fff;color:#173452;font-weight:900;font-size:11px}
+.dailyAlt button:first-child{background:#eef4f9}
+body[data-theme="dark"] .dailyHead p{color:#aebed3}
+body[data-theme="dark"] .dailyClose,body[data-theme="dark"] .dailyCard,body[data-theme="dark"] .dailyAlt button{background:#0e2b4e;color:#f7f9fc;border-color:rgba(255,255,255,.12)}
+body[data-theme="dark"] .dailyCard small{color:#9fb1c7}
+body[data-theme="dark"] .dailyAlt button:first-child{background:#173c68}
+
+/* Expense cadence */
+.frequencyRow{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.freqBtn{border:1px solid #dce6ef;background:#fff;color:#51657a;border-radius:12px;padding:9px 5px;font-size:9px;font-weight:850}
+.freqBtn.on{outline:2px solid #ff7a1a;background:#fff3e9;color:#9d470d}
+body[data-theme="dark"] .freqBtn{background:#0e2b4e;color:#aebed3;border-color:rgba(255,255,255,.12)}
+body[data-theme="dark"] .freqBtn.on{background:#173c68;color:#ffb477}
+
+/* Aspirational goal poster */
+.goalFocus{display:block;padding:0;overflow:hidden;border-radius:26px;background:#0b2949}
+.goalDreamVisual{position:relative;height:150px;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(145deg,#123b68,#081d37)}
+.goalDreamVisual:before,.goalDreamVisual:after{content:"";position:absolute;border-radius:50%;filter:blur(2px);opacity:.65}
+.goalDreamVisual:before{width:160px;height:160px;right:-45px;top:-65px;background:rgba(255,255,255,.10)}
+.goalDreamVisual:after{width:105px;height:105px;left:-28px;bottom:-52px;background:rgba(255,122,26,.18)}
+.goalDreamSky{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent 56%)}
+.goalDreamRoad{position:absolute;left:-10%;right:-10%;bottom:-22px;height:74px;background:rgba(2,11,21,.34);transform:skewY(-4deg);border-top:1px solid rgba(255,255,255,.08)}
+.goalDreamRoad:after{content:"";position:absolute;left:14%;right:14%;top:22px;height:2px;background:linear-gradient(90deg,transparent 0 10%,rgba(255,255,255,.55) 10% 21%,transparent 21% 36%,rgba(255,255,255,.55) 36% 48%,transparent 48% 64%,rgba(255,255,255,.55) 64% 76%,transparent 76%)}
+.goalDreamEmoji{position:absolute;right:22px;bottom:19px;font-size:70px;line-height:1;filter:drop-shadow(0 12px 18px rgba(0,0,0,.36));transform:rotate(-3deg)}
+.goalDreamCopy{position:absolute;left:17px;top:17px;max-width:62%;z-index:3}.goalDreamCopy small{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#ffd0a8;font-weight:950}.goalDreamCopy strong{display:block;margin-top:6px;font-size:24px;line-height:1.02;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.25)}
+.goalDreamCopy em{display:block;margin-top:7px;font-size:10px;line-height:1.35;color:#dce8f5;font-style:normal}
+.goalFocusBody{padding:14px 15px 15px}.goalFocusBody .goalFocusName{font-size:17px}.goalFocusMotivation{margin-top:8px;padding:9px 10px;border-radius:13px;background:rgba(255,122,26,.08);border:1px solid rgba(255,154,73,.16);color:#ffd0ae;font-size:10px;line-height:1.42}
+.goalTheme-auto .goalDreamVisual{background:linear-gradient(160deg,#142c4b 0%,#0b4f6f 52%,#f18b45 130%)}
+.goalTheme-vacation .goalDreamVisual{background:linear-gradient(155deg,#315f95 0%,#5ab4c8 54%,#ffbb72 110%)}
+.goalTheme-house .goalDreamVisual{background:linear-gradient(155deg,#183b37,#3e7664 55%,#c99a5b 125%)}
+.goalTheme-tech .goalDreamVisual{background:linear-gradient(155deg,#12294e,#315ca8 58%,#7b61d1 125%)}
+.goalTheme-emergency .goalDreamVisual{background:linear-gradient(155deg,#103d41,#146a62 58%,#42b98d 125%)}
+.goalTheme-health .goalDreamVisual{background:linear-gradient(155deg,#183b45,#24706a 58%,#5bc28c 125%)}
+.goalTheme-money .goalDreamVisual{background:linear-gradient(155deg,#263b2c,#5b7a39 58%,#d2ad55 125%)}
+.goalTheme-default .goalDreamVisual{background:linear-gradient(155deg,#173357,#254f7c 58%,#ff8a43 135%)}
+body[data-theme="light"] .goalFocus{background:#fff;border-color:#e1d5c8;box-shadow:0 12px 28px rgba(31,49,70,.08)}
+body[data-theme="light"] .goalFocusBody{color:#112848}
+body[data-theme="light"] .goalFocusMeta{color:#53677d}
+body[data-theme="light"] .goalFocusMotivation{background:#fff5ec;color:#8f4b1d;border-color:#efd4bd}
+body[data-theme="light"] .goalFocusBar{background:#e7ecf0}
+@media(max-width:390px){.goalDreamVisual{height:140px}.goalDreamEmoji{font-size:62px}.goalDreamCopy strong{font-size:21px}.dailyGrid{grid-template-columns:repeat(2,1fr)}}
 
 </style>
 </head>
@@ -287,12 +366,16 @@ body[data-theme="light"] .goalRemoveBtn{background:#f3f6f8;color:#5f7185;border-
   <div id="financialHealthBadge" class="healthBadge" data-health="neutral">Empezando</div>
 </section>
 
-<section id="goalFocus" class="goalFocus empty">
-  <div id="goalFocusIcon" class="goalFocusIcon">🎯</div>
-  <div>
-    <div class="goalFocusEy">TU META EN FOCO</div>
+<section id="goalFocus" class="goalFocus goalTheme-default">
+  <div class="goalDreamVisual">
+    <div class="goalDreamSky"></div><div class="goalDreamRoad"></div>
+    <div class="goalDreamCopy"><small>TU META EN FOCO</small><strong id="goalDreamTitle">Tu próxima conquista</strong><em id="goalDreamLine">Mirala antes de gastar. Cada decisión puede acercarte un poco más.</em></div>
+    <div id="goalDreamEmoji" class="goalDreamEmoji">🎯</div>
+  </div>
+  <div class="goalFocusBody">
     <div id="goalFocusName" class="goalFocusName">Elegí algo que quieras lograr</div>
-    <div id="goalFocusMeta" class="goalFocusMeta">Ver tu meta cada vez que abrís la app ayuda a mantenerla presente antes de gastar.</div>
+    <div id="goalFocusMeta" class="goalFocusMeta">Tu meta va a quedar siempre cerca para ayudarte a priorizar lo importante.</div>
+    <div id="goalFocusMotivation" class="goalFocusMotivation">Antes de un gasto impulsivo, preguntate: ¿esto me acerca o me aleja de lo que quiero?</div>
     <div id="goalFocusBar" class="goalFocusBar hidden"><i id="goalFocusFill" style="width:0%"></i></div>
     <div class="goalFocusActions"><button id="goalFocusEdit" class="goalFocusBtn" onclick="openGoal()">Crear meta</button><button id="goalFocusDone" class="goalFocusBtn done hidden" onclick="completeFeaturedGoal()">✓ Marcar lograda</button></div>
   </div>
@@ -395,10 +478,12 @@ body[data-theme="light"] .goalRemoveBtn{background:#f3f6f8;color:#5f7185;border-
 <footer class="appFooter"><b>Mi Balance</b><br>Creada con ❤️ por el equipo de AmarangoElectro.<br>Una herramienta simple para ayudarte a cuidar tus números.</footer>
 </div>
 
-<button class="fab" onclick="openExpense()">+</button>
-<nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>🧾</span>Gastos</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
+<button class="fab" onclick="openDailyQuickDrawer()" aria-label="Agregar gasto rápido">+</button>
+<nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>➕</span>Agregar</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
 
-<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span>$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
+<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span>$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
+
+<div id="dailyQuickModal" class="modal" onclick="backdrop(event,'dailyQuickModal')"><div class="sheet dailySheet"><div class="dailyHandle"></div><div class="dailyHead"><div><h3>¿Qué gastaste recién?</h3><p>Elegí uno. Si tiene “+1”, suma el importe de siempre al instante.</p></div><button class="dailyClose" onclick="closeM('dailyQuickModal')">×</button></div><div id="dailyQuickGrid" class="dailyGrid"></div><div class="dailyAlt"><button onclick="closeM('dailyQuickModal');openExpense()">Otro gasto / alquiler / servicio</button><button onclick="closeM('dailyQuickModal');openQuickPresetManager()">⚙ Gastos de siempre</button></div></div></div>
 
 <div id="incomeModal" class="modal" onclick="backdrop(event,'incomeModal')"><div class="sheet"><h3>Tu ingreso mensual</h3><input id="incomeInput" type="number" inputmode="decimal" placeholder="¿Cuánto entra por mes?"><label style="display:block;margin:13px 0 6px;font-weight:900">¿Cuánto querés reservar para vos?</label><select id="savingPct"><option>10</option><option>15</option><option selected>20</option><option>25</option><option>30</option></select><button class="primary" onclick="saveIncome()">Guardar</button><button class="secondary" onclick="closeM('incomeModal')">Cancelar</button></div></div>
 
@@ -461,7 +546,7 @@ body[data-theme="light"] .goalRemoveBtn{background:#f3f6f8;color:#5f7185;border-
 <script>
 const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍷","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
 const EMPTY_STATE=()=>({profileName:"",income:0,savingPct:20,expenses:[],quickPresets:{},goals:{week:null,month:null,year:null},goalHistory:[]});
-let state=EMPTY_STATE(), selected="Otros", quickContext=null, pendingGoalPeriod=null, vaultKey=null, currentProfileId=null, currentEmail="";
+let state=EMPTY_STATE(), selected="Otros", quickContext=null, expenseFrequency="once", pendingGoalPeriod=null, vaultKey=null, currentProfileId=null, currentEmail="";
 const $=id=>document.getElementById(id), fmt=n=>"$ "+Math.round(Number(n||0)).toLocaleString("es-AR");
 function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.goals=x.goals&&typeof x.goals==="object"?x.goals:{week:null,month:null,year:null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
 function monthExpenses(){const n=new Date();return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()})}
@@ -497,6 +582,17 @@ function renderPresetList(){
 }
 function saveQuickPreset(){const cat=presetCategory.value,a=Number(presetAmount.value)||0;if(!cat||a<=0){notify("Elegí un gasto y un importe válido.","warn");return}state.quickPresets=state.quickPresets||{};state.quickPresets[cat]={amount:a,updatedAt:Date.now()};persist();render();renderPresetList();notify("Guardamos "+cat+" como gasto de siempre.","success")}
 function deleteQuickPreset(cat){delete state.quickPresets[cat];persist();render();renderPresetList();notify("Quitamos ese gasto de siempre.","success")}
+function openDailyQuickDrawer(){renderDailyQuickDrawer();openM("dailyQuickModal")}
+function renderDailyQuickDrawer(){
+  const grid=$("dailyQuickGrid");if(!grid)return;
+  const starter=["Café","Kiosco","Cigarrillos","Cerveza","Viáticos","Bebidas"],saved=Object.keys(state.quickPresets||{}).filter(k=>Number(state.quickPresets[k]?.amount)>0),ordered=[...new Set([...saved,...starter])].slice(0,8);
+  grid.innerHTML=ordered.map(cat=>{
+    const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,count=monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
+    return '<div class="dailyCard '+(amount?'hasPreset':'')+'" onclick="'+(amount?('quickAddFromDrawer(\''+escapeHtml(cat)+'\')'):('openQuickFromDrawer(\''+escapeHtml(cat)+'\')'))+'"><span class="dailyEmoji">'+emoji+'</span><b>'+escapeHtml(label)+'</b><small>'+(amount?('De siempre · '+fmt(amount)):'Poné el importe')+(count?' · x'+count+' este mes':'')+'</small>'+(amount?'<button class="dailyPlus" onclick="event.stopPropagation();quickAddFromDrawer(\''+escapeHtml(cat)+'\')">＋1 '+fmt(amount)+'</button>':'')+'</div>'
+  }).join("")
+}
+function quickAddFromDrawer(cat){quickAddUsual(cat);renderDailyQuickDrawer()}
+function openQuickFromDrawer(cat){closeM("dailyQuickModal");openQuick(cat)}
 function inferGoalIcon(name){
   const n=String(name||"").toLowerCase();
   if(/auto|coche|carro|veh[ií]culo/.test(n))return "🚗";
@@ -510,6 +606,17 @@ function inferGoalIcon(name){
   if(/salud|gym|gimnasio/.test(n))return "💚";
   if(/ahorr/.test(n))return "💰";
   return "🎯"
+}
+function goalVisualTheme(goal){
+  const icon=goal?.icon||inferGoalIcon(goal?.name||"");
+  if(icon==="🚗"||icon==="🏍️")return {cls:"goalTheme-auto",dream:"Ese vehículo que hoy imaginás puede convertirse en un plan.",emoji:icon};
+  if(icon==="✈️")return {cls:"goalTheme-vacation",dream:"Ese viaje empieza mucho antes de subirte al avión.",emoji:"🏝️"};
+  if(icon==="🏠")return {cls:"goalTheme-house",dream:"Tu casa futura se construye también con decisiones pequeñas.",emoji:"🏡"};
+  if(icon==="💻"||icon==="📱")return {cls:"goalTheme-tech",dream:"Que la próxima compra importante sea una decisión, no un impulso.",emoji:icon};
+  if(icon==="🛟")return {cls:"goalTheme-emergency",dream:"La tranquilidad también puede ser una meta concreta.",emoji:"🛟"};
+  if(icon==="🚭"||icon==="💚")return {cls:"goalTheme-health",dream:"Cuidar tu bolsillo y tu bienestar puede ir en la misma dirección.",emoji:icon};
+  if(icon==="💰")return {cls:"goalTheme-money",dream:"Ver crecer tu ahorro también es una conquista.",emoji:"💰"};
+  return {cls:"goalTheme-default",dream:"Mirar tu meta todos los días ayuda a recordar qué estás priorizando.",emoji:icon||"🎯"}
 }
 function goalCapacity(period){
   const saving=state.income*state.savingPct/100,now=new Date(),monthsLeft=Math.max(1,12-now.getMonth());
@@ -552,21 +659,35 @@ function renderGreetingAndFocus(){
   if(g)g.innerHTML=name?"Hola, "+name+" 👋":"Hola 👋";
   if(sub)sub.textContent=health.sub;
   if(badge){badge.dataset.health=health.key;badge.textContent=health.label}
-  const f=featuredGoal(),box=$("goalFocus"),icon=$("goalFocusIcon"),title=$("goalFocusName"),meta=$("goalFocusMeta"),bar=$("goalFocusBar"),fill=$("goalFocusFill"),edit=$("goalFocusEdit"),done=$("goalFocusDone"),cele=$("goalCelebration");
-  if(!box||!icon||!title||!meta)return;
+  const f=featuredGoal(),box=$("goalFocus"),dreamTitle=$("goalDreamTitle"),dreamLine=$("goalDreamLine"),dreamEmoji=$("goalDreamEmoji"),title=$("goalFocusName"),meta=$("goalFocusMeta"),motivation=$("goalFocusMotivation"),bar=$("goalFocusBar"),fill=$("goalFocusFill"),edit=$("goalFocusEdit"),done=$("goalFocusDone"),cele=$("goalCelebration");
+  if(!box||!title||!meta)return;
+  box.className="goalFocus goalTheme-default";
   if(!f){
-    box.classList.add("empty");icon.textContent="🎯";title.textContent="Elegí algo que quieras lograr";meta.textContent="Ver tu meta cada vez que abrís la app ayuda a tenerla presente antes de gastar.";
-    bar?.classList.add("hidden");done?.classList.add("hidden");if(edit){edit.textContent="Crear meta";edit.onclick=()=>openGoal("month")}if(cele)cele.classList.remove("show");return
+    if(dreamTitle)dreamTitle.textContent="Tu próxima conquista";
+    if(dreamLine)dreamLine.textContent="Elegí algo que realmente quieras. Después lo vas a ver cada vez que abras Mi Balance.";
+    if(dreamEmoji)dreamEmoji.textContent="🎯";
+    title.textContent="Elegí algo que quieras lograr";
+    meta.textContent="Tu meta va a quedar siempre cerca para ayudarte a priorizar lo importante.";
+    if(motivation)motivation.textContent="Antes de un gasto impulsivo, preguntate: ¿esto me acerca o me aleja de lo que quiero?";
+    bar?.classList.add("hidden");done?.classList.add("hidden");
+    if(edit){edit.textContent="Crear meta";edit.onclick=()=>openGoal("month")}
+    if(cele)cele.classList.remove("show");return
   }
-  const goal=f.goal,period=f.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":"hasta fin de año";
-  box.classList.remove("empty");icon.textContent=goal.icon||inferGoalIcon(goal.name);title.textContent=goal.name||"Tu meta";
+  const goal=f.goal,period=f.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":"hasta fin de año",visual=goalVisualTheme(goal);
+  box.className="goalFocus "+visual.cls;
+  if(dreamTitle)dreamTitle.textContent=goal.name||"Tu meta";
+  if(dreamLine)dreamLine.textContent=visual.dream;
+  if(dreamEmoji)dreamEmoji.textContent=visual.emoji;
+  title.textContent=(goal.icon||inferGoalIcon(goal.name))+" "+(goal.name||"Tu meta");
   if(goal.completedAt){
     meta.textContent="Meta marcada como lograda. Disfrutá este momento y elegí el próximo paso cuando quieras.";
+    if(motivation)motivation.textContent="Lo lograste. Guardá este momento como prueba de que sostener un plan funciona.";
     bar?.classList.remove("hidden");if(fill)fill.style.width="100%";done?.classList.add("hidden");
     if(edit){edit.textContent="Ver / editar";edit.onclick=()=>openGoal(period)}
     if(cele){cele.classList.add("show");$("celebrationTitle").textContent=period==="week"?"🏆 ¡Semana cumplida!":"🏆 ¡Meta cumplida!";$("celebrationText").textContent="Bien ahí"+(state.profileName?", "+state.profileName:"")+". Reconocer un logro también ayuda a sostener el hábito."}
   }else{
     meta.textContent=target>0?"Con tu ritmo actual proyectás "+fmt(capacity)+" "+periodLabel+" hacia una meta de "+fmt(target)+".":"Tené esta imagen presente antes de un gasto impulsivo.";
+    if(motivation)motivation.textContent="Antes de gastar, mirá tu meta: ¿esta compra te acerca o puede esperar?";
     bar?.classList.remove("hidden");if(fill)fill.style.width=pct+"%";done?.classList.remove("hidden");if(done)done.onclick=()=>completeGoal(period);
     if(edit){edit.textContent="Editar meta";edit.onclick=()=>openGoal(period)}if(cele)cele.classList.remove("show")
   }
@@ -634,7 +755,7 @@ function render(){
   incomeV.textContent=fmt(state.income);savingV.textContent=fmt(saving);spentV.textContent=fmt(spent);availableV.textContent=fmt(Math.max(0,avail));annualV.textContent=fmt(saving*12);
   savingText.textContent=state.savingPct+"% para vos";savingBar.style.width=Math.min(100,state.savingPct)+"%";spentText.textContent=(state.income?Math.round(spent/state.income*100):0)+"% de tus ingresos";
   expenseList.innerHTML="";
-  state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(e.note||"Sin nota")+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});
+  state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml((frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});
   if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
   renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();
 }
@@ -696,13 +817,15 @@ window.addEventListener("popstate",()=>{
 });
 function stayInApp(){closeM("exitConfirmModal")}
 function confirmAppExit(){closeM("exitConfirmModal");allowNativeExit=true;history.back()}
-function openExpense(){quickContext=null;selected="Otros";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
-function openQuick(cat){quickContext=cat;selected=cat;if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;const preset=Number(state.quickPresets?.[cat]?.amount)||0;expenseAmount.value=preset||"";if($("rememberQuickRow"))$("rememberQuickRow").classList.remove("hidden");if($("rememberQuickAmount"))$("rememberQuickAmount").checked=!preset;renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function setExpenseFrequency(freq){expenseFrequency=freq||"once";document.querySelectorAll("#frequencyRow .freqBtn").forEach(b=>b.classList.toggle("on",b.dataset.freq===expenseFrequency))}
+function frequencyLabel(freq){return freq==="daily"?"Diario":freq==="weekly"?"Semanal":freq==="monthly"?"Mensual":""}
+function openExpense(){quickContext=null;selected="Otros";expenseFrequency="once";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");setExpenseFrequency("once");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function openQuick(cat){quickContext=cat;selected=cat;expenseFrequency="daily";if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;const preset=Number(state.quickPresets?.[cat]?.amount)||0;expenseAmount.value=preset||"";if($("rememberQuickRow"))$("rememberQuickRow").classList.remove("hidden");if($("rememberQuickAmount"))$("rememberQuickAmount").checked=!preset;setExpenseFrequency("daily");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
 function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
 function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();openM("goalModal")}
 function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||"";if($("goalIcon"))$("goalIcon").value=g?.icon||inferGoalIcon(g?.name||"")}
 function chooseGoalSuggestion(name,icon,period){goalPeriod.value=period;goalName.value=name;goalIcon.value=icon;goalAmount.value="";setTimeout(()=>goalAmount.focus(),80)}
-function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return;}state.expenses.push({amount:a,category:selected,note:note.value.trim(),ts:Date.now(),quick:!!quickContext});if(quickContext&&$("rememberQuickAmount")?.checked){state.quickPresets=state.quickPresets||{};state.quickPresets[quickContext]={amount:a,updatedAt:Date.now()}}expenseAmount.value="";note.value="";quickContext=null;persist();render();closeM("expenseModal")}
+function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return;}state.expenses.push({amount:a,category:selected,note:note.value.trim(),frequency:expenseFrequency||"once",ts:Date.now(),quick:!!quickContext});if(quickContext&&$("rememberQuickAmount")?.checked){state.quickPresets=state.quickPresets||{};state.quickPresets[quickContext]={amount:a,updatedAt:Date.now()}}expenseAmount.value="";note.value="";quickContext=null;expenseFrequency="once";persist();render();closeM("expenseModal")}
 function delExpense(i){state.expenses.splice(i,1);persist();render()}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
 function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null};const prev=state.goals[p]||{};state.goals[p]={name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt:prev.createdAt||Date.now(),completedAt:null};persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para ayudarte a tenerla presente.","success")}
 function completeGoal(period){const g=state.goals&&state.goals[period];if(!g||g.completedAt)return;g.completedAt=Date.now();archiveGoal(period,"completed");persist();render();notify(period==="week"?"🏆 ¡Semana cumplida! Bien ahí.":"🏆 ¡Meta lograda! Felicitaciones.","success")}
