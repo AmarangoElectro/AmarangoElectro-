@@ -1,4 +1,5 @@
 import { HeroSlider } from "./components/hero-slider";
+import { MiBalanceReferralWelcome } from "./components/mi-balance-referral-welcome";
 import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import { RecentlyViewedRail } from "./components/recently-viewed-rail";
@@ -16,6 +17,7 @@ export default async function Home() {
       <SiteHeader />
       <main>
         <HeroSlider />
+        <MiBalanceReferralWelcome />
 
         <section id="experiencia" className="home-quick-trust" aria-label="Beneficios AmarangoElectro">
           <article><span aria-hidden="true">🚚</span><div><strong>Envíos coordinados</strong><small>Consultá disponibilidad y zona</small></div></article>
