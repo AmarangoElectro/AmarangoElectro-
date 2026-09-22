@@ -35,6 +35,11 @@ button,input,select{font:inherit}.app{max-width:520px;margin:auto;min-height:100
 .btn2{width:100%;margin-top:12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:#173c68;color:white;font-weight:850}.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:4px 18px 16px}.action{border:1px solid var(--line);background:#0e2b4e;color:white;border-radius:18px;padding:12px 6px}.action span{font-size:23px;display:block}.action small{font-size:10px;color:#d6e2f1}
 .section{padding:7px 18px}.section h2{font-size:22px;margin:10px 0 12px}.list{display:flex;flex-direction:column;gap:10px}.rowItem{display:flex;align-items:center;gap:11px;padding:12px;background:#0e2b4e;border:1px solid var(--line);border-radius:18px}.emo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#173c68;font-size:20px}.meta{flex:1}.meta b{display:block}.meta small{color:var(--muted)}.amt{font-weight:900}.rowActions{display:flex;align-items:center;gap:2px}.editMove,.del{width:31px;height:31px;border:0;background:none;border-radius:9px;font-size:16px;display:grid;place-items:center}.editMove{color:#8ec5ff}.del{color:#ff9898;font-size:20px}.editMove:active,.del:active{background:rgba(255,255,255,.06)}
 body[data-theme="light"] .editMove:active,body[data-theme="light"] .del:active{background:#edf2f6}
+.expensesPortalWrap{padding:8px 18px}.expensesPortal{width:100%;display:grid;grid-template-columns:45px 1fr auto 16px;gap:10px;align-items:center;padding:13px 14px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#12355e,#0b2949);color:var(--text);text-align:left;box-shadow:0 9px 24px rgba(0,0,0,.10)}.expensesPortalIcon{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;background:#173c68;font-size:22px}.expensesPortalCopy{min-width:0}.expensesPortalCopy b{display:block;font-size:15px}.expensesPortalCopy small{display:block;margin-top:3px;color:var(--muted);font-size:10px;line-height:1.3}.expensesPortalMeta{text-align:right}.expensesPortalMeta strong{display:block;color:#ffb066;font-size:16px}.expensesPortalMeta span{display:block;color:var(--muted);font-size:8px;white-space:nowrap}.expensesPortalArrow{font-size:25px;color:#ff9a49;font-weight:900}
+.expensesSheet{padding-top:15px}.expensesDrawerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:-15px;z-index:2;margin:-15px -2px 0;padding:15px 2px 10px;background:inherit}.expensesDrawerHead p{margin:0!important;font-size:11px;line-height:1.35;color:var(--muted)!important}.expensesDrawerSummary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:4px 0 13px}.expensesDrawerSummary>div{padding:11px;border-radius:15px;border:1px solid #dce6ef;background:#fff}.expensesDrawerSummary small{display:block;color:#748397;font-size:9px}.expensesDrawerSummary b{display:block;margin-top:3px;font-size:16px}.expensesDrawerList{padding-bottom:4px}
+.storeBadge{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:9px;font-weight:900;color:var(--muted);margin-bottom:7px}.storeCategoryLine{margin-bottom:7px;color:#ffb066;font-size:10px;font-weight:950;letter-spacing:.03em}
+body[data-theme="dark"] .expensesDrawerSummary>div{background:#0e2b4e;border-color:rgba(255,255,255,.12)}
+body[data-theme="light"] .expensesPortal{background:linear-gradient(180deg,#fff,#faf7f1);box-shadow:0 9px 24px rgba(31,49,70,.06)}body[data-theme="light"] .expensesPortalIcon{background:#eef4f9}body[data-theme="light"] .expensesDrawerSummary>div{background:#fff;border-color:#d6e0e9}
 .tip{margin:8px 18px;padding:16px;border-radius:20px;background:#12345b;border:1px solid var(--line)}.tip p{margin:5px 0 0;color:#cbd7e6;font-size:14px;line-height:1.5}
 .fab{position:fixed;right:max(18px,calc(50% - 242px));bottom:92px;width:60px;height:60px;border-radius:50%;border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:white;font-size:32px;box-shadow:0 14px 32px rgba(255,122,26,.34);z-index:50}
 .bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(520px,100%);display:grid;grid-template-columns:repeat(4,1fr);padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:rgba(7,24,47,.97);border-top:1px solid var(--line);backdrop-filter:blur(14px);z-index:40}.nav{border:0;background:none;color:#9eb0c7;font-size:11px}.nav span{display:block;font-size:21px}.nav.on{color:#ff8b2f}
@@ -566,19 +571,43 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 </section>
 
 <section id="storeCard" class="storeCard">
-  <div style="display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;font-size:9px;font-weight:900;color:var(--muted);margin-bottom:8px">🐝 DE LOS CREADORES DE MI BALANCE</div>
-  <b id="storeTitle">AmarangoElectro</b>
+  <div class="storeBadge">🐝 AMARANGOELECTRO</div>
+  <div class="storeCategoryLine">Electrodomésticos · Tecnología · Hogar</div>
+  <b id="storeTitle">Conocé nuestra tienda</b>
   <p id="storeText">Cuando tus números te den margen, también está bueno disfrutar sin desordenar tu plan.</p>
-  <a class="storeLink" href="https://amarangoelectro.com.ar/?utm_source=mi_balance&amp;utm_medium=referral&amp;utm_campaign=regalo_mi_balance" target="_blank" rel="noopener">Conocer AmarangoElectro →</a>
+  <a class="storeLink" href="https://amarangoelectro.com.ar/?utm_source=mi_balance&amp;utm_medium=referral&amp;utm_campaign=regalo_mi_balance" target="_blank" rel="noopener">Visitar la tienda de AmarangoElectro →</a>
 </section>
 
-<section class="section"><h2>Últimos movimientos</h2><div id="expenseList" class="list"></div></section>
+<section class="expensesPortalWrap">
+  <button class="expensesPortal" onclick="openExpensesDrawer()" aria-label="Abrir mis gastos">
+    <div class="expensesPortalIcon">🧾</div>
+    <div class="expensesPortalCopy">
+      <b>Mis gastos</b>
+      <small>Ver, editar y ordenar todos tus movimientos</small>
+    </div>
+    <div class="expensesPortalMeta"><strong id="expensesPortalCount">0</strong><span>este mes</span></div>
+    <div class="expensesPortalArrow">›</div>
+  </button>
+</section>
 <section class="tip"><b>💡 Pagarte primero</b><p>Separar una parte de tus ingresos antes de gastar hace visible tu futuro. No es dejar de vivir: es hacer que una parte de lo que trabajaste quede con vos.</p></section>
 <footer class="appFooter"><b>Mi Balance</b><br>Creada con ❤️ por el equipo de AmarangoElectro.<br>Una herramienta simple para ayudarte a cuidar tus números.</footer>
 </div>
 
 <button class="fab" onclick="openDailyQuickDrawer()" aria-label="Agregar gasto rápido">+</button>
 <nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>➕</span>Agregar</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
+
+<div id="expensesModal" class="modal" onclick="backdrop(event,'expensesModal')"><div class="sheet expensesSheet">
+  <div class="expensesDrawerHead">
+    <div><h3 style="margin-bottom:3px">🧾 Mis gastos</h3><p>Todo queda acá, sin alargar la pantalla principal.</p></div>
+    <button class="dailyClose" onclick="closeM('expensesModal')" aria-label="Cerrar mis gastos">×</button>
+  </div>
+  <div class="expensesDrawerSummary">
+    <div><small>Movimientos este mes</small><b id="expensesDrawerCount">0</b></div>
+    <div><small>Total del mes</small><b id="expensesDrawerTotal">$ 0</b></div>
+  </div>
+  <div id="expenseList" class="list expensesDrawerList"></div>
+  <button class="secondary" onclick="closeM('expensesModal')">Cerrar</button>
+</div></div>
 
 <div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel" for="expenseDate">Fecha</label><input id="expenseDate" type="date"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button id="expenseSaveBtn" class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
 
@@ -941,19 +970,26 @@ function renderMonthStatus(){
 function renderStore(){
   const month=monthExpenses(),spent=month.reduce((a,e)=>a+Number(e.amount||0),0),saving=state.income*state.savingPct/100,spendable=Math.max(0,state.income-saving),pressure=spendable>0?spent/spendable:0;
   const t=$("storeTitle"),p=$("storeText");if(!t||!p)return;
-  if(!state.income){t.textContent="🐝 AmarangoElectro";p.textContent="Primero cargá tus números. Cuando tengas claro tu margen, podés decidir mejor qué gusto darte."}
-  else if(pressure<=.55){t.textContent="🐝 Tus números vienen ordenados";p.textContent="Si querés darte un gusto y entra dentro de tu plan, podés mirar AmarangoElectro sin perder de vista tus metas."}
-  else if(pressure<=.8){t.textContent="🐝 Antes de comprar, mirá tu margen";p.textContent="Estás usando buena parte de lo disponible. Si entrás a la tienda, hacelo con tu presupuesto a la vista."}
-  else{t.textContent="🐝 Primero cuidemos tus números";p.textContent="Hoy conviene priorizar tu plan. AmarangoElectro va a seguir ahí cuando recuperes margen."}
+  if(!state.income){t.textContent="Conocé nuestra tienda";p.textContent="En AmarangoElectro encontrás electrodomésticos, tecnología y productos para el hogar. Primero ordená tus números y después decidí con claridad."}
+  else if(pressure<=.55){t.textContent="Tus números vienen ordenados";p.textContent="Si entra dentro de tu plan, conocé nuestra tienda de electrodomésticos, tecnología y hogar sin perder de vista tus metas."}
+  else if(pressure<=.8){t.textContent="Antes de comprar, mirá tu margen";p.textContent="Podés conocer AmarangoElectro —electrodomésticos, tecnología y hogar— pero hacelo con tu presupuesto a la vista."}
+  else{t.textContent="Primero cuidemos tus números";p.textContent="Hoy conviene priorizar tu plan. Nuestra tienda de electrodomésticos, tecnología y hogar va a seguir ahí cuando recuperes margen."}
 }
+function openExpensesDrawer(){render();openM("expensesModal")}
 function render(){
   state=normalizeState(state);
   const month=monthExpenses(),spent=month.reduce((a,e)=>a+Number(e.amount||0),0),saving=state.income*state.savingPct/100,avail=state.income-saving-spent;
   incomeV.textContent=fmt(state.income);savingV.textContent=fmt(saving);spentV.textContent=fmt(spent);availableV.textContent=fmt(Math.max(0,avail));annualV.textContent=fmt(saving*12);
   savingText.textContent=state.savingPct+"% para vos";savingBar.style.width=Math.min(100,state.savingPct)+"%";spentText.textContent=(state.income?Math.round(spent/state.income*100):0)+"% de tus ingresos";
-  expenseList.innerHTML="";
-  state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(new Date(Number(e.ts)||Date.now()).toLocaleDateString("es-AR")+" · "+(frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><div class="rowActions"><button class="editMove" onclick="editExpense('+i+')" aria-label="Editar gasto">✎</button><button class="del" onclick="delExpense('+i+')" aria-label="Enviar a papelera">×</button></div>';expenseList.appendChild(d)});
-  if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
+  const currentMonthExpenses=monthExpenses(),currentMonthTotal=currentMonthExpenses.reduce((a,e)=>a+Number(e.amount||0),0);
+  if($("expensesPortalCount"))$("expensesPortalCount").textContent=currentMonthExpenses.length;
+  if($("expensesDrawerCount"))$("expensesDrawerCount").textContent=currentMonthExpenses.length;
+  if($("expensesDrawerTotal"))$("expensesDrawerTotal").textContent=fmt(currentMonthTotal);
+  if($("expenseList")){
+    expenseList.innerHTML="";
+    state.expenses.slice().reverse().forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(new Date(Number(e.ts)||Date.now()).toLocaleDateString("es-AR")+" · "+(frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><div class="rowActions"><button class="editMove" onclick="editExpense('+i+')" aria-label="Editar gasto">✎</button><button class="del" onclick="delExpense('+i+')" aria-label="Enviar a papelera">×</button></div>';expenseList.appendChild(d)});
+    if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
+  }
   renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
 }
 function updateFinancialPulse(){
