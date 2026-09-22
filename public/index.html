@@ -3068,6 +3068,13 @@ function tiendaPublicarControlAdmin(mostrarAviso){
 }
 function tiendaBajarControlPublicacion(){
   if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
+  // Si la nube quedó con una lista manual incompleta por una escritura vieja,
+  // el equipo administrador puede conservar productos que todavía existen en
+  // su copia local. Los fusionamos antes de aplicar estados individuales y
+  // luego reparamos catalogo_manuales. Para clientes y vendedores la nube
+  // sigue siendo la única autoridad, evitando revivir copias viejas.
+  var manualesFusionadosDescarga=null;
+  var manualesPendientesRecuperar=[];
   return Promise.all([
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_CONTROL_PUBLICACION_ID).maybeSingle(),
     sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle(),
@@ -3086,8 +3093,32 @@ function tiendaBajarControlPublicacion(){
       _tiendaControlPublicacionNubeListo=true;
       if(rm&&rm.data&&Array.isArray(rm.data.datos)){
         var automaticos=(tiendaProductos||[]).filter(tiendaEsAutomatico);
-        tiendaProductos=automaticos.concat(rm.data.datos);
+        var manualesNube=rm.data.datos;
+        if(tiendaEsAdmin||adminUnlocked){
+          var manualesLocales=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
+          manualesFusionadosDescarga=tiendaFusionarManualesPorVersion(manualesNube,manualesLocales);
+          var nubePorId={};
+          manualesNube.forEach(function(p){if(p&&p.id!=null)nubePorId[String(p.id)]=p;});
+          manualesPendientesRecuperar=manualesFusionadosDescarga.filter(function(p){
+            if(!p||p.id==null)return false;
+            var remoto=nubePorId[String(p.id)];
+            return !remoto||tiendaMarcaTiempoProducto(p)>tiendaMarcaTiempoProducto(remoto);
+          });
+          tiendaProductos=automaticos.concat(manualesFusionadosDescarga);
+        }else{
+          tiendaProductos=automaticos.concat(manualesNube);
+        }
       }
+      var finalizarDescarga=function(resultadoCambio){
+        if(!manualesPendientesRecuperar.length||!manualesFusionadosDescarga)return Promise.resolve(resultadoCambio);
+        return tiendaSubirManualesNube(0,manualesFusionadosDescarga).then(function(){
+          console.info('Catálogo manual incompleto reparado desde la copia del administrador:',manualesPendientesRecuperar.length);
+          return true;
+        }).catch(function(errorRecuperacion){
+          console.warn('No se pudo reparar todavía el catálogo manual incompleto.',errorRecuperacion);
+          return resultadoCambio;
+        });
+      };
       var cambioRevision=tiendaAplicarRevisionesManualesNube(rr&&Array.isArray(rr.data)?rr.data:[]);
       if(r&&r.data&&r.data.datos){
         var cambio=tiendaAplicarControlPublicacion(r.data.datos);
@@ -3100,7 +3131,7 @@ function tiendaBajarControlPublicacion(){
         // del proveedor pueden revivir algo que está en la papelera.
         var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
         try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
-        return cambio||cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion;
+        return finalizarDescarga(cambio||cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion);
       }
       // La primera vez, el administrador que ya tiene el estado correcto crea
       // el mapa para que clientes y vendedores lo reciban inmediatamente.
@@ -3108,8 +3139,8 @@ function tiendaBajarControlPublicacion(){
       tiendaMigrarCategoriasAdminNube(rc&&Array.isArray(rc.data)?rc.data:[]);
       var cambioVisibilidad=tiendaAplicarVisibilidadesAdminNube(rv&&Array.isArray(rv.data)?rv.data:[]);
       var cambioEliminacion=tiendaAplicarEliminacionesNube(re&&Array.isArray(re.data)?re.data:[]);
-      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion;});
-      return cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion;
+      if(tiendaEsAdmin)return tiendaGuardarNubeLiviano().then(function(){return finalizarDescarga(cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion);});
+      return finalizarDescarga(cambioRevision||cambioCategoria||cambioVisibilidad||cambioEliminacion);
     }).catch(function(error){
       // No silenciar del todo: mantiene el modo lectura (el guard de
       // tiendaPrepararBandejasAdmin ya bloquea acciones automáticas mientras
@@ -10227,13 +10258,16 @@ async function tiendaProcesarCarga(){
       // 1) match por clave normalizada FUERTE (ignora emojis, espacios, símbolos) — es el principal ahora
       var existe=null;
       if(kn.length>=3){
-        existe=tiendaProductos.find(function(p){ return claveProd(p.nombre)===kn; });
+        // Una carga manual sólo puede actualizar otra carga manual. Si se
+        // empareja con un artículo automático, el proveedor lo reemplaza en
+        // la siguiente sincronización y parece que la publicación desapareció.
+        existe=tiendaProductos.find(function(p){ return !tiendaEsAutomatico(p) && claveProd(p.nombre)===kn; });
       }
       // 2) si no, match suave por nombre casi idéntico
       if(!existe){
         var normSuave=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
         existe=tiendaProductos.find(function(p){
-          return (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
+          return !tiendaEsAutomatico(p) && (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
         });
       }
       var esParecido=false;
@@ -10241,6 +10275,7 @@ async function tiendaProcesarCarga(){
       if(!existe && kn.length>=6){
         var mejor=null, mejorLen=0;
         tiendaProductos.forEach(function(p){
+          if(tiendaEsAutomatico(p))return;
           var kp=claveProd(p.nombre);
           if(!kp || kp.length<6) return;
           if((kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1) &&
