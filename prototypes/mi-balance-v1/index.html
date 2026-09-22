@@ -349,9 +349,29 @@ body[data-theme="light"] .goalFocusMotivation{background:#fff5ec;color:#8f4b1d;b
 body[data-theme="light"] .goalFocusBar{background:#e7ecf0}
 @media(max-width:390px){.goalDreamVisual{height:140px}.goalDreamEmoji{font-size:62px}.goalDreamCopy strong{font-size:21px}.dailyGrid{grid-template-columns:repeat(2,1fr)}}
 
+/* Seamless startup: cover auth restoration so login never flashes */
+.bootSplash{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#07182f,#0b2343);color:#f7f9fc;opacity:1;visibility:visible;transition:opacity .16s ease,visibility .16s ease}
+.bootSplash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.bootSplashInner{text-align:center;padding:24px}.bootSplash .mark{margin:auto;width:66px;height:66px;border-radius:21px}
+.bootSplashTitle{margin-top:14px;font-size:27px;font-weight:950;letter-spacing:-.7px}.bootSplashSub{margin-top:4px;color:#aebed3;font-size:11px;font-weight:700}
+.bootDots{display:flex;justify-content:center;gap:6px;margin-top:16px}.bootDots i{width:6px;height:6px;border-radius:50%;background:#ff8b2f;animation:bootDot 1s ease-in-out infinite}.bootDots i:nth-child(2){animation-delay:.14s}.bootDots i:nth-child(3){animation-delay:.28s}
+@keyframes bootDot{0%,60%,100%{transform:translateY(0);opacity:.45}30%{transform:translateY(-5px);opacity:1}}
+body[data-theme="light"] .bootSplash{background:linear-gradient(180deg,#fbf8f1,#efe8dc);color:#112848}
+body[data-theme="light"] .bootSplashSub{color:#64758a}
+@media(prefers-reduced-motion:reduce){.bootDots i{animation:none}}
+
 </style>
 </head>
 <body>
+<script>try{document.body.dataset.theme=localStorage.getItem("mb_theme")||"dark"}catch(e){document.body.dataset.theme="dark"}</script>
+<div id="bootSplash" class="bootSplash" aria-label="Abriendo Mi Balance">
+  <div class="bootSplashInner">
+    <div class="mark"><i></i><i></i><i></i></div>
+    <div class="bootSplashTitle">Mi Balance</div>
+    <div class="bootSplashSub">Un regalo de AmarangoElectro</div>
+    <div class="bootDots" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>
+</div>
 <div id="lock" class="lock"><div class="lockBox"><div class="mark" style="margin:auto;width:65px;height:65px;border-radius:21px"><i></i><i></i><i></i></div><h2>Mi Balance</h2><p>Un regalo de AmarangoElectro</p><div class="panel">
 <div id="setup">
   <b>Creá tu espacio privado</b>
@@ -1100,6 +1120,10 @@ function applyTheme(mode){
   const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=m==="light"?"#f8f3e9":"#07182f"
 }
 function toggleTheme(){applyTheme(document.body.dataset.theme==="light"?"dark":"light")}
+function hideBootSplash(){
+  const splash=$("bootSplash");if(!splash)return;
+  requestAnimationFrame(()=>splash.classList.add("hide"));
+}
 let deferredInstallPrompt=null;
 function appIsInstalled(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true}
 function syncInstallUI(){const hide=appIsInstalled();["installOnboarding","installCard"].forEach(id=>{const el=$(id);if(el)el.classList.toggle("hidden",hide)})}
@@ -1126,9 +1150,15 @@ async function installApp(){
 async function bootApp(){
   applyTheme(localStorage.getItem("mb_theme")||"dark");syncSoundUI();renderCats();render();syncInstallUI();armBackGuard();
   const resumed=await restoreActiveSession();
-  if(resumed){lock.style.display="none";setTimeout(()=>maybeStartGuide(),450);return}
+  if(resumed){
+    lock.style.display="none";
+    hideBootSplash();
+    setTimeout(()=>maybeStartGuide(),450);
+    return
+  }
   lock.style.display="flex";
-  if(profiles().length||localStorage.getItem("mb_salt"))showLogin();else showSetup()
+  if(profiles().length||localStorage.getItem("mb_salt"))showLogin();else showSetup();
+  hideBootSplash()
 }
 bootApp();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
