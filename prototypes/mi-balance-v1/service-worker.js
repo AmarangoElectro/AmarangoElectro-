@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v19-monthly-edit-backup';
+const CACHE='mi-balance-v20-expenses-drawer-store-copy';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
