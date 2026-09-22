@@ -222,6 +222,34 @@ body[data-theme="dark"] .quickVisibleChip{background:#0e2b4e;color:#f7f9fc;borde
 body[data-theme="dark"] .quickVisibleChip.on{background:#173c68}
 body[data-theme="light"] .quickVisibleChip{background:#fff;color:#173452;border-color:#d6e0e9}
 
+/* Summary modal */
+.summaryGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.summaryStat{padding:14px;border-radius:17px;border:1px solid var(--line);background:#102f53}
+.summaryStat small{display:block;color:var(--muted);font-size:10px;font-weight:800}
+.summaryStat b{display:block;font-size:22px;margin-top:3px}
+.summaryStat.income b{color:#62e0a6}.summaryStat.spent b{color:#ffad6d}
+.summarySection{margin-top:16px}.summarySection> b{display:block;margin-bottom:5px}
+.summaryRow{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.summaryRow b{font-size:13px}.summaryRow span{font-weight:800}
+.summaryPanel{margin-top:13px;padding:14px;border-radius:17px;border:1px solid var(--line);background:#102f53}
+.summaryPanel b{display:block}.summaryPanel p{margin:6px 0 0!important;font-size:12px;line-height:1.45;color:#cbd7e6!important}
+.summaryPanel.micro{border-color:rgba(255,191,90,.28);background:linear-gradient(145deg,#3b3116,#1a2a3c)}
+.summaryPanel.saving{border-color:rgba(65,217,138,.28);background:linear-gradient(145deg,#123b31,#102c3a)}
+.summaryPanel.micro b{color:#ffd071}.summaryPanel.saving b{color:#70e6ae}
+body[data-theme="light"] .summaryStat{background:#fff;border-color:#d9e2ea}
+body[data-theme="light"] .summaryStat small{color:#64758a}
+body[data-theme="light"] .summaryStat.income{background:#eef8f3}.summaryStat.spent{}
+body[data-theme="light"] .summaryStat.spent{background:#fff2e8}
+body[data-theme="light"] .summaryStat.income b{color:#1d7e56}.summaryStat.spent b{}
+body[data-theme="light"] .summaryStat.spent b{color:#b85412}
+body[data-theme="light"] .summaryRow{border-bottom-color:#dce5ed}
+body[data-theme="light"] .summaryPanel{background:#fff;border-color:#d9e2ea}
+body[data-theme="light"] .summaryPanel.micro{background:#fff8e4;border-color:#efdca8}
+body[data-theme="light"] .summaryPanel.saving{background:#edf8f2;border-color:#c9e8d6}
+body[data-theme="light"] .summaryPanel.micro b{color:#825c00}
+body[data-theme="light"] .summaryPanel.saving b{color:#246a4a}
+body[data-theme="light"] .summaryPanel p{color:#53677d!important}
+
 /* Goal history */
 .goalHistoryCard{margin:8px 18px;padding:15px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(145deg,#0f3157,#0a2645)}
 .goalHistoryHead{display:flex;justify-content:space-between;gap:10px;align-items:center}.goalHistoryHead b{font-size:14px}.goalHistoryHead span{font-size:10px;color:#7ce8b6}
@@ -861,8 +889,15 @@ function openSummary(){
   const by={},month=monthExpenses();let spent=0;
   month.forEach(e=>{spent+=+e.amount;by[e.category]=(by[e.category]||0)+(+e.amount)});
   const saving=state.income*state.savingPct/100,micro=microSpend(),recover=micro*.30;
-  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>'<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #dce5ed"><b>'+escapeHtml(k)+'</b><span>'+fmt(v)+'</span></div>').join("");
-  summary.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:#eef5fb;padding:14px;border-radius:16px"><small>Ingresos</small><b style="display:block;font-size:22px">'+fmt(state.income)+'</b></div><div style="background:#fff1e5;padding:14px;border-radius:16px"><small>Gastaste</small><b style="display:block;font-size:22px">'+fmt(spent)+'</b></div></div><div style="margin-top:16px"><b>Principales categorías</b>'+(rows||"<p>Sin movimientos este mes.</p>")+'</div><div style="margin-top:14px;background:#fff7df;padding:14px;border-radius:16px"><b>🔎 Microgastos</b><p>'+fmt(micro)+' este mes. Bajando 30% podrías recuperar cerca de '+fmt(recover)+' por mes.</p></div><div style="background:#e9f8ef;padding:14px;border-radius:16px"><b>🌱 Tu ahorro planeado</b><p>'+fmt(saving)+' por mes · '+fmt(saving*12)+' en 12 meses si mantenés el ritmo.</p></div>';
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>'<div class="summaryRow"><b>'+escapeHtml(k)+'</b><span>'+fmt(v)+'</span></div>').join("");
+  summary.innerHTML=
+    '<div class="summaryGrid">'+
+      '<div class="summaryStat income"><small>Ingresos</small><b>'+fmt(state.income)+'</b></div>'+
+      '<div class="summaryStat spent"><small>Gastaste</small><b>'+fmt(spent)+'</b></div>'+
+    '</div>'+
+    '<div class="summarySection"><b>Principales categorías</b>'+(rows||'<p style="color:var(--muted)">Sin movimientos este mes.</p>')+'</div>'+
+    '<div class="summaryPanel micro"><b>🔎 Microgastos</b><p>'+fmt(micro)+' este mes. Bajando 30% podrías recuperar cerca de '+fmt(recover)+' por mes.</p></div>'+
+    '<div class="summaryPanel saving"><b>🌱 Tu ahorro planeado</b><p>'+fmt(saving)+' por mes · '+fmt(saving*12)+' en 12 meses si mantenés el ritmo.</p></div>';
   openM("summaryModal")
 }
 const enc=new TextEncoder(),dec=new TextDecoder();
