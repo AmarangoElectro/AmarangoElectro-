@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v2-install-share';
+const CACHE='mi-balance-v3-financial-pulse';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
