@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v15-amarango-referral';
+const CACHE='mi-balance-v16-seamless-session-start';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
