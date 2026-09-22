@@ -33,7 +33,8 @@ button,input,select{font:inherit}.app{max-width:520px;margin:auto;min-height:100
 .ey{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:#ffad6d;font-weight:900}.hero h1{font-size:34px;line-height:1.05;margin:9px 0 8px}.hero p{color:#cbd7e6;line-height:1.48;margin:0}.privacy{margin-top:16px;font-size:13px;color:#d6e2f1}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 18px}.card{background:linear-gradient(180deg,#12365f,#0d294a);border:1px solid var(--line);border-radius:22px;padding:16px}.wide{grid-column:1/-1}.lab{color:var(--muted);font-size:13px;font-weight:800}.val{font-size:28px;font-weight:950;margin-top:3px}.green{color:var(--green)}.orange{color:#ff9a49}.progress{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:10px}.progress b{display:block;height:100%;background:linear-gradient(90deg,#ff7a1a,#ffb66f)}
 .btn2{width:100%;margin-top:12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:#173c68;color:white;font-weight:850}.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:4px 18px 16px}.action{border:1px solid var(--line);background:#0e2b4e;color:white;border-radius:18px;padding:12px 6px}.action span{font-size:23px;display:block}.action small{font-size:10px;color:#d6e2f1}
-.section{padding:7px 18px}.section h2{font-size:22px;margin:10px 0 12px}.list{display:flex;flex-direction:column;gap:10px}.rowItem{display:flex;align-items:center;gap:11px;padding:12px;background:#0e2b4e;border:1px solid var(--line);border-radius:18px}.emo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#173c68;font-size:20px}.meta{flex:1}.meta b{display:block}.meta small{color:var(--muted)}.amt{font-weight:900}.del{border:0;background:none;color:#ff9898;font-size:20px}
+.section{padding:7px 18px}.section h2{font-size:22px;margin:10px 0 12px}.list{display:flex;flex-direction:column;gap:10px}.rowItem{display:flex;align-items:center;gap:11px;padding:12px;background:#0e2b4e;border:1px solid var(--line);border-radius:18px}.emo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:#173c68;font-size:20px}.meta{flex:1}.meta b{display:block}.meta small{color:var(--muted)}.amt{font-weight:900}.rowActions{display:flex;align-items:center;gap:2px}.editMove,.del{width:31px;height:31px;border:0;background:none;border-radius:9px;font-size:16px;display:grid;place-items:center}.editMove{color:#8ec5ff}.del{color:#ff9898;font-size:20px}.editMove:active,.del:active{background:rgba(255,255,255,.06)}
+body[data-theme="light"] .editMove:active,body[data-theme="light"] .del:active{background:#edf2f6}
 .tip{margin:8px 18px;padding:16px;border-radius:20px;background:#12345b;border:1px solid var(--line)}.tip p{margin:5px 0 0;color:#cbd7e6;font-size:14px;line-height:1.5}
 .fab{position:fixed;right:max(18px,calc(50% - 242px));bottom:92px;width:60px;height:60px;border-radius:50%;border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:white;font-size:32px;box-shadow:0 14px 32px rgba(255,122,26,.34);z-index:50}
 .bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(520px,100%);display:grid;grid-template-columns:repeat(4,1fr);padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:rgba(7,24,47,.97);border-top:1px solid var(--line);backdrop-filter:blur(14px);z-index:40}.nav{border:0;background:none;color:#9eb0c7;font-size:11px}.nav span{display:block;font-size:21px}.nav.on{color:#ff8b2f}
@@ -119,6 +120,8 @@ button:active,.storeLink:active{transform:scale(.985)}
 .trashList{display:grid;gap:9px;margin-top:14px}.trashItem{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:11px;border-radius:15px;border:1px solid #dce6ef;background:#fff}.trashItemIcon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#eef4f8;font-size:20px}.trashItemText{min-width:0}.trashItemText b{display:block;font-size:12px}.trashItemText small{display:block;color:#738398;font-size:9px;margin-top:3px}.trashRestore{border:1px solid #bedfce;background:#eef9f3;color:#24714e;border-radius:11px;padding:8px;font-size:9px;font-weight:900}
 .trashEmpty{padding:18px 12px;text-align:center;color:#748397;font-size:12px}
 body[data-theme="dark"] .accountSettingsBlock{background:#0e2b4e;border-color:rgba(255,255,255,.12)}body[data-theme="dark"] .accountSettingsBlock small{color:#9fb1c7}body[data-theme="dark"] .dataDeleteBtn{background:#351b24;color:#ff9b9b;border-color:#5c2a36}body[data-theme="dark"] .trashItem{background:#0e2b4e;border-color:rgba(255,255,255,.12)}body[data-theme="dark"] .trashItemIcon{background:#173c68}body[data-theme="dark"] .trashHead>span{border-color:rgba(255,255,255,.12)}body[data-theme="dark"] .trashRestore{background:#123b31;color:#70e6ae;border-color:rgba(65,217,138,.28)}
+.backupNote{margin-top:8px;color:var(--muted);font-size:9px;line-height:1.4}.backupActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.backupBtn{border:1px solid #dce6ef;background:#fff;color:#173452;border-radius:13px;padding:10px 8px;font-size:10px;font-weight:900}.restoreLoginBtn{width:100%;margin-top:9px;border:1px solid var(--line);background:transparent;color:#ff9a49;border-radius:14px;padding:11px;font-weight:900}
+body[data-theme="dark"] .backupBtn{background:#0e2b4e;color:#f7f9fc;border-color:rgba(255,255,255,.12)}
 body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
 
 /* Futuristic financial monitor */
@@ -241,6 +244,11 @@ body[data-theme="light"] .feedbackSelected{background:#fff3e9;color:#9d470d;bord
 @media(max-width:390px){.feedbackChoices{grid-template-columns:1fr}.feedbackChoices button{min-height:38px}}
 
 /* Summary modal */
+.summaryNav{display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;margin-bottom:12px}.summaryNav button{height:38px;border-radius:12px;border:1px solid var(--line);background:#102f53;color:#fff;font-size:20px;font-weight:900}.summaryNav button:disabled{opacity:.3}.summaryNav strong{text-align:center;font-size:14px;text-transform:capitalize}
+.monthCompare{margin:11px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:11px;line-height:1.4;color:var(--muted)}
+.monthHistoryTitle{margin-top:16px;font-size:12px;font-weight:900}.monthHistoryStrip{display:flex;gap:7px;overflow:auto;padding:8px 0 2px;scrollbar-width:none}.monthHistoryStrip::-webkit-scrollbar{display:none}.monthHistoryBtn{flex:0 0 auto;border:1px solid var(--line);background:#102f53;color:#dce6f2;border-radius:12px;padding:8px 10px;font-size:9px;font-weight:900}.monthHistoryBtn.on{outline:2px solid #ff7a1a;color:#fff}
+body[data-theme="light"] .summaryNav button,body[data-theme="light"] .monthHistoryBtn{background:#eef4f9;color:#173c68;border-color:#d8e2ec}.monthHistoryBtn.on{}
+body[data-theme="light"] .monthCompare{background:#f6f8fa;border-color:#dce4ea;color:#53677d}
 .summaryGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .summaryStat{padding:14px;border-radius:17px;border:1px solid var(--line);background:#102f53}
 .summaryStat small{display:block;color:var(--muted);font-size:10px;font-weight:800}
@@ -404,6 +412,7 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
   <div class="emailNote">🔐 Tu correo y tus movimientos quedan guardados en este dispositivo. AmarangoElectro no recibe ni puede ver tus gastos, ingresos o metas.</div>
   <button class="primary" onclick="createVault()">Crear mi espacio</button>
   <button id="showLoginBtn" class="linkBtn hidden" onclick="showLogin()">Ya tengo un espacio en este dispositivo</button>
+  <button class="restoreLoginBtn" onclick="pickBackupFile()">📥 Restaurar una copia de seguridad</button>
 </div>
 <div id="unlock" class="hidden">
   <b>Entrá a tu espacio</b>
@@ -423,8 +432,10 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
   <button class="linkBtn" onclick="showSetup()">Crear otro espacio</button>
   <div class="accountLine">Cerrar sesión no borra nada. Tu correo queda recordado para que volver a entrar sea rápido.</div>
   <button class="secondary" onclick="resetAllVaults()">Borrar espacios de este dispositivo</button>
+  <button class="restoreLoginBtn" onclick="pickBackupFile()">📥 Restaurar una copia de seguridad</button>
 </div>
 </div>
+<input id="backupFileInput" type="file" accept="application/json,.json" hidden onchange="restoreBackupFile(this)">
 <div id="installOnboarding" class="installOnboard">
 <img class="installIcon" src="./icon.svg" alt="Ícono de Mi Balance">
 <div class="installCopy"><b>Instalá Mi Balance</b><span>Queda como una app en tu celular. Gratis y sin Play Store.</span></div>
@@ -569,7 +580,7 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 <button class="fab" onclick="openDailyQuickDrawer()" aria-label="Agregar gasto rápido">+</button>
 <nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>➕</span>Agregar</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
 
-<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
+<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel" for="expenseDate">Fecha</label><input id="expenseDate" type="date"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button id="expenseSaveBtn" class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
 
 <div id="dailyQuickModal" class="modal" onclick="backdrop(event,'dailyQuickModal')"><div class="sheet dailySheet"><div class="dailyHandle"></div><div class="dailyHead"><div><h3>¿Qué gastaste recién?</h3><p>Elegí uno. Si tiene “+1”, suma el importe de siempre al instante.</p></div><button class="dailyClose" onclick="closeM('dailyQuickModal')">×</button></div><div id="dailyQuickGrid" class="dailyGrid"></div><div class="dailyAlt"><button onclick="closeM('dailyQuickModal');openExpense()">Otro gasto / alquiler / servicio</button><button onclick="closeM('dailyQuickModal');openQuickPresetManager()">⚙ Gastos de siempre</button></div></div></div>
 
@@ -593,7 +604,7 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 
 <div id="installHelpModal" class="modal" onclick="backdrop(event,'installHelpModal')"><div class="sheet" style="text-align:center"><img class="installHelpLogo" src="./icon.svg" alt=""><h3>Instalar Mi Balance</h3><div id="installHelpBody" style="color:#44546a;line-height:1.55;text-align:left"></div><button class="secondary" onclick="closeM('installHelpModal')">Cerrar</button></div></div>
 
-<div id="summaryModal" class="modal" onclick="backdrop(event,'summaryModal')"><div class="sheet"><h3>Resumen del mes</h3><div id="summary"></div><button class="secondary" onclick="closeM('summaryModal')">Cerrar</button></div></div>
+<div id="summaryModal" class="modal" onclick="backdrop(event,'summaryModal')"><div class="sheet"><h3 id="summaryTitle">Resumen del mes</h3><div id="summary"></div><button class="secondary" onclick="closeM('summaryModal')">Cerrar</button></div></div>
 
 <div id="resetConfirmModal" class="modal" onclick="backdrop(event,'resetConfirmModal')"><div class="sheet"><h3>¿Borrar todos los espacios?</h3><p style="color:#56677b;line-height:1.55">Esto elimina de este dispositivo todos los espacios, movimientos y metas guardados en Mi Balance. Esta acción no se puede deshacer.</p><button class="dangerBtn" onclick="confirmResetAllVaults()">Sí, borrar todo</button><button class="secondary" onclick="closeM('resetConfirmModal')">Cancelar</button></div></div>
 
@@ -608,6 +619,11 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
     <button id="soundToggleBtn" class="accountAction" onclick="toggleSound()"><span>🔊 Sonidos</span><span id="soundToggleText">Activados</span></button>
     <button class="accountAction" onclick="openTrash()"><span>🗑 Papelera</span><span id="trashAccountCount">0</span></button>
     <button class="accountAction" onclick="shareApp()"><span>🤝 Compartir Mi Balance</span><span>›</span></button>
+  </div>
+  <div class="accountSettingsBlock">
+    <label class="fieldLabel">Copia de seguridad</label>
+    <div class="backupActions"><button class="backupBtn" onclick="downloadBackup()">💾 Crear copia</button><button class="backupBtn" onclick="pickBackupFile()">📥 Restaurar</button></div>
+    <small>La copia conserva tus datos cifrados. Para abrirla en otro dispositivo necesitás el mismo correo y PIN.</small>
   </div>
   <div class="accountSettingsBlock">
     <label class="fieldLabel" for="currencySelect">Moneda de Mi Balance</label>
@@ -656,6 +672,8 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 
 <div id="emptyTrashConfirmModal" class="modal" onclick="backdrop(event,'emptyTrashConfirmModal')"><div class="sheet"><h3>Vaciar papelera</h3><p style="color:#56677b;line-height:1.5">Los movimientos de la papelera se eliminarán definitivamente. Esta acción no se puede deshacer.</p><button class="dangerBtn" onclick="confirmEmptyTrash()">Eliminar definitivamente</button><button class="secondary" onclick="closeM('emptyTrashConfirmModal')">Cancelar</button></div></div>
 
+<div id="restoreBackupConfirmModal" class="modal" onclick="backdrop(event,'restoreBackupConfirmModal')"><div class="sheet"><h3>Restaurar copia de seguridad</h3><p id="restoreBackupText" style="color:#56677b;line-height:1.55">Vamos a recuperar este espacio en el dispositivo.</p><p class="backupNote">Después vas a entrar con el mismo correo y PIN con el que se creó la copia.</p><button class="primary" onclick="confirmRestoreBackup()">Restaurar copia</button><button class="secondary" onclick="cancelRestoreBackup()">Cancelar</button></div></div>
+
 <div id="deleteCurrentDataModal" class="modal" onclick="backdrop(event,'deleteCurrentDataModal')"><div class="sheet"><h3>Borrar mis datos</h3><p style="color:#56677b;line-height:1.55">Esto elimina de este dispositivo tu espacio actual, movimientos, metas, papelera y preferencias financieras. No afecta otros espacios guardados en el mismo dispositivo.</p><button class="dangerBtn" onclick="confirmDeleteCurrentData()">Sí, borrar mis datos</button><button class="secondary" onclick="closeM('deleteCurrentDataModal')">Cancelar</button></div></div>
 
 <div id="removeGoalModal" class="modal" onclick="backdrop(event,'removeGoalModal')"><div class="sheet"><h3>Quitar esta meta</h3><p style="color:#56677b;line-height:1.5">La sacamos de tus metas activas, pero queda anotada en tu historial para que no pierdas el recorrido.</p><button class="dangerBtn" onclick="confirmRemoveGoal()">Quitar de mis metas</button><button class="secondary" onclick="closeM('removeGoalModal')">Cancelar</button></div></div>
@@ -679,12 +697,18 @@ const DEFAULT_QUICK_VISIBLE=["Café","Kiosco","Comida","Viáticos","Bebidas","Ot
 const GOAL_KEYS=["week","month","year","five","ten"];
 const CURRENCIES={ARS:{symbol:"$",digits:0},USD:{symbol:"US$",digits:2},EUR:{symbol:"€",digits:2},BRL:{symbol:"R$",digits:2},UYU:{symbol:"$U",digits:0},CLP:{symbol:"CLP$",digits:0},GBP:{symbol:"£",digits:2},PYG:{symbol:"₲",digits:0}};
 const EMPTY_STATE=()=>({profileName:"",currency:"ARS",income:0,savingPct:20,expenses:[],trash:[],quickPresets:{},quickVisible:[...DEFAULT_QUICK_VISIBLE],goals:{week:null,month:null,year:null,five:null,ten:null},goalHistory:[]});
-let state=EMPTY_STATE(), selected="Otros", quickContext=null, expenseFrequency="once", pendingGoalPeriod=null, feedbackChoice="", vaultKey=null, currentProfileId=null, currentEmail="";
+let state=EMPTY_STATE(), selected="Otros", quickContext=null, expenseFrequency="once", editingExpenseIndex=null, summaryOffset=0, pendingGoalPeriod=null, feedbackChoice="", pendingBackupData=null, vaultKey=null, currentProfileId=null, currentEmail="";
 const $=id=>document.getElementById(id);
 function currencyCode(){return CURRENCIES[state?.currency]?state.currency:"ARS"}
 function fmt(n){const code=currencyCode(),cfg=CURRENCIES[code];try{return new Intl.NumberFormat("es-AR",{style:"currency",currency:code,minimumFractionDigits:cfg.digits,maximumFractionDigits:cfg.digits}).format(Number(n||0))}catch(e){return cfg.symbol+" "+Number(n||0).toLocaleString("es-AR")}}
 function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.currency=CURRENCIES[x.currency]?x.currency:"ARS";x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.trash=Array.isArray(x.trash)?x.trash:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)&&x.quickVisible.length?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];const oldGoals=x.goals&&typeof x.goals==="object"?x.goals:{};x.goals={week:oldGoals.week||null,month:oldGoals.month||null,year:oldGoals.year||null,five:oldGoals.five||null,ten:oldGoals.ten||null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
-function monthExpenses(){const n=new Date();return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()})}
+function monthExpenses(){const n=new Date();return expensesForMonth(n)}
+function expensesForMonth(ref){return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===ref.getFullYear()&&d.getMonth()===ref.getMonth()})}
+function monthRef(offset=0){const n=new Date();return new Date(n.getFullYear(),n.getMonth()+offset,1,12,0,0,0)}
+function monthLabel(ref){return ref.toLocaleDateString("es-AR",{month:"long",year:"numeric"})}
+function dateInputFromTs(ts){const d=new Date(Number(ts)||Date.now()),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+day}
+function tsFromDateInput(v,fallback=Date.now()){if(!v)return Number(fallback)||Date.now();const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d,12,0,0,0).getTime()}
+function microSpendFor(list){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Streaming","Restaurantes","Salidas"]);return list.reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
 function categoryEmoji(name){return (cats.find(c=>c[1]===name)||["🧾"])[0]}
@@ -928,7 +952,7 @@ function render(){
   incomeV.textContent=fmt(state.income);savingV.textContent=fmt(saving);spentV.textContent=fmt(spent);availableV.textContent=fmt(Math.max(0,avail));annualV.textContent=fmt(saving*12);
   savingText.textContent=state.savingPct+"% para vos";savingBar.style.width=Math.min(100,state.savingPct)+"%";spentText.textContent=(state.income?Math.round(spent/state.income*100):0)+"% de tus ingresos";
   expenseList.innerHTML="";
-  state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml((frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});
+  state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(new Date(Number(e.ts)||Date.now()).toLocaleDateString("es-AR")+" · "+(frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><div class="rowActions"><button class="editMove" onclick="editExpense('+i+')" aria-label="Editar gasto">✎</button><button class="del" onclick="delExpense('+i+')" aria-label="Enviar a papelera">×</button></div>';expenseList.appendChild(d)});
   if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
   renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
 }
@@ -992,31 +1016,64 @@ function stayInApp(){closeM("exitConfirmModal")}
 function confirmAppExit(){closeM("exitConfirmModal");allowNativeExit=true;history.back()}
 function setExpenseFrequency(freq){expenseFrequency=freq||"once";document.querySelectorAll("#frequencyRow .freqBtn").forEach(b=>b.classList.toggle("on",b.dataset.freq===expenseFrequency))}
 function frequencyLabel(freq){return freq==="daily"?"Diario":freq==="weekly"?"Semanal":freq==="monthly"?"Mensual":""}
-function openExpense(){quickContext=null;selected="Otros";expenseFrequency="once";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");setExpenseFrequency("once");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
-function openQuick(cat){quickContext=cat;selected=cat;expenseFrequency="daily";if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;const preset=Number(state.quickPresets?.[cat]?.amount)||0;expenseAmount.value=preset||"";if($("rememberQuickRow"))$("rememberQuickRow").classList.remove("hidden");if($("rememberQuickAmount"))$("rememberQuickAmount").checked=!preset;setExpenseFrequency("daily");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function openExpense(){editingExpenseIndex=null;quickContext=null;selected="Otros";expenseFrequency="once";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="+ Guardar gasto";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(Date.now());if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");setExpenseFrequency("once");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function openQuick(cat){editingExpenseIndex=null;quickContext=cat;selected=cat;expenseFrequency="daily";if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="+ Guardar gasto";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(Date.now());const preset=Number(state.quickPresets?.[cat]?.amount)||0;expenseAmount.value=preset||"";if($("rememberQuickRow"))$("rememberQuickRow").classList.remove("hidden");if($("rememberQuickAmount"))$("rememberQuickAmount").checked=!preset;setExpenseFrequency("daily");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function editExpense(i){
+  const e=state.expenses[i];if(!e)return;
+  editingExpenseIndex=i;quickContext=null;selected=e.category||"Otros";expenseFrequency=e.frequency||"once";
+  if($("expenseTitle"))$("expenseTitle").textContent="Editar gasto";
+  if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="Guardar cambios";
+  expenseAmount.value=Number(e.amount)||"";note.value=e.note||"";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(e.ts);
+  if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");
+  setExpenseFrequency(expenseFrequency);renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)
+}
 function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
 function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();openM("goalModal")}
 function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||"";if($("goalIcon"))$("goalIcon").value=g?.icon||inferGoalIcon(g?.name||"")}
 function chooseGoalSuggestion(name,icon,period){goalPeriod.value=period;goalName.value=name;goalIcon.value=icon;goalAmount.value="";setTimeout(()=>goalAmount.focus(),80)}
-function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return;}state.expenses.push({amount:a,category:selected,note:note.value.trim(),frequency:expenseFrequency||"once",ts:Date.now(),quick:!!quickContext});if(quickContext&&$("rememberQuickAmount")?.checked){state.quickPresets=state.quickPresets||{};state.quickPresets[quickContext]={amount:a,updatedAt:Date.now()}}expenseAmount.value="";note.value="";quickContext=null;expenseFrequency="once";persist();render();closeM("expenseModal")}
+function saveExpense(){
+  const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return}
+  if(editingExpenseIndex!==null){
+    const old=state.expenses[editingExpenseIndex];if(!old)return;
+    state.expenses[editingExpenseIndex]={...old,amount:a,category:selected,note:note.value.trim(),frequency:expenseFrequency||"once",ts:tsFromDateInput($("expenseDate")?.value,old.ts)};
+    editingExpenseIndex=null;persist();render();closeM("expenseModal");notify("Gasto actualizado.","success")
+  }else{
+    state.expenses.push({amount:a,category:selected,note:note.value.trim(),frequency:expenseFrequency||"once",ts:tsFromDateInput($("expenseDate")?.value,Date.now()),quick:!!quickContext});
+    if(quickContext&&$("rememberQuickAmount")?.checked){state.quickPresets=state.quickPresets||{};state.quickPresets[quickContext]={amount:a,updatedAt:Date.now()}}
+    persist();render();closeM("expenseModal")
+  }
+  expenseAmount.value="";note.value="";quickContext=null;expenseFrequency="once"
+}
 function delExpense(i){const item=state.expenses[i];if(!item)return;state.trash=Array.isArray(state.trash)?state.trash:[];state.trash.unshift({id:"exp-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),type:"expense",item:{...item},deletedAt:Date.now()});state.expenses.splice(i,1);persist();render();notify("Movimiento enviado a la papelera.","success")}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
 function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null,five:null,ten:null};const prev=state.goals[p]||{},createdAt=prev.completedAt?Date.now():(prev.createdAt||Date.now());state.goals[p]={name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt,completedAt:null};persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para ayudarte a tenerla presente.","success")}
 function completeGoal(period){const g=state.goals&&state.goals[period];if(!g||g.completedAt)return;g.completedAt=Date.now();archiveGoal(period,"completed");persist();render();notify(period==="week"?"🏆 ¡Semana cumplida! Bien ahí.":"🏆 ¡Meta lograda! Felicitaciones.","success")}
 function completeFeaturedGoal(){const f=featuredGoal();if(f&&!f.goal.completedAt)completeGoal(f.period)}
-function openSummary(){
-  const by={},month=monthExpenses();let spent=0;
-  month.forEach(e=>{spent+=+e.amount;by[e.category]=(by[e.category]||0)+(+e.amount)});
-  const saving=state.income*state.savingPct/100,micro=microSpend(),recover=micro*.30;
+function openSummary(offset=0){
+  summaryOffset=Math.min(0,Number(offset)||0);
+  renderSummaryMonth();
+  openM("summaryModal")
+}
+function changeSummaryMonth(delta){summaryOffset=Math.min(0,summaryOffset+delta);renderSummaryMonth()}
+function renderSummaryMonth(){
+  const ref=monthRef(summaryOffset),month=expensesForMonth(ref),prev=expensesForMonth(monthRef(summaryOffset-1)),by={};let spent=0,prevSpent=0;
+  month.forEach(e=>{spent+=Number(e.amount||0);by[e.category]=(by[e.category]||0)+Number(e.amount||0)});prev.forEach(e=>prevSpent+=Number(e.amount||0));
+  const micro=microSpendFor(month),recover=micro*.30,saving=state.income*state.savingPct/100,isCurrent=summaryOffset===0;
   const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>'<div class="summaryRow"><b>'+escapeHtml(k)+'</b><span>'+fmt(v)+'</span></div>').join("");
+  let compare="Todavía no hay un mes anterior con movimientos para comparar.";
+  if(prevSpent>0){const diff=spent-prevSpent,pct=Math.round(Math.abs(diff)/prevSpent*100);compare=diff===0?"Gastaste prácticamente lo mismo que el mes anterior.":diff<0?"Gastaste "+fmt(Math.abs(diff))+" menos que el mes anterior ("+pct+"% menos).":"Gastaste "+fmt(diff)+" más que el mes anterior ("+pct+"% más)."}
+  const history=[0,-1,-2,-3,-4,-5].map(o=>{const d=monthRef(o),n=expensesForMonth(d).reduce((a,e)=>a+Number(e.amount||0),0);return '<button class="monthHistoryBtn '+(o===summaryOffset?"on":"")+'" onclick="openSummary('+o+')">'+d.toLocaleDateString("es-AR",{month:"short"})+' · '+fmt(n)+'</button>'}).join("");
+  if($("summaryTitle"))$("summaryTitle").textContent="Resumen · "+monthLabel(ref);
   summary.innerHTML=
+    '<div class="summaryNav"><button onclick="changeSummaryMonth(-1)" aria-label="Mes anterior">‹</button><strong>'+monthLabel(ref)+'</strong><button '+(isCurrent?"disabled":"")+' onclick="changeSummaryMonth(1)" aria-label="Mes siguiente">›</button></div>'+
     '<div class="summaryGrid">'+
-      '<div class="summaryStat income"><small>Ingresos</small><b>'+fmt(state.income)+'</b></div>'+
+      (isCurrent?'<div class="summaryStat income"><small>Ingresos</small><b>'+fmt(state.income)+'</b></div>':'<div class="summaryStat income"><small>Movimientos</small><b>'+month.length+'</b></div>')+
       '<div class="summaryStat spent"><small>Gastaste</small><b>'+fmt(spent)+'</b></div>'+
     '</div>'+
-    '<div class="summarySection"><b>Principales categorías</b>'+(rows||'<p style="color:var(--muted)">Sin movimientos este mes.</p>')+'</div>'+
-    '<div class="summaryPanel micro"><b>🔎 Microgastos</b><p>'+fmt(micro)+' este mes. Bajando 30% podrías recuperar cerca de '+fmt(recover)+' por mes.</p></div>'+
-    '<div class="summaryPanel saving"><b>🌱 Tu ahorro planeado</b><p>'+fmt(saving)+' por mes · '+fmt(saving*12)+' en 12 meses si mantenés el ritmo.</p></div>';
-  openM("summaryModal")
+    '<div class="monthCompare">📊 '+compare+'</div>'+
+    '<div class="summarySection"><b>Principales categorías</b>'+(rows||'<p style="color:var(--muted)">Sin movimientos en este mes.</p>')+'</div>'+
+    '<div class="summaryPanel micro"><b>🔎 Microgastos</b><p>'+fmt(micro)+' en '+monthLabel(ref)+'. Si bajaras 30%, serían cerca de '+fmt(recover)+' menos.</p></div>'+
+    (isCurrent?'<div class="summaryPanel saving"><b>🌱 Tu ahorro planeado</b><p>'+fmt(saving)+' por mes · '+fmt(saving*12)+' en 12 meses si mantenés el ritmo.</p></div>':'')+
+    '<div class="monthHistoryTitle">Últimos 6 meses</div><div class="monthHistoryStrip">'+history+'</div>';
 }
 const enc=new TextEncoder(),dec=new TextDecoder();
 const SESSION_DB_NAME="mi-balance-session-v1",SESSION_STORE="session";
@@ -1160,6 +1217,33 @@ function syncSoundUI(){if($("soundToggleText"))$("soundToggleText").textContent=
 function toggleSound(){soundEnabled=!soundEnabled;localStorage.setItem("mb_sound",soundEnabled?"on":"off");syncSoundUI();if(soundEnabled)appClickSound()}
 document.addEventListener("pointerup",e=>{const hit=e.target.closest&&e.target.closest("button,a");if(hit&&!hit.disabled)appClickSound()},{capture:true});
 
+function pickBackupFile(){const input=$("backupFileInput");if(input){input.value="";input.click()}}
+function downloadBackup(){
+  if(!currentProfileId||!currentEmail){notify("Entrá a tu espacio antes de crear una copia.","warn");return}
+  const prof=profiles().find(p=>p.id===currentProfileId),vault=localStorage.getItem("mb_vault_v2_"+currentProfileId);
+  if(!prof||!vault){notify("No encontramos los datos para crear la copia.","error");return}
+  const backup={app:"Mi Balance",version:1,exportedAt:Date.now(),profile:{id:prof.id,email:prof.email,salt:prof.salt,createdAt:prof.createdAt||Date.now()},vault:JSON.parse(vault)};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a"),d=new Date(),name="mi-balance-backup-"+d.toISOString().slice(0,10)+".json";
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify("Copia de seguridad creada.","success")
+}
+async function restoreBackupFile(input){
+  const file=input?.files?.[0];if(!file)return;
+  try{
+    const raw=await file.text(),b=JSON.parse(raw);
+    if(b?.app!=="Mi Balance"||b?.version!==1||!b?.profile?.id||!emailOk(b?.profile?.email)||!b?.profile?.salt||!b?.vault?.iv||!b?.vault?.data)throw new Error("invalid backup");
+    const expected=await profileId(b.profile.email);if(expected!==b.profile.id)throw new Error("profile mismatch");
+    pendingBackupData=b;
+    if($("restoreBackupText"))$("restoreBackupText").textContent="Vamos a restaurar el espacio de "+b.profile.email+". Si ya existe en este dispositivo, la copia lo reemplazará.";
+    openM("restoreBackupConfirmModal")
+  }catch(e){pendingBackupData=null;notify("Ese archivo no parece ser una copia válida de Mi Balance.","error")}
+}
+function cancelRestoreBackup(){pendingBackupData=null;closeM("restoreBackupConfirmModal")}
+async function confirmRestoreBackup(){
+  const b=pendingBackupData;if(!b)return;
+  const list=profiles(),profile={id:b.profile.id,email:normEmail(b.profile.email),salt:b.profile.salt,createdAt:b.profile.createdAt||Date.now(),restoredAt:Date.now()},i=list.findIndex(p=>p.id===profile.id);
+  if(i>=0)list[i]=profile;else list.push(profile);
+  saveProfiles(list);localStorage.setItem("mb_vault_v2_"+profile.id,JSON.stringify(b.vault));rememberProfileEmail(profile.email);pendingBackupData=null;await clearActiveSession();closeM("restoreBackupConfirmModal");notify("Copia restaurada. Entrá con tu PIN habitual.","success");setTimeout(()=>location.reload(),550)
+}
 function openFeedback(choice){feedbackChoice=choice||"";if($("feedbackSelected"))$("feedbackSelected").textContent=feedbackChoice||"Tu opinión";if($("feedbackComment"))$("feedbackComment").value="";openM("feedbackModal")}
 async function submitFeedback(){
   if(!feedbackChoice){notify("Elegí primero cómo te está sirviendo Mi Balance.","warn");return}
