@@ -31,7 +31,7 @@ function productKey(product) {
     .toLowerCase();
 }
 
-test("expanded V16 catalog reconstructs to 391 visible unique products", async () => {
+test("expanded V16 catalog reconstructs to 422 visible unique products", async () => {
   const pilot = JSON.parse(await source("fixtures/v411-catalog-evidence-public.json")).products
     .filter((row) => row.category !== "celulares")
     .map((row) => ({
@@ -95,9 +95,19 @@ test("expanded V16 catalog reconstructs to 391 visible unique products", async (
       price: row.sale,
     }));
 
+  const expansion31 = JSON.parse(await source("fixtures/v16-catalog-expansion-31-literal-brand-20260921.json")).products
+    .map((row) => ({
+      category: row.category,
+      subcategory: row.subcategory ?? null,
+      brand: row.brand,
+      model: null,
+      name: row.name,
+      price: row.sale,
+    }));
+
   const merged = [];
   const seen = new Set();
-  for (const group of [pilot, cohort, electro, phones, expansion63, expansion5]) {
+  for (const group of [pilot, cohort, electro, phones, expansion63, expansion5, expansion31]) {
     for (const product of group) {
       const key = productKey(product);
       if (seen.has(key)) continue;
@@ -106,7 +116,7 @@ test("expanded V16 catalog reconstructs to 391 visible unique products", async (
     }
   }
 
-  assert.equal(merged.length, 391);
+  assert.equal(merged.length, 422);
 
   const byCategory = Object.fromEntries(
     [...new Set(merged.map((row) => row.category))]
@@ -114,7 +124,7 @@ test("expanded V16 catalog reconstructs to 391 visible unique products", async (
   );
 
   assert.equal(byCategory.celulares, 90);
-  assert.equal(byCategory.electrodomesticos, 251);
+  assert.equal(byCategory.electrodomesticos, 282);
   assert.equal(byCategory["smart-tv"], 20);
   assert.equal(byCategory.audio, 10);
   assert.equal(byCategory.gaming, 6);
@@ -125,6 +135,7 @@ test("expansion fixtures contain only allowlisted public product fields", async 
   for (const file of [
     "fixtures/v16-catalog-expansion-63-20260921.json",
     "fixtures/v16-catalog-expansion-5-v412.json",
+    "fixtures/v16-catalog-expansion-31-literal-brand-20260921.json",
   ]) {
     const fixture = JSON.parse(await source(file));
     for (const row of fixture.products) {
@@ -157,6 +168,26 @@ test("five-product V4.12 expansion is fully pictured and public-safe", async () 
   assert.equal(fixture.product_count, 5);
   assert.equal(fixture.products.length, 5);
   for (const row of fixture.products) {
+    assert.ok(row.sale > 0);
+    assert.match(row.image, /^https:\/\//);
+  }
+});
+
+
+test("31-product literal-brand expansion stays strict and deduplicated", async () => {
+  const fixture = JSON.parse(await source("fixtures/v16-catalog-expansion-31-literal-brand-20260921.json"));
+
+  assert.equal(fixture.product_count, 31);
+  assert.equal(fixture.products.length, 31);
+
+  const ids = fixture.products.map((row) => row.id);
+  assert.equal(new Set(ids).size, 31);
+  assert.ok(!ids.includes("-463"), "short duplicate Drean HDR370 row must stay excluded");
+
+  for (const row of fixture.products) {
+    assert.equal(row.category, "electrodomesticos");
+    assert.equal(row.availability, "available");
+    assert.equal(row.brand_evidence, "literal_known_brand_in_same_category");
     assert.ok(row.sale > 0);
     assert.match(row.image, /^https:\/\//);
   }
