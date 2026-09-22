@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v16-seamless-session-start';
+const CACHE='mi-balance-v17-quick-minus-one';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
