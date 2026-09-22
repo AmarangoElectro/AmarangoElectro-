@@ -1,10 +1,40 @@
 {
-  "name":"Mi Balance — un regalo de Amarango",
-  "short_name":"Mi Balance",
-  "start_url":"./index.html",
-  "display":"standalone",
-  "background_color":"#07182f",
-  "theme_color":"#07182f",
-  "description":"Controlá tu plata sin complicarte.",
-  "icons":[{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "name": "Mi Balance — Un regalo de Amarango",
+  "short_name": "Mi Balance",
+  "description": "Controlá tu plata sin complicarte. Gratis, privada y guardada en tu dispositivo.",
+  "lang": "es-AR",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07182f",
+  "theme_color": "#07182f",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {
+      "src": "/.netlify/images?url=/icon.svg&w=192&h=192&fit=cover&fm=png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/.netlify/images?url=/icon.svg&w=512&h=512&fit=cover&fm=png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/.netlify/images?url=/icon-maskable.svg&w=512&h=512&fit=cover&fm=png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
