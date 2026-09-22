@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v11-recurring-expenses';
+const CACHE='mi-balance-v12-theme-quick-goal-poster';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
