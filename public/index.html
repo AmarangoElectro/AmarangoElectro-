@@ -978,7 +978,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <input id="carga-dolar" placeholder="Cotización dólar (si es USD)" inputmode="numeric"
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
     <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--sub);margin-bottom:12px;">
-      <input type="checkbox" id="carga-reemplazar"> Reemplazar todo el catálogo (si no, agrega)
+      <input type="checkbox" id="carga-reemplazar"> Reemplazar solamente los productos manuales (conserva los automáticos)
     </label>
     <button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaProcesarCarga()">✅ Cargar productos</button>
     <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="document.getElementById('modal-carga').style.display='none'">Cancelar</button>
@@ -2964,45 +2964,67 @@ function tiendaOlvidarEliminacionManual(id){
     localStorage.setItem(TIENDA_ELIMINADOS_KEY, JSON.stringify(mapa));
   }catch(e){}
 }
-function tiendaSubirManualesNube(){
+function tiendaFusionarManualesPorVersion(manualesServidor, manualesLocales){
+  var porId={};
+  (manualesServidor||[]).forEach(function(p){
+    if(!p || p.id==null)return;
+    porId[String(p.id)]=p;
+  });
+  (manualesLocales||[]).forEach(function(pLocal){
+    if(!pLocal || pLocal.id==null)return;
+    var clave=String(pLocal.id);
+    var pServidor=porId[clave];
+    if(!pServidor || tiendaMarcaTiempoProducto(pLocal)>=tiendaMarcaTiempoProducto(pServidor)){
+      porId[clave]=pLocal;
+    }
+  });
+  return Object.keys(porId).map(function(k){return porId[k];});
+}
+function tiendaSubirManualesNube(intento, manualesProtegidos){
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
+  intento=Number(intento)||0;
   var manualesLocal=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
+  if(Array.isArray(manualesProtegidos) && manualesProtegidos.length){
+    manualesLocal=manualesLocal.concat(manualesProtegidos);
+  }
   return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
     .then(function(res){
+      // Nunca interpretar un error de lectura como "no hay manuales". Ese
+      // comportamiento reemplazaba la fila por la copia parcial del equipo y
+      // podía borrar productos cargados desde otro celular o PC.
+      if(res&&res.error)throw res.error;
       var manualesServidor=(res && !res.error && res.data && Array.isArray(res.data.datos))?res.data.datos:[];
-      var porId={};
-      // Fix 2026-08-26 (v2): antes, si ESTE dispositivo tenía registrado un
-      // borrado reciente para un ID, se saltaba directamente la versión del
-      // servidor para ese producto — incluso cuando el servidor YA tenía el
-      // borrado (eliminado=true) más nuevo que cualquier otra cosa. Eso
-      // dejaba un hueco: como el servidor nunca se cargaba en porId, la
-      // copia local (aunque fuera vieja y sin el borrado) entraba sin
-      // competir en el paso siguiente. Ahora el servidor siempre se carga
-      // acá, y todo se decide por fecha (tiendaMarcaTiempoProducto, que ya
-      // incluye eliminadoActualizado) en el mismo paso de abajo — sin casos
-      // especiales.
-      manualesServidor.forEach(function(p){
-        if(!p || p.id==null)return;
-        porId[String(p.id)]=p;
-      });
-      manualesLocal.forEach(function(pLocal){
-        if(pLocal==null || pLocal.id==null)return;
-        var clave=String(pLocal.id);
-        var pServidor=porId[clave];
-        // Si el servidor no lo tiene, o la version local es igual o mas
-        // reciente, gana la local (incluye el cambio que se esta guardando
-        // ahora mismo). Si el servidor tiene algo MAS nuevo que esta copia
-        // nunca vio, se respeta esa version en vez de pisarla a ciegas.
-        if(!pServidor || tiendaMarcaTiempoProducto(pLocal)>=tiendaMarcaTiempoProducto(pServidor)){
-          porId[clave]=pLocal;
-        }
-      });
-      var fusionado=Object.keys(porId).map(function(k){return porId[k];});
+      var fusionado=tiendaFusionarManualesPorVersion(manualesServidor,manualesLocal);
       return sbCalc.from('tienda_catalogo').upsert({
         id:TIENDA_MANUALES_ID,
         datos:fusionado,
         actualizado:new Date().toISOString()
-      }).select('actualizado');
+      }).select('actualizado').then(function(guardado){
+        if(guardado&&guardado.error)throw guardado.error;
+        // Confirmar el conjunto completo, no sólo el producto recién tocado.
+        // Si dos equipos guardaron casi al mismo tiempo, reintentamos la unión
+        // para que la última escritura no pierda manuales de la otra.
+        return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
+          .then(function(verificacion){
+            if(verificacion&&verificacion.error)throw verificacion.error;
+            var confirmados=(verificacion&&verificacion.data&&Array.isArray(verificacion.data.datos))
+              ?verificacion.data.datos:[];
+            var porIdConfirmado={};
+            confirmados.forEach(function(p){if(p&&p.id!=null)porIdConfirmado[String(p.id)]=p;});
+            var faltan=fusionado.filter(function(p){
+              if(!p||p.id==null)return false;
+              var remoto=porIdConfirmado[String(p.id)];
+              return !remoto || tiendaMarcaTiempoProducto(remoto)<tiendaMarcaTiempoProducto(p);
+            });
+            if(faltan.length && intento<2){
+              return tiendaSubirManualesNube(intento+1,fusionado);
+            }
+            if(faltan.length){
+              throw new Error('La nube no confirmó el catálogo manual completo ('+faltan.length+' producto(s) pendientes)');
+            }
+            return guardado;
+          });
+      });
     });
 }
 function tiendaGuardarNubeLiviano(){
@@ -5835,16 +5857,27 @@ function tiendaRepararIdsManuales(){
   var maxId=0;
   tiendaProductos.forEach(function(p){
     var n=Number(p&&p.id);
-    if(Number.isFinite(n) && n>0){maxId=Math.max(maxId,Math.floor(n));usados[String(Math.floor(n))]=true;}
+    if(Number.isFinite(n) && n>0){
+      maxId=Math.max(maxId,Math.floor(n));
+      // Los IDs automáticos quedan reservados. Los manuales se registran en
+      // el segundo paso para poder detectar dos manuales con el mismo ID.
+      if(tiendaEsAutomatico(p))usados[String(Math.floor(n))]=true;
+    }
   });
   var cambio=false;
   tiendaProductos.forEach(function(p){
     if(!p || tiendaEsAutomatico(p))return;
     var n=Number(p.id);
+    var claveActual=Number.isFinite(n)?String(Math.floor(n)):'';
     var invalido=p.id===null || typeof p.id==='undefined' || !Number.isFinite(n) || n<=0;
-    if(invalido){
+    var duplicado=!invalido && usados[claveActual]===true;
+    if(invalido||duplicado){
       do{maxId++;}while(usados[String(maxId)]);
-      p.id=maxId;usados[String(maxId)]=true;cambio=true;
+      p.id=maxId;
+      p.estadoManualActualizado=Date.now();
+      usados[String(maxId)]=true;cambio=true;
+    }else{
+      usados[claveActual]=true;
     }
   });
   return cambio;
@@ -10163,7 +10196,13 @@ async function tiendaProcesarCarga(){
   }
 
   if(reemplazar){
-    tiendaProductos=nuevos;
+    var automaticosConservados=tiendaProductos.filter(tiendaEsAutomatico);
+    var manualesAnteriores=tiendaProductos.length-automaticosConservados.length;
+    if(!confirm('⚠️ Vas a reemplazar '+manualesAnteriores+' producto(s) manual(es) por los '+nuevos.length+' de esta carga.\n\nLos productos automáticos de proveedores se conservan. ¿Continuar?'))return;
+    // La copia debe tomarse ANTES de reemplazar. Así la recuperación no
+    // depende de Papelera y conserva también fotos y estados anteriores.
+    tiendaBackupAuto();
+    tiendaProductos=automaticosConservados.concat(nuevos);
     idsManualesTocados=nuevos.map(function(p){return p.id;});
     primerProductoCarga=nuevos[0]||null;
   }else{
