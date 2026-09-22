@@ -5,6 +5,7 @@ import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter
 import { V16Cellphones90PublicCatalogAdapter } from "./v16-cellphones-90-public-adapter";
 import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter";
 import { V16CatalogExpansion5V412Adapter } from "./v16-catalog-expansion-5-v412-adapter";
+import { V16CatalogExpansion31LiteralBrandAdapter } from "./v16-catalog-expansion-31-literal-brand-adapter";
 import { V16CatalogExpansion31KnownBrandAdapter } from "./v16-catalog-expansion-31-known-brand-adapter";
 import { V16CatalogExpansion48ExplicitBrandAdapter } from "./v16-catalog-expansion-48-explicit-brand-adapter";
 import { V16CatalogExpansion99CuratedBrandAdapter } from "./v16-catalog-expansion-99-curated-brand-adapter";
@@ -15,6 +16,7 @@ const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
 const cellphoneSnapshotCatalog = new V16Cellphones90PublicCatalogAdapter();
 const catalogExpansion63 = new V16CatalogExpansion63Adapter();
 const catalogExpansion5 = new V16CatalogExpansion5V412Adapter();
+const catalogExpansion31 = new V16CatalogExpansion31LiteralBrandAdapter();
 const catalogExpansion31 = new V16CatalogExpansion31KnownBrandAdapter();
 const catalogExpansion48 = new V16CatalogExpansion48ExplicitBrandAdapter();
 const catalogExpansion99 = new V16CatalogExpansion99CuratedBrandAdapter();
@@ -55,8 +57,9 @@ function mergeUnique(...groups: Product[][]) {
  *
  * - primaryCatalog: evidencia histórica mínima ya integrada.
  * - cohort0Catalog: cohorte real congelada previa.
- * - electroCatalog: snapshot real sanitizado de electrodomésticos, copiado
- *   en modo read-only desde Supabase y versionado en GitHub.
+ * - electroCatalog: snapshot real sanitizado de electrodomésticos.
+ * - cellphoneSnapshotCatalog: 90 celulares canónicos con precio/foto sanitizados.
+ * - catalogExpansion63 / 5 / 31: ampliaciones públicas versionadas y deduplicadas.
  *
  * Ninguna de estas fuentes escribe sobre la tienda legacy ni sobre Supabase.
  */
@@ -121,6 +124,7 @@ export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
 export { v16Cellphones90PublicEvidence } from "./v16-cellphones-90-public-adapter";
 export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapter";
 export { v16CatalogExpansion5Evidence } from "./v16-catalog-expansion-5-v412-adapter";
+export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-literal-brand-adapter";
 export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-known-brand-adapter";
 export { v16CatalogExpansion48Evidence } from "./v16-catalog-expansion-48-explicit-brand-adapter";
 export { v16CatalogExpansion99Evidence } from "./v16-catalog-expansion-99-curated-brand-adapter";
