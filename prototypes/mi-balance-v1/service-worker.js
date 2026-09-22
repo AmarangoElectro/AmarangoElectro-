@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v4-private-profiles-quick-goals';
+const CACHE='mi-balance-v5-live-pulse-native-dialog-cleanup';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
