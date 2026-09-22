@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `cdd106240545c7d80897b5a0b066004b9655e47a`
+- Minimum app-code HEAD covered by this handoff: `72a0fc70ebc0a714e81c2933fda91d836a1dc329`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -223,3 +223,16 @@ Prepared on the same branch:
 - current reconstructed category counts include 282 Electrodomésticos, 90 Celulares, 20 Smart TV and 10 Audio;
 - 410/422 reconstructed products have an image; missing-photo states remain fail-closed/customer-safe;
 - regression coverage: `tests/v16-catalog-expansion-391-regression.test.mjs` and the updated 90-cellphone activation coverage.
+
+
+### Catalog expansion — 472 visible unique products
+Prepared on the same branch:
+- active composite catalog reconstructs to 472 visible unique products;
+- 460/472 reconstructed products have an image;
+- fourth expansion adds 50 Storage-backed products across Herramientas, Cuidado personal, Smart TV, Hogar, Audio, Camping and Otros;
+- inferred brand is accepted only when the product name contains a literal brand already evidenced in the active catalog;
+- ambiguous labels are excluded;
+- external CDN-only images are excluded from this batch;
+- duplicate Gamma `G12602KAR` short row `-423` and duplicate Drean `HDR370` short row `-463` remain excluded;
+- current reconstructed counts include 282 Electrodomésticos, 90 Celulares, 28 Herramientas, 24 Smart TV, 12 Audio and 12 Cuidado personal;
+- regression floor updated in `tests/v16-catalog-expansion-391-regression.test.mjs`.
