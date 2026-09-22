@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="/.netlify/images?url=/icon-maskable.svg&amp;w=180&amp;h=180&amp;fit=cover&amp;fm=png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Mi Balance">
-<meta property="og:title" content="Mi Balance — Un regalo de Amarango">
+<meta property="og:title" content="Mi Balance — Un regalo de AmarangoElectro">
 <meta property="og:description" content="Controlá tu plata sin complicarte. Gratis, privada e instalable.">
 <meta property="og:url" content="https://mibalance-amarango.netlify.app/">
 <meta property="og:image" content="https://mibalance-amarango.netlify.app/.netlify/images?url=/social-preview-v2.svg&amp;w=1200&amp;h=630&amp;fit=cover&amp;fm=png">
@@ -18,12 +18,12 @@
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Mi Balance — Un regalo de Amarango">
+<meta property="og:image:alt" content="Mi Balance — Un regalo de AmarangoElectro">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Mi Balance — Un regalo de Amarango">
+<meta name="twitter:title" content="Mi Balance — Un regalo de AmarangoElectro">
 <meta name="twitter:description" content="Controlá tu plata sin complicarte. Gratis, privada e instalable.">
 <meta name="twitter:image" content="https://mibalance-amarango.netlify.app/.netlify/images?url=/social-preview-v2.svg&amp;w=1200&amp;h=630&amp;fit=cover&amp;fm=png">
-<title>Mi Balance — Un regalo de Amarango</title>
+<title>Mi Balance — Un regalo de AmarangoElectro</title>
 <style>
 :root{--navy:#07182f;--navy2:#0e2b4e;--panel:#12355e;--orange:#ff7a1a;--text:#f7f9fc;--muted:#aebed3;--green:#41d98a;--line:rgba(255,255,255,.11)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(180deg,#061426,#0b2140 62%,#07182f);color:var(--text);min-height:100vh}
@@ -64,12 +64,62 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 @keyframes pulseDash{to{stroke-dashoffset:-84}}
 @media(prefers-reduced-motion:reduce){.pulseLine{animation:none}}
 
+.topTools{display:flex;align-items:center;gap:7px}.iconBtn{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:#102f53;color:#fff;display:grid;place-items:center;font-size:17px}.privacyPill{font-size:11px;color:#b8c7d8;white-space:nowrap}
+.quickWrap{padding:4px 18px 12px}.quickHead{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:9px}.quickHead b{font-size:17px}.quickHead small{color:var(--muted);font-size:10px}.quickRail{display:flex;gap:8px;overflow:auto;padding-bottom:3px;scrollbar-width:none}.quickRail::-webkit-scrollbar{display:none}.quickChip{min-width:78px;border:1px solid var(--line);background:#0e2b4e;color:#fff;border-radius:16px;padding:10px 9px;text-align:center}.quickChip span{display:block;font-size:21px}.quickChip b{display:block;font-size:10px;margin-top:4px}
+.insightCard,.shareCard,.storeCard,.goalsCard{margin:8px 18px;padding:16px;border-radius:20px;border:1px solid var(--line);background:linear-gradient(145deg,#12355e,#0b2949)}.insightCard b,.shareCard b,.storeCard b,.goalsCard b{display:block}.insightCard p,.shareCard p,.storeCard p,.goalsCard p{color:#cbd7e6;font-size:13px;line-height:1.45;margin:6px 0 0}.microBig{font-size:27px;font-weight:950;color:#ffb066;margin-top:5px}.inlineBtns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.smallBtn{border:1px solid var(--line);border-radius:14px;background:#173c68;color:#fff;padding:11px;font-weight:850}.smallBtn.primaryMini{border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49)}.storeLink{display:block;text-align:center;text-decoration:none;margin-top:12px;border-radius:14px;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff;padding:12px;font-weight:950}
+.goalRows{display:flex;flex-direction:column;gap:9px;margin-top:10px}.goalRow{padding:11px;border-radius:15px;background:rgba(0,0,0,.11);border:1px solid var(--line)}.goalTop{display:flex;justify-content:space-between;gap:10px}.goalTop span{font-size:11px;color:var(--muted)}.goalHint{font-size:11px;color:#cbd7e6;margin-top:4px}.goalProgress{height:6px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:8px}.goalProgress i{display:block;height:100%;background:linear-gradient(90deg,#41d98a,#ffb066);border-radius:99px}
+.fieldLabel{display:block;margin:12px 0 6px;font-weight:900;font-size:13px}.emailNote{padding:10px 12px;border-radius:14px;background:rgba(65,217,138,.08);border:1px solid rgba(65,217,138,.22);font-size:11px;line-height:1.45;color:#c7dfd3;margin:10px 0}.accountLine{font-size:11px;color:var(--muted);margin-top:9px}.linkBtn{border:0;background:none;color:#ff9a49;font-weight:850;padding:8px 0}
+body[data-theme="light"]{--text:#112848;--muted:#6f7e90;--line:rgba(13,45,82,.12);background:linear-gradient(180deg,#fbf8f1,#f4efe4 60%,#efe8dc);color:var(--text)}
+body[data-theme="light"] .top{background:rgba(250,247,240,.94)}
+body[data-theme="light"] .mark{background:#edf3f9}
+body[data-theme="light"] .iconBtn{background:#fff;color:#11335c;border-color:#d7e0ea}
+body[data-theme="light"] .privacyPill,body[data-theme="light"] .sub{color:#64758a}
+body[data-theme="light"] .heroCard{background:radial-gradient(circle at 88% 8%,rgba(255,122,26,.13),transparent 29%),linear-gradient(145deg,#fff,#f6f1e8);box-shadow:0 18px 45px rgba(29,47,70,.09)}
+body[data-theme="light"] .hero p,body[data-theme="light"] .privacy,body[data-theme="light"] .pulseMsg,body[data-theme="light"] .insightCard p,body[data-theme="light"] .shareCard p,body[data-theme="light"] .storeCard p,body[data-theme="light"] .goalsCard p,body[data-theme="light"] .goalHint{color:#5c6d80}
+body[data-theme="light"] .card,body[data-theme="light"] .rowItem,body[data-theme="light"] .tip,body[data-theme="light"] .installCard,body[data-theme="light"] .pulseCard,body[data-theme="light"] .insightCard,body[data-theme="light"] .shareCard,body[data-theme="light"] .storeCard,body[data-theme="light"] .goalsCard{background:linear-gradient(180deg,#fff,#faf7f1);box-shadow:0 9px 24px rgba(31,49,70,.06)}
+body[data-theme="light"] .quickChip,body[data-theme="light"] .smallBtn,body[data-theme="light"] .btn2{background:#eef4f9;color:#12335b;border-color:#d8e2ec}
+body[data-theme="light"] .quickHead small,body[data-theme="light"] .installCopy span{color:#6c7b8d}
+body[data-theme="light"] .bottom{background:rgba(250,247,240,.97)}
+body[data-theme="light"] .nav{color:#6d7b8c}body[data-theme="light"] .nav.on{color:#e86810}
+body[data-theme="light"] .pulseScreen{background:linear-gradient(180deg,#edf3f7,#f8fafc);border-color:#dbe5ee}
+body[data-theme="light"] .goalRow{background:#f5f7f9}
+body[data-theme="light"] .goalProgress{background:#e4eaf0}
+body[data-theme="light"] .sheet{background:#fbf8f1;color:#112848}
+body[data-theme="light"] .sheet input,body[data-theme="light"] .sheet select,body[data-theme="light"] .amount,body[data-theme="light"] .cat,body[data-theme="light"] .secondary{background:#fff;color:#112848;border-color:#d6e0e9}
+body[data-theme="light"] .cat.on{background:#fff2e7}
+body[data-theme="light"] .lock{background:linear-gradient(180deg,#f8f3e9,#eee5d8);color:#112848}
+body[data-theme="light"] .panel{background:#fff;border-color:#dbe3ea;box-shadow:0 14px 34px rgba(31,49,70,.09)}
+body[data-theme="light"] .lockBox p,body[data-theme="light"] .tiny{color:#68798d}
+body[data-theme="light"] .emailNote{color:#2c6148;background:#edf8f2}
+@media(max-width:410px){.privacyPill{display:none}.topTools{gap:5px}.iconBtn{width:34px;height:34px}.inlineBtns{grid-template-columns:1fr}.quickChip{min-width:72px}}
+
 </style>
 </head>
 <body>
-<div id="lock" class="lock"><div class="lockBox"><div class="mark" style="margin:auto;width:65px;height:65px;border-radius:21px"><i></i><i></i><i></i></div><h2>Mi Balance</h2><p>Un regalo de Amarango</p><div class="panel">
-<div id="setup"><b>Protegé tus datos con un PIN</b><p class="tiny">Tus movimientos se cifran y quedan guardados en este dispositivo. Amarango no recibe tus gastos.</p><input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN de 4 a 8 números"><button class="primary" onclick="createVault()">Crear mi espacio</button></div>
-<div id="unlock" class="hidden"><b>Ingresá tu PIN</b><p class="tiny">Tus datos siguen cifrados en este dispositivo.</p><input id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"><button class="primary" onclick="unlockVault()">Entrar</button><button class="secondary" onclick="resetVault()">Borrar datos locales</button></div>
+<div id="lock" class="lock"><div class="lockBox"><div class="mark" style="margin:auto;width:65px;height:65px;border-radius:21px"><i></i><i></i><i></i></div><h2>Mi Balance</h2><p>Un regalo de AmarangoElectro</p><div class="panel">
+<div id="setup">
+  <b>Creá tu espacio privado</b>
+  <p class="tiny">Simple para usar todos los días. Tus números son tuyos.</p>
+  <label class="fieldLabel" for="newEmail">Tu correo electrónico</label>
+  <input id="newEmail" type="email" inputmode="email" autocomplete="email" placeholder="vos@correo.com">
+  <label class="fieldLabel" for="newPin">Elegí un PIN</label>
+  <input id="newPin" type="password" inputmode="numeric" maxlength="8" autocomplete="new-password" placeholder="PIN de 4 a 8 números">
+  <div class="emailNote">🔐 Tu correo y tus movimientos quedan guardados en este dispositivo. AmarangoElectro no recibe ni puede ver tus gastos, ingresos o metas.</div>
+  <button class="primary" onclick="createVault()">Crear mi espacio</button>
+  <button id="showLoginBtn" class="linkBtn hidden" onclick="showLogin()">Ya tengo un espacio en este dispositivo</button>
+</div>
+<div id="unlock" class="hidden">
+  <b>Entrá a tu espacio</b>
+  <p class="tiny">Usá tu correo y tu PIN. Los datos se descifran solamente en este dispositivo.</p>
+  <label class="fieldLabel" for="email">Correo electrónico</label>
+  <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="vos@correo.com">
+  <label class="fieldLabel" for="pin">PIN</label>
+  <input id="pin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password" placeholder="Tu PIN">
+  <button class="primary" onclick="unlockVault()">Entrar</button>
+  <button class="linkBtn" onclick="showSetup()">Crear otro espacio</button>
+  <div class="accountLine">Si olvidás el PIN, no podemos leerlo ni recuperarlo porque tus datos no se envían a AmarangoElectro.</div>
+  <button class="secondary" onclick="resetAllVaults()">Borrar espacios de este dispositivo</button>
+</div>
 </div>
 <div id="installOnboarding" class="installOnboard">
 <img class="installIcon" src="./icon.svg" alt="Ícono de Mi Balance">
@@ -79,7 +129,7 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 </div></div>
 
 <div class="app">
-<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de Amarango</span></div></div><div style="font-size:12px;color:#b8c7d8">🔒 Solo tuyos</div></header>
+<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><div class="privacyPill">🔒 Solo tuyos</div></div></header>
 
 <section class="pulseWrap">
   <div id="financialPulse" class="pulseCard" data-level="neutral">
@@ -97,7 +147,7 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
   </div>
 </section>
 
-<section class="hero"><div class="heroCard"><div class="ey">Tu mes, más claro</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Registrá lo que entra, lo que gastás y lo que decidís guardar para vos.</p><div class="privacy">🔐 Guardado local y cifrado.</div></div></section>
+<section class="hero"><div class="heroCard"><div class="ey">Tus números, más claros</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Anotá lo que entra, lo que gastás y lo que querés lograr. Sin planillas difíciles.</p><div class="privacy">🔐 Privado · cifrado · pensado para usar todos los días.</div></div></section>
 
 <div id="installCard" class="installCard">
 <img class="installIcon" src="./icon.svg" alt="Ícono de Mi Balance">
@@ -116,8 +166,44 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 <section class="actions">
 <button class="action" onclick="openExpense()"><span>➕</span><small>Gasto</small></button>
 <button class="action" onclick="openIncome()"><span>💰</span><small>Ingreso</small></button>
-<button class="action" onclick="openGoal()"><span>🎯</span><small>Objetivo</small></button>
+<button class="action" onclick="openGoal()"><span>🎯</span><small>Meta</small></button>
 <button class="action" onclick="openSummary()"><span>📊</span><small>Resumen</small></button>
+</section>
+
+<section class="quickWrap">
+  <div class="quickHead"><div><b>⚡ Anotá un gasto al toque</b><small>Ideal para esos microgastos que se acumulan</small></div></div>
+  <div class="quickRail">
+    <button class="quickChip" onclick="openQuick('Café')"><span>☕</span><b>Café</b></button>
+    <button class="quickChip" onclick="openQuick('Kiosco')"><span>🍫</span><b>Kiosco</b></button>
+    <button class="quickChip" onclick="openQuick('Cigarrillos')"><span>🚬</span><b>Cigarrillos</b></button>
+    <button class="quickChip" onclick="openQuick('Viáticos')"><span>🚌</span><b>Transporte</b></button>
+    <button class="quickChip" onclick="openQuick('Otros')"><span>➕</span><b>Otro</b></button>
+  </div>
+</section>
+
+<section id="microInsight" class="insightCard">
+  <b>🔎 Tus microgastos del mes</b>
+  <div id="microTotal" class="microBig">$ 0</div>
+  <p id="microText">Cada gasto chico cuenta. Cuando empieces a cargarlos, te mostramos cuánto podrían representar en un año.</p>
+</section>
+
+<section class="goalsCard">
+  <b>🎯 Tus metas</b>
+  <p>Semanal, mensual o anual. Poné algo concreto que quieras lograr y mirá qué ritmo necesitás.</p>
+  <div id="goalHome" class="goalRows"></div>
+  <button class="btn2" onclick="openGoal()">+ Crear o editar una meta</button>
+</section>
+
+<section class="shareCard">
+  <b>🤝 Ayudá a alguien a ordenar sus números</b>
+  <p>Mi Balance es un regalo de AmarangoElectro. Compartilo con un amigo o familiar que quiera tener más claro en qué se le va la plata.</p>
+  <div class="inlineBtns"><button class="smallBtn primaryMini" onclick="shareApp()">Compartir Mi Balance</button><button class="smallBtn" onclick="installApp()">Instalar app</button></div>
+</section>
+
+<section id="storeCard" class="storeCard">
+  <b id="storeTitle">🐝 AmarangoElectro</b>
+  <p id="storeText">Cuando tus números te den margen, también está bueno disfrutar sin desordenar tu plan.</p>
+  <a class="storeLink" href="https://amarangoelectro.com.ar/" target="_blank" rel="noopener">Visitar AmarangoElectro</a>
 </section>
 
 <section class="section"><h2>Últimos movimientos</h2><div id="expenseList" class="list"></div></section>
@@ -127,28 +213,79 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 <button class="fab" onclick="openExpense()">+</button>
 <nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>🧾</span>Gastos</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
 
-<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3>Agregar gasto</h3><div class="amount"><span>$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional" style="margin-top:13px"><button class="primary" onclick="saveExpense()">+ Agregar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
+<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span>$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><button class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
 
 <div id="incomeModal" class="modal" onclick="backdrop(event,'incomeModal')"><div class="sheet"><h3>Tu ingreso mensual</h3><input id="incomeInput" type="number" inputmode="decimal" placeholder="¿Cuánto entra por mes?"><label style="display:block;margin:13px 0 6px;font-weight:900">¿Cuánto querés reservar para vos?</label><select id="savingPct"><option>10</option><option>15</option><option selected>20</option><option>25</option><option>30</option></select><button class="primary" onclick="saveIncome()">Guardar</button><button class="secondary" onclick="closeM('incomeModal')">Cancelar</button></div></div>
 
-<div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3>Tu objetivo</h3><input id="goalName" placeholder="Ej: fondo de emergencia"><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo" style="margin-top:9px"><button class="primary" onclick="saveGoal()">Guardar objetivo</button><button class="secondary" onclick="closeM('goalModal')">Cancelar</button></div></div>
+<div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3>Tu meta</h3><label class="fieldLabel">Plazo</label><select id="goalPeriod" onchange="loadGoalPeriod()"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">Anual</option></select><label class="fieldLabel">¿Qué querés lograr?</label><input id="goalName" placeholder="Ej: vacaciones, notebook, fondo de emergencia"><label class="fieldLabel">¿Cuánto necesitás?</label><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo"><button class="primary" onclick="saveGoal()">Guardar meta</button><button class="secondary" onclick="closeM('goalModal')">Cancelar</button></div></div>
 
 <div id="installHelpModal" class="modal" onclick="backdrop(event,'installHelpModal')"><div class="sheet" style="text-align:center"><img class="installHelpLogo" src="./icon.svg" alt=""><h3>Instalar Mi Balance</h3><div id="installHelpBody" style="color:#44546a;line-height:1.55;text-align:left"></div><button class="secondary" onclick="closeM('installHelpModal')">Cerrar</button></div></div>
 
 <div id="summaryModal" class="modal" onclick="backdrop(event,'summaryModal')"><div class="sheet"><h3>Resumen del mes</h3><div id="summary"></div><button class="secondary" onclick="closeM('summaryModal')">Cerrar</button></div></div>
 
 <script>
-const cats=[["☕","Café"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍺","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
-let state={income:0,savingPct:20,expenses:[],goal:null}, selected="Otros", vaultKey=null;
+const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍺","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
+const EMPTY_STATE=()=>({income:0,savingPct:20,expenses:[],goals:{week:null,month:null,year:null}});
+let state=EMPTY_STATE(), selected="Otros", vaultKey=null, currentProfileId=null, currentEmail="";
 const $=id=>document.getElementById(id), fmt=n=>"$ "+Math.round(Number(n||0)).toLocaleString("es-AR");
+function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.goals=x.goals&&typeof x.goals==="object"?x.goals:{week:null,month:null,year:null};if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
+function monthExpenses(){const n=new Date();return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()})}
+function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Golosinas","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
-function render(){const spent=state.expenses.reduce((a,e)=>a+Number(e.amount),0),saving=state.income*state.savingPct/100,avail=Math.max(0,state.income-saving-spent);incomeV.textContent=fmt(state.income);savingV.textContent=fmt(saving);spentV.textContent=fmt(spent);availableV.textContent=fmt(avail);annualV.textContent=fmt(saving*12);savingText.textContent=state.savingPct+"% para vos";savingBar.style.width=Math.min(100,state.savingPct)+"%";spentText.textContent=(state.income?Math.round(spent/state.income*100):0)+"% de tus ingresos";expenseList.innerHTML="";state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+e.category+'</b><small>'+(e.note||"Sin nota")+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:#b8c7d8">Todavía no cargaste gastos. Tocá <b>+</b> y empezá por el próximo gasto.</div>'}
+function renderGoals(){
+  const box=$("goalHome");if(!box)return;
+  const saving=state.income*state.savingPct/100, weekly=saving/4.33;
+  const now=new Date(),monthsLeft=Math.max(1,12-now.getMonth());
+  const cfg={week:["Semanal",weekly,1],month:["Mensual",saving,1],year:["Anual",saving,monthsLeft]};
+  const rows=[];
+  ["week","month","year"].forEach(k=>{
+    const g=state.goals&&state.goals[k];if(!g)return;
+    const [label,capacity,periods]=cfg[k],target=Number(g.amount)||0;
+    const need=k==="year"?target/periods:target;
+    const pct=need>0?Math.min(100,capacity/need*100):0;
+    const gap=Math.max(0,need-capacity);
+    let hint="";
+    if(k==="year")hint=capacity>=need?"Tu ritmo actual alcanza para llegar este año.":"Para llegar este año, te faltaría separar "+fmt(gap)+" más por mes.";
+    else hint=capacity>=need?"Tu ritmo actual alcanza para esta meta.":"Te faltaría separar "+fmt(gap)+" más por "+(k==="week"?"semana":"mes")+".";
+    rows.push('<div class="goalRow"><div class="goalTop"><b>'+label+' · '+escapeHtml(g.name||"Meta")+'</b><span>'+fmt(target)+'</span></div><div class="goalHint">'+hint+'</div><div class="goalProgress"><i style="width:'+pct+'%"></i></div></div>');
+  });
+  box.innerHTML=rows.length?rows.join(""):'<div class="goalRow"><div class="goalHint">Todavía no cargaste metas. Elegí algo concreto que quieras lograr.</div></div>';
+}
+function renderMicro(){
+  const micro=microSpend(),monthlySave=state.income*state.savingPct/100;
+  if($("microTotal"))$("microTotal").textContent=fmt(micro);
+  if($("microText")){
+    if(!micro)$("microText").textContent="Cada gasto chico cuenta. Cuando empieces a cargarlos, te mostramos cuánto podrían representar en un año.";
+    else{
+      const recover=micro*.30;
+      $("microText").textContent="Si bajaras apenas 30% de estos microgastos, podrías recuperar cerca de "+fmt(recover)+" por mes ("+fmt(recover*12)+" al año)."+(monthlySave?" Eso se suma a tu ahorro planeado.":"");
+    }
+  }
+}
+function renderStore(){
+  const month=monthExpenses(),spent=month.reduce((a,e)=>a+Number(e.amount||0),0),saving=state.income*state.savingPct/100,spendable=Math.max(0,state.income-saving),pressure=spendable>0?spent/spendable:0;
+  const t=$("storeTitle"),p=$("storeText");if(!t||!p)return;
+  if(!state.income){t.textContent="🐝 AmarangoElectro";p.textContent="Primero cargá tus números. Cuando tengas claro tu margen, podés decidir mejor qué gusto darte."}
+  else if(pressure<=.55){t.textContent="🐝 Tus números vienen ordenados";p.textContent="Si querés darte un gusto y entra dentro de tu plan, podés mirar AmarangoElectro sin perder de vista tus metas."}
+  else if(pressure<=.8){t.textContent="🐝 Antes de comprar, mirá tu margen";p.textContent="Estás usando buena parte de lo disponible. Si entrás a la tienda, hacelo con tu presupuesto a la vista."}
+  else{t.textContent="🐝 Primero cuidemos tus números";p.textContent="Hoy conviene priorizar tu plan. AmarangoElectro va a seguir ahí cuando recuperes margen."}
+}
+function render(){
+  state=normalizeState(state);
+  const month=monthExpenses(),spent=month.reduce((a,e)=>a+Number(e.amount||0),0),saving=state.income*state.savingPct/100,avail=state.income-saving-spent;
+  incomeV.textContent=fmt(state.income);savingV.textContent=fmt(saving);spentV.textContent=fmt(spent);availableV.textContent=fmt(Math.max(0,avail));annualV.textContent=fmt(saving*12);
+  savingText.textContent=state.savingPct+"% para vos";savingBar.style.width=Math.min(100,state.savingPct)+"%";spentText.textContent=(state.income?Math.round(spent/state.income*100):0)+"% de tus ingresos";
+  expenseList.innerHTML="";
+  state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(e.note||"Sin nota")+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});
+  if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
+  renderMicro();renderGoals();renderStore();
+}
 function updateFinancialPulse(){
   const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),path=$("pulsePath");
   if(!card||!label||!msg||!path)return;
   const income=Number(state.income)||0;
   const saving=income*(Number(state.savingPct)||0)/100;
-  const spent=state.expenses.reduce((a,e)=>a+Number(e.amount||0),0);
+  const spent=monthExpenses().reduce((a,e)=>a+Number(e.amount||0),0);
   const spendable=Math.max(0,income-saving);
   const pressure=spendable>0?spent/spendable:0;
 
@@ -184,18 +321,94 @@ function updateFinancialPulse(){
 const _renderBase=render;
 render=function(){_renderBase();updateFinancialPulse()};
 
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
 function openM(id){$(id).classList.add("show")}function closeM(id){$(id).classList.remove("show")}function backdrop(e,id){if(e.target.id===id)closeM(id)}
-function openExpense(){renderCats();openM("expenseModal")}function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}function openGoal(){goalName.value=state.goal?.name||"";goalAmount.value=state.goal?.amount||"";openM("goalModal")}
+function openExpense(){selected="Otros";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function openQuick(cat){selected=cat;if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
+function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();openM("goalModal")}
+function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||""}
 function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0)return alert("Ingresá un importe válido.");state.expenses.push({amount:a,category:selected,note:note.value.trim(),ts:Date.now()});expenseAmount.value="";note.value="";persist();render();closeM("expenseModal")}
 function delExpense(i){state.expenses.splice(i,1);persist();render()}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
-function saveGoal(){state.goal={name:goalName.value.trim(),amount:Number(goalAmount.value)||0};persist();closeM("goalModal")}
-function openSummary(){const by={};let spent=0;state.expenses.forEach(e=>{spent+=+e.amount;by[e.category]=(by[e.category]||0)+(+e.amount)});const saving=state.income*state.savingPct/100,micro=["Café","Golosinas","Streaming","Restaurantes","Salidas"].reduce((a,k)=>a+(by[k]||0),0);const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>'<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e6edf4"><b>'+k+'</b><span>'+fmt(v)+'</span></div>').join("");summary.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:#eef5fb;padding:14px;border-radius:16px"><small>Ingresos</small><b style="display:block;font-size:22px">'+fmt(state.income)+'</b></div><div style="background:#fff1e5;padding:14px;border-radius:16px"><small>Gastaste</small><b style="display:block;font-size:22px">'+fmt(spent)+'</b></div></div><div style="margin-top:16px"><b>Principales categorías</b>'+(rows||"<p>Sin movimientos todavía.</p>")+'</div><div style="margin-top:14px;background:#fff7df;padding:14px;border-radius:16px"><b>🔎 Microgastos detectados</b><p>'+fmt(micro)+' este mes en categorías que suelen pasar desapercibidas.</p></div><div style="background:#e9f8ef;padding:14px;border-radius:16px"><b>🌱 Si mantenés tu '+state.savingPct+'%</b><p>En 12 meses habrías separado '+fmt(saving*12)+' para vos.</p></div>'+(state.goal?'<div style="background:#eef3ff;padding:14px;border-radius:16px"><b>🎯 '+(state.goal.name||"Tu objetivo")+'</b><p>Meta: '+fmt(state.goal.amount)+'</p></div>':"");openM("summaryModal")}
-const enc=new TextEncoder(),dec=new TextDecoder();function b64(x){return btoa(String.fromCharCode(...new Uint8Array(x)))}function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0)).buffer}
-async function derive(pin,salt){const m=await crypto.subtle.importKey("raw",enc.encode(pin),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:150000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
-async function persist(){if(!vaultKey)return;const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv},vaultKey,enc.encode(JSON.stringify(state)));localStorage.setItem("mb_vault",JSON.stringify({iv:b64(iv),data:b64(cipher)}))}
-async function createVault(){const p=newPin.value.trim();if(!/^\d{4,8}$/.test(p))return alert("Usá un PIN de 4 a 8 números.");const salt=crypto.getRandomValues(new Uint8Array(16));localStorage.setItem("mb_salt",b64(salt));vaultKey=await derive(p,salt);await persist();lock.style.display="none";render()}
-async function unlockVault(){try{const salt=new Uint8Array(unb64(localStorage.getItem("mb_salt"))),k=await derive(pin.value.trim(),salt),o=JSON.parse(localStorage.getItem("mb_vault")),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},k,unb64(o.data));state=JSON.parse(dec.decode(plain));vaultKey=k;lock.style.display="none";render()}catch(e){alert("PIN incorrecto o datos dañados.")}}
-function resetVault(){if(confirm("Esto borra los datos guardados en este dispositivo. ¿Continuar?")){localStorage.removeItem("mb_vault");localStorage.removeItem("mb_salt");location.reload()}}
+function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0)return alert("Poné una meta y un monto válido.");state.goals=state.goals||{week:null,month:null,year:null};state.goals[p]={name:n,amount:a};persist();render();closeM("goalModal")}
+function openSummary(){
+  const by={},month=monthExpenses();let spent=0;
+  month.forEach(e=>{spent+=+e.amount;by[e.category]=(by[e.category]||0)+(+e.amount)});
+  const saving=state.income*state.savingPct/100,micro=microSpend(),recover=micro*.30;
+  const rows=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>'<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #dce5ed"><b>'+escapeHtml(k)+'</b><span>'+fmt(v)+'</span></div>').join("");
+  summary.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:#eef5fb;padding:14px;border-radius:16px"><small>Ingresos</small><b style="display:block;font-size:22px">'+fmt(state.income)+'</b></div><div style="background:#fff1e5;padding:14px;border-radius:16px"><small>Gastaste</small><b style="display:block;font-size:22px">'+fmt(spent)+'</b></div></div><div style="margin-top:16px"><b>Principales categorías</b>'+(rows||"<p>Sin movimientos este mes.</p>")+'</div><div style="margin-top:14px;background:#fff7df;padding:14px;border-radius:16px"><b>🔎 Microgastos</b><p>'+fmt(micro)+' este mes. Bajando 30% podrías recuperar cerca de '+fmt(recover)+' por mes.</p></div><div style="background:#e9f8ef;padding:14px;border-radius:16px"><b>🌱 Tu ahorro planeado</b><p>'+fmt(saving)+' por mes · '+fmt(saving*12)+' en 12 meses si mantenés el ritmo.</p></div>';
+  openM("summaryModal")
+}
+const enc=new TextEncoder(),dec=new TextDecoder();
+function b64(x){return btoa(String.fromCharCode(...new Uint8Array(x)))}function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0)).buffer}
+function normEmail(v){return String(v||"").trim().toLowerCase()}
+function emailOk(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normEmail(v))}
+function profiles(){try{return JSON.parse(localStorage.getItem("mb_profiles_v2")||"[]")}catch(e){return []}}
+function saveProfiles(list){localStorage.setItem("mb_profiles_v2",JSON.stringify(list))}
+async function profileId(email){const hash=await crypto.subtle.digest("SHA-256",enc.encode(normEmail(email)));return b64(hash).replace(/[+/=]/g,"").slice(0,22)}
+async function derive(secret,salt){const m=await crypto.subtle.importKey("raw",enc.encode(secret),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:180000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function persist(){
+  if(!vaultKey||!currentProfileId)return;
+  const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv},vaultKey,enc.encode(JSON.stringify(normalizeState(state))));
+  localStorage.setItem("mb_vault_v2_"+currentProfileId,JSON.stringify({iv:b64(iv),data:b64(cipher)}))
+}
+function showSetup(){setup.classList.remove("hidden");unlock.classList.add("hidden");if($("showLoginBtn"))$("showLoginBtn").classList.toggle("hidden",profiles().length===0&&!localStorage.getItem("mb_salt"))}
+function showLogin(){setup.classList.add("hidden");unlock.classList.remove("hidden")}
+async function createVault(){
+  const e=normEmail(newEmail.value),p=newPin.value.trim();
+  if(!emailOk(e))return alert("Ingresá un correo válido.");
+  if(!/^\d{4,8}$/.test(p))return alert("Usá un PIN de 4 a 8 números.");
+  const id=await profileId(e),list=profiles();
+  if(list.some(x=>x.id===id))return alert("Ese correo ya tiene un espacio en este dispositivo. Elegí “Ya tengo un espacio”.");
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;state=EMPTY_STATE();
+  list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);await persist();
+  lock.style.display="none";render()
+}
+async function unlockLegacy(e,p){
+  const saltRaw=localStorage.getItem("mb_salt"),vaultRaw=localStorage.getItem("mb_vault");if(!saltRaw||!vaultRaw)return false;
+  try{
+    const oldKey=await derive(p,new Uint8Array(unb64(saltRaw))),o=JSON.parse(vaultRaw),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},oldKey,unb64(o.data));
+    state=normalizeState(JSON.parse(dec.decode(plain)));
+    const id=await profileId(e),salt=crypto.getRandomValues(new Uint8Array(16)),list=profiles();
+    vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;
+    if(!list.some(x=>x.id===id)){list.push({id,email:e,salt:b64(salt),createdAt:Date.now(),migrated:true});saveProfiles(list)}
+    await persist();localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");return true
+  }catch(err){return false}
+}
+async function unlockVault(){
+  const e=normEmail(email.value),p=pin.value.trim();if(!emailOk(e))return alert("Ingresá tu correo.");if(!p)return alert("Ingresá tu PIN.");
+  const id=await profileId(e),list=profiles(),prof=list.find(x=>x.id===id);
+  try{
+    if(!prof){
+      if(await unlockLegacy(e,p)){lock.style.display="none";render();return}
+      return alert("No encontramos un espacio con ese correo en este dispositivo.");
+    }
+    const k=await derive(e+"|"+p,new Uint8Array(unb64(prof.salt))),o=JSON.parse(localStorage.getItem("mb_vault_v2_"+id)||"null");
+    if(!o)throw new Error("missing vault");
+    const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},k,unb64(o.data));
+    state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=k;currentProfileId=id;currentEmail=e;lock.style.display="none";render()
+  }catch(err){alert("Correo o PIN incorrecto, o los datos están dañados.")}
+}
+function logoutVault(){vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();lock.style.display="flex";showLogin();render()}
+function resetAllVaults(){
+  if(!confirm("Esto borra todos los espacios de Mi Balance guardados en este dispositivo. ¿Continuar?"))return;
+  profiles().forEach(p=>localStorage.removeItem("mb_vault_v2_"+p.id));localStorage.removeItem("mb_profiles_v2");localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");location.reload()
+}
+const SHARE_URL="https://mibalance-amarango.netlify.app/";
+async function shareApp(){
+  const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
+  try{
+    if(navigator.share){await navigator.share(data);return}
+    await navigator.clipboard.writeText(data.text+" "+data.url);alert("Link copiado. Ya podés compartirlo.")
+  }catch(e){if(e&&e.name!=="AbortError")prompt("Copiá este enlace para compartir Mi Balance:",SHARE_URL)}
+}
+function applyTheme(mode){
+  const m=mode||localStorage.getItem("mb_theme")||"dark";document.body.dataset.theme=m;localStorage.setItem("mb_theme",m);
+  if($("themeBtn"))$("themeBtn").textContent=m==="light"?"🌙":"☀️";
+  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=m==="light"?"#f8f3e9":"#07182f"
+}
+function toggleTheme(){applyTheme(document.body.dataset.theme==="light"?"dark":"light")}
 let deferredInstallPrompt=null;
 function appIsInstalled(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true}
 function syncInstallUI(){const hide=appIsInstalled();["installOnboarding","installCard"].forEach(id=>{const el=$(id);if(el)el.classList.toggle("hidden",hide)})}
@@ -219,7 +432,8 @@ async function installApp(){
   }
   openM("installHelpModal");
 }
-if(localStorage.getItem("mb_salt")){setup.classList.add("hidden");unlock.classList.remove("hidden")}
+applyTheme(localStorage.getItem("mb_theme")||"dark");
+if(profiles().length||localStorage.getItem("mb_salt"))showLogin();else showSetup();
 renderCats();render();syncInstallUI();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
 </script>
