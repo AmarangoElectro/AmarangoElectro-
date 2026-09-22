@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v13-editable-quick-access';
+const CACHE='mi-balance-v14-summary-theme-contrast';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
