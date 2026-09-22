@@ -207,8 +207,13 @@ body[data-theme="light"] .goalSuggest{background:#fff;color:#173452;border-color
 
 /* One-tap recurring expenses */
 .quickHead{align-items:center}.quickManage{border:1px solid var(--line);background:#173c68;color:#fff;border-radius:12px;padding:8px 9px;font-size:10px;font-weight:900;white-space:nowrap}
-.quickItem{position:relative;min-width:96px;flex:0 0 auto}.quickItem .quickChip{width:100%;min-width:96px;padding:10px 8px 31px}.quickItem.noPreset .quickChip{padding-bottom:10px}
-.quickUsual{position:absolute;left:6px;right:6px;bottom:5px;height:24px;border:0;border-radius:10px;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff;font-size:9px;font-weight:950;display:flex;align-items:center;justify-content:center;gap:3px}
+.quickItem{position:relative;min-width:104px;flex:0 0 auto}.quickItem .quickChip{width:100%;min-width:104px;padding:10px 8px 39px}.quickItem.noPreset .quickChip{padding-bottom:10px}
+.quickStepper{position:absolute;left:6px;right:6px;bottom:5px;height:31px;display:grid;grid-template-columns:31px 1fr;gap:5px}
+.quickStepMinus,.quickStepPlus{border:0;border-radius:10px;font-size:10px;font-weight:950;display:flex;align-items:center;justify-content:center}
+.quickStepMinus{background:#24384f;color:#dbe6f2;border:1px solid rgba(255,255,255,.09)}
+.quickStepMinus:disabled{opacity:.34}
+.quickStepPlus{background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff}
+body[data-theme="light"] .quickStepMinus{background:#e9eef3;color:#40566d;border-color:#d5dee7}
 .quickAmount{display:block;font-size:9px!important;color:#ffb477;margin-top:3px!important}.quickCount{position:absolute;right:5px;top:5px;padding:3px 5px;border-radius:99px;background:#07182f;color:#cdd8e5;font-size:8px;font-weight:900;border:1px solid var(--line)}
 .rememberRow{display:flex;align-items:flex-start;gap:9px;margin:11px 0 0;padding:10px;border-radius:13px;background:#eef4f8;color:#40546b;font-size:11px;line-height:1.35}.rememberRow input{width:auto!important;margin-top:2px;accent-color:#ff7a1a}
 .presetList{display:grid;gap:8px;margin-top:12px}.presetRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:11px;border:1px solid #dce6ef;border-radius:14px;background:#fff}.presetRow b{font-size:12px}.presetRow small{display:block;color:#748397;margin-top:2px}.presetDelete{border:0;background:#fff1f1;color:#b63b3b;border-radius:10px;padding:8px;font-weight:900}
@@ -306,7 +311,8 @@ body[data-theme="light"] .exitStay{color:#fff}
 .dailyGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}
 .dailyCard{position:relative;min-height:105px;border:1px solid #dce6ef;border-radius:18px;background:#fff;color:#142a43;padding:13px;text-align:left;overflow:hidden}
 .dailyCard .dailyEmoji{font-size:25px;display:block}.dailyCard b{display:block;margin-top:6px;font-size:13px}.dailyCard small{display:block;margin-top:3px;color:#748398;font-size:10px}
-.dailyCard.hasPreset{padding-bottom:40px}.dailyPlus{position:absolute;left:9px;right:9px;bottom:8px;height:29px;border:0;border-radius:11px;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff;font-size:10px;font-weight:950}
+.dailyCard.hasPreset{padding-bottom:45px}.dailyStepper{position:absolute;left:9px;right:9px;bottom:8px;height:32px;display:grid;grid-template-columns:38px 1fr;gap:6px}.dailyMinus,.dailyPlus{border:0;border-radius:11px;font-size:10px;font-weight:950}.dailyMinus{background:#e9eef3;color:#40566d;border:1px solid #d5dee7}.dailyMinus:disabled{opacity:.42}.dailyPlus{background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff}
+body[data-theme="dark"] .dailyMinus{background:#24384f;color:#dbe6f2;border-color:rgba(255,255,255,.09)}
 .dailyAlt{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.dailyAlt button{border-radius:14px;padding:11px;border:1px solid #dce6ef;background:#fff;color:#173452;font-weight:900;font-size:11px}
 .dailyAlt button:first-child{background:#eef4f9}
 body[data-theme="dark"] .dailyHead p{color:#aebed3}
@@ -616,14 +622,29 @@ function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerve
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
 function categoryEmoji(name){return (cats.find(c=>c[1]===name)||["🧾"])[0]}
 function monthCategoryCount(cat){return monthExpenses().filter(e=>e.category===cat).length}
+function monthQuickUsualCount(cat){
+  const amount=Number(state.quickPresets?.[cat]?.amount)||0;if(!amount)return 0;
+  return monthExpenses().filter(e=>e.category===cat&&e.quick===true&&Number(e.amount)===amount).length
+}
+function quickRemoveUsual(cat){
+  const amount=Number(state.quickPresets?.[cat]?.amount)||0;if(!amount)return;
+  const now=new Date();
+  for(let i=state.expenses.length-1;i>=0;i--){
+    const e=state.expenses[i],d=new Date(Number(e.ts)||0);
+    if(e.category===cat&&e.quick===true&&Number(e.amount)===amount&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()){
+      state.expenses.splice(i,1);persist();render();notify(categoryEmoji(cat)+" "+cat+" −1 · "+fmt(amount),"success");return
+    }
+  }
+  notify("No hay unidades rápidas de "+cat+" para quitar este mes.","info")
+}
 function renderQuickExpenses(){
   const rail=$("quickRail");if(!rail)return;
   const ordered=(state.quickVisible&&state.quickVisible.length?state.quickVisible:DEFAULT_QUICK_VISIBLE).slice(0,8);
   rail.innerHTML=ordered.map(cat=>{
-    const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,count=monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
+    const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,usualCount=monthQuickUsualCount(cat),count=amount?usualCount:monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
     return '<div class="quickItem '+(amount?"":"noPreset")+'">'+(count?'<span class="quickCount">x'+count+'</span>':'')+
       '<button class="quickChip" onclick="openQuick(\''+escapeHtml(cat)+'\')"><span>'+emoji+'</span><b>'+escapeHtml(label)+'</b>'+(amount?'<span class="quickAmount">'+fmt(amount)+'</span>':'')+'</button>'+
-      (amount?'<button class="quickUsual" onclick="event.stopPropagation();quickAddUsual(\''+escapeHtml(cat)+'\')">＋1 <span>'+fmt(amount)+'</span></button>':'')+'</div>'
+      (amount?'<div class="quickStepper"><button class="quickStepMinus" '+(usualCount?'':'disabled')+' onclick="event.stopPropagation();quickRemoveUsual(\''+escapeHtml(cat)+'\')">−1</button><button class="quickStepPlus" onclick="event.stopPropagation();quickAddUsual(\''+escapeHtml(cat)+'\')">＋1</button></div>':'')+'</div>'
   }).join("");
 }
 function quickAddUsual(cat){
@@ -663,11 +684,12 @@ function renderDailyQuickDrawer(){
   const grid=$("dailyQuickGrid");if(!grid)return;
   const ordered=(state.quickVisible&&state.quickVisible.length?state.quickVisible:DEFAULT_QUICK_VISIBLE).slice(0,8);
   grid.innerHTML=ordered.map(cat=>{
-    const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,count=monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
-    return '<div class="dailyCard '+(amount?'hasPreset':'')+'" onclick="'+(amount?('quickAddFromDrawer(\''+escapeHtml(cat)+'\')'):('openQuickFromDrawer(\''+escapeHtml(cat)+'\')'))+'"><span class="dailyEmoji">'+emoji+'</span><b>'+escapeHtml(label)+'</b><small>'+(amount?('De siempre · '+fmt(amount)):'Poné el importe')+(count?' · x'+count+' este mes':'')+'</small>'+(amount?'<button class="dailyPlus" onclick="event.stopPropagation();quickAddFromDrawer(\''+escapeHtml(cat)+'\')">＋1 '+fmt(amount)+'</button>':'')+'</div>'
+    const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,usualCount=monthQuickUsualCount(cat),count=amount?usualCount:monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
+    return '<div class="dailyCard '+(amount?'hasPreset':'')+'" onclick="openQuickFromDrawer(\''+escapeHtml(cat)+'\')"><span class="dailyEmoji">'+emoji+'</span><b>'+escapeHtml(label)+'</b><small>'+(amount?('De siempre · '+fmt(amount)):'Poné el importe')+(count?' · x'+count+' este mes':'')+'</small>'+(amount?'<div class="dailyStepper"><button class="dailyMinus" '+(usualCount?'':'disabled')+' onclick="event.stopPropagation();quickRemoveFromDrawer(\''+escapeHtml(cat)+'\')">−1</button><button class="dailyPlus" onclick="event.stopPropagation();quickAddFromDrawer(\''+escapeHtml(cat)+'\')">＋1 '+fmt(amount)+'</button></div>':'')+'</div>'
   }).join("")
 }
 function quickAddFromDrawer(cat){quickAddUsual(cat);renderDailyQuickDrawer()}
+function quickRemoveFromDrawer(cat){quickRemoveUsual(cat);renderDailyQuickDrawer()}
 function openQuickFromDrawer(cat){closeM("dailyQuickModal");openQuick(cat)}
 function inferGoalIcon(name){
   const n=String(name||"").toLowerCase();
