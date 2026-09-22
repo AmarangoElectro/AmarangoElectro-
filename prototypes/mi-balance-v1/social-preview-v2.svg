@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07182f"/><stop offset="1" stop-color="#0d2b4f"/></linearGradient>
+  <linearGradient id="orange" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffd08c"/><stop offset="1" stop-color="#ff7a1a"/></linearGradient>
+  <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="28" flood-color="#000" flood-opacity=".24"/></filter>
+</defs>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<circle cx="1060" cy="-40" r="245" fill="#ff7a1a" opacity=".10"/>
+<rect x="55" y="50" width="1090" height="530" rx="42" fill="#0d2a4c" stroke="#21456d" stroke-width="2" filter="url(#shadow)"/>
+
+<g transform="translate(105 145)">
+  <rect width="210" height="210" rx="48" fill="#07182f" stroke="#27496d" stroke-width="2"/>
+  <rect x="48" y="116" width="30" height="52" rx="13" fill="url(#orange)"/>
+  <rect x="91" y="78" width="30" height="90" rx="13" fill="url(#orange)"/>
+  <rect x="134" y="34" width="30" height="134" rx="13" fill="url(#orange)"/>
+</g>
+
+<text x="365" y="178" fill="#f7f9fc" font-family="Arial, sans-serif" font-size="72" font-weight="800">Mi Balance</text>
+<text x="369" y="228" fill="#ff9a49" font-family="Arial, sans-serif" font-size="28" font-weight="700">Un regalo de Amarango</text>
+<text x="369" y="291" fill="#d6e2f1" font-family="Arial, sans-serif" font-size="34" font-weight="500">Controlá tu plata sin complicarte.</text>
+
+<g transform="translate(369 344)">
+  <rect x="0" y="0" width="138" height="48" rx="24" fill="#143b66" stroke="#41d98a"/>
+  <text x="69" y="31" text-anchor="middle" fill="#f7f9fc" font-family="Arial, sans-serif" font-size="19" font-weight="700">GRATIS</text>
+  <rect x="153" y="0" width="152" height="48" rx="24" fill="#143b66" stroke="#41d98a"/>
+  <text x="229" y="31" text-anchor="middle" fill="#f7f9fc" font-family="Arial, sans-serif" font-size="19" font-weight="700">PRIVADA</text>
+  <rect x="320" y="0" width="186" height="48" rx="24" fill="#143b66" stroke="#41d98a"/>
+  <text x="413" y="31" text-anchor="middle" fill="#f7f9fc" font-family="Arial, sans-serif" font-size="19" font-weight="700">INSTALABLE</text>
+</g>
+
+<g transform="translate(365 430)">
+  <rect width="670" height="94" rx="22" fill="#0a2340" stroke="#1e4166"/>
+  <text x="28" y="36" fill="#aebed3" font-family="Arial, sans-serif" font-size="20">Tus datos quedan cifrados en tu dispositivo.</text>
+  <text x="28" y="69" fill="#f7f9fc" font-family="Arial, sans-serif" font-size="22" font-weight="700">Abrila desde tu pantalla como cualquier app.</text>
+</g>
+</svg>
