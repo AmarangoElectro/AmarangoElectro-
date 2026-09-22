@@ -151,6 +151,51 @@ body[data-theme="light"] .accountAction{background:#fff;color:#173452;border-col
 body[data-theme="light"] .logoutBtn{background:#fff5f5}
 @media(max-width:390px){.topTools{gap:4px}.iconBtn{width:32px;height:32px;border-radius:11px;font-size:15px}.brand{gap:7px}.mark{width:35px;height:35px}.sub{font-size:9px}}
 
+/* Greeting + financial health */
+.welcomeStrip{margin:12px 18px 4px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:17px;background:rgba(16,47,83,.62)}
+.welcomeStrip b{display:block;font-size:15px}.welcomeStrip small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.healthBadge{flex:0 0 auto;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:950;border:1px solid var(--line);background:rgba(127,154,183,.12);color:#b9cbe0}
+.healthBadge[data-health="great"]{color:#55dfa0;border-color:rgba(65,217,138,.32);background:rgba(65,217,138,.1)}
+.healthBadge[data-health="good"]{color:#ffd071;border-color:rgba(255,191,90,.32);background:rgba(255,191,90,.09)}
+.healthBadge[data-health="tight"]{color:#ff9d68;border-color:rgba(255,138,75,.34);background:rgba(255,138,75,.1)}
+.healthBadge[data-health="care"]{color:#ff8585;border-color:rgba(255,107,107,.36);background:rgba(255,107,107,.1)}
+
+/* Goal always in sight */
+.goalFocus{margin:10px 18px 8px;display:grid;grid-template-columns:72px 1fr;gap:13px;align-items:center;padding:15px;border-radius:23px;border:1px solid rgba(255,154,73,.28);background:radial-gradient(circle at 12% 25%,rgba(255,122,26,.15),transparent 38%),linear-gradient(145deg,#12345b,#0a2747);box-shadow:0 12px 28px rgba(0,0,0,.14)}
+.goalFocusIcon{width:66px;height:66px;border-radius:20px;display:grid;place-items:center;font-size:36px;background:rgba(255,255,255,.06);border:1px solid var(--line);box-shadow:inset 0 0 18px rgba(255,255,255,.03)}
+.goalFocusEy{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:#ffad6d;font-weight:950}.goalFocusName{font-size:18px;font-weight:950;margin-top:3px;line-height:1.12}.goalFocusMeta{font-size:11px;color:#c7d5e5;margin-top:5px;line-height:1.4}
+.goalFocusBar{height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:9px}.goalFocusBar i{display:block;height:100%;background:linear-gradient(90deg,#ff7a1a,#41d98a);border-radius:99px}
+.goalFocusActions{display:flex;gap:8px;margin-top:10px}.goalFocusBtn{border:1px solid var(--line);background:#173c68;color:#fff;border-radius:12px;padding:8px 10px;font-size:10px;font-weight:900}.goalFocusBtn.done{background:rgba(65,217,138,.12);border-color:rgba(65,217,138,.28);color:#70e6ae}
+.goalFocus.empty{grid-template-columns:54px 1fr}.goalFocus.empty .goalFocusIcon{width:50px;height:50px;font-size:26px;border-radius:16px}
+.goalCelebration{margin:8px 18px;padding:13px 14px;border-radius:18px;border:1px solid rgba(65,217,138,.25);background:linear-gradient(145deg,rgba(65,217,138,.12),rgba(18,53,94,.72));display:none}
+.goalCelebration.show{display:block}.goalCelebration b{display:block;color:#7ce8b6}.goalCelebration p{margin:4px 0 0;color:#cfdfec;font-size:12px;line-height:1.4}
+
+/* Goal suggestions */
+.goalSuggestions{display:flex;gap:8px;overflow:auto;padding:2px 0 5px;scrollbar-width:none}.goalSuggestions::-webkit-scrollbar{display:none}
+.goalSuggest{min-width:max-content;border:1px solid #dce6ef;background:#fff;color:#18304e;border-radius:999px;padding:9px 11px;font-size:11px;font-weight:850}
+.goalDoneBtn{margin-top:8px;width:100%;border:1px solid rgba(65,217,138,.3);background:rgba(65,217,138,.09);color:#55dfa0;border-radius:12px;padding:8px;font-size:10px;font-weight:900}
+
+/* Light mode readability pass */
+body[data-theme="light"] .welcomeStrip{background:#fff;border-color:#d8e2eb;box-shadow:0 8px 20px rgba(31,49,70,.05)}
+body[data-theme="light"] .goalFocus{background:radial-gradient(circle at 12% 25%,rgba(255,122,26,.10),transparent 38%),linear-gradient(145deg,#fff,#f8f3ea);border-color:#efd7c3;box-shadow:0 10px 24px rgba(31,49,70,.07)}
+body[data-theme="light"] .goalFocusIcon{background:#f3f6f9;border-color:#dce4eb}
+body[data-theme="light"] .goalFocusEy,body[data-theme="light"] .ey{color:#a94400}
+body[data-theme="light"] .goalFocusMeta{color:#53677d}
+body[data-theme="light"] .goalFocusBtn{background:#edf3f8;color:#173c68;border-color:#d7e1ea}
+body[data-theme="light"] .goalCelebration{background:#edf9f3;border-color:#bde8d0}
+body[data-theme="light"] .goalCelebration p{color:#3d6653}
+body[data-theme="light"] .lab,body[data-theme="light"] .meta small,body[data-theme="light"] .quickHead small{color:#5f7185}
+body[data-theme="light"] .val,body[data-theme="light"] .quickHead b,body[data-theme="light"] .goalsCard b,body[data-theme="light"] .insightCard b,body[data-theme="light"] .shareCard b,body[data-theme="light"] .storeCard b{color:#112848}
+body[data-theme="light"] .pulseCard{background:radial-gradient(circle at 85% 10%,color-mix(in srgb,var(--pulse) 10%,transparent),transparent 28%),linear-gradient(145deg,#071a30,#0b2949);color:#f7f9fc}
+body[data-theme="light"] .pulseMsg{color:#c9d6e5}
+body[data-theme="light"] .pulseMonitorTop{color:#7f99b6}
+body[data-theme="light"] .pulseTitle{color:#f7f9fc}
+body[data-theme="light"] .healthBadge{background:#f2f5f8}
+body[data-theme="light"] .sheet p,body[data-theme="light"] .accountEmail,body[data-theme="light"] .accountLine{color:#4f6277!important}
+body[data-theme="light"] input::placeholder{color:#7d8996}
+body[data-theme="light"] .goalSuggest{background:#fff;color:#173452;border-color:#d6e0e9}
+@media(max-width:390px){.goalFocus{grid-template-columns:62px 1fr}.goalFocusIcon{width:58px;height:58px;font-size:31px}}
+
 </style>
 </head>
 <body>
@@ -158,6 +203,8 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
 <div id="setup">
   <b>Creá tu espacio privado</b>
   <p class="tiny">Simple para usar todos los días. Tus números son tuyos.</p>
+  <label class="fieldLabel" for="newName">¿Cómo querés que te saludemos? <span style="font-weight:600;color:var(--muted)">(opcional)</span></label>
+  <input id="newName" type="text" maxlength="24" autocomplete="name" placeholder="Ej: Maxi">
   <label class="fieldLabel" for="newEmail">Tu correo electrónico</label>
   <input id="newEmail" type="email" inputmode="email" autocomplete="email" placeholder="vos@correo.com">
   <label class="fieldLabel" for="newPin">Elegí un PIN</label>
@@ -197,6 +244,23 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
 
 <div class="app">
 <header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
+
+<section class="welcomeStrip">
+  <div><b id="greetingText">Hola 👋</b><small id="greetingSub">Hoy también cuenta.</small></div>
+  <div id="financialHealthBadge" class="healthBadge" data-health="neutral">Empezando</div>
+</section>
+
+<section id="goalFocus" class="goalFocus empty">
+  <div id="goalFocusIcon" class="goalFocusIcon">🎯</div>
+  <div>
+    <div class="goalFocusEy">TU META EN FOCO</div>
+    <div id="goalFocusName" class="goalFocusName">Elegí algo que quieras lograr</div>
+    <div id="goalFocusMeta" class="goalFocusMeta">Ver tu meta cada vez que abrís la app ayuda a mantenerla presente antes de gastar.</div>
+    <div id="goalFocusBar" class="goalFocusBar hidden"><i id="goalFocusFill" style="width:0%"></i></div>
+    <div class="goalFocusActions"><button id="goalFocusEdit" class="goalFocusBtn" onclick="openGoal()">Crear meta</button><button id="goalFocusDone" class="goalFocusBtn done hidden" onclick="completeFeaturedGoal()">✓ Marcar lograda</button></div>
+  </div>
+</section>
+<section id="goalCelebration" class="goalCelebration"><b id="celebrationTitle">🏆 ¡Meta cumplida!</b><p id="celebrationText">Reconocé el logro. Lo que sostenés en el tiempo vale más que un día perfecto.</p></section>
 
 <section class="pulseWrap">
   <div id="financialPulse" class="pulseCard" data-level="neutral">
@@ -292,7 +356,21 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
 
 <div id="incomeModal" class="modal" onclick="backdrop(event,'incomeModal')"><div class="sheet"><h3>Tu ingreso mensual</h3><input id="incomeInput" type="number" inputmode="decimal" placeholder="¿Cuánto entra por mes?"><label style="display:block;margin:13px 0 6px;font-weight:900">¿Cuánto querés reservar para vos?</label><select id="savingPct"><option>10</option><option>15</option><option selected>20</option><option>25</option><option>30</option></select><button class="primary" onclick="saveIncome()">Guardar</button><button class="secondary" onclick="closeM('incomeModal')">Cancelar</button></div></div>
 
-<div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3>Tu meta</h3><label class="fieldLabel">Plazo</label><select id="goalPeriod" onchange="loadGoalPeriod()"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">Anual</option></select><label class="fieldLabel">¿Qué querés lograr?</label><input id="goalName" placeholder="Ej: vacaciones, notebook, fondo de emergencia"><label class="fieldLabel">¿Cuánto necesitás?</label><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo"><button class="primary" onclick="saveGoal()">Guardar meta</button><button class="secondary" onclick="closeM('goalModal')">Cancelar</button></div></div>
+<div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3>Tu meta</h3>
+<label class="fieldLabel">Ideas rápidas <span style="font-weight:600;color:#708095">(opcional)</span></label>
+<div class="goalSuggestions">
+  <button class="goalSuggest" onclick="chooseGoalSuggestion('Auto','🚗','year')">🚗 Auto</button>
+  <button class="goalSuggest" onclick="chooseGoalSuggestion('Vacaciones','✈️','year')">✈️ Vacaciones</button>
+  <button class="goalSuggest" onclick="chooseGoalSuggestion('Fondo de emergencia','🛟','month')">🛟 Emergencia</button>
+  <button class="goalSuggest" onclick="chooseGoalSuggestion('Notebook','💻','year')">💻 Notebook</button>
+  <button class="goalSuggest" onclick="chooseGoalSuggestion('Casa','🏠','year')">🏠 Casa</button>
+  <button class="goalSuggest" onclick="chooseGoalSuggestion('Una semana sin fumar','🚭','week')">🚭 No fumar</button>
+</div>
+<label class="fieldLabel">Plazo</label><select id="goalPeriod" onchange="loadGoalPeriod()"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">Anual</option></select>
+<label class="fieldLabel">Imagen de tu meta</label><select id="goalIcon"><option value="🎯">🎯 Objetivo</option><option value="🚗">🚗 Auto / movilidad</option><option value="✈️">✈️ Vacaciones / viaje</option><option value="🏠">🏠 Casa</option><option value="💻">💻 Tecnología</option><option value="🛟">🛟 Fondo de emergencia</option><option value="🚭">🚭 Dejar un hábito</option><option value="💚">💚 Salud</option><option value="💰">💰 Ahorro</option></select>
+<label class="fieldLabel">¿Qué querés lograr?</label><input id="goalName" placeholder="Ej: vacaciones, auto, fondo de emergencia">
+<label class="fieldLabel">¿Cuánto necesitás?</label><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo">
+<button class="primary" onclick="saveGoal()">Guardar meta</button><button class="secondary" onclick="closeM('goalModal')">Cancelar</button></div></div>
 
 <div id="installHelpModal" class="modal" onclick="backdrop(event,'installHelpModal')"><div class="sheet" style="text-align:center"><img class="installHelpLogo" src="./icon.svg" alt=""><h3>Instalar Mi Balance</h3><div id="installHelpBody" style="color:#44546a;line-height:1.55;text-align:left"></div><button class="secondary" onclick="closeM('installHelpModal')">Cerrar</button></div></div>
 
@@ -306,6 +384,7 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
   <div class="accountSheetHead"><div class="accountAvatar">👤</div><div><h3 style="margin:0">Tu espacio</h3><div id="accountEmail" class="accountEmail">—</div></div></div>
   <div class="emailNote">🔐 Tus movimientos y metas siguen cifrados y guardados en este dispositivo.</div>
   <div class="accountActions">
+    <button class="accountAction" onclick="openProfileName()"><span>👋 Personalizar saludo</span><span>›</span></button>
     <button class="accountAction" onclick="startGuideFromAccount()"><span>❓ Ver guía de nuevo</span><span>›</span></button>
     <button id="soundToggleBtn" class="accountAction" onclick="toggleSound()"><span>🔊 Sonidos</span><span id="soundToggleText">Activados</span></button>
     <button class="accountAction" onclick="shareApp()"><span>🤝 Compartir Mi Balance</span><span>›</span></button>
@@ -313,6 +392,8 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
   <button class="logoutBtn" onclick="logoutVault()">Cerrar sesión</button>
   <button class="secondary" onclick="closeM('accountModal')">Cerrar</button>
 </div></div>
+
+<div id="profileNameModal" class="modal" onclick="backdrop(event,'profileNameModal')"><div class="sheet"><h3>¿Cómo querés que te saludemos?</h3><p style="color:#56677b;line-height:1.5">Es opcional. Se guarda cifrado junto con tus datos en este dispositivo.</p><input id="profileNameInput" maxlength="24" placeholder="Ej: Maxi"><button class="primary" onclick="saveProfileName()">Guardar saludo</button><button class="secondary" onclick="closeM('profileNameModal')">Cancelar</button></div></div>
 
 <div id="guideLayer" class="guideLayer" aria-live="polite">
   <div id="guideSpot" class="guideSpot"></div>
@@ -327,13 +408,71 @@ body[data-theme="light"] .logoutBtn{background:#fff5f5}
 
 <script>
 const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍺","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
-const EMPTY_STATE=()=>({income:0,savingPct:20,expenses:[],goals:{week:null,month:null,year:null}});
+const EMPTY_STATE=()=>({profileName:"",income:0,savingPct:20,expenses:[],goals:{week:null,month:null,year:null}});
 let state=EMPTY_STATE(), selected="Otros", vaultKey=null, currentProfileId=null, currentEmail="";
 const $=id=>document.getElementById(id), fmt=n=>"$ "+Math.round(Number(n||0)).toLocaleString("es-AR");
-function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.goals=x.goals&&typeof x.goals==="object"?x.goals:{week:null,month:null,year:null};if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
+function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.goals=x.goals&&typeof x.goals==="object"?x.goals:{week:null,month:null,year:null};if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
 function monthExpenses(){const n=new Date();return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()})}
 function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Golosinas","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
+function inferGoalIcon(name){
+  const n=String(name||"").toLowerCase();
+  if(/auto|coche|carro|veh[ií]culo/.test(n))return "🚗";
+  if(/moto/.test(n))return "🏍️";
+  if(/vacacion|viaje|playa/.test(n))return "✈️";
+  if(/casa|hogar|depto|departamento/.test(n))return "🏠";
+  if(/notebook|compu|pc|tecnolog/.test(n))return "💻";
+  if(/celular|tel[eé]fono|iphone/.test(n))return "📱";
+  if(/emergencia|fondo/.test(n))return "🛟";
+  if(/cigarr|fumar|tabaco/.test(n))return "🚭";
+  if(/salud|gym|gimnasio/.test(n))return "💚";
+  if(/ahorr/.test(n))return "💰";
+  return "🎯"
+}
+function goalCapacity(period){
+  const saving=state.income*state.savingPct/100,now=new Date(),monthsLeft=Math.max(1,12-now.getMonth());
+  return period==="week"?saving/4.33:period==="year"?saving*monthsLeft:saving
+}
+function featuredGoal(){
+  const goals=state.goals||{};
+  const active=["week","month","year"].map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&!x.goal.completedAt);
+  if(active.length)return active[0];
+  const completed=["week","month","year"].map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&x.goal.completedAt).sort((a,b)=>(b.goal.completedAt||0)-(a.goal.completedAt||0));
+  return completed[0]||null
+}
+function financialHealth(){
+  const income=Number(state.income)||0;if(!income)return {key:"neutral",label:"Empezando",sub:"Cargá tu ingreso para ver tu salud financiera."};
+  const saving=income*(Number(state.savingPct)||0)/100,spent=monthExpenses().reduce((a,e)=>a+Number(e.amount||0),0),spendable=Math.max(1,income-saving),pressure=spent/spendable;
+  if(pressure<=.55&&state.savingPct>=10)return {key:"great",label:"Muy saludable",sub:"Tu ahorro y tus gastos vienen con buen margen."};
+  if(pressure<=.80)return {key:"good",label:"En equilibrio",sub:"Vas bien, aunque conviene seguir mirando los gastos chicos."};
+  if(pressure<1)return {key:"tight",label:"Ajustada",sub:"Tu presupuesto está exigido. Cada decisión suma."};
+  return {key:"care",label:"A cuidar",sub:"Tus gastos ya alcanzaron lo disponible después del ahorro."}
+}
+function renderGreetingAndFocus(){
+  const name=state.profileName?escapeHtml(state.profileName):"",g=$("greetingText"),sub=$("greetingSub"),badge=$("financialHealthBadge");
+  const health=financialHealth();
+  if(g)g.innerHTML=name?"Hola, "+name+" 👋":"Hola 👋";
+  if(sub)sub.textContent=health.sub;
+  if(badge){badge.dataset.health=health.key;badge.textContent=health.label}
+  const f=featuredGoal(),box=$("goalFocus"),icon=$("goalFocusIcon"),title=$("goalFocusName"),meta=$("goalFocusMeta"),bar=$("goalFocusBar"),fill=$("goalFocusFill"),edit=$("goalFocusEdit"),done=$("goalFocusDone"),cele=$("goalCelebration");
+  if(!box||!icon||!title||!meta)return;
+  if(!f){
+    box.classList.add("empty");icon.textContent="🎯";title.textContent="Elegí algo que quieras lograr";meta.textContent="Ver tu meta cada vez que abrís la app ayuda a tenerla presente antes de gastar.";
+    bar?.classList.add("hidden");done?.classList.add("hidden");if(edit){edit.textContent="Crear meta";edit.onclick=()=>openGoal("month")}if(cele)cele.classList.remove("show");return
+  }
+  const goal=f.goal,period=f.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":"hasta fin de año";
+  box.classList.remove("empty");icon.textContent=goal.icon||inferGoalIcon(goal.name);title.textContent=goal.name||"Tu meta";
+  if(goal.completedAt){
+    meta.textContent="Meta marcada como lograda. Disfrutá este momento y elegí el próximo paso cuando quieras.";
+    bar?.classList.remove("hidden");if(fill)fill.style.width="100%";done?.classList.add("hidden");
+    if(edit){edit.textContent="Ver / editar";edit.onclick=()=>openGoal(period)}
+    if(cele){cele.classList.add("show");$("celebrationTitle").textContent=period==="week"?"🏆 ¡Semana cumplida!":"🏆 ¡Meta cumplida!";$("celebrationText").textContent="Bien ahí"+(state.profileName?", "+state.profileName:"")+". Reconocer un logro también ayuda a sostener el hábito."}
+  }else{
+    meta.textContent=target>0?"Con tu ritmo actual proyectás "+fmt(capacity)+" "+periodLabel+" hacia una meta de "+fmt(target)+".":"Tené esta imagen presente antes de un gasto impulsivo.";
+    bar?.classList.remove("hidden");if(fill)fill.style.width=pct+"%";done?.classList.remove("hidden");if(done)done.onclick=()=>completeGoal(period);
+    if(edit){edit.textContent="Editar meta";edit.onclick=()=>openGoal(period)}if(cele)cele.classList.remove("show")
+  }
+}
 function renderGoals(){
   const box=$("goalHome");if(!box)return;
   const saving=state.income*state.savingPct/100, weekly=saving/4.33;
@@ -342,14 +481,15 @@ function renderGoals(){
   const rows=[];
   ["week","month","year"].forEach(k=>{
     const g=state.goals&&state.goals[k];if(!g)return;
-    const [label,capacity,periods]=cfg[k],target=Number(g.amount)||0;
+    const [label,capacity,periods]=cfg[k],target=Number(g.amount)||0,icon=g.icon||inferGoalIcon(g.name);
     const need=k==="year"?target/periods:target;
-    const pct=need>0?Math.min(100,capacity/need*100):0;
+    const pct=g.completedAt?100:(need>0?Math.min(100,capacity/need*100):0);
     const gap=Math.max(0,need-capacity);
     let hint="";
-    if(k==="year")hint=capacity>=need?"Tu ritmo actual alcanza para llegar este año.":"Para llegar este año, te faltaría separar "+fmt(gap)+" más por mes.";
+    if(g.completedAt)hint="🏆 ¡Felicitaciones! Marcaste esta meta como lograda.";
+    else if(k==="year")hint=capacity>=need?"Tu ritmo actual alcanza para llegar este año.":"Para llegar este año, te faltaría separar "+fmt(gap)+" más por mes.";
     else hint=capacity>=need?"Tu ritmo actual alcanza para esta meta.":"Te faltaría separar "+fmt(gap)+" más por "+(k==="week"?"semana":"mes")+".";
-    rows.push('<div class="goalRow"><div class="goalTop"><b>'+label+' · '+escapeHtml(g.name||"Meta")+'</b><span>'+fmt(target)+'</span></div><div class="goalHint">'+hint+'</div><div class="goalProgress"><i style="width:'+pct+'%"></i></div></div>');
+    rows.push('<div class="goalRow"><div class="goalTop"><b>'+icon+' '+label+' · '+escapeHtml(g.name||"Meta")+'</b><span>'+fmt(target)+'</span></div><div class="goalHint">'+hint+'</div><div class="goalProgress"><i style="width:'+pct+'%"></i></div>'+(g.completedAt?'':'<button class="goalDoneBtn" onclick="completeGoal(\''+k+'\')">✓ Marcar como lograda</button>')+'</div>');
   });
   box.innerHTML=rows.length?rows.join(""):'<div class="goalRow"><div class="goalHint">Todavía no cargaste metas. Elegí algo concreto que quieras lograr.</div></div>';
 }
@@ -380,7 +520,7 @@ function render(){
   expenseList.innerHTML="";
   state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(e.note||"Sin nota")+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});
   if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
-  renderMicro();renderGoals();renderStore();
+  renderMicro();renderGoals();renderGreetingAndFocus();renderStore();
 }
 function updateFinancialPulse(){
   const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),rate=$("pulseRate"),paths=[...document.querySelectorAll(".pulseLine")];
@@ -432,10 +572,13 @@ function openExpense(){selected="Otros";if($("expenseTitle"))$("expenseTitle").t
 function openQuick(cat){selected=cat;if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
 function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
 function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();openM("goalModal")}
-function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||""}
+function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||"";if($("goalIcon"))$("goalIcon").value=g?.icon||inferGoalIcon(g?.name||"")}
+function chooseGoalSuggestion(name,icon,period){goalPeriod.value=period;goalName.value=name;goalIcon.value=icon;goalAmount.value="";setTimeout(()=>goalAmount.focus(),80)}
 function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return;}state.expenses.push({amount:a,category:selected,note:note.value.trim(),ts:Date.now()});expenseAmount.value="";note.value="";persist();render();closeM("expenseModal")}
 function delExpense(i){state.expenses.splice(i,1);persist();render()}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
-function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null};state.goals[p]={name:n,amount:a};persist();render();closeM("goalModal")}
+function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null};const prev=state.goals[p]||{};state.goals[p]={name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt:prev.createdAt||Date.now(),completedAt:null};persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para ayudarte a tenerla presente.","success")}
+function completeGoal(period){const g=state.goals&&state.goals[period];if(!g||g.completedAt)return;g.completedAt=Date.now();persist();render();notify(period==="week"?"🏆 ¡Semana cumplida! Bien ahí.":"🏆 ¡Meta lograda! Felicitaciones.","success")}
+function completeFeaturedGoal(){const f=featuredGoal();if(f&&!f.goal.completedAt)completeGoal(f.period)}
 function openSummary(){
   const by={},month=monthExpenses();let spent=0;
   month.forEach(e=>{spent+=+e.amount;by[e.category]=(by[e.category]||0)+(+e.amount)});
@@ -534,7 +677,7 @@ async function createVault(){
   const id=await profileId(e),list=profiles();
   if(list.some(x=>x.id===id)){notify("Ese correo ya tiene un espacio en este dispositivo. Elegí “Ya tengo un espacio”.","warn");return;}
   const salt=crypto.getRandomValues(new Uint8Array(16));
-  vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;state=EMPTY_STATE();
+  vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;state=EMPTY_STATE();state.profileName=String(newName?.value||"").trim().slice(0,24);
   list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);rememberProfileEmail(e);await persist();await saveActiveSession();
   lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500)
 }
@@ -587,6 +730,8 @@ function toggleSound(){soundEnabled=!soundEnabled;localStorage.setItem("mb_sound
 document.addEventListener("pointerup",e=>{const hit=e.target.closest&&e.target.closest("button,a");if(hit&&!hit.disabled)appClickSound()},{capture:true});
 
 function openAccount(){if($("accountEmail"))$("accountEmail").textContent=currentEmail||localStorage.getItem("mb_last_email")||"Este dispositivo";syncSoundUI();openM("accountModal")}
+function openProfileName(){closeM("accountModal");profileNameInput.value=state.profileName||"";setTimeout(()=>openM("profileNameModal"),120)}
+function saveProfileName(){state.profileName=String(profileNameInput.value||"").trim().slice(0,24);persist();render();closeM("profileNameModal");notify(state.profileName?"Listo. Desde ahora te saludamos como "+state.profileName+".":"Listo. Dejamos el saludo sin nombre.","success")}
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
