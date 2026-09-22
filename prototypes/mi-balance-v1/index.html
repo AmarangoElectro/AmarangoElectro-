@@ -112,7 +112,13 @@ button:active,.storeLink:active{transform:scale(.985)}
 .quickIdentity button{border:0;background:none;color:#ff9a49;font-weight:900;font-size:11px}
 .accountSheetHead{display:flex;gap:12px;align-items:center}.accountAvatar{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:#123b68;font-size:22px}.accountEmail{font-size:13px;color:#5f7185;overflow-wrap:anywhere}.accountActions{display:grid;gap:9px;margin-top:16px}
 .accountAction{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid #dce6ef;background:#fff;color:#13253d;padding:13px 14px;border-radius:15px;font-weight:850;text-align:left}.accountAction span:last-child{color:#6d7e91}
+.accountSettingsBlock{margin-top:14px;padding:12px;border-radius:16px;border:1px solid #dce6ef;background:#f5f8fb}.accountSettingsBlock .fieldLabel{margin-top:0}.accountSettingsBlock small{display:block;margin-top:7px;color:#6d7e91;font-size:10px;line-height:1.4}
+.dataDeleteBtn{width:100%;border:1px solid #efc8c8;background:#fff7f7;color:#a62d2d;padding:12px;border-radius:15px;font-weight:900;margin-top:11px}
 .logoutBtn{width:100%;border:1px solid #f1c8c8;background:#fff5f5;color:#a62d2d;padding:13px;border-radius:15px;font-weight:900;margin-top:12px}
+.trashHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.trashHead p{margin:0!important;font-size:11px;line-height:1.4}.trashHead>span{flex:0 0 auto;padding:5px 8px;border-radius:999px;border:1px solid #dce6ef;font-size:10px;font-weight:900}
+.trashList{display:grid;gap:9px;margin-top:14px}.trashItem{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:11px;border-radius:15px;border:1px solid #dce6ef;background:#fff}.trashItemIcon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#eef4f8;font-size:20px}.trashItemText{min-width:0}.trashItemText b{display:block;font-size:12px}.trashItemText small{display:block;color:#738398;font-size:9px;margin-top:3px}.trashRestore{border:1px solid #bedfce;background:#eef9f3;color:#24714e;border-radius:11px;padding:8px;font-size:9px;font-weight:900}
+.trashEmpty{padding:18px 12px;text-align:center;color:#748397;font-size:12px}
+body[data-theme="dark"] .accountSettingsBlock{background:#0e2b4e;border-color:rgba(255,255,255,.12)}body[data-theme="dark"] .accountSettingsBlock small{color:#9fb1c7}body[data-theme="dark"] .dataDeleteBtn{background:#351b24;color:#ff9b9b;border-color:#5c2a36}body[data-theme="dark"] .trashItem{background:#0e2b4e;border-color:rgba(255,255,255,.12)}body[data-theme="dark"] .trashItemIcon{background:#173c68}body[data-theme="dark"] .trashHead>span{border-color:rgba(255,255,255,.12)}body[data-theme="dark"] .trashRestore{background:#123b31;color:#70e6ae;border-color:rgba(65,217,138,.28)}
 body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
 
 /* Futuristic financial monitor */
@@ -514,7 +520,7 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 
 <section id="goalsCard" class="goalsCard">
   <b>🎯 Tus metas</b>
-  <p>Semanal, mensual o anual. Poné algo concreto que quieras lograr y mirá qué ritmo necesitás.</p>
+  <p>Semanal, mensual, anual, a 5 años o a 10 años. Poné algo concreto que quieras lograr y mirá qué ritmo necesitás.</p>
   <div id="goalHome" class="goalRows"></div>
   <button class="btn2" onclick="openGoal()">+ Crear o editar una meta</button>
 </section>
@@ -545,7 +551,7 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 <button class="fab" onclick="openDailyQuickDrawer()" aria-label="Agregar gasto rápido">+</button>
 <nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>➕</span>Agregar</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
 
-<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span>$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
+<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
 
 <div id="dailyQuickModal" class="modal" onclick="backdrop(event,'dailyQuickModal')"><div class="sheet dailySheet"><div class="dailyHandle"></div><div class="dailyHead"><div><h3>¿Qué gastaste recién?</h3><p>Elegí uno. Si tiene “+1”, suma el importe de siempre al instante.</p></div><button class="dailyClose" onclick="closeM('dailyQuickModal')">×</button></div><div id="dailyQuickGrid" class="dailyGrid"></div><div class="dailyAlt"><button onclick="closeM('dailyQuickModal');openExpense()">Otro gasto / alquiler / servicio</button><button onclick="closeM('dailyQuickModal');openQuickPresetManager()">⚙ Gastos de siempre</button></div></div></div>
 
@@ -561,7 +567,7 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
   <button class="goalSuggest" onclick="chooseGoalSuggestion('Casa','🏠','year')">🏠 Casa</button>
   <button class="goalSuggest" onclick="chooseGoalSuggestion('Una semana sin fumar','🚭','week')">🚭 No fumar</button>
 </div>
-<label class="fieldLabel">Plazo</label><select id="goalPeriod" onchange="loadGoalPeriod()"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">Anual</option></select>
+<label class="fieldLabel">Plazo</label><select id="goalPeriod" onchange="loadGoalPeriod()"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">1 año</option><option value="five">5 años</option><option value="ten">10 años</option></select>
 <label class="fieldLabel">Imagen de tu meta</label><select id="goalIcon"><option value="🎯">🎯 Objetivo</option><option value="🚗">🚗 Auto / movilidad</option><option value="✈️">✈️ Vacaciones / viaje</option><option value="🏠">🏠 Casa</option><option value="💻">💻 Tecnología</option><option value="🛟">🛟 Fondo de emergencia</option><option value="🚭">🚭 Dejar un hábito</option><option value="💚">💚 Salud</option><option value="💰">💰 Ahorro</option></select>
 <label class="fieldLabel">¿Qué querés lograr?</label><input id="goalName" placeholder="Ej: vacaciones, auto, fondo de emergencia">
 <label class="fieldLabel">¿Cuánto necesitás?</label><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo">
@@ -582,8 +588,24 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
     <button class="accountAction" onclick="openProfileName()"><span>👋 Personalizar saludo</span><span>›</span></button>
     <button class="accountAction" onclick="startGuideFromAccount()"><span>❓ Ver guía de nuevo</span><span>›</span></button>
     <button id="soundToggleBtn" class="accountAction" onclick="toggleSound()"><span>🔊 Sonidos</span><span id="soundToggleText">Activados</span></button>
+    <button class="accountAction" onclick="openTrash()"><span>🗑 Papelera</span><span id="trashAccountCount">0</span></button>
     <button class="accountAction" onclick="shareApp()"><span>🤝 Compartir Mi Balance</span><span>›</span></button>
   </div>
+  <div class="accountSettingsBlock">
+    <label class="fieldLabel" for="currencySelect">Moneda de Mi Balance</label>
+    <select id="currencySelect" onchange="saveCurrency(this.value)">
+      <option value="ARS">🇦🇷 Peso argentino (ARS)</option>
+      <option value="USD">🇺🇸 Dólar estadounidense (USD)</option>
+      <option value="EUR">🇪🇺 Euro (EUR)</option>
+      <option value="BRL">🇧🇷 Real brasileño (BRL)</option>
+      <option value="UYU">🇺🇾 Peso uruguayo (UYU)</option>
+      <option value="CLP">🇨🇱 Peso chileno (CLP)</option>
+      <option value="GBP">🇬🇧 Libra esterlina (GBP)</option>
+      <option value="PYG">🇵🇾 Guaraní paraguayo (PYG)</option>
+    </select>
+    <small>Elegí la moneda en la que cargás tus números. Cambiarla no convierte automáticamente los importes anteriores.</small>
+  </div>
+  <button class="dataDeleteBtn" onclick="requestDeleteCurrentData()">⚠️ Borrar mis datos de este dispositivo</button>
   <button class="logoutBtn" onclick="logoutVault()">Cerrar sesión</button>
   <button class="secondary" onclick="closeM('accountModal')">Cerrar</button>
 </div></div>
@@ -594,6 +616,12 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 <div class="quickVisibleHead"><div><b>¿Qué querés ver al tocar +?</b><small>Elegí hasta 8 accesos</small></div><button class="quickVisibleReset" onclick="resetQuickVisible()">Restablecer</button></div>
 <div id="quickVisibleGrid" class="quickVisibleGrid"></div>
 <label class="fieldLabel">Guardar un importe de siempre</label><select id="presetCategory" onchange="loadPresetCategory()"></select><label class="fieldLabel">Importe habitual</label><input id="presetAmount" type="number" inputmode="decimal" placeholder="Ej: 3500"><button class="primary" onclick="saveQuickPreset()">Guardar gasto de siempre</button><div id="presetList" class="presetList"></div><button class="secondary" onclick="closeM('quickPresetModal')">Cerrar</button></div></div>
+
+<div id="trashModal" class="modal" onclick="backdrop(event,'trashModal')"><div class="sheet"><div class="trashHead"><div><h3 style="margin-bottom:3px">🗑 Papelera</h3><p>Los movimientos que borres quedan acá hasta que los restaures o vacíes la papelera.</p></div><span id="trashCount">0</span></div><div id="trashList" class="trashList"></div><button id="emptyTrashBtn" class="dataDeleteBtn" onclick="requestEmptyTrash()">Vaciar papelera</button><button class="secondary" onclick="closeM('trashModal')">Cerrar</button></div></div>
+
+<div id="emptyTrashConfirmModal" class="modal" onclick="backdrop(event,'emptyTrashConfirmModal')"><div class="sheet"><h3>Vaciar papelera</h3><p style="color:#56677b;line-height:1.5">Los movimientos de la papelera se eliminarán definitivamente. Esta acción no se puede deshacer.</p><button class="dangerBtn" onclick="confirmEmptyTrash()">Eliminar definitivamente</button><button class="secondary" onclick="closeM('emptyTrashConfirmModal')">Cancelar</button></div></div>
+
+<div id="deleteCurrentDataModal" class="modal" onclick="backdrop(event,'deleteCurrentDataModal')"><div class="sheet"><h3>Borrar mis datos</h3><p style="color:#56677b;line-height:1.55">Esto elimina de este dispositivo tu espacio actual, movimientos, metas, papelera y preferencias financieras. No afecta otros espacios guardados en el mismo dispositivo.</p><button class="dangerBtn" onclick="confirmDeleteCurrentData()">Sí, borrar mis datos</button><button class="secondary" onclick="closeM('deleteCurrentDataModal')">Cancelar</button></div></div>
 
 <div id="removeGoalModal" class="modal" onclick="backdrop(event,'removeGoalModal')"><div class="sheet"><h3>Quitar esta meta</h3><p style="color:#56677b;line-height:1.5">La sacamos de tus metas activas, pero queda anotada en tu historial para que no pierdas el recorrido.</p><button class="dangerBtn" onclick="confirmRemoveGoal()">Quitar de mis metas</button><button class="secondary" onclick="closeM('removeGoalModal')">Cancelar</button></div></div>
 
@@ -613,10 +641,14 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 <script>
 const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍷","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
 const DEFAULT_QUICK_VISIBLE=["Café","Kiosco","Comida","Viáticos","Bebidas","Otros"];
-const EMPTY_STATE=()=>({profileName:"",income:0,savingPct:20,expenses:[],quickPresets:{},quickVisible:[...DEFAULT_QUICK_VISIBLE],goals:{week:null,month:null,year:null},goalHistory:[]});
+const GOAL_KEYS=["week","month","year","five","ten"];
+const CURRENCIES={ARS:{symbol:"$",digits:0},USD:{symbol:"US$",digits:2},EUR:{symbol:"€",digits:2},BRL:{symbol:"R$",digits:2},UYU:{symbol:"$U",digits:0},CLP:{symbol:"CLP$",digits:0},GBP:{symbol:"£",digits:2},PYG:{symbol:"₲",digits:0}};
+const EMPTY_STATE=()=>({profileName:"",currency:"ARS",income:0,savingPct:20,expenses:[],trash:[],quickPresets:{},quickVisible:[...DEFAULT_QUICK_VISIBLE],goals:{week:null,month:null,year:null,five:null,ten:null},goalHistory:[]});
 let state=EMPTY_STATE(), selected="Otros", quickContext=null, expenseFrequency="once", pendingGoalPeriod=null, vaultKey=null, currentProfileId=null, currentEmail="";
-const $=id=>document.getElementById(id), fmt=n=>"$ "+Math.round(Number(n||0)).toLocaleString("es-AR");
-function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)&&x.quickVisible.length?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];x.goals=x.goals&&typeof x.goals==="object"?x.goals:{week:null,month:null,year:null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
+const $=id=>document.getElementById(id);
+function currencyCode(){return CURRENCIES[state?.currency]?state.currency:"ARS"}
+function fmt(n){const code=currencyCode(),cfg=CURRENCIES[code];try{return new Intl.NumberFormat("es-AR",{style:"currency",currency:code,minimumFractionDigits:cfg.digits,maximumFractionDigits:cfg.digits}).format(Number(n||0))}catch(e){return cfg.symbol+" "+Number(n||0).toLocaleString("es-AR")}}
+function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.currency=CURRENCIES[x.currency]?x.currency:"ARS";x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.trash=Array.isArray(x.trash)?x.trash:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)&&x.quickVisible.length?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];const oldGoals=x.goals&&typeof x.goals==="object"?x.goals:{};x.goals={week:oldGoals.week||null,month:oldGoals.month||null,year:oldGoals.year||null,five:oldGoals.five||null,ten:oldGoals.ten||null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
 function monthExpenses(){const n=new Date();return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()})}
 function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
@@ -716,15 +748,17 @@ function goalVisualTheme(goal){
   if(icon==="💰")return {cls:"goalTheme-money",dream:"Ver crecer tu ahorro también es una conquista.",emoji:"💰"};
   return {cls:"goalTheme-default",dream:"Mirar tu meta todos los días ayuda a recordar qué estás priorizando.",emoji:icon||"🎯"}
 }
+function goalMonths(period){return period==="year"?12:period==="five"?60:period==="ten"?120:period==="month"?1:0}
 function goalCapacity(period){
-  const saving=state.income*state.savingPct/100,now=new Date(),monthsLeft=Math.max(1,12-now.getMonth());
-  return period==="week"?saving/4.33:period==="year"?saving*monthsLeft:saving
+  const saving=state.income*state.savingPct/100;
+  if(period==="week")return saving/4.33;
+  const months=goalMonths(period);return months?saving*months:saving
 }
 function featuredGoal(){
   const goals=state.goals||{};
-  const active=["week","month","year"].map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&!x.goal.completedAt);
+  const active=GOAL_KEYS.map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&!x.goal.completedAt);
   if(active.length)return active[0];
-  const completed=["week","month","year"].map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&x.goal.completedAt).sort((a,b)=>(b.goal.completedAt||0)-(a.goal.completedAt||0));
+  const completed=GOAL_KEYS.map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&x.goal.completedAt).sort((a,b)=>(b.goal.completedAt||0)-(a.goal.completedAt||0));
   return completed[0]||null
 }
 function archiveGoal(period,status){
@@ -740,7 +774,7 @@ function renderGoalHistory(){
   if(!hist.length){list.innerHTML='<div class="goalHint">Tus metas logradas y las que saques de vista van a quedar acá.</div>';return}
   list.innerHTML=hist.slice(0,7).map(h=>'<div class="historyGoal"><div class="historyGoalIcon">'+(h.icon||"🎯")+'</div><div class="historyGoalText"><b>'+escapeHtml(h.name||"Meta")+'</b><small>'+formatGoalPeriod(h.period)+' · '+new Date(h.endedAt||Date.now()).toLocaleDateString("es-AR")+'</small></div><span class="historyStatus '+(h.status==="completed"?"done":"removed")+'">'+(h.status==="completed"?"Lograda":"Quitada")+'</span></div>').join("")
 }
-function formatGoalPeriod(p){return p==="week"?"Semanal":p==="month"?"Mensual":"Anual"}
+function formatGoalPeriod(p){return p==="week"?"Semanal":p==="month"?"Mensual":p==="year"?"1 año":p==="five"?"5 años":p==="ten"?"10 años":"Meta"}
 function requestRemoveGoal(period){if(!state.goals?.[period])return;pendingGoalPeriod=period;openM("removeGoalModal")}
 function confirmRemoveGoal(){const p=pendingGoalPeriod;if(!p||!state.goals?.[p]){closeM("removeGoalModal");return}if(!state.goals[p].completedAt)archiveGoal(p,"removed");state.goals[p]=null;pendingGoalPeriod=null;persist();render();closeM("removeGoalModal");notify("Meta quitada. Su recorrido quedó en el historial.","success")}
 function financialHealth(){
@@ -771,7 +805,7 @@ function renderGreetingAndFocus(){
     if(edit){edit.textContent="Crear meta";edit.onclick=()=>openGoal("month")}
     if(cele)cele.classList.remove("show");return
   }
-  const goal=f.goal,period=f.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":"hasta fin de año",visual=goalVisualTheme(goal);
+  const goal=f.goal,period=f.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":period==="year"?"en 1 año":period==="five"?"en 5 años":"en 10 años",visual=goalVisualTheme(goal);
   box.className="goalFocus "+visual.cls;
   if(dreamTitle)dreamTitle.textContent=goal.name||"Tu meta";
   if(dreamLine)dreamLine.textContent=visual.dream;
@@ -792,20 +826,26 @@ function renderGreetingAndFocus(){
 }
 function renderGoals(){
   const box=$("goalHome");if(!box)return;
-  const saving=state.income*state.savingPct/100, weekly=saving/4.33;
-  const now=new Date(),monthsLeft=Math.max(1,12-now.getMonth());
-  const cfg={week:["Semanal",weekly,1],month:["Mensual",saving,1],year:["Anual",saving,monthsLeft]};
+  const monthlySaving=state.income*state.savingPct/100,weekly=monthlySaving/4.33;
+  const cfg={week:["Semanal",weekly,0],month:["Mensual",monthlySaving,1],year:["1 año",monthlySaving,12],five:["5 años",monthlySaving,60],ten:["10 años",monthlySaving,120]};
   const rows=[];
-  ["week","month","year"].forEach(k=>{
+  GOAL_KEYS.forEach(k=>{
     const g=state.goals&&state.goals[k];if(!g)return;
-    const [label,capacity,periods]=cfg[k],target=Number(g.amount)||0,icon=g.icon||inferGoalIcon(g.name);
-    const need=k==="year"?target/periods:target;
-    const pct=g.completedAt?100:(need>0?Math.min(100,capacity/need*100):0);
-    const gap=Math.max(0,need-capacity);
+    const [label,perMonth,months]=cfg[k],target=Number(g.amount)||0,icon=g.icon||inferGoalIcon(g.name);
+    const projected=k==="week"?weekly:(months?perMonth*months:perMonth);
+    const pct=g.completedAt?100:(target>0?Math.min(100,projected/target*100):0);
     let hint="";
     if(g.completedAt)hint="🏆 ¡Felicitaciones! Marcaste esta meta como lograda.";
-    else if(k==="year")hint=capacity>=need?"Tu ritmo actual alcanza para llegar este año.":"Para llegar este año, te faltaría separar "+fmt(gap)+" más por mes.";
-    else hint=capacity>=need?"Tu ritmo actual alcanza para esta meta.":"Te faltaría separar "+fmt(gap)+" más por "+(k==="week"?"semana":"mes")+".";
+    else if(k==="week"){
+      const gap=Math.max(0,target-weekly);
+      hint=weekly>=target?"Tu ritmo actual alcanza para esta meta semanal.":"Te faltaría separar "+fmt(gap)+" más por semana.";
+    }else if(k==="month"){
+      const gap=Math.max(0,target-monthlySaving);
+      hint=monthlySaving>=target?"Tu ritmo actual alcanza para esta meta mensual.":"Te faltaría separar "+fmt(gap)+" más este mes.";
+    }else{
+      const needPerMonth=months?target/months:target,gap=Math.max(0,needPerMonth-monthlySaving);
+      hint=monthlySaving>=needPerMonth?"Con tu ahorro actual, la proyección alcanza para "+label+".":"Para llegar en "+label+", necesitás cerca de "+fmt(needPerMonth)+" por mes"+(gap?" (unos "+fmt(gap)+" más que tu plan actual).":".");
+    }
     rows.push('<div class="goalRow"><div class="goalTop"><b>'+icon+' '+label+' · '+escapeHtml(g.name||"Meta")+'</b><span>'+fmt(target)+'</span></div><div class="goalHint">'+hint+'</div><div class="goalProgress"><i style="width:'+pct+'%"></i></div><div class="goalRowActions">'+(g.completedAt?'<button class="goalDoneBtn" disabled>🏆 Lograda</button>':'<button class="goalDoneBtn" onclick="completeGoal(\''+k+'\')">✓ Marcar lograda</button>')+'<button class="goalRemoveBtn" onclick="requestRemoveGoal(\''+k+'\')">Quitar</button></div></div>');
   });
   box.innerHTML=rows.length?rows.join(""):'<div class="goalRow"><div class="goalHint">Todavía no cargaste metas. Elegí algo concreto que quieras lograr.</div></div>';
@@ -855,7 +895,7 @@ function render(){
   expenseList.innerHTML="";
   state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml((frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});
   if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
-  renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();
+  renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
 }
 function updateFinancialPulse(){
   const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),rate=$("pulseRate"),paths=[...document.querySelectorAll(".pulseLine")];
@@ -924,8 +964,8 @@ function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();open
 function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||"";if($("goalIcon"))$("goalIcon").value=g?.icon||inferGoalIcon(g?.name||"")}
 function chooseGoalSuggestion(name,icon,period){goalPeriod.value=period;goalName.value=name;goalIcon.value=icon;goalAmount.value="";setTimeout(()=>goalAmount.focus(),80)}
 function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return;}state.expenses.push({amount:a,category:selected,note:note.value.trim(),frequency:expenseFrequency||"once",ts:Date.now(),quick:!!quickContext});if(quickContext&&$("rememberQuickAmount")?.checked){state.quickPresets=state.quickPresets||{};state.quickPresets[quickContext]={amount:a,updatedAt:Date.now()}}expenseAmount.value="";note.value="";quickContext=null;expenseFrequency="once";persist();render();closeM("expenseModal")}
-function delExpense(i){state.expenses.splice(i,1);persist();render()}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
-function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null};const prev=state.goals[p]||{};state.goals[p]={name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt:prev.createdAt||Date.now(),completedAt:null};persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para ayudarte a tenerla presente.","success")}
+function delExpense(i){const item=state.expenses[i];if(!item)return;state.trash=Array.isArray(state.trash)?state.trash:[];state.trash.unshift({id:"exp-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),type:"expense",item:{...item},deletedAt:Date.now()});state.expenses.splice(i,1);persist();render();notify("Movimiento enviado a la papelera.","success")}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
+function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null,five:null,ten:null};const prev=state.goals[p]||{},createdAt=prev.completedAt?Date.now():(prev.createdAt||Date.now());state.goals[p]={name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt,completedAt:null};persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para ayudarte a tenerla presente.","success")}
 function completeGoal(period){const g=state.goals&&state.goals[period];if(!g||g.completedAt)return;g.completedAt=Date.now();archiveGoal(period,"completed");persist();render();notify(period==="week"?"🏆 ¡Semana cumplida! Bien ahí.":"🏆 ¡Meta lograda! Felicitaciones.","success")}
 function completeFeaturedGoal(){const f=featuredGoal();if(f&&!f.goal.completedAt)completeGoal(f.period)}
 function openSummary(){
@@ -1085,7 +1125,30 @@ function syncSoundUI(){if($("soundToggleText"))$("soundToggleText").textContent=
 function toggleSound(){soundEnabled=!soundEnabled;localStorage.setItem("mb_sound",soundEnabled?"on":"off");syncSoundUI();if(soundEnabled)appClickSound()}
 document.addEventListener("pointerup",e=>{const hit=e.target.closest&&e.target.closest("button,a");if(hit&&!hit.disabled)appClickSound()},{capture:true});
 
-function openAccount(){if($("accountEmail"))$("accountEmail").textContent=currentEmail||localStorage.getItem("mb_last_email")||"Este dispositivo";syncSoundUI();openM("accountModal")}
+function currencySymbol(){return CURRENCIES[currencyCode()]?.symbol||"$"}
+function syncCurrencyUI(){if($("currencySelect"))$("currencySelect").value=currencyCode();if($("expenseCurrencySymbol"))$("expenseCurrencySymbol").textContent=currencySymbol()}
+function saveCurrency(code){if(!CURRENCIES[code])return;state.currency=code;persist();syncCurrencyUI();render();notify("Moneda cambiada a "+code+". No convertimos los importes cargados.","success")}
+function openTrash(){closeM("accountModal");renderTrash();openM("trashModal")}
+function renderTrash(){
+  state.trash=Array.isArray(state.trash)?state.trash:[];
+  const list=$("trashList"),count=$("trashCount"),accountCount=$("trashAccountCount"),emptyBtn=$("emptyTrashBtn");
+  const n=state.trash.length;if(count)count.textContent=n+" "+(n===1?"elemento":"elementos");if(accountCount)accountCount.textContent=String(n);if(emptyBtn)emptyBtn.classList.toggle("hidden",!n);
+  if(!list)return;
+  if(!n){list.innerHTML='<div class="trashEmpty">La papelera está vacía.</div>';return}
+  list.innerHTML=state.trash.slice(0,30).map(t=>{const e=t.item||{},emoji=categoryEmoji(e.category),when=new Date(t.deletedAt||Date.now()).toLocaleDateString("es-AR");return '<div class="trashItem"><div class="trashItemIcon">'+emoji+'</div><div class="trashItemText"><b>'+escapeHtml(e.category||"Movimiento")+' · '+fmt(e.amount)+'</b><small>'+escapeHtml(e.note||"Sin nota")+' · eliminado '+when+'</small></div><button class="trashRestore" onclick="restoreTrashItem(\''+escapeHtml(t.id)+'\')">Restaurar</button></div>'}).join("")
+}
+function restoreTrashItem(id){const i=(state.trash||[]).findIndex(t=>t.id===id);if(i<0)return;const t=state.trash[i];if(t.type==="expense"&&t.item)state.expenses.push(t.item);state.trash.splice(i,1);persist();render();renderTrash();notify("Movimiento restaurado.","success")}
+function requestEmptyTrash(){if(!(state.trash||[]).length)return;openM("emptyTrashConfirmModal")}
+function confirmEmptyTrash(){state.trash=[];persist();render();renderTrash();closeM("emptyTrashConfirmModal");notify("Papelera vaciada.","success")}
+function requestDeleteCurrentData(){closeM("accountModal");openM("deleteCurrentDataModal")}
+async function confirmDeleteCurrentData(){
+  const id=currentProfileId,emailToDelete=currentEmail;if(!id)return;
+  await clearActiveSession();localStorage.removeItem("mb_vault_v2_"+id);localStorage.removeItem("mb_tour_seen_v2_"+id);
+  const remaining=profiles().filter(p=>p.id!==id);saveProfiles(remaining);
+  const last=normEmail(localStorage.getItem("mb_last_email")||"");if(last===normEmail(emailToDelete)){if(remaining.length)rememberProfileEmail(remaining[remaining.length-1].email);else localStorage.removeItem("mb_last_email")}
+  vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();closeM("deleteCurrentDataModal");location.reload()
+}
+function openAccount(){if($("accountEmail"))$("accountEmail").textContent=currentEmail||localStorage.getItem("mb_last_email")||"Este dispositivo";syncSoundUI();syncCurrencyUI();if($("trashAccountCount"))$("trashAccountCount").textContent=String((state.trash||[]).length);openM("accountModal")}
 function openProfileName(){closeM("accountModal");profileNameInput.value=state.profileName||"";setTimeout(()=>openM("profileNameModal"),120)}
 function saveProfileName(){state.profileName=String(profileNameInput.value||"").trim().slice(0,24);persist();render();closeM("profileNameModal");notify(state.profileName?"Listo. Desde ahora te saludamos como "+state.profileName+".":"Listo. Dejamos el saludo sin nombre.","success")}
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
@@ -1095,7 +1158,7 @@ const GUIDE_STEPS=[
   {sel:"#incomeCard",title:"Primero: cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance empieza a calcular todo."},
   {sel:"#quickExpenses",title:"Después: anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos café, kiosco, transporte o cualquier gasto del día."},
   {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."},
-  {sel:"#goalsCard",title:"Terminá con una meta",text:"Elegí algo concreto que quieras lograr y comparalo con tu ritmo de ahorro. Después podés tocar ? cuando quieras volver a ver esta guía."}
+  {sel:"#goalsCard",title:"Terminá con una meta",text:"Elegí algo concreto que quieras lograr: esta semana, este mes, en 1 año, 5 años o 10 años. Comparalo con tu ritmo de ahorro y mantenelo siempre a la vista."}
 ]
 let guideIndex=0,guideForce=false,guideTimer=null;
 function tourSeenKey(){return currentProfileId?"mb_tour_seen_v2_"+currentProfileId:"mb_tour_seen_v2_guest"}
