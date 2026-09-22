@@ -57,12 +57,12 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 .pulseTitle{font-size:13px;font-weight:900;letter-spacing:.02em}.pulseState{font-size:11px;font-weight:950;padding:6px 9px;border-radius:999px;color:var(--pulse);background:color-mix(in srgb,var(--pulse) 13%,transparent);border:1px solid color-mix(in srgb,var(--pulse) 35%,transparent)}
 .pulseScreen{height:72px;border-radius:15px;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.04));border:1px solid rgba(255,255,255,.07);overflow:hidden;position:relative}
 .pulseScreen:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:18px 18px}
-.pulseSvg{width:100%;height:100%;display:block}.pulseLine{fill:none;stroke:var(--pulse);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--pulse) 60%,transparent));stroke-dasharray:14 7;animation:pulseDash var(--pulseSpeed) linear infinite}
-.pulseGlow{position:absolute;right:-30px;top:18px;width:90px;height:90px;border-radius:50%;background:var(--pulse);opacity:.08;filter:blur(20px)}
+.pulseFlow{position:absolute;inset:0;width:200%;height:100%;display:flex;z-index:1;will-change:transform;animation:pulseTravel var(--pulseSpeed) linear infinite}.pulseSvg{width:50%;height:100%;flex:0 0 50%;display:block}.pulseLine{fill:none;stroke:var(--pulse);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--pulse) 60%,transparent))}
+.pulseGlow{position:absolute;right:-30px;top:18px;width:90px;height:90px;border-radius:50%;background:var(--pulse);opacity:.08;filter:blur(20px);z-index:2;pointer-events:none}
 .pulseMsg{margin-top:9px;color:#c9d6e5;font-size:12px;line-height:1.42}.pulseMetric{color:var(--pulse);font-weight:900}
 .pulseCard[data-level="good"]{--pulse:#41d98a;--pulseSpeed:1.65s}.pulseCard[data-level="watch"]{--pulse:#ffbf5a;--pulseSpeed:.9s}.pulseCard[data-level="tight"]{--pulse:#ff8a4b;--pulseSpeed:.65s}.pulseCard[data-level="critical"]{--pulse:#ff6b6b;--pulseSpeed:2.8s}.pulseCard[data-level="neutral"]{--pulse:#7f9ab7;--pulseSpeed:3.2s}
-@keyframes pulseDash{to{stroke-dashoffset:-84}}
-@media(prefers-reduced-motion:reduce){.pulseLine{animation:none}}
+@keyframes pulseTravel{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@media(prefers-reduced-motion:reduce){.pulseFlow{animation:none}}
 
 .topTools{display:flex;align-items:center;gap:7px}.iconBtn{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:#102f53;color:#fff;display:grid;place-items:center;font-size:17px}.privacyPill{font-size:11px;color:#b8c7d8;white-space:nowrap}
 .quickWrap{padding:4px 18px 12px}.quickHead{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:9px}.quickHead b{font-size:17px}.quickHead small{color:var(--muted);font-size:10px}.quickRail{display:flex;gap:8px;overflow:auto;padding-bottom:3px;scrollbar-width:none}.quickRail::-webkit-scrollbar{display:none}.quickChip{min-width:78px;border:1px solid var(--line);background:#0e2b4e;color:#fff;border-radius:16px;padding:10px 9px;text-align:center}.quickChip span{display:block;font-size:21px}.quickChip b{display:block;font-size:10px;margin-top:4px}
@@ -92,6 +92,13 @@ body[data-theme="light"] .panel{background:#fff;border-color:#dbe3ea;box-shadow:
 body[data-theme="light"] .lockBox p,body[data-theme="light"] .tiny{color:#68798d}
 body[data-theme="light"] .emailNote{color:#2c6148;background:#edf8f2}
 @media(max-width:410px){.privacyPill{display:none}.topTools{gap:5px}.iconBtn{width:34px;height:34px}.inlineBtns{grid-template-columns:1fr}.quickChip{min-width:72px}}
+
+
+.appNotice{position:fixed;top:max(76px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translate(-50%,-14px);width:min(440px,calc(100% - 28px));z-index:350;pointer-events:none;opacity:0;transition:opacity .18s ease,transform .18s ease;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.15);background:linear-gradient(145deg,#123b68,#0b2949);color:#fff;box-shadow:0 14px 34px rgba(0,0,0,.28);font-size:13px;font-weight:800;line-height:1.4}
+.appNotice.show{opacity:1;transform:translate(-50%,0)}.appNotice[data-kind="success"]{background:linear-gradient(145deg,#0f4935,#123b36)}.appNotice[data-kind="warn"]{background:linear-gradient(145deg,#6a4311,#4e310d)}.appNotice[data-kind="error"]{background:linear-gradient(145deg,#6a2424,#431818)}
+.dangerBtn{width:100%;border:0;border-radius:16px;background:linear-gradient(145deg,#b83232,#dd4f4f);color:white;padding:14px;font-weight:950;margin-top:13px}
+.shareFallbackUrl{font-size:15px;user-select:all}
+body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shadow:0 14px 34px rgba(20,38,60,.2)}
 
 </style>
 </head>
@@ -128,6 +135,8 @@ body[data-theme="light"] .emailNote{color:#2c6148;background:#edf8f2}
 </div>
 </div></div>
 
+<div id="appNotice" class="appNotice" role="status" aria-live="polite" aria-atomic="true"><span id="appNoticeText"></span></div>
+
 <div class="app">
 <header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><div class="privacyPill">🔒 Solo tuyos</div></div></header>
 
@@ -139,9 +148,14 @@ body[data-theme="light"] .emailNote{color:#2c6148;background:#edf8f2}
     </div>
     <div class="pulseScreen" aria-label="Indicador visual del estado financiero">
       <div class="pulseGlow"></div>
-      <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true">
-        <path id="pulsePath" class="pulseLine" d="M0 45 H600"/>
-      </svg>
+      <div class="pulseFlow" aria-hidden="true">
+        <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none">
+          <path class="pulseLine" d="M0 45 H600"/>
+        </svg>
+        <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none">
+          <path class="pulseLine" d="M0 45 H600"/>
+        </svg>
+      </div>
     </div>
     <div id="pulseMessage" class="pulseMsg">Cargá tus ingresos y gastos para ver cómo viene tu <span class="pulseMetric">pulso financiero</span>.</div>
   </div>
@@ -223,6 +237,10 @@ body[data-theme="light"] .emailNote{color:#2c6148;background:#edf8f2}
 
 <div id="summaryModal" class="modal" onclick="backdrop(event,'summaryModal')"><div class="sheet"><h3>Resumen del mes</h3><div id="summary"></div><button class="secondary" onclick="closeM('summaryModal')">Cerrar</button></div></div>
 
+<div id="resetConfirmModal" class="modal" onclick="backdrop(event,'resetConfirmModal')"><div class="sheet"><h3>¿Borrar todos los espacios?</h3><p style="color:#56677b;line-height:1.55">Esto elimina de este dispositivo todos los espacios, movimientos y metas guardados en Mi Balance. Esta acción no se puede deshacer.</p><button class="dangerBtn" onclick="confirmResetAllVaults()">Sí, borrar todo</button><button class="secondary" onclick="closeM('resetConfirmModal')">Cancelar</button></div></div>
+
+<div id="shareFallbackModal" class="modal" onclick="backdrop(event,'shareFallbackModal')"><div class="sheet"><h3>Compartir Mi Balance</h3><p style="color:#56677b;line-height:1.55">Mantené presionado el enlace para copiarlo y compartirlo.</p><input id="shareFallbackUrl" class="shareFallbackUrl" readonly value="https://mibalance-amarango.netlify.app/"><button class="secondary" onclick="selectShareFallback()">Seleccionar enlace</button><button class="secondary" onclick="closeM('shareFallbackModal')">Cerrar</button></div></div>
+
 <script>
 const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍺","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
 const EMPTY_STATE=()=>({income:0,savingPct:20,expenses:[],goals:{week:null,month:null,year:null}});
@@ -281,8 +299,8 @@ function render(){
   renderMicro();renderGoals();renderStore();
 }
 function updateFinancialPulse(){
-  const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),path=$("pulsePath");
-  if(!card||!label||!msg||!path)return;
+  const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),paths=[...document.querySelectorAll(".pulseLine")];
+  if(!card||!label||!msg||!paths.length)return;
   const income=Number(state.income)||0;
   const saving=income*(Number(state.savingPct)||0)/100;
   const spent=monthExpenses().reduce((a,e)=>a+Number(e.amount||0),0);
@@ -315,22 +333,24 @@ function updateFinancialPulse(){
   card.dataset.level=level;
   label.textContent=title;
   msg.innerHTML=message;
-  path.setAttribute("d",d);
+  paths.forEach(path=>path.setAttribute("d",d));
 }
 
 const _renderBase=render;
 render=function(){_renderBase();updateFinancialPulse()};
 
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+let noticeTimer=null;
+function notify(message,kind="info"){const box=$("appNotice"),txt=$("appNoticeText");if(!box||!txt)return;clearTimeout(noticeTimer);txt.textContent=message;box.dataset.kind=kind;box.classList.add("show");noticeTimer=setTimeout(()=>box.classList.remove("show"),2600)}
 function openM(id){$(id).classList.add("show")}function closeM(id){$(id).classList.remove("show")}function backdrop(e,id){if(e.target.id===id)closeM(id)}
 function openExpense(){selected="Otros";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
 function openQuick(cat){selected=cat;if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
 function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
 function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();openM("goalModal")}
 function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||""}
-function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0)return alert("Ingresá un importe válido.");state.expenses.push({amount:a,category:selected,note:note.value.trim(),ts:Date.now()});expenseAmount.value="";note.value="";persist();render();closeM("expenseModal")}
+function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return;}state.expenses.push({amount:a,category:selected,note:note.value.trim(),ts:Date.now()});expenseAmount.value="";note.value="";persist();render();closeM("expenseModal")}
 function delExpense(i){state.expenses.splice(i,1);persist();render()}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
-function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0)return alert("Poné una meta y un monto válido.");state.goals=state.goals||{week:null,month:null,year:null};state.goals[p]={name:n,amount:a};persist();render();closeM("goalModal")}
+function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null};state.goals[p]={name:n,amount:a};persist();render();closeM("goalModal")}
 function openSummary(){
   const by={},month=monthExpenses();let spent=0;
   month.forEach(e=>{spent+=+e.amount;by[e.category]=(by[e.category]||0)+(+e.amount)});
@@ -357,10 +377,10 @@ function showSetup(){setup.classList.remove("hidden");unlock.classList.add("hidd
 function showLogin(){setup.classList.add("hidden");unlock.classList.remove("hidden")}
 async function createVault(){
   const e=normEmail(newEmail.value),p=newPin.value.trim();
-  if(!emailOk(e))return alert("Ingresá un correo válido.");
-  if(!/^\d{4,8}$/.test(p))return alert("Usá un PIN de 4 a 8 números.");
+  if(!emailOk(e)){notify("Ingresá un correo válido.","warn");return;}
+  if(!/^\d{4,8}$/.test(p)){notify("Usá un PIN de 4 a 8 números.","warn");return;}
   const id=await profileId(e),list=profiles();
-  if(list.some(x=>x.id===id))return alert("Ese correo ya tiene un espacio en este dispositivo. Elegí “Ya tengo un espacio”.");
+  if(list.some(x=>x.id===id)){notify("Ese correo ya tiene un espacio en este dispositivo. Elegí “Ya tengo un espacio”.","warn");return;}
   const salt=crypto.getRandomValues(new Uint8Array(16));
   vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;state=EMPTY_STATE();
   list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);await persist();
@@ -378,32 +398,31 @@ async function unlockLegacy(e,p){
   }catch(err){return false}
 }
 async function unlockVault(){
-  const e=normEmail(email.value),p=pin.value.trim();if(!emailOk(e))return alert("Ingresá tu correo.");if(!p)return alert("Ingresá tu PIN.");
+  const e=normEmail(email.value),p=pin.value.trim();if(!emailOk(e)){notify("Ingresá tu correo.","warn");return;}if(!p){notify("Ingresá tu PIN.","warn");return;}
   const id=await profileId(e),list=profiles(),prof=list.find(x=>x.id===id);
   try{
     if(!prof){
       if(await unlockLegacy(e,p)){lock.style.display="none";render();return}
-      return alert("No encontramos un espacio con ese correo en este dispositivo.");
+      notify("No encontramos un espacio con ese correo en este dispositivo.","warn");return;
     }
     const k=await derive(e+"|"+p,new Uint8Array(unb64(prof.salt))),o=JSON.parse(localStorage.getItem("mb_vault_v2_"+id)||"null");
     if(!o)throw new Error("missing vault");
     const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},k,unb64(o.data));
     state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=k;currentProfileId=id;currentEmail=e;lock.style.display="none";render()
-  }catch(err){alert("Correo o PIN incorrecto, o los datos están dañados.")}
+  }catch(err){notify("Correo o PIN incorrecto, o los datos están dañados.","error")}
 }
 function logoutVault(){vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();lock.style.display="flex";showLogin();render()}
-function resetAllVaults(){
-  if(!confirm("Esto borra todos los espacios de Mi Balance guardados en este dispositivo. ¿Continuar?"))return;
-  profiles().forEach(p=>localStorage.removeItem("mb_vault_v2_"+p.id));localStorage.removeItem("mb_profiles_v2");localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");location.reload()
-}
+function resetAllVaults(){openM("resetConfirmModal")}
+function confirmResetAllVaults(){profiles().forEach(p=>localStorage.removeItem("mb_vault_v2_"+p.id));localStorage.removeItem("mb_profiles_v2");localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");closeM("resetConfirmModal");location.reload()}
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
   try{
     if(navigator.share){await navigator.share(data);return}
-    await navigator.clipboard.writeText(data.text+" "+data.url);alert("Link copiado. Ya podés compartirlo.")
-  }catch(e){if(e&&e.name!=="AbortError")prompt("Copiá este enlace para compartir Mi Balance:",SHARE_URL)}
+    await navigator.clipboard.writeText(data.text+" "+data.url);notify("Link copiado. Ya podés compartirlo.","success")
+  }catch(e){if(e&&e.name!=="AbortError"){shareFallbackUrl.value=SHARE_URL;openM("shareFallbackModal")}}
 }
+function selectShareFallback(){const input=$("shareFallbackUrl");if(!input)return;input.focus();input.select();input.setSelectionRange(0,input.value.length);notify("Enlace seleccionado. Mantené presionado para copiarlo.","success")}
 function applyTheme(mode){
   const m=mode||localStorage.getItem("mb_theme")||"dark";document.body.dataset.theme=m;localStorage.setItem("mb_theme",m);
   if($("themeBtn"))$("themeBtn").textContent=m==="light"?"🌙":"☀️";
