@@ -347,6 +347,7 @@ function profiles(){try{return JSON.parse(localStorage.getItem("mb_profiles_v2")
 function saveProfiles(list){localStorage.setItem("mb_profiles_v2",JSON.stringify(list))}
 async function profileId(email){const hash=await crypto.subtle.digest("SHA-256",enc.encode(normEmail(email)));return b64(hash).replace(/[+/=]/g,"").slice(0,22)}
 async function derive(secret,salt){const m=await crypto.subtle.importKey("raw",enc.encode(secret),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:180000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function deriveLegacy(pin,salt){const m=await crypto.subtle.importKey("raw",enc.encode(pin),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:150000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
 async function persist(){
   if(!vaultKey||!currentProfileId)return;
   const iv=crypto.getRandomValues(new Uint8Array(12)),cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv},vaultKey,enc.encode(JSON.stringify(normalizeState(state))));
@@ -368,7 +369,7 @@ async function createVault(){
 async function unlockLegacy(e,p){
   const saltRaw=localStorage.getItem("mb_salt"),vaultRaw=localStorage.getItem("mb_vault");if(!saltRaw||!vaultRaw)return false;
   try{
-    const oldKey=await derive(p,new Uint8Array(unb64(saltRaw))),o=JSON.parse(vaultRaw),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},oldKey,unb64(o.data));
+    const oldKey=await deriveLegacy(p,new Uint8Array(unb64(saltRaw))),o=JSON.parse(vaultRaw),plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},oldKey,unb64(o.data));
     state=normalizeState(JSON.parse(dec.decode(plain)));
     const id=await profileId(e),salt=crypto.getRandomValues(new Uint8Array(16)),list=profiles();
     vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;
