@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v14-summary-theme-contrast';
+const CACHE='mi-balance-v15-amarango-referral';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
