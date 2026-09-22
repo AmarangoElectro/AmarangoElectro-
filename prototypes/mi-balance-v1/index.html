@@ -100,6 +100,49 @@ body[data-theme="light"] .emailNote{color:#2c6148;background:#edf8f2}
 .shareFallbackUrl{font-size:15px;user-select:all}
 body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shadow:0 14px 34px rgba(20,38,60,.2)}
 
+/* App feel */
+body,.app,.lock{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,select,textarea,.shareFallbackUrl{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+html,body{overscroll-behavior-y:contain}button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button:active,.storeLink:active{transform:scale(.985)}
+
+/* Quick login / account */
+.quickIdentity{display:flex;align-items:center;gap:10px;text-align:left;padding:11px 12px;margin:8px 0 12px;border-radius:15px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.quickIdentity .qiText{flex:1;min-width:0}.quickIdentity small{display:block;color:var(--muted);font-size:10px}.quickIdentity b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.quickIdentity button{border:0;background:none;color:#ff9a49;font-weight:900;font-size:11px}
+.accountSheetHead{display:flex;gap:12px;align-items:center}.accountAvatar{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:#123b68;font-size:22px}.accountEmail{font-size:13px;color:#5f7185;overflow-wrap:anywhere}.accountActions{display:grid;gap:9px;margin-top:16px}
+.accountAction{width:100%;display:flex;justify-content:space-between;align-items:center;border:1px solid #dce6ef;background:#fff;color:#13253d;padding:13px 14px;border-radius:15px;font-weight:850;text-align:left}.accountAction span:last-child{color:#6d7e91}
+.logoutBtn{width:100%;border:1px solid #f1c8c8;background:#fff5f5;color:#a62d2d;padding:13px;border-radius:15px;font-weight:900;margin-top:12px}
+body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
+
+/* Futuristic financial monitor */
+.pulseCard{background:radial-gradient(circle at 85% 10%,color-mix(in srgb,var(--pulse) 10%,transparent),transparent 28%),linear-gradient(145deg,#071a30,#0b2949)}
+.pulseMonitorTop{display:flex;justify-content:space-between;align-items:center;margin:-1px 0 7px;color:#7f99b6;font:800 9px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.12em}
+.pulseMonitorTop span:last-child{color:var(--pulse)}
+.pulseScreen{height:86px;background:#03111f;border-color:color-mix(in srgb,var(--pulse) 18%,#18324b);box-shadow:inset 0 0 24px rgba(0,0,0,.42)}
+.pulseScreen:before{background-image:linear-gradient(color-mix(in srgb,var(--pulse) 8%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--pulse) 8%,transparent) 1px,transparent 1px);background-size:18px 18px}
+.pulseLine{stroke-width:3;filter:drop-shadow(0 0 4px var(--pulse)) drop-shadow(0 0 9px color-mix(in srgb,var(--pulse) 45%,transparent))}
+.pulseSweep{position:absolute;top:0;bottom:0;width:36px;right:-36px;z-index:3;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--pulse) 13%,transparent),color-mix(in srgb,var(--pulse) 38%,transparent));filter:blur(.2px);animation:monitorSweep var(--pulseSpeed) linear infinite;pointer-events:none}
+.pulseEdge{position:absolute;right:9px;top:8px;bottom:8px;width:2px;border-radius:4px;background:var(--pulse);box-shadow:0 0 8px var(--pulse);opacity:.72;z-index:4}
+.pulseCard[data-level="good"]{--pulse:#41d98a;--pulseSpeed:2.2s}.pulseCard[data-level="watch"]{--pulse:#ffbf5a;--pulseSpeed:1.4s}.pulseCard[data-level="tight"]{--pulse:#ff8a4b;--pulseSpeed:.95s}.pulseCard[data-level="critical"]{--pulse:#ff6b6b;--pulseSpeed:3.6s}.pulseCard[data-level="neutral"]{--pulse:#7f9ab7;--pulseSpeed:3.2s}
+@keyframes monitorSweep{from{transform:translateX(-560px);opacity:.15}15%{opacity:.8}to{transform:translateX(36px);opacity:.15}}
+@media(prefers-reduced-motion:reduce){.pulseSweep{animation:none}}
+
+/* Guided tour */
+.guideLayer{position:fixed;inset:0;z-index:900;display:none;pointer-events:none}
+.guideLayer.show{display:block}.guideSpot{position:fixed;border:2px solid #ff9a49;border-radius:20px;box-shadow:0 0 0 9999px rgba(1,8,17,.76),0 0 0 5px rgba(255,122,26,.14),0 0 28px rgba(255,122,26,.5);transition:all .24s ease;pointer-events:none}
+.guideCard{position:fixed;left:14px;right:14px;max-width:480px;margin:auto;padding:16px;border-radius:21px;background:linear-gradient(145deg,#123b68,#091f39);border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.42);color:#fff;pointer-events:auto}
+.guideCard.top{top:18px}.guideCard.bottom{bottom:calc(18px + env(safe-area-inset-bottom))}
+.guideStep{color:#ffad6d;font-size:10px;font-weight:950;letter-spacing:.12em;text-transform:uppercase}.guideCard h3{margin:6px 0;font-size:20px}.guideCard p{margin:0;color:#d1ddeb;font-size:13px;line-height:1.45}.guideButtons{display:grid;grid-template-columns:auto 1fr;gap:9px;margin-top:13px}.guideSkip,.guideNext{border-radius:13px;padding:10px 12px;font-weight:900}.guideSkip{border:1px solid rgba(255,255,255,.15);background:transparent;color:#d5dfeb}.guideNext{border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:#fff}
+.guideHint{margin-top:8px!important;font-size:10px!important;color:#8fa6c0!important}
+
+/* Footer */
+.appFooter{margin:24px 18px 12px;padding:18px 12px 28px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.55}.appFooter b{color:var(--text);font-size:12px}
+body[data-theme="light"] .pulseScreen{background:#071a2c;border-color:#cedae5}
+body[data-theme="light"] .accountAction{background:#fff;color:#173452;border-color:#d6e0e9}
+body[data-theme="light"] .logoutBtn{background:#fff5f5}
+@media(max-width:390px){.topTools{gap:4px}.iconBtn{width:32px;height:32px;border-radius:11px;font-size:15px}.brand{gap:7px}.mark{width:35px;height:35px}.sub{font-size:9px}}
+
 </style>
 </head>
 <body>
@@ -117,14 +160,21 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
 </div>
 <div id="unlock" class="hidden">
   <b>Entrá a tu espacio</b>
-  <p class="tiny">Usá tu correo y tu PIN. Los datos se descifran solamente en este dispositivo.</p>
-  <label class="fieldLabel" for="email">Correo electrónico</label>
-  <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="vos@correo.com">
-  <label class="fieldLabel" for="pin">PIN</label>
-  <input id="pin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password" placeholder="Tu PIN">
+  <p class="tiny">Tu cuenta queda recordada en este dispositivo. Para volver a entrar normalmente solo usás tu PIN.</p>
+  <div id="quickIdentity" class="quickIdentity hidden">
+    <div class="accountAvatar" style="width:38px;height:38px;border-radius:12px">👤</div>
+    <div class="qiText"><small>Continuar como</small><b id="quickEmail">—</b></div>
+    <button type="button" onclick="changeLoginEmail()">Cambiar</button>
+  </div>
+  <div id="emailLoginFields">
+    <label class="fieldLabel" for="email">Correo electrónico</label>
+    <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="vos@correo.com">
+  </div>
+  <label class="fieldLabel" for="pin">Tu PIN</label>
+  <input id="pin" type="password" inputmode="numeric" maxlength="8" autocomplete="current-password" placeholder="PIN">
   <button class="primary" onclick="unlockVault()">Entrar</button>
   <button class="linkBtn" onclick="showSetup()">Crear otro espacio</button>
-  <div class="accountLine">Si olvidás el PIN, no podemos leerlo ni recuperarlo porque tus datos no se envían a AmarangoElectro.</div>
+  <div class="accountLine">Cerrar sesión no borra nada. Tu correo queda recordado para que volver a entrar sea rápido.</div>
   <button class="secondary" onclick="resetAllVaults()">Borrar espacios de este dispositivo</button>
 </div>
 </div>
@@ -138,7 +188,7 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
 <div id="appNotice" class="appNotice" role="status" aria-live="polite" aria-atomic="true"><span id="appNoticeText"></span></div>
 
 <div class="app">
-<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><div class="privacyPill">🔒 Solo tuyos</div></div></header>
+<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
 
 <section class="pulseWrap">
   <div id="financialPulse" class="pulseCard" data-level="neutral">
@@ -146,8 +196,10 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
       <div class="pulseTitle">〽️ Pulso financiero</div>
       <div id="pulseState" class="pulseState">Esperando datos</div>
     </div>
+    <div class="pulseMonitorTop"><span>ECG · PULSO FINANCIERO</span><span id="pulseRate">RITMO —</span></div>
     <div class="pulseScreen" aria-label="Indicador visual del estado financiero">
       <div class="pulseGlow"></div>
+      <div class="pulseSweep"></div><div class="pulseEdge"></div>
       <div class="pulseFlow" aria-hidden="true">
         <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none">
           <path class="pulseLine" d="M0 45 H600"/>
@@ -161,7 +213,7 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
   </div>
 </section>
 
-<section class="hero"><div class="heroCard"><div class="ey">Tus números, más claros</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Anotá lo que entra, lo que gastás y lo que querés lograr. Sin planillas difíciles.</p><div class="privacy">🔐 Privado · cifrado · pensado para usar todos los días.</div></div></section>
+<section id="guideIntro" class="hero"><div class="heroCard"><div class="ey">Tus números, más claros</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Anotá lo que entra, lo que gastás y lo que querés lograr. Sin planillas difíciles.</p><div class="privacy">🔐 Privado · cifrado · pensado para usar todos los días.</div></div></section>
 
 <div id="installCard" class="installCard">
 <img class="installIcon" src="./icon.svg" alt="Ícono de Mi Balance">
@@ -170,7 +222,7 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
 </div>
 
 <section class="grid">
-<div class="card wide"><div class="lab">Ingresos del mes</div><div id="incomeV" class="val green">$ 0</div><button class="btn2" onclick="openIncome()">Editar ingreso</button></div>
+<div id="incomeCard" class="card wide"><div class="lab">Ingresos del mes</div><div id="incomeV" class="val green">$ 0</div><button class="btn2" onclick="openIncome()">Editar ingreso</button></div>
 <div class="card"><div class="lab">Pagate primero</div><div id="savingV" class="val orange">$ 0</div><div class="progress"><b id="savingBar" style="width:20%"></b></div><div id="savingText" class="lab" style="margin-top:7px">20% para vos</div></div>
 <div class="card"><div class="lab">Gastaste</div><div id="spentV" class="val">$ 0</div><div id="spentText" class="lab" style="margin-top:7px">0% de tus ingresos</div></div>
 <div class="card"><div class="lab">Disponible</div><div id="availableV" class="val">$ 0</div><div class="lab" style="margin-top:7px">Después de ahorro y gastos</div></div>
@@ -184,7 +236,7 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
 <button class="action" onclick="openSummary()"><span>📊</span><small>Resumen</small></button>
 </section>
 
-<section class="quickWrap">
+<section id="quickExpenses" class="quickWrap">
   <div class="quickHead"><div><b>⚡ Anotá un gasto al toque</b><small>Ideal para esos microgastos que se acumulan</small></div></div>
   <div class="quickRail">
     <button class="quickChip" onclick="openQuick('Café')"><span>☕</span><b>Café</b></button>
@@ -201,14 +253,14 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
   <p id="microText">Cada gasto chico cuenta. Cuando empieces a cargarlos, te mostramos cuánto podrían representar en un año.</p>
 </section>
 
-<section class="goalsCard">
+<section id="goalsCard" class="goalsCard">
   <b>🎯 Tus metas</b>
   <p>Semanal, mensual o anual. Poné algo concreto que quieras lograr y mirá qué ritmo necesitás.</p>
   <div id="goalHome" class="goalRows"></div>
   <button class="btn2" onclick="openGoal()">+ Crear o editar una meta</button>
 </section>
 
-<section class="shareCard">
+<section id="shareCard" class="shareCard">
   <b>🤝 Ayudá a alguien a ordenar sus números</b>
   <p>Mi Balance es un regalo de AmarangoElectro. Compartilo con un amigo o familiar que quiera tener más claro en qué se le va la plata.</p>
   <div class="inlineBtns"><button class="smallBtn primaryMini" onclick="shareApp()">Compartir Mi Balance</button><button class="smallBtn" onclick="installApp()">Instalar app</button></div>
@@ -222,6 +274,7 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
 
 <section class="section"><h2>Últimos movimientos</h2><div id="expenseList" class="list"></div></section>
 <section class="tip"><b>💡 Pagarte primero</b><p>Separar una parte de tus ingresos antes de gastar hace visible tu futuro. No es dejar de vivir: es hacer que una parte de lo que trabajaste quede con vos.</p></section>
+<footer class="appFooter"><b>Mi Balance</b><br>Creada con ❤️ por el equipo de AmarangoElectro.<br>Una herramienta simple para ayudarte a cuidar tus números.</footer>
 </div>
 
 <button class="fab" onclick="openExpense()">+</button>
@@ -240,6 +293,29 @@ body[data-theme="light"] .appNotice{border-color:rgba(255,255,255,.55);box-shado
 <div id="resetConfirmModal" class="modal" onclick="backdrop(event,'resetConfirmModal')"><div class="sheet"><h3>¿Borrar todos los espacios?</h3><p style="color:#56677b;line-height:1.55">Esto elimina de este dispositivo todos los espacios, movimientos y metas guardados en Mi Balance. Esta acción no se puede deshacer.</p><button class="dangerBtn" onclick="confirmResetAllVaults()">Sí, borrar todo</button><button class="secondary" onclick="closeM('resetConfirmModal')">Cancelar</button></div></div>
 
 <div id="shareFallbackModal" class="modal" onclick="backdrop(event,'shareFallbackModal')"><div class="sheet"><h3>Compartir Mi Balance</h3><p style="color:#56677b;line-height:1.55">Mantené presionado el enlace para copiarlo y compartirlo.</p><input id="shareFallbackUrl" class="shareFallbackUrl" readonly value="https://mibalance-amarango.netlify.app/"><button class="secondary" onclick="selectShareFallback()">Seleccionar enlace</button><button class="secondary" onclick="closeM('shareFallbackModal')">Cerrar</button></div></div>
+
+<div id="accountModal" class="modal" onclick="backdrop(event,'accountModal')"><div class="sheet">
+  <div class="accountSheetHead"><div class="accountAvatar">👤</div><div><h3 style="margin:0">Tu espacio</h3><div id="accountEmail" class="accountEmail">—</div></div></div>
+  <div class="emailNote">🔐 Tus movimientos y metas siguen cifrados y guardados en este dispositivo.</div>
+  <div class="accountActions">
+    <button class="accountAction" onclick="startGuideFromAccount()"><span>❓ Ver guía de nuevo</span><span>›</span></button>
+    <button id="soundToggleBtn" class="accountAction" onclick="toggleSound()"><span>🔊 Sonidos</span><span id="soundToggleText">Activados</span></button>
+    <button class="accountAction" onclick="shareApp()"><span>🤝 Compartir Mi Balance</span><span>›</span></button>
+  </div>
+  <button class="logoutBtn" onclick="logoutVault()">Cerrar sesión</button>
+  <button class="secondary" onclick="closeM('accountModal')">Cerrar</button>
+</div></div>
+
+<div id="guideLayer" class="guideLayer" aria-live="polite">
+  <div id="guideSpot" class="guideSpot"></div>
+  <div id="guideCard" class="guideCard bottom">
+    <div id="guideStep" class="guideStep">PASO 1</div>
+    <h3 id="guideTitle">Bienvenido a Mi Balance</h3>
+    <p id="guideText">Te mostramos lo esencial en menos de un minuto.</p>
+    <p class="guideHint">La parte iluminada es la que estamos explicando.</p>
+    <div class="guideButtons"><button class="guideSkip" onclick="finishGuide()">Salir</button><button id="guideNext" class="guideNext" onclick="nextGuide()">Siguiente</button></div>
+  </div>
+</div>
 
 <script>
 const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍽️","Comida"],["🚌","Viáticos"],["🏠","Alquiler"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍺","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
@@ -299,7 +375,7 @@ function render(){
   renderMicro();renderGoals();renderStore();
 }
 function updateFinancialPulse(){
-  const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),paths=[...document.querySelectorAll(".pulseLine")];
+  const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),rate=$("pulseRate"),paths=[...document.querySelectorAll(".pulseLine")];
   if(!card||!label||!msg||!paths.length)return;
   const income=Number(state.income)||0;
   const saving=income*(Number(state.savingPct)||0)/100;
@@ -314,25 +390,26 @@ function updateFinancialPulse(){
     if(pressure<=0.55){
       level="good";title="Estable";
       message='Vas bien. Tus gastos ocupan '+Math.round(pressure*100)+'% de lo disponible después de tu ahorro.';
-      d="M0 45 H55 L68 45 L76 34 L86 61 L98 18 L111 45 H175 L188 45 L196 34 L206 61 L218 18 L231 45 H295 L308 45 L316 34 L326 61 L338 18 L351 45 H415 L428 45 L436 34 L446 61 L458 18 L471 45 H600";
+      d="M0 45 H70 Q82 45 92 38 Q102 31 112 45 H145 L153 53 L162 18 L171 72 L181 45 H212 Q228 27 247 45 H300 H370 Q382 45 392 38 Q402 31 412 45 H445 L453 53 L462 18 L471 72 L481 45 H512 Q528 27 547 45 H600";
     }else if(pressure<=0.80){
       level="watch";title="Atención";
       message='A cuidarnos un poco más. Ya usaste '+Math.round(pressure*100)+'% de lo disponible después de tu ahorro.';
-      d="M0 45 H40 L50 45 L58 30 L68 64 L78 15 L90 45 H125 L135 45 L143 27 L153 66 L163 13 L175 45 H210 L220 45 L228 31 L238 62 L248 18 L260 45 H295 L305 45 L313 28 L323 67 L333 12 L345 45 H380 L390 45 L398 30 L408 63 L418 16 L430 45 H600";
+      d="M0 45 H42 Q51 45 59 38 Q67 31 75 45 H93 L100 54 L108 14 L116 75 L125 45 H144 Q155 28 169 45 H202 Q211 45 219 38 Q227 31 235 45 H253 L260 54 L268 14 L276 75 L285 45 H304 Q315 28 329 45 H362 Q371 45 379 38 Q387 31 395 45 H413 L420 54 L428 14 L436 75 L445 45 H464 Q475 28 489 45 H600";
     }else if(pressure<1){
       level="tight";title="Muy ajustado";
       message='Tus números están exigidos: ya usaste '+Math.round(pressure*100)+'% de lo disponible. Conviene frenar algunos gastos.';
-      d="M0 45 H28 L36 45 L43 26 L51 70 L60 10 L71 45 H95 L103 45 L110 25 L118 71 L127 9 L138 45 H162 L170 45 L177 27 L185 68 L194 12 L205 45 H229 L237 45 L244 24 L252 72 L261 8 L272 45 H296 L304 45 L311 26 L319 70 L328 10 L339 45 H600";
+      d="M0 45 H26 Q34 45 40 37 Q46 30 52 45 H64 L70 55 L77 10 L84 78 L92 45 H105 Q114 27 125 45 H150 Q158 45 164 37 Q170 30 176 45 H188 L194 55 L201 10 L208 78 L216 45 H229 Q238 27 249 45 H274 Q282 45 288 37 Q294 30 300 45 H312 L318 55 L325 10 L332 78 L340 45 H353 Q362 27 373 45 H398 Q406 45 412 37 Q418 30 424 45 H436 L442 55 L449 10 L456 78 L464 45 H477 Q486 27 497 45 H600";
     }else{
       level="critical";title="Pulso débil";
       message='A cuidarnos un poco más: tus gastos ya alcanzaron o superaron lo disponible después de tu ahorro.';
-      d="M0 45 H160 L172 45 L180 39 L188 52 L197 31 L207 45 H430 L442 45 L450 40 L458 51 L467 33 L477 45 H600";
+      d="M0 45 H195 Q207 45 216 41 Q225 37 234 45 H255 L262 50 L269 28 L277 61 L286 45 H316 Q331 34 347 45 H600";
     }
   }
 
   card.dataset.level=level;
   label.textContent=title;
   msg.innerHTML=message;
+  if(rate)rate.textContent=level==="good"?"RITMO CALMO":level==="watch"?"RITMO ACTIVO":level==="tight"?"RITMO ALTO":level==="critical"?"RITMO LENTO":"RITMO —";
   paths.forEach(path=>path.setAttribute("d",d));
 }
 
@@ -374,7 +451,27 @@ async function persist(){
   localStorage.setItem("mb_vault_v2_"+currentProfileId,JSON.stringify({iv:b64(iv),data:b64(cipher)}))
 }
 function showSetup(){setup.classList.remove("hidden");unlock.classList.add("hidden");if($("showLoginBtn"))$("showLoginBtn").classList.toggle("hidden",profiles().length===0&&!localStorage.getItem("mb_salt"))}
-function showLogin(){setup.classList.add("hidden");unlock.classList.remove("hidden")}
+function showLogin(){
+  setup.classList.add("hidden");unlock.classList.remove("hidden");
+  const list=profiles(),last=normEmail(localStorage.getItem("mb_last_email")||"");
+  const chosen=(last&&list.find(x=>x.email===last))||list[list.length-1];
+  if(chosen){
+    email.value=chosen.email;
+    if($("quickEmail"))$("quickEmail").textContent=chosen.email;
+    if($("quickIdentity"))$("quickIdentity").classList.remove("hidden");
+    if($("emailLoginFields"))$("emailLoginFields").classList.add("hidden");
+  }else{
+    if($("quickIdentity"))$("quickIdentity").classList.add("hidden");
+    if($("emailLoginFields"))$("emailLoginFields").classList.remove("hidden");
+  }
+  if($("pin"))$("pin").value="";
+}
+function changeLoginEmail(){
+  if($("quickIdentity"))$("quickIdentity").classList.add("hidden");
+  if($("emailLoginFields"))$("emailLoginFields").classList.remove("hidden");
+  email.readOnly=false;email.value="";setTimeout(()=>email.focus(),100)
+}
+function rememberProfileEmail(e){localStorage.setItem("mb_last_email",normEmail(e))}
 async function createVault(){
   const e=normEmail(newEmail.value),p=newPin.value.trim();
   if(!emailOk(e)){notify("Ingresá un correo válido.","warn");return;}
@@ -383,8 +480,8 @@ async function createVault(){
   if(list.some(x=>x.id===id)){notify("Ese correo ya tiene un espacio en este dispositivo. Elegí “Ya tengo un espacio”.","warn");return;}
   const salt=crypto.getRandomValues(new Uint8Array(16));
   vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;state=EMPTY_STATE();
-  list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);await persist();
-  lock.style.display="none";render()
+  list.push({id,email:e,salt:b64(salt),createdAt:Date.now()});saveProfiles(list);rememberProfileEmail(e);await persist();
+  lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500)
 }
 async function unlockLegacy(e,p){
   const saltRaw=localStorage.getItem("mb_salt"),vaultRaw=localStorage.getItem("mb_vault");if(!saltRaw||!vaultRaw)return false;
@@ -394,7 +491,7 @@ async function unlockLegacy(e,p){
     const id=await profileId(e),salt=crypto.getRandomValues(new Uint8Array(16)),list=profiles();
     vaultKey=await derive(e+"|"+p,salt);currentProfileId=id;currentEmail=e;
     if(!list.some(x=>x.id===id)){list.push({id,email:e,salt:b64(salt),createdAt:Date.now(),migrated:true});saveProfiles(list)}
-    await persist();localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");return true
+    rememberProfileEmail(e);await persist();localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");return true
   }catch(err){return false}
 }
 async function unlockVault(){
@@ -402,18 +499,77 @@ async function unlockVault(){
   const id=await profileId(e),list=profiles(),prof=list.find(x=>x.id===id);
   try{
     if(!prof){
-      if(await unlockLegacy(e,p)){lock.style.display="none";render();return}
+      if(await unlockLegacy(e,p)){lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500);return}
       notify("No encontramos un espacio con ese correo en este dispositivo.","warn");return;
     }
     const k=await derive(e+"|"+p,new Uint8Array(unb64(prof.salt))),o=JSON.parse(localStorage.getItem("mb_vault_v2_"+id)||"null");
     if(!o)throw new Error("missing vault");
     const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(unb64(o.iv))},k,unb64(o.data));
-    state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=k;currentProfileId=id;currentEmail=e;lock.style.display="none";render()
+    state=normalizeState(JSON.parse(dec.decode(plain)));vaultKey=k;currentProfileId=id;currentEmail=e;rememberProfileEmail(e);lock.style.display="none";render();setTimeout(()=>maybeStartGuide(),500)
   }catch(err){notify("Correo o PIN incorrecto, o los datos están dañados.","error")}
 }
-function logoutVault(){vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();lock.style.display="flex";showLogin();render()}
+function logoutVault(){
+  const remembered=currentEmail;closeM("accountModal");finishGuide(false);
+  vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();
+  if(remembered)rememberProfileEmail(remembered);
+  lock.style.display="flex";showLogin();render();notify("Sesión cerrada. Tus datos siguen guardados.","success")
+}
 function resetAllVaults(){openM("resetConfirmModal")}
 function confirmResetAllVaults(){profiles().forEach(p=>localStorage.removeItem("mb_vault_v2_"+p.id));localStorage.removeItem("mb_profiles_v2");localStorage.removeItem("mb_salt");localStorage.removeItem("mb_vault");closeM("resetConfirmModal");location.reload()}
+let soundEnabled=localStorage.getItem("mb_sound")!=="off",audioCtx=null;
+function appClickSound(){
+  if(!soundEnabled)return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=audioCtx.currentTime;
+    o.type="sine";o.frequency.setValueAtTime(520,t);o.frequency.exponentialRampToValueAtTime(360,t+.045);
+    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.045,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+.055);
+    o.connect(g);g.connect(audioCtx.destination);o.start(t);o.stop(t+.06)
+  }catch(e){}
+}
+function syncSoundUI(){if($("soundToggleText"))$("soundToggleText").textContent=soundEnabled?"Activados":"Silenciados";if($("soundToggleBtn"))$("soundToggleBtn").querySelector("span").textContent=soundEnabled?"🔊 Sonidos":"🔇 Sonidos"}
+function toggleSound(){soundEnabled=!soundEnabled;localStorage.setItem("mb_sound",soundEnabled?"on":"off");syncSoundUI();if(soundEnabled)appClickSound()}
+document.addEventListener("pointerup",e=>{const hit=e.target.closest&&e.target.closest("button,a");if(hit&&!hit.disabled)appClickSound()},{capture:true});
+
+function openAccount(){if($("accountEmail"))$("accountEmail").textContent=currentEmail||localStorage.getItem("mb_last_email")||"Este dispositivo";syncSoundUI();openM("accountModal")}
+function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
+
+const GUIDE_STEPS=[
+  {sel:"#financialPulse",title:"Tu pulso financiero",text:"Este monitor traduce tus números en una señal visual. No es médico: cuanto más exigido está tu presupuesto, cambia el ritmo y el color."},
+  {sel:"#incomeCard",title:"Empezá por tu ingreso",text:"Cargá cuánto entra por mes y cuánto querés separar para vos. Con eso Mi Balance calcula el resto."},
+  {sel:"#quickExpenses",title:"Gastos en segundos",text:"Esto está pensado para usarlo todo el día. Café, kiosco, transporte o cualquier gasto: tocás, ponés el monto y listo."},
+  {sel:"#microInsight",title:"Descubrí los microgastos",text:"Mi Balance junta esos gastos chicos que parecen nada y te muestra cuánto representan en el mes y en el año."},
+  {sel:"#goalsCard",title:"Poné una meta concreta",text:"Podés crear una meta semanal, mensual o anual y comparar cuánto necesitás separar con tu ritmo actual."},
+  {sel:"#shareCard",title:"Ayudá a otra persona",text:"Si a alguien le puede servir ordenar sus números, compartile Mi Balance desde acá."},
+  {sel:"#helpBtn",title:"Volvé a esta guía cuando quieras",text:"El botón ? queda siempre arriba. También podés abrir Tu espacio para cerrar sesión o activar y silenciar los sonidos."}
+];
+let guideIndex=0,guideForce=false,guideTimer=null;
+function tourSeenKey(){return currentProfileId?"mb_tour_seen_v2_"+currentProfileId:"mb_tour_seen_v2_guest"}
+function maybeStartGuide(){if(!localStorage.getItem(tourSeenKey()))startGuide(false)}
+function startGuide(force=false){
+  if(lock.style.display!=="none"){notify("Entrá a tu espacio para iniciar la guía.","info");return}
+  guideForce=force;guideIndex=0;
+  $("guideLayer").classList.add("show");showGuideStep()
+}
+function showGuideStep(){
+  const step=GUIDE_STEPS[guideIndex],el=document.querySelector(step.sel);if(!el){nextGuide();return}
+  clearTimeout(guideTimer);el.scrollIntoView({behavior:"smooth",block:"center"});
+  guideTimer=setTimeout(()=>{
+    const r=el.getBoundingClientRect(),pad=7,spot=$("guideSpot"),card=$("guideCard");
+    spot.style.left=Math.max(6,r.left-pad)+"px";spot.style.top=Math.max(6,r.top-pad)+"px";
+    spot.style.width=Math.min(innerWidth-12,r.width+pad*2)+"px";spot.style.height=Math.min(innerHeight-12,r.height+pad*2)+"px";
+    $("guideStep").textContent="PASO "+(guideIndex+1)+" DE "+GUIDE_STEPS.length;$("guideTitle").textContent=step.title;$("guideText").textContent=step.text;
+    $("guideNext").textContent=guideIndex===GUIDE_STEPS.length-1?"Listo":"Siguiente";
+    card.classList.remove("top","bottom");card.classList.add(r.top>innerHeight*.48?"top":"bottom")
+  },320)
+}
+function nextGuide(){if(guideIndex>=GUIDE_STEPS.length-1){finishGuide();return}guideIndex++;showGuideStep()}
+function finishGuide(mark=true){
+  clearTimeout(guideTimer);if($("guideLayer"))$("guideLayer").classList.remove("show");
+  if(mark&&currentProfileId)localStorage.setItem(tourSeenKey(),"1")
+}
+addEventListener("resize",()=>{if($("guideLayer")&&$("guideLayer").classList.contains("show"))showGuideStep()});
+
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
@@ -452,7 +608,7 @@ async function installApp(){
   }
   openM("installHelpModal");
 }
-applyTheme(localStorage.getItem("mb_theme")||"dark");
+applyTheme(localStorage.getItem("mb_theme")||"dark");syncSoundUI();
 if(profiles().length||localStorage.getItem("mb_salt"))showLogin();else showSetup();
 renderCats();render();syncInstallUI();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
