@@ -6,6 +6,7 @@ import { V16Cellphones90PublicCatalogAdapter } from "./v16-cellphones-90-public-
 import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter";
 import { V16CatalogExpansion5V412Adapter } from "./v16-catalog-expansion-5-v412-adapter";
 import { V16CatalogExpansion31LiteralBrandAdapter } from "./v16-catalog-expansion-31-literal-brand-adapter";
+import { V16CatalogExpansion50GlobalBrandStorageAdapter } from "./v16-catalog-expansion-50-global-brand-storage-adapter";
 import { V16CatalogExpansion31KnownBrandAdapter } from "./v16-catalog-expansion-31-known-brand-adapter";
 import { V16CatalogExpansion48ExplicitBrandAdapter } from "./v16-catalog-expansion-48-explicit-brand-adapter";
 import { V16CatalogExpansion99CuratedBrandAdapter } from "./v16-catalog-expansion-99-curated-brand-adapter";
@@ -17,6 +18,7 @@ const cellphoneSnapshotCatalog = new V16Cellphones90PublicCatalogAdapter();
 const catalogExpansion63 = new V16CatalogExpansion63Adapter();
 const catalogExpansion5 = new V16CatalogExpansion5V412Adapter();
 const catalogExpansion31 = new V16CatalogExpansion31LiteralBrandAdapter();
+const catalogExpansion50 = new V16CatalogExpansion50GlobalBrandStorageAdapter();
 const catalogExpansion31 = new V16CatalogExpansion31KnownBrandAdapter();
 const catalogExpansion48 = new V16CatalogExpansion48ExplicitBrandAdapter();
 const catalogExpansion99 = new V16CatalogExpansion99CuratedBrandAdapter();
@@ -59,7 +61,7 @@ function mergeUnique(...groups: Product[][]) {
  * - cohort0Catalog: cohorte real congelada previa.
  * - electroCatalog: snapshot real sanitizado de electrodomésticos.
  * - cellphoneSnapshotCatalog: 90 celulares canónicos con precio/foto sanitizados.
- * - catalogExpansion63 / 5 / 31: ampliaciones públicas versionadas y deduplicadas.
+ * - catalogExpansion63 / 5 / 31 / 50: ampliaciones públicas versionadas y deduplicadas.
  *
  * Ninguna de estas fuentes escribe sobre la tienda legacy ni sobre Supabase.
  */
@@ -125,6 +127,7 @@ export { v16Cellphones90PublicEvidence } from "./v16-cellphones-90-public-adapte
 export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapter";
 export { v16CatalogExpansion5Evidence } from "./v16-catalog-expansion-5-v412-adapter";
 export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-literal-brand-adapter";
+export { v16CatalogExpansion50Evidence } from "./v16-catalog-expansion-50-global-brand-storage-adapter";
 export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-known-brand-adapter";
 export { v16CatalogExpansion48Evidence } from "./v16-catalog-expansion-48-explicit-brand-adapter";
 export { v16CatalogExpansion99Evidence } from "./v16-catalog-expansion-99-curated-brand-adapter";
