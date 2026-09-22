@@ -51,6 +51,18 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 .installBtn:active{transform:translateY(1px)}
 .installHelpLogo{width:72px;height:72px;border-radius:20px;display:block;margin:0 auto 14px}
 @media(max-width:390px){.installCard{align-items:flex-start;flex-wrap:wrap}.installCard .installCopy{min-width:calc(100% - 68px)}.installCard .installBtn{width:100%}}
+.pulseWrap{padding:14px 18px 0}
+.pulseCard{--pulse:#41d98a;--pulseSpeed:1.65s;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#0d2c50,#081d37);padding:14px 15px 13px;box-shadow:0 12px 28px rgba(0,0,0,.16)}
+.pulseHead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.pulseTitle{font-size:13px;font-weight:900;letter-spacing:.02em}.pulseState{font-size:11px;font-weight:950;padding:6px 9px;border-radius:999px;color:var(--pulse);background:color-mix(in srgb,var(--pulse) 13%,transparent);border:1px solid color-mix(in srgb,var(--pulse) 35%,transparent)}
+.pulseScreen{height:72px;border-radius:15px;background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.04));border:1px solid rgba(255,255,255,.07);overflow:hidden;position:relative}
+.pulseScreen:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:18px 18px}
+.pulseSvg{width:100%;height:100%;display:block}.pulseLine{fill:none;stroke:var(--pulse);stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--pulse) 60%,transparent));stroke-dasharray:14 7;animation:pulseDash var(--pulseSpeed) linear infinite}
+.pulseGlow{position:absolute;right:-30px;top:18px;width:90px;height:90px;border-radius:50%;background:var(--pulse);opacity:.08;filter:blur(20px)}
+.pulseMsg{margin-top:9px;color:#c9d6e5;font-size:12px;line-height:1.42}.pulseMetric{color:var(--pulse);font-weight:900}
+.pulseCard[data-level="good"]{--pulse:#41d98a;--pulseSpeed:1.65s}.pulseCard[data-level="watch"]{--pulse:#ffbf5a;--pulseSpeed:.9s}.pulseCard[data-level="tight"]{--pulse:#ff8a4b;--pulseSpeed:.65s}.pulseCard[data-level="critical"]{--pulse:#ff6b6b;--pulseSpeed:2.8s}.pulseCard[data-level="neutral"]{--pulse:#7f9ab7;--pulseSpeed:3.2s}
+@keyframes pulseDash{to{stroke-dashoffset:-84}}
+@media(prefers-reduced-motion:reduce){.pulseLine{animation:none}}
 
 </style>
 </head>
@@ -68,6 +80,22 @@ input,select{width:100%;border:1px solid #dce6ef;border-radius:14px;background:w
 
 <div class="app">
 <header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de Amarango</span></div></div><div style="font-size:12px;color:#b8c7d8">🔒 Solo tuyos</div></header>
+
+<section class="pulseWrap">
+  <div id="financialPulse" class="pulseCard" data-level="neutral">
+    <div class="pulseHead">
+      <div class="pulseTitle">〽️ Pulso financiero</div>
+      <div id="pulseState" class="pulseState">Esperando datos</div>
+    </div>
+    <div class="pulseScreen" aria-label="Indicador visual del estado financiero">
+      <div class="pulseGlow"></div>
+      <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true">
+        <path id="pulsePath" class="pulseLine" d="M0 45 H600"/>
+      </svg>
+    </div>
+    <div id="pulseMessage" class="pulseMsg">Cargá tus ingresos y gastos para ver cómo viene tu <span class="pulseMetric">pulso financiero</span>.</div>
+  </div>
+</section>
 
 <section class="hero"><div class="heroCard"><div class="ey">Tu mes, más claro</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Registrá lo que entra, lo que gastás y lo que decidís guardar para vos.</p><div class="privacy">🔐 Guardado local y cifrado.</div></div></section>
 
@@ -115,6 +143,47 @@ let state={income:0,savingPct:20,expenses:[],goal:null}, selected="Otros", vault
 const $=id=>document.getElementById(id), fmt=n=>"$ "+Math.round(Number(n||0)).toLocaleString("es-AR");
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
 function render(){const spent=state.expenses.reduce((a,e)=>a+Number(e.amount),0),saving=state.income*state.savingPct/100,avail=Math.max(0,state.income-saving-spent);incomeV.textContent=fmt(state.income);savingV.textContent=fmt(saving);spentV.textContent=fmt(spent);availableV.textContent=fmt(avail);annualV.textContent=fmt(saving*12);savingText.textContent=state.savingPct+"% para vos";savingBar.style.width=Math.min(100,state.savingPct)+"%";spentText.textContent=(state.income?Math.round(spent/state.income*100):0)+"% de tus ingresos";expenseList.innerHTML="";state.expenses.slice().reverse().slice(0,12).forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+e.category+'</b><small>'+(e.note||"Sin nota")+'</small></div><div class="amt">'+fmt(e.amount)+'</div><button class="del" onclick="delExpense('+i+')">×</button>';expenseList.appendChild(d)});if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:#b8c7d8">Todavía no cargaste gastos. Tocá <b>+</b> y empezá por el próximo gasto.</div>'}
+function updateFinancialPulse(){
+  const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),path=$("pulsePath");
+  if(!card||!label||!msg||!path)return;
+  const income=Number(state.income)||0;
+  const saving=income*(Number(state.savingPct)||0)/100;
+  const spent=state.expenses.reduce((a,e)=>a+Number(e.amount||0),0);
+  const spendable=Math.max(0,income-saving);
+  const pressure=spendable>0?spent/spendable:0;
+
+  let level="neutral",title="Esperando datos",message='Cargá tus ingresos y gastos para ver cómo viene tu <span class="pulseMetric">pulso financiero</span>.';
+  let d="M0 45 H600";
+
+  if(income>0){
+    if(pressure<=0.55){
+      level="good";title="Estable";
+      message='Vas bien. Tus gastos ocupan '+Math.round(pressure*100)+'% de lo disponible después de tu ahorro.';
+      d="M0 45 H55 L68 45 L76 34 L86 61 L98 18 L111 45 H175 L188 45 L196 34 L206 61 L218 18 L231 45 H295 L308 45 L316 34 L326 61 L338 18 L351 45 H415 L428 45 L436 34 L446 61 L458 18 L471 45 H600";
+    }else if(pressure<=0.80){
+      level="watch";title="Atención";
+      message='A cuidarnos un poco más. Ya usaste '+Math.round(pressure*100)+'% de lo disponible después de tu ahorro.';
+      d="M0 45 H40 L50 45 L58 30 L68 64 L78 15 L90 45 H125 L135 45 L143 27 L153 66 L163 13 L175 45 H210 L220 45 L228 31 L238 62 L248 18 L260 45 H295 L305 45 L313 28 L323 67 L333 12 L345 45 H380 L390 45 L398 30 L408 63 L418 16 L430 45 H600";
+    }else if(pressure<1){
+      level="tight";title="Muy ajustado";
+      message='Tus números están exigidos: ya usaste '+Math.round(pressure*100)+'% de lo disponible. Conviene frenar algunos gastos.';
+      d="M0 45 H28 L36 45 L43 26 L51 70 L60 10 L71 45 H95 L103 45 L110 25 L118 71 L127 9 L138 45 H162 L170 45 L177 27 L185 68 L194 12 L205 45 H229 L237 45 L244 24 L252 72 L261 8 L272 45 H296 L304 45 L311 26 L319 70 L328 10 L339 45 H600";
+    }else{
+      level="critical";title="Pulso débil";
+      message='A cuidarnos un poco más: tus gastos ya alcanzaron o superaron lo disponible después de tu ahorro.';
+      d="M0 45 H160 L172 45 L180 39 L188 52 L197 31 L207 45 H430 L442 45 L450 40 L458 51 L467 33 L477 45 H600";
+    }
+  }
+
+  card.dataset.level=level;
+  label.textContent=title;
+  msg.innerHTML=message;
+  path.setAttribute("d",d);
+}
+
+const _renderBase=render;
+render=function(){_renderBase();updateFinancialPulse()};
+
 function openM(id){$(id).classList.add("show")}function closeM(id){$(id).classList.remove("show")}function backdrop(e,id){if(e.target.id===id)closeM(id)}
 function openExpense(){renderCats();openM("expenseModal")}function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}function openGoal(){goalName.value=state.goal?.name||"";goalAmount.value=state.goal?.amount||"";openM("goalModal")}
 function saveExpense(){const a=Number(expenseAmount.value);if(!a||a<=0)return alert("Ingresá un importe válido.");state.expenses.push({amount:a,category:selected,note:note.value.trim(),ts:Date.now()});expenseAmount.value="";note.value="";persist();render();closeM("expenseModal")}
