@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v20-expenses-drawer-store-copy';
+const CACHE='mi-balance-v21-financial-rhythm-chart';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
