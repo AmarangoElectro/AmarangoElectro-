@@ -42,7 +42,7 @@ body[data-theme="dark"] .expensesDrawerSummary>div{background:#0e2b4e;border-col
 body[data-theme="light"] .expensesPortal{background:linear-gradient(180deg,#fff,#faf7f1);box-shadow:0 9px 24px rgba(31,49,70,.06)}body[data-theme="light"] .expensesPortalIcon{background:#eef4f9}body[data-theme="light"] .expensesDrawerSummary>div{background:#fff;border-color:#d6e0e9}
 .tip{margin:8px 18px;padding:16px;border-radius:20px;background:#12345b;border:1px solid var(--line)}.tip p{margin:5px 0 0;color:#cbd7e6;font-size:14px;line-height:1.5}
 .fab{position:fixed;right:max(18px,calc(50% - 242px));bottom:92px;width:60px;height:60px;border-radius:50%;border:0;background:linear-gradient(145deg,#ff7a1a,#ff9a49);color:white;font-size:32px;box-shadow:0 14px 32px rgba(255,122,26,.34);z-index:50}
-.bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(520px,100%);display:grid;grid-template-columns:repeat(4,1fr);padding:9px 10px calc(9px + env(safe-area-inset-bottom));background:rgba(7,24,47,.97);border-top:1px solid var(--line);backdrop-filter:blur(14px);z-index:40}.nav{border:0;background:none;color:#9eb0c7;font-size:11px}.nav span{display:block;font-size:21px}.nav.on{color:#ff8b2f}
+.bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(520px,100%);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 7px calc(8px + env(safe-area-inset-bottom));background:rgba(7,24,47,.97);border-top:1px solid var(--line);backdrop-filter:blur(14px);z-index:40}.nav{border:0;background:none;color:#9eb0c7;font-size:9px;padding:3px 1px}.nav span{display:block;font-size:19px}.nav.on{color:#ff8b2f}.navRhythm{position:relative;color:#ff9a49;font-weight:900}.navRhythm:before{content:"";position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:34px;height:3px;border-radius:99px;background:linear-gradient(90deg,#ff6818,#ff9a49)}
 .modal{position:fixed;inset:0;display:none;align-items:end;justify-content:center;background:rgba(0,0,0,.62);z-index:100}.modal.show{display:flex}.sheet{width:min(520px,100%);max-height:92vh;overflow:auto;background:#f8fbff;color:#101928;border-radius:28px 28px 0 0;padding:20px 18px 28px}.sheet h3{font-size:24px;margin:0 0 13px}
 .amount{display:flex;align-items:center;gap:7px;border:1px solid #dce6ef;border-radius:17px;background:white;padding:13px}.amount span{font-size:25px;font-weight:900}.amount input{border:0;outline:0;width:100%;font-size:30px;font-weight:950}
 .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}.cat{background:white;border:1px solid #dce6ef;border-radius:15px;padding:9px;text-align:center}.cat.on{outline:2px solid var(--orange);background:#fff4ea}.cat b{display:block;font-size:11px;margin-top:3px}
@@ -174,6 +174,9 @@ body[data-theme="light"] .financeGameStatus{background:#f8fafc;border-color:#e5e
 body[data-theme="light"] .financeGameMain b{color:#07111f}body[data-theme="light"] .financeGameMain span{color:#647184}body[data-theme="light"] .financeLevel{background:#fff;border-color:#e3e8ed}body[data-theme="light"] .financeLevel b{color:#e05e12}body[data-theme="light"] .financeStreak,body[data-theme="light"] .financeMission{background:#fff;border-color:#e5e8ec}body[data-theme="light"] .financeStreak b,body[data-theme="light"] .financeMission b{color:#14243a}body[data-theme="light"] .financeLevelTrack i{background:#e4e9ee}
 @media(max-width:390px){.financeGameStatus{grid-template-columns:52px 1fr}.financeAvatar{width:52px;height:52px;font-size:28px}.financeLevel{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px}.financeLevel b{margin:0}.financeGameRow{grid-template-columns:1fr}.financeMission b{font-size:9px}}
 
+/* Rhythm lives in navigation to keep Home simple */
+.rhythmDrawerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.rhythmDrawerHead small{display:block;color:var(--orange);font-size:8px;font-weight:950;letter-spacing:.13em}.rhythmDrawerHead h3{margin:4px 0 4px;font-size:22px}.rhythmDrawerHead p{margin:0!important;color:var(--muted)!important;font-size:10px!important;line-height:1.4!important}.rhythmSheet .rhythmWrap{padding:0}.rhythmSheet .monthStatus{margin:12px 0 0}.rhythmSheet .rhythmCard{box-shadow:none}.rhythmSheet{padding-bottom:calc(25px + env(safe-area-inset-bottom))}
+body[data-theme="dark"] .rhythmSheet{background:#0d1526}body[data-theme="light"] .rhythmSheet{background:#fff}
 /* Financial rhythm / trading-style monthly chart */
 .rhythmWrap{padding:14px 18px 0}
 .rhythmCard{--rhythm:#7f9ab7;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:24px;background:radial-gradient(circle at 90% 0%,color-mix(in srgb,var(--rhythm) 13%,transparent),transparent 30%),linear-gradient(155deg,#071a30,#0b2949);padding:15px;box-shadow:0 14px 32px rgba(0,0,0,.17)}
@@ -892,48 +895,14 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 </section>
 <section id="goalCelebration" class="goalCelebration"><b id="celebrationTitle">🏆 ¡Meta cumplida!</b><p id="celebrationText">Reconocé el logro. Lo que sostenés en el tiempo vale más que un día perfecto.</p></section>
 
+<section id="quickExpenses" class="quickWrap">
+  <div class="quickHead"><div><b>⚡ Anotá un gasto al toque</b><small>Tocá la tarjeta para poner otro precio · tocá + para sumar el de siempre</small></div><button class="quickManage" onclick="openQuickPresetManager()">⚙ De siempre</button></div>
+  <div id="quickRail" class="quickRail"></div>
+</section>
+
 <section id="goalCarouselCard" class="goalCarouselCard">
   <div class="goalCarouselHead"><div><small>POR ESTO LO ESTÁS HACIENDO</small><b>Tus objetivos</b></div><button onclick="openGoal()">+ Agregar</button></div>
   <div id="goalHome" class="goalCarousel"></div>
-</section>
-
-<section class="rhythmWrap">
-  <div id="financialRhythm" class="rhythmCard" data-level="neutral">
-    <div class="rhythmHead">
-      <div><div class="rhythmEy">TU MES EN MOVIMIENTO</div><div class="rhythmTitle">📈 Tu ritmo financiero</div></div>
-      <div id="rhythmState" class="rhythmState">Esperando datos</div>
-    </div>
-    <div id="financeGameStatus" class="financeGameStatus" data-mode="neutral">
-      <div id="financeAvatar" class="financeAvatar" aria-hidden="true">🐝</div>
-      <div class="financeGameMain">
-        <small>ESTADO FINANCIERO DEL MES</small>
-        <b id="financeGameTitle">Empezando</b>
-        <span id="financeGameSubtitle">Cargá tu ingreso y algunos gastos para empezar el juego.</span>
-      </div>
-      <div class="financeLevel"><small>NIVEL</small><b id="financeLevelLabel">—</b></div>
-    </div>
-    <div class="financeGameRow">
-      <div class="financeStreak"><span>🔥</span><div><small>Racha</small><b id="financeStreakValue">0 días</b></div></div>
-      <div class="financeMission"><span>🎮</span><div><small>Desafío de hoy</small><b id="financeMissionText">Empezá cargando tus números</b></div></div>
-    </div>
-    <div class="financeLevelTrack" aria-label="Escala de control financiero">
-      <i data-step="1"></i><i data-step="2"></i><i data-step="3"></i><i data-step="4"></i><i data-step="5"></i>
-    </div>
-    <div class="rhythmStats">
-      <div><small>Disponible</small><b id="rhythmAvailable">$ 0</b></div>
-      <div><small>Hoy</small><b id="rhythmToday">$ 0</b></div>
-      <div><small>Promedio diario</small><b id="rhythmDailyAvg">$ 0</b></div>
-    </div>
-    <div class="rhythmChartBox" aria-label="Gráfico diario de gastos del mes">
-      <svg id="rhythmChart" class="rhythmChart" viewBox="0 0 600 180" preserveAspectRatio="none" role="img" aria-label="Gastos diarios y ritmo recomendado"></svg>
-    </div>
-    <div class="rhythmLegend">
-      <span><i class="legendBar"></i> Gasto diario</span>
-      <span><i class="legendAvg"></i> Promedio 3 días</span>
-      <span><i class="legendPlan"></i> Ritmo recomendado</span>
-    </div>
-    <div id="rhythmMessage" class="rhythmMessage">Cargá tu ingreso y tus gastos para empezar a ver cómo se mueve tu mes.</div>
-  </div>
 </section>
 
 <section id="guideIntro" class="hero"><div class="heroCard"><div class="ey">Tus números, más claros</div><h1>Controlá tu plata<br>sin complicarte.</h1><p>Anotá lo que entra, lo que gastás y lo que querés lograr. Sin planillas difíciles.</p><div class="privacy">🔐 Privado · cifrado · pensado para usar todos los días.</div></div></section>
@@ -952,26 +921,11 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 <div class="card"><div class="lab">Proyección anual</div><div id="annualV" class="val green">$ 0</div><div class="lab" style="margin-top:7px">Si mantenés este ritmo</div></div>
 </section>
 
-<section id="monthStatus" class="monthStatus">
-  <div class="monthStatusHead"><b>📅 Así viene tu mes</b><span id="monthDayText">—</span></div>
-  <div id="monthStatusText" class="monthStatusText">Cargá tus movimientos y te mostramos el ritmo del mes.</div>
-  <div class="monthBars">
-    <div class="monthBarLine"><span>Mes transcurrido</span><div class="monthBar"><i id="calendarProgress" style="width:0%"></i></div><b id="calendarPct">0%</b></div>
-    <div class="monthBarLine"><span>Dinero usado</span><div class="monthBar money"><i id="budgetProgress" style="width:0%"></i></div><b id="budgetPct">0%</b></div>
-  </div>
-  <div id="monthMini" class="monthMini"></div>
-</section>
-
 <section class="actions">
 <button class="action" onclick="openExpense()"><span>➕</span><small>Gasto</small></button>
 <button class="action" onclick="openIncome()"><span>💰</span><small>Ingreso</small></button>
 <button class="action" onclick="openGoal()"><span>🎯</span><small>Meta</small></button>
 <button class="action" onclick="openSummary()"><span>📊</span><small>Resumen</small></button>
-</section>
-
-<section id="quickExpenses" class="quickWrap">
-  <div class="quickHead"><div><b>⚡ Anotá un gasto al toque</b><small>Tocá la tarjeta para poner otro precio · tocá + para sumar el de siempre</small></div><button class="quickManage" onclick="openQuickPresetManager()">⚙ De siempre</button></div>
-  <div id="quickRail" class="quickRail"></div>
 </section>
 
 <section id="microInsight" class="insightCard">
@@ -1026,7 +980,62 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 </div>
 
 <button class="fab" onclick="openDailyQuickDrawer()" aria-label="Agregar gasto rápido">+</button>
-<nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>➕</span>Agregar</button><button class="nav" onclick="openSummary()"><span>📈</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
+<nav class="bottom"><button class="nav on"><span>🏠</span>Inicio</button><button class="nav" onclick="openExpense()"><span>➕</span>Agregar</button><button id="rhythmNavBtn" class="nav navRhythm" onclick="openRhythmPanel()"><span>📈</span>Ritmo</button><button class="nav" onclick="openSummary()"><span>📊</span>Resumen</button><button class="nav" onclick="openGoal()"><span>🎯</span>Metas</button></nav>
+
+<div id="rhythmModal" class="modal" onclick="backdrop(event,'rhythmModal')"><div class="sheet rhythmSheet">
+  <div class="rhythmDrawerHead">
+    <div><small>TU TABLERO</small><h3>📈 Tu ritmo financiero</h3><p>Entrá acá cuando quieras mirar el detalle. La pantalla principal queda más simple.</p></div>
+    <button class="dailyClose" onclick="closeM('rhythmModal')" aria-label="Cerrar ritmo financiero">×</button>
+  </div>
+  <section class="rhythmWrap">
+  <div id="financialRhythm" class="rhythmCard" data-level="neutral">
+    <div class="rhythmHead">
+      <div><div class="rhythmEy">TU MES EN MOVIMIENTO</div><div class="rhythmTitle">📈 Tu ritmo financiero</div></div>
+      <div id="rhythmState" class="rhythmState">Esperando datos</div>
+    </div>
+    <div id="financeGameStatus" class="financeGameStatus" data-mode="neutral">
+      <div id="financeAvatar" class="financeAvatar" aria-hidden="true">🐝</div>
+      <div class="financeGameMain">
+        <small>ESTADO FINANCIERO DEL MES</small>
+        <b id="financeGameTitle">Empezando</b>
+        <span id="financeGameSubtitle">Cargá tu ingreso y algunos gastos para empezar el juego.</span>
+      </div>
+      <div class="financeLevel"><small>NIVEL</small><b id="financeLevelLabel">—</b></div>
+    </div>
+    <div class="financeGameRow">
+      <div class="financeStreak"><span>🔥</span><div><small>Racha</small><b id="financeStreakValue">0 días</b></div></div>
+      <div class="financeMission"><span>🎮</span><div><small>Desafío de hoy</small><b id="financeMissionText">Empezá cargando tus números</b></div></div>
+    </div>
+    <div class="financeLevelTrack" aria-label="Escala de control financiero">
+      <i data-step="1"></i><i data-step="2"></i><i data-step="3"></i><i data-step="4"></i><i data-step="5"></i>
+    </div>
+    <div class="rhythmStats">
+      <div><small>Disponible</small><b id="rhythmAvailable">$ 0</b></div>
+      <div><small>Hoy</small><b id="rhythmToday">$ 0</b></div>
+      <div><small>Promedio diario</small><b id="rhythmDailyAvg">$ 0</b></div>
+    </div>
+    <div class="rhythmChartBox" aria-label="Gráfico diario de gastos del mes">
+      <svg id="rhythmChart" class="rhythmChart" viewBox="0 0 600 180" preserveAspectRatio="none" role="img" aria-label="Gastos diarios y ritmo recomendado"></svg>
+    </div>
+    <div class="rhythmLegend">
+      <span><i class="legendBar"></i> Gasto diario</span>
+      <span><i class="legendAvg"></i> Promedio 3 días</span>
+      <span><i class="legendPlan"></i> Ritmo recomendado</span>
+    </div>
+    <div id="rhythmMessage" class="rhythmMessage">Cargá tu ingreso y tus gastos para empezar a ver cómo se mueve tu mes.</div>
+  </div>
+</section>
+  <section id="monthStatus" class="monthStatus">
+  <div class="monthStatusHead"><b>📅 Así viene tu mes</b><span id="monthDayText">—</span></div>
+  <div id="monthStatusText" class="monthStatusText">Cargá tus movimientos y te mostramos el ritmo del mes.</div>
+  <div class="monthBars">
+    <div class="monthBarLine"><span>Mes transcurrido</span><div class="monthBar"><i id="calendarProgress" style="width:0%"></i></div><b id="calendarPct">0%</b></div>
+    <div class="monthBarLine"><span>Dinero usado</span><div class="monthBar money"><i id="budgetProgress" style="width:0%"></i></div><b id="budgetPct">0%</b></div>
+  </div>
+  <div id="monthMini" class="monthMini"></div>
+</section>
+  <button class="secondary" onclick="closeM('rhythmModal')">Cerrar</button>
+</div></div>
 
 <div id="expensesModal" class="modal" onclick="backdrop(event,'expensesModal')"><div class="sheet expensesSheet">
   <div class="expensesDrawerHead">
@@ -1477,6 +1486,7 @@ function renderStore(){
   else if(pressure<=.8){t.textContent="Antes de comprar, mirá tu margen";p.textContent="Podés conocer AmarangoElectro —electrodomésticos, tecnología y hogar— pero hacelo con tu presupuesto a la vista."}
   else{t.textContent="Primero cuidemos tus números";p.textContent="Hoy conviene priorizar tu plan. Nuestra tienda de electrodomésticos, tecnología y hogar va a seguir ahí cuando recuperes margen."}
 }
+function openRhythmPanel(){render();openM("rhythmModal")}
 function openExpensesDrawer(){render();openM("expensesModal")}
 function render(){
   state=normalizeState(state);
@@ -1905,13 +1915,13 @@ function saveProfileName(){state.profileName=String(profileNameInput.value||"").
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
-  {sel:"#moneyHomePanel",title:"¿Dónde está tu plata hoy?",text:"Las bolsitas de adentro representan lo que todavía conservás y las de afuera lo que ya gastaste. Abajo ves qué porcentaje ingresó, cuánto gastaste, cuánto te queda y cuánto decidiste proteger. La idea es que puedas mirar y entender tu mes en segundos."},
-  {sel:"#goalCarouselCard",title:"Recordá para qué te cuidás",text:"Podés tener varias metas y deslizarlas de costado. Elegí una como principal: esa va a quedar siempre destacada para recordarte por qué estás tomando mejores decisiones."},
-  {sel:"#financeGameStatus",title:"Jugá a cuidar tu mes",text:"Tu estado cambia según cómo venís: en control, en equilibrio, con atención o en recuperación. También tenés nivel, racha y un desafío simple. No competís con nadie: intentás mejorar tu propio mes."},
-  {sel:"#financialRhythm",title:"Entendé el gráfico",text:"Las barras muestran cuánto gastaste cada día. La línea blanca resume el promedio de los últimos 3 días y la punteada marca un ritmo diario orientativo. Un pico alto significa que ese día gastaste más."},
-  {sel:"#incomeCard",title:"Cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance puede ayudarte a dimensionar tus gastos."},
-  {sel:"#quickExpenses",title:"Anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos lo que vas gastando. Cuanto más completo sea el registro, más útil es el espejo que te muestra la app."},
-  {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."}
+  {sel:"#moneyHomePanel",title:"¿Dónde está tu plata hoy?",text:"Las bolsitas de adentro representan lo que todavía conservás y las de afuera lo que ya gastaste. Los porcentajes te permiten entender el mes en segundos."},
+  {sel:"#goalFocus",title:"Tu meta principal siempre a la vista",text:"Esta es la meta que elegiste como más importante. La idea es verla seguido y recordar por qué estás cuidando tus gastos."},
+  {sel:"#quickExpenses",title:"Anotá un gasto al toque",text:"Esto queda bien arriba para que registrar café, kiosco, supermercado o cualquier gasto chico te lleve apenas unos segundos."},
+  {sel:"#goalCarouselCard",title:"Tus otros objetivos",text:"Deslizá de costado para ver todas tus metas. Podés tener varias y elegir cualquiera como principal."},
+  {sel:"#rhythmNavBtn",title:"Tu ritmo financiero está acá",text:"Tocá Ritmo para abrir el tablero tipo trading. Ahí ves picos de gasto, promedio de 3 días, ritmo recomendado, racha, desafío y cómo viene el mes. Lo sacamos de Inicio para que la pantalla sea más simple."},
+  {sel:"#incomeCard",title:"Cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar. Con eso Mi Balance puede dimensionar mejor cuánto estás usando."},
+  {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Los gastos chicos también cuentan. Acá ves cuánto representan juntos durante el mes."}
 ]
 let guideIndex=0,guideForce=false,guideTimer=null;
 function tourSeenKey(){return currentProfileId?"mb_tour_seen_v2_"+currentProfileId:"mb_tour_seen_v2_guest"}
