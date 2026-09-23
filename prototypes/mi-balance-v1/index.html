@@ -142,6 +142,24 @@ body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
 @keyframes monitorSweep{from{transform:translateX(-560px);opacity:.15}15%{opacity:.8}to{transform:translateX(36px);opacity:.15}}
 @media(prefers-reduced-motion:reduce){.pulseSweep{animation:none}}
 
+/* Money awareness — visual first */
+.moneyHomePanel{margin:10px 18px 8px;padding:16px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(155deg,#0d1526,#090f1a);box-shadow:0 14px 34px rgba(0,0,0,.2)}
+.moneyHomeHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.moneyHomeHead small{display:block;color:var(--orange);font-size:8px;font-weight:950;letter-spacing:.13em}.moneyHomeHead h2{margin:4px 0 0;color:#fff;font-size:20px;line-height:1.05;letter-spacing:-.5px}.moneyHomeBadge{flex:0 0 auto;padding:6px 8px;border-radius:999px;border:1px solid var(--line);font-size:9px;font-weight:950;color:#b9c7d8;background:#111b2d}
+.moneyHomeMotto{margin:8px 0 0;color:#c4ceda;font-size:11px;line-height:1.45;font-weight:700}
+.moneyScene{display:grid;grid-template-columns:1fr 24px 1fr;gap:7px;align-items:stretch;margin-top:13px}.moneySceneSide{min-width:0;padding:11px;border-radius:17px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)}.moneySceneSide.inside{background:linear-gradient(145deg,rgba(65,217,138,.08),rgba(255,255,255,.02))}.moneySceneSide.outside{background:linear-gradient(145deg,rgba(255,104,24,.08),rgba(255,255,255,.02))}.moneySceneLabel{display:flex;align-items:center;gap:8px}.moneySceneLabel>span{font-size:25px}.moneySceneLabel small{display:block;color:#8397ad;font-size:7px;font-weight:950;letter-spacing:.11em}.moneySceneLabel b{display:block;margin-top:2px;color:#fff;font-size:12px}.moneySceneDivider{display:grid;place-items:center;color:#77899d;font-size:17px}.moneyBags{min-height:48px;display:flex;align-content:flex-start;flex-wrap:wrap;gap:3px;margin-top:9px}.moneyBag{font-size:15px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.18));animation:bagIn .28s ease both}.moneyBag.dim{opacity:.15;filter:grayscale(1)}@keyframes bagIn{from{transform:translateY(5px) scale(.88);opacity:0}to{transform:none;opacity:1}}
+.moneyPctGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}.moneyPctGrid>div{min-width:0;padding:9px 5px;border-radius:13px;text-align:center;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025)}.moneyPctGrid small{display:block;color:#8294a8;font-size:7px;font-weight:850}.moneyPctGrid b{display:block;margin-top:2px;color:#fff;font-size:12px}.moneyPctGrid>div:nth-child(2) b{color:#ff9b62}.moneyPctGrid>div:nth-child(3) b{color:#65dfa1}.moneyPctGrid>div:nth-child(4) b{color:#8eb7ff}
+.moneyHomeMessage{margin-top:9px;padding:9px 11px;border-radius:13px;background:#111b2d;color:#b8c6d5;font-size:10px;line-height:1.4}.moneyHomePanel[data-state="good"] .moneyHomeBadge{color:#55dfa0;border-color:rgba(65,217,138,.26)}.moneyHomePanel[data-state="watch"] .moneyHomeBadge{color:#ffd071;border-color:rgba(255,191,90,.28)}.moneyHomePanel[data-state="tight"] .moneyHomeBadge{color:#ff9d68;border-color:rgba(255,138,75,.30)}.moneyHomePanel[data-state="critical"] .moneyHomeBadge{color:#ff8585;border-color:rgba(255,107,107,.34)}
+body[data-theme="light"] .moneyHomePanel{background:#fff;border-color:#e5e8ec;box-shadow:0 12px 30px rgba(5,7,11,.06)}body[data-theme="light"] .moneyHomeHead h2,body[data-theme="light"] .moneySceneLabel b,body[data-theme="light"] .moneyPctGrid b{color:#07111f}body[data-theme="light"] .moneyHomeMotto{color:#4f5968}body[data-theme="light"] .moneyHomeBadge,body[data-theme="light"] .moneyHomeMessage{background:#f4f5f7;border-color:#e5e8ec;color:#607083}body[data-theme="light"] .moneySceneSide{border-color:#e5e8ec;background:#f8fafc}body[data-theme="light"] .moneySceneSide.inside{background:#f1fbf6}body[data-theme="light"] .moneySceneSide.outside{background:#fff6f0}body[data-theme="light"] .moneyPctGrid>div{background:#f8fafc;border-color:#e5e8ec}
+@media(max-width:390px){.moneyScene{grid-template-columns:1fr 18px 1fr}.moneyHomeHead h2{font-size:18px}.moneyPctGrid{grid-template-columns:repeat(2,1fr)}}
+
+/* Multiple goals — main goal + horizontal objectives */
+.goalCarouselCard{margin:8px 18px;padding:13px;border-radius:20px;border:1px solid var(--line);background:#0d1526;box-shadow:0 10px 26px rgba(0,0,0,.16)}.goalCarouselHead{display:flex;align-items:center;justify-content:space-between;gap:10px}.goalCarouselHead small{display:block;color:var(--orange);font-size:7px;font-weight:950;letter-spacing:.12em}.goalCarouselHead b{display:block;margin-top:2px;font-size:14px}.goalCarouselHead button{border:0;border-radius:11px;background:linear-gradient(145deg,#ff6818,#ff8a4a);color:#fff;padding:8px 10px;font-size:9px;font-weight:950}
+.goalCarousel{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 1px 2px;scrollbar-width:none}.goalCarousel::-webkit-scrollbar{display:none}.goalMini{position:relative;flex:0 0 min(78vw,285px);scroll-snap-align:start;padding:12px;border-radius:17px;border:1px solid #223148;background:#111b2d}.goalMini.primary{border-color:rgba(255,104,24,.46);box-shadow:inset 0 0 0 1px rgba(255,104,24,.08)}.goalMiniTop{display:flex;align-items:flex-start;gap:9px}.goalMiniIcon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#16233a;font-size:23px}.goalMiniCopy{min-width:0;flex:1}.goalMiniCopy b{display:block;color:#fff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.goalMiniCopy small{display:block;margin-top:3px;color:#9aa6b5;font-size:8px}.goalMiniAmount{margin-top:8px;color:#fff;font-size:16px;font-weight:950}.goalMiniPrimary{position:absolute;right:8px;top:8px;border:0;border-radius:999px;padding:5px 7px;background:#1a2638;color:#98a9bc;font-size:8px;font-weight:900}.goalMini.primary .goalMiniPrimary{background:rgba(255,104,24,.12);color:#ff9b62}.goalMiniActions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:9px}.goalMiniActions button{min-height:31px;border-radius:9px;border:1px solid #26364d;background:#16233a;color:#dce5ef;font-size:8px;font-weight:900}.goalMiniActions .goalMiniDone{color:#70e6ae}.goalMiniActions .goalMiniRemove{color:#ff9b9b}.goalCarouselEmpty{width:100%;padding:12px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);font-size:10px;text-align:center}
+body[data-theme="light"] .goalCarouselCard{background:#fff;border-color:#e5e8ec;box-shadow:0 10px 26px rgba(5,7,11,.055)}body[data-theme="light"] .goalMini{background:#f8fafc;border-color:#e5e8ec}body[data-theme="light"] .goalMiniIcon{background:#eef3f7}body[data-theme="light"] .goalMiniCopy b,body[data-theme="light"] .goalMiniAmount{color:#07111f}body[data-theme="light"] .goalMiniCopy small{color:#69717c}body[data-theme="light"] .goalMiniPrimary{background:#eef2f6;color:#607083}body[data-theme="light"] .goalMiniActions button{background:#fff;color:#334a62;border-color:#dfe4ea}.goalPrimaryChoice{margin-top:12px}
+
+/* Goal celebration */
+.goalWinOverlay{position:fixed;z-index:1200;inset:0;display:grid;place-items:center;padding:24px;background:rgba(3,7,12,.84);backdrop-filter:blur(8px);opacity:0;visibility:hidden;pointer-events:none;transition:.22s}.goalWinOverlay.show{opacity:1;visibility:visible;pointer-events:auto}.goalWinCard{position:relative;z-index:2;width:min(390px,92vw);padding:27px 20px 20px;border-radius:28px;text-align:center;background:linear-gradient(160deg,#111b2d,#0d1526);border:1px solid rgba(255,104,24,.32);box-shadow:0 28px 80px rgba(0,0,0,.42);transform:scale(.88);transition:transform .28s cubic-bezier(.2,.8,.2,1)}.goalWinOverlay.show .goalWinCard{transform:scale(1)}.goalWinEmoji{font-size:56px;animation:goalPop .7s ease both}.goalWinCard small{display:block;margin-top:4px;color:#ff9b62;font-size:9px;font-weight:950;letter-spacing:.14em}.goalWinCard h2{margin:6px 0;color:#fff;font-size:27px}.goalWinCard p{margin:0 auto;color:#b8c6d5;font-size:12px;line-height:1.5}.goalWinCard button{margin-top:18px;border:0;border-radius:14px;padding:12px 15px;background:linear-gradient(145deg,#ff6818,#ff8a4a);color:#fff;font-weight:950}.goalConfetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}.goalConfetti i{position:absolute;top:-8%;width:8px;height:16px;border-radius:3px;background:#ff6818;animation:confettiFall 1.7s ease-in forwards}.goalConfetti i:nth-child(2n){background:#5b93ff}.goalConfetti i:nth-child(3n){background:#41d98a}.goalConfetti i:nth-child(4n){background:#ffd071}.goalConfetti i:nth-child(1){left:7%;animation-delay:.05s}.goalConfetti i:nth-child(2){left:15%;animation-delay:.28s}.goalConfetti i:nth-child(3){left:24%;animation-delay:.13s}.goalConfetti i:nth-child(4){left:33%;animation-delay:.38s}.goalConfetti i:nth-child(5){left:41%;animation-delay:.02s}.goalConfetti i:nth-child(6){left:49%;animation-delay:.22s}.goalConfetti i:nth-child(7){left:58%;animation-delay:.09s}.goalConfetti i:nth-child(8){left:66%;animation-delay:.34s}.goalConfetti i:nth-child(9){left:74%;animation-delay:.17s}.goalConfetti i:nth-child(10){left:82%;animation-delay:.4s}.goalConfetti i:nth-child(11){left:89%;animation-delay:.1s}.goalConfetti i:nth-child(12){left:95%;animation-delay:.3s}@keyframes confettiFall{0%{transform:translateY(-10vh) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(115vh) rotate(540deg);opacity:.8}}@keyframes goalPop{0%{transform:scale(.5) rotate(-8deg);opacity:0}65%{transform:scale(1.15) rotate(4deg)}100%{transform:none;opacity:1}}body[data-theme="light"] .goalWinOverlay{background:rgba(9,18,29,.72)}body[data-theme="light"] .goalWinCard{background:#fff;border-color:#ffd0b4}body[data-theme="light"] .goalWinCard h2{color:#07111f}body[data-theme="light"] .goalWinCard p{color:#5d6b7b}
+
 /* Financial state — light gamification, fully local */
 .financeGameStatus{display:grid;grid-template-columns:58px 1fr auto;gap:11px;align-items:center;margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(255,255,255,.035)}
 .financeAvatar{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(145deg,rgba(255,104,24,.18),rgba(91,147,255,.10));border:1px solid rgba(255,255,255,.10);font-size:31px;box-shadow:inset 0 0 24px rgba(255,255,255,.025);transition:transform .25s ease}
@@ -832,6 +850,32 @@ body[data-theme="light"] .lockBox p{color:#69717c}
   <div id="financialHealthBadge" class="healthBadge" data-health="neutral">Empezando</div>
 </section>
 
+<section id="moneyHomePanel" class="moneyHomePanel" data-state="neutral">
+  <div class="moneyHomeHead">
+    <div><small>CONCIENCIA DEL MES</small><h2>¿Dónde está tu plata hoy?</h2></div>
+    <div id="moneyHomeBadge" class="moneyHomeBadge">Empezando</div>
+  </div>
+  <p class="moneyHomeMotto">No se trata de dejar de vivir. Se trata de dejar de perder el control.</p>
+  <div class="moneyScene">
+    <div class="moneySceneSide inside">
+      <div class="moneySceneLabel"><span>🏠</span><div><small>ADENTRO</small><b id="moneyInsideAmount">$ 0</b></div></div>
+      <div id="moneyInsideBags" class="moneyBags" aria-label="Dinero que todavía permanece con vos"></div>
+    </div>
+    <div class="moneySceneDivider"><span>↔</span></div>
+    <div class="moneySceneSide outside">
+      <div class="moneySceneLabel"><span>🚪</span><div><small>YA SALIÓ</small><b id="moneyOutsideAmount">$ 0</b></div></div>
+      <div id="moneyOutsideBags" class="moneyBags" aria-label="Dinero gastado este mes"></div>
+    </div>
+  </div>
+  <div class="moneyPctGrid">
+    <div><small>Ingresó</small><b id="moneyIncomePct">0%</b></div>
+    <div><small>Gastaste</small><b id="moneySpentPct">0%</b></div>
+    <div><small>Te queda</small><b id="moneyRemainPct">0%</b></div>
+    <div><small>Protegés</small><b id="moneySavingPct">0%</b></div>
+  </div>
+  <div id="moneyHomeMessage" class="moneyHomeMessage">Cargá tu ingreso y empezamos a mostrarte cuánto queda adentro y cuánto ya salió.</div>
+</section>
+
 <section id="goalFocus" class="goalFocus goalTheme-default">
   <div class="goalDreamVisual">
     <div class="goalDreamSky"></div><div class="goalDreamRoad"></div>
@@ -847,6 +891,11 @@ body[data-theme="light"] .lockBox p{color:#69717c}
   </div>
 </section>
 <section id="goalCelebration" class="goalCelebration"><b id="celebrationTitle">🏆 ¡Meta cumplida!</b><p id="celebrationText">Reconocé el logro. Lo que sostenés en el tiempo vale más que un día perfecto.</p></section>
+
+<section id="goalCarouselCard" class="goalCarouselCard">
+  <div class="goalCarouselHead"><div><small>POR ESTO LO ESTÁS HACIENDO</small><b>Tus objetivos</b></div><button onclick="openGoal()">+ Agregar</button></div>
+  <div id="goalHome" class="goalCarousel"></div>
+</section>
 
 <section class="rhythmWrap">
   <div id="financialRhythm" class="rhythmCard" data-level="neutral">
@@ -931,13 +980,6 @@ body[data-theme="light"] .lockBox p{color:#69717c}
   <p id="microText">Cada gasto chico cuenta. Cuando empieces a cargarlos, te mostramos cuánto podrían representar en un año.</p>
 </section>
 
-<section id="goalsCard" class="goalsCard">
-  <b>🎯 Tus metas</b>
-  <p>Semanal, mensual, anual, a 5 años o a 10 años. Poné algo concreto que quieras lograr y mirá qué ritmo necesitás.</p>
-  <div id="goalHome" class="goalRows"></div>
-  <button class="btn2" onclick="openGoal()">+ Crear o editar una meta</button>
-</section>
-
 <details class="goalHistoryCard goalHistoryCompact">
   <summary class="goalHistoryHead"><b>🏆 Historial de metas</b><div><span id="goalHistoryCount">0 logradas</span><i class="goalHistoryChevron">⌄</i></div></summary>
   <div id="goalHistoryList" class="goalHistoryList"><div class="goalHint">Tus metas logradas y las que saques de vista van a quedar acá.</div></div>
@@ -1014,7 +1056,7 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 
 <div id="incomeModal" class="modal" onclick="backdrop(event,'incomeModal')"><div class="sheet"><h3>Tu ingreso mensual</h3><input id="incomeInput" type="number" inputmode="decimal" placeholder="¿Cuánto entra por mes?"><label style="display:block;margin:13px 0 6px;font-weight:900">¿Cuánto querés reservar para vos?</label><select id="savingPct"><option>10</option><option>15</option><option selected>20</option><option>25</option><option>30</option></select><button class="primary" onclick="saveIncome()">Guardar</button><button class="secondary" onclick="closeM('incomeModal')">Cancelar</button></div></div>
 
-<div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3>Tu meta</h3>
+<div id="goalModal" class="modal" onclick="backdrop(event,'goalModal')"><div class="sheet"><h3 id="goalModalTitle">Tu meta</h3>
 <label class="fieldLabel">Ideas rápidas <span style="font-weight:600;color:#708095">(opcional)</span></label>
 <div class="goalSuggestions">
   <button class="goalSuggest" onclick="chooseGoalSuggestion('Auto','🚗','year')">🚗 Auto</button>
@@ -1024,10 +1066,11 @@ body[data-theme="light"] .lockBox p{color:#69717c}
   <button class="goalSuggest" onclick="chooseGoalSuggestion('Casa','🏠','year')">🏠 Casa</button>
   <button class="goalSuggest" onclick="chooseGoalSuggestion('Una semana sin fumar','🚭','week')">🚭 No fumar</button>
 </div>
-<label class="fieldLabel">Plazo</label><select id="goalPeriod" onchange="loadGoalPeriod()"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">1 año</option><option value="five">5 años</option><option value="ten">10 años</option></select>
+<label class="fieldLabel">Plazo</label><select id="goalPeriod"><option value="week">Semanal</option><option value="month" selected>Mensual</option><option value="year">1 año</option><option value="five">5 años</option><option value="ten">10 años</option></select>
 <label class="fieldLabel">Imagen de tu meta</label><select id="goalIcon"><option value="🎯">🎯 Objetivo</option><option value="🚗">🚗 Auto / movilidad</option><option value="✈️">✈️ Vacaciones / viaje</option><option value="🏠">🏠 Casa</option><option value="💻">💻 Tecnología</option><option value="🛟">🛟 Fondo de emergencia</option><option value="🚭">🚭 Dejar un hábito</option><option value="💚">💚 Salud</option><option value="💰">💰 Ahorro</option></select>
 <label class="fieldLabel">¿Qué querés lograr?</label><input id="goalName" placeholder="Ej: vacaciones, auto, fondo de emergencia">
 <label class="fieldLabel">¿Cuánto necesitás?</label><input id="goalAmount" type="number" inputmode="decimal" placeholder="Monto objetivo">
+<label class="rememberRow goalPrimaryChoice"><input id="goalPrimary" type="checkbox"><span><b>⭐ Mostrar como mi meta principal</b><br>Va a ser la que veas primero cada vez que abras Mi Balance.</span></label>
 <button class="primary" onclick="saveGoal()">Guardar meta</button><button class="secondary" onclick="closeM('goalModal')">Cancelar</button></div></div>
 
 <div id="installHelpModal" class="modal" onclick="backdrop(event,'installHelpModal')"><div class="sheet" style="text-align:center"><img class="installHelpLogo" src="./icon.svg" alt=""><h3>Instalar Mi Balance</h3><div id="installHelpBody" style="color:#44546a;line-height:1.55;text-align:left"></div><button class="secondary" onclick="closeM('installHelpModal')">Cerrar</button></div></div>
@@ -1104,6 +1147,19 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 
 <div id="deleteCurrentDataModal" class="modal" onclick="backdrop(event,'deleteCurrentDataModal')"><div class="sheet"><h3>Borrar mis datos</h3><p style="color:#56677b;line-height:1.55">Esto elimina de este dispositivo tu espacio actual, movimientos, metas, papelera y preferencias financieras. No afecta otros espacios guardados en el mismo dispositivo.</p><button class="dangerBtn" onclick="confirmDeleteCurrentData()">Sí, borrar mis datos</button><button class="secondary" onclick="closeM('deleteCurrentDataModal')">Cancelar</button></div></div>
 
+<div id="goalWinOverlay" class="goalWinOverlay" aria-live="polite">
+  <div class="goalConfetti" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+  <div class="goalWinCard">
+    <div id="goalWinEmoji" class="goalWinEmoji">🏆</div>
+    <small>META CUMPLIDA</small>
+    <h2 id="goalWinTitle">¡Lo lograste!</h2>
+    <p id="goalWinText">Todo ese esfuerzo tuvo un para qué.</p>
+    <button onclick="closeGoalCelebration()">Seguir con mi próximo objetivo</button>
+  </div>
+</div>
+
 <div id="removeGoalModal" class="modal" onclick="backdrop(event,'removeGoalModal')"><div class="sheet"><h3>Quitar esta meta</h3><p style="color:#56677b;line-height:1.5">La sacamos de tus metas activas, pero queda anotada en tu historial para que no pierdas el recorrido.</p><button class="dangerBtn" onclick="confirmRemoveGoal()">Quitar de mis metas</button><button class="secondary" onclick="closeM('removeGoalModal')">Cancelar</button></div></div>
 
 <div id="exitConfirmModal" class="modal"><div class="sheet exitSheet"><div class="exitIcon">👋</div><h3>¿Querés salir de Mi Balance?</h3><p style="color:#56677b;line-height:1.5">Tu sesión y tus datos quedan guardados. La próxima vez entrás directo mientras no cierres sesión.</p><div class="exitBtns"><button class="exitGo" onclick="confirmAppExit()">Sí, salir</button><button class="exitStay" onclick="stayInApp()">Seguir acá</button></div></div></div>
@@ -1124,12 +1180,26 @@ const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Ce
 const DEFAULT_QUICK_VISIBLE=["Café","Kiosco","Comida","Viáticos","Bebidas","Otros"];
 const GOAL_KEYS=["week","month","year","five","ten"];
 const CURRENCIES={ARS:{symbol:"$",digits:0},USD:{symbol:"US$",digits:2},EUR:{symbol:"€",digits:2},BRL:{symbol:"R$",digits:2},UYU:{symbol:"$U",digits:0},CLP:{symbol:"CLP$",digits:0},GBP:{symbol:"£",digits:2},PYG:{symbol:"₲",digits:0}};
-const EMPTY_STATE=()=>({profileName:"",currency:"ARS",income:0,savingPct:20,expenses:[],trash:[],quickPresets:{},quickVisible:[...DEFAULT_QUICK_VISIBLE],goals:{week:null,month:null,year:null,five:null,ten:null},goalHistory:[]});
-let state=EMPTY_STATE(), selected="Otros", quickContext=null, quickMenuCat="", quickHoldTimer=null, quickHoldOpened=false, expenseFrequency="once", editingExpenseIndex=null, summaryOffset=0, pendingGoalPeriod=null, feedbackChoice="", pendingBackupData=null, vaultKey=null, currentProfileId=null, currentEmail="";
+const EMPTY_STATE=()=>({profileName:"",currency:"ARS",income:0,savingPct:20,expenses:[],trash:[],quickPresets:{},quickVisible:[...DEFAULT_QUICK_VISIBLE],goals:{week:null,month:null,year:null,five:null,ten:null},goalItems:[],goalHistory:[]});
+let state=EMPTY_STATE(), selected="Otros", quickContext=null, quickMenuCat="", quickHoldTimer=null, quickHoldOpened=false, expenseFrequency="once", editingExpenseIndex=null, editingGoalId=null, summaryOffset=0, pendingGoalId=null, feedbackChoice="", pendingBackupData=null, vaultKey=null, currentProfileId=null, currentEmail="";
 const $=id=>document.getElementById(id);
 function currencyCode(){return CURRENCIES[state?.currency]?state.currency:"ARS"}
 function fmt(n){const code=currencyCode(),cfg=CURRENCIES[code];try{return new Intl.NumberFormat("es-AR",{style:"currency",currency:code,minimumFractionDigits:cfg.digits,maximumFractionDigits:cfg.digits}).format(Number(n||0))}catch(e){return cfg.symbol+" "+Number(n||0).toLocaleString("es-AR")}}
-function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.currency=CURRENCIES[x.currency]?x.currency:"ARS";x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.trash=Array.isArray(x.trash)?x.trash:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];const oldGoals=x.goals&&typeof x.goals==="object"?x.goals:{};x.goals={week:oldGoals.week||null,month:oldGoals.month||null,year:oldGoals.year||null,five:oldGoals.five||null,ten:oldGoals.ten||null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
+function normalizeState(x){
+  x=x&&typeof x==="object"?x:EMPTY_STATE();
+  x.profileName=String(x.profileName||"").trim().slice(0,24);x.currency=CURRENCIES[x.currency]?x.currency:"ARS";x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;
+  x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.trash=Array.isArray(x.trash)?x.trash:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];
+  const oldGoals=x.goals&&typeof x.goals==="object"?x.goals:{};x.goals={week:oldGoals.week||null,month:oldGoals.month||null,year:oldGoals.year||null,five:oldGoals.five||null,ten:oldGoals.ten||null};
+  if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;
+  x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];
+  if(!Array.isArray(x.goalItems)){
+    const migrated=[];GOAL_KEYS.forEach(period=>{const g=x.goals?.[period];if(g&&!g.completedAt)migrated.push({id:"legacy-"+period+"-"+(g.createdAt||Date.now()),period,name:g.name||"Meta",amount:Number(g.amount)||0,icon:g.icon||inferGoalIcon(g.name||""),createdAt:g.createdAt||Date.now(),isPrimary:migrated.length===0,completedAt:null})});x.goalItems=migrated
+  }
+  x.goalItems=x.goalItems.filter(g=>g&&g.name&&!g.completedAt).map((g,i)=>({id:String(g.id||("goal-"+(g.createdAt||Date.now())+"-"+i)),period:GOAL_KEYS.includes(g.period)?g.period:"month",name:String(g.name||"Meta").slice(0,80),amount:Number(g.amount)||0,icon:g.icon||inferGoalIcon(g.name||""),createdAt:Number(g.createdAt)||Date.now(),isPrimary:!!g.isPrimary,completedAt:null}));
+  if(x.goalItems.length&&!x.goalItems.some(g=>g.isPrimary))x.goalItems[0].isPrimary=true;
+  if(x.goalItems.filter(g=>g.isPrimary).length>1){let found=false;x.goalItems.forEach(g=>{if(g.isPrimary&&!found)found=true;else if(g.isPrimary)g.isPrimary=false})}
+  return x
+}
 function monthExpenses(){const n=new Date();return expensesForMonth(n)}
 function expensesForMonth(ref){return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===ref.getFullYear()&&d.getMonth()===ref.getMonth()})}
 function monthRef(offset=0){const n=new Date();return new Date(n.getFullYear(),n.getMonth()+offset,1,12,0,0,0)}
@@ -1275,18 +1345,21 @@ function goalCapacity(period){
   if(period==="week")return saving/4.33;
   const months=goalMonths(period);return months?saving*months:saving
 }
+function activeGoals(){return Array.isArray(state.goalItems)?state.goalItems:[]}
+function goalById(id){return activeGoals().find(g=>g.id===id)||null}
 function featuredGoal(){
-  const goals=state.goals||{};
-  const active=GOAL_KEYS.map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&!x.goal.completedAt);
-  if(active.length)return active[0];
-  const completed=GOAL_KEYS.map(k=>({period:k,goal:goals[k]})).filter(x=>x.goal&&x.goal.completedAt).sort((a,b)=>(b.goal.completedAt||0)-(a.goal.completedAt||0));
-  return completed[0]||null
+  const active=activeGoals();if(!active.length)return null;
+  const primary=active.find(g=>g.isPrimary)||active[0];
+  return {id:primary.id,period:primary.period,goal:primary}
 }
-function archiveGoal(period,status){
-  const g=state.goals?.[period];if(!g)return;
-  state.goalHistory=state.goalHistory||[];
-  const key=(g.createdAt||0)+"|"+period+"|"+status;
-  if(!state.goalHistory.some(x=>x.key===key))state.goalHistory.unshift({key,period,status,name:g.name,amount:g.amount,icon:g.icon||inferGoalIcon(g.name),createdAt:g.createdAt||Date.now(),endedAt:Date.now()});
+function setPrimaryGoal(id){
+  const target=goalById(id);if(!target)return;
+  activeGoals().forEach(g=>g.isPrimary=g.id===id);persist();render();notify("⭐ "+target.name+" ahora es tu meta principal.","success")
+}
+function archiveGoalItem(g,status){
+  if(!g)return;state.goalHistory=state.goalHistory||[];
+  const key=String(g.id||g.createdAt)+"|"+status;
+  if(!state.goalHistory.some(x=>x.key===key))state.goalHistory.unshift({key,id:g.id,period:g.period,status,name:g.name,amount:g.amount,icon:g.icon||inferGoalIcon(g.name),createdAt:g.createdAt||Date.now(),endedAt:Date.now()})
 }
 function renderGoalHistory(){
   const list=$("goalHistoryList"),count=$("goalHistoryCount");if(!list||!count)return;
@@ -1296,8 +1369,13 @@ function renderGoalHistory(){
   list.innerHTML=hist.slice(0,7).map(h=>'<div class="historyGoal"><div class="historyGoalIcon">'+(h.icon||"🎯")+'</div><div class="historyGoalText"><b>'+escapeHtml(h.name||"Meta")+'</b><small>'+formatGoalPeriod(h.period)+' · '+new Date(h.endedAt||Date.now()).toLocaleDateString("es-AR")+'</small></div><span class="historyStatus '+(h.status==="completed"?"done":"removed")+'">'+(h.status==="completed"?"Lograda":"Quitada")+'</span></div>').join("")
 }
 function formatGoalPeriod(p){return p==="week"?"Semanal":p==="month"?"Mensual":p==="year"?"1 año":p==="five"?"5 años":p==="ten"?"10 años":"Meta"}
-function requestRemoveGoal(period){if(!state.goals?.[period])return;pendingGoalPeriod=period;openM("removeGoalModal")}
-function confirmRemoveGoal(){const p=pendingGoalPeriod;if(!p||!state.goals?.[p]){closeM("removeGoalModal");return}if(!state.goals[p].completedAt)archiveGoal(p,"removed");state.goals[p]=null;pendingGoalPeriod=null;persist();render();closeM("removeGoalModal");notify("Meta quitada. Su recorrido quedó en el historial.","success")}
+function requestRemoveGoal(id){if(!goalById(id))return;pendingGoalId=id;openM("removeGoalModal")}
+function confirmRemoveGoal(){
+  const g=goalById(pendingGoalId);if(!g){closeM("removeGoalModal");return}
+  const wasPrimary=g.isPrimary;archiveGoalItem(g,"removed");state.goalItems=activeGoals().filter(x=>x.id!==g.id);if(wasPrimary&&state.goalItems.length)state.goalItems[0].isPrimary=true;
+  pendingGoalId=null;persist();render();closeM("removeGoalModal");notify("Meta quitada. Su recorrido quedó en el historial.","success")
+}
+
 function financialHealth(){
   const income=Number(state.income)||0;if(!income)return {key:"neutral",label:"Empezando",sub:"Cargá tu ingreso para ver tu salud financiera."};
   const saving=income*(Number(state.savingPct)||0)/100,spent=monthExpenses().reduce((a,e)=>a+Number(e.amount||0),0),spendable=Math.max(1,income-saving),pressure=spent/spendable;
@@ -1308,69 +1386,37 @@ function financialHealth(){
 }
 function renderGreetingAndFocus(){
   const name=state.profileName?escapeHtml(state.profileName):"",g=$("greetingText"),sub=$("greetingSub"),badge=$("financialHealthBadge");
-  const health=financialHealth();
-  if(g)g.innerHTML=name?"Hola, "+name+" 👋":"Hola 👋";
-  if(sub)sub.textContent=health.sub;
-  if(badge){badge.dataset.health=health.key;badge.textContent=health.label}
+  const health=financialHealth();if(g)g.innerHTML=name?"Hola, "+name+" 👋":"Hola 👋";if(sub)sub.textContent=health.sub;if(badge){badge.dataset.health=health.key;badge.textContent=health.label}
   const f=featuredGoal(),box=$("goalFocus"),dreamTitle=$("goalDreamTitle"),dreamLine=$("goalDreamLine"),dreamEmoji=$("goalDreamEmoji"),title=$("goalFocusName"),meta=$("goalFocusMeta"),motivation=$("goalFocusMotivation"),bar=$("goalFocusBar"),fill=$("goalFocusFill"),edit=$("goalFocusEdit"),done=$("goalFocusDone"),cele=$("goalCelebration");
-  if(!box||!title||!meta)return;
-  box.className="goalFocus goalTheme-default";
+  if(!box||!title||!meta)return;box.className="goalFocus goalTheme-default";
   if(!f){
-    if(dreamTitle)dreamTitle.textContent="Tu próxima conquista";
-    if(dreamLine)dreamLine.textContent="Elegí algo que realmente quieras. Después lo vas a ver cada vez que abras Mi Balance.";
-    if(dreamEmoji)dreamEmoji.textContent="🎯";
-    title.textContent="Elegí algo que quieras lograr";
-    meta.textContent="Tu meta va a quedar siempre cerca para ayudarte a priorizar lo importante.";
-    if(motivation)motivation.textContent="Antes de un gasto impulsivo, preguntate: ¿esto me acerca o me aleja de lo que quiero?";
-    bar?.classList.add("hidden");done?.classList.add("hidden");
-    if(edit){edit.textContent="Crear meta";edit.onclick=()=>openGoal("month")}
-    if(cele)cele.classList.remove("show");return
+    if(dreamTitle)dreamTitle.textContent="Tu próxima conquista";if(dreamLine)dreamLine.textContent="Elegí algo que realmente quieras. Después lo vas a ver cada vez que abras Mi Balance.";if(dreamEmoji)dreamEmoji.textContent="🎯";
+    title.textContent="Elegí algo que quieras lograr";meta.textContent="Tu meta principal va a quedar siempre cerca para recordarte por qué estás cuidando tu plata.";if(motivation)motivation.textContent="Antes de un gasto impulsivo, preguntate: ¿esto me acerca o me aleja de lo que quiero?";
+    bar?.classList.add("hidden");done?.classList.add("hidden");if(edit){edit.textContent="Crear meta";edit.onclick=()=>openGoal()}if(cele)cele.classList.remove("show");return
   }
-  const goal=f.goal,period=f.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":period==="year"?"en 1 año":period==="five"?"en 5 años":"en 10 años",visual=goalVisualTheme(goal);
-  box.className="goalFocus "+visual.cls;
-  if(dreamTitle)dreamTitle.textContent=goal.name||"Tu meta";
-  if(dreamLine)dreamLine.textContent=visual.dream;
-  if(dreamEmoji)dreamEmoji.textContent=visual.emoji;
-  title.textContent=(goal.icon||inferGoalIcon(goal.name))+" "+(goal.name||"Tu meta");
-  if(goal.completedAt){
-    meta.textContent="Meta marcada como lograda. Disfrutá este momento y elegí el próximo paso cuando quieras.";
-    if(motivation)motivation.textContent="Lo lograste. Guardá este momento como prueba de que sostener un plan funciona.";
-    bar?.classList.remove("hidden");if(fill)fill.style.width="100%";done?.classList.add("hidden");
-    if(edit){edit.textContent="Ver / editar";edit.onclick=()=>openGoal(period)}
-    if(cele){cele.classList.add("show");$("celebrationTitle").textContent=period==="week"?"🏆 ¡Semana cumplida!":"🏆 ¡Meta cumplida!";$("celebrationText").textContent="Bien ahí"+(state.profileName?", "+state.profileName:"")+". Reconocer un logro también ayuda a sostener el hábito."}
-  }else{
-    meta.textContent=target>0?"Con tu ritmo actual proyectás "+fmt(capacity)+" "+periodLabel+" hacia una meta de "+fmt(target)+".":"Tené esta imagen presente antes de un gasto impulsivo.";
-    if(motivation)motivation.textContent="Antes de gastar, mirá tu meta: ¿esta compra te acerca o puede esperar?";
-    bar?.classList.remove("hidden");if(fill)fill.style.width=pct+"%";done?.classList.remove("hidden");if(done)done.onclick=()=>completeGoal(period);
-    if(edit){edit.textContent="Editar meta";edit.onclick=()=>openGoal(period)}if(cele)cele.classList.remove("show")
-  }
+  const goal=f.goal,period=goal.period,target=Number(goal.amount)||0,capacity=goalCapacity(period),pct=target>0?Math.min(100,capacity/target*100):0,periodLabel=period==="week"?"esta semana":period==="month"?"este mes":period==="year"?"en 1 año":period==="five"?"en 5 años":"en 10 años",visual=goalVisualTheme(goal);
+  box.className="goalFocus "+visual.cls;if(dreamTitle)dreamTitle.textContent=goal.name||"Tu meta";if(dreamLine)dreamLine.textContent=visual.dream;if(dreamEmoji)dreamEmoji.textContent=visual.emoji;
+  title.textContent=(goal.icon||inferGoalIcon(goal.name))+" "+(goal.name||"Tu meta principal");
+  meta.textContent=target>0?"Con tu ritmo actual proyectás "+fmt(capacity)+" "+periodLabel+" hacia una meta de "+fmt(target)+".":"Tené esta imagen presente antes de un gasto impulsivo.";
+  if(motivation)motivation.textContent="Antes de gastar, mirá tu meta: ¿esta compra te acerca o puede esperar?";
+  bar?.classList.remove("hidden");if(fill)fill.style.width=pct+"%";done?.classList.remove("hidden");if(done)done.onclick=()=>completeGoal(goal.id);
+  if(edit){edit.textContent="Editar meta";edit.onclick=()=>openGoal(goal.id)}if(cele)cele.classList.remove("show")
 }
 function renderGoals(){
   const box=$("goalHome");if(!box)return;
-  const monthlySaving=state.income*state.savingPct/100,weekly=monthlySaving/4.33;
-  const cfg={week:["Semanal",weekly,0],month:["Mensual",monthlySaving,1],year:["1 año",monthlySaving,12],five:["5 años",monthlySaving,60],ten:["10 años",monthlySaving,120]};
-  const rows=[];
-  GOAL_KEYS.forEach(k=>{
-    const g=state.goals&&state.goals[k];if(!g)return;
-    const [label,perMonth,months]=cfg[k],target=Number(g.amount)||0,icon=g.icon||inferGoalIcon(g.name);
-    const projected=k==="week"?weekly:(months?perMonth*months:perMonth);
-    const pct=g.completedAt?100:(target>0?Math.min(100,projected/target*100):0);
-    let hint="";
-    if(g.completedAt)hint="🏆 ¡Felicitaciones! Marcaste esta meta como lograda.";
-    else if(k==="week"){
-      const gap=Math.max(0,target-weekly);
-      hint=weekly>=target?"Tu ritmo actual alcanza para esta meta semanal.":"Te faltaría separar "+fmt(gap)+" más por semana.";
-    }else if(k==="month"){
-      const gap=Math.max(0,target-monthlySaving);
-      hint=monthlySaving>=target?"Tu ritmo actual alcanza para esta meta mensual.":"Te faltaría separar "+fmt(gap)+" más este mes.";
-    }else{
-      const needPerMonth=months?target/months:target,gap=Math.max(0,needPerMonth-monthlySaving);
-      hint=monthlySaving>=needPerMonth?"Con tu ahorro actual, la proyección alcanza para "+label+".":"Para llegar en "+label+", necesitás cerca de "+fmt(needPerMonth)+" por mes"+(gap?" (unos "+fmt(gap)+" más que tu plan actual).":".");
-    }
-    rows.push('<div class="goalRow"><div class="goalTop"><b>'+icon+' '+label+' · '+escapeHtml(g.name||"Meta")+'</b><span>'+fmt(target)+'</span></div><div class="goalHint">'+hint+'</div><div class="goalProgress"><i style="width:'+pct+'%"></i></div><div class="goalRowActions">'+(g.completedAt?'<button class="goalDoneBtn" disabled>🏆 Lograda</button>':'<button class="goalDoneBtn" onclick="completeGoal(\''+k+'\')">✓ Marcar lograda</button>')+'<button class="goalRemoveBtn" onclick="requestRemoveGoal(\''+k+'\')">Quitar</button></div></div>');
-  });
-  box.innerHTML=rows.length?rows.join(""):'<div class="goalRow"><div class="goalHint">Todavía no cargaste metas. Elegí algo concreto que quieras lograr.</div></div>';
+  const items=activeGoals();
+  if(!items.length){box.innerHTML='<button class="goalCarouselEmpty" onclick="openGoal()">Todavía no cargaste objetivos. Tocá acá para crear el primero.</button>';return}
+  box.innerHTML=items.map(g=>{
+    const icon=g.icon||inferGoalIcon(g.name),primary=!!g.isPrimary;
+    return '<article class="goalMini '+(primary?'primary':'')+'">'+
+      '<button class="goalMiniPrimary" onclick="setPrimaryGoal(\''+escapeHtml(g.id)+'\')">'+(primary?'★ Principal':'☆ Hacer principal')+'</button>'+
+      '<div class="goalMiniTop"><div class="goalMiniIcon">'+icon+'</div><div class="goalMiniCopy"><b>'+escapeHtml(g.name)+'</b><small>'+formatGoalPeriod(g.period)+'</small></div></div>'+
+      '<div class="goalMiniAmount">'+fmt(g.amount)+'</div>'+
+      '<div class="goalMiniActions"><button onclick="openGoal(\''+escapeHtml(g.id)+'\')">Editar</button><button class="goalMiniDone" onclick="completeGoal(\''+escapeHtml(g.id)+'\')">✓ Lograda</button><button class="goalMiniRemove" onclick="requestRemoveGoal(\''+escapeHtml(g.id)+'\')">Quitar</button></div>'+
+    '</article>'
+  }).join("")
 }
+
 function renderMicro(){
   const micro=microSpend(),monthlySave=state.income*state.savingPct/100;
   if($("microTotal"))$("microTotal").textContent=fmt(micro);
@@ -1400,6 +1446,29 @@ function renderMonthStatus(){
   const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
   if($("monthMini"))$("monthMini").innerHTML='<span>🧾 '+month.length+' movimientos</span><span>🔎 Microgastos '+fmt(micro)+'</span>'+(top?'<span>'+categoryEmoji(top[0])+' Mayor categoría: '+escapeHtml(top[0])+'</span>':'');
 }
+function renderMoneyHome(){
+  const panel=$("moneyHomePanel");if(!panel)return;
+  const income=Number(state.income)||0,spent=monthExpenses().reduce((a,e)=>a+Number(e.amount||0),0),saving=income*(Number(state.savingPct)||0)/100,remaining=Math.max(0,income-spent);
+  const spentPct=income>0?Math.round(spent/income*100):0,remainPct=income>0?Math.max(0,Math.round(remaining/income*100)):0,savingPct=income>0?Math.round(saving/income*100):0;
+  const cappedSpent=Math.min(100,Math.max(0,spentPct)),insideCount=income>0?Math.round((100-cappedSpent)/10):0,outsideCount=income>0?10-insideCount:0;
+  const bags=(active,total=10)=>Array.from({length:total},(_,i)=>'<span class="moneyBag '+(i<active?'':'dim')+'">💰</span>').join("");
+  if($("moneyInsideBags"))$("moneyInsideBags").innerHTML=bags(insideCount);
+  if($("moneyOutsideBags"))$("moneyOutsideBags").innerHTML=bags(outsideCount);
+  if($("moneyInsideAmount"))$("moneyInsideAmount").textContent=fmt(remaining);
+  if($("moneyOutsideAmount"))$("moneyOutsideAmount").textContent=fmt(spent);
+  if($("moneyIncomePct"))$("moneyIncomePct").textContent=income>0?"100%":"0%";
+  if($("moneySpentPct"))$("moneySpentPct").textContent=spentPct+"%";
+  if($("moneyRemainPct"))$("moneyRemainPct").textContent=remainPct+"%";
+  if($("moneySavingPct"))$("moneySavingPct").textContent=savingPct+"%";
+  let stateKey="neutral",badge="Empezando",message="Cargá tu ingreso y empezamos a mostrarte cuánto queda adentro y cuánto ya salió.";
+  if(income>0){
+    if(spentPct<=40){stateKey="good";badge="Buen control";message="La mayor parte de lo que ingresó todavía está con vos. Seguí mirando tus decisiones antes de gastar."}
+    else if(spentPct<=65){stateKey="watch";badge="Prestá atención";message="Ya salió "+spentPct+"% de lo que ingresó este mes. Mirá tus gastos antes de que se acelere."}
+    else if(spentPct<100){stateKey="tight";badge="Mes ajustado";message="Ya salió "+spentPct+"% de lo que ingresó. Es un buen momento para revisar Mis gastos y priorizar lo importante."}
+    else{stateKey="critical";badge="Frená y revisá";message="Tus gastos alcanzaron o superaron lo ingresado este mes. Revisar lo que se fue puede ayudarte a recuperar control."}
+  }
+  panel.dataset.state=stateKey;if($("moneyHomeBadge"))$("moneyHomeBadge").textContent=badge;if($("moneyHomeMessage"))$("moneyHomeMessage").textContent=message
+}
 function renderStore(){
   const month=monthExpenses(),spent=month.reduce((a,e)=>a+Number(e.amount||0),0),saving=state.income*state.savingPct/100,spendable=Math.max(0,state.income-saving),pressure=spendable>0?spent/spendable:0;
   const t=$("storeTitle"),p=$("storeText");if(!t||!p)return;
@@ -1423,7 +1492,7 @@ function render(){
     state.expenses.slice().reverse().forEach((e,r)=>{const i=state.expenses.length-1-r,em=(cats.find(c=>c[1]===e.category)||["🧾"])[0],d=document.createElement("div");d.className="rowItem";d.innerHTML='<div class="emo">'+em+'</div><div class="meta"><b>'+escapeHtml(e.category)+'</b><small>'+escapeHtml(new Date(Number(e.ts)||Date.now()).toLocaleDateString("es-AR")+" · "+(frequencyLabel(e.frequency)?frequencyLabel(e.frequency)+" · ":"")+(e.note||"Sin nota"))+'</small></div><div class="amt">'+fmt(e.amount)+'</div><div class="rowActions"><button class="editMove" onclick="editExpense('+i+')" aria-label="Editar gasto">✎</button><button class="del" onclick="delExpense('+i+')" aria-label="Enviar a papelera">×</button></div>';expenseList.appendChild(d)});
     if(!state.expenses.length)expenseList.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">Todavía no cargaste gastos. Tocá <b>+</b> o usá un acceso rápido.</div>';
   }
-  renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
+  renderMoneyHome();renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
 }
 function financialGameStreak(daily,recommended,day){
   if(!recommended||!daily.length)return 0;
@@ -1545,8 +1614,14 @@ function editExpense(i){
   setExpenseFrequency(expenseFrequency);renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)
 }
 function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
-function openGoal(period){goalPeriod.value=period||"month";loadGoalPeriod();openM("goalModal")}
-function loadGoalPeriod(){const g=state.goals&&state.goals[goalPeriod.value];goalName.value=g?.name||"";goalAmount.value=g?.amount||"";if($("goalIcon"))$("goalIcon").value=g?.icon||inferGoalIcon(g?.name||"")}
+function openGoal(target=""){
+  const existing=goalById(target);editingGoalId=existing?.id||null;
+  if($("goalModalTitle"))$("goalModalTitle").textContent=existing?"Editar meta":"Nueva meta";
+  goalPeriod.value=existing?.period||(GOAL_KEYS.includes(target)?target:"month");
+  goalName.value=existing?.name||"";goalAmount.value=existing?.amount||"";goalIcon.value=existing?.icon||"🎯";if($("goalPrimary"))$("goalPrimary").checked=existing?!!existing.isPrimary:activeGoals().length===0;
+  openM("goalModal");setTimeout(()=>goalName.focus(),100)
+}
+function loadGoalPeriod(){}
 function chooseGoalSuggestion(name,icon,period){goalPeriod.value=period;goalName.value=name;goalIcon.value=icon;goalAmount.value="";setTimeout(()=>goalAmount.focus(),80)}
 function saveExpense(){
   const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return}
@@ -1562,9 +1637,30 @@ function saveExpense(){
   expenseAmount.value="";note.value="";quickContext=null;expenseFrequency="once"
 }
 function delExpense(i){const item=state.expenses[i];if(!item)return;state.trash=Array.isArray(state.trash)?state.trash:[];state.trash.unshift({id:"exp-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),type:"expense",item:{...item},deletedAt:Date.now()});state.expenses.splice(i,1);persist();render();notify("Movimiento enviado a la papelera.","success")}function saveIncome(){state.income=Number(incomeInput.value)||0;state.savingPct=Number(savingPct.value)||20;persist();render();closeM("incomeModal")}
-function saveGoal(){const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return;}state.goals=state.goals||{week:null,month:null,year:null,five:null,ten:null};const prev=state.goals[p]||{},createdAt=prev.completedAt?Date.now():(prev.createdAt||Date.now());state.goals[p]={name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt,completedAt:null};persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para ayudarte a tenerla presente.","success")}
-function completeGoal(period){const g=state.goals&&state.goals[period];if(!g||g.completedAt)return;g.completedAt=Date.now();archiveGoal(period,"completed");persist();render();notify(period==="week"?"🏆 ¡Semana cumplida! Bien ahí.":"🏆 ¡Meta lograda! Felicitaciones.","success")}
-function completeFeaturedGoal(){const f=featuredGoal();if(f&&!f.goal.completedAt)completeGoal(f.period)}
+function saveGoal(){
+  const p=goalPeriod.value,n=goalName.value.trim(),a=Number(goalAmount.value)||0;if(!n||a<=0){notify("Poné una meta y un monto válido.","warn");return}
+  const wantsPrimary=!!$("goalPrimary")?.checked;let items=activeGoals(),g=editingGoalId?goalById(editingGoalId):null;
+  if(g){g.period=p;g.name=n;g.amount=a;g.icon=goalIcon.value||inferGoalIcon(n);if(wantsPrimary)items.forEach(x=>x.isPrimary=x.id===g.id)}
+  else{
+    const id="goal-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),isPrimary=wantsPrimary||items.length===0;
+    if(isPrimary)items.forEach(x=>x.isPrimary=false);items.push({id,period:p,name:n,amount:a,icon:goalIcon.value||inferGoalIcon(n),createdAt:Date.now(),isPrimary,completedAt:null})
+  }
+  if(items.length&&!items.some(x=>x.isPrimary))items[0].isPrimary=true;
+  state.goalItems=items;editingGoalId=null;persist();render();closeM("goalModal");notify("Meta guardada. Va a quedar a la vista para recordarte por qué te estás cuidando.","success")
+}
+function showGoalCelebration(goal){
+  if($("goalWinEmoji"))$("goalWinEmoji").textContent=goal.icon||inferGoalIcon(goal.name);
+  if($("goalWinTitle"))$("goalWinTitle").textContent="¡"+goal.name+" lograda!";
+  if($("goalWinText"))$("goalWinText").textContent="Esto es avance real. Disfrutalo y elegí el próximo objetivo cuando quieras.";
+  const layer=$("goalWinOverlay");if(layer){layer.classList.remove("show");void layer.offsetWidth;layer.classList.add("show")}
+  try{if(navigator.vibrate)navigator.vibrate([70,45,110])}catch(e){}
+}
+function closeGoalCelebration(){const layer=$("goalWinOverlay");if(layer)layer.classList.remove("show")}
+function completeGoal(id){
+  const g=goalById(id);if(!g)return;const snapshot={...g},wasPrimary=!!g.isPrimary;archiveGoalItem(g,"completed");state.goalItems=activeGoals().filter(x=>x.id!==id);if(wasPrimary&&state.goalItems.length)state.goalItems[0].isPrimary=true;
+  persist();render();showGoalCelebration(snapshot);notify("🏆 ¡Meta lograda! Felicitaciones.","success")
+}
+function completeFeaturedGoal(){const f=featuredGoal();if(f)completeGoal(f.id)}
 function openSummary(offset=0){
   summaryOffset=Math.min(0,Number(offset)||0);
   renderSummaryMonth();
@@ -1809,12 +1905,13 @@ function saveProfileName(){state.profileName=String(profileNameInput.value||"").
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
-  {sel:"#financeGameStatus",title:"Jugá a cuidar tu mes",text:"Este personaje te muestra de un vistazo cómo venís: en control, en equilibrio, con atención o en recuperación. También tenés nivel, racha y un desafío simple para hoy. No competís con nadie: intentás mejorar tu propio mes."},
-  {sel:"#financialRhythm",title:"Entendé el gráfico",text:"Las barras muestran cuánto gastaste cada día. La línea blanca resume el promedio de los últimos 3 días y la punteada marca un ritmo diario orientativo según tu ingreso y ahorro. Un pico alto significa que ese día gastaste más."},
-  {sel:"#incomeCard",title:"Primero: cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance empieza a calcular todo."},
-  {sel:"#quickExpenses",title:"Después: anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos café, kiosco, transporte o cualquier gasto del día."},
-  {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."},
-  {sel:"#goalsCard",title:"Terminá con una meta",text:"Elegí algo concreto que quieras lograr: esta semana, este mes, en 1 año, 5 años o 10 años. Comparalo con tu ritmo de ahorro y mantenelo siempre a la vista."}
+  {sel:"#moneyHomePanel",title:"¿Dónde está tu plata hoy?",text:"Las bolsitas de adentro representan lo que todavía conservás y las de afuera lo que ya gastaste. Abajo ves qué porcentaje ingresó, cuánto gastaste, cuánto te queda y cuánto decidiste proteger. La idea es que puedas mirar y entender tu mes en segundos."},
+  {sel:"#goalCarouselCard",title:"Recordá para qué te cuidás",text:"Podés tener varias metas y deslizarlas de costado. Elegí una como principal: esa va a quedar siempre destacada para recordarte por qué estás tomando mejores decisiones."},
+  {sel:"#financeGameStatus",title:"Jugá a cuidar tu mes",text:"Tu estado cambia según cómo venís: en control, en equilibrio, con atención o en recuperación. También tenés nivel, racha y un desafío simple. No competís con nadie: intentás mejorar tu propio mes."},
+  {sel:"#financialRhythm",title:"Entendé el gráfico",text:"Las barras muestran cuánto gastaste cada día. La línea blanca resume el promedio de los últimos 3 días y la punteada marca un ritmo diario orientativo. Un pico alto significa que ese día gastaste más."},
+  {sel:"#incomeCard",title:"Cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance puede ayudarte a dimensionar tus gastos."},
+  {sel:"#quickExpenses",title:"Anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos lo que vas gastando. Cuanto más completo sea el registro, más útil es el espejo que te muestra la app."},
+  {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."}
 ]
 let guideIndex=0,guideForce=false,guideTimer=null;
 function tourSeenKey(){return currentProfileId?"mb_tour_seen_v2_"+currentProfileId:"mb_tour_seen_v2_guest"}
