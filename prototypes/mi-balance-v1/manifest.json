@@ -7,10 +7,13 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#07182f",
-  "theme_color": "#07182f",
+  "background_color": "#060a12",
+  "theme_color": "#060a12",
   "orientation": "portrait-primary",
-  "categories": ["finance", "utilities"],
+  "categories": [
+    "finance",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "/.netlify/images?url=/icon.svg&w=192&h=192&fit=cover&fm=png",
