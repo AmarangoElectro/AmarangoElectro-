@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07182f">
+<meta name="theme-color" content="#060a12">
 <meta name="description" content="Controlá tu plata sin complicarte. Mi Balance es gratis, privada y guarda tus datos cifrados en tu dispositivo. Un regalo de Amarango.">
 <link rel="canonical" href="https://mibalance-amarango.netlify.app/">
 <link rel="manifest" href="./manifest.json">
@@ -1736,7 +1736,7 @@ function selectShareFallback(){const input=$("shareFallbackUrl");if(!input)retur
 function applyTheme(mode){
   const m=mode||localStorage.getItem("mb_theme")||"dark";document.body.dataset.theme=m;localStorage.setItem("mb_theme",m);
   if($("themeBtn"))$("themeBtn").textContent=m==="light"?"🌙":"☀️";
-  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=m==="light"?"#f8f3e9":"#07182f"
+  const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=m==="light"?"#ffffff":"#060a12"
 }
 function toggleTheme(){applyTheme(document.body.dataset.theme==="light"?"dark":"light")}
 function hideBootSplash(){
