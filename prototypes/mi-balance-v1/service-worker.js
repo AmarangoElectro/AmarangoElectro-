@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v28-gamified-finance-status';
+const CACHE='mi-balance-v29-money-awareness-multigoals';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
