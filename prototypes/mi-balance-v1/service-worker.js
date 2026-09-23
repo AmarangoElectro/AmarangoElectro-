@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v25-supermercado-almacen';
+const CACHE='mi-balance-v26-quick-menu-categories';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
