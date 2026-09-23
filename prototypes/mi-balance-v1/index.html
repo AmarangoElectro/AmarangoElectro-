@@ -142,6 +142,23 @@ body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
 @keyframes monitorSweep{from{transform:translateX(-560px);opacity:.15}15%{opacity:.8}to{transform:translateX(36px);opacity:.15}}
 @media(prefers-reduced-motion:reduce){.pulseSweep{animation:none}}
 
+/* Financial rhythm / trading-style monthly chart */
+.rhythmWrap{padding:14px 18px 0}
+.rhythmCard{--rhythm:#7f9ab7;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:24px;background:radial-gradient(circle at 90% 0%,color-mix(in srgb,var(--rhythm) 13%,transparent),transparent 30%),linear-gradient(155deg,#071a30,#0b2949);padding:15px;box-shadow:0 14px 32px rgba(0,0,0,.17)}
+.rhythmCard[data-level="good"]{--rhythm:#41d98a}.rhythmCard[data-level="watch"]{--rhythm:#ffbf5a}.rhythmCard[data-level="tight"]{--rhythm:#ff8a4b}.rhythmCard[data-level="critical"]{--rhythm:#ff6b6b}.rhythmCard[data-level="neutral"]{--rhythm:#7f9ab7}
+.rhythmHead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.rhythmEy{font:850 8px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;color:#7f99b6}.rhythmTitle{font-size:16px;font-weight:950;margin-top:4px;letter-spacing:-.2px}.rhythmState{flex:0 0 auto;font-size:10px;font-weight:950;padding:6px 8px;border-radius:999px;color:var(--rhythm);background:color-mix(in srgb,var(--rhythm) 12%,transparent);border:1px solid color-mix(in srgb,var(--rhythm) 34%,transparent)}
+.rhythmStats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.rhythmStats>div{min-width:0;padding:9px 9px 8px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(255,255,255,.035)}.rhythmStats small{display:block;color:#8198b2;font-size:8px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rhythmStats b{display:block;margin-top:3px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rhythmChartBox{position:relative;height:176px;margin-top:10px;border-radius:16px;overflow:hidden;background:#03111f;border:1px solid color-mix(in srgb,var(--rhythm) 17%,#17324e);box-shadow:inset 0 0 24px rgba(0,0,0,.42)}
+.rhythmChartBox:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:100% 36px,50px 100%;pointer-events:none}
+.rhythmChart{position:relative;z-index:1;width:100%;height:100%;display:block}.rhythmBar{fill:color-mix(in srgb,var(--rhythm) 55%,#173c68);opacity:.82}.rhythmBar.today{fill:#ff8b2f;opacity:1}.rhythmAvgLine{fill:none;stroke:#f7f9fc;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgba(255,255,255,.22));stroke-dasharray:900;stroke-dashoffset:900;animation:rhythmDraw .75s ease forwards}.rhythmPlanLine{stroke:#ffb066;stroke-width:2;stroke-dasharray:8 8;opacity:.72}.rhythmAxisLabel{fill:#7f99b6;font-size:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.rhythmTodayMarker{stroke:#ff8b2f;stroke-width:1.5;stroke-dasharray:4 5;opacity:.6}
+@keyframes rhythmDraw{to{stroke-dashoffset:0}}
+.rhythmLegend{display:flex;flex-wrap:wrap;gap:7px 11px;margin-top:8px;color:#8fa4bd;font-size:8px;font-weight:800}.rhythmLegend span{display:flex;align-items:center;gap:4px}.rhythmLegend i{display:inline-block;width:13px;height:3px;border-radius:99px}.legendBar{background:color-mix(in srgb,var(--rhythm) 65%,#173c68)}.legendAvg{background:#f7f9fc}.legendPlan{height:0!important;border-top:2px dashed #ffb066;border-radius:0!important}
+.rhythmMessage{margin-top:9px;color:#c9d6e5;font-size:11px;line-height:1.42}.rhythmMessage strong{color:var(--rhythm)}
+body[data-theme="light"] .rhythmCard{background:radial-gradient(circle at 90% 0%,color-mix(in srgb,var(--rhythm) 9%,transparent),transparent 30%),linear-gradient(180deg,#fff,#f5f8fa);color:#112848;border-color:#d7e1e8;box-shadow:0 10px 26px rgba(31,49,70,.07)}
+body[data-theme="light"] .rhythmEy{color:#6f8297}body[data-theme="light"] .rhythmStats>div{background:#f6f8fa;border-color:#dce4eb}body[data-theme="light"] .rhythmStats small{color:#687b91}body[data-theme="light"] .rhythmChartBox{background:#071a2c;border-color:#cedae5}body[data-theme="light"] .rhythmMessage{color:#51657a}
+@media(max-width:390px){.rhythmStats{gap:5px}.rhythmStats>div{padding:8px 7px}.rhythmStats b{font-size:11px}.rhythmChartBox{height:164px}}
+@media(prefers-reduced-motion:reduce){.rhythmAvgLine{animation:none;stroke-dashoffset:0}}
+
 /* Guided tour */
 .guideLayer{position:fixed;inset:0;z-index:900;display:none;pointer-events:none}
 .guideLayer.show{display:block}
@@ -474,26 +491,26 @@ body[data-theme="light"] .bootSplashSub{color:#64758a}
 </section>
 <section id="goalCelebration" class="goalCelebration"><b id="celebrationTitle">🏆 ¡Meta cumplida!</b><p id="celebrationText">Reconocé el logro. Lo que sostenés en el tiempo vale más que un día perfecto.</p></section>
 
-<section class="pulseWrap">
-  <div id="financialPulse" class="pulseCard" data-level="neutral">
-    <div class="pulseHead">
-      <div class="pulseTitle">〽️ Pulso financiero</div>
-      <div id="pulseState" class="pulseState">Esperando datos</div>
+<section class="rhythmWrap">
+  <div id="financialRhythm" class="rhythmCard" data-level="neutral">
+    <div class="rhythmHead">
+      <div><div class="rhythmEy">TU MES EN MOVIMIENTO</div><div class="rhythmTitle">📈 Tu ritmo financiero</div></div>
+      <div id="rhythmState" class="rhythmState">Esperando datos</div>
     </div>
-    <div class="pulseMonitorTop"><span>ECG · PULSO FINANCIERO</span><span id="pulseRate">RITMO —</span></div>
-    <div class="pulseScreen" aria-label="Indicador visual del estado financiero">
-      <div class="pulseGlow"></div>
-      <div class="pulseSweep"></div><div class="pulseEdge"></div>
-      <div class="pulseFlow" aria-hidden="true">
-        <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none">
-          <path class="pulseLine" d="M0 45 H600"/>
-        </svg>
-        <svg class="pulseSvg" viewBox="0 0 600 90" preserveAspectRatio="none">
-          <path class="pulseLine" d="M0 45 H600"/>
-        </svg>
-      </div>
+    <div class="rhythmStats">
+      <div><small>Disponible</small><b id="rhythmAvailable">$ 0</b></div>
+      <div><small>Hoy</small><b id="rhythmToday">$ 0</b></div>
+      <div><small>Promedio diario</small><b id="rhythmDailyAvg">$ 0</b></div>
     </div>
-    <div id="pulseMessage" class="pulseMsg">Cargá tus ingresos y gastos para ver cómo viene tu <span class="pulseMetric">pulso financiero</span>.</div>
+    <div class="rhythmChartBox" aria-label="Gráfico diario de gastos del mes">
+      <svg id="rhythmChart" class="rhythmChart" viewBox="0 0 600 180" preserveAspectRatio="none" role="img" aria-label="Gastos diarios y ritmo recomendado"></svg>
+    </div>
+    <div class="rhythmLegend">
+      <span><i class="legendBar"></i> Gasto diario</span>
+      <span><i class="legendAvg"></i> Promedio 3 días</span>
+      <span><i class="legendPlan"></i> Ritmo recomendado</span>
+    </div>
+    <div id="rhythmMessage" class="rhythmMessage">Cargá tu ingreso y tus gastos para empezar a ver cómo se mueve tu mes.</div>
   </div>
 </section>
 
@@ -992,47 +1009,57 @@ function render(){
   }
   renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
 }
-function updateFinancialPulse(){
-  const card=$("financialPulse"),label=$("pulseState"),msg=$("pulseMessage"),rate=$("pulseRate"),paths=[...document.querySelectorAll(".pulseLine")];
-  if(!card||!label||!msg||!paths.length)return;
-  const income=Number(state.income)||0;
-  const saving=income*(Number(state.savingPct)||0)/100;
-  const spent=monthExpenses().reduce((a,e)=>a+Number(e.amount||0),0);
-  const spendable=Math.max(0,income-saving);
-  const pressure=spendable>0?spent/spendable:0;
+function renderFinancialRhythm(){
+  const card=$("financialRhythm"),chart=$("rhythmChart"),label=$("rhythmState"),msg=$("rhythmMessage");
+  if(!card||!chart||!label||!msg)return;
 
-  let level="neutral",title="Esperando datos",message='Cargá tus ingresos y gastos para ver cómo viene tu <span class="pulseMetric">pulso financiero</span>.';
-  let d="M0 45 H600";
+  const now=new Date(),year=now.getFullYear(),monthIndex=now.getMonth(),day=now.getDate(),days=new Date(year,monthIndex+1,0).getDate();
+  const income=Number(state.income)||0,saving=income*(Number(state.savingPct)||0)/100,spendable=Math.max(0,income-saving);
+  const daily=Array(days).fill(0);
+  monthExpenses().forEach(e=>{const d=new Date(Number(e.ts)||Date.now());const idx=d.getDate()-1;if(idx>=0&&idx<days)daily[idx]+=Number(e.amount||0)});
+  const spent=daily.reduce((a,v)=>a+v,0),available=Math.max(0,spendable-spent),todaySpend=daily[day-1]||0,dailyAvg=day?spent/day:0,recommended=spendable>0?spendable/days:0;
+  const expected=spendable>0?recommended*day:0,pace=expected>0?spent/expected:0;
 
+  let level="neutral",title="Esperando datos",message="Cargá tu ingreso y tus gastos para empezar a ver cómo se mueve tu mes.";
   if(income>0){
-    if(pressure<=0.55){
-      level="good";title="Estable";
-      message='Vas bien. Tus gastos ocupan '+Math.round(pressure*100)+'% de lo disponible después de tu ahorro.';
-      d="M0 45 H70 Q82 45 92 38 Q102 31 112 45 H145 L153 53 L162 18 L171 72 L181 45 H212 Q228 27 247 45 H300 H370 Q382 45 392 38 Q402 31 412 45 H445 L453 53 L462 18 L471 72 L481 45 H512 Q528 27 547 45 H600";
-    }else if(pressure<=0.80){
-      level="watch";title="Atención";
-      message='A cuidarnos un poco más. Ya usaste '+Math.round(pressure*100)+'% de lo disponible después de tu ahorro.';
-      d="M0 45 H42 Q51 45 59 38 Q67 31 75 45 H93 L100 54 L108 14 L116 75 L125 45 H144 Q155 28 169 45 H202 Q211 45 219 38 Q227 31 235 45 H253 L260 54 L268 14 L276 75 L285 45 H304 Q315 28 329 45 H362 Q371 45 379 38 Q387 31 395 45 H413 L420 54 L428 14 L436 75 L445 45 H464 Q475 28 489 45 H600";
-    }else if(pressure<1){
-      level="tight";title="Muy ajustado";
-      message='Tus números están exigidos: ya usaste '+Math.round(pressure*100)+'% de lo disponible. Conviene frenar algunos gastos.';
-      d="M0 45 H26 Q34 45 40 37 Q46 30 52 45 H64 L70 55 L77 10 L84 78 L92 45 H105 Q114 27 125 45 H150 Q158 45 164 37 Q170 30 176 45 H188 L194 55 L201 10 L208 78 L216 45 H229 Q238 27 249 45 H274 Q282 45 288 37 Q294 30 300 45 H312 L318 55 L325 10 L332 78 L340 45 H353 Q362 27 373 45 H398 Q406 45 412 37 Q418 30 424 45 H436 L442 55 L449 10 L456 78 L464 45 H477 Q486 27 497 45 H600";
-    }else{
-      level="critical";title="Pulso débil";
-      message='A cuidarnos un poco más: tus gastos ya alcanzaron o superaron lo disponible después de tu ahorro.';
-      d="M0 45 H195 Q207 45 216 41 Q225 37 234 45 H255 L262 50 L269 28 L277 61 L286 45 H316 Q331 34 347 45 H600";
-    }
+    if(pace<=.85){level="good";title="Debajo del ritmo";message="<strong>Buen control.</strong> Venís gastando más despacio que el ritmo previsto para esta altura del mes."}
+    else if(pace<=1.05){level="good";title="En línea";message="<strong>Ritmo estable.</strong> Tus gastos vienen bastante alineados con el punto del mes en el que estás."}
+    else if(pace<=1.20){level="watch";title="Acelerando";message="<strong>Atención.</strong> Tus gastos se adelantaron un poco al ritmo recomendado. Todavía estás a tiempo de regularlos."}
+    else if(spent<spendable){level="tight";title="Ritmo alto";message="<strong>Ritmo alto.</strong> Estás gastando más rápido de lo previsto para esta altura del mes."}
+    else{level="critical";title="Por encima";message="<strong>Presupuesto exigido.</strong> Ya alcanzaste o superaste lo disponible después del ahorro."}
   }
 
-  card.dataset.level=level;
-  label.textContent=title;
-  msg.innerHTML=message;
-  if(rate)rate.textContent=level==="good"?"RITMO CALMO":level==="watch"?"RITMO ACTIVO":level==="tight"?"RITMO ALTO":level==="critical"?"RITMO LENTO":"RITMO —";
-  paths.forEach(path=>path.setAttribute("d",d));
+  card.dataset.level=level;label.textContent=title;msg.innerHTML=message;
+  if($("rhythmAvailable"))$("rhythmAvailable").textContent=fmt(available);
+  if($("rhythmToday"))$("rhythmToday").textContent=fmt(todaySpend);
+  if($("rhythmDailyAvg"))$("rhythmDailyAvg").textContent=fmt(dailyAvg);
+
+  const moving=daily.map((_,i)=>{
+    const start=Math.max(0,i-2),slice=daily.slice(start,i+1);
+    return slice.reduce((a,v)=>a+v,0)/slice.length
+  });
+  const dataMax=Math.max(1,...daily,...moving,recommended);
+  const top=18,bottom=148,left=20,right=580,height=bottom-top,width=right-left,step=width/days,barW=Math.max(4,step*.58);
+  const y=v=>bottom-(Number(v||0)/dataMax)*height;
+  const points=moving.map((v,i)=>[(left+step*i+step/2),y(v)]);
+  const path=points.length?points.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" "):"";
+  const labelDays=[1,Math.max(1,Math.round(days/2)),days];
+  const bars=daily.map((v,i)=>{
+    const x=left+step*i+(step-barW)/2,yy=y(v),h=Math.max(v>0?2:0,bottom-yy),todayClass=i===day-1?" today":"";
+    return '<rect class="rhythmBar'+todayClass+'" x="'+x.toFixed(2)+'" y="'+yy.toFixed(2)+'" width="'+barW.toFixed(2)+'" height="'+h.toFixed(2)+'" rx="2"></rect>'
+  }).join("");
+  const axis=labelDays.map(d=>'<text class="rhythmAxisLabel" x="'+(left+step*(d-1)+step/2).toFixed(2)+'" y="169" text-anchor="middle">D'+d+'</text>').join("");
+  const planY=y(recommended),todayX=left+step*(day-1)+step/2;
+  chart.innerHTML=
+    '<line class="rhythmPlanLine" x1="'+left+'" y1="'+planY.toFixed(2)+'" x2="'+right+'" y2="'+planY.toFixed(2)+'"></line>'+
+    bars+
+    (path?'<path class="rhythmAvgLine" d="'+path+'"></path>':'')+
+    '<line class="rhythmTodayMarker" x1="'+todayX.toFixed(2)+'" y1="'+top+'" x2="'+todayX.toFixed(2)+'" y2="'+bottom+'"></line>'+
+    axis;
 }
 
 const _renderBase=render;
-render=function(){_renderBase();updateFinancialPulse()};
+render=function(){_renderBase();renderFinancialRhythm()};
 
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
 let noticeTimer=null;
@@ -1328,7 +1355,7 @@ function saveProfileName(){state.profileName=String(profileNameInput.value||"").
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
-  {sel:"#financialPulse",title:"Tu pulso financiero",text:"Acá ves de un vistazo cómo vienen tus números. El color y el ritmo cambian según qué tan exigido esté tu presupuesto."},
+  {sel:"#financialRhythm",title:"Tu ritmo financiero",text:"Acá ves cómo se mueve tu mes día por día. Las barras muestran cuánto gastaste, la línea blanca suaviza los últimos 3 días y la punteada marca un ritmo diario orientativo según tu presupuesto."},
   {sel:"#incomeCard",title:"Primero: cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance empieza a calcular todo."},
   {sel:"#quickExpenses",title:"Después: anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos café, kiosco, transporte o cualquier gasto del día."},
   {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."},
