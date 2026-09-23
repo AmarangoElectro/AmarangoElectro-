@@ -279,7 +279,7 @@ body[data-theme="light"] .goalSuggest{background:#fff;color:#173452;border-color
 
 /* One-tap recurring expenses */
 .quickHead{align-items:center}.quickManage{border:1px solid var(--line);background:#173c68;color:#fff;border-radius:12px;padding:8px 9px;font-size:10px;font-weight:900;white-space:nowrap}
-.quickItem{position:relative;min-width:104px;flex:0 0 auto}.quickItem .quickChip{width:100%;min-width:104px;padding:10px 8px 39px}.quickItem.noPreset .quickChip{padding-bottom:10px}
+.quickItem{position:relative;min-width:104px;flex:0 0 auto}.quickItem .quickChip{width:100%;min-width:104px;padding:10px 8px 39px}.quickItem.noPreset .quickChip{padding-bottom:10px}.quickItemManage{position:absolute;left:5px;top:5px;z-index:3;width:24px;height:24px;border:1px solid var(--line);border-radius:999px;background:rgba(7,17,31,.82);color:#dfe7f0;font-size:16px;line-height:1;display:grid;place-items:center;padding:0}.quickItemManage:active{transform:scale(.94)}body[data-theme="light"] .quickItemManage{background:rgba(255,255,255,.96);color:#334a62;border-color:#d8e1e9}.quickRailEmpty{min-width:100%;padding:13px;border:1px dashed var(--line);border-radius:15px;color:var(--muted);font-size:10px;line-height:1.4;text-align:center}
 .quickStepper{position:absolute;left:6px;right:6px;bottom:5px;height:31px;display:grid;grid-template-columns:31px 1fr;gap:5px}
 .quickStepMinus,.quickStepPlus{border:0;border-radius:10px;font-size:10px;font-weight:950;display:flex;align-items:center;justify-content:center}
 .quickStepMinus{background:#24384f;color:#dbe6f2;border:1px solid rgba(255,255,255,.09)}
@@ -294,7 +294,7 @@ body[data-theme="light"] .quickStepMinus{background:#e9eef3;color:#40566d;border
 .quickVisibleChip{min-height:60px;border:1px solid #dce6ef;background:#fff;color:#173452;border-radius:14px;padding:8px 6px;text-align:center;position:relative}
 .quickVisibleChip span{display:block;font-size:20px}.quickVisibleChip b{display:block;font-size:9px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .quickVisibleChip.on{outline:2px solid #ff7a1a;background:#fff4ea}.quickVisibleChip.on:after{content:"✓";position:absolute;right:5px;top:5px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#ff7a1a;color:#fff;font-size:9px;font-weight:950}
-.quickVisibleReset{border:0;background:none;color:#ff7a1a;font-size:10px;font-weight:900;padding:5px 0}
+.quickVisibleReset{border:0;background:none;color:#ff7a1a;font-size:10px;font-weight:900;padding:5px 0}.quickItemMenuHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.quickItemMenuHead small{color:var(--orange);font-size:9px;font-weight:950;letter-spacing:.12em}.quickItemMenuHead h3{margin:4px 0 4px}.quickItemMenuHead p{margin:0!important;color:#69717c!important;font-size:11px;line-height:1.4}.quickRemoveAccessBtn{width:100%;margin-top:10px;border:1px solid #efc8c8;background:#fff7f7;color:#a62d2d;border-radius:15px;padding:12px;font-weight:900}.quickItemMenuNote{margin:10px 2px 0!important;color:#738398!important;font-size:9px!important;line-height:1.45!important}body[data-theme="dark"] .quickItemMenuHead p,body[data-theme="dark"] .quickItemMenuNote{color:#9aa6b5!important}body[data-theme="dark"] .quickRemoveAccessBtn{background:#351b24;color:#ff9b9b;border-color:#5c2a36}
 body[data-theme="dark"] .quickVisibleChip{background:#0e2b4e;color:#f7f9fc;border-color:rgba(255,255,255,.12)}
 body[data-theme="dark"] .quickVisibleChip.on{background:#173c68}
 body[data-theme="light"] .quickVisibleChip{background:#fff;color:#173452;border-color:#d6e0e9}
@@ -971,6 +971,15 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 
 <div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel" for="expenseDate">Fecha</label><input id="expenseDate" type="date"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button id="expenseSaveBtn" class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
 
+<div id="quickItemMenuModal" class="modal" onclick="backdrop(event,'quickItemMenuModal')"><div class="sheet quickItemMenuSheet">
+  <div class="dailyHandle"></div>
+  <div class="quickItemMenuHead"><div><small>ACCESO RÁPIDO</small><h3 id="quickItemMenuTitle">Gasto</h3><p id="quickItemMenuText">Administrá este acceso sin borrar tus otros datos.</p></div><button class="dailyClose" onclick="closeM('quickItemMenuModal')">×</button></div>
+  <button class="accountAction" onclick="editQuickMenuItem()"><span>✏️ Editar importe / configuración</span><span>›</span></button>
+  <button id="quickUndoLastBtn" class="accountAction" onclick="undoLatestQuickCategoryExpense()"><span>↩️ Deshacer último gasto</span><span>›</span></button>
+  <button class="quickRemoveAccessBtn" onclick="removeQuickShortcutFromMenu()">Quitar de accesos rápidos</button>
+  <p class="quickItemMenuNote">Quitar el acceso no borra tus gastos anteriores. Si deshacés un gasto, va a la papelera y podés recuperarlo.</p>
+</div></div>
+
 <div id="dailyQuickModal" class="modal" onclick="backdrop(event,'dailyQuickModal')"><div class="sheet dailySheet"><div class="dailyHandle"></div><div class="dailyHead"><div><h3>¿Qué gastaste recién?</h3><p>Elegí uno. Si tiene “+1”, suma el importe de siempre al instante.</p></div><button class="dailyClose" onclick="closeM('dailyQuickModal')">×</button></div><div id="dailyQuickGrid" class="dailyGrid"></div><div class="dailyAlt"><button onclick="closeM('dailyQuickModal');openExpense()">Otro gasto / alquiler / servicio</button><button onclick="closeM('dailyQuickModal');openQuickPresetManager()">⚙ Gastos de siempre</button></div></div></div>
 
 <div id="incomeModal" class="modal" onclick="backdrop(event,'incomeModal')"><div class="sheet"><h3>Tu ingreso mensual</h3><input id="incomeInput" type="number" inputmode="decimal" placeholder="¿Cuánto entra por mes?"><label style="display:block;margin:13px 0 6px;font-weight:900">¿Cuánto querés reservar para vos?</label><select id="savingPct"><option>10</option><option>15</option><option selected>20</option><option>25</option><option>30</option></select><button class="primary" onclick="saveIncome()">Guardar</button><button class="secondary" onclick="closeM('incomeModal')">Cancelar</button></div></div>
@@ -1081,24 +1090,24 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 </div>
 
 <script>
-const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🛒","Supermercado"],["🏪","Almacén"],["🚌","Viáticos"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍷","Alcohol"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
+const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🛒","Supermercado"],["🏪","Almacén"],["🚌","Viáticos"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["📱","Teléfono"],["🤖","IA"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍷","Alcohol"],["🧩","Hábitos a reducir"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
 const DEFAULT_QUICK_VISIBLE=["Café","Kiosco","Comida","Viáticos","Bebidas","Otros"];
 const GOAL_KEYS=["week","month","year","five","ten"];
 const CURRENCIES={ARS:{symbol:"$",digits:0},USD:{symbol:"US$",digits:2},EUR:{symbol:"€",digits:2},BRL:{symbol:"R$",digits:2},UYU:{symbol:"$U",digits:0},CLP:{symbol:"CLP$",digits:0},GBP:{symbol:"£",digits:2},PYG:{symbol:"₲",digits:0}};
 const EMPTY_STATE=()=>({profileName:"",currency:"ARS",income:0,savingPct:20,expenses:[],trash:[],quickPresets:{},quickVisible:[...DEFAULT_QUICK_VISIBLE],goals:{week:null,month:null,year:null,five:null,ten:null},goalHistory:[]});
-let state=EMPTY_STATE(), selected="Otros", quickContext=null, expenseFrequency="once", editingExpenseIndex=null, summaryOffset=0, pendingGoalPeriod=null, feedbackChoice="", pendingBackupData=null, vaultKey=null, currentProfileId=null, currentEmail="";
+let state=EMPTY_STATE(), selected="Otros", quickContext=null, quickMenuCat="", quickHoldTimer=null, quickHoldOpened=false, expenseFrequency="once", editingExpenseIndex=null, summaryOffset=0, pendingGoalPeriod=null, feedbackChoice="", pendingBackupData=null, vaultKey=null, currentProfileId=null, currentEmail="";
 const $=id=>document.getElementById(id);
 function currencyCode(){return CURRENCIES[state?.currency]?state.currency:"ARS"}
 function fmt(n){const code=currencyCode(),cfg=CURRENCIES[code];try{return new Intl.NumberFormat("es-AR",{style:"currency",currency:code,minimumFractionDigits:cfg.digits,maximumFractionDigits:cfg.digits}).format(Number(n||0))}catch(e){return cfg.symbol+" "+Number(n||0).toLocaleString("es-AR")}}
-function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.currency=CURRENCIES[x.currency]?x.currency:"ARS";x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.trash=Array.isArray(x.trash)?x.trash:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)&&x.quickVisible.length?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];const oldGoals=x.goals&&typeof x.goals==="object"?x.goals:{};x.goals={week:oldGoals.week||null,month:oldGoals.month||null,year:oldGoals.year||null,five:oldGoals.five||null,ten:oldGoals.ten||null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
+function normalizeState(x){x=x&&typeof x==="object"?x:EMPTY_STATE();x.profileName=String(x.profileName||"").trim().slice(0,24);x.currency=CURRENCIES[x.currency]?x.currency:"ARS";x.income=Number(x.income)||0;x.savingPct=Number(x.savingPct)||20;x.expenses=Array.isArray(x.expenses)?x.expenses:[];x.trash=Array.isArray(x.trash)?x.trash:[];x.quickPresets=x.quickPresets&&typeof x.quickPresets==="object"?x.quickPresets:{};x.quickVisible=Array.isArray(x.quickVisible)?[...new Set(x.quickVisible.filter(n=>cats.some(c=>c[1]===n)))].slice(0,8):[...DEFAULT_QUICK_VISIBLE];const oldGoals=x.goals&&typeof x.goals==="object"?x.goals:{};x.goals={week:oldGoals.week||null,month:oldGoals.month||null,year:oldGoals.year||null,five:oldGoals.five||null,ten:oldGoals.ten||null};x.goalHistory=Array.isArray(x.goalHistory)?x.goalHistory:[];if(x.goal&&!x.goals.month)x.goals.month=x.goal;delete x.goal;return x}
 function monthExpenses(){const n=new Date();return expensesForMonth(n)}
 function expensesForMonth(ref){return state.expenses.filter(e=>{const d=new Date(Number(e.ts)||Date.now());return d.getFullYear()===ref.getFullYear()&&d.getMonth()===ref.getMonth()})}
 function monthRef(offset=0){const n=new Date();return new Date(n.getFullYear(),n.getMonth()+offset,1,12,0,0,0)}
 function monthLabel(ref){return ref.toLocaleDateString("es-AR",{month:"long",year:"numeric"})}
 function dateInputFromTs(ts){const d=new Date(Number(ts)||Date.now()),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+day}
 function tsFromDateInput(v,fallback=Date.now()){if(!v)return Number(fallback)||Date.now();const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d,12,0,0,0).getTime()}
-function microSpendFor(list){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Streaming","Restaurantes","Salidas"]);return list.reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
-function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
+function microSpendFor(list){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Hábitos a reducir","Streaming","Restaurantes","Salidas"]);return list.reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
+function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Alcohol","Hábitos a reducir","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
 function categoryEmoji(name){return (cats.find(c=>c[1]===name)||["🧾"])[0]}
 function monthCategoryCount(cat){return monthExpenses().filter(e=>e.category===cat).length}
@@ -1119,21 +1128,55 @@ function quickRemoveUsual(cat){
 }
 function renderQuickExpenses(){
   const rail=$("quickRail");if(!rail)return;
-  const ordered=(state.quickVisible&&state.quickVisible.length?state.quickVisible:DEFAULT_QUICK_VISIBLE).slice(0,8);
+  const ordered=(Array.isArray(state.quickVisible)?state.quickVisible:DEFAULT_QUICK_VISIBLE).slice(0,8);
+  if(!ordered.length){rail.innerHTML='<button class="quickRailEmpty" onclick="openQuickPresetManager()">No tenés accesos rápidos visibles. Tocá acá para elegir cuáles querés mostrar.</button>';return}
   rail.innerHTML=ordered.map(cat=>{
     const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,usualCount=monthQuickUsualCount(cat),count=amount?usualCount:monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
-    return '<div class="quickItem '+(amount?"":"noPreset")+'">'+(count?'<span class="quickCount">x'+count+'</span>':'')+
-      '<button class="quickChip" onclick="openQuick(\''+escapeHtml(cat)+'\')"><span>'+emoji+'</span><b>'+escapeHtml(label)+'</b>'+(amount?'<span class="quickAmount">'+fmt(amount)+'</span>':'')+'</button>'+
+    return '<div class="quickItem '+(amount?"":"noPreset")+'">'+
+      '<button class="quickItemManage" aria-label="Administrar '+escapeHtml(label)+'" onclick="event.stopPropagation();openQuickItemMenu(\''+escapeHtml(cat)+'\')">⋮</button>'+
+      (count?'<span class="quickCount">x'+count+'</span>':'')+
+      '<button class="quickChip" onpointerdown="startQuickHold(event,\''+escapeHtml(cat)+'\')" onpointerup="cancelQuickHold()" onpointercancel="cancelQuickHold()" onpointerleave="cancelQuickHold()" onclick="quickChipTap(\''+escapeHtml(cat)+'\')"><span>'+emoji+'</span><b>'+escapeHtml(label)+'</b>'+(amount?'<span class="quickAmount">'+fmt(amount)+'</span>':'')+'</button>'+
       (amount?'<div class="quickStepper"><button class="quickStepMinus" '+(usualCount?'':'disabled')+' onclick="event.stopPropagation();quickRemoveUsual(\''+escapeHtml(cat)+'\')">−1</button><button class="quickStepPlus" onclick="event.stopPropagation();quickAddUsual(\''+escapeHtml(cat)+'\')">＋1</button></div>':'')+'</div>'
   }).join("");
+}
+function startQuickHold(event,cat){if(event?.pointerType==="mouse")return;cancelQuickHold();quickHoldOpened=false;quickHoldTimer=setTimeout(()=>{quickHoldOpened=true;openQuickItemMenu(cat)},560)}
+function cancelQuickHold(){if(quickHoldTimer){clearTimeout(quickHoldTimer);quickHoldTimer=null}}
+function quickChipTap(cat){cancelQuickHold();if(quickHoldOpened){quickHoldOpened=false;return}openQuick(cat)}
+function openQuickItemMenu(cat){
+  quickMenuCat=cat;
+  const label=cat==="Viáticos"?"Transporte":cat,count=monthCategoryCount(cat);
+  if($("quickItemMenuTitle"))$("quickItemMenuTitle").textContent=categoryEmoji(cat)+" "+label;
+  if($("quickItemMenuText"))$("quickItemMenuText").textContent="Tenés "+count+" "+(count===1?"movimiento":"movimientos")+" de esta categoría este mes.";
+  if($("quickUndoLastBtn"))$("quickUndoLastBtn").disabled=count===0;
+  openM("quickItemMenuModal")
+}
+function editQuickMenuItem(){const cat=quickMenuCat;closeM("quickItemMenuModal");setTimeout(()=>openQuickPresetManager(cat),120)}
+function removeQuickShortcut(cat){
+  state.quickVisible=Array.isArray(state.quickVisible)?state.quickVisible:[...DEFAULT_QUICK_VISIBLE];
+  state.quickVisible=state.quickVisible.filter(x=>x!==cat);
+  persist();render();renderQuickVisibility();
+}
+function removeQuickShortcutFromMenu(){const cat=quickMenuCat;if(!cat)return;removeQuickShortcut(cat);closeM("quickItemMenuModal");notify(categoryEmoji(cat)+" "+cat+" ya no aparece en tus accesos rápidos. Tus gastos siguen guardados.","success")}
+function undoLatestQuickCategoryExpense(){
+  const cat=quickMenuCat;if(!cat)return;
+  const now=new Date();
+  for(let i=state.expenses.length-1;i>=0;i--){
+    const e=state.expenses[i],d=new Date(Number(e.ts)||0);
+    if(e.category===cat&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()){
+      state.trash=Array.isArray(state.trash)?state.trash:[];
+      state.trash.unshift({id:"exp-"+Date.now()+"-"+Math.random().toString(36).slice(2,7),type:"expense",item:{...e},deletedAt:Date.now()});
+      state.expenses.splice(i,1);persist();render();closeM("quickItemMenuModal");notify("Deshicimos el último gasto de "+cat+". Quedó en la papelera.","success");return
+    }
+  }
+  notify("No hay gastos de "+cat+" este mes para deshacer.","info")
 }
 function quickAddUsual(cat){
   const amount=Number(state.quickPresets?.[cat]?.amount)||0;if(!amount){openQuick(cat);return}
   state.expenses.push({amount,category:cat,note:"Gasto de siempre",ts:Date.now(),quick:true});persist();render();notify(categoryEmoji(cat)+" "+cat+" +1 · "+fmt(amount),"success")
 }
-function openQuickPresetManager(){
+function openQuickPresetManager(focusCat=""){
   presetCategory.innerHTML=cats.map(c=>'<option value="'+escapeHtml(c[1])+'">'+c[0]+' '+escapeHtml(c[1])+'</option>').join("");
-  const first=Object.keys(state.quickPresets||{})[0];if(first)presetCategory.value=first;
+  const first=focusCat||Object.keys(state.quickPresets||{})[0];if(first&&cats.some(c=>c[1]===first))presetCategory.value=first;
   loadPresetCategory();renderQuickVisibility();renderPresetList();openM("quickPresetModal")
 }
 function renderQuickVisibility(){
@@ -1162,7 +1205,7 @@ function deleteQuickPreset(cat){delete state.quickPresets[cat];persist();render(
 function openDailyQuickDrawer(){renderDailyQuickDrawer();openM("dailyQuickModal")}
 function renderDailyQuickDrawer(){
   const grid=$("dailyQuickGrid");if(!grid)return;
-  const ordered=(state.quickVisible&&state.quickVisible.length?state.quickVisible:DEFAULT_QUICK_VISIBLE).slice(0,8);
+  const ordered=(Array.isArray(state.quickVisible)?state.quickVisible:DEFAULT_QUICK_VISIBLE).slice(0,8);
   grid.innerHTML=ordered.map(cat=>{
     const p=state.quickPresets?.[cat],amount=Number(p?.amount)||0,usualCount=monthQuickUsualCount(cat),count=amount?usualCount:monthCategoryCount(cat),emoji=categoryEmoji(cat),label=cat==="Viáticos"?"Transporte":cat;
     return '<div class="dailyCard '+(amount?'hasPreset':'')+'" onclick="openQuickFromDrawer(\''+escapeHtml(cat)+'\')"><span class="dailyEmoji">'+emoji+'</span><b>'+escapeHtml(label)+'</b><small>'+(amount?('De siempre · '+fmt(amount)):'Poné el importe')+(count?' · x'+count+' este mes':'')+'</small>'+(amount?'<div class="dailyStepper"><button class="dailyMinus" '+(usualCount?'':'disabled')+' onclick="event.stopPropagation();quickRemoveFromDrawer(\''+escapeHtml(cat)+'\')">−1</button><button class="dailyPlus" onclick="event.stopPropagation();quickAddFromDrawer(\''+escapeHtml(cat)+'\')">＋1 '+fmt(amount)+'</button></div>':'')+'</div>'
