@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v22-guide-light-contrast';
+const CACHE='mi-balance-v23-amarango-theme-coherence';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
