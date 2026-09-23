@@ -258,6 +258,12 @@ body[data-theme="light"] .accountAction{background:#fff;color:#173452;border-col
 body[data-theme="light"] .logoutBtn{background:#fff5f5}
 @media(max-width:390px){.topTools{gap:4px}.iconBtn{width:32px;height:32px;border-radius:11px;font-size:15px}.brand{gap:7px}.mark{width:35px;height:35px}.sub{font-size:9px}}
 
+/* App update notice — appears only when a newer deployed build is detected */
+.appUpdateBar{margin:8px 18px 4px;padding:10px 11px 10px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,104,24,.28);border-radius:16px;background:linear-gradient(145deg,rgba(255,104,24,.10),rgba(13,21,38,.96));box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.appUpdateBar b{display:block;color:#fff;font-size:11px}.appUpdateBar small{display:block;margin-top:2px;color:#aebccc;font-size:8px;line-height:1.35}.appUpdateBar button{flex:0 0 auto;border:0;border-radius:11px;background:linear-gradient(145deg,#ff6818,#ff8a4a);color:#fff;padding:9px 10px;font-size:9px;font-weight:950}
+body[data-theme="light"] .appUpdateBar{background:#fff7f1;border-color:#ffd3ba;box-shadow:0 8px 20px rgba(5,7,11,.05)}body[data-theme="light"] .appUpdateBar b{color:#07111f}body[data-theme="light"] .appUpdateBar small{color:#69717c}
+@media(max-width:390px){.appUpdateBar{align-items:flex-start}.appUpdateBar button{padding:9px 8px}}
+
 /* Greeting + financial health */
 .welcomeStrip{margin:12px 18px 4px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:17px;background:rgba(16,47,83,.62)}
 .welcomeStrip b{display:block;font-size:15px}.welcomeStrip small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
@@ -847,6 +853,7 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 
 <div class="app">
 <header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
+<div id="appUpdateBar" class="appUpdateBar hidden"><div><b>✨ Hay una actualización de Mi Balance</b><small>Actualizá para ver las últimas mejoras. Tus datos no se borran.</small></div><button onclick="applyAppUpdate()">↻ Actualizar</button></div>
 
 <section class="welcomeStrip">
   <div><b id="greetingText">Hola 👋</b><small id="greetingSub">Hoy también cuenta.</small></div>
@@ -1099,6 +1106,7 @@ body[data-theme="light"] .lockBox p{color:#69717c}
     <button id="soundToggleBtn" class="accountAction" onclick="toggleSound()"><span>🔊 Sonidos</span><span id="soundToggleText">Activados</span></button>
     <button class="accountAction" onclick="openTrash()"><span>🗑 Papelera</span><span id="trashAccountCount">0</span></button>
     <button class="accountAction" onclick="shareApp()"><span>🤝 Compartir Mi Balance</span><span>›</span></button>
+    <button class="accountAction" onclick="checkForAppUpdate(true)"><span>↻ Buscar actualizaciones</span><span id="accountUpdateStatus">›</span></button>
   </div>
   <div class="accountSettingsBlock">
     <label class="fieldLabel">Copia de seguridad</label>
@@ -1953,6 +1961,7 @@ function finishGuide(mark=true){
 }
 addEventListener("resize",()=>{if($("guideLayer")&&$("guideLayer").classList.contains("show"))showGuideStep()});
 
+const APP_BUILD="mi-balance-v31-update-control";
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
@@ -1962,6 +1971,37 @@ async function shareApp(){
   }catch(e){if(e&&e.name!=="AbortError"){shareFallbackUrl.value=SHARE_URL;openM("shareFallbackModal")}}
 }
 function selectShareFallback(){const input=$("shareFallbackUrl");if(!input)return;input.focus();input.select();input.setSelectionRange(0,input.value.length);notify("Enlace seleccionado. Mantené presionado para copiarlo.","success")}
+function setAppUpdateVisible(show){
+  const bar=$("appUpdateBar");if(bar)bar.classList.toggle("hidden",!show);
+  const status=$("accountUpdateStatus");if(status)status.textContent=show?"Nueva":"›";
+}
+async function checkForAppUpdate(manual=false){
+  try{
+    if("serviceWorker" in navigator){
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(reg)await reg.update();
+    }
+    const res=await fetch("./service-worker.js?update_check="+Date.now(),{cache:"no-store",headers:{"cache-control":"no-cache"}});
+    if(!res.ok)throw new Error("update check failed");
+    const txt=await res.text(),m=txt.match(/const CACHE=['"]([^'"]+)['"]/),remote=m?.[1]||"";
+    const available=!!remote&&remote!==APP_BUILD;
+    setAppUpdateVisible(available);
+    if(manual)notify(available?"Hay una versión nueva lista para actualizar.":"Ya tenés la última versión de Mi Balance.",available?"success":"info");
+    return available
+  }catch(e){
+    if(manual)notify("No pudimos comprobar actualizaciones ahora. Probá de nuevo en un momento.","warn");
+    return false
+  }
+}
+async function applyAppUpdate(){
+  const btn=$("appUpdateBar")?.querySelector("button");if(btn){btn.disabled=true;btn.textContent="Actualizando…"}
+  try{
+    if("serviceWorker" in navigator){
+      const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.update()
+    }
+  }catch(e){}
+  setTimeout(()=>location.reload(),180)
+}
 function applyTheme(mode){
   const m=mode||localStorage.getItem("mb_theme")||"dark";document.body.dataset.theme=m;localStorage.setItem("mb_theme",m);
   if($("themeBtn"))$("themeBtn").textContent=m==="light"?"🌙":"☀️";
@@ -2009,6 +2049,13 @@ async function bootApp(){
   hideBootSplash()
 }
 bootApp();
-if("serviceWorker"in navigator)navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).catch(()=>{});
+if("serviceWorker"in navigator){
+  navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).then(reg=>{
+    setTimeout(()=>checkForAppUpdate(false),1400);
+    reg.addEventListener("updatefound",()=>setTimeout(()=>checkForAppUpdate(false),900))
+  }).catch(()=>{});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")setTimeout(()=>checkForAppUpdate(false),700)});
+  setInterval(()=>{if(document.visibilityState==="visible")checkForAppUpdate(false)},300000);
+}
 </script>
 </body></html>
