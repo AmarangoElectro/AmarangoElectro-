@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v27-helados-history-collapse';
+const CACHE='mi-balance-v28-gamified-finance-status';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
