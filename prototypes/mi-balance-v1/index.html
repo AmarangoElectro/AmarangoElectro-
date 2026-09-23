@@ -142,6 +142,20 @@ body[data-theme="light"] .quickIdentity{background:#f3f6f8;border-color:#dbe3ea}
 @keyframes monitorSweep{from{transform:translateX(-560px);opacity:.15}15%{opacity:.8}to{transform:translateX(36px);opacity:.15}}
 @media(prefers-reduced-motion:reduce){.pulseSweep{animation:none}}
 
+/* Financial state — light gamification, fully local */
+.financeGameStatus{display:grid;grid-template-columns:58px 1fr auto;gap:11px;align-items:center;margin-top:12px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(255,255,255,.035)}
+.financeAvatar{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(145deg,rgba(255,104,24,.18),rgba(91,147,255,.10));border:1px solid rgba(255,255,255,.10);font-size:31px;box-shadow:inset 0 0 24px rgba(255,255,255,.025);transition:transform .25s ease}
+.financeGameStatus[data-mode="great"] .financeAvatar{animation:financeAvatarWin 1.8s ease-in-out infinite}
+@keyframes financeAvatarWin{50%{transform:translateY(-2px) rotate(-2deg)}}
+.financeGameMain{min-width:0}.financeGameMain small,.financeLevel small,.financeStreak small,.financeMission small{display:block;color:#879ab0;font-size:7px;font-weight:950;letter-spacing:.10em}.financeGameMain b{display:block;margin-top:3px;color:#fff;font-size:17px;line-height:1.05}.financeGameMain span{display:block;margin-top:4px;color:#aab8c8;font-size:9px;line-height:1.35}
+.financeLevel{min-width:68px;padding:8px 7px;border-radius:13px;text-align:center;background:#111b2d;border:1px solid #223148}.financeLevel b{display:block;margin-top:3px;color:#ff9b62;font-size:10px}
+.financeGameRow{display:grid;grid-template-columns:.8fr 1.2fr;gap:7px;margin-top:8px}.financeStreak,.financeMission{min-width:0;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025)}.financeStreak>span,.financeMission>span{font-size:18px}.financeStreak b,.financeMission b{display:block;margin-top:2px;color:#edf3f9;font-size:9px;line-height:1.25}
+.financeLevelTrack{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:9px}.financeLevelTrack i{height:5px;border-radius:99px;background:#243249;opacity:.72}.financeLevelTrack i.on{background:linear-gradient(90deg,#41d98a,#ffb066,#ff6818);opacity:1;box-shadow:0 0 10px rgba(255,104,24,.12)}
+.financeGameStatus[data-mode="great"]{border-color:rgba(65,217,138,.28);background:rgba(65,217,138,.055)}.financeGameStatus[data-mode="balanced"]{border-color:rgba(91,147,255,.22)}.financeGameStatus[data-mode="watch"]{border-color:rgba(255,191,90,.28);background:rgba(255,191,90,.045)}.financeGameStatus[data-mode="tight"]{border-color:rgba(255,138,75,.32);background:rgba(255,138,75,.05)}.financeGameStatus[data-mode="recovery"]{border-color:rgba(255,107,107,.30);background:rgba(255,107,107,.045)}
+body[data-theme="light"] .financeGameStatus{background:#f8fafc;border-color:#e5e8ec}.financeGameStatus[data-mode="great"] body[data-theme="light"]{background:#fff}
+body[data-theme="light"] .financeGameMain b{color:#07111f}body[data-theme="light"] .financeGameMain span{color:#647184}body[data-theme="light"] .financeLevel{background:#fff;border-color:#e3e8ed}body[data-theme="light"] .financeLevel b{color:#e05e12}body[data-theme="light"] .financeStreak,body[data-theme="light"] .financeMission{background:#fff;border-color:#e5e8ec}body[data-theme="light"] .financeStreak b,body[data-theme="light"] .financeMission b{color:#14243a}body[data-theme="light"] .financeLevelTrack i{background:#e4e9ee}
+@media(max-width:390px){.financeGameStatus{grid-template-columns:52px 1fr}.financeAvatar{width:52px;height:52px;font-size:28px}.financeLevel{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px}.financeLevel b{margin:0}.financeGameRow{grid-template-columns:1fr}.financeMission b{font-size:9px}}
+
 /* Financial rhythm / trading-style monthly chart */
 .rhythmWrap{padding:14px 18px 0}
 .rhythmCard{--rhythm:#7f9ab7;position:relative;overflow:hidden;border:1px solid var(--line);border-radius:24px;background:radial-gradient(circle at 90% 0%,color-mix(in srgb,var(--rhythm) 13%,transparent),transparent 30%),linear-gradient(155deg,#071a30,#0b2949);padding:15px;box-shadow:0 14px 32px rgba(0,0,0,.17)}
@@ -840,6 +854,22 @@ body[data-theme="light"] .lockBox p{color:#69717c}
       <div><div class="rhythmEy">TU MES EN MOVIMIENTO</div><div class="rhythmTitle">📈 Tu ritmo financiero</div></div>
       <div id="rhythmState" class="rhythmState">Esperando datos</div>
     </div>
+    <div id="financeGameStatus" class="financeGameStatus" data-mode="neutral">
+      <div id="financeAvatar" class="financeAvatar" aria-hidden="true">🐝</div>
+      <div class="financeGameMain">
+        <small>ESTADO FINANCIERO DEL MES</small>
+        <b id="financeGameTitle">Empezando</b>
+        <span id="financeGameSubtitle">Cargá tu ingreso y algunos gastos para empezar el juego.</span>
+      </div>
+      <div class="financeLevel"><small>NIVEL</small><b id="financeLevelLabel">—</b></div>
+    </div>
+    <div class="financeGameRow">
+      <div class="financeStreak"><span>🔥</span><div><small>Racha</small><b id="financeStreakValue">0 días</b></div></div>
+      <div class="financeMission"><span>🎮</span><div><small>Desafío de hoy</small><b id="financeMissionText">Empezá cargando tus números</b></div></div>
+    </div>
+    <div class="financeLevelTrack" aria-label="Escala de control financiero">
+      <i data-step="1"></i><i data-step="2"></i><i data-step="3"></i><i data-step="4"></i><i data-step="5"></i>
+    </div>
     <div class="rhythmStats">
       <div><small>Disponible</small><b id="rhythmAvailable">$ 0</b></div>
       <div><small>Hoy</small><b id="rhythmToday">$ 0</b></div>
@@ -1395,6 +1425,23 @@ function render(){
   }
   renderMicro();renderQuickExpenses();renderGoals();renderGoalHistory();renderGreetingAndFocus();renderMonthStatus();renderStore();syncCurrencyUI();
 }
+function financialGameStreak(daily,recommended,day){
+  if(!recommended||!daily.length)return 0;
+  let first=-1;for(let i=0;i<day;i++){if(Number(daily[i]||0)>0){first=i;break}}
+  if(first<0)return 0;
+  let streak=0;
+  for(let i=day-1;i>=first;i--){
+    if(Number(daily[i]||0)<=recommended*1.05)streak++;
+    else break
+  }
+  return streak
+}
+function financialTopMicroCategory(){
+  const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Helados","Alcohol","Hábitos a reducir","Streaming","Restaurantes","Salidas"]);
+  const totals={};
+  monthExpenses().forEach(e=>{if(micro.has(e.category))totals[e.category]=(totals[e.category]||0)+Number(e.amount||0)});
+  const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);return sorted[0]?.[0]||""
+}
 function renderFinancialRhythm(){
   const card=$("financialRhythm"),chart=$("rhythmChart"),label=$("rhythmState"),msg=$("rhythmMessage");
   if(!card||!chart||!label||!msg)return;
@@ -1407,15 +1454,36 @@ function renderFinancialRhythm(){
   const expected=spendable>0?recommended*day:0,pace=expected>0?spent/expected:0;
 
   let level="neutral",title="Esperando datos",message="Cargá tu ingreso y tus gastos para empezar a ver cómo se mueve tu mes.";
+  let gameMode="neutral",gameTitle="Empezando",gameSubtitle="Cargá tu ingreso y algunos gastos para empezar el juego.",avatar="🐝",levelLabel="—",levelStep=0;
   if(income>0){
-    if(pace<=.85){level="good";title="Debajo del ritmo";message="<strong>Buen control.</strong> Venís gastando más despacio que el ritmo previsto para esta altura del mes."}
-    else if(pace<=1.05){level="good";title="En línea";message="<strong>Ritmo estable.</strong> Tus gastos vienen bastante alineados con el punto del mes en el que estás."}
-    else if(pace<=1.20){level="watch";title="Acelerando";message="<strong>Atención.</strong> Tus gastos se adelantaron un poco al ritmo recomendado. Todavía estás a tiempo de regularlos."}
-    else if(spent<spendable){level="tight";title="Ritmo alto";message="<strong>Ritmo alto.</strong> Estás gastando más rápido de lo previsto para esta altura del mes."}
-    else{level="critical";title="Por encima";message="<strong>Presupuesto exigido.</strong> Ya alcanzaste o superaste lo disponible después del ahorro."}
+    if(pace<=.72){level="good";title="Debajo del ritmo";message="<strong>Excelente control.</strong> Venís usando bastante menos que el ritmo previsto para esta altura del mes.";gameMode="great";gameTitle="¡Vas muy bien!";gameSubtitle="Estás cuidando margen y dejando espacio para tus metas.";avatar="😎";levelLabel="Pro";levelStep=5}
+    else if(pace<=.90){level="good";title="Debajo del ritmo";message="<strong>Buen control.</strong> Venís gastando más despacio que el ritmo previsto para esta altura del mes.";gameMode="great";gameTitle="En control";gameSubtitle="Tu plata está avanzando a un ritmo saludable para tu plan.";avatar="🙂";levelLabel="Control";levelStep=4}
+    else if(pace<=1.05){level="good";title="En línea";message="<strong>Ritmo estable.</strong> Tus gastos vienen bastante alineados con el punto del mes en el que estás.";gameMode="balanced";gameTitle="En equilibrio";gameSubtitle="Vas parejo. La misión es sostener este ritmo.";avatar="🐝";levelLabel="Equilibrio";levelStep=3}
+    else if(pace<=1.20){level="watch";title="Acelerando";message="<strong>Atención.</strong> Tus gastos se adelantaron un poco al ritmo recomendado. Todavía estás a tiempo de regularlos.";gameMode="watch";gameTitle="Ojo con el ritmo";gameSubtitle="Te adelantaste un poco, pero todavía podés acomodar el mes.";avatar="🧐";levelLabel="Atención";levelStep=2}
+    else if(spent<spendable){level="tight";title="Ritmo alto";message="<strong>Ritmo alto.</strong> Estás gastando más rápido de lo previsto para esta altura del mes.";gameMode="tight";gameTitle="Mes ajustado";gameSubtitle="Conviene bajar un cambio para recuperar margen.";avatar="😬";levelLabel="Ajustado";levelStep=1}
+    else{level="critical";title="Por encima";message="<strong>Presupuesto exigido.</strong> Ya alcanzaste o superaste lo disponible después del ahorro.";gameMode="recovery";gameTitle="Modo recuperación";gameSubtitle="La partida no terminó: el objetivo ahora es frenar y recuperar control.";avatar="🛠️";levelLabel="Recuperar";levelStep=1}
+  }
+
+  const streak=financialGameStreak(daily,recommended,day),topMicro=financialTopMicroCategory();
+  let mission="Empezá cargando tus números";
+  if(income>0){
+    if(gameMode==="recovery"||gameMode==="tight")mission=topMicro?"Hoy intentá no sumar "+topMicro+".":"Hoy evitá un gasto que pueda esperar.";
+    else if(gameMode==="watch")mission="Cerrá el día por debajo de "+fmt(recommended)+".";
+    else if(streak>=3)mission="Sumá un día más a tu racha.";
+    else if(topMicro)mission="Probá pasar hoy sin un gasto de "+topMicro+".";
+    else mission="Mantené hoy tus gastos por debajo de "+fmt(recommended)+".";
   }
 
   card.dataset.level=level;label.textContent=title;msg.innerHTML=message;
+  const game=$("financeGameStatus");if(game)game.dataset.mode=gameMode;
+  if($("financeGameTitle"))$("financeGameTitle").textContent=gameTitle;
+  if($("financeGameSubtitle"))$("financeGameSubtitle").textContent=gameSubtitle;
+  if($("financeAvatar"))$("financeAvatar").textContent=avatar;
+  if($("financeLevelLabel"))$("financeLevelLabel").textContent=levelLabel;
+  if($("financeStreakValue"))$("financeStreakValue").textContent=streak+" "+(streak===1?"día":"días");
+  if($("financeMissionText"))$("financeMissionText").textContent=mission;
+  document.querySelectorAll(".financeLevelTrack i").forEach((el,i)=>el.classList.toggle("on",i<levelStep));
+
   if($("rhythmAvailable"))$("rhythmAvailable").textContent=fmt(available);
   if($("rhythmToday"))$("rhythmToday").textContent=fmt(todaySpend);
   if($("rhythmDailyAvg"))$("rhythmDailyAvg").textContent=fmt(dailyAvg);
@@ -1741,7 +1809,8 @@ function saveProfileName(){state.profileName=String(profileNameInput.value||"").
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
-  {sel:"#financialRhythm",title:"Tu ritmo financiero",text:"Acá ves cómo se mueve tu mes día por día. Las barras muestran cuánto gastaste, la línea blanca suaviza los últimos 3 días y la punteada marca un ritmo diario orientativo según tu presupuesto."},
+  {sel:"#financeGameStatus",title:"Jugá a cuidar tu mes",text:"Este personaje te muestra de un vistazo cómo venís: en control, en equilibrio, con atención o en recuperación. También tenés nivel, racha y un desafío simple para hoy. No competís con nadie: intentás mejorar tu propio mes."},
+  {sel:"#financialRhythm",title:"Entendé el gráfico",text:"Las barras muestran cuánto gastaste cada día. La línea blanca resume el promedio de los últimos 3 días y la punteada marca un ritmo diario orientativo según tu ingreso y ahorro. Un pico alto significa que ese día gastaste más."},
   {sel:"#incomeCard",title:"Primero: cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar para vos. Con eso Mi Balance empieza a calcular todo."},
   {sel:"#quickExpenses",title:"Después: anotá los gastos",text:"Usá estos accesos rápidos para registrar en segundos café, kiosco, transporte o cualquier gasto del día."},
   {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Mi Balance junta los gastos chicos y te muestra cuánto representan. Ahí suele aparecer plata que parecía invisible."},
