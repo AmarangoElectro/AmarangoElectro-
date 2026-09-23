@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v30-simple-home-rhythm-nav';
+const CACHE='mi-balance-v31-update-control';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
 
 self.addEventListener('install',event=>{
