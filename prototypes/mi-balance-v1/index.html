@@ -450,6 +450,298 @@ body[data-theme="light"] .bootSplash{background:linear-gradient(180deg,#fbf8f1,#
 body[data-theme="light"] .bootSplashSub{color:#64758a}
 @media(prefers-reduced-motion:reduce){.bootDots i{animation:none}}
 
+
+/* AmarangoElectro brand coherence pass
+   Palette aligned with the current V16 visual system without changing Mi Balance structure. */
+body[data-theme="dark"]{
+  --navy:#060a12;
+  --navy2:#0d1526;
+  --panel:#0d1526;
+  --orange:#ff8a4a;
+  --text:#eef2f8;
+  --muted:#9aa6b5;
+  --green:#41d98a;
+  --line:#223148;
+  --amarango-blue:#5b93ff;
+  background:
+    radial-gradient(circle at 82% 6%,rgba(91,147,255,.08),transparent 24%),
+    linear-gradient(180deg,#060a12,#080d17 58%,#060a12);
+  color:#eef2f8;
+}
+body[data-theme="light"]{
+  --navy:#ffffff;
+  --navy2:#f4f5f7;
+  --panel:#ffffff;
+  --orange:#ff6818;
+  --text:#05070b;
+  --muted:#69717c;
+  --green:#16865d;
+  --line:#e5e8ec;
+  --amarango-blue:#0756d8;
+  background:
+    radial-gradient(circle at 88% 3%,rgba(7,86,216,.045),transparent 22%),
+    #ffffff;
+  color:#05070b;
+}
+
+/* Header + navigation: recognizable Amarango shell */
+body[data-theme="dark"] .top{
+  background:rgba(6,10,18,.96);
+  border-bottom-color:#223148;
+  box-shadow:0 10px 28px rgba(0,0,0,.22);
+}
+body[data-theme="light"] .top{
+  background:rgba(255,255,255,.96);
+  border-bottom-color:#e5e8ec;
+  box-shadow:0 8px 26px rgba(5,7,11,.055);
+}
+body[data-theme="dark"] .brand{color:#fff}
+body[data-theme="light"] .brand{color:#05070b}
+body[data-theme] .brand .sub{color:var(--orange);font-weight:800}
+body[data-theme="dark"] .mark{background:#0d1526;border-color:#223148}
+body[data-theme="light"] .mark{background:#f4f5f7;border-color:#e5e8ec}
+body[data-theme] .mark i{background:linear-gradient(#ffb178,var(--orange))}
+body[data-theme="dark"] .iconBtn{background:#0d1526;color:#fff;border-color:#223148}
+body[data-theme="light"] .iconBtn{background:#fff;color:#07111f;border-color:#dfe4ea;box-shadow:0 5px 14px rgba(5,7,11,.05)}
+body[data-theme="dark"] .bottom{background:rgba(6,10,18,.98);border-top-color:#223148}
+body[data-theme="light"] .bottom{background:rgba(255,255,255,.98);border-top-color:#e5e8ec}
+body[data-theme] .nav.on{color:var(--orange)}
+
+/* Core surfaces: Amarango white / graphite instead of generic navy */
+body[data-theme="dark"] .card,
+body[data-theme="dark"] .installCard,
+body[data-theme="dark"] .insightCard,
+body[data-theme="dark"] .shareCard,
+body[data-theme="dark"] .storeCard,
+body[data-theme="dark"] .goalsCard,
+body[data-theme="dark"] .feedbackCard,
+body[data-theme="dark"] .goalHistoryCard,
+body[data-theme="dark"] .monthStatus,
+body[data-theme="dark"] .expensesPortal,
+body[data-theme="dark"] .welcomeStrip{
+  background:linear-gradient(180deg,#0d1526,#0a111f);
+  border-color:#223148;
+  box-shadow:0 12px 30px rgba(0,0,0,.22);
+}
+body[data-theme="light"] .card,
+body[data-theme="light"] .installCard,
+body[data-theme="light"] .insightCard,
+body[data-theme="light"] .shareCard,
+body[data-theme="light"] .storeCard,
+body[data-theme="light"] .goalsCard,
+body[data-theme="light"] .feedbackCard,
+body[data-theme="light"] .goalHistoryCard,
+body[data-theme="light"] .monthStatus,
+body[data-theme="light"] .expensesPortal,
+body[data-theme="light"] .welcomeStrip{
+  background:#fff;
+  border-color:#e5e8ec;
+  box-shadow:0 10px 28px rgba(5,7,11,.055);
+}
+body[data-theme="dark"] .tip{background:#0d1526;color:#eef2f8;border-color:#223148}
+body[data-theme="light"] .tip{background:#f8f9fb;color:#05070b;border-color:#e5e8ec}
+
+/* Primary text stays white/ink; Amarango orange carries secondary emphasis */
+body[data-theme="dark"] .lab,
+body[data-theme="dark"] .meta small,
+body[data-theme="dark"] .quickHead small,
+body[data-theme="dark"] .monthStatusText,
+body[data-theme="dark"] .goalHint,
+body[data-theme="dark"] .storeCard p,
+body[data-theme="dark"] .insightCard p,
+body[data-theme="dark"] .feedbackCard p,
+body[data-theme="dark"] .shareCard p{color:#9aa6b5}
+body[data-theme="light"] .lab,
+body[data-theme="light"] .meta small,
+body[data-theme="light"] .quickHead small,
+body[data-theme="light"] .monthStatusText,
+body[data-theme="light"] .goalHint,
+body[data-theme="light"] .storeCard p,
+body[data-theme="light"] .insightCard p,
+body[data-theme="light"] .feedbackCard p,
+body[data-theme="light"] .shareCard p{color:#69717c}
+body[data-theme] .ey,
+body[data-theme] .storeCategoryLine,
+body[data-theme] .goalFocusEy,
+body[data-theme] .rhythmEy,
+body[data-theme] .guideStep{color:var(--orange)}
+body[data-theme="dark"] .val:not(.green):not(.orange),
+body[data-theme="dark"] .quickHead b,
+body[data-theme="dark"] .goalsCard b,
+body[data-theme="dark"] .insightCard b,
+body[data-theme="dark"] .shareCard b,
+body[data-theme="dark"] .storeCard b,
+body[data-theme="dark"] .feedbackCard b,
+body[data-theme="dark"] .goalHistoryHead b{color:#fff}
+body[data-theme="light"] .val:not(.green):not(.orange),
+body[data-theme="light"] .quickHead b,
+body[data-theme="light"] .goalsCard b,
+body[data-theme="light"] .insightCard b,
+body[data-theme="light"] .shareCard b,
+body[data-theme="light"] .storeCard b,
+body[data-theme="light"] .feedbackCard b,
+body[data-theme="light"] .goalHistoryHead b{color:#05070b}
+
+/* Buttons and interactive accents */
+body[data-theme] .primary,
+body[data-theme] .smallBtn.primaryMini,
+body[data-theme] .storeLink,
+body[data-theme] .fab,
+body[data-theme] .installBtn,
+body[data-theme] .guideNext{
+  background:linear-gradient(145deg,#ff6818,#ff8a4a);
+  color:#fff;
+  box-shadow:0 9px 20px rgba(255,104,24,.22);
+}
+body[data-theme="dark"] .btn2,
+body[data-theme="dark"] .smallBtn,
+body[data-theme="dark"] .quickChip,
+body[data-theme="dark"] .goalFocusBtn{
+  background:#111b2d;
+  color:#eef2f8;
+  border-color:#223148;
+}
+body[data-theme="light"] .btn2,
+body[data-theme="light"] .smallBtn,
+body[data-theme="light"] .quickChip,
+body[data-theme="light"] .goalFocusBtn{
+  background:#f4f5f7;
+  color:#07111f;
+  border-color:#e5e8ec;
+}
+body[data-theme] .quickManage,
+body[data-theme] .linkBtn{color:var(--orange)}
+body[data-theme="dark"] .quickManage{background:#111b2d;border-color:#223148}
+body[data-theme="light"] .quickManage{background:#f4f5f7;border-color:#e5e8ec}
+
+/* Trading panel: same Amarango dark identity in both themes, with theme-aware shell */
+body[data-theme="dark"] .rhythmCard{
+  background:
+    radial-gradient(circle at 88% 2%,rgba(91,147,255,.12),transparent 30%),
+    linear-gradient(155deg,#0d1526,#060a12);
+  border-color:#223148;
+}
+body[data-theme="light"] .rhythmCard{
+  background:
+    radial-gradient(circle at 88% 2%,rgba(7,86,216,.055),transparent 30%),
+    #fff;
+  border-color:#e5e8ec;
+}
+body[data-theme="dark"] .rhythmStats>div{background:#111b2d;border-color:#223148}
+body[data-theme="light"] .rhythmStats>div{background:#f4f5f7;border-color:#e5e8ec}
+body[data-theme="dark"] .rhythmStats small{color:#9aa6b5}
+body[data-theme="light"] .rhythmStats small{color:#69717c}
+body[data-theme="dark"] .rhythmTitle,
+body[data-theme="dark"] .rhythmStats b{color:#fff}
+body[data-theme="light"] .rhythmTitle,
+body[data-theme="light"] .rhythmStats b{color:#05070b}
+body[data-theme] .rhythmState{border-color:color-mix(in srgb,var(--rhythm) 36%,transparent)}
+
+/* Goal hero keeps its personality, but surrounding language is unmistakably Amarango */
+body[data-theme="dark"] .goalFocus{
+  border-color:#223148;
+  background:#0d1526;
+  box-shadow:0 14px 34px rgba(0,0,0,.26);
+}
+body[data-theme="light"] .goalFocus{
+  border-color:#e5e8ec;
+  background:#fff;
+  box-shadow:0 12px 30px rgba(5,7,11,.06);
+}
+body[data-theme="dark"] .goalFocusBody{color:#fff}
+body[data-theme="light"] .goalFocusBody{color:#05070b}
+body[data-theme="dark"] .goalFocusMeta{color:#9aa6b5}
+body[data-theme="light"] .goalFocusMeta{color:#69717c}
+body[data-theme="dark"] .goalFocusMotivation{
+  background:rgba(255,104,24,.08);
+  color:#ffc39d;
+  border-color:rgba(255,104,24,.2);
+}
+body[data-theme="light"] .goalFocusMotivation{
+  background:#fff4ed;
+  color:#8b3d0e;
+  border-color:#ffd8c2;
+}
+
+/* Sheets / inputs follow the same store language */
+body[data-theme="dark"] .sheet{background:#0d1526;color:#eef2f8;border-top-color:#223148}
+body[data-theme="dark"] .sheet input,
+body[data-theme="dark"] .sheet select,
+body[data-theme="dark"] .amount,
+body[data-theme="dark"] .cat,
+body[data-theme="dark"] .secondary{
+  background:#111b2d;
+  color:#eef2f8;
+  border-color:#223148;
+}
+body[data-theme="light"] .sheet{background:#fff;color:#05070b}
+body[data-theme="light"] .sheet input,
+body[data-theme="light"] .sheet select,
+body[data-theme="light"] .amount,
+body[data-theme="light"] .cat,
+body[data-theme="light"] .secondary{
+  background:#fff;
+  color:#05070b;
+  border-color:#dfe4ea;
+}
+body[data-theme] .cat.on,
+body[data-theme] .freqBtn.on{
+  outline-color:var(--orange);
+}
+body[data-theme="dark"] .cat.on,
+body[data-theme="dark"] .freqBtn.on{
+  background:#16233a;
+  color:#ffb48d;
+}
+body[data-theme="light"] .cat.on,
+body[data-theme="light"] .freqBtn.on{
+  background:#fff4ed;
+  color:#9a430f;
+}
+
+/* Brand CTA clearly reads as AmarangoElectro */
+body[data-theme] .storeBadge{
+  color:var(--orange);
+  border-color:color-mix(in srgb,var(--orange) 28%,var(--line));
+  background:color-mix(in srgb,var(--orange) 7%,transparent);
+}
+body[data-theme="dark"] .storeLink{border:1px solid rgba(255,255,255,.04)}
+body[data-theme="light"] .storeLink{border:1px solid rgba(255,104,24,.10)}
+
+/* Preserve the corrected guide readability in both themes */
+body[data-theme="dark"] .guideCard{
+  background:linear-gradient(160deg,#111b2d,#0d1526 72%);
+  border-color:#223148;
+  color:#fff;
+}
+body[data-theme="dark"] .guideCard h3{color:#fff}
+body[data-theme="dark"] .guideCard p{color:#c4ceda}
+body[data-theme="dark"] .guideHint{color:#9aa6b5!important}
+body[data-theme="dark"] .guideSkip{background:#111b2d;color:#d9e1eb;border-color:#223148}
+body[data-theme="light"] .guideCard{
+  background:#fff;
+  color:#07111f;
+  border-color:#e5e8ec;
+}
+body[data-theme="light"] .guideCard h3{color:#07111f}
+body[data-theme="light"] .guideCard p{color:#4f5968}
+body[data-theme="light"] .guideHint{color:#69717c!important}
+body[data-theme="light"] .guideSkip{background:#f4f5f7;color:#07111f;border-color:#dfe4ea}
+
+/* Startup/auth also belongs to the same family */
+body[data-theme="dark"] .bootSplash,
+body[data-theme="dark"] .lock{background:linear-gradient(180deg,#060a12,#0a101c);color:#eef2f8}
+body[data-theme="light"] .bootSplash,
+body[data-theme="light"] .lock{background:#fff;color:#05070b}
+body[data-theme="dark"] .panel{background:#0d1526;border-color:#223148}
+body[data-theme="light"] .panel{background:#fff;border-color:#e5e8ec}
+body[data-theme="dark"] .bootSplashSub,
+body[data-theme="dark"] .tiny,
+body[data-theme="dark"] .lockBox p{color:#9aa6b5}
+body[data-theme="light"] .bootSplashSub,
+body[data-theme="light"] .tiny,
+body[data-theme="light"] .lockBox p{color:#69717c}
+
 </style>
 </head>
 <body>
