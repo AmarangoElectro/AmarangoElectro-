@@ -5,24 +5,18 @@ import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter
 import { V16Cellphones90PublicCatalogAdapter } from "./v16-cellphones-90-public-adapter";
 import { V16CatalogExpansion63Adapter } from "./v16-catalog-expansion-63-adapter";
 import { V16CatalogExpansion5V412Adapter } from "./v16-catalog-expansion-5-v412-adapter";
-import { V16CatalogExpansion31Adapter } from "./v16-catalog-expansion-31-adapter";
 import { V16CatalogExpansion31LiteralBrandAdapter } from "./v16-catalog-expansion-31-literal-brand-adapter";
 import { V16CatalogExpansion50GlobalBrandStorageAdapter } from "./v16-catalog-expansion-50-global-brand-storage-adapter";
-import { V16CatalogExpansion31KnownBrandAdapter } from "./v16-catalog-expansion-31-known-brand-adapter";
-import { V16CatalogExpansion48ExplicitBrandAdapter } from "./v16-catalog-expansion-48-explicit-brand-adapter";
 import { V16CatalogExpansion99CuratedBrandAdapter } from "./v16-catalog-expansion-99-curated-brand-adapter";
 
 const primaryCatalog = new V411AuditedPilotCatalogAdapter();
 const cohort0Catalog = new Cohort0FrozenCatalogAdapter();
 const electroCatalog = new V16ElectroSnapshotCatalogAdapter();
-const cellphoneSnapshotCatalog = new V16Cellphones90PublicCatalogAdapter();
+const cellphoneCatalog = new V16Cellphones90PublicCatalogAdapter();
 const catalogExpansion63 = new V16CatalogExpansion63Adapter();
 const catalogExpansion5 = new V16CatalogExpansion5V412Adapter();
-const catalogExpansion31 = new V16CatalogExpansion31Adapter();
 const catalogExpansion31 = new V16CatalogExpansion31LiteralBrandAdapter();
 const catalogExpansion50 = new V16CatalogExpansion50GlobalBrandStorageAdapter();
-const catalogExpansion31 = new V16CatalogExpansion31KnownBrandAdapter();
-const catalogExpansion48 = new V16CatalogExpansion48ExplicitBrandAdapter();
 const catalogExpansion99 = new V16CatalogExpansion99CuratedBrandAdapter();
 
 function productKey(product: Product) {
@@ -57,35 +51,62 @@ function mergeUnique(...groups: Product[][]) {
 }
 
 /**
- * Catálogo compuesto V16.
+ * Catálogo compuesto V16 — fuente pública read-only.
  *
- * - primaryCatalog: evidencia histórica mínima ya integrada.
- * - cohort0Catalog: cohorte real congelada previa.
- * - electroCatalog: snapshot real sanitizado de electrodomésticos.
- * - cellphoneSnapshotCatalog: 90 celulares canónicos con precio/foto sanitizados.
- * - catalogExpansion63 / 5 / 31 / 50: ampliaciones públicas versionadas y deduplicadas.
+ * Fuentes activas:
+ * - piloto histórico no-celular;
+ * - cohorte 0 congelada;
+ * - 224 Electrodomésticos sanitizados;
+ * - 90 celulares canónicos con precio/foto sanitizados;
+ * - expansiones públicas deduplicadas: 63 + 5 + 31 + 50 + 99.
  *
- * Ninguna de estas fuentes escribe sobre la tienda legacy ni sobre Supabase.
+ * Las fuentes redundantes 31-known-brand, 48-explicit-brand y otros
+ * checkpoints intermedios permanecen versionados como evidencia, pero
+ * NO forman parte del catálogo activo.
+ *
+ * Ninguna de estas fuentes escribe sobre Supabase ni producción.
  */
 class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
-    const [primaryResults, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results, expansion31Results, expansion48Results, expansion99Results] = await Promise.all([
+    const [
+      primaryResults,
+      cohort0Results,
+      electroResults,
+      cellphoneResults,
+      expansion63Results,
+      expansion5Results,
+      expansion31Results,
+      expansion50Results,
+      expansion99Results,
+    ] = await Promise.all([
       primaryCatalog.listProducts(query),
       cohort0Catalog.listProducts(query),
       electroCatalog.listProducts(query),
-      cellphoneSnapshotCatalog.listProducts(query),
+      cellphoneCatalog.listProducts(query),
       catalogExpansion63.listProducts(query),
       catalogExpansion5.listProducts(query),
       catalogExpansion31.listProducts(query),
-      catalogExpansion48.listProducts(query),
+      catalogExpansion50.listProducts(query),
       catalogExpansion99.listProducts(query),
     ]);
 
-    const primaryWithoutLegacyCellphones = primaryResults.filter((product) => product.category !== "celulares");
+    const primaryWithoutLegacyCellphones = primaryResults.filter(
+      (product) => product.category !== "celulares",
+    );
 
-    return mergeUnique(primaryWithoutLegacyCellphones, cohort0Results, electroResults, cellphoneSnapshotResults, expansion63Results, expansion5Results, expansion31Results, expansion48Results, expansion99Results);
+    return mergeUnique(
+      primaryWithoutLegacyCellphones,
+      cohort0Results,
+      electroResults,
+      cellphoneResults,
+      expansion63Results,
+      expansion5Results,
+      expansion31Results,
+      expansion50Results,
+      expansion99Results,
+    );
   }
 
   async getProductBySlug(slug: string) {
@@ -98,7 +119,7 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
     const electroMatch = await electroCatalog.getProductBySlug(slug);
     if (electroMatch) return electroMatch;
 
-    const cellphoneMatch = await cellphoneSnapshotCatalog.getProductBySlug(slug);
+    const cellphoneMatch = await cellphoneCatalog.getProductBySlug(slug);
     if (cellphoneMatch) return cellphoneMatch;
 
     const expansion63Match = await catalogExpansion63.getProductBySlug(slug);
@@ -110,8 +131,8 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
     const expansion31Match = await catalogExpansion31.getProductBySlug(slug);
     if (expansion31Match) return expansion31Match;
 
-    const expansion48Match = await catalogExpansion48.getProductBySlug(slug);
-    if (expansion48Match) return expansion48Match;
+    const expansion50Match = await catalogExpansion50.getProductBySlug(slug);
+    if (expansion50Match) return expansion50Match;
 
     return catalogExpansion99.getProductBySlug(slug);
   }
@@ -128,9 +149,6 @@ export { v16ElectroSnapshotEvidence } from "./v16-electro-snapshot-adapter";
 export { v16Cellphones90PublicEvidence } from "./v16-cellphones-90-public-adapter";
 export { v16CatalogExpansion63Evidence } from "./v16-catalog-expansion-63-adapter";
 export { v16CatalogExpansion5Evidence } from "./v16-catalog-expansion-5-v412-adapter";
-export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-adapter";
 export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-literal-brand-adapter";
 export { v16CatalogExpansion50Evidence } from "./v16-catalog-expansion-50-global-brand-storage-adapter";
-export { v16CatalogExpansion31Evidence } from "./v16-catalog-expansion-31-known-brand-adapter";
-export { v16CatalogExpansion48Evidence } from "./v16-catalog-expansion-48-explicit-brand-adapter";
 export { v16CatalogExpansion99Evidence } from "./v16-catalog-expansion-99-curated-brand-adapter";
