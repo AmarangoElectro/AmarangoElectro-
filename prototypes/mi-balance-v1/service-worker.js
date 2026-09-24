@@ -1,5 +1,5 @@
-const CACHE='mi-balance-v31-update-control';
-const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg'];
+const CACHE='mi-balance-v32-amarango-promo';
+const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg','./amarango-logo-320.webp','./amarango-electro-promo-bg.webp'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
