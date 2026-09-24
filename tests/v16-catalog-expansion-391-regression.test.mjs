@@ -31,7 +31,7 @@ function productKey(product) {
     .toLowerCase();
 }
 
-test("expanded V16 catalog reconstructs to 472 visible unique products", async () => {
+test("expanded V16 catalog reconstructs to 571 visible unique products", async () => {
   const pilot = JSON.parse(await source("fixtures/v411-catalog-evidence-public.json")).products
     .filter((row) => row.category !== "celulares")
     .map((row) => ({
@@ -115,9 +115,19 @@ test("expanded V16 catalog reconstructs to 472 visible unique products", async (
       price: row.sale,
     }));
 
+  const expansion99 = JSON.parse(await source("fixtures/v16-catalog-expansion-99-curated-brand.json")).products
+    .map((row) => ({
+      category: row.category,
+      subcategory: row.subcategory ?? null,
+      brand: row.brand,
+      model: null,
+      name: row.name,
+      price: row.sale,
+    }));
+
   const merged = [];
   const seen = new Set();
-  for (const group of [pilot, cohort, electro, phones, expansion63, expansion5, expansion31, expansion50]) {
+  for (const group of [pilot, cohort, electro, phones, expansion63, expansion5, expansion31, expansion50, expansion99]) {
     for (const product of group) {
       const key = productKey(product);
       if (seen.has(key)) continue;
@@ -126,7 +136,7 @@ test("expanded V16 catalog reconstructs to 472 visible unique products", async (
     }
   }
 
-  assert.equal(merged.length, 472);
+  assert.equal(merged.length, 571);
 
   const byCategory = Object.fromEntries(
     [...new Set(merged.map((row) => row.category))]
@@ -134,11 +144,11 @@ test("expanded V16 catalog reconstructs to 472 visible unique products", async (
   );
 
   assert.equal(byCategory.celulares, 90);
-  assert.equal(byCategory.electrodomesticos, 282);
-  assert.equal(byCategory["smart-tv"], 24);
-  assert.equal(byCategory.audio, 12);
+  assert.equal(byCategory.electrodomesticos, 287);
+  assert.equal(byCategory["smart-tv"], 29);
+  assert.equal(byCategory.audio, 33);
   assert.equal(byCategory.gaming, 6);
-  assert.equal(byCategory.herramientas, 28);
+  assert.equal(byCategory.herramientas, 48);
 });
 
 test("expansion fixtures contain only allowlisted public product fields", async () => {
@@ -147,6 +157,7 @@ test("expansion fixtures contain only allowlisted public product fields", async 
     "fixtures/v16-catalog-expansion-5-v412.json",
     "fixtures/v16-catalog-expansion-31-literal-brand-20260921.json",
     "fixtures/v16-catalog-expansion-50-global-brand-storage-20260921.json",
+    "fixtures/v16-catalog-expansion-99-curated-brand.json",
   ]) {
     const fixture = JSON.parse(await source(file));
     for (const row of fixture.products) {
@@ -222,5 +233,23 @@ test("50-product global literal-brand expansion stays Storage-backed and dedupli
     assert.equal(row.image_evidence, "usable_by_storage_metadata");
     assert.ok(row.sale > 0);
     assert.match(row.image, /^https:\/\/[^/]*supabase\.co\/storage\//);
+  }
+});
+
+
+test("99-product curated expansion stays explicit, pictured and deduplicated", async () => {
+  const fixture = JSON.parse(await source("fixtures/v16-catalog-expansion-99-curated-brand.json"));
+
+  assert.equal(fixture.product_count, 99);
+  assert.equal(fixture.products.length, 99);
+
+  const ids = fixture.products.map((row) => row.id);
+  assert.equal(new Set(ids).size, 99);
+
+  for (const row of fixture.products) {
+    assert.equal(row.availability, "available");
+    assert.equal(row.image_status, "usable_by_storage_metadata");
+    assert.ok(row.sale > 0);
+    assert.match(row.image, /^https:\/\//);
   }
 });
