@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `72a0fc70ebc0a714e81c2933fda91d836a1dc329`
+- Minimum app-code HEAD covered by this handoff: `ea583b297abde0380f7a2a36482c5c369ed17602`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -236,3 +236,16 @@ Prepared on the same branch:
 - duplicate Gamma `G12602KAR` short row `-423` and duplicate Drean `HDR370` short row `-463` remain excluded;
 - current reconstructed counts include 282 Electrodomésticos, 90 Celulares, 28 Herramientas, 24 Smart TV, 12 Audio and 12 Cuidado personal;
 - regression floor updated in `tests/v16-catalog-expansion-391-regression.test.mjs`.
+
+
+### Catalog expansion — consolidated 571-product target
+Current active catalog composition is deduplicated and read-only:
+- 224 sanitized Electrodomésticos snapshot rows;
+- 90 canonical cellphones with sanitized price/photo evidence; legacy positions 10 and 91 remain excluded;
+- frozen cohort and non-cellphone pilot evidence;
+- public expansion batches: 63 + 5 + 31 + 50 + 99;
+- total reconstructed visible unique products: **571**;
+- category totals include: 287 Electrodomésticos, 90 Celulares, 48 Herramientas, 33 Audio, 32 Cuidado personal y salud, 29 Smart TV, 18 Hogar, 14 Otros, 6 Gaming, 5 Tecnología y accesorios, 4 Camping/aire libre/mascotas, 3 Bebés/juguetes and 2 Descanso;
+- redundant checkpoint adapters/files remain versioned as evidence but are not active in `lib/catalog/index.ts`;
+- `lib/catalog/index.ts` has one unique adapter instance per active expansion and no duplicate `catalogExpansion31` declarations;
+- regression coverage: `tests/v16-catalog-expansion-391-regression.test.mjs` now locks the **571-product** reconstructed total.
