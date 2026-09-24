@@ -793,6 +793,91 @@ body[data-theme="light"] .bootSplashSub,
 body[data-theme="light"] .tiny,
 body[data-theme="light"] .lockBox p{color:#69717c}
 
+
+/* AmarangoElectro promo — noticeable, branded, but still integrated with Mi Balance */
+.storePromoCard{
+  margin:12px 18px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.storePromoTap{
+  display:block;
+  overflow:hidden;
+  position:relative;
+  border-radius:22px;
+  text-decoration:none;
+  background:#07101f;
+  border:1px solid rgba(91,147,255,.42);
+  box-shadow:0 14px 34px rgba(0,0,0,.22),0 0 0 1px rgba(255,104,24,.08);
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.storePromoTap:active{transform:scale(.988);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.storePromoVisual{position:relative;min-height:246px;overflow:hidden;background:#07101f}
+.storePromoBg{
+  position:absolute;
+  z-index:0;
+  right:-7%;
+  top:-3%;
+  width:78%;
+  height:106%;
+  object-fit:cover;
+  object-position:center;
+  opacity:.92;
+  filter:saturate(1.08) contrast(1.04);
+  clip-path:polygon(21% 0,100% 0,100% 100%,0 100%);
+}
+.storePromoShade{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(90deg,#07101f 0%,#07101f 38%,rgba(7,16,31,.86) 53%,rgba(7,16,31,.20) 76%,rgba(7,16,31,.06) 100%);
+}
+.storePromoGlow{position:absolute;z-index:1;width:250px;height:250px;border-radius:50%;filter:blur(58px);opacity:.18;pointer-events:none}
+.storePromoGlowBlue{left:-130px;top:-105px;background:#0b6cff}
+.storePromoGlowOrange{right:-140px;bottom:-140px;background:#ff6818}
+.storePromoContent{position:relative;z-index:2;width:62%;padding:15px 14px 14px;color:#fff}
+.storePromoBrand{display:flex;align-items:center;gap:9px;min-width:0}
+.storePromoBrand img{width:48px;height:48px;flex:0 0 auto;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 0 18px rgba(22,111,255,.28),0 0 14px rgba(255,104,24,.22)}
+.storePromoBrand>div{min-width:0}
+.storePromoBrand b{display:block;font-size:11px;line-height:1;letter-spacing:.015em;color:#fff!important;white-space:nowrap}
+.storePromoBrand b span{color:#5b93ff}
+.storePromoBrand small{display:block;margin-top:4px;color:#b9c5d4;font-size:5.5px;font-weight:850;letter-spacing:.12em;white-space:nowrap}
+.storePromoHeadline{margin-top:13px;color:#fff;font-size:25px;font-weight:950;line-height:.94;letter-spacing:-.9px}
+.storePromoHeadline strong{display:inline-block;margin-top:3px;color:#fff;font-size:27px}
+.storePromoHeadline strong span{color:#ff7b2d}
+.storePromoContent>p{max-width:240px!important;margin:10px 0 0!important;color:#d4dce6!important;font-size:10px!important;line-height:1.42!important}
+.storePromoCta{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:calc(100% + 56%);
+  margin-top:13px;
+  min-height:44px;
+  border-radius:13px;
+  background:linear-gradient(145deg,#ff6818,#ff8a4a);
+  color:#fff;
+  font-size:10px;
+  font-weight:950;
+  box-shadow:0 8px 20px rgba(255,104,24,.24);
+}
+.storePromoCta span{font-size:17px;line-height:1}
+.storePromoContext{
+  margin:8px 4px 0!important;
+  padding:0 5px!important;
+  color:var(--muted)!important;
+  font-size:9px!important;
+  line-height:1.4!important;
+}
+body[data-theme="light"] .storePromoTap{border-color:rgba(7,86,216,.28);box-shadow:0 13px 30px rgba(5,7,11,.10),0 0 0 1px rgba(255,104,24,.10)}
+body[data-theme="light"] .storePromoContext{color:#69717c!important}
+@media(max-width:390px){
+  .storePromoVisual{min-height:222px}
+  .storePromoContent{width:65%;padding:13px 12px}
+  .storePromoBrand img{width:42px;height:42px}
+  .storePromoBrand b{font-size:9.5px}
+  .storePromoBrand small{font-size:4.8px}
+  .storePromoHeadline{font-size:22px}.storePromoHeadline strong{font-size:23px}
+  .storePromoContent>p{font-size:9px!important}
+  .storePromoCta{width:calc(100% + 50%);font-size:9px;min-height:40px}
+}
 </style>
 </head>
 <body>
@@ -963,12 +1048,25 @@ body[data-theme="light"] .lockBox p{color:#69717c}
   <div class="inlineBtns"><button class="smallBtn primaryMini" onclick="shareApp()">Compartir Mi Balance</button><button class="smallBtn" onclick="installApp()">Instalar app</button></div>
 </section>
 
-<section id="storeCard" class="storeCard">
-  <div class="storeBadge">🐝 AMARANGOELECTRO</div>
-  <div class="storeCategoryLine">Electrodomésticos · Tecnología · Hogar</div>
-  <b id="storeTitle">Conocé nuestra tienda</b>
-  <p id="storeText">Cuando tus números te den margen, también está bueno disfrutar sin desordenar tu plan.</p>
-  <a class="storeLink" href="https://amarangoelectro.com.ar/?utm_source=mi_balance&amp;utm_medium=referral&amp;utm_campaign=regalo_mi_balance" target="_blank" rel="noopener">Visitar la tienda de AmarangoElectro →</a>
+<section id="storeCard" class="storeCard storePromoCard">
+  <a class="storePromoTap" href="https://amarangoelectro.com.ar/?utm_source=mi_balance&amp;utm_medium=referral&amp;utm_campaign=regalo_mi_balance" target="_blank" rel="noopener" aria-label="Conocé AmarangoElectro: electrodomésticos, tecnología y hogar">
+    <div class="storePromoVisual">
+      <img class="storePromoBg" src="./amarango-electro-promo-bg.webp" alt="" aria-hidden="true">
+      <div class="storePromoShade"></div>
+      <div class="storePromoGlow storePromoGlowBlue"></div>
+      <div class="storePromoGlow storePromoGlowOrange"></div>
+      <div class="storePromoContent">
+        <div class="storePromoBrand">
+          <img src="./amarango-logo-320.webp" alt="Logo de AmarangoElectro">
+          <div><b>AMARANGO<span>ELECTRO</span></b><small>ELECTRODOMÉSTICOS · TECNOLOGÍA · HOGAR</small></div>
+        </div>
+        <div class="storePromoHeadline">Conocé<br><strong>Amarango<span>Electro</span></strong></div>
+        <p>Todo en electrodomésticos, tecnología y hogar para hacer más simple tu día a día.</p>
+        <div class="storePromoCta">Visitar la tienda de AmarangoElectro <span>→</span></div>
+      </div>
+    </div>
+  </a>
+  <p id="storeText" class="storePromoContext">Cuando tus números te den margen, también está bueno disfrutar sin desordenar tu plan.</p>
 </section>
 
 <section class="expensesPortalWrap">
@@ -1488,11 +1586,11 @@ function renderMoneyHome(){
 }
 function renderStore(){
   const month=monthExpenses(),spent=month.reduce((a,e)=>a+Number(e.amount||0),0),saving=state.income*state.savingPct/100,spendable=Math.max(0,state.income-saving),pressure=spendable>0?spent/spendable:0;
-  const t=$("storeTitle"),p=$("storeText");if(!t||!p)return;
-  if(!state.income){t.textContent="Conocé nuestra tienda";p.textContent="En AmarangoElectro encontrás electrodomésticos, tecnología y productos para el hogar. Primero ordená tus números y después decidí con claridad."}
-  else if(pressure<=.55){t.textContent="Tus números vienen ordenados";p.textContent="Si entra dentro de tu plan, conocé nuestra tienda de electrodomésticos, tecnología y hogar sin perder de vista tus metas."}
-  else if(pressure<=.8){t.textContent="Antes de comprar, mirá tu margen";p.textContent="Podés conocer AmarangoElectro —electrodomésticos, tecnología y hogar— pero hacelo con tu presupuesto a la vista."}
-  else{t.textContent="Primero cuidemos tus números";p.textContent="Hoy conviene priorizar tu plan. Nuestra tienda de electrodomésticos, tecnología y hogar va a seguir ahí cuando recuperes margen."}
+  const p=$("storeText");if(!p)return;
+  if(!state.income)p.textContent="Conocé AmarangoElectro cuando quieras. Primero cargá tus números para decidir con claridad.";
+  else if(pressure<=.55)p.textContent="Tus números vienen con margen. Si entra dentro de tu plan, podés conocer nuestra tienda sin perder de vista tus metas.";
+  else if(pressure<=.8)p.textContent="Antes de comprar, mirá tu margen. La tienda está ahí para cuando la decisión entre dentro de tu plan.";
+  else p.textContent="Primero cuidemos tus números. AmarangoElectro va a seguir ahí cuando recuperes margen.";
 }
 function openRhythmPanel(){render();openM("rhythmModal")}
 function openExpensesDrawer(){render();openM("expensesModal")}
@@ -1961,7 +2059,7 @@ function finishGuide(mark=true){
 }
 addEventListener("resize",()=>{if($("guideLayer")&&$("guideLayer").classList.contains("show"))showGuideStep()});
 
-const APP_BUILD="mi-balance-v31-update-control";
+const APP_BUILD="mi-balance-v32-amarango-promo";
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
