@@ -11,6 +11,7 @@ export type CatalogSource =
   | "v16-catalog-expansion-63"
   | "v16-cellphones-90-public"
   | "v16-catalog-expansion-5-v412"
+  | "v16-catalog-expansion-31"
   | "v16-catalog-expansion-31-literal-brand"
   | "v16-catalog-expansion-31-known-brand"
   | "v16-catalog-expansion-50-global-brand-storage"
