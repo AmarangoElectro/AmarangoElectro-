@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v32-amarango-promo';
+const CACHE='mi-balance-v33-promo-legibility-uber';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg','./amarango-logo-320.webp','./amarango-electro-promo-bg.webp'];
 
 self.addEventListener('install',event=>{
