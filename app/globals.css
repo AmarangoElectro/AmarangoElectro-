@@ -9246,3 +9246,102 @@ html[data-theme="dark"] .route-skeleton-home-hero {
     width: 100%;
   }
 }
+
+
+/* V16 PLAN PROTEGIDO — segunda fórmula Admin-only. */
+.admin-calculator-formula-tabs {
+  margin: 16px 22px 0;
+  padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--soft);
+}
+.admin-calculator-formula-tabs button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 9px;
+  font-weight: 950;
+  cursor: pointer;
+}
+.admin-calculator-formula-tabs button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 5px 14px rgba(4,18,38,.08);
+}
+.admin-protected-commercial {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--soft);
+}
+.admin-protected-commercial pre {
+  max-height: 360px;
+  margin: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: var(--foreground);
+  font: 700 10px/1.55 ui-sans-serif,system-ui,sans-serif;
+}
+.admin-protected-commercial > button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 12px;
+  background: #0b2a50;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 950;
+  cursor: pointer;
+}
+.admin-protected-commercial > button svg { width: 15px; }
+.admin-protected-base-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.admin-protected-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+}
+.admin-protected-plan-grid article {
+  min-width: 0;
+  padding: 14px;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: var(--card);
+}
+.admin-protected-plan-grid article small {
+  color: var(--orange);
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .04em;
+}
+.admin-protected-plan-grid article strong {
+  color: var(--foreground);
+  font-size: 14px;
+}
+.admin-protected-plan-grid article span {
+  color: var(--muted-foreground);
+  font-size: 8px;
+  line-height: 1.45;
+}
+@media (max-width: 900px) {
+  .admin-protected-base-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .admin-protected-plan-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .admin-calculator-formula-tabs { margin-inline: 12px; }
+  .admin-protected-base-metrics { grid-template-columns: 1fr 1fr; }
+  .admin-protected-commercial pre { font-size: 9px; }
+}
