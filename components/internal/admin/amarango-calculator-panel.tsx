@@ -119,7 +119,8 @@ export function AmarangoCalculatorPanel() {
                 <div><small>Costo real</small><strong>{money(protectedQuote.costExact)}</strong></div>
                 <div><small>Precio contado</small><strong>{money(protectedQuote.cashPriceExact)}</strong></div>
                 <div><small>Markup aplicado</small><strong>{protectedQuote.markupPercent}%</strong></div>
-                <div><small>Inicial interna (75% costo)</small><strong>{money(protectedQuote.initialExact)}</strong></div>
+                <div><small>Base inicial 75%</small><strong>{money(protectedQuote.baseInitialExact)}</strong></div>
+                <div><small>Inicial protegida aplicada</small><strong>{money(protectedQuote.initialPesos)}</strong></div>
               </div>
 
               <div className="admin-protected-plan-grid">
@@ -149,7 +150,7 @@ export function AmarangoCalculatorPanel() {
                   <span>Ganancia neta Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
                 </article>
               </div>
-              <p className="admin-finance-helper">Los cálculos internos no usan terminación .999 ni redondeos comerciales. Los importes mostrados se cierran a pesos y cualquier diferencia queda únicamente en el último pago.</p>
+              <p className="admin-finance-helper">La inicial toma 75% del costo como piso y sube automáticamente cuando haga falta para quedar siempre por encima de todas las cuotas posteriores. Ajuste aplicado: {money(protectedQuote.initialAdjustmentPesos)}. Los importes mostrados se cierran a pesos y cualquier diferencia queda únicamente en el último pago.</p>
             </div>
           )}
         </div>

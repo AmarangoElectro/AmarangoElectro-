@@ -37,8 +37,11 @@ export interface PlanProtegidoQuote {
   costExact: number;
   markupPercent: 80 | 60 | 50 | 40 | 30;
   cashPriceExact: number;
+  baseInitialExact: number;
+  baseInitialPesos: number;
   initialExact: number;
   initialPesos: number;
+  initialAdjustmentPesos: number;
   cashCommission: ProtectedCommissionSchedule;
   cashAmarangoNetExact: number;
   plan3: ProtectedFinancedPlan;
@@ -62,6 +65,41 @@ export function protectedMarkupForCost(cost: number): 80 | 60 | 50 | 40 | 30 {
 export function roundProtectedPeso(value: number) {
   if (!Number.isFinite(value)) throw new RangeError("value must be finite");
   return Math.round(value);
+}
+
+function minimumInitialToStayAboveLaterPayments(totalExact: number, laterCount: number) {
+  const totalPesos = roundProtectedPeso(totalExact);
+  return Math.ceil((totalPesos + laterCount) / (laterCount + 1));
+}
+
+function protectedInitialForRelief(
+  baseInitialExact: number,
+  total3Exact: number,
+  total6Exact: number,
+) {
+  const baseInitialPesos = roundProtectedPeso(baseInitialExact);
+  let initialPesos = Math.max(
+    baseInitialPesos,
+    minimumInitialToStayAboveLaterPayments(total3Exact, 2),
+    minimumInitialToStayAboveLaterPayments(total6Exact, 5),
+  );
+
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const plan3 = buildProtectedPaymentSchedule(total3Exact, initialPesos, 2);
+    const plan6 = buildProtectedPaymentSchedule(total6Exact, initialPesos, 5);
+    const highestLater = Math.max(...plan3.laterPesos, ...plan6.laterPesos);
+    if (initialPesos > highestLater) {
+      return Object.freeze({
+        baseInitialExact,
+        baseInitialPesos,
+        initialPesos,
+        initialAdjustmentPesos: initialPesos - baseInitialPesos,
+      });
+    }
+    initialPesos += 1;
+  }
+
+  throw new Error("Unable to guarantee a protected initial above later payments");
 }
 
 function allocateRoundedAmounts(totalExact: number, equalPaymentExact: number, count: number) {
@@ -130,7 +168,7 @@ export function quotePlanProtegido(
 
   const markupPercent = protectedMarkupForCost(cost);
   const cashPriceExact = cost * (100 + markupPercent) / 100;
-  const initialExact = cost * 75 / 100;
+  const baseInitialExact = cost * 75 / 100;
 
   const cashCommission = quoteProtectedCommission(cashPriceExact, policy.commission.cashPercent, 1);
   const financedCommission3 = quoteProtectedCommission(cashPriceExact, policy.commission.financedPercent, 2);
@@ -144,6 +182,8 @@ export function quotePlanProtegido(
   const formula1Six = quoteInstallmentPlan(cashPriceExact, 6, policy);
   const total6Exact = formula1Six.total;
 
+  const protectedInitial = protectedInitialForRelief(baseInitialExact, total3Exact, total6Exact);
+  const initialExact = protectedInitial.initialPesos;
   const plan3Schedule = buildProtectedPaymentSchedule(total3Exact, initialExact, 2);
   const plan6Schedule = buildProtectedPaymentSchedule(total6Exact, initialExact, 5);
 
@@ -152,8 +192,11 @@ export function quotePlanProtegido(
     costExact: cost,
     markupPercent,
     cashPriceExact,
+    baseInitialExact: protectedInitial.baseInitialExact,
+    baseInitialPesos: protectedInitial.baseInitialPesos,
     initialExact,
-    initialPesos: roundProtectedPeso(initialExact),
+    initialPesos: protectedInitial.initialPesos,
+    initialAdjustmentPesos: protectedInitial.initialAdjustmentPesos,
     cashCommission,
     cashAmarangoNetExact: cashPriceExact - cost - cashCommission.totalExact,
     plan3: Object.freeze({

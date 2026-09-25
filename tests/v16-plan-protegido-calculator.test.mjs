@@ -50,7 +50,7 @@ test("Plan Protegido keeps Formula 1 untouched and reuses its active 6-plan surc
 test("Plan Protegido customer schedules always close exactly in displayed pesos", async () => {
   const result = await runTs(`
     import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
-    const costs=[1,49999,50000,99999,100000,249999,250000,349999,350000,477333];
+    const costs=[1000,40000,49999,50000,99999,100000,249999,250000,349999,350000,477333];
     process.stdout.write(JSON.stringify(costs.map(cost=>{const q=quotePlanProtegido(cost);return {
       cost,
       p3:{total:q.plan3.schedule.totalPesos,initial:q.plan3.schedule.initialPesos,later:q.plan3.schedule.laterPesos},
@@ -63,6 +63,8 @@ test("Plan Protegido customer schedules always close exactly in displayed pesos"
   for (const row of result) {
     assert.equal(row.p3.initial + row.p3.later.reduce((a,b)=>a+b,0), row.p3.total);
     assert.equal(row.p6.initial + row.p6.later.reduce((a,b)=>a+b,0), row.p6.total);
+    assert.ok(row.p3.later.every((payment)=>row.p3.initial > payment));
+    assert.ok(row.p6.later.every((payment)=>row.p6.initial > payment));
     assert.equal(row.c3.paymentPesos.reduce((a,b)=>a+b,0), row.c3.totalPesos);
     assert.equal(row.c6.paymentPesos.reduce((a,b)=>a+b,0), row.c6.totalPesos);
   }
@@ -113,4 +115,26 @@ test("Admin calculator exposes two formulas and keeps protected flow local-only"
   assert.match(panel,/Copiar mensaje/);
   assert.match(engine,/quoteInstallmentPlan\(cashPriceExact, 6, policy\)/);
   assert.doesNotMatch([panel,engine].join("\n"),/fetch\s*\(|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(|\.rpc\s*\(/i);
+});
+
+
+test("Plan Protegido treats 75 percent as a floor and raises the initial only when relief requires it", async () => {
+  const result = await runTs(`
+    import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
+    const low=quotePlanProtegido(40000);
+    const normal=quotePlanProtegido(50000);
+    process.stdout.write(JSON.stringify({low,normal}));
+  `);
+
+  assert.equal(result.low.baseInitialPesos, 30000);
+  assert.equal(result.low.initialPesos, 32401);
+  assert.equal(result.low.initialAdjustmentPesos, 2401);
+  assert.ok(result.low.plan3.schedule.laterPesos.every((payment)=>result.low.initialPesos>payment));
+  assert.ok(result.low.plan6.schedule.laterPesos.every((payment)=>result.low.initialPesos>payment));
+
+  assert.equal(result.normal.baseInitialPesos, 37500);
+  assert.equal(result.normal.initialPesos, 37500);
+  assert.equal(result.normal.initialAdjustmentPesos, 0);
+  assert.ok(result.normal.plan3.schedule.laterPesos.every((payment)=>result.normal.initialPesos>payment));
+  assert.ok(result.normal.plan6.schedule.laterPesos.every((payment)=>result.normal.initialPesos>payment));
 });
