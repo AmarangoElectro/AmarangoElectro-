@@ -113,3 +113,43 @@ It does not contain:
 - `tests/v16-plan-protegido-calculator.test.mjs`
 
 Status: implementation prepared and QA'd in branch only. No deploy performed.
+
+
+## Protected-initial relief rule update
+Owner requirement: the first payment must always be strictly higher than every later payment so the customer's strongest effort happens at pickup and the payment burden falls afterward.
+
+The original 75%-of-cost rule is now a **floor**, not an absolute fixed amount.
+
+Applied rule:
+1. Compute base initial = 75% of cost.
+2. Compute the minimum displayed-peso initial required for Plan 3 and Plan 6 so every later payment is strictly lower.
+3. Use the largest of those values.
+4. Verify the actual rounded schedules; if needed, raise the initial by $1 until the invariant is true.
+5. Use the same protected initial for Plan 3 and Plan 6.
+
+This preserves total financed amounts and Amarango profitability; it only redistributes customer collections.
+
+Examples:
+- Cost $40.000, markup 80%:
+  - 75% base initial = $30.000.
+  - Fixed 75% would produce Plan 3 later payments of $33.600 and violate the commercial intent.
+  - Protected initial becomes $32.401.
+  - Plan 3 later payments: $32.400 and $32.399.
+  - Plan 6 later payments remain below $32.401.
+- Cost $49.999:
+  - base initial = $37.499.
+  - protected initial = $40.500.
+  - Plan 3 later payments = $40.499 / $40.499.
+- Cost $50.000:
+  - base initial = protected initial = $37.500.
+  - no adjustment required.
+
+QA sweep:
+- all mandatory boundary costs;
+- irregular representative costs;
+- thousands of sampled costs above $1.000.
+
+Result: zero detected failures for:
+- initial > every later Plan 3 payment;
+- initial > every later Plan 6 payment;
+- initial + later payments = displayed financed total exactly.

@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `fe8cbd6ecb9a82a7c67b420bcab8665174a11877`
+- Minimum app-code HEAD covered by this handoff: `98025b3313ce890d465acb816255898cb0eeec63`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -297,3 +297,15 @@ Current active catalog composition is deduplicated and read-only:
 - Regression coverage: `tests/v16-plan-protegido-calculator.test.mjs`.
 - The actual `/administracion` workspace imports this calculator component; this is not an orphan prototype.
 - No Supabase/production/main change and no automatic deploy.
+
+
+### 2026-09-25 protected-initial relief invariant
+- Owner clarified commercial intent: first payment must always be higher than every later payment.
+- The 75%-of-cost initial is now a floor.
+- Plan Protegido automatically raises the initial only when required to preserve the relief pattern.
+- Same adjusted initial is used for Plan 3 and Plan 6.
+- Financed totals, Formula 1 6-plan surcharge, commissions and Amarango net profitability are unchanged; only payment distribution changes.
+- Runtime verifies the actual peso-rounded schedules and guarantees initial > every later payment.
+- Cost $40.000 example: base $30.000 → protected initial $32.401 → Plan 3 later $32.400 / $32.399.
+- Regression test updated to enforce both exact closing and the strict initial-greater-than-later invariant.
+- No main, Supabase, production or automatic deploy.
