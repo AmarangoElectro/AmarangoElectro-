@@ -167,9 +167,21 @@ test("Plan Protegido QA cost 50k automatically raises initial just enough for st
 });
 
 test("future protected-plan configuration must fail loudly when required initial exceeds 55-percent cap", async () => {
-  const engine=await source("lib/internal/finance/plan-protegido.ts");
-  assert.match(engine,/PROTECTED_INITIAL_EXCEEDS_55_PERCENT_CASH_CAP/);
-  assert.match(engine,/requiredInitialCents > initialCapCents/);
-  assert.match(engine,/initialPesos > capPesos/);
-  assert.match(engine,/CONFIGURACIÓN INVÁLIDA|Configuración inválida|inconsistente/i);
+  const result = await runTs(`
+    import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
+    import { AMARANGO_CURRENT_POLICY } from './lib/internal/finance/amarango-policy.ts';
+    const invalidPolicy={
+      ...AMARANGO_CURRENT_POLICY,
+      installmentPlans: AMARANGO_CURRENT_POLICY.installmentPlans.map(plan =>
+        plan.installments===6 ? {...plan,surchargePercent:300,active:true} : plan
+      ),
+    };
+    let error=null;
+    try { quotePlanProtegido(100000,invalidPolicy); }
+    catch (value) { error={name:value?.name,code:value?.code,message:value?.message}; }
+    process.stdout.write(JSON.stringify({error}));
+  `);
+  assert.equal(result.error.name,"ProtectedInitialConfigurationError");
+  assert.equal(result.error.code,"PROTECTED_INITIAL_EXCEEDS_55_PERCENT_CASH_CAP");
+  assert.match(result.error.message,/55% del contado|55%/i);
 });

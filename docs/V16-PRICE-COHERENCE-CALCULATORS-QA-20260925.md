@@ -132,3 +132,24 @@ Si una configuración financiera futura necesitara una inicial superior al 55% d
 - cierre exacto de cuotas;
 - privacidad del mensaje comercial;
 - interfaz con dos fórmulas alimentadas por costo.
+
+
+## QA final de inicial protegida
+Barrido matemático ejecutado sobre todos los costos enteros desde $1 hasta $600.000:
+- precio contado monotónico: PASS;
+- inicial mostrada > cada cuota posterior Plan 3: PASS;
+- inicial mostrada > cada cuota posterior Plan 6: PASS;
+- necesidad financiera real dentro del tope 55% con la política vigente: PASS;
+- cierre a pesos con ajuste sólo en última cuota: PASS.
+
+Caso $50.000:
+- contado: $89.999;
+- initialBase exacta: $37.500,00;
+- mínimo Plan 3 exacto: $40.499,55;
+- ajuste de alivio estricto: inicial interna $40.500,55;
+- inicial mostrada/cobrada: $40.501;
+- posteriores Plan 3: $40.499 + $40.499;
+- posteriores Plan 6: $23.940 + $23.940 + $23.940 + $23.940 + última $23.937;
+- total Plan 3 y Plan 6: sin modificación.
+
+El test de configuración inválida usa además una política futura artificial con un recargo de Plan 6 suficientemente alto para exigir una inicial superior al 55%; debe lanzar `ProtectedInitialConfigurationError` y no romper el tope.
