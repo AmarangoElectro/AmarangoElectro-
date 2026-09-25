@@ -94,15 +94,6 @@ function resolveProtectedInitial(
     throw new ProtectedInitialConfigurationError(requiredInitialCents, initialCapCents);
   }
 
-  // Customer-facing collection works in whole pesos. Round the required
-  // mathematical minimum upward, while the commercial cap rounds downward,
-  // so the 55% ceiling can never be exceeded by display rounding.
-  const capPesos = Math.floor(initialCapCents / 100);
-  let initialPesos = Math.ceil(requiredInitialCents / 100);
-  if (initialPesos > capPesos) {
-    throw new ProtectedInitialConfigurationError(initialPesos * 100, initialCapCents);
-  }
-
   const baseReason =
     requiredInitialCents === minInitial3Cents && minInitial3Cents >= minInitial6Cents && minInitial3Cents >= initialBaseCents
       ? "plan3_balance_floor"
@@ -113,36 +104,36 @@ function resolveProtectedInitial(
           : "75_percent_cost";
 
   let reason: PlanProtegidoQuote["initialReason"] = baseReason;
-  const beforeStrictReliefPesos = initialPesos;
+  let initialCents = requiredInitialCents;
+  const baseDisplayedPesos = Math.round(initialBaseCents / 100);
 
-  // Preserve the commercial promise literally: after the initial payment,
-  // every displayed payment must be lower. If whole-peso allocation creates
-  // an equality, move the minimum number of pesos into the initial payment
-  // without changing either financed total.
+  // Keep the formula exact in cents. Only if whole-peso presentation creates
+  // an equality with a later installment, shift the smallest possible $1
+  // into the initial. The financed total never changes.
   for (let attempt = 0; attempt < 12; attempt += 1) {
-    const initialCents = initialPesos * 100;
     const plan3 = buildScheduleFromCents(total3Cents, initialCents, 2);
     const plan6 = buildScheduleFromCents(total6Cents, initialCents, 5);
+    const initialPesos = plan3.initialPesos;
     const highestLater = Math.max(...plan3.laterPesos, ...plan6.laterPesos);
 
     if (initialPesos > highestLater) {
-      if (initialPesos > beforeStrictReliefPesos) reason = "strict_relief_adjustment";
+      if (initialCents > requiredInitialCents) reason = "strict_relief_adjustment";
       return Object.freeze({
         initialBaseCents,
         minInitial3Cents,
         minInitial6Cents,
         initialCents,
         initialPesos,
-        initialAdjustmentPesos: initialPesos - Math.round(initialBaseCents / 100),
+        initialAdjustmentPesos: initialPesos - baseDisplayedPesos,
         reason,
         plan3,
         plan6,
       });
     }
 
-    initialPesos += 1;
-    if (initialPesos > capPesos) {
-      throw new ProtectedInitialConfigurationError(initialPesos * 100, initialCapCents);
+    initialCents += 100;
+    if (initialCents > initialCapCents) {
+      throw new ProtectedInitialConfigurationError(initialCents, initialCapCents);
     }
   }
 

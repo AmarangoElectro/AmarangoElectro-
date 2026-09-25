@@ -160,6 +160,7 @@ test("Plan Protegido QA cost 50k automatically raises initial just enough for st
   assert.equal(result.initialBaseExact,37500);
   assert.ok(Math.abs(result.minInitial3Exact-(result.plan3.totalExact/3))<0.011);
   assert.equal(result.initialPesos,40501);
+  assert.ok(Math.abs(result.initialExact-40500.55)<0.011);
   assert.deepEqual(result.plan3.schedule.laterPesos,[40499,40499]);
   assert.ok(result.plan6.schedule.laterPesos.every(payment=>result.initialPesos>payment));
   assert.ok(result.initialExact<=result.initialCapExact);
