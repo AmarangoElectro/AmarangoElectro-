@@ -57,7 +57,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <main className="product-page">
         <div className="product-return-row"><ReturnToResults fallbackHref={`/categoria/${product.category}#catalogo`} /></div>
         <nav className="breadcrumb" aria-label="Migas de pan"><Link href="/">Inicio</Link><span>›</span><Link href={`/categoria/${product.category}`}>{categoryTitle}</Link><span>›</span><strong>{product.name}</strong></nav>
-        <section className={`product-detail brand-${brandTone}`}>
+        <section
+          className={`product-detail brand-${brandTone}`}
+          data-product-category={product.category}
+          data-product-subcategory={product.subcategory ?? ""}
+        >
           <div className="product-detail-visual">
             {product.image ? (
               <>

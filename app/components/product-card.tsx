@@ -87,6 +87,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
       data-product-id={product.id}
       data-product-brand={product.brand}
       data-product-category={product.category}
+      data-product-subcategory={product.subcategory ?? ""}
       data-product-price={product.price?.amount ?? ""}
       data-product-stock={product.stock.status}
       data-sector-theme={visualTheme.sectorId}

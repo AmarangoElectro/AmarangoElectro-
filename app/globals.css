@@ -5411,6 +5411,84 @@ html[data-theme="dark"] .featured-sector-card:active {
   .product-card-premium:active { transform: scale(.992); }
 }
 
+/* V16 PRODUCT PHOTO FRAMING — presentation-only.
+   Keeps source images untouched and adapts contain framing to product shape. */
+.product-card-premium .product-image {
+  object-position: center;
+  padding: clamp(10px, 5.5%, 20px);
+}
+.product-card-premium[data-product-category="celulares"] .product-image {
+  object-position: center;
+  padding: 6% 13%;
+}
+.product-card-premium[data-product-category="smart-tv"] .product-image {
+  object-position: center;
+  padding: 6% 4%;
+}
+.product-card-premium[data-product-category="audio"] .product-image {
+  object-position: center bottom;
+  padding: 6% 7% 4%;
+}
+.product-card-premium[data-product-category="herramientas"] .product-image {
+  object-position: center;
+  padding: 6%;
+}
+.product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="refrigeracion"] .product-image,
+.product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="lavado"] .product-image {
+  object-position: center bottom;
+  padding: 6% 10% 3%;
+}
+.product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="pequenos-electrodomesticos"] .product-image,
+.product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="coccion"] .product-image,
+.product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="limpieza"] .product-image {
+  object-position: center;
+  padding: 6%;
+}
+
+.product-detail .detail-product-image {
+  object-position: center;
+  padding: clamp(24px, 4.5vw, 48px);
+}
+.product-detail[data-product-category="celulares"] .detail-product-image {
+  padding: 6% 16%;
+}
+.product-detail[data-product-category="smart-tv"] .detail-product-image {
+  padding: 7% 4%;
+}
+.product-detail[data-product-category="audio"] .detail-product-image {
+  object-position: center bottom;
+  padding: 7% 9% 4%;
+}
+.product-detail[data-product-category="herramientas"] .detail-product-image {
+  padding: 7%;
+}
+.product-detail[data-product-category="electrodomesticos"][data-product-subcategory="refrigeracion"] .detail-product-image,
+.product-detail[data-product-category="electrodomesticos"][data-product-subcategory="lavado"] .detail-product-image {
+  object-position: center bottom;
+  padding: 6% 11% 3%;
+}
+.product-detail[data-product-category="electrodomesticos"][data-product-subcategory="pequenos-electrodomesticos"] .detail-product-image,
+.product-detail[data-product-category="electrodomesticos"][data-product-subcategory="coccion"] .detail-product-image,
+.product-detail[data-product-category="electrodomesticos"][data-product-subcategory="limpieza"] .detail-product-image {
+  padding: 7%;
+}
+
+@media (max-width: 680px) {
+  .product-card-premium .product-image { padding: 5px; }
+  .product-card-premium[data-product-category="celulares"] .product-image { padding: 7px 13px; }
+  .product-card-premium[data-product-category="smart-tv"] .product-image { padding: 7px 4px; }
+  .product-card-premium[data-product-category="audio"] .product-image { padding: 7px 6px 3px; }
+  .product-card-premium[data-product-category="herramientas"] .product-image { padding: 6px; }
+  .product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="refrigeracion"] .product-image,
+  .product-card-premium[data-product-category="electrodomesticos"][data-product-subcategory="lavado"] .product-image {
+    padding: 7px 11px 3px;
+  }
+  .product-detail[data-product-category="electrodomesticos"][data-product-subcategory="refrigeracion"] .detail-product-image,
+  .product-detail[data-product-category="electrodomesticos"][data-product-subcategory="lavado"] .detail-product-image {
+    padding: 18px 30px 8px;
+  }
+}
+
 /* V16 — ajuste visual definitivo sobre la base materializada.
    Solo presentación: no altera catálogo, pricing, cuotas, CTA ni rutas. */
 .hero-slider-v16-premium {
