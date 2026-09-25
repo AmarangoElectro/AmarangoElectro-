@@ -119,34 +119,34 @@ export function AmarangoCalculatorPanel() {
                 <div><small>Costo real</small><strong>{money(protectedQuote.costExact)}</strong></div>
                 <div><small>Precio contado</small><strong>{money(protectedQuote.cashPriceExact)}</strong></div>
                 <div><small>Markup aplicado</small><strong>{protectedQuote.markupPercent}%</strong></div>
-                <div><small>Inicial interna</small><strong>{money(protectedQuote.initialExact)}</strong></div>
+                <div><small>Inicial interna (75% costo)</small><strong>{money(protectedQuote.initialExact)}</strong></div>
               </div>
 
               <div className="admin-protected-plan-grid">
                 <article>
                   <small>CONTADO</small>
                   <strong>{money(protectedQuote.cashPriceExact)}</strong>
-                  <span>Comisión 10%: {money(protectedQuote.cashCommission.totalExact)}</span>
-                  <span>Ganancia Amarango: {money(protectedQuote.cashAmarangoNetExact)}</span>
+                  <span>Comisión 10%: {money(protectedQuote.cashCommission.totalExact)} · 1 pago</span>
+                  <span>Ganancia neta Amarango: {money(protectedQuote.cashAmarangoNetExact)}</span>
                 </article>
                 <article>
                   <small>🚀 PLAN 3 CUOTAS</small>
-                  <strong>Total {money(protectedQuote.plan3.totalExact)}</strong>
+                  <strong>Total financiado {money(protectedQuote.plan3.totalExact)}</strong>
                   <span>Inicial: {money(protectedQuote.plan3.schedule.initialPesos)}</span>
                   <span>Posteriores: {paymentSummary(protectedQuote.plan3.schedule)}</span>
-                  <span>Comisión 15%: {money(protectedQuote.plan3.commission.totalExact)}</span>
+                  <span>Comisión total 15%: {money(protectedQuote.plan3.commission.totalExact)}</span>
                   <span>{commissionSummary(protectedQuote.plan3.commission)}</span>
-                  <span>Ganancia Amarango: {money(protectedQuote.plan3.amarangoNetExact)}</span>
+                  <span>Ganancia neta Amarango: {money(protectedQuote.plan3.amarangoNetExact)}</span>
                 </article>
                 <article>
                   <small>⚡ PLAN 6 CUOTAS</small>
-                  <strong>Total {money(protectedQuote.plan6.totalExact)}</strong>
+                  <strong>Total financiado {money(protectedQuote.plan6.totalExact)}</strong>
                   <span>Recargo vigente Fórmula 1: {protectedQuote.plan6.surchargePercent}%</span>
                   <span>Inicial: {money(protectedQuote.plan6.schedule.initialPesos)}</span>
                   <span>Posteriores: {paymentSummary(protectedQuote.plan6.schedule)}</span>
-                  <span>Comisión 15%: {money(protectedQuote.plan6.commission.totalExact)}</span>
+                  <span>Comisión total 15%: {money(protectedQuote.plan6.commission.totalExact)}</span>
                   <span>{commissionSummary(protectedQuote.plan6.commission)}</span>
-                  <span>Ganancia Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
+                  <span>Ganancia neta Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
                 </article>
               </div>
               <p className="admin-finance-helper">Los cálculos internos no usan terminación .999 ni redondeos comerciales. Los importes mostrados se cierran a pesos y cualquier diferencia queda únicamente en el último pago.</p>
