@@ -89,7 +89,7 @@ test("Plan Protegido commissions use cash price and preserve 10/15 percent plus 
   assert.ok(Math.abs(result.plan6.commission.totalExact-53699.85)<1e-7);
 });
 
-test("commercial Plan Protegido copy exposes no private cost, markup or 75-percent rule", async () => {
+test("commercial Plan Protegido copy exposes no private cost, markup or internal initial-percent rule", async () => {
   const result = await runTs(`
     import { buildPlanProtegidoCommercialMessage, quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
     const q=quotePlanProtegido(238666);
@@ -100,7 +100,7 @@ test("commercial Plan Protegido copy exposes no private cost, markup or 75-perce
   assert.match(result.message,/PLAN 3 CUOTAS/);
   assert.match(result.message,/PLAN 6 CUOTAS/);
   assert.match(result.message,/Contado:/);
-  assert.doesNotMatch(result.message,/costo|markup|75%|75 %|comisi[oó]n|ganancia/i);
+  assert.doesNotMatch(result.message,/costo|markup|90%|90 %|80%|80 %|75%|75 %|70%|70 %|65%|65 %|comisi[oó]n|ganancia/i);
   assert.doesNotMatch(result.message,/PLAN 2|PLAN 4|2 CUOTAS|4 CUOTAS/);
 });
 
@@ -118,23 +118,41 @@ test("Admin calculator exposes two formulas and keeps protected flow local-only"
 });
 
 
-test("Plan Protegido treats 75 percent as a floor and raises the initial only when relief requires it", async () => {
+test("Plan Protegido uses a balanced initial percentage by cost tier", async () => {
   const result = await runTs(`
     import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
-    const low=quotePlanProtegido(40000);
-    const normal=quotePlanProtegido(50000);
-    process.stdout.write(JSON.stringify({low,normal}));
+    const costs=[40000,50000,100000,250000,350000];
+    process.stdout.write(JSON.stringify(costs.map(cost=>{const q=quotePlanProtegido(cost);return {
+      cost,
+      markup:q.markupPercent,
+      initialPercent:q.initialPercentOfCost,
+      cash:q.cashPriceExact,
+      initialExact:q.initialExact,
+      initialPesos:q.initialPesos,
+      adjustment:q.roundingAdjustmentPesos,
+      p3:q.plan3.schedule,
+      p6:q.plan6.schedule,
+    }})));
   `);
 
-  assert.equal(result.low.baseInitialPesos, 30000);
-  assert.equal(result.low.initialPesos, 32401);
-  assert.equal(result.low.initialAdjustmentPesos, 2401);
-  assert.ok(result.low.plan3.schedule.laterPesos.every((payment)=>result.low.initialPesos>payment));
-  assert.ok(result.low.plan6.schedule.laterPesos.every((payment)=>result.low.initialPesos>payment));
+  assert.deepEqual(result.map((row)=>row.markup), [80,60,50,40,30]);
+  assert.deepEqual(result.map((row)=>row.initialPercent), [90,80,75,70,65]);
+  for (const row of result) {
+    assert.ok(Math.abs(row.initialExact - row.cash * 0.5) < 1e-7);
+    assert.ok(row.p3.laterPesos.every((payment)=>row.initialPesos>payment));
+    assert.ok(row.p6.laterPesos.every((payment)=>row.initialPesos>payment));
+    assert.equal(row.p3.initialPesos + row.p3.laterPesos.reduce((a,b)=>a+b,0), row.p3.totalPesos);
+    assert.equal(row.p6.initialPesos + row.p6.laterPesos.reduce((a,b)=>a+b,0), row.p6.totalPesos);
+  }
+});
 
-  assert.equal(result.normal.baseInitialPesos, 37500);
-  assert.equal(result.normal.initialPesos, 37500);
-  assert.equal(result.normal.initialAdjustmentPesos, 0);
-  assert.ok(result.normal.plan3.schedule.laterPesos.every((payment)=>result.normal.initialPesos>payment));
-  assert.ok(result.normal.plan6.schedule.laterPesos.every((payment)=>result.normal.initialPesos>payment));
+test("Plan 3 keeps the same relief ratio across every markup tier before rounding", async () => {
+  const result = await runTs(`
+    import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
+    const costs=[40000,50000,100000,250000,350000];
+    process.stdout.write(JSON.stringify(costs.map(cost=>{const q=quotePlanProtegido(cost);return {
+      ratio:q.initialExact/q.plan3.schedule.laterPaymentExact
+    }})));
+  `);
+  for (const row of result) assert.ok(Math.abs(row.ratio-(20/17))<0.0001);
 });

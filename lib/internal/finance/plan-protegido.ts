@@ -37,11 +37,10 @@ export interface PlanProtegidoQuote {
   costExact: number;
   markupPercent: 80 | 60 | 50 | 40 | 30;
   cashPriceExact: number;
-  baseInitialExact: number;
-  baseInitialPesos: number;
+  initialPercentOfCost: 90 | 80 | 75 | 70 | 65;
   initialExact: number;
   initialPesos: number;
-  initialAdjustmentPesos: number;
+  roundingAdjustmentPesos: number;
   cashCommission: ProtectedCommissionSchedule;
   cashAmarangoNetExact: number;
   plan3: ProtectedFinancedPlan;
@@ -67,22 +66,31 @@ export function roundProtectedPeso(value: number) {
   return Math.round(value);
 }
 
-function minimumInitialToStayAboveLaterPayments(totalExact: number, laterCount: number) {
-  const totalPesos = roundProtectedPeso(totalExact);
-  return Math.ceil((totalPesos + laterCount) / (laterCount + 1));
+export function protectedInitialPercentForMarkup(
+  markupPercent: 80 | 60 | 50 | 40 | 30,
+): 90 | 80 | 75 | 70 | 65 {
+  if (markupPercent === 80) return 90;
+  if (markupPercent === 60) return 80;
+  if (markupPercent === 50) return 75;
+  if (markupPercent === 40) return 70;
+  return 65;
 }
 
-function protectedInitialForRelief(
-  baseInitialExact: number,
+/**
+ * Balanced protected initial:
+ * - mathematically equals 50% of the protected cash price;
+ * - therefore maps to 90/80/75/70/65% of cost across markup tiers;
+ * - keeps Plan 3 relief consistent across every tier;
+ * - may move only by whole pesos if display rounding ever threatens
+ *   the strict "initial > every later payment" invariant.
+ */
+function protectedInitialForBalance(
+  initialExact: number,
   total3Exact: number,
   total6Exact: number,
 ) {
-  const baseInitialPesos = roundProtectedPeso(baseInitialExact);
-  let initialPesos = Math.max(
-    baseInitialPesos,
-    minimumInitialToStayAboveLaterPayments(total3Exact, 2),
-    minimumInitialToStayAboveLaterPayments(total6Exact, 5),
-  );
+  let initialPesos = roundProtectedPeso(initialExact);
+  const policyInitialPesos = initialPesos;
 
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const plan3 = buildProtectedPaymentSchedule(total3Exact, initialPesos, 2);
@@ -90,16 +98,14 @@ function protectedInitialForRelief(
     const highestLater = Math.max(...plan3.laterPesos, ...plan6.laterPesos);
     if (initialPesos > highestLater) {
       return Object.freeze({
-        baseInitialExact,
-        baseInitialPesos,
         initialPesos,
-        initialAdjustmentPesos: initialPesos - baseInitialPesos,
+        roundingAdjustmentPesos: initialPesos - policyInitialPesos,
       });
     }
     initialPesos += 1;
   }
 
-  throw new Error("Unable to guarantee a protected initial above later payments");
+  throw new Error("Unable to guarantee balanced protected initial above later payments");
 }
 
 function allocateRoundedAmounts(totalExact: number, equalPaymentExact: number, count: number) {
@@ -168,7 +174,8 @@ export function quotePlanProtegido(
 
   const markupPercent = protectedMarkupForCost(cost);
   const cashPriceExact = cost * (100 + markupPercent) / 100;
-  const baseInitialExact = cost * 75 / 100;
+  const initialPercentOfCost = protectedInitialPercentForMarkup(markupPercent);
+  const initialExact = cost * initialPercentOfCost / 100;
 
   const cashCommission = quoteProtectedCommission(cashPriceExact, policy.commission.cashPercent, 1);
   const financedCommission3 = quoteProtectedCommission(cashPriceExact, policy.commission.financedPercent, 2);
@@ -182,21 +189,20 @@ export function quotePlanProtegido(
   const formula1Six = quoteInstallmentPlan(cashPriceExact, 6, policy);
   const total6Exact = formula1Six.total;
 
-  const protectedInitial = protectedInitialForRelief(baseInitialExact, total3Exact, total6Exact);
-  const initialExact = protectedInitial.initialPesos;
-  const plan3Schedule = buildProtectedPaymentSchedule(total3Exact, initialExact, 2);
-  const plan6Schedule = buildProtectedPaymentSchedule(total6Exact, initialExact, 5);
+  const protectedInitial = protectedInitialForBalance(initialExact, total3Exact, total6Exact);
+  const collectedInitialPesos = protectedInitial.initialPesos;
+  const plan3Schedule = buildProtectedPaymentSchedule(total3Exact, collectedInitialPesos, 2);
+  const plan6Schedule = buildProtectedPaymentSchedule(total6Exact, collectedInitialPesos, 5);
 
   return Object.freeze({
     version: PLAN_PROTEGIDO_VERSION,
     costExact: cost,
     markupPercent,
     cashPriceExact,
-    baseInitialExact: protectedInitial.baseInitialExact,
-    baseInitialPesos: protectedInitial.baseInitialPesos,
+    initialPercentOfCost,
     initialExact,
     initialPesos: protectedInitial.initialPesos,
-    initialAdjustmentPesos: protectedInitial.initialAdjustmentPesos,
+    roundingAdjustmentPesos: protectedInitial.roundingAdjustmentPesos,
     cashCommission,
     cashAmarangoNetExact: cashPriceExact - cost - cashCommission.totalExact,
     plan3: Object.freeze({

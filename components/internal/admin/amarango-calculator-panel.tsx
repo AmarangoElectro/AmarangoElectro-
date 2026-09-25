@@ -119,8 +119,8 @@ export function AmarangoCalculatorPanel() {
                 <div><small>Costo real</small><strong>{money(protectedQuote.costExact)}</strong></div>
                 <div><small>Precio contado</small><strong>{money(protectedQuote.cashPriceExact)}</strong></div>
                 <div><small>Markup aplicado</small><strong>{protectedQuote.markupPercent}%</strong></div>
-                <div><small>Base inicial 75%</small><strong>{money(protectedQuote.baseInitialExact)}</strong></div>
-                <div><small>Inicial protegida aplicada</small><strong>{money(protectedQuote.initialPesos)}</strong></div>
+                <div><small>% inicial sobre costo</small><strong>{protectedQuote.initialPercentOfCost}%</strong></div>
+                <div><small>Inicial protegida</small><strong>{money(protectedQuote.initialPesos)}</strong></div>
               </div>
 
               <div className="admin-protected-plan-grid">
@@ -150,7 +150,7 @@ export function AmarangoCalculatorPanel() {
                   <span>Ganancia neta Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
                 </article>
               </div>
-              <p className="admin-finance-helper">La inicial toma 75% del costo como piso y sube automáticamente cuando haga falta para quedar siempre por encima de todas las cuotas posteriores. Ajuste aplicado: {money(protectedQuote.initialAdjustmentPesos)}. Los importes mostrados se cierran a pesos y cualquier diferencia queda únicamente en el último pago.</p>
+              <p className="admin-finance-helper">La inicial se equilibra por tramo: 90% / 80% / 75% / 70% / 65% del costo según el markup. Eso equivale a 50% del precio contado y mantiene una relación consistente: en Plan 3 la inicial es aproximadamente 17,65% mayor que cada cuota posterior. Ajuste técnico por redondeo: {money(protectedQuote.roundingAdjustmentPesos)}.</p>
             </div>
           )}
         </div>
