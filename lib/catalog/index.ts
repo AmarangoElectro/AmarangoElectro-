@@ -33,6 +33,41 @@ function productKey(product: Product) {
     .toLowerCase();
 }
 
+const derivedToolSectorSlugs = new Set(["taladros", "amoladoras", "sierras"]);
+
+function normalizeToolName(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function deriveToolSubcategory(product: Product): Product {
+  if (product.category !== "herramientas" || product.subcategory) return product;
+
+  const normalizedName = normalizeToolName(product.name);
+  const matches = new Set<string>();
+
+  if (/\b(taladro|taladros|atornillador|atornilladores|percutor)\b/.test(normalizedName)) {
+    matches.add("taladros");
+  }
+  if (/\b(amoladora|amoladoras)\b/.test(normalizedName)) {
+    matches.add("amoladoras");
+  }
+  if (/\b(sierra|sierras|caladora|caladoras|circular|circulares)\b/.test(normalizedName)) {
+    matches.add("sierras");
+  }
+
+  if (matches.size !== 1) return product;
+  const [subcategory] = matches;
+  return { ...product, subcategory };
+}
+
+function usesDerivedToolSector(query: CatalogQuery) {
+  return query.category === "herramientas"
+    && Boolean(query.subcategory && derivedToolSectorSlugs.has(query.subcategory));
+}
+
 function mergeUnique(...groups: Product[][]) {
   const seen = new Set<string>();
   const merged: Product[] = [];
@@ -69,6 +104,9 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
   readonly source = primaryCatalog.source;
 
   async listProducts(query: CatalogQuery = {}) {
+    const sourceQuery: CatalogQuery = { ...query };
+    if (usesDerivedToolSector(query)) delete sourceQuery.subcategory;
+
     const [
       primaryResults,
       cohort0Results,
@@ -80,22 +118,22 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
       expansion50Results,
       expansion99Results,
     ] = await Promise.all([
-      primaryCatalog.listProducts(query),
-      cohort0Catalog.listProducts(query),
-      electroCatalog.listProducts(query),
-      cellphoneCatalog.listProducts(query),
-      catalogExpansion63.listProducts(query),
-      catalogExpansion5.listProducts(query),
-      catalogExpansion31.listProducts(query),
-      catalogExpansion50.listProducts(query),
-      catalogExpansion99.listProducts(query),
+      primaryCatalog.listProducts(sourceQuery),
+      cohort0Catalog.listProducts(sourceQuery),
+      electroCatalog.listProducts(sourceQuery),
+      cellphoneCatalog.listProducts(sourceQuery),
+      catalogExpansion63.listProducts(sourceQuery),
+      catalogExpansion5.listProducts(sourceQuery),
+      catalogExpansion31.listProducts(sourceQuery),
+      catalogExpansion50.listProducts(sourceQuery),
+      catalogExpansion99.listProducts(sourceQuery),
     ]);
 
     const primaryWithoutLegacyCellphones = primaryResults.filter(
       (product) => product.category !== "celulares",
     );
 
-    return mergeUnique(
+    const merged = mergeUnique(
       primaryWithoutLegacyCellphones,
       cohort0Results,
       electroResults,
@@ -105,35 +143,42 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
       expansion31Results,
       expansion50Results,
       expansion99Results,
-    );
+    ).map(deriveToolSubcategory);
+
+    if (usesDerivedToolSector(query)) {
+      return merged.filter((product) => product.subcategory === query.subcategory);
+    }
+
+    return merged;
   }
 
   async getProductBySlug(slug: string) {
     const primaryMatch = await primaryCatalog.getProductBySlug(slug);
-    if (primaryMatch && primaryMatch.category !== "celulares") return primaryMatch;
+    if (primaryMatch && primaryMatch.category !== "celulares") return deriveToolSubcategory(primaryMatch);
 
     const cohort0Match = await cohort0Catalog.getProductBySlug(slug);
-    if (cohort0Match) return cohort0Match;
+    if (cohort0Match) return deriveToolSubcategory(cohort0Match);
 
     const electroMatch = await electroCatalog.getProductBySlug(slug);
-    if (electroMatch) return electroMatch;
+    if (electroMatch) return deriveToolSubcategory(electroMatch);
 
     const cellphoneMatch = await cellphoneCatalog.getProductBySlug(slug);
-    if (cellphoneMatch) return cellphoneMatch;
+    if (cellphoneMatch) return deriveToolSubcategory(cellphoneMatch);
 
     const expansion63Match = await catalogExpansion63.getProductBySlug(slug);
-    if (expansion63Match) return expansion63Match;
+    if (expansion63Match) return deriveToolSubcategory(expansion63Match);
 
     const expansion5Match = await catalogExpansion5.getProductBySlug(slug);
-    if (expansion5Match) return expansion5Match;
+    if (expansion5Match) return deriveToolSubcategory(expansion5Match);
 
     const expansion31Match = await catalogExpansion31.getProductBySlug(slug);
-    if (expansion31Match) return expansion31Match;
+    if (expansion31Match) return deriveToolSubcategory(expansion31Match);
 
     const expansion50Match = await catalogExpansion50.getProductBySlug(slug);
-    if (expansion50Match) return expansion50Match;
+    if (expansion50Match) return deriveToolSubcategory(expansion50Match);
 
-    return catalogExpansion99.getProductBySlug(slug);
+    const expansion99Match = await catalogExpansion99.getProductBySlug(slug);
+    return expansion99Match ? deriveToolSubcategory(expansion99Match) : null;
   }
 }
 
