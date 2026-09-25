@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `cb60c1581d2d6b2065da028aa16c27298fc55cb5`
+- Minimum app-code HEAD covered by this handoff: `a6d18d34b5d1eecf5eba4e91423212e338bd88c8`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -310,3 +310,17 @@ Current active catalog composition is deduplicated and read-only:
 - Broad sampled QA from $1.000 to $1.000.000 found zero closing/relief failures.
 - Regression coverage locks the 90/80/75/70/65 mapping and cross-tier relief ratio.
 - No main, Supabase, production or automatic deploy.
+
+
+### 2026-09-25 Definitive calculator coherence delta
+- App-code HEAD: `a6d18d34b5d1eecf5eba4e91423212e338bd88c8`.
+- Both Admin calculators are cost-fed and share `lib/internal/finance/coherent-pricing.ts`.
+- Exact markup boundaries: <50k 80%; 50..<100k 60%; 100..<250k 50%; 250..<350k 40%; >=350k 30%.
+- Global mathematical floors prevent price drops across markup boundaries.
+- Strategic commercial rounding is centralized and upward-only with endings 299 / 499 / 799 / 999; it can never lower the coherent price.
+- Calculadora Clásica keeps its existing 2/4/6 financing logic and uses the definitive coherent cash price as its base.
+- Plan Protegido uses the same definitive cash price, initial = MIN(75% cost, 55% cash), Plan 3 = +35%, Plan 6 reuses the current 6-installment total (+78%).
+- New money paths use integer cents where introduced; displayed installment remainder is assigned only to the final payment.
+- QA source: `docs/V16-PRICE-COHERENCE-CALCULATORS-QA-20260925.md`.
+- Important commercial note: the definitive MIN(75% cost, 55% cash) initial can be lower than a later Plan-3 installment at some low costs; no hidden override was added.
+- No main, Supabase, production, catalog, Home, banners, images or automatic deploy.
