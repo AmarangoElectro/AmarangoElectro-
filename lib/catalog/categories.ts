@@ -143,8 +143,8 @@ export const categories: CategoryDefinition[] = [
       sub("parlantes-portatiles", "Parlantes portátiles", "Música para llevar a todos lados.", "🔉"),
       sub("torres", "Torres", "Potencia y presencia para tus reuniones.", "🎚️"),
       sub("barras-de-sonido", "Barras de sonido", "Audio para TV y entretenimiento.", "▬"),
-      sub("auriculares", "Auriculares", "Escucha personal y comodidad.", "🎧"),
-      sub("home-audio", "Home audio", "Equipos para disfrutar en casa.", "🎵"),
+      sub("auriculares", "Auriculares", "Escucha personal y comodidad.", "🎧", { navigationStatus: "planned" }),
+      sub("home-audio", "Home audio", "Equipos para disfrutar en casa.", "🎵", { navigationStatus: "planned" }),
     ],
   },
   {

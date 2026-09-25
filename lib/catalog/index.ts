@@ -34,6 +34,7 @@ function productKey(product: Product) {
 }
 
 const derivedToolSectorSlugs = new Set(["taladros", "amoladoras", "sierras"]);
+const derivedAudioSectorSlugs = new Set(["parlantes-portatiles", "torres", "barras-de-sonido"]);
 
 function normalizeToolName(value: string) {
   return value
@@ -63,9 +64,29 @@ function deriveToolSubcategory(product: Product): Product {
   return { ...product, subcategory };
 }
 
+function deriveAudioSubcategory(product: Product): Product {
+  if (product.category !== "audio" || product.subcategory) return product;
+
+  const normalizedName = normalizeToolName(product.name);
+  const matches = new Set<string>();
+
+  if (/\bparlante portatil\b/.test(normalizedName)) matches.add("parlantes-portatiles");
+  if (/\btorre\b/.test(normalizedName)) matches.add("torres");
+  if (/\bbarra de sonido\b/.test(normalizedName)) matches.add("barras-de-sonido");
+
+  if (matches.size !== 1) return product;
+  const [subcategory] = matches;
+  return { ...product, subcategory };
+}
+
 function usesDerivedToolSector(query: CatalogQuery) {
   return query.category === "herramientas"
     && Boolean(query.subcategory && derivedToolSectorSlugs.has(query.subcategory));
+}
+
+function usesDerivedAudioSector(query: CatalogQuery) {
+  return query.category === "audio"
+    && Boolean(query.subcategory && derivedAudioSectorSlugs.has(query.subcategory));
 }
 
 function mergeUnique(...groups: Product[][]) {
@@ -105,7 +126,7 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
 
   async listProducts(query: CatalogQuery = {}) {
     const sourceQuery: CatalogQuery = { ...query };
-    if (usesDerivedToolSector(query)) delete sourceQuery.subcategory;
+    if (usesDerivedToolSector(query) || usesDerivedAudioSector(query)) delete sourceQuery.subcategory;
 
     const [
       primaryResults,
@@ -143,9 +164,9 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
       expansion31Results,
       expansion50Results,
       expansion99Results,
-    ).map(deriveToolSubcategory);
+    ).map(deriveToolSubcategory).map(deriveAudioSubcategory);
 
-    if (usesDerivedToolSector(query)) {
+    if (usesDerivedToolSector(query) || usesDerivedAudioSector(query)) {
       return merged.filter((product) => product.subcategory === query.subcategory);
     }
 
@@ -154,31 +175,31 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
 
   async getProductBySlug(slug: string) {
     const primaryMatch = await primaryCatalog.getProductBySlug(slug);
-    if (primaryMatch && primaryMatch.category !== "celulares") return deriveToolSubcategory(primaryMatch);
+    if (primaryMatch && primaryMatch.category !== "celulares") return deriveAudioSubcategory(deriveToolSubcategory(primaryMatch));
 
     const cohort0Match = await cohort0Catalog.getProductBySlug(slug);
-    if (cohort0Match) return deriveToolSubcategory(cohort0Match);
+    if (cohort0Match) return deriveAudioSubcategory(deriveToolSubcategory(cohort0Match));
 
     const electroMatch = await electroCatalog.getProductBySlug(slug);
-    if (electroMatch) return deriveToolSubcategory(electroMatch);
+    if (electroMatch) return deriveAudioSubcategory(deriveToolSubcategory(electroMatch));
 
     const cellphoneMatch = await cellphoneCatalog.getProductBySlug(slug);
-    if (cellphoneMatch) return deriveToolSubcategory(cellphoneMatch);
+    if (cellphoneMatch) return deriveAudioSubcategory(deriveToolSubcategory(cellphoneMatch));
 
     const expansion63Match = await catalogExpansion63.getProductBySlug(slug);
-    if (expansion63Match) return deriveToolSubcategory(expansion63Match);
+    if (expansion63Match) return deriveAudioSubcategory(deriveToolSubcategory(expansion63Match));
 
     const expansion5Match = await catalogExpansion5.getProductBySlug(slug);
-    if (expansion5Match) return deriveToolSubcategory(expansion5Match);
+    if (expansion5Match) return deriveAudioSubcategory(deriveToolSubcategory(expansion5Match));
 
     const expansion31Match = await catalogExpansion31.getProductBySlug(slug);
-    if (expansion31Match) return deriveToolSubcategory(expansion31Match);
+    if (expansion31Match) return deriveAudioSubcategory(deriveToolSubcategory(expansion31Match));
 
     const expansion50Match = await catalogExpansion50.getProductBySlug(slug);
-    if (expansion50Match) return deriveToolSubcategory(expansion50Match);
+    if (expansion50Match) return deriveAudioSubcategory(deriveToolSubcategory(expansion50Match));
 
     const expansion99Match = await catalogExpansion99.getProductBySlug(slug);
-    return expansion99Match ? deriveToolSubcategory(expansion99Match) : null;
+    return expansion99Match ? deriveAudioSubcategory(deriveToolSubcategory(expansion99Match)) : null;
   }
 }
 

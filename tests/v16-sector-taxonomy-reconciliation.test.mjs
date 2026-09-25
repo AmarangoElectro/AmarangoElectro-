@@ -18,3 +18,12 @@ test("Herramientas derivation covers the approved aliases",()=>{
   assert.match(i,/amoladora\|amoladoras/);
   assert.match(i,/sierra\|sierras\|caladora\|caladoras\|circular\|circulares/);
 });
+
+test("Audio derives only evidenced active sectors and keeps empty routes planned",()=>{
+  assert.match(i,/function deriveAudioSubcategory/);
+  assert.match(i,/parlante portatil/);
+  assert.match(i,/barra de sonido/);
+  assert.match(i,/matches\.add\("torres"\)/);
+  assert.match(c,/sub\("auriculares"[\s\S]*navigationStatus: "planned"/);
+  assert.match(c,/sub\("home-audio"[\s\S]*navigationStatus: "planned"/);
+});
