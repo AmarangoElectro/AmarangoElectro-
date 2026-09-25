@@ -55,7 +55,7 @@ export function estimateCostFromSale(
   positive(salePrice, "salePrice");
   for (const tier of policy.pricingTiers) {
     const candidate = salePrice / (1 + tier.markupPercent / 100);
-    if (tier.maxCost === null || candidate < tier.maxCost) {
+    if (tier.maxCost === null || candidate <= tier.maxCost) {
       return {
         cost: Math.round(candidate),
         salePrice: roundTo(salePrice, policy.rounding.sale),

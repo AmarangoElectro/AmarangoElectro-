@@ -33,6 +33,10 @@ test("global coherent pricing uses exact markup boundaries and mandatory floors"
   assert.equal(result[7].commercialPrice, 374999);
   assert.equal(result[8].commercialPrice, 489999);
   assert.equal(result[9].commercialPrice, 489999);
+  assert.equal(result[2].coherenceFloor, 89998.2);
+  assert.equal(result[5].coherenceFloor, 159998.4);
+  assert.equal(result[7].coherenceFloor, 374998.5);
+  assert.equal(result[9].coherenceFloor, 489998.6);
   assert.equal(result[2].coherenceApplied, true);
   assert.equal(result[5].coherenceApplied, true);
   assert.equal(result[7].coherenceApplied, true);
@@ -106,6 +110,9 @@ test("Plan Protegido uses min(75% cost, 55% cash), exact commissions and closes 
     assert.equal(q.plan3.commission.paymentCount,2);
     assert.equal(q.plan6.commission.paymentCount,3);
     assert.equal(q.plan6.surchargePercent,78);
+    assert.ok(Math.abs(q.cashAmarangoNetExact-(q.cashPriceExact-q.costExact-q.cashCommission.totalExact))<0.011);
+    assert.ok(Math.abs(q.plan3.amarangoNetExact-(q.plan3.totalExact-q.costExact-q.plan3.commission.totalExact))<0.011);
+    assert.ok(Math.abs(q.plan6.amarangoNetExact-(q.plan6.totalExact-q.costExact-q.plan6.commission.totalExact))<0.011);
     assert.equal(q.plan3.schedule.initialPesos+q.plan3.schedule.laterPesos.reduce((a,b)=>a+b,0),q.plan3.schedule.totalPesos);
     assert.equal(q.plan6.schedule.initialPesos+q.plan6.schedule.laterPesos.reduce((a,b)=>a+b,0),q.plan6.schedule.totalPesos);
   }
