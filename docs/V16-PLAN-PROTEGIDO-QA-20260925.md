@@ -55,13 +55,13 @@ Result: PASS for Plan 3 and Plan 6.
 
 Any peso difference caused by final display rounding is assigned only to the final later payment.
 
-Examples:
-- Cost $49.999:
-  - Plan 3 displayed: initial $37.499 + $41.999 + $42.000 = $121.498.
-  - Plan 6 displayed: initial $37.499 + $24.540 + $24.540 + $24.540 + $24.540 + $24.538 = $160.197.
-- Cost $50.000:
-  - Plan 3: initial $37.500 + 2 × $35.250 = $108.000.
-  - Plan 6: initial $37.500 + 5 × $20.980 = $142.400.
+Examples after the balanced-initial policy:
+- Cost $49.999, markup 80%, initial 90% of cost:
+  - Plan 3 displayed: initial $44.999 + $38.249 + $38.250 = $121.498.
+  - Plan 6 displayed: initial $44.999 + $23.040 + $23.040 + $23.040 + $23.040 + $23.038 = $160.197.
+- Cost $50.000, markup 60%, initial 80% of cost:
+  - Plan 3: initial $40.000 + 2 × $34.000 = $108.000.
+  - Plan 6: initial $40.000 + 5 × $20.480 = $142.400.
 
 ## User example QA — cash price $357.999
 
@@ -103,7 +103,7 @@ Generated customer copy contains:
 It does not contain:
 - cost;
 - markup;
-- the 75% internal rule;
+- the internal initial-percentage table;
 - commissions;
 - Amarango net profit.
 
@@ -115,41 +115,66 @@ It does not contain:
 Status: implementation prepared and QA'd in branch only. No deploy performed.
 
 
-## Protected-initial relief rule update
-Owner requirement: the first payment must always be strictly higher than every later payment so the customer's strongest effort happens at pickup and the payment burden falls afterward.
+## Balanced protected-initial rule
 
-The original 75%-of-cost rule is now a **floor**, not an absolute fixed amount.
+Owner requirement: the first payment must always be higher than every later payment, while keeping a coherent commercial effort across all cost tiers and avoiding unnecessary pressure on high-ticket sales.
 
-Applied rule:
-1. Compute base initial = 75% of cost.
-2. Compute the minimum displayed-peso initial required for Plan 3 and Plan 6 so every later payment is strictly lower.
-3. Use the largest of those values.
-4. Verify the actual rounded schedules; if needed, raise the initial by $1 until the invariant is true.
-5. Use the same protected initial for Plan 3 and Plan 6.
+Final rule:
+- markup 80% → initial 90% of cost;
+- markup 60% → initial 80% of cost;
+- markup 50% → initial 75% of cost;
+- markup 40% → initial 70% of cost;
+- markup 30% → initial 65% of cost.
 
-This preserves total financed amounts and Amarango profitability; it only redistributes customer collections.
+Equivalent invariant:
+`initialExact = cashPriceExact × 50%`.
+
+This is intentionally balanced:
+- Plan 3 total remains 135% of cash price.
+- After a 50%-of-cash initial, the remaining 85% of cash is split in two.
+- Each later Plan 3 payment is therefore 42.5% of cash.
+- Before peso rounding, initial / later payment = 50 / 42.5 = **1.176470588...**.
+- Therefore the initial is consistently about **17.65% higher** than each later Plan 3 payment at every markup tier.
+- Plan 6 uses the same initial and its later payments are even lower.
+
+This changes only payment distribution. It does not change:
+- cash price;
+- financed totals;
+- the +35% Plan 3 surcharge;
+- Formula 1's +78% Plan 6 surcharge;
+- advisor commission percentages/bases;
+- Amarango net profitability.
 
 Examples:
 - Cost $40.000, markup 80%:
-  - 75% base initial = $30.000.
-  - Fixed 75% would produce Plan 3 later payments of $33.600 and violate the commercial intent.
-  - Protected initial becomes $32.401.
-  - Plan 3 later payments: $32.400 and $32.399.
-  - Plan 6 later payments remain below $32.401.
-- Cost $49.999:
-  - base initial = $37.499.
-  - protected initial = $40.500.
-  - Plan 3 later payments = $40.499 / $40.499.
-- Cost $50.000:
-  - base initial = protected initial = $37.500.
-  - no adjustment required.
+  - cash $72.000;
+  - initial 90% of cost = $36.000;
+  - Plan 3 later payments = $30.600 / $30.600.
+- Cost $50.000, markup 60%:
+  - cash $80.000;
+  - initial 80% of cost = $40.000;
+  - Plan 3 later payments = $34.000 / $34.000.
+- Cost $100.000, markup 50%:
+  - cash $150.000;
+  - initial 75% of cost = $75.000;
+  - Plan 3 later payments = $63.750 / $63.750.
+- Cost $250.000, markup 40%:
+  - cash $350.000;
+  - initial 70% of cost = $175.000;
+  - Plan 3 later payments = $148.750 / $148.750.
+- Cost $350.000, markup 30%:
+  - cash $455.000;
+  - initial 65% of cost = $227.500;
+  - Plan 3 later payments = $193.375 / $193.375.
 
 QA sweep:
-- all mandatory boundary costs;
+- mandatory boundary costs 49.999 / 50.000 / 99.999 / 100.000 / 249.999 / 250.000 / 349.999 / 350.000;
 - irregular representative costs;
-- thousands of sampled costs above $1.000.
+- broad sampled costs from $1.000 through $1.000.000.
 
 Result: zero detected failures for:
 - initial > every later Plan 3 payment;
 - initial > every later Plan 6 payment;
 - initial + later payments = displayed financed total exactly.
+
+The engine also retains a whole-peso rounding guard: if display rounding could ever threaten the strict inequality, only the charged initial may move by the minimum whole-peso amount needed to preserve it.

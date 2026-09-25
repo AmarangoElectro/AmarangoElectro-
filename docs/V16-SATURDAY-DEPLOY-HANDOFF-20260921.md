@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `98025b3313ce890d465acb816255898cb0eeec63`
+- Minimum app-code HEAD covered by this handoff: `cb60c1581d2d6b2065da028aa16c27298fc55cb5`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -285,27 +285,28 @@ Current active catalog composition is deduplicated and read-only:
 - Plan Protegido is cost-only: real ARS cost is the source of truth and sale price is never reverse-engineered.
 - Exact protected markup ladder: <50k 80%; 50k..<100k 60%; 100k..<250k 50%; 250k..<350k 40%; >=350k 30%.
 - Protected cash price does not use Formula 1's legacy $500 sale rounding.
-- Initial is calculated internally from 75% of cost; commercial copy exposes only the amount, never the internal rule.
+- Initial is balanced by markup tier: 90% / 80% / 75% / 70% / 65% of cost, equivalent to 50% of the protected cash price; commercial copy exposes only the amount.
 - Customer options are only cash / 3 / 6.
 - Plan 3 uses +35% over protected cash price.
 - Plan 6 reuses Formula 1's current active 6-installment rule through `quoteInstallmentPlan`; current surcharge is 78%.
 - Customer payment schedules round only displayed/cobrable pesos and assign any remainder solely to the final later payment so the displayed total closes exactly.
 - Advisor commission stays based on protected cash price: 10% cash; 15% financed; Plan 3 commission in 2 payouts; Plan 6 commission in 3 payouts.
 - Admin view exposes real cost, cash price, markup, internal initial, financed totals, later installments, commission totals/payout counts and Amarango net result.
-- Generated customer message excludes cost, markup, 75% rule, commission and Amarango net.
+- Generated customer message excludes cost, markup, the internal initial-percentage table, commission and Amarango net.
 - QA boundary/report: `docs/V16-PLAN-PROTEGIDO-QA-20260925.md`.
 - Regression coverage: `tests/v16-plan-protegido-calculator.test.mjs`.
 - The actual `/administracion` workspace imports this calculator component; this is not an orphan prototype.
 - No Supabase/production/main change and no automatic deploy.
 
 
-### 2026-09-25 protected-initial relief invariant
-- Owner clarified commercial intent: first payment must always be higher than every later payment.
-- The 75%-of-cost initial is now a floor.
-- Plan Protegido automatically raises the initial only when required to preserve the relief pattern.
-- Same adjusted initial is used for Plan 3 and Plan 6.
-- Financed totals, Formula 1 6-plan surcharge, commissions and Amarango net profitability are unchanged; only payment distribution changes.
-- Runtime verifies the actual peso-rounded schedules and guarantees initial > every later payment.
-- Cost $40.000 example: base $30.000 → protected initial $32.401 → Plan 3 later $32.400 / $32.399.
-- Regression test updated to enforce both exact closing and the strict initial-greater-than-later invariant.
+### 2026-09-25 balanced protected-initial invariant
+- Owner clarified the goal is not merely initial > later payments, but a coherent effort/relief balance across every cost tier.
+- Final initial table by markup: 80% markup → 90% of cost; 60% → 80%; 50% → 75%; 40% → 70%; 30% → 65%.
+- This is mathematically equivalent to taking 50% of the protected cash price as the initial.
+- Plan 3 therefore preserves the same pre-rounding relationship in every tier: initial is about 17.65% higher than each later payment.
+- Plan 6 uses the same initial and produces a stronger subsequent-payment relief.
+- Runtime still verifies the actual peso-rounded schedules and guarantees initial > every later payment.
+- Financed totals, +35% Plan 3, Formula 1 +78% Plan 6, commissions and Amarango net profitability remain unchanged.
+- Broad sampled QA from $1.000 to $1.000.000 found zero closing/relief failures.
+- Regression coverage locks the 90/80/75/70/65 mapping and cross-tier relief ratio.
 - No main, Supabase, production or automatic deploy.
