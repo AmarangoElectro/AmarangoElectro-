@@ -23,7 +23,6 @@ function productKey(product) {
     product.brand,
     product.model ?? "",
     product.name,
-    product.price ?? "",
   ]
     .join("|")
     .normalize("NFD")
@@ -31,7 +30,7 @@ function productKey(product) {
     .toLowerCase();
 }
 
-test("expanded V16 catalog reconstructs to 571 visible unique products", async () => {
+test("expanded V16 catalog reconstructs to 569 visible unique products", async () => {
   const pilot = JSON.parse(await source("fixtures/v411-catalog-evidence-public.json")).products
     .filter((row) => row.category !== "celulares")
     .map((row) => ({
@@ -136,7 +135,7 @@ test("expanded V16 catalog reconstructs to 571 visible unique products", async (
     }
   }
 
-  assert.equal(merged.length, 571);
+  assert.equal(merged.length, 569);
 
   const byCategory = Object.fromEntries(
     [...new Set(merged.map((row) => row.category))]
@@ -144,11 +143,16 @@ test("expanded V16 catalog reconstructs to 571 visible unique products", async (
   );
 
   assert.equal(byCategory.celulares, 90);
-  assert.equal(byCategory.electrodomesticos, 287);
+  assert.equal(byCategory.electrodomesticos, 285);
   assert.equal(byCategory["smart-tv"], 29);
   assert.equal(byCategory.audio, 33);
   assert.equal(byCategory.gaming, 6);
   assert.equal(byCategory.herramientas, 48);
+
+  const philco = merged.find((row) => row.name === "HELADERA PHILCO PHNT375XDI CON DISPENSER");
+  const kanji = merged.find((row) => row.name === "HELADERA KANJI SIDE BY SIDE 400 LTS");
+  assert.equal(philco?.price, 934500);
+  assert.equal(kanji?.price, 1027000);
 });
 
 test("expansion fixtures contain only allowlisted public product fields", async () => {

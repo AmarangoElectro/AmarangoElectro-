@@ -26,7 +26,6 @@ function productKey(product: Product) {
     product.brand,
     product.model ?? "",
     product.name,
-    product.price?.amount ?? "",
   ]
     .join("|")
     .normalize("NFD")

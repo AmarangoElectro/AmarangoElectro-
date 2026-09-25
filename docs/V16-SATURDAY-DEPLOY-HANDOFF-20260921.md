@@ -238,14 +238,14 @@ Prepared on the same branch:
 - regression floor updated in `tests/v16-catalog-expansion-391-regression.test.mjs`.
 
 
-### Catalog expansion — consolidated 571-product target
+### Catalog expansion — consolidated 569-product target
 Current active catalog composition is deduplicated and read-only:
 - 224 sanitized Electrodomésticos snapshot rows;
 - 90 canonical cellphones with sanitized price/photo evidence; legacy positions 10 and 91 remain excluded;
 - frozen cohort and non-cellphone pilot evidence;
 - public expansion batches: 63 + 5 + 31 + 50 + 99;
-- total reconstructed visible unique products: **571**;
-- category totals include: 287 Electrodomésticos, 90 Celulares, 48 Herramientas, 33 Audio, 32 Cuidado personal y salud, 29 Smart TV, 18 Hogar, 14 Otros, 6 Gaming, 5 Tecnología y accesorios, 4 Camping/aire libre/mascotas, 3 Bebés/juguetes and 2 Descanso;
+- total reconstructed visible unique products: **569**;
+- category totals include: 285 Electrodomésticos, 90 Celulares, 48 Herramientas, 33 Audio, 32 Cuidado personal y salud, 29 Smart TV, 18 Hogar, 14 Otros, 6 Gaming, 5 Tecnología y accesorios, 4 Camping/aire libre/mascotas, 3 Bebés/juguetes and 2 Descanso;
 - redundant checkpoint adapters/files remain versioned as evidence but are not active in `lib/catalog/index.ts`;
 - `lib/catalog/index.ts` has one unique adapter instance per active expansion and no duplicate `catalogExpansion31` declarations;
-- regression coverage: `tests/v16-catalog-expansion-391-regression.test.mjs` now locks the **571-product** reconstructed total.
+- regression coverage: `tests/v16-catalog-expansion-391-regression.test.mjs` now locks the **569-product** reconstructed total.
