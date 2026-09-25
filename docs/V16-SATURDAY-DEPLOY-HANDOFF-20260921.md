@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `3f50a203aab2ef760753c9dc42822ec19c8dfc56`
+- Minimum app-code HEAD covered by this handoff: `fe8cbd6ecb9a82a7c67b420bcab8665174a11877`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -277,3 +277,23 @@ Current active catalog composition is deduplicated and read-only:
 - Brand-locale matching is normalized for casing/family, preventing valid locales such as POCO from disappearing because the product brand is stored as `POCO` while locale metadata uses `Poco`.
 - Regression coverage: `tests/v16-cellphone-brand-family-regression.test.mjs`.
 - These changes are committed to GitHub only. This session has no Site/preview deploy action; the preview still requires publication from the editable Work/Site environment.
+
+
+### 2026-09-25 Plan Protegido calculator delta
+- Existing Admin calculator Formula 1 remains intact; its authoritative source blobs were not modified.
+- Administration → Calculadora now exposes two independent modes: `Fórmula actual` and `Plan Protegido`.
+- Plan Protegido is cost-only: real ARS cost is the source of truth and sale price is never reverse-engineered.
+- Exact protected markup ladder: <50k 80%; 50k..<100k 60%; 100k..<250k 50%; 250k..<350k 40%; >=350k 30%.
+- Protected cash price does not use Formula 1's legacy $500 sale rounding.
+- Initial is calculated internally from 75% of cost; commercial copy exposes only the amount, never the internal rule.
+- Customer options are only cash / 3 / 6.
+- Plan 3 uses +35% over protected cash price.
+- Plan 6 reuses Formula 1's current active 6-installment rule through `quoteInstallmentPlan`; current surcharge is 78%.
+- Customer payment schedules round only displayed/cobrable pesos and assign any remainder solely to the final later payment so the displayed total closes exactly.
+- Advisor commission stays based on protected cash price: 10% cash; 15% financed; Plan 3 commission in 2 payouts; Plan 6 commission in 3 payouts.
+- Admin view exposes real cost, cash price, markup, internal initial, financed totals, later installments, commission totals/payout counts and Amarango net result.
+- Generated customer message excludes cost, markup, 75% rule, commission and Amarango net.
+- QA boundary/report: `docs/V16-PLAN-PROTEGIDO-QA-20260925.md`.
+- Regression coverage: `tests/v16-plan-protegido-calculator.test.mjs`.
+- The actual `/administracion` workspace imports this calculator component; this is not an orphan prototype.
+- No Supabase/production/main change and no automatic deploy.
