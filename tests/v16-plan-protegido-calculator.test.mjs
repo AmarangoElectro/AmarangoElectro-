@@ -95,15 +95,20 @@ test("Classic and Plan Protegido share exactly the same definitive cash price", 
   }
 });
 
-test("Plan Protegido uses min(75% cost, 55% cash), exact commissions and closes displayed totals", async () => {
+test("Plan Protegido protects the initial above every later installment without breaking 55% cap", async () => {
   const result = await runTs(`
     import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
     const costs=[49998,49999,50000,50001,99999,100000,249999,250000,349999,350000,350001,477333];
     process.stdout.write(JSON.stringify(costs.map(cost=>quotePlanProtegido(cost))));
   `);
   for (const q of result) {
-    const expected=Math.min(q.costExact*.75,q.cashPriceExact*.55);
-    assert.ok(Math.abs(q.initialExact-expected)<0.011);
+    const initialBase=Math.min(q.costExact*.75,q.cashPriceExact*.55);
+    assert.ok(Math.abs(q.initialBaseExact-initialBase)<0.011);
+    assert.ok(q.initialExact+0.011>=q.plan3.totalExact/3);
+    assert.ok(q.initialExact+0.011>=q.plan6.totalExact/6);
+    assert.ok(q.initialExact<=q.cashPriceExact*.55+0.011);
+    assert.ok(q.plan3.schedule.laterPesos.every(payment=>q.plan3.schedule.initialPesos>payment));
+    assert.ok(q.plan6.schedule.laterPesos.every(payment=>q.plan6.schedule.initialPesos>payment));
     assert.ok(Math.abs(q.cashCommission.totalExact-q.cashPriceExact*.10)<0.011);
     assert.ok(Math.abs(q.plan3.commission.totalExact-q.cashPriceExact*.15)<0.011);
     assert.ok(Math.abs(q.plan6.commission.totalExact-q.cashPriceExact*.15)<0.011);
@@ -142,4 +147,28 @@ test("Admin calculator exposes two cost-fed formulas without write paths", async
   assert.doesNotMatch(panel,/>Venta ARS</);
   assert.match(engine,/AMARANGO_STRATEGIC_TERMINATIONS/);
   assert.doesNotMatch([panel,engine].join("\n"),/fetch\s*\(|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(|\.rpc\s*\(/i);
+});
+
+
+test("Plan Protegido QA cost 50k automatically raises initial just enough for strict later-payment relief", async () => {
+  const result = await runTs(`
+    import { quotePlanProtegido } from './lib/internal/finance/plan-protegido.ts';
+    const q=quotePlanProtegido(50000);
+    process.stdout.write(JSON.stringify(q));
+  `);
+  assert.equal(result.cashPriceExact,89999);
+  assert.equal(result.initialBaseExact,37500);
+  assert.ok(Math.abs(result.minInitial3Exact-(result.plan3.totalExact/3))<0.011);
+  assert.equal(result.initialPesos,40501);
+  assert.deepEqual(result.plan3.schedule.laterPesos,[40499,40499]);
+  assert.ok(result.plan6.schedule.laterPesos.every(payment=>result.initialPesos>payment));
+  assert.ok(result.initialExact<=result.initialCapExact);
+});
+
+test("future protected-plan configuration must fail loudly when required initial exceeds 55-percent cap", async () => {
+  const engine=await source("lib/internal/finance/plan-protegido.ts");
+  assert.match(engine,/PROTECTED_INITIAL_EXCEEDS_55_PERCENT_CASH_CAP/);
+  assert.match(engine,/requiredInitialCents > initialCapCents/);
+  assert.match(engine,/initialPesos > capPesos/);
+  assert.match(engine,/CONFIGURACIÓN INVÁLIDA|Configuración inválida|inconsistente/i);
 });

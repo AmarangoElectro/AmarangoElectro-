@@ -92,15 +92,25 @@ Comisiones:
 
 Las cuotas mostradas cierran exactamente al peso. Si la división genera diferencia, sólo la última cuota absorbe el ajuste.
 
-## Nota comercial importante
-La nueva fórmula definitiva de inicial reemplaza la regla anterior 90/80/75/70/65.
+## Corrección final de inicial
+La inicial ahora se resuelve con:
+- `initialBase = MIN(costo × 75%, contado × 55%)`;
+- `minInitial3 = totalPlan3 / 3`;
+- `minInitial6 = totalPlan6 / 6`;
+- `initial = MIN(tope55, MAX(initialBase, minInitial3, minInitial6))`.
 
-Con `MIN(75% costo, 55% contado)`, en algunos costos bajos la inicial puede ser menor que una cuota posterior de Plan 3. Ejemplo aproximado en el borde de $50.000:
-- contado: $89.999;
-- inicial: $37.500;
-- cuotas posteriores Plan 3: alrededor de $41.999 / $42.000.
+Al cobrar en pesos enteros, si el reparto deja igualdad exacta, la inicial sube únicamente el mínimo necesario para que cada cuota posterior quede estrictamente por debajo, sin cambiar el total financiado.
 
-Esto es consecuencia directa de la fórmula definitiva recibida; no se agregó un ajuste oculto que la contradiga.
+QA obligatorio costo $50.000:
+- contado definitivo: $89.999;
+- initialBase: $37.500;
+- mínimo matemático Plan 3: $40.499,55;
+- $40.500 todavía puede empatar con la última cuota por cierre a pesos;
+- inicial final: $40.501;
+- Plan 3: $40.499 + $40.499;
+- la inicial queda estrictamente por encima de ambas.
+
+Si una configuración financiera futura necesitara una inicial superior al 55% del contado, se lanza un error explícito de configuración inválida; el tope no se rompe ni se oculta.
 
 ## Seguridad
 - no main;
@@ -114,7 +124,9 @@ Esto es consecuencia directa de la fórmula definitiva recibida; no se agregó u
 - redondeo ascendente;
 - propiedad de monotonía $1..$600.000;
 - igualdad de contado Clásica vs Protegido;
-- inicial 75%/55%;
+- inicial base 75%/55% + mínimos Plan 3/6;
+- inicial estrictamente mayor que cada cuota posterior;
+- guard de configuración inválida si el mínimo supera 55%;
 - comisiones;
 - ganancias;
 - cierre exacto de cuotas;

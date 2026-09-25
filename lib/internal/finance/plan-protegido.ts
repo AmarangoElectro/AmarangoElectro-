@@ -48,9 +48,13 @@ export interface PlanProtegidoQuote {
   cashPriceExact: number;
   initialObjectiveExact: number;
   initialCapExact: number;
+  initialBaseExact: number;
+  minInitial3Exact: number;
+  minInitial6Exact: number;
   initialExact: number;
   initialPesos: number;
-  initialReason: "75_percent_cost" | "55_percent_cash_cap";
+  initialAdjustmentPesos: number;
+  initialReason: "75_percent_cost" | "55_percent_cash_cap" | "plan3_balance_floor" | "plan6_balance_floor" | "strict_relief_adjustment";
   cashCommission: ProtectedCommissionSchedule;
   cashAmarangoNetExact: number;
   plan3: ProtectedFinancedPlan;
@@ -60,6 +64,89 @@ export interface PlanProtegidoQuote {
 function positiveFinite(value: number, label: string) {
   if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} must be a positive finite number`);
   return value;
+}
+
+export class ProtectedInitialConfigurationError extends Error {
+  readonly code = "PROTECTED_INITIAL_EXCEEDS_55_PERCENT_CASH_CAP";
+  readonly requiredInitialExact: number;
+  readonly initialCapExact: number;
+
+  constructor(requiredInitialCents: number, initialCapCents: number) {
+    super("Plan Protegido inconsistente: la inicial mínima necesaria supera el tope de 55% del contado");
+    this.name = "ProtectedInitialConfigurationError";
+    this.requiredInitialExact = fromMoneyCents(requiredInitialCents);
+    this.initialCapExact = fromMoneyCents(initialCapCents);
+  }
+}
+
+function resolveProtectedInitial(
+  initialObjectiveCents: number,
+  initialCapCents: number,
+  total3Cents: number,
+  total6Cents: number,
+) {
+  const initialBaseCents = Math.min(initialObjectiveCents, initialCapCents);
+  const minInitial3Cents = Math.ceil(total3Cents / 3);
+  const minInitial6Cents = Math.ceil(total6Cents / 6);
+  const requiredInitialCents = Math.max(initialBaseCents, minInitial3Cents, minInitial6Cents);
+
+  if (requiredInitialCents > initialCapCents) {
+    throw new ProtectedInitialConfigurationError(requiredInitialCents, initialCapCents);
+  }
+
+  // Customer-facing collection works in whole pesos. Round the required
+  // mathematical minimum upward, while the commercial cap rounds downward,
+  // so the 55% ceiling can never be exceeded by display rounding.
+  const capPesos = Math.floor(initialCapCents / 100);
+  let initialPesos = Math.ceil(requiredInitialCents / 100);
+  if (initialPesos > capPesos) {
+    throw new ProtectedInitialConfigurationError(initialPesos * 100, initialCapCents);
+  }
+
+  const baseReason =
+    requiredInitialCents === minInitial3Cents && minInitial3Cents >= minInitial6Cents && minInitial3Cents >= initialBaseCents
+      ? "plan3_balance_floor"
+      : requiredInitialCents === minInitial6Cents && minInitial6Cents >= initialBaseCents
+        ? "plan6_balance_floor"
+        : initialCapCents < initialObjectiveCents
+          ? "55_percent_cash_cap"
+          : "75_percent_cost";
+
+  let reason: PlanProtegidoQuote["initialReason"] = baseReason;
+  const beforeStrictReliefPesos = initialPesos;
+
+  // Preserve the commercial promise literally: after the initial payment,
+  // every displayed payment must be lower. If whole-peso allocation creates
+  // an equality, move the minimum number of pesos into the initial payment
+  // without changing either financed total.
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const initialCents = initialPesos * 100;
+    const plan3 = buildScheduleFromCents(total3Cents, initialCents, 2);
+    const plan6 = buildScheduleFromCents(total6Cents, initialCents, 5);
+    const highestLater = Math.max(...plan3.laterPesos, ...plan6.laterPesos);
+
+    if (initialPesos > highestLater) {
+      if (initialPesos > beforeStrictReliefPesos) reason = "strict_relief_adjustment";
+      return Object.freeze({
+        initialBaseCents,
+        minInitial3Cents,
+        minInitial6Cents,
+        initialCents,
+        initialPesos,
+        initialAdjustmentPesos: initialPesos - Math.round(initialBaseCents / 100),
+        reason,
+        plan3,
+        plan6,
+      });
+    }
+
+    initialPesos += 1;
+    if (initialPesos > capPesos) {
+      throw new ProtectedInitialConfigurationError(initialPesos * 100, initialCapCents);
+    }
+  }
+
+  throw new Error("Plan Protegido inconsistente: no fue posible garantizar alivio posterior");
 }
 
 export function protectedMarkupForCost(cost: number): AmarangoMarkupPercent {
@@ -144,8 +231,6 @@ export function quotePlanProtegido(
 
   const initialObjectiveCents = Math.round(costCents * 75 / 100);
   const initialCapCents = Math.round(cashPriceCents * 55 / 100);
-  const initialCents = Math.min(initialObjectiveCents, initialCapCents);
-  const initialReason = initialCapCents < initialObjectiveCents ? "55_percent_cash_cap" : "75_percent_cost";
 
   const cashCommission = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.cashPercent, 1);
   const financedCommission3 = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.financedPercent, 2);
@@ -158,8 +243,15 @@ export function quotePlanProtegido(
   const formula1Six = quoteInstallmentPlan(pricing.commercialPrice, 6, policy);
   const total6Cents = toMoneyCents(formula1Six.total);
 
-  const plan3Schedule = buildScheduleFromCents(total3Cents, initialCents, 2);
-  const plan6Schedule = buildScheduleFromCents(total6Cents, initialCents, 5);
+  const protectedInitial = resolveProtectedInitial(
+    initialObjectiveCents,
+    initialCapCents,
+    total3Cents,
+    total6Cents,
+  );
+  const initialCents = protectedInitial.initialCents;
+  const plan3Schedule = protectedInitial.plan3;
+  const plan6Schedule = protectedInitial.plan6;
 
   const cashNetCents = cashPriceCents - costCents - toMoneyCents(cashCommission.totalExact);
   const plan3NetCents = total3Cents - costCents - toMoneyCents(financedCommission3.totalExact);
@@ -173,9 +265,13 @@ export function quotePlanProtegido(
     cashPriceExact: pricing.commercialPrice,
     initialObjectiveExact: fromMoneyCents(initialObjectiveCents),
     initialCapExact: fromMoneyCents(initialCapCents),
+    initialBaseExact: fromMoneyCents(protectedInitial.initialBaseCents),
+    minInitial3Exact: fromMoneyCents(protectedInitial.minInitial3Cents),
+    minInitial6Exact: fromMoneyCents(protectedInitial.minInitial6Cents),
     initialExact: fromMoneyCents(initialCents),
-    initialPesos: Math.round(initialCents / 100),
-    initialReason,
+    initialPesos: protectedInitial.initialPesos,
+    initialAdjustmentPesos: protectedInitial.initialAdjustmentPesos,
+    initialReason: protectedInitial.reason,
     cashCommission,
     cashAmarangoNetExact: fromMoneyCents(cashNetCents),
     plan3: Object.freeze({

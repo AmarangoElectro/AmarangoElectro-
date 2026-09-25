@@ -45,9 +45,11 @@ export function AmarangoCalculatorPanel() {
   const [protectedCost, setProtectedCost] = useState(150000);
   const [productName, setProductName] = useState("");
   const [copied, setCopied] = useState(false);
-  const protectedQuote = useMemo(() => {
-    try { return quotePlanProtegido(protectedCost); } catch { return null; }
+  const protectedState = useMemo(() => {
+    try { return { quote: quotePlanProtegido(protectedCost), error: null as string | null }; }
+    catch (error) { return { quote: null, error: error instanceof Error ? error.message : "Configuración inválida del Plan Protegido" }; }
   }, [protectedCost]);
+  const protectedQuote = protectedState.quote;
   const commercialMessage = useMemo(
     () => protectedQuote ? buildPlanProtegidoCommercialMessage(productName, protectedQuote) : "",
     [productName, protectedQuote],
@@ -105,7 +107,8 @@ export function AmarangoCalculatorPanel() {
             <div className="admin-finance-section-label"><ShieldCheck /><span>Plan Protegido · costo real</span></div>
             <label className="admin-finance-field"><span>Nombre del producto</span><div><input type="text" value={productName} onChange={(event) => setProductName(event.target.value)} placeholder="Ej. Smart TV Samsung 55&quot;" /></div></label>
             <label className="admin-finance-field"><span>Precio de costo real</span><div><b>$</b><input type="number" min="1" step="1" value={protectedCost} onChange={(event) => setProtectedCost(Number(event.target.value))} /></div></label>
-            <p className="admin-finance-helper">Comparte el mismo contado definitivo que la Calculadora Clásica. La inicial es el menor valor entre 75% del costo y 55% del contado.</p>
+            <p className="admin-finance-helper">Comparte el mismo contado definitivo que la Calculadora Clásica. La inicial busca 75% del costo, respeta el tope de 55% del contado y sube sólo lo mínimo necesario para que todas las cuotas posteriores sean menores.</p>
+            {protectedState.error && <p className="admin-finance-helper"><strong>CONFIGURACIÓN INVÁLIDA:</strong> {protectedState.error}</p>}
             {protectedQuote && (
               <div className="admin-protected-commercial">
                 <div className="admin-finance-section-label"><WalletCards /><span>Mensaje comercial</span></div>
@@ -133,8 +136,17 @@ export function AmarangoCalculatorPanel() {
                 <div><small>Precio contado definitivo</small><strong>{money(protectedQuote.cashPriceExact)}</strong></div>
                 <div><small>Objetivo inicial · 75% costo</small><strong>{money2(protectedQuote.initialObjectiveExact)}</strong></div>
                 <div><small>Tope inicial · 55% contado</small><strong>{money2(protectedQuote.initialCapExact)}</strong></div>
+                <div><small>Inicial base</small><strong>{money2(protectedQuote.initialBaseExact)}</strong></div>
+                <div><small>Mínimo Plan 3</small><strong>{money2(protectedQuote.minInitial3Exact)}</strong></div>
+                <div><small>Mínimo Plan 6</small><strong>{money2(protectedQuote.minInitial6Exact)}</strong></div>
                 <div><small>Inicial protegida</small><strong>{money(protectedQuote.initialPesos)}</strong></div>
-                <div><small>Regla que limitó</small><strong>{protectedQuote.initialReason === "55_percent_cash_cap" ? "Tope 55% contado" : "75% costo"}</strong></div>
+                <div><small>Ajuste vs. inicial base</small><strong>{money(protectedQuote.initialAdjustmentPesos)}</strong></div>
+                <div><small>Regla decisiva</small><strong>{
+                  protectedQuote.initialReason === "plan3_balance_floor" ? "Equilibrio Plan 3" :
+                  protectedQuote.initialReason === "plan6_balance_floor" ? "Equilibrio Plan 6" :
+                  protectedQuote.initialReason === "strict_relief_adjustment" ? "Alivio estricto posterior" :
+                  protectedQuote.initialReason === "55_percent_cash_cap" ? "Tope 55% contado" : "75% costo"
+                }</strong></div>
               </div>
 
               <div className="admin-protected-plan-grid">
@@ -164,7 +176,7 @@ export function AmarangoCalculatorPanel() {
                   <span>Ganancia neta Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
                 </article>
               </div>
-              <p className="admin-finance-helper">Los importes internos se conservan en centavos en los puntos monetarios nuevos. Si una división deja diferencia al mostrar pesos, sólo se ajusta la última cuota para cerrar el total exacto mostrado.</p>
+              <p className="admin-finance-helper">La inicial nunca supera 55% del contado y debe ser mayor que cada cuota posterior. Los importes internos se conservan en centavos; si una división deja diferencia al mostrar pesos, sólo se ajusta la última cuota para cerrar el total exacto mostrado.</p>
             </div>
           )}
         </div>
