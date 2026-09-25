@@ -30,3 +30,9 @@ test("Xiaomi local and accordion use brand-family matching without rewriting pro
   assert.match(accordion, /normalizeBrandFamily\(brand\.brand\)/);
   assert.match(client, /compactBrandMode \? brandsShareFamily\(product\.brand, deferredBrand\)/);
 });
+
+test("brand locales resolve casing and Redmi/Xiaomi family consistently", async () => {
+  const locale = await source("lib/theme/brand-locale.ts");
+  assert.match(locale, /brandsShareFamily\(locale\.brand, brand\)/);
+  assert.match(locale, /some\(\(brand\) => brandsShareFamily\(locale\.brand, brand\)\)/);
+});

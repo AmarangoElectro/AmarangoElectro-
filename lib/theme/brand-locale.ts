@@ -1,3 +1,5 @@
+import { brandsShareFamily } from "@/lib/catalog/brand-family";
+
 export type BrandLocaleKey =
   | "apple" | "samsung" | "motorola" | "xiaomi" | "infinix" | "poco"
   | "tcl" | "jbl" | "sony" | "playstation"
@@ -182,15 +184,15 @@ export const brandLocales: readonly BrandLocaleDefinition[] = [
 
 export function getBrandLocale(brand?: string, sector?: string): BrandLocaleDefinition | undefined {
   if (!brand) return undefined;
-  const normalized = brand.trim().toLocaleLowerCase("es-AR");
   return brandLocales.find((locale) =>
-    locale.brand.toLocaleLowerCase("es-AR") === normalized &&
+    brandsShareFamily(locale.brand, brand) &&
     (!sector || locale.sectors.includes(sector))
   );
 }
 
 export function getBrandLocalesForSector(sector: string, publishableBrands: ReadonlySet<string>) {
   return brandLocales.filter((locale) =>
-    locale.sectors.includes(sector) && publishableBrands.has(locale.brand)
+    locale.sectors.includes(sector)
+    && [...publishableBrands].some((brand) => brandsShareFamily(locale.brand, brand))
   );
 }
