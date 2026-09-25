@@ -13,6 +13,7 @@ import {
 } from "../../../lib/internal/finance/plan-protegido";
 
 const money = (value: number) => `$${Math.round(value).toLocaleString("es-AR")}`;
+const money2 = (value: number) => `$${value.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 function paymentSummary(schedule: ProtectedPaymentSchedule) {
   const payments = [...schedule.laterPesos];
@@ -32,15 +33,15 @@ function commissionSummary(commission: ProtectedCommissionSchedule) {
 export function AmarangoCalculatorPanel() {
   const [formula, setFormula] = useState<"current" | "protected">("current");
 
-  // Formula actual: preserved as-is.
-  const [mode, setMode] = useState<"cost_ars" | "sale_ars" | "cost_usd">("cost_ars");
+  // Calculadora clásica: la financiación permanece intacta, pero la base sale siempre de costo real.
+  const [mode, setMode] = useState<"cost_ars" | "cost_usd">("cost_ars");
   const [amount, setAmount] = useState(150000);
   const [fxRate, setFxRate] = useState(1500);
   const quote = useMemo(() => {
     try { return quoteAmarangoCalculator({ mode, amount, fxRate, installmentPlans:[2,4,6] }); } catch { return null; }
   }, [mode, amount, fxRate]);
 
-  // Plan Protegido: independent cost-only source of truth.
+  // Plan Protegido: comparte exactamente el mismo precio contado definitivo.
   const [protectedCost, setProtectedCost] = useState(150000);
   const [productName, setProductName] = useState("");
   const [copied, setCopied] = useState(false);
@@ -62,41 +63,49 @@ export function AmarangoCalculatorPanel() {
   return (
     <section className="admin-calculator-panel admin-finance-tool">
       <header className="admin-finance-tool-header">
-        <div className="admin-finance-tool-title"><span><Calculator /></span><div><small>HERRAMIENTA PRIVADA · SOLO ADMIN</small><h2>Calculadora AmarangoElectro</h2><p>Dos fórmulas independientes. La fórmula actual permanece intacta.</p></div></div>
+        <div className="admin-finance-tool-title"><span><Calculator /></span><div><small>HERRAMIENTA PRIVADA · SOLO ADMIN</small><h2>Calculadora AmarangoElectro</h2><p>Clásica y Plan Protegido comparten costo real, piso de coherencia y precio contado definitivo.</p></div></div>
         <span className="admin-policy-badge"><ShieldCheck /> {formula === "current" ? `Política ${AMARANGO_POLICY_VERSION}` : `Protegido ${PLAN_PROTEGIDO_VERSION}`}</span>
       </header>
 
       <div className="admin-calculator-formula-tabs" role="group" aria-label="Fórmula de financiación">
-        <button type="button" onClick={() => setFormula("current")} aria-pressed={formula === "current"}>Fórmula actual</button>
+        <button type="button" onClick={() => setFormula("current")} aria-pressed={formula === "current"}>Calculadora clásica</button>
         <button type="button" onClick={() => setFormula("protected")} aria-pressed={formula === "protected"}>Plan Protegido</button>
       </div>
 
       {formula === "current" ? (
         <div className="admin-finance-tool-grid" data-calculator-formula="current">
           <div className="admin-finance-controls">
-            <div className="admin-finance-section-label"><CircleDollarSign /><span>Punto de partida</span></div>
-            <div className="admin-calculator-modes" role="group" aria-label="Tipo de cálculo">
+            <div className="admin-finance-section-label"><CircleDollarSign /><span>Costo real · fuente de verdad</span></div>
+            <div className="admin-calculator-modes" role="group" aria-label="Moneda del costo real">
               <button type="button" onClick={() => setMode("cost_ars")} aria-pressed={mode === "cost_ars"}>Costo ARS</button>
-              <button type="button" onClick={() => setMode("sale_ars")} aria-pressed={mode === "sale_ars"}>Venta ARS</button>
               <button type="button" onClick={() => setMode("cost_usd")} aria-pressed={mode === "cost_usd"}>Costo USD</button>
             </div>
-            <label className="admin-finance-field"><span>Monto de referencia</span><div><b>$</b><input type="number" value={amount} onChange={(event) => setAmount(Number(event.target.value))} /></div></label>
+            <label className="admin-finance-field"><span>Precio de costo real</span><div><b>$</b><input type="number" min="1" step="1" value={amount} onChange={(event) => setAmount(Number(event.target.value))} /></div></label>
             {mode === "cost_usd" && <label className="admin-finance-field"><span>Cotización USD</span><div><b>$</b><input type="number" value={fxRate} onChange={(event) => setFxRate(Number(event.target.value))} /></div></label>}
-            <p className="admin-finance-helper">El cálculo es una proyección local. No guarda ni modifica productos.</p>
+            <p className="admin-finance-helper">No se infiere el costo desde el precio de venta. La financiación 2/4/6 conserva sus porcentajes actuales.</p>
           </div>
           {quote && <div className="admin-calculator-result admin-finance-result">
-            <div className="admin-result-primary"><span><WalletCards /></span><small>CONTADO SUGERIDO</small><strong>{money(quote.salePrice)}</strong><p>Costo {money(quote.costArs)} · Markup {quote.markupPercent}%</p></div>
-            <div className="admin-result-metrics"><div><small>Ganancia bruta</small><strong>{money(quote.grossMarginArs)}</strong></div><div><small>Política aplicada</small><strong>{AMARANGO_POLICY_VERSION}</strong></div></div>
-            <div className="admin-installment-grid"><div className="admin-finance-section-label"><TrendingUp /><span>Opciones de cuotas</span></div>{quote.installments.map((plan) => <article key={plan.installments}><small>{plan.installments} CUOTAS</small><strong>{money(plan.installmentAmount)}</strong><span>cada cuota</span></article>)}</div>
+            <div className="admin-result-primary"><span><WalletCards /></span><small>PRECIO CONTADO DEFINITIVO</small><strong>{money(quote.salePrice)}</strong><p>Costo {money(quote.costArs)} · Markup {quote.markupPercent}%</p></div>
+            <div className="admin-result-metrics admin-protected-base-metrics">
+              <div><small>Precio antes de coherencia</small><strong>{quote.markupPrice === null ? "—" : money2(quote.markupPrice)}</strong></div>
+              <div><small>Piso de coherencia</small><strong>{quote.coherenceApplied ? "SÍ" : "NO"}</strong></div>
+              <div><small>Precio coherente</small><strong>{quote.coherentPrice === null ? "—" : money2(quote.coherentPrice)}</strong></div>
+              <div><small>Terminación comercial</small><strong>{quote.commercialTermination === null ? "—" : `.${String(quote.commercialTermination).padStart(3,"0")}`}</strong></div>
+              <div><small>Ajuste comercial</small><strong>{quote.commercialAdjustmentArs === null ? "—" : money2(quote.commercialAdjustmentArs)}</strong></div>
+              <div><small>Comisión contado 10%</small><strong>{money(quote.salePrice * .10)}</strong></div>
+              <div><small>Ganancia neta contado</small><strong>{money(quote.salePrice - quote.costArs - quote.salePrice * .10)}</strong></div>
+              <div><small>Política financiera</small><strong>{AMARANGO_POLICY_VERSION}</strong></div>
+            </div>
+            <div className="admin-installment-grid"><div className="admin-finance-section-label"><TrendingUp /><span>Opciones clásicas</span></div>{quote.installments.map((plan) => <article key={plan.installments}><small>{plan.installments} CUOTAS</small><strong>{money(plan.installmentAmount)}</strong><span>Total {money(plan.total)}</span><span>Comisión 15% contado: {money(quote.salePrice * .15)}</span><span>Ganancia Amarango: {money(plan.total - quote.costArs - quote.salePrice * .15)}</span></article>)}</div>
           </div>}
         </div>
       ) : (
         <div className="admin-finance-tool-grid admin-protected-grid" data-calculator-formula="protected">
           <div className="admin-finance-controls">
-            <div className="admin-finance-section-label"><ShieldCheck /><span>Plan Protegido · costo como fuente de verdad</span></div>
+            <div className="admin-finance-section-label"><ShieldCheck /><span>Plan Protegido · costo real</span></div>
             <label className="admin-finance-field"><span>Nombre del producto</span><div><input type="text" value={productName} onChange={(event) => setProductName(event.target.value)} placeholder="Ej. Smart TV Samsung 55&quot;" /></div></label>
             <label className="admin-finance-field"><span>Precio de costo real</span><div><b>$</b><input type="number" min="1" step="1" value={protectedCost} onChange={(event) => setProtectedCost(Number(event.target.value))} /></div></label>
-            <p className="admin-finance-helper">Esta fórmula no deduce costos ni usa el precio de venta como origen. El costo cargado es la fuente de verdad.</p>
+            <p className="admin-finance-helper">Comparte el mismo contado definitivo que la Calculadora Clásica. La inicial es el menor valor entre 75% del costo y 55% del contado.</p>
             {protectedQuote && (
               <div className="admin-protected-commercial">
                 <div className="admin-finance-section-label"><WalletCards /><span>Mensaje comercial</span></div>
@@ -112,15 +121,20 @@ export function AmarangoCalculatorPanel() {
                 <span><ShieldCheck /></span>
                 <small>🐝 LLEVÁTELO HOY POR</small>
                 <strong>{money(protectedQuote.initialPesos)}</strong>
-                <p>Contado {money(protectedQuote.cashPriceExact)} · Markup interno {protectedQuote.markupPercent}%</p>
+                <p>Contado {money(protectedQuote.cashPriceExact)} · Markup {protectedQuote.markupPercent}%</p>
               </div>
 
               <div className="admin-result-metrics admin-protected-base-metrics">
                 <div><small>Costo real</small><strong>{money(protectedQuote.costExact)}</strong></div>
-                <div><small>Precio contado</small><strong>{money(protectedQuote.cashPriceExact)}</strong></div>
-                <div><small>Markup aplicado</small><strong>{protectedQuote.markupPercent}%</strong></div>
-                <div><small>% inicial sobre costo</small><strong>{protectedQuote.initialPercentOfCost}%</strong></div>
+                <div><small>Precio antes de coherencia</small><strong>{money2(protectedQuote.pricing.markupPrice)}</strong></div>
+                <div><small>Piso aplicado</small><strong>{protectedQuote.pricing.coherenceApplied ? "SÍ" : "NO"}</strong></div>
+                <div><small>Precio coherente</small><strong>{money2(protectedQuote.pricing.coherentPrice)}</strong></div>
+                <div><small>Terminación comercial</small><strong>{`.${String(protectedQuote.pricing.commercialTermination).padStart(3,"0")}`}</strong></div>
+                <div><small>Precio contado definitivo</small><strong>{money(protectedQuote.cashPriceExact)}</strong></div>
+                <div><small>Objetivo inicial · 75% costo</small><strong>{money2(protectedQuote.initialObjectiveExact)}</strong></div>
+                <div><small>Tope inicial · 55% contado</small><strong>{money2(protectedQuote.initialCapExact)}</strong></div>
                 <div><small>Inicial protegida</small><strong>{money(protectedQuote.initialPesos)}</strong></div>
+                <div><small>Regla que limitó</small><strong>{protectedQuote.initialReason === "55_percent_cash_cap" ? "Tope 55% contado" : "75% costo"}</strong></div>
               </div>
 
               <div className="admin-protected-plan-grid">
@@ -150,7 +164,7 @@ export function AmarangoCalculatorPanel() {
                   <span>Ganancia neta Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
                 </article>
               </div>
-              <p className="admin-finance-helper">La inicial se equilibra por tramo: 90% / 80% / 75% / 70% / 65% del costo según el markup. Eso equivale a 50% del precio contado y mantiene una relación consistente: en Plan 3 la inicial es aproximadamente 17,65% mayor que cada cuota posterior. Ajuste técnico por redondeo: {money(protectedQuote.roundingAdjustmentPesos)}.</p>
+              <p className="admin-finance-helper">Los importes internos se conservan en centavos en los puntos monetarios nuevos. Si una división deja diferencia al mostrar pesos, sólo se ajusta la última cuota para cerrar el total exacto mostrado.</p>
             </div>
           )}
         </div>

@@ -1,13 +1,13 @@
 import {
   markupForCost,
   quoteInstallmentPlan,
-  quoteSaleFromCost,
   roundTo,
   type CommercePolicy,
   type InstallmentQuote,
   type SaleQuote,
 } from "./calculator-engine";
 import { AMARANGO_CURRENT_POLICY } from "./amarango-policy";
+import { quoteCoherentCashPrice } from "./coherent-pricing";
 
 export interface AmarangoCalculatorInput {
   mode: "cost_ars" | "sale_ars" | "cost_usd";
@@ -31,6 +31,12 @@ export interface AmarangoCalculatorQuote {
   discountPercent: number;
   grossMarginArs: number;
   installments: readonly InstallmentQuote[];
+  markupPrice: number | null;
+  coherenceFloor: number | null;
+  coherenceApplied: boolean;
+  coherentPrice: number | null;
+  commercialTermination: number | null;
+  commercialAdjustmentArs: number | null;
 }
 
 function positive(value: number, label: string): number {
@@ -38,6 +44,10 @@ function positive(value: number, label: string): number {
   return value;
 }
 
+/**
+ * Legacy helper kept only for compatibility with historical Plate "Venta" mode.
+ * Authoritative V16 calculators no longer use reverse sale->cost inference.
+ */
 export function estimateCostFromSale(
   salePrice: number,
   policy: CommercePolicy = AMARANGO_CURRENT_POLICY,
@@ -45,7 +55,7 @@ export function estimateCostFromSale(
   positive(salePrice, "salePrice");
   for (const tier of policy.pricingTiers) {
     const candidate = salePrice / (1 + tier.markupPercent / 100);
-    if (tier.maxCost === null || candidate <= tier.maxCost) {
+    if (tier.maxCost === null || candidate < tier.maxCost) {
       return {
         cost: Math.round(candidate),
         salePrice: roundTo(salePrice, policy.rounding.sale),
@@ -71,18 +81,25 @@ export function quoteAmarangoCalculator(
   let costUsd: number | null = null;
   let fxRate: number | null = null;
   let baseQuote: SaleQuote;
+  let coherent = null as ReturnType<typeof quoteCoherentCashPrice> | null;
 
   if (input.mode === "cost_usd") {
     fxRate = positive(input.fxRate ?? 0, "fxRate");
     costUsd = input.amount;
     costArs = Math.round(costUsd * fxRate);
-    baseQuote = quoteSaleFromCost(costArs, policy, input.manualMarkupPercent);
+    coherent = quoteCoherentCashPrice(costArs);
+    baseQuote = { cost: costArs, salePrice: coherent.commercialPrice, markupPercent: coherent.markupPercent };
   } else if (input.mode === "sale_ars") {
     baseQuote = estimateCostFromSale(input.amount, policy);
     costArs = baseQuote.cost;
   } else {
     costArs = input.amount;
-    baseQuote = quoteSaleFromCost(costArs, policy, input.manualMarkupPercent);
+    coherent = quoteCoherentCashPrice(costArs);
+    baseQuote = { cost: costArs, salePrice: coherent.commercialPrice, markupPercent: coherent.markupPercent };
+  }
+
+  if (input.manualMarkupPercent !== undefined && coherent) {
+    throw new Error("Authoritative cost calculators use the fixed Amarango markup ladder");
   }
 
   const saleBeforeDiscount = baseQuote.salePrice;
@@ -106,5 +123,11 @@ export function quoteAmarangoCalculator(
     discountPercent,
     grossMarginArs: salePrice - costArs,
     installments: Object.freeze(installments),
+    markupPrice: coherent?.markupPrice ?? null,
+    coherenceFloor: coherent?.coherenceFloor ?? null,
+    coherenceApplied: coherent?.coherenceApplied ?? false,
+    coherentPrice: coherent?.coherentPrice ?? null,
+    commercialTermination: coherent?.commercialTermination ?? null,
+    commercialAdjustmentArs: coherent?.commercialAdjustment ?? null,
   });
 }

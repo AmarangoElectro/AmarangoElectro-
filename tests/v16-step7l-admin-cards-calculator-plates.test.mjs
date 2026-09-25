@@ -23,8 +23,8 @@ test("Step 7L uses the current Amarango markup and 2/4/6 policy in an Admin-only
   assert.equal(result.gov.adminOnly, true);
   assert.deepEqual(result.tiers.map(x=>x.markupPercent), [80,60,50,40,30]);
   assert.deepEqual(result.plans.map(x=>[x.installments,x.surchargePercent]), [[2,15],[4,55],[6,78]]);
-  assert.deepEqual(result.costs.map(x=>x.markupPercent), [80,60,50,40,30]);
-  assert.equal(result.costs[0].salePrice, 90000);
+  assert.deepEqual(result.costs.map(x=>x.markupPercent), [60,50,40,30,30]);
+  assert.equal(result.costs[0].salePrice, 89999);
   assert.equal(result.costs[0].installments[0].installmentAmount, 52000);
   assert.equal(result.reverse.cost, 50000);
 });
@@ -36,7 +36,7 @@ test("Step 7L System Placas preserves Cost/Venta/USD paste behavior and keeps pr
     const usd=buildPlate({text:'Motorola G15 256GB\\n150usd',mode:'usd',fxRate:1500,installmentPlans:[2,4,6],discountPercent:10});
     process.stdout.write(JSON.stringify({cost,usd}));
   `);
-  assert.equal(result.cost.publicSalePrice, 90000);
+  assert.equal(result.cost.publicSalePrice, 89999);
   assert.equal(result.cost.privateAdmin.costArs, 50000);
   assert.match(result.cost.shareText, /2 cuotas fijas/);
   assert.doesNotMatch(result.cost.shareText, /50\.000|COSTO|markup/i);

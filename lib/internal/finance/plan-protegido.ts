@@ -1,7 +1,15 @@
 import { quoteInstallmentPlan, type CommercePolicy } from "./calculator-engine";
 import { AMARANGO_CURRENT_POLICY } from "./amarango-policy";
+import {
+  fromMoneyCents,
+  markupForRealCost,
+  quoteCoherentCashPrice,
+  toMoneyCents,
+  type AmarangoMarkupPercent,
+  type CoherentCashPriceQuote,
+} from "./coherent-pricing";
 
-export const PLAN_PROTEGIDO_VERSION = "2026-09-25";
+export const PLAN_PROTEGIDO_VERSION = "2026-09-25-coherencia";
 export const PLAN_PROTEGIDO_THREE_SURCHARGE_PERCENT = 35;
 
 export interface ProtectedPaymentSchedule {
@@ -34,13 +42,15 @@ export interface ProtectedFinancedPlan {
 
 export interface PlanProtegidoQuote {
   version: string;
+  pricing: CoherentCashPriceQuote;
   costExact: number;
-  markupPercent: 80 | 60 | 50 | 40 | 30;
+  markupPercent: AmarangoMarkupPercent;
   cashPriceExact: number;
-  initialPercentOfCost: 90 | 80 | 75 | 70 | 65;
+  initialObjectiveExact: number;
+  initialCapExact: number;
   initialExact: number;
   initialPesos: number;
-  roundingAdjustmentPesos: number;
+  initialReason: "75_percent_cost" | "55_percent_cash_cap";
   cashCommission: ProtectedCommissionSchedule;
   cashAmarangoNetExact: number;
   plan3: ProtectedFinancedPlan;
@@ -52,13 +62,8 @@ function positiveFinite(value: number, label: string) {
   return value;
 }
 
-export function protectedMarkupForCost(cost: number): 80 | 60 | 50 | 40 | 30 {
-  positiveFinite(cost, "cost");
-  if (cost < 50_000) return 80;
-  if (cost < 100_000) return 60;
-  if (cost < 250_000) return 50;
-  if (cost < 350_000) return 40;
-  return 30;
+export function protectedMarkupForCost(cost: number): AmarangoMarkupPercent {
+  return markupForRealCost(cost);
 }
 
 export function roundProtectedPeso(value: number) {
@@ -66,56 +71,33 @@ export function roundProtectedPeso(value: number) {
   return Math.round(value);
 }
 
-export function protectedInitialPercentForMarkup(
-  markupPercent: 80 | 60 | 50 | 40 | 30,
-): 90 | 80 | 75 | 70 | 65 {
-  if (markupPercent === 80) return 90;
-  if (markupPercent === 60) return 80;
-  if (markupPercent === 50) return 75;
-  if (markupPercent === 40) return 70;
-  return 65;
-}
+function buildScheduleFromCents(
+  totalCents: number,
+  initialCents: number,
+  laterCount: number,
+): ProtectedPaymentSchedule {
+  if (!Number.isInteger(totalCents) || totalCents <= 0) throw new RangeError("totalCents must be positive integer cents");
+  if (!Number.isInteger(initialCents) || initialCents <= 0) throw new RangeError("initialCents must be positive integer cents");
+  if (!Number.isInteger(laterCount) || laterCount < 1) throw new RangeError("laterCount must be an integer >= 1");
+  if (initialCents >= totalCents) throw new RangeError("initial must be lower than total");
 
-/**
- * Balanced protected initial:
- * - mathematically equals 50% of the protected cash price;
- * - therefore maps to 90/80/75/70/65% of cost across markup tiers;
- * - keeps Plan 3 relief consistent across every tier;
- * - may move only by whole pesos if display rounding ever threatens
- *   the strict "initial > every later payment" invariant.
- */
-function protectedInitialForBalance(
-  initialExact: number,
-  total3Exact: number,
-  total6Exact: number,
-) {
-  let initialPesos = roundProtectedPeso(initialExact);
-  const policyInitialPesos = initialPesos;
+  const balanceCents = totalCents - initialCents;
+  const totalPesos = Math.round(totalCents / 100);
+  const initialPesos = Math.round(initialCents / 100);
+  const laterPaymentExact = fromMoneyCents(balanceCents) / laterCount;
+  const standardLaterPesos = Math.round(laterPaymentExact);
+  const laterPesos = Array.from({ length: laterCount }, () => standardLaterPesos);
+  laterPesos[laterPesos.length - 1] = totalPesos - initialPesos - standardLaterPesos * (laterCount - 1);
 
-  for (let attempt = 0; attempt < 12; attempt += 1) {
-    const plan3 = buildProtectedPaymentSchedule(total3Exact, initialPesos, 2);
-    const plan6 = buildProtectedPaymentSchedule(total6Exact, initialPesos, 5);
-    const highestLater = Math.max(...plan3.laterPesos, ...plan6.laterPesos);
-    if (initialPesos > highestLater) {
-      return Object.freeze({
-        initialPesos,
-        roundingAdjustmentPesos: initialPesos - policyInitialPesos,
-      });
-    }
-    initialPesos += 1;
-  }
-
-  throw new Error("Unable to guarantee balanced protected initial above later payments");
-}
-
-function allocateRoundedAmounts(totalExact: number, equalPaymentExact: number, count: number) {
-  const totalPesos = roundProtectedPeso(totalExact);
-  const standard = roundProtectedPeso(equalPaymentExact);
-  const payments = Array.from({ length: count }, () => standard);
-  if (payments.length) {
-    payments[payments.length - 1] = totalPesos - standard * (payments.length - 1);
-  }
-  return { totalPesos, payments: Object.freeze(payments) };
+  return Object.freeze({
+    totalExact: fromMoneyCents(totalCents),
+    initialExact: fromMoneyCents(initialCents),
+    balanceExact: fromMoneyCents(balanceCents),
+    laterPaymentExact,
+    totalPesos,
+    initialPesos,
+    laterPesos: Object.freeze(laterPesos),
+  });
 }
 
 export function buildProtectedPaymentSchedule(
@@ -125,44 +107,28 @@ export function buildProtectedPaymentSchedule(
 ): ProtectedPaymentSchedule {
   positiveFinite(totalExact, "totalExact");
   positiveFinite(initialExact, "initialExact");
-  if (!Number.isInteger(laterCount) || laterCount < 1) throw new RangeError("laterCount must be an integer >= 1");
-  if (initialExact >= totalExact) throw new RangeError("initialExact must be lower than totalExact");
-
-  const balanceExact = totalExact - initialExact;
-  const laterPaymentExact = balanceExact / laterCount;
-  const totalPesos = roundProtectedPeso(totalExact);
-  const initialPesos = roundProtectedPeso(initialExact);
-  const balancePesos = totalPesos - initialPesos;
-  const standardLaterPeso = roundProtectedPeso(laterPaymentExact);
-  const laterPesos = Array.from({ length: laterCount }, () => standardLaterPeso);
-  laterPesos[laterPesos.length - 1] = balancePesos - standardLaterPeso * (laterPesos.length - 1);
-
-  return Object.freeze({
-    totalExact,
-    initialExact,
-    balanceExact,
-    laterPaymentExact,
-    totalPesos,
-    initialPesos,
-    laterPesos: Object.freeze(laterPesos),
-  });
+  return buildScheduleFromCents(toMoneyCents(totalExact), toMoneyCents(initialExact), laterCount);
 }
 
-function quoteProtectedCommission(
-  cashPriceExact: number,
+function quoteProtectedCommissionFromCents(
+  cashPriceCents: number,
   percent: number,
   paymentCount: number,
 ): ProtectedCommissionSchedule {
-  const totalExact = cashPriceExact * percent / 100;
-  const paymentExact = totalExact / paymentCount;
-  const allocation = allocateRoundedAmounts(totalExact, paymentExact, paymentCount);
+  const totalCents = Math.round(cashPriceCents * percent / 100);
+  const paymentExact = fromMoneyCents(totalCents) / paymentCount;
+  const totalPesos = Math.round(totalCents / 100);
+  const standardPesos = Math.round(paymentExact);
+  const paymentPesos = Array.from({ length: paymentCount }, () => standardPesos);
+  paymentPesos[paymentPesos.length - 1] = totalPesos - standardPesos * (paymentCount - 1);
+
   return Object.freeze({
     percent,
-    totalExact,
-    totalPesos: allocation.totalPesos,
+    totalExact: fromMoneyCents(totalCents),
+    totalPesos,
     paymentCount,
     paymentExact,
-    paymentPesos: allocation.payments,
+    paymentPesos: Object.freeze(paymentPesos),
   });
 }
 
@@ -172,54 +138,61 @@ export function quotePlanProtegido(
 ): PlanProtegidoQuote {
   positiveFinite(cost, "cost");
 
-  const markupPercent = protectedMarkupForCost(cost);
-  const cashPriceExact = cost * (100 + markupPercent) / 100;
-  const initialPercentOfCost = protectedInitialPercentForMarkup(markupPercent);
-  const initialExact = cost * initialPercentOfCost / 100;
+  const pricing = quoteCoherentCashPrice(cost);
+  const costCents = toMoneyCents(pricing.cost);
+  const cashPriceCents = toMoneyCents(pricing.commercialPrice);
 
-  const cashCommission = quoteProtectedCommission(cashPriceExact, policy.commission.cashPercent, 1);
-  const financedCommission3 = quoteProtectedCommission(cashPriceExact, policy.commission.financedPercent, 2);
-  const financedCommission6 = quoteProtectedCommission(cashPriceExact, policy.commission.financedPercent, 3);
+  const initialObjectiveCents = Math.round(costCents * 75 / 100);
+  const initialCapCents = Math.round(cashPriceCents * 55 / 100);
+  const initialCents = Math.min(initialObjectiveCents, initialCapCents);
+  const initialReason = initialCapCents < initialObjectiveCents ? "55_percent_cash_cap" : "75_percent_cost";
 
-  const total3Exact = cashPriceExact * (100 + PLAN_PROTEGIDO_THREE_SURCHARGE_PERCENT) / 100;
+  const cashCommission = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.cashPercent, 1);
+  const financedCommission3 = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.financedPercent, 2);
+  const financedCommission6 = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.financedPercent, 3);
 
-  // Reuse Formula 1's active 6-installment financial rule. We intentionally
-  // consume its exact total and redistribute it; its legacy rounded
-  // installmentAmount is not used by Plan Protegido.
-  const formula1Six = quoteInstallmentPlan(cashPriceExact, 6, policy);
-  const total6Exact = formula1Six.total;
+  const total3Cents = Math.round(cashPriceCents * (100 + PLAN_PROTEGIDO_THREE_SURCHARGE_PERCENT) / 100);
 
-  const protectedInitial = protectedInitialForBalance(initialExact, total3Exact, total6Exact);
-  const collectedInitialPesos = protectedInitial.initialPesos;
-  const plan3Schedule = buildProtectedPaymentSchedule(total3Exact, collectedInitialPesos, 2);
-  const plan6Schedule = buildProtectedPaymentSchedule(total6Exact, collectedInitialPesos, 5);
+  // Reuse Formula 1's active 6-installment financial total exactly, then
+  // redistribute only the collection timing into one initial + five later payments.
+  const formula1Six = quoteInstallmentPlan(pricing.commercialPrice, 6, policy);
+  const total6Cents = toMoneyCents(formula1Six.total);
+
+  const plan3Schedule = buildScheduleFromCents(total3Cents, initialCents, 2);
+  const plan6Schedule = buildScheduleFromCents(total6Cents, initialCents, 5);
+
+  const cashNetCents = cashPriceCents - costCents - toMoneyCents(cashCommission.totalExact);
+  const plan3NetCents = total3Cents - costCents - toMoneyCents(financedCommission3.totalExact);
+  const plan6NetCents = total6Cents - costCents - toMoneyCents(financedCommission6.totalExact);
 
   return Object.freeze({
     version: PLAN_PROTEGIDO_VERSION,
-    costExact: cost,
-    markupPercent,
-    cashPriceExact,
-    initialPercentOfCost,
-    initialExact,
-    initialPesos: protectedInitial.initialPesos,
-    roundingAdjustmentPesos: protectedInitial.roundingAdjustmentPesos,
+    pricing,
+    costExact: pricing.cost,
+    markupPercent: pricing.markupPercent,
+    cashPriceExact: pricing.commercialPrice,
+    initialObjectiveExact: fromMoneyCents(initialObjectiveCents),
+    initialCapExact: fromMoneyCents(initialCapCents),
+    initialExact: fromMoneyCents(initialCents),
+    initialPesos: Math.round(initialCents / 100),
+    initialReason,
     cashCommission,
-    cashAmarangoNetExact: cashPriceExact - cost - cashCommission.totalExact,
+    cashAmarangoNetExact: fromMoneyCents(cashNetCents),
     plan3: Object.freeze({
       installments: 3,
       surchargePercent: PLAN_PROTEGIDO_THREE_SURCHARGE_PERCENT,
-      totalExact: total3Exact,
+      totalExact: fromMoneyCents(total3Cents),
       schedule: plan3Schedule,
       commission: financedCommission3,
-      amarangoNetExact: total3Exact - cost - financedCommission3.totalExact,
+      amarangoNetExact: fromMoneyCents(plan3NetCents),
     }),
     plan6: Object.freeze({
       installments: 6,
       surchargePercent: formula1Six.surchargePercent,
-      totalExact: total6Exact,
+      totalExact: fromMoneyCents(total6Cents),
       schedule: plan6Schedule,
       commission: financedCommission6,
-      amarangoNetExact: total6Exact - cost - financedCommission6.totalExact,
+      amarangoNetExact: fromMoneyCents(plan6NetCents),
     }),
   });
 }
@@ -246,7 +219,6 @@ export function buildPlanProtegidoCommercialMessage(productName: string, quote: 
     `🔥 ${safeName}`,
     "",
     `🐝 ¡Llevátelo hoy por solo ${formatProtectedArs(quote.initialPesos)}!`,
-    "",
     "Después elegí cómo seguir 👇",
     "",
     "🚀 PLAN 3 CUOTAS",
