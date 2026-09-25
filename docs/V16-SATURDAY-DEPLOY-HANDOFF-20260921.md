@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `70cc0678c3e9a8f2fac3a530e792282b1ce94c4f`
+- Minimum app-code HEAD covered by this handoff: `3f50a203aab2ef760753c9dc42822ec19c8dfc56`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -262,3 +262,18 @@ Current active catalog composition is deduplicated and read-only:
 - no GitHub Actions workflow exists in the repository; commits do not auto-deploy;
 - build entry remains `npm run build` -> `scripts/build-verified.sh` -> bounded `vinext build`;
 - publish only this branch tip to `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`, then perform browser/live visual validation before any production action.
+
+
+### 2026-09-24 product-photo framing + cellphone brand-family delta
+- Product images remain the original catalog URLs; no image asset was replaced, generated or reassigned.
+- Product cards and PDP now expose category/subcategory only as presentation metadata for image framing.
+- Photo framing is shape-aware and remains `object-fit: contain`: Celulares, Smart TV, Audio, Herramientas and tall Electrodomésticos use separate padding/object-position rules.
+- Refrigeración and Lavado are bottom-aligned in cards/PDP so tall appliances sit naturally inside the frame instead of floating vertically.
+- Smart TV uses a wider visual frame; Celulares retain lateral breathing room; Audio/Herramientas use a larger usable image area.
+- Mobile framing has explicit rules under 680 px and preserves the approved two-cards-per-row layout.
+- Regression coverage: `tests/v16-product-image-framing-regression.test.mjs`.
+- Cellphone brand-family navigation now treats Redmi as part of the Xiaomi storefront family without rewriting the product's stored/displayed brand.
+- Default cellphone accordion now resolves the full 90-product cohort: 15 Apple + 20 Samsung + 25 Motorola + 12 Xiaomi/Redmi + 7 Infinix + 11 POCO.
+- Brand-locale matching is normalized for casing/family, preventing valid locales such as POCO from disappearing because the product brand is stored as `POCO` while locale metadata uses `Poco`.
+- Regression coverage: `tests/v16-cellphone-brand-family-regression.test.mjs`.
+- These changes are committed to GitHub only. This session has no Site/preview deploy action; the preview still requires publication from the editable Work/Site environment.
