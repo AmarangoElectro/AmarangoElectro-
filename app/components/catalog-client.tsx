@@ -25,6 +25,7 @@ import {
 } from "@/lib/commerce/compare-store";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-banner";
+import { brandsShareFamily } from "@/lib/catalog/brand-family";
 
 const brandProfiles = {
   Todos: {
@@ -96,7 +97,10 @@ export function CatalogClient({
 }: CatalogClientProps) {
   const brands = useMemo(() => ["Todos", ...new Set(products.map((product) => product.brand))], [products]);
   const categoryOptions = useMemo(() => ["Todas", ...new Set(products.map((product) => product.category))], [products]);
-  const [brand, setBrand] = useState(() => brands.includes(initialBrand) ? initialBrand : "Todos");
+  const [brand, setBrand] = useState(() => {
+    if (brands.includes(initialBrand)) return initialBrand;
+    return brands.find((item) => item !== "Todos" && brandsShareFamily(item, initialBrand)) ?? "Todos";
+  });
   const [category, setCategory] = useState(() => categoryOptions.includes(initialCategory) ? initialCategory : "Todas");
   const [search, setSearch] = useState(initialSearch);
   const [sort, setSort] = useState(initialSort);
@@ -128,7 +132,8 @@ export function CatalogClient({
 
   const filtered = useMemo(() => {
     const candidates = products.filter((product) => {
-      const brandMatches = deferredBrand === "Todos" || product.brand === deferredBrand;
+      const brandMatches = deferredBrand === "Todos"
+        || (compactBrandMode ? brandsShareFamily(product.brand, deferredBrand) : product.brand === deferredBrand);
       const categoryMatches = deferredCategory === "Todas" || product.category === deferredCategory;
       const favoriteMatches = !deferredFavoritesOnly || favoriteIds.has(product.id);
       const availableMatches = !deferredAvailableOnly || product.stock.status === "in_stock";
@@ -142,7 +147,7 @@ export function CatalogClient({
     if (deferredSort === "price-asc") return [...result].sort((a, b) => (a.price?.amount ?? Number.POSITIVE_INFINITY) - (b.price?.amount ?? Number.POSITIVE_INFINITY));
     if (deferredSort === "price-desc") return [...result].sort((a, b) => (b.price?.amount ?? Number.NEGATIVE_INFINITY) - (a.price?.amount ?? Number.NEGATIVE_INFINITY));
     return result;
-  }, [deferredAvailableOnly, deferredBrand, deferredCategory, deferredFavoritesOnly, deferredMaxPrice, deferredSearch, deferredSort, favoriteIds, products]);
+  }, [compactBrandMode, deferredAvailableOnly, deferredBrand, deferredCategory, deferredFavoritesOnly, deferredMaxPrice, deferredSearch, deferredSort, favoriteIds, products]);
 
   const correction = useMemo(
     () => (filtered.length === 0 && deferredSearch.trim() ? suggestCatalogCorrection(products, deferredSearch) : null),

@@ -9,6 +9,7 @@ import { getBrandCampaignArtwork } from "./brand-campaign-banner";
 import { ProductCard } from "./product-card";
 import Link from "./store-link";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
+import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
 
 type BrandProductAccordionProps = {
   categorySlug: string;
@@ -16,16 +17,12 @@ type BrandProductAccordionProps = {
   brands: SubcategoryDefinition[];
 };
 
-function normalizeBrand(value: string) {
-  return value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-AR");
-}
-
 export function BrandProductAccordion({ categorySlug, products, brands }: BrandProductAccordionProps) {
   const [openBrands, setOpenBrands] = useState<Set<string>>(() => new Set());
   const productsByBrand = useMemo(() => {
     const grouped = new Map<string, Product[]>();
     for (const product of products) {
-      const key = normalizeBrand(product.brand);
+      const key = normalizeBrandFamily(product.brand);
       grouped.set(key, [...(grouped.get(key) ?? []), product]);
     }
     return grouped;
@@ -50,7 +47,7 @@ export function BrandProductAccordion({ categorySlug, products, brands }: BrandP
         {brands.map((brand) => {
           if (!brand.brand) return null;
           const artwork = getBrandCampaignArtwork(brand.brand);
-          const brandProducts = productsByBrand.get(normalizeBrand(brand.brand)) ?? [];
+          const brandProducts = productsByBrand.get(normalizeBrandFamily(brand.brand)) ?? [];
           const isOpen = openBrands.has(brand.slug);
           const panelId = `brand-products-${brand.slug}`;
 

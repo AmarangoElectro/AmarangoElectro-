@@ -16,6 +16,7 @@ import { AllSectorsSheet } from "@/app/components/all-sectors-sheet";
 import { BrandProductAccordion } from "@/app/components/brand-product-accordion";
 import { getBrandLocale, getBrandLocalesForSector } from "@/lib/theme/brand-locale";
 import { deriveSubcategoryContext } from "@/lib/navigation/subcategory-context";
+import { brandsShareFamily } from "@/lib/catalog/brand-family";
 
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
@@ -49,14 +50,14 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   ]);
   const availableBrands = new Set(categoryProducts.map((product) => product.brand));
   const knownBrands = new Set([...category.brands, ...category.subcategories.flatMap((item) => item.brand ? [item.brand] : [])]);
-  const requestedBrand = rawRequestedBrand && availableBrands.has(rawRequestedBrand) ? rawRequestedBrand : undefined;
-  const requestedCampaignBrand = requestedBrand ?? (rawRequestedBrand
-    ? [...knownBrands].find((brand) => brand.toLocaleLowerCase("es-AR") === rawRequestedBrand.toLocaleLowerCase("es-AR"))
-    : undefined);
+  const requestedCampaignBrand = rawRequestedBrand
+    ? [...knownBrands].find((brand) => brandsShareFamily(brand, rawRequestedBrand))
+      ?? [...availableBrands].find((brand) => brandsShareFamily(brand, rawRequestedBrand))
+    : undefined;
   const products = requestedCampaignBrand
-    ? categoryProducts.filter((product) => product.brand.toLocaleLowerCase("es-AR") === requestedCampaignBrand.toLocaleLowerCase("es-AR"))
+    ? categoryProducts.filter((product) => brandsShareFamily(product.brand, requestedCampaignBrand))
     : categoryProducts;
-  const initialBrand = requestedBrand;
+  const initialBrand = requestedCampaignBrand;
   const brandLocale = getBrandLocale(requestedBrand, slug);
   const publishableBrandLocales = getBrandLocalesForSector(slug, availableBrands);
   const initialSearch = typeof q === "string" ? q.slice(0, 120) : "";
