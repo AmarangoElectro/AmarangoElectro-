@@ -25,5 +25,6 @@ test("photo framing keeps contain and adapts by product shape", async () => {
   assert.match(css, /data-product-category="audio"[\s\S]*?object-position:\s*center bottom/);
   assert.match(css, /data-product-subcategory="refrigeracion"[\s\S]*?object-position:\s*center bottom/);
   assert.match(css, /data-product-subcategory="lavado"[\s\S]*?object-position:\s*center bottom/);
-  assert.doesNotMatch(css, /V16 PRODUCT PHOTO FRAMING[\s\S]*?object-fit:\s*cover/);
+  assert.match(css, /\.product-card-premium \.product-image\s*\{[^}]*object-fit:\s*contain/);
+  assert.match(css, /\.detail-product-image\s*\{[^}]*object-fit:\s*contain/);
 });
