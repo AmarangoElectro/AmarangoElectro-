@@ -4,7 +4,7 @@
 
 - Repository: `AmarangoElectro/AmarangoElectro-`
 - Branch: `work/v16-modelo-correcto-live-20260919`
-- Minimum app-code HEAD covered by this handoff: `ea583b297abde0380f7a2a36482c5c369ed17602`
+- Minimum app-code HEAD covered by this handoff: `70cc0678c3e9a8f2fac3a530e792282b1ce94c4f`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
 - Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
@@ -12,11 +12,11 @@
 ## Current GitHub state prepared for deployment
 
 ### Catalog
-- Approximately 266 visible unique products from the composite catalog.
+- 569 visible unique products from the composite catalog.
 - 224 sanitized Electrodomésticos rows remain integrated.
-- 30 sanitized cellphone rows are connected with the approved small-batch adapter.
-- Legacy position 10 remains excluded.
-- Composite catalog de-duplicates exact commercial keys across sources.
+- 90 canonical cellphone rows are the sole public Celulares source.
+- Legacy positions 10 and 91 remain excluded.
+- Composite catalog de-duplicates product identity across sources even when stale source prices differ, preserving the earlier verified source.
 
 ### Home sector access
 Prepared direct access for:
@@ -249,3 +249,16 @@ Current active catalog composition is deduplicated and read-only:
 - redundant checkpoint adapters/files remain versioned as evidence but are not active in `lib/catalog/index.ts`;
 - `lib/catalog/index.ts` has one unique adapter instance per active expansion and no duplicate `catalogExpansion31` declarations;
 - regression coverage: `tests/v16-catalog-expansion-391-regression.test.mjs` now locks the **569-product** reconstructed total.
+
+
+### 2026-09-24 final pre-deploy QA delta
+- branch verified from `bdbe61bda65f9f60e851aa07480f6bbd703c2f4b` through the current pre-deploy work with no writes to `main`, Supabase or production;
+- catalog identity QA corrected two stale duplicate refrigerator rows, leaving **569** visible unique products and **285 Electrodomésticos**;
+- missing-photo audit remains fail-closed for exactly three evidenced products: Codini Secarropas 6.5 KG, DELHI Estufa Cuarzo DL-1200w and SMART TV BGH 43" C/GOOGLE TV; no substitute image was invented;
+- Herramientas sector routing now derives only unambiguous names: **15 Taladros, 1 Amoladora, 3 Sierras**; the remaining tools stay in the full Herramientas catalog;
+- Audio sector routing now derives only explicit evidence: **8 Torres, 1 Barra de sonido, 1 Parlante portátil**; Auriculares and Home audio remain planned until validated products exist;
+- taxonomy QA: all 569 products resolve to known top-level categories and no active product carries an unknown subcategory;
+- mobile source-level QA covers **320 / 360 / 390 / 412 px**, preserving two product cards per row, horizontal sector-tab scrolling, safe-area bottom navigation and 16 px search input sizing on narrow screens;
+- no GitHub Actions workflow exists in the repository; commits do not auto-deploy;
+- build entry remains `npm run build` -> `scripts/build-verified.sh` -> bounded `vinext build`;
+- publish only this branch tip to `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`, then perform browser/live visual validation before any production action.
