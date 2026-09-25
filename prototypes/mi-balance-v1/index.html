@@ -818,24 +818,25 @@ body[data-theme="light"] .lockBox p{color:#69717c}
 .storePromoBg{
   position:absolute;
   z-index:0;
-  right:-7%;
+  right:-16%;
   top:-3%;
-  width:78%;
+  width:68%;
   height:106%;
   object-fit:cover;
-  object-position:center;
-  opacity:.92;
-  filter:saturate(1.08) contrast(1.04);
-  clip-path:polygon(21% 0,100% 0,100% 100%,0 100%);
+  object-position:72% center;
+  opacity:.96;
+  filter:saturate(1.08) contrast(1.06);
+  clip-path:polygon(28% 0,100% 0,100% 100%,0 100%);
 }
 .storePromoShade{
   position:absolute;inset:0;z-index:1;
-  background:linear-gradient(90deg,#07101f 0%,#07101f 38%,rgba(7,16,31,.86) 53%,rgba(7,16,31,.20) 76%,rgba(7,16,31,.06) 100%);
+  background:linear-gradient(90deg,#07101f 0%,#07101f 50%,rgba(7,16,31,.98) 60%,rgba(7,16,31,.82) 70%,rgba(7,16,31,.34) 83%,rgba(7,16,31,.05) 100%);
 }
 .storePromoGlow{position:absolute;z-index:1;width:250px;height:250px;border-radius:50%;filter:blur(58px);opacity:.18;pointer-events:none}
 .storePromoGlowBlue{left:-130px;top:-105px;background:#0b6cff}
 .storePromoGlowOrange{right:-140px;bottom:-140px;background:#ff6818}
 .storePromoContent{position:relative;z-index:2;width:62%;padding:15px 14px 14px;color:#fff}
+.storePromoContent:before{content:"";position:absolute;z-index:-1;left:7px;top:8px;right:-14px;bottom:55px;border-radius:16px;background:linear-gradient(90deg,rgba(7,16,31,.93) 0%,rgba(7,16,31,.78) 72%,rgba(7,16,31,0) 100%);pointer-events:none}
 .storePromoBrand{display:flex;align-items:center;gap:9px;min-width:0}
 .storePromoBrand img{width:48px;height:48px;flex:0 0 auto;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 0 18px rgba(22,111,255,.28),0 0 14px rgba(255,104,24,.22)}
 .storePromoBrand>div{min-width:0}
@@ -1291,7 +1292,7 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 </div>
 
 <script>
-const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🛒","Supermercado"],["🏪","Almacén"],["🚌","Viáticos"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["📱","Teléfono"],["🤖","IA"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍦","Helados"],["🍷","Alcohol"],["🧩","Hábitos a reducir"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
+const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🛒","Supermercado"],["🏪","Almacén"],["🚌","Viáticos"],["🚗","Uber"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["📱","Teléfono"],["🤖","IA"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍦","Helados"],["🍷","Alcohol"],["🧩","Hábitos a reducir"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
 const DEFAULT_QUICK_VISIBLE=["Café","Kiosco","Comida","Viáticos","Bebidas","Otros"];
 const GOAL_KEYS=["week","month","year","five","ten"];
 const CURRENCIES={ARS:{symbol:"$",digits:0},USD:{symbol:"US$",digits:2},EUR:{symbol:"€",digits:2},BRL:{symbol:"R$",digits:2},UYU:{symbol:"$U",digits:0},CLP:{symbol:"CLP$",digits:0},GBP:{symbol:"£",digits:2},PYG:{symbol:"₲",digits:0}};
@@ -2059,7 +2060,7 @@ function finishGuide(mark=true){
 }
 addEventListener("resize",()=>{if($("guideLayer")&&$("guideLayer").classList.contains("show"))showGuideStep()});
 
-const APP_BUILD="mi-balance-v32-amarango-promo";
+const APP_BUILD="mi-balance-v33-promo-legibility-uber";
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
