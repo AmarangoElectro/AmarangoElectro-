@@ -58,7 +58,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
     ? categoryProducts.filter((product) => brandsShareFamily(product.brand, requestedCampaignBrand))
     : categoryProducts;
   const initialBrand = requestedCampaignBrand;
-  const brandLocale = getBrandLocale(requestedBrand, slug);
+  const brandLocale = getBrandLocale(requestedCampaignBrand, slug);
   const publishableBrandLocales = getBrandLocalesForSector(slug, availableBrands);
   const initialSearch = typeof q === "string" ? q.slice(0, 120) : "";
   const initialSort = orden === "brand" || orden === "name" || orden === "price-asc" || orden === "price-desc" ? orden : "recommended";
