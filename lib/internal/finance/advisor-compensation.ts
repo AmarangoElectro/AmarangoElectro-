@@ -228,8 +228,10 @@ export function summarizeAdvisorMonth(sales: readonly AdvisorMonthlySaleSnapshot
     const commission = sale.financed
       ? quoteFinancedAdvisorCommission(sale.cashPriceArs)
       : quoteCashAdvisorCommission(sale.cashPriceArs, cashCommissionPercent);
-    commissionGeneratedArs += commission.commissionArs;
-    commissionPaidArs += Math.max(0, Math.min(commission.commissionArs, Math.round(sale.commissionPaidArs ?? 0)));
+    if (!sale.cancelled) {
+      commissionGeneratedArs += commission.commissionArs;
+      commissionPaidArs += Math.max(0, Math.min(commission.commissionArs, Math.round(sale.commissionPaidArs ?? 0)));
+    }
   }
 
   const roundedEquivalent = Math.round(equivalentSales * 2) / 2;
