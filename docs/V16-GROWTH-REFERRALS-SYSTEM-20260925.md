@@ -29,20 +29,52 @@ Se incorporó una capacidad nativa de crecimiento V16, separada de proveedores e
 No existe pago por reclutamiento, recompensa por registro ni desbloqueo por una sola venta grande. El sistema modela recompensa exclusivamente por operación válida y condición de cobro.
 
 ## Persistencia real / backend
-No se tocó Supabase ni producción.
 
-El repositorio actual no expone todavía un contrato backend congelado/autenticado para:
-- crear/persistir referrals;
-- resolver código público → customerId;
-- persistir source attribution en lead/cliente/venta/cobranza;
-- liberar/usar rewards;
-- administrar políticas de beneficios;
-- persistir solicitudes/niveles de asesor;
-- servir el funnel real.
+### Backend autoritativo aplicado en Supabase
+Proyecto: `zctaukyrhsmpjkcddcqq`.
 
-Por seguridad, `GrowthGateway` queda explícitamente `not_connected` y las superficies muestran “Conexión segura pendiente” en vez de inventar datos o éxitos.
+Se aplicaron migraciones aditivas V16 para:
+- identidades de referido y códigos públicos únicos;
+- atribución first-touch y propagación lead → cliente → venta → pago;
+- lifecycle de referidos y antifraude por customerId/DNI/teléfono;
+- RewardPolicy configurable y wallet de beneficios;
+- automatización de reward contra el ledger real `v16_payment_events`, incluyendo re-evaluación por REVERSAL;
+- integración con Entregas para condiciones delivery + valid payment;
+- solicitudes cliente → asesor;
+- reglas/niveles de asesor sin montos comerciales hardcodeados;
+- snapshots idempotentes de riesgo por venta;
+- exposición abierta por costo real + costos directos + comisiones comprometidas − cobro neto;
+- acquisition events/costs y funnel segmentable;
+- outbox `v16_growth_events` provider-neutral;
+- bridge server-only `v16_chatgpt_growth_bridge`.
 
-Esto mantiene el mismo patrón de seguridad ya usado por CRM/Reportes/Asesores: UI y dominio preparados, pero ninguna mutación se finge localmente.
+No se sembraron policies, niveles, costos, referidos ni beneficios de ejemplo. Las tablas Growth quedaron inicialmente en cero.
+
+### Seguridad
+- tablas Growth con RLS activado;
+- acceso directo revocado a `anon` y `authenticated`;
+- ningún RPC Growth quedó ejecutable por `anon`;
+- RPCs de Admin validan rol/capability;
+- escrituras sensibles mantienen AAL2;
+- el bridge ChatGPT sólo puede ejecutarlo `service_role`;
+- el bridge reconstituye la identidad V16 por email autenticado server-side y la degrada deliberadamente a `aal1`; nunca falsifica AAL2;
+- una prueba real confirmó que lecturas owner funcionan a través del bridge y que `save_reward_policy` queda bloqueado con `step_up_required`;
+- no se creó ninguna policy de QA durante esa prueba.
+
+### Bridge del Site
+V16 incluye `POST /api/v16/growth`.
+Ese endpoint:
+1. exige la identidad autenticada de Sign in with ChatGPT;
+2. rechaza requests cross-site;
+3. toma `SUPABASE_SECRET_KEY` únicamente de una variable server-side;
+4. llama sólo a la acción permitida dentro de `v16_chatgpt_growth_bridge`;
+5. nunca entrega la secret key ni un token Supabase al navegador.
+
+Requisito de hosting pendiente: configurar `SUPABASE_SECRET_KEY` en ChatGPT Sites → Settings → Environment Variables. No copiar esa clave a código, GitHub, mensajes ni variables públicas. `SUPABASE_URL` puede configurarse opcionalmente; si falta se usa el Project URL público ya fijado por el backend.
+
+### Identidades
+Los dos owners existentes ya están vinculados a `auth.users` + `v16_user_access`.
+Los clientes comunes NO se vincularán por coincidencia aproximada de nombre/teléfono/email. El enrolamiento cliente → identidad autenticada queda como gate separado y debe conservar el patrón de invitación/claim explícito ya usado por asesores.
 
 ## Privacidad y antifraude
 El navegador sólo conserva temporalmente código público y metadatos de atribución. No usa DNI/teléfono/customerId como autoridad local.
@@ -99,11 +131,16 @@ No se debe usar localStorage/sessionStorage como autoridad para ninguno de esos 
 
 ## Estado de activación
 - Dominio V16: IMPLEMENTADO.
-- UI Mi Amarango: IMPLEMENTADA con fail-closed cuando no hay backend.
+- Backend Supabase autoritativo: IMPLEMENTADO.
+- Reward/payment/reversal automation: IMPLEMENTADA.
+- Source attribution + funnel + risk engine: IMPLEMENTADOS.
+- UI Mi Amarango: IMPLEMENTADA; requiere identidad cliente enrolada.
 - Producto/deep-links: IMPLEMENTADOS.
-- Admin adquisición/configuración/aprobaciones: IMPLEMENTADO con fail-closed.
-- Escalamiento/riesgo: motor y UI IMPLEMENTADOS; datos reales pendientes de backend.
-- Automatizaciones: eventos provider-neutral IMPLEMENTADOS; transporte externo pendiente.
-- Persistencia autoritativa: PENDIENTE DE CONTRATO BACKEND SEGURO.
-- Supabase: NO MODIFICADO.
-- Producción: NO MODIFICADA / NO PUBLICADA.
+- Admin adquisición/configuración/aprobaciones: IMPLEMENTADO.
+- Same-origin ChatGPT → Supabase bridge: IMPLEMENTADO EN CÓDIGO.
+- Hosted secret `SUPABASE_SECRET_KEY`: PENDIENTE DE CONFIGURACIÓN EN SITES.
+- AAL2 para escrituras administrativas: SE MANTIENE BLOQUEADO hasta step-up real.
+- Enrolamiento de clientes comunes: PENDIENTE como gate separado.
+- Automatizaciones externas Margarita/WhatsApp: transporte pendiente; V16 ya emite eventos.
+- Supabase: MODIFICADO sólo mediante migraciones aditivas Growth autorizadas en este gate.
+- Producción/Site publicado: NO MODIFICADO / NO PUBLICADO.
