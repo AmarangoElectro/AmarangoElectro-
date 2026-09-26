@@ -6,9 +6,14 @@ import { createGrowthGateway, type GrowthGatewayResult } from "@/lib/growth/grow
 import { projectAdvisorGrowth } from "@/lib/growth/referral-growth-engine";
 import type {
   AcquisitionFunnelRow,
+  AcquisitionSource,
+  AdvisorApplication,
   AdvisorGrowthLevelRule,
   AdvisorGrowthState,
+  ReferralRecord,
   RewardPolicy,
+  RewardReleaseCondition,
+  RewardType,
 } from "@/lib/growth/referral-growth-contract";
 
 const money=(value:number)=>value.toLocaleString("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0});
@@ -26,28 +31,63 @@ export function GrowthAcquisitionPanel() {
   const [policies,setPolicies]=useState<GrowthGatewayResult<readonly RewardPolicy[]>>({status:"not_connected"});
   const [levels,setLevels]=useState<GrowthGatewayResult<readonly AdvisorGrowthLevelRule[]>>({status:"not_connected"});
   const [advisors,setAdvisors]=useState<GrowthGatewayResult<readonly AdvisorGrowthState[]>>({status:"not_connected"});
+  const [referrals,setReferrals]=useState<GrowthGatewayResult<readonly ReferralRecord[]>>({status:"not_connected"});
+  const [applications,setApplications]=useState<GrowthGatewayResult<readonly AdvisorApplication[]>>({status:"not_connected"});
   const [source,setSource]=useState("ALL");
-  const [period,setPeriod]=useState("30d");
+  const [period,setPeriod]=useState<"7d"|"30d"|"90d">("30d");
+  const [actionNotice,setActionNotice]=useState("");
+  const [policyDraft,setPolicyDraft]=useState<RewardPolicy>({
+    policyId:"draft",name:"",active:true,rewardType:"AMARANGO_BALANCE",
+    fixedValueArs:null,percentValue:null,maxValueArs:null,minimumPurchaseArs:null,
+    expiresAfterDays:null,allowedProductIds:[],allowedCategoryIds:[],
+    releaseCondition:"FIRST_VALID_PAYMENT",minimumPaidAmountArs:null,
+  });
+  const [levelDraft,setLevelDraft]=useState<AdvisorGrowthLevelRule>({
+    levelId:"draft",label:"",order:1,maxExposurePerSaleArs:0,maxOpenExposureArs:0,
+    minimumPaidSales:0,minimumCompletedOperations:0,minimumPortfolioQuality:0,
+    maximumDelinquencyRate:1,minimumRecurringClients:0,minimumTenureDays:0,
+    requiresCorrectDocumentation:true,requiresAdminApproval:true,benefits:[],
+  });
 
   useEffect(()=>{
     let cancelled=false;
     const gateway=createGrowthGateway();
+    const filters={source:source==="ALL"?null:source as AcquisitionSource,periodPreset:period};
     Promise.all([
-      gateway.getAcquisitionFunnel(),
+      gateway.getAcquisitionFunnel(filters),
       gateway.listRewardPolicies(),
       gateway.listAdvisorLevels(),
       gateway.getAdvisorGrowthStates(),
-    ]).then(([a,b,c,d])=>{if(!cancelled){setFunnel(a);setPolicies(b);setLevels(c);setAdvisors(d);}});
+      gateway.listReferrals(filters),
+      gateway.listAdvisorApplications(),
+    ]).then(([a,b,c,d,e,g])=>{if(!cancelled){setFunnel(a);setPolicies(b);setLevels(c);setAdvisors(d);setReferrals(e);setApplications(g);}});
     return()=>{cancelled=true;};
-  },[]);
+  },[source,period]);
 
   const funnelData=funnel.status==="ok"?funnel.data:null;
   const policyRows=policies.status==="ok"?policies.data:[];
   const levelRows=levels.status==="ok"?levels.data:[];
   const advisorRows=advisors.status==="ok"?advisors.data:[];
+  const referralRows=referrals.status==="ok"?referrals.data:[];
+  const applicationRows=applications.status==="ok"?applications.data:[];
   const advisorProjections=useMemo(()=>advisorRows.flatMap(state=>{
     try{return [{state,projection:projectAdvisorGrowth(state,levelRows)}];}catch{return [];}
   }),[advisorRows,levelRows]);
+
+  async function savePolicy(){
+    const result=await createGrowthGateway().saveRewardPolicy(policyDraft);
+    setActionNotice(result.status==="ok"?"Política guardada.":result.status==="not_connected"?"Conexión segura pendiente: la política no fue guardada.":"No pudimos guardar la política.");
+  }
+
+  async function saveLevel(){
+    const result=await createGrowthGateway().saveAdvisorLevel(levelDraft);
+    setActionNotice(result.status==="ok"?"Nivel guardado.":result.status==="not_connected"?"Conexión segura pendiente: el nivel no fue guardado.":"No pudimos guardar el nivel.");
+  }
+
+  async function reviewApplication(applicationId:string,decision:"APPROVED"|"REJECTED"){
+    const result=await createGrowthGateway().reviewAdvisorApplication(applicationId,decision);
+    setActionNotice(result.status==="ok"?"Solicitud actualizada.":result.status==="not_connected"?"Conexión segura pendiente: la solicitud no fue modificada.":"No pudimos revisar la solicitud.");
+  }
 
   const funnelSteps=[
     ["VISITAS",funnelData?.visits],["LEADS",funnelData?.leads],["EVALUACIONES",funnelData?.evaluations],
@@ -71,7 +111,8 @@ export function GrowthAcquisitionPanel() {
         <small>Filtros preparados: fuente · campaña · asesor · referidor · producto · categoría · período</small>
       </div>
 
-      <Status results={[funnel,policies,levels,advisors]}/>
+      <Status results={[funnel,policies,levels,advisors,referrals,applications]}/>
+      {actionNotice&&<div className="growth-admin-status"><b>{actionNotice}</b></div>}
 
       <div className="growth-funnel" data-source-filter={source} data-period-filter={period}>
         {funnelSteps.map(([label,value],index)=><article key={label}><small>{label}</small><strong>{value??"—"}</strong>{index<funnelSteps.length-1&&<span>↓</span>}</article>)}
@@ -105,6 +146,51 @@ export function GrowthAcquisitionPanel() {
           <div><small>CAPACIDAD DISPONIBLE</small><b>{money(projection.availableOpenExposureArs)}</b></div>
           <div><small>BLOQUEOS</small><b>{projection.blockers.join(" · ")||"Ninguno"}</b></div>
         </article>)}</div>}
+      </section>
+
+
+      <section className="growth-admin-block">
+        <div className="growth-section-heading"><Network/><div><small>REFERIDOS TRAZABLES</small><strong>Estado y origen de cada recomendación.</strong></div></div>
+        {referralRows.length===0?<div className="growth-empty">Sin referidos disponibles desde una fuente segura.</div>:<div className="growth-policy-list">{referralRows.map(row=><article key={row.referralId}><div><strong>{row.referrerDisplayName?"Vino recomendado por "+row.referrerDisplayName:"Referidor protegido"}</strong><small>{row.status+" · "+row.referralCode+(row.productId?" · producto "+row.productId:"")}</small></div><span>{row.updatedAt}</span></article>)}</div>}
+      </section>
+
+      <section className="growth-admin-block">
+        <div className="growth-section-heading"><Gift/><div><small>EDITAR BENEFICIO</small><strong>Política adaptable al margen real.</strong></div></div>
+        <div className="growth-config-grid">
+          <label>Nombre<input value={policyDraft.name} onChange={e=>setPolicyDraft({...policyDraft,name:e.target.value})}/></label>
+          <label>Tipo<select value={policyDraft.rewardType} onChange={e=>setPolicyDraft({...policyDraft,rewardType:e.target.value as RewardType})}>{["AMARANGO_BALANCE","NEXT_PURCHASE_DISCOUNT","COUPON","GIFT","SPECIAL_BENEFIT","SHIPPING_BENEFIT","OTHER"].map(x=><option key={x}>{x}</option>)}</select></label>
+          <label>Valor fijo<input type="number" value={policyDraft.fixedValueArs??""} onChange={e=>setPolicyDraft({...policyDraft,fixedValueArs:e.target.value?Number(e.target.value):null})}/></label>
+          <label>Porcentaje<input type="number" value={policyDraft.percentValue??""} onChange={e=>setPolicyDraft({...policyDraft,percentValue:e.target.value?Number(e.target.value):null})}/></label>
+          <label>Tope<input type="number" value={policyDraft.maxValueArs??""} onChange={e=>setPolicyDraft({...policyDraft,maxValueArs:e.target.value?Number(e.target.value):null})}/></label>
+          <label>Mínimo compra<input type="number" value={policyDraft.minimumPurchaseArs??""} onChange={e=>setPolicyDraft({...policyDraft,minimumPurchaseArs:e.target.value?Number(e.target.value):null})}/></label>
+          <label>Vence en días<input type="number" value={policyDraft.expiresAfterDays??""} onChange={e=>setPolicyDraft({...policyDraft,expiresAfterDays:e.target.value?Number(e.target.value):null})}/></label>
+          <label>Condición<select value={policyDraft.releaseCondition} onChange={e=>setPolicyDraft({...policyDraft,releaseCondition:e.target.value as RewardReleaseCondition})}>{["FIRST_VALID_PAYMENT","MINIMUM_PAID_AMOUNT","DELIVERY_AND_VALID_PAYMENT","SALE_PAID_IN_FULL","ADMIN_APPROVAL"].map(x=><option key={x}>{x}</option>)}</select></label>
+          <label>Mínimo cobrado<input type="number" value={policyDraft.minimumPaidAmountArs??""} onChange={e=>setPolicyDraft({...policyDraft,minimumPaidAmountArs:e.target.value?Number(e.target.value):null})}/></label>
+        </div>
+        <button className="growth-admin-save" type="button" onClick={savePolicy}>Guardar política segura</button>
+      </section>
+
+      <section className="growth-admin-block">
+        <div className="growth-section-heading"><UsersRound/><div><small>CONFIGURAR NIVEL</small><strong>Límites y calidad de cartera.</strong></div></div>
+        <div className="growth-config-grid">
+          <label>Nombre<input value={levelDraft.label} onChange={e=>setLevelDraft({...levelDraft,label:e.target.value})}/></label>
+          <label>Exposición máx. por venta<input type="number" value={levelDraft.maxExposurePerSaleArs} onChange={e=>setLevelDraft({...levelDraft,maxExposurePerSaleArs:Number(e.target.value)})}/></label>
+          <label>Exposición abierta máx.<input type="number" value={levelDraft.maxOpenExposureArs} onChange={e=>setLevelDraft({...levelDraft,maxOpenExposureArs:Number(e.target.value)})}/></label>
+          <label>Ventas cobradas mín.<input type="number" value={levelDraft.minimumPaidSales} onChange={e=>setLevelDraft({...levelDraft,minimumPaidSales:Number(e.target.value)})}/></label>
+          <label>Operaciones completas mín.<input type="number" value={levelDraft.minimumCompletedOperations} onChange={e=>setLevelDraft({...levelDraft,minimumCompletedOperations:Number(e.target.value)})}/></label>
+          <label>Calidad cartera mín.<input type="number" step=".01" value={levelDraft.minimumPortfolioQuality} onChange={e=>setLevelDraft({...levelDraft,minimumPortfolioQuality:Number(e.target.value)})}/></label>
+          <label>Mora máxima<input type="number" step=".01" value={levelDraft.maximumDelinquencyRate} onChange={e=>setLevelDraft({...levelDraft,maximumDelinquencyRate:Number(e.target.value)})}/></label>
+          <label>Clientes recurrentes mín.<input type="number" value={levelDraft.minimumRecurringClients} onChange={e=>setLevelDraft({...levelDraft,minimumRecurringClients:Number(e.target.value)})}/></label>
+          <label>Antigüedad mínima días<input type="number" value={levelDraft.minimumTenureDays} onChange={e=>setLevelDraft({...levelDraft,minimumTenureDays:Number(e.target.value)})}/></label>
+          <label className="growth-check"><input type="checkbox" checked={levelDraft.requiresCorrectDocumentation} onChange={e=>setLevelDraft({...levelDraft,requiresCorrectDocumentation:e.target.checked})}/> Documentación correcta</label>
+          <label className="growth-check"><input type="checkbox" checked={levelDraft.requiresAdminApproval} onChange={e=>setLevelDraft({...levelDraft,requiresAdminApproval:e.target.checked})}/> Aprobación administrativa</label>
+        </div>
+        <button className="growth-admin-save" type="button" onClick={saveLevel}>Guardar nivel seguro</button>
+      </section>
+
+      <section className="growth-admin-block">
+        <div className="growth-section-heading"><UsersRound/><div><small>SOLICITUDES ASESOR</small><strong>Cliente → asesor sólo con aprobación.</strong></div></div>
+        {applicationRows.length===0?<div className="growth-empty">No hay solicitudes disponibles desde una fuente segura.</div>:<div className="growth-policy-list">{applicationRows.map(app=><article key={app.applicationId}><div><strong>{"Solicitud "+app.applicationId}</strong><small>{app.status+" · cliente "+app.customerId}</small></div>{app.status==="PENDING"?<span><button type="button" onClick={()=>reviewApplication(app.applicationId,"APPROVED")}>Aprobar</button> <button type="button" onClick={()=>reviewApplication(app.applicationId,"REJECTED")}>Rechazar</button></span>:<span>{app.status}</span>}</article>)}</div>}
       </section>
 
       <section className="growth-admin-block growth-antifraud">
