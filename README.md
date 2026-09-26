@@ -1,4 +1,17 @@
-# AmarangoElectro V16 — Step 7R.1
+# AmarangoElectro V16
+
+El estado operativo vigente, los comandos reproducibles y los bloqueos conocidos están centralizados en [`docs/V16-CURRENT-MASTER-HANDOFF.md`](docs/V16-CURRENT-MASTER-HANDOFF.md).
+
+## Continuidad rápida
+
+```bash
+npm ci
+npm run v16:preflight
+npm run v16:qa
+npm run preview:v16
+```
+
+# Historial — Step 7R.1
 
 **Banner Framing Fix**
 
