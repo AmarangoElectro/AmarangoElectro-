@@ -37,3 +37,6 @@ El puente consulta al Worker actual de Margarita:
 `https://amara.max-huracan73.workers.dev`
 
 No modifica V16, main, producción de la tienda ni Supabase.
+
+
+<!-- BUILD_TRIGGER_20260925: activar Workers Builds sobre la nueva rama -->
