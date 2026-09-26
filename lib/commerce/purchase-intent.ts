@@ -15,7 +15,7 @@ export interface PurchaseIntentProduct {
   availabilityLabel: string | null;
   financingLabel: string | null;
   source: "amarango-v16";
-  attribution: SourceAttribution | null;
+  attribution?: SourceAttribution | null;
 }
 
 export interface PurchaseIntentDraft {
