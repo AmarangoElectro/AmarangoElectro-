@@ -1,4 +1,5 @@
 import type { ProductBridgeItem } from "./product-bridge";
+import type { SourceAttribution } from "@/lib/growth/referral-growth-contract";
 
 export interface SaleItemSnapshot {
   readonly snapshotVersion: "amarango-sale-item/v1";
@@ -11,6 +12,7 @@ export interface SaleItemSnapshot {
   readonly supplier: string | null;
   readonly priceUpdatedAt: string | null;
   readonly soldAt: string;
+  readonly sourceAttribution: SourceAttribution | null;
 }
 
 export interface SaleItemSnapshotInput {
@@ -19,6 +21,7 @@ export interface SaleItemSnapshotInput {
   costUsedArs?: number | null;
   supplier?: string | null;
   soldAt: string;
+  sourceAttribution?: SourceAttribution | null;
 }
 
 /** Crea evidencia histórica inmutable. V3 no persiste ni confirma ventas. */
@@ -38,5 +41,6 @@ export function createSaleItemSnapshot(input: Readonly<SaleItemSnapshotInput>): 
     supplier: input.supplier ?? input.product.administrative?.supplier ?? null,
     priceUpdatedAt: input.product.priceUpdatedAt,
     soldAt: input.soldAt,
+    sourceAttribution: input.sourceAttribution ?? null,
   });
 }
