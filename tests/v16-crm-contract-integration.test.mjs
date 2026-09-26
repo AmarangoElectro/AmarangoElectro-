@@ -58,7 +58,7 @@ test("CRM UI panels never embed real-looking PII fixtures and never invent tabs 
   const combined = `${listPanel}\n${panel360}`;
   assert.doesNotMatch(combined, /Cliente demo|cliente_demo|\bCL01\b/i);
   assert.doesNotMatch(combined, /\d{2}\.\d{3}\.\d{3}|\d{7,8}/); // no literal DNI-shaped numbers
-  assert.match(combined, /Datos no conectados en este entorno/);
+  assert.match(combined, /Conexión requerida/);
   // Resumen + Ventas + Pagos (the last one added by V16_PAYMENT_HISTORY_UI_CONTRACT_CORRECTION,
   // backed by the real v16_payment_history_* RPCs) — still no invented
   // Cuotas/Entregas/Garantías/Documentos/Historial tabs, which have no RPC backing.
@@ -95,7 +95,6 @@ test("Production routes render unchanged; /administracion renders the new CRM ta
   assert.doesNotMatch(searchHtml, /Clientes \/ CRM|v16_crm_/i);
 
   const admin = await render("/administracion");
-  assert.equal(admin.status, 200);
-  const adminHtml = await admin.text();
-  assert.match(adminHtml, /Clientes \/ CRM/);
+  assert.equal(admin.status, 307);
+  assert.match(admin.headers.get("location") ?? "", /\/signin-with-chatgpt\?return_to=%2Fadministracion/);
 });

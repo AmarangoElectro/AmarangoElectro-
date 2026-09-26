@@ -21,7 +21,7 @@ test("Home header navigation points only to real destinations", async () => {
   assert.match(home, /id="experiencia"/);
   assert.match(home, /id="financiacion"/);
   assert.match(products, /id="productos"/);
-  assert.match(offers, /id={advisor ? undefined : "ofertas"}/);
+  assert.ok(offers.includes('id={advisor ? undefined : "ofertas"}'));
 
   assert.doesNotMatch([header, footer].join("\n"), /#como-comprar/);
   assert.doesNotMatch(header, /categoria\/celulares\?favoritos=1/);

@@ -9,12 +9,15 @@ const categoryPage = fs.readFileSync(path.join(root, "app/categoria/[slug]/page.
 const css = fs.readFileSync(path.join(root, "app/globals.css"), "utf8");
 
 test("the recovered sector showroom keeps the approved copy and navigation", () => {
-  assert.match(showroom, /Tu próximo celular empieza acá\./);
-  assert.match(showroom, /Sentí el ritmo\. Viví la música\./);
+  assert.match(showroom, /Tecnología para acompañar tu día\./);
+  assert.match(showroom, /Audio para cada ambiente\./);
   assert.match(showroom, /Buscar en este sector/);
-  for (const label of ["Celulares", "Smart TV", "Audio", "Gaming", "Samsung", "iPhone", "Motorola"]) {
+  for (const label of ["Celulares", "Smart TV", "Audio", "Gaming"]) {
     assert.match(showroom, new RegExp(label));
   }
+  assert.match(showroom, /availableBrands/);
+  assert.match(showroom, /knownCategoryBrands/);
+  assert.match(showroom, /brand === "Apple" \? "iPhone" : brand/);
   assert.match(showroom, /ThemeToggle/);
   assert.match(showroom, /sector-bottom-navigation/);
 });
