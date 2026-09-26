@@ -2,7 +2,7 @@ import { getChatGPTUser } from "@/app/chatgpt-auth";
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? "https://zctaukyrhsmpjkcddcqq.supabase.co";
 
-const ACTIONS = new Set([
+const ACTIONS: ReadonlySet<string> = new Set([
   "resolve_access",
   "current_customer_snapshot",
   "reward_policies_list",
@@ -55,7 +55,7 @@ export async function POST(request:Request) {
   }
 
   const action=String(payload.action??"");
-  if(!ACTIONS.has(action as never)) return response(403,{status:"unauthorized"});
+  if(!ACTIONS.has(action)) return response(403,{status:"unauthorized"});
   const args=payload.args && typeof payload.args==="object" && !Array.isArray(payload.args) ? payload.args : {};
 
   let upstream:Response;
