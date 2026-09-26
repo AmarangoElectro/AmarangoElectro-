@@ -9371,3 +9371,7 @@ html[data-theme="dark"] .advisor-product-commission{background:color-mix(in srgb
 .advisor-comp-admin__pending{margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--soft)}.advisor-comp-admin__pending b{font-size:11px}.advisor-comp-admin__pending p{margin:4px 0 0;color:var(--muted-foreground);font-size:10px;line-height:1.4}
 .advisor-comp-admin__rows{margin-top:12px;display:grid;gap:8px}.advisor-comp-admin__rows article{padding:12px;display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:9px;border:1px solid var(--border);border-radius:14px}.advisor-comp-admin__rows article>div{display:grid;gap:2px}.advisor-comp-admin__rows small{color:var(--muted-foreground);font-size:8px}.advisor-comp-admin__rows b{font-size:11px}
 @media(max-width:900px){.advisor-comp-admin__policy{grid-template-columns:1fr}.advisor-comp-admin__tables{grid-template-columns:1fr}.advisor-comp-admin__rows article{grid-template-columns:1fr 1fr}}
+
+.advisor-main-goal-complete{margin-top:12px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(255,255,255,.16);border-radius:14px;background:rgba(255,255,255,.07)}
+.advisor-main-goal-complete strong{font-size:12px;color:#fff}.advisor-main-goal-complete span{font-size:11px;font-weight:900;color:#ffb26f}
+@media(max-width:760px){.advisor-main-goal-complete{align-items:flex-start;flex-direction:column}}
