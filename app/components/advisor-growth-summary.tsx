@@ -42,7 +42,7 @@ export function AdvisorGrowthSummary() {
         <article><Gauge/><small>CAPACIDAD DISPONIBLE</small><strong>{money(projection.availableOpenExposureArs)}</strong></article>
         <article><BadgeCheck/><small>PRÓXIMO NIVEL</small><strong>{projection.nextLevel?.label??"Nivel máximo"}</strong></article>
       </div>
-      <div className="advisor-growth-benefits"><Gift/><div><small>BENEFICIOS DEL NIVEL</small><p>{projection.currentLevel.benefits.length?projection.currentLevel.benefits.join(" · "):"Sin beneficios configurados."}</p></div></div>
+      <div className="advisor-growth-benefits"><Gift/><div><small>BENEFICIOS DEL NIVEL</small><p>{(projection.currentLevel.benefits?.length??0)>0?projection.currentLevel.benefits?.join(" · "):"Sin beneficios configurados."}</p></div></div>
       {projection.blockers.length>0&&<p className="advisor-growth-blockers">Para el próximo nivel: {projection.blockers.join(" · ")}.</p>}
     </section>
   );
