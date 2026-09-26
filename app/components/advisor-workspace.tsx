@@ -12,6 +12,8 @@ import { findSectorGuide } from "@/lib/onboarding/sector-guides";
 import { toast } from "sonner";
 import Image from "next/image";
 import { AdvisorGrowthSummary } from "./advisor-growth-summary";
+import { AdvisorCompensationSummary } from "./advisor-compensation-summary";
+import { quoteFinancedAdvisorCommission } from "@/lib/internal/finance/advisor-compensation";
 
 const advisorGuide = findSectorGuide("asesor", "mi-amarango");
 const liveStockSuppliers = new Set(["mega electro", "electro impacto"]);
@@ -63,6 +65,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <article><WalletCards /><span><small>CUOTAS</small><strong>Conexión segura pendiente</strong></span></article>
         <a className="advisor-quick-card advisor-quick-card--sale" href="#advisor-sale-draft"><ClipboardList /><span><small>NUEVA VENTA</small><strong>Preparar operación</strong></span></a>
       </section>
+      <AdvisorCompensationSummary />
       <AdvisorGrowthSummary />
       <AdvisorSaleDraftPanel products={products} />
       <div id="advisor-offers" className="advisor-offers-anchor"><OffersShowcase advisor /></div>
@@ -73,6 +76,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
             const sixPlan = product.financing.find((plan) => plan.installments === 6 && plan.installmentAmount);
             const supplier = product.specifications.Proveedor?.trim().toLocaleLowerCase("es-AR") ?? "";
             const hasLiveStock = liveStockSuppliers.has(supplier);
+            const financedCommission = product.price ? quoteFinancedAdvisorCommission(product.price.amount) : null;
             const stockText = hasLiveStock
               ? product.stock.status === "out_of_stock"
                 ? "Sin stock"
@@ -87,6 +91,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
                 <small>{product.brand} · {product.category}</small><h3>{product.name}</h3>
                 <strong className="advisor-product-price">{money(product.price?.amount)}</strong>
                 <p>{sixPlan?.installmentAmount ? `6 cuotas de ${money(sixPlan.installmentAmount.amount)}` : product.price ? "Consultá opciones de pago" : "Consultá precio y opciones de pago"}</p>
+                {financedCommission && <p className="advisor-product-commission"><b>Comisión financiada {money(financedCommission.commissionArs)}</b> · 2 pagos de {money(financedCommission.paymentArs[0])}</p>}
                 <span className={`advisor-availability ${hasLiveStock ? "is-live" : "needs-check"}`}>{stockText}</span>
               </div>
               <div className="advisor-product-card__actions"><Link href={`/producto/${product.slug}`}>Ver producto</Link><button type="button" onClick={() => share(product)}><Share2 size={16} /> Publicar</button></div>
