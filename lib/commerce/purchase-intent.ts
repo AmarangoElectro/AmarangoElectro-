@@ -1,4 +1,5 @@
 import type { Product } from "@/lib/catalog";
+import type { SourceAttribution } from "@/lib/growth/referral-growth-contract";
 
 export type PurchaseIntent = "buy" | "installments" | "availability" | "delivery";
 
@@ -14,6 +15,7 @@ export interface PurchaseIntentProduct {
   availabilityLabel: string | null;
   financingLabel: string | null;
   source: "amarango-v16";
+  attribution: SourceAttribution | null;
 }
 
 export interface PurchaseIntentDraft {
@@ -40,7 +42,7 @@ function formatPrice(product: Product) {
   }).format(product.price.amount);
 }
 
-export function buildPurchaseIntentProduct(product: Product, url: string): PurchaseIntentProduct {
+export function buildPurchaseIntentProduct(product: Product, url: string, attribution: SourceAttribution | null = null): PurchaseIntentProduct {
   return {
     productId: product.id,
     slug: product.slug,
@@ -53,15 +55,12 @@ export function buildPurchaseIntentProduct(product: Product, url: string): Purch
     availabilityLabel: product.stock.label,
     financingLabel: product.financing[0]?.label ?? null,
     source: "amarango-v16",
+    attribution,
   };
 }
 
 export function announcePurchaseIntent(product: PurchaseIntentProduct) {
-  window.dispatchEvent(
-    new CustomEvent<PurchaseIntentProduct>(PURCHASE_INTENT_EVENT, {
-      detail: product,
-    }),
-  );
+  window.dispatchEvent(new CustomEvent<PurchaseIntentProduct>(PURCHASE_INTENT_EVENT, { detail: product }));
 }
 
 export function intentLabel(intent: PurchaseIntent) {
@@ -77,10 +76,7 @@ export function buildPurchaseIntentSummary(draft: PurchaseIntentDraft) {
     `Precio publicado: ${draft.product.priceLabel ?? "A confirmar"}.`,
     `Disponibilidad: ${draft.product.availabilityLabel ?? "A confirmar"}.`,
   ];
-
-  if (draft.intent === "installments") {
-    lines.push(`Financiación publicada: ${draft.product.financingLabel ?? "A confirmar"}.`);
-  }
+  if (draft.intent === "installments") lines.push(`Financiación publicada: ${draft.product.financingLabel ?? "A confirmar"}.`);
   if (note) lines.push(`Comentario: ${note}`);
   lines.push(`Producto: ${draft.product.url}`);
   return lines.join("\n");

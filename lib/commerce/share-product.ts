@@ -1,9 +1,13 @@
+import { addReferralToUrl } from "@/lib/growth/referral-growth-engine";
+
 export interface ShareProductInput {
   name: string;
   url: string;
   cashPriceArs?: number | null;
   installments?: readonly { installments: number; amountArs: number | null }[];
   imageUrl?: string | null;
+  referralCode?: string | null;
+  productId?: string | null;
 }
 
 export type ShareProductResult = "shared" | "copied" | "cancelled";
@@ -29,17 +33,13 @@ export function buildShareProductText(product: ShareProductInput) {
   return lines.join("\n");
 }
 
-/** Compartir individual: la imagen queda declarada para el futuro, sin fetch, WhatsApp, Margarita ni endpoints. */
 export async function shareProductLink(
   product: ShareProductInput,
   capabilities: ShareCapabilities = navigator,
 ): Promise<ShareProductResult> {
   const text = buildShareProductText(product);
-  const data: ShareData = {
-    title: product.name,
-    text,
-    url: product.url,
-  };
+  const shareUrl = product.referralCode ? addReferralToUrl(product.url, product.referralCode, product.productId) : product.url;
+  const data: ShareData = { title: product.name, text, url: shareUrl };
 
   if (capabilities.share) {
     try {
@@ -51,6 +51,6 @@ export async function shareProductLink(
   }
 
   if (!capabilities.clipboard?.writeText) throw new Error("Share is not available");
-  await capabilities.clipboard.writeText(`${text}\n${product.url}`);
+  await capabilities.clipboard.writeText(`${text}\n${shareUrl}`);
   return "copied";
 }

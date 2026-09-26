@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./growth.css";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";
 import { PerformanceBudget } from "./components/performance-budget";
 import { PwaManager } from "./components/pwa-manager";
 import { ScrollQualityManager } from "./components/scroll-quality-manager";
+import { GrowthAttributionCapture } from "./components/growth-attribution-capture";
 import { themeInitScript } from "@/lib/ux/theme-preference";
 
 export const viewport: Viewport = {
@@ -24,21 +26,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es-AR">
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
+      <head><script dangerouslySetInnerHTML={{ __html: themeInitScript }} /></head>
       <body className="antialiased">
         <PerformanceBudget />
         <ScrollQualityManager />
         <PwaManager />
         <RouteScrollReset />
+        <GrowthAttributionCapture />
         {children}
         <Toaster position="bottom-center" richColors />
       </body>
