@@ -124,11 +124,10 @@ test("growth UI is native to V16 but never fabricates backend success",async()=>
     source("lib/integration/sale-snapshot.ts"),
     source("app/layout.tsx"),
   ]);
-  assert.match(gateway,/SupabaseGrowthGateway/);
-  assert.match(gateway,/getCrmAccessConfig/);
+  assert.match(gateway,/SameOriginGrowthGateway/);
+  assert.match(gateway,/\/api\/v16\/growth/);
   assert.match(gateway,/NOT_CONNECTED_GROWTH_GATEWAY/);
-  assert.match(gateway,/\/rest\/v1\/rpc\//);
-  assert.doesNotMatch(gateway,/from\(["'][^"']+["']\)|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/i);
+  assert.doesNotMatch(gateway,/SUPABASE_SECRET_KEY|\/rest\/v1\/rpc\/|getCrmAccessConfig|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/i);
   assert.match(admin,/MÉTRICA PRINCIPAL/);
   assert.match(admin,/No es multinivel/);
   assert.match(hub,/RECOMENDÁ Y GANÁ/);
@@ -160,9 +159,9 @@ test("Admin growth contract exposes every requested segmentation and secure conf
   for(const token of ["campaignId","advisorId","referrerCustomerId","productId","categoryId","periodPreset","periodFrom","periodTo"]) assert.match(contract,new RegExp(token));
   for(const token of ["saveRewardPolicy","saveAdvisorLevel","listAdvisorApplications","reviewAdvisorApplication","listReferrals"]) assert.match(gateway,new RegExp(token));
   for(const token of ["Campaña","Asesor","Referidor","Producto","Categoría","Política activa","Productos habilitados","Categorías habilitadas","Beneficios del nivel","Aprobar","Rechazar"]) assert.match(admin,new RegExp(token));
-  assert.match(gateway,/v16_growth_save_reward_policy/);
-  assert.match(gateway,/v16_growth_save_advisor_level/);
-  assert.doesNotMatch(gateway,/createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/i);
+  assert.match(gateway,/save_reward_policy/);
+  assert.match(gateway,/save_advisor_level/);
+  assert.doesNotMatch(gateway,/SUPABASE_SECRET_KEY|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/i);
 });
 
 test("Mi Amarango exposes referral history wallet available pending and used benefits without fake values",async()=>{
@@ -182,7 +181,7 @@ test("growth authority remains provider-neutral and referral code is never treat
   assert.match(capture,/referralCode/);
   assert.doesNotMatch(capture,/dni|referredDni|referrerDni|telefono|referrerPhone|referredPhone/i);
   assert.match(gateway,/not_connected/);
-  assert.match(gateway,/getCrmAccessConfig/);
+  assert.match(gateway,/\/api\/v16\/growth/);
   assert.match(events,/amarango:growth-domain-event/);
   assert.doesNotMatch(events,/whatsapp|margarita|twilio|meta/i);
 });
@@ -224,13 +223,17 @@ test("unevaluated advisor quality and delinquency block progression instead of r
   assert.ok(result.progressPercent<100);
 });
 
-test("Growth gateway names match the secure Supabase backend contract and remain fail-closed without session config",async()=>{
-  const [gateway,bridge]=await Promise.all([
+test("Growth uses the same-origin ChatGPT-authenticated server bridge and keeps the Supabase secret server-only",async()=>{
+  const [gateway,route]=await Promise.all([
     source("lib/growth/growth-gateway.ts"),
-    source("lib/internal/auth/secure-rpc-session-bridge-contract.ts"),
+    source("app/api/v16/growth/route.ts"),
   ]);
-  const rpcNames=[...new Set([...gateway.matchAll(/"(v16_growth_[a-z0-9_]+)"/g)].map(m=>m[1]))];
-  for(const name of rpcNames) assert.match(bridge,new RegExp(name));
-  assert.match(gateway,/new SupabaseGrowthGateway\(getCrmAccessConfig\(\)\)/);
-  assert.match(gateway,/new SupabaseGrowthGateway\(null\)/);
+  assert.match(gateway,/new SameOriginGrowthGateway\(\)/);
+  assert.match(gateway,/\/api\/v16\/growth/);
+  assert.match(route,/getChatGPTUser/);
+  assert.match(route,/process\.env\.SUPABASE_SECRET_KEY/);
+  assert.match(route,/v16_chatgpt_growth_bridge/);
+  assert.match(route,/sec-fetch-site/);
+  assert.doesNotMatch(gateway,/SUPABASE_SECRET_KEY|sb_secret_|service_role/i);
+  assert.doesNotMatch(route,/sb_secret_[A-Za-z0-9_-]+/);
 });
