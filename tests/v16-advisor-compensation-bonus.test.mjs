@@ -112,3 +112,66 @@ test("duplicate sale ids fail instead of double-counting monthly progress",async
   `);
   assert.match(result.message,/Duplicate advisor sale snapshot/);
 });
+
+
+test("cancelled sales generate neither bonus units nor monthly generated commission",async()=>{
+  const result=await runTs(`
+    import {summarizeAdvisorMonth} from './lib/internal/finance/advisor-compensation.ts';
+    process.stdout.write(JSON.stringify(summarizeAdvisorMonth([
+      {saleId:'cancelled',cashPriceArs:350000,financed:true,validPayment:true,delivered:true,cancelled:true,installmentsCurrent:true,commissionPaidArs:37500},
+    ])));
+  `);
+  assert.equal(result.equivalentSales,0);
+  assert.equal(result.commissionGeneratedArs,0);
+  assert.equal(result.commissionPaidArs,0);
+  assert.equal(result.bonus.bonusArs,0);
+});
+
+test("advisor UI exposes commission and targets but never product cost",async()=>{
+  const {readFile}=await import("node:fs/promises");
+  const root=new URL("../",import.meta.url);
+  const [workspace,draft,summary,admin,adapter]=await Promise.all([
+    readFile(new URL("app/components/advisor-workspace.tsx",root),"utf8"),
+    readFile(new URL("app/components/advisor-sale-draft-panel.tsx",root),"utf8"),
+    readFile(new URL("app/components/advisor-compensation-summary.tsx",root),"utf8"),
+    readFile(new URL("components/internal/admin/advisor-compensation-admin-summary.tsx",root),"utf8"),
+    readFile(new URL("lib/advisors/advisor-compensation-adapter.ts",root),"utf8"),
+  ]);
+  assert.match(workspace,/Comisión financiada/);
+  assert.match(draft,/MI COMISIÓN/);
+  assert.match(summary,/TU MES/);
+  assert.match(summary,/PREMIO ALCANZADO/);
+  assert.match(admin,/COMISIONES \+ PREMIO MENSUAL/);
+  assert.match(adapter,/not_connected/);
+  assert.doesNotMatch([workspace,draft,summary].join("\n"),/costo real|costReal|markup/i);
+});
+
+test("Plan Protegido uses the same fixed financed commission for Plan 3 and Plan 6 without changing customer totals",async()=>{
+  const result=await runTs(`
+    import {quotePlanProtegido} from './lib/internal/finance/plan-protegido.ts';
+    import {quoteFinancedAdvisorCommission} from './lib/internal/finance/advisor-compensation.ts';
+    const costs=[50000,100000,250000,350000,477333,800000];
+    process.stdout.write(JSON.stringify(costs.map(cost=>{
+      const q=quotePlanProtegido(cost);
+      const commission=quoteFinancedAdvisorCommission(q.cashPriceExact);
+      return {
+        cash:q.cashPriceExact,
+        plan3Total:q.plan3.totalExact,
+        plan6Total:q.plan6.totalExact,
+        c3:q.plan3.commission.totalExact,
+        c6:q.plan6.commission.totalExact,
+        expected:commission.commissionArs,
+        p3:q.plan3.commission.paymentCount,
+        p6:q.plan6.commission.paymentCount,
+      };
+    })));
+  `);
+  for(const row of result){
+    assert.equal(row.c3,row.expected);
+    assert.equal(row.c6,row.expected);
+    assert.equal(row.p3,2);
+    assert.equal(row.p6,2);
+    assert.ok(row.plan3Total>row.cash);
+    assert.ok(row.plan6Total>row.plan3Total);
+  }
+});
