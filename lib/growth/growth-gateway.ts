@@ -183,11 +183,11 @@ export class SameOriginGrowthGateway implements GrowthGateway {
 
   async saveRewardPolicy(input:RewardPolicy) {
     const result=await bridge("save_reward_policy",{
-      p_policy_id:uuidOrNull(input.policyId),p_name:input.name,p_active:input.active,p_reward_type:input.rewardType,
-      p_fixed_value_ars:input.fixedValueArs??null,p_percent_value:input.percentValue??null,p_max_value_ars:input.maxValueArs??null,
-      p_minimum_purchase_ars:input.minimumPurchaseArs??null,p_expires_after_days:input.expiresAfterDays??null,
-      p_allowed_product_ids:input.allowedProductIds??[],p_allowed_category_ids:input.allowedCategoryIds??[],
-      p_release_condition:input.releaseCondition,p_minimum_paid_amount_ars:input.minimumPaidAmountArs??null,p_priority:input.priority??100,
+      policy_id:uuidOrNull(input.policyId),name:input.name,active:input.active,reward_type:input.rewardType,
+      fixed_value_ars:input.fixedValueArs??null,percent_value:input.percentValue??null,max_value_ars:input.maxValueArs??null,
+      minimum_purchase_ars:input.minimumPurchaseArs??null,expires_after_days:input.expiresAfterDays??null,
+      allowed_product_ids:input.allowedProductIds??[],allowed_category_ids:input.allowedCategoryIds??[],
+      release_condition:input.releaseCondition,minimum_paid_amount_ars:input.minimumPaidAmountArs??null,priority:input.priority??100,
     });
     if(result.status!=="ok")return result;
     const row=first<any>(result.data); if(!row)return {status:"error",message:"Policy RPC returned no row"};
@@ -196,9 +196,9 @@ export class SameOriginGrowthGateway implements GrowthGateway {
 
   async getAcquisitionFunnel(filters:AcquisitionFilters={}) {
     const result=await bridge("acquisition_funnel",{
-      p_source:filters.source??null,p_campaign_id:filters.campaignId??null,p_advisor_id:uuidOrNull(filters.advisorId),
-      p_referrer_customer_id:filters.referrerCustomerId??null,p_product_id:filters.productId??null,p_category_id:filters.categoryId??null,
-      p_period_preset:filters.periodPreset??"30d",p_period_from:filters.periodFrom??null,p_period_to:filters.periodTo??null,
+      source:filters.source??null,campaign_id:filters.campaignId??null,advisor_id:uuidOrNull(filters.advisorId),
+      referrer_customer_id:filters.referrerCustomerId??null,product_id:filters.productId??null,category_id:filters.categoryId??null,
+      period_preset:filters.periodPreset??"30d",period_from:filters.periodFrom??null,period_to:filters.periodTo??null,
     });
     if(result.status!=="ok")return result;
     const row=first<any>(result.data); if(!row)return {status:"error",message:"Funnel RPC returned no row"};
@@ -216,9 +216,9 @@ export class SameOriginGrowthGateway implements GrowthGateway {
 
   async listReferrals(filters:AcquisitionFilters={}) {
     const result=await bridge("referrals_list",{
-      p_source:filters.source??null,p_campaign_id:filters.campaignId??null,p_advisor_id:uuidOrNull(filters.advisorId),
-      p_referrer_customer_id:filters.referrerCustomerId??null,p_product_id:filters.productId??null,p_category_id:filters.categoryId??null,
-      p_period_from:periodFrom(filters),p_period_to:filters.periodTo??null,p_row_limit:200,p_row_offset:0,
+      source:filters.source??null,campaign_id:filters.campaignId??null,advisor_id:uuidOrNull(filters.advisorId),
+      referrer_customer_id:filters.referrerCustomerId??null,product_id:filters.productId??null,category_id:filters.categoryId??null,
+      period_from:periodFrom(filters),period_to:filters.periodTo??null,row_limit:200,row_offset:0,
     });
     if(result.status!=="ok")return result;
     return {status:"ok",data:(Array.isArray(result.data)?result.data:[]).map(referral)};
@@ -232,13 +232,13 @@ export class SameOriginGrowthGateway implements GrowthGateway {
 
   async saveAdvisorLevel(input:AdvisorGrowthLevelRule) {
     const result=await bridge("save_advisor_level",{
-      p_level_id:uuidOrNull(input.levelId),p_label:input.label,p_sort_order:input.order,p_active:input.active??false,
-      p_max_exposure_per_sale_ars:input.maxExposurePerSaleArs,p_max_open_exposure_ars:input.maxOpenExposureArs,
-      p_minimum_paid_sales:input.minimumPaidSales,p_minimum_completed_operations:input.minimumCompletedOperations,
-      p_minimum_portfolio_quality:input.minimumPortfolioQuality,p_maximum_delinquency_rate:input.maximumDelinquencyRate,
-      p_minimum_recurring_clients:input.minimumRecurringClients,p_minimum_tenure_days:input.minimumTenureDays,
-      p_requires_correct_documentation:input.requiresCorrectDocumentation,p_requires_admin_approval:input.requiresAdminApproval,
-      p_benefits:input.benefits??[],
+      level_id:uuidOrNull(input.levelId),label:input.label,sort_order:input.order,active:input.active??false,
+      max_exposure_per_sale_ars:input.maxExposurePerSaleArs,max_open_exposure_ars:input.maxOpenExposureArs,
+      minimum_paid_sales:input.minimumPaidSales,minimum_completed_operations:input.minimumCompletedOperations,
+      minimum_portfolio_quality:input.minimumPortfolioQuality,maximum_delinquency_rate:input.maximumDelinquencyRate,
+      minimum_recurring_clients:input.minimumRecurringClients,minimum_tenure_days:input.minimumTenureDays,
+      requires_correct_documentation:input.requiresCorrectDocumentation,requires_admin_approval:input.requiresAdminApproval,
+      benefits:input.benefits??[],
     });
     if(result.status!=="ok")return result;
     const row=first<any>(result.data); if(!row)return {status:"error",message:"Advisor level RPC returned no row"};
@@ -273,7 +273,7 @@ export class SameOriginGrowthGateway implements GrowthGateway {
 
   async reviewAdvisorApplication(applicationId:string,decision:"APPROVED"|"REJECTED") {
     const result=await bridge("review_advisor_application",{
-      p_application_id:applicationId,p_decision:decision,p_note:null,
+      application_id:applicationId,decision:decision,note:null,
     });
     if(result.status!=="ok")return result;
     const row=first<any>(result.data); if(!row)return {status:"error",message:"Advisor review RPC returned no row"};
