@@ -86,7 +86,7 @@ const n=(value:unknown)=>typeof value==="number"?value:Number(value ?? 0);
 const nullableN=(value:unknown)=>value===null||value===undefined?null:n(value);
 const s=(value:unknown)=>value===null||value===undefined?null:String(value);
 const uuidOrNull=(value:string|undefined|null)=>value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)?value:null;
-const first=<T>(value:unknown):T|null=>Array.isArray(value)?(value[0] as T??null):(value as T??null);
+const first=<T>(value:unknown):T|null=>Array.isArray(value)?((value[0] as T)??null):((value as T)??null);
 
 function policy(row:any):RewardPolicy {
   return {
