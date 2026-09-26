@@ -23,3 +23,24 @@ export type AdvisorCompensationResult<T> =
   | { status: "unauthorized" }
   | { status: "step_up_required" }
   | { status: "error"; message: string };
+
+
+export interface AdvisorMonthlyCompensationOperation {
+  saleId: string;
+  advisorId: string;
+  advisorName?: string | null;
+  productName: string;
+  cashPriceArs: number;
+  paymentMode: "CASH" | "FINANCED";
+  commissionTotalArs: number;
+  commissionPaymentCount: 1 | 2;
+  commissionPaymentsArs: readonly number[];
+  commissionPaidArs: number;
+  commissionPendingArs: number;
+  countsForBonus: boolean;
+  equivalentSales: number;
+  validationStatus: "VALID" | "PENDING_VALID_PAYMENT" | "PENDING_DELIVERY" | "FINANCED_ARREARS" | "CANCELLED";
+  validationReason: string;
+  delivered: boolean;
+  installmentsCurrent: boolean | null;
+}
