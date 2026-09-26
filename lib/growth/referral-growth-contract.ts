@@ -130,6 +130,7 @@ export interface AdvisorGrowthLevelRule {
   minimumTenureDays: number;
   requiresCorrectDocumentation: boolean;
   requiresAdminApproval: boolean;
+  benefits: readonly string[];
 }
 
 export interface AdvisorGrowthState {
