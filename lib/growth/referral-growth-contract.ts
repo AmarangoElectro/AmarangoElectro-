@@ -55,7 +55,9 @@ export interface ReferralRecord {
   referralId: string;
   referralCode: string;
   referrerCustomerId: string;
+  referrerDisplayName?: string | null;
   referredCustomerId: string | null;
+  referredDisplayName?: string | null;
   leadId: string | null;
   saleId: string | null;
   productId: string | null;
@@ -179,6 +181,18 @@ export type ReferralFraudSignal =
   | "SAME_PHONE"
   | "SHARED_DEVICE_REVIEW"
   | "SHARED_IP_REVIEW";
+
+export interface AcquisitionFilters {
+  source?: AcquisitionSource | null;
+  campaignId?: string | null;
+  advisorId?: string | null;
+  referrerCustomerId?: string | null;
+  productId?: string | null;
+  categoryId?: string | null;
+  periodPreset?: "7d" | "30d" | "90d" | null;
+  periodFrom?: string | null;
+  periodTo?: string | null;
+}
 
 export interface AcquisitionFunnelRow {
   visits: number;
