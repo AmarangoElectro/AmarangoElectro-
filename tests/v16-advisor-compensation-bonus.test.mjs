@@ -233,3 +233,38 @@ test("bonus after 20 advances only on completed equivalent sales, preserving hal
   assert.equal(result[3].progress.nextTarget,22);
   assert.equal(result[3].progress.remainingEquivalentSales,0.5);
 });
+
+
+test("per-operation compensation surface is prepared fail-closed and does not expose product cost",async()=>{
+  const {readFile}=await import("node:fs/promises");
+  const root=new URL("../",import.meta.url);
+  const [contract,adapter,component]=await Promise.all([
+    readFile(new URL("lib/advisors/advisor-compensation-contract.ts",root),"utf8"),
+    readFile(new URL("lib/advisors/advisor-compensation-adapter.ts",root),"utf8"),
+    readFile(new URL("app/components/advisor-compensation-operations.tsx",root),"utf8"),
+  ]);
+  for(const token of ["cashPriceArs","commissionTotalArs","commissionPaymentCount","commissionPaidArs","commissionPendingArs","countsForBonus","validationStatus","validationReason"]) assert.match(contract,new RegExp(token));
+  assert.match(adapter,/listCurrentMonthOperations/);
+  assert.match(adapter,/not_connected/);
+  for(const token of ["COMISIÓN","PAGOS DE COMISIÓN","COBRADO","PENDIENTE","VENTA EQUIVALENTE"]) assert.match(component,new RegExp(token));
+  assert.doesNotMatch(component,/costo real|costReal|markup/i);
+});
+
+test("advisor commission changes do not alter Classic customer installment totals",async()=>{
+  const result=await runTs(`
+    import {quoteAmarangoCalculator} from './lib/internal/finance/amarango-calculator.ts';
+    const costs=[50000,100000,250000,350000,477333];
+    process.stdout.write(JSON.stringify(costs.map(cost=>{
+      const q=quoteAmarangoCalculator({mode:'cost_ars',amount:cost,installmentPlans:[2,4,6]});
+      return {cash:q.salePrice,plans:q.installments.map(p=>({n:p.installments,total:p.total}))};
+    })));
+  `);
+  for(const row of result){
+    const p2=row.plans.find(p=>p.n===2);
+    const p4=row.plans.find(p=>p.n===4);
+    const p6=row.plans.find(p=>p.n===6);
+    assert.ok(Math.abs(p2.total-row.cash*1.15)<1.01);
+    assert.ok(Math.abs(p4.total-row.cash*1.55)<1.01);
+    assert.ok(Math.abs(p6.total-row.cash*1.78)<1.01);
+  }
+});
