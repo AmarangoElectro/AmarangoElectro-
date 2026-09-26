@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import type { Product } from "@/lib/catalog";
 import { shareProductLink } from "@/lib/commerce/share-product";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
+import { getAuthorizedReferralShareCode } from "@/lib/growth/referral-attribution-client";
 import { getProductCardVisualTheme, type ProductCardVisualContext } from "@/lib/theme/product-card-theme";
 import {
   getFavoritesServerSnapshot,
@@ -73,7 +74,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
     const url = new URL(href, window.location.origin).toString();
     try {
       playSonicCue("share");
-      const result = await shareProductLink({ name: product.name, url, cashPriceArs: product.price?.amount ?? null, installments: product.financing.map((plan) => ({ installments: plan.installments, amountArs: plan.installmentAmount?.amount ?? null })), imageUrl: product.image?.src ?? null });
+      const result = await shareProductLink({ name: product.name, url, cashPriceArs: product.price?.amount ?? null, installments: product.financing.map((plan) => ({ installments: plan.installments, amountArs: plan.installmentAmount?.amount ?? null })), imageUrl: product.image?.src ?? null, referralCode: getAuthorizedReferralShareCode(), productId: product.id });
       if (result === "copied") toast.success("Enlace copiado para compartir");
     } catch {
       toast.error("No pudimos compartir este producto.");
