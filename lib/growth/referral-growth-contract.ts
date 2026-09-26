@@ -123,6 +123,7 @@ export interface AdvisorGrowthLevelRule {
   levelId: string;
   label: string;
   order: number;
+  active?: boolean;
   maxExposurePerSaleArs: number;
   maxOpenExposureArs: number;
   minimumPaidSales: number;
