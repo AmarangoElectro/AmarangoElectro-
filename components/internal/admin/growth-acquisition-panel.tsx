@@ -22,6 +22,7 @@ const pct=(value:number|null)=>value===null?"—":`${(value*100).toFixed(1)}%`;
 function Status({results}:{results:readonly GrowthGatewayResult<unknown>[]}) {
   if(results.some(result=>result.status==="error")) return <div className="growth-admin-status error"><b>No pudimos cargar Adquisición.</b></div>;
   if(results.some(result=>result.status==="unauthorized")) return <div className="growth-admin-status warn"><b>Esta identidad no tiene acceso a Adquisición.</b></div>;
+  if(results.some(result=>result.status==="step_up_required")) return <div className="growth-admin-status warn"><b>Verificación adicional requerida.</b><span>Las escrituras sensibles de Growth requieren AAL2 y no se habilitan sólo con la sesión normal.</span></div>;
   if(results.some(result=>result.status==="not_connected")) return <div className="growth-admin-status"><b>Conexión segura pendiente.</b><span>No se muestran métricas, límites ni recompensas ficticias.</span></div>;
   return null;
 }
@@ -89,17 +90,17 @@ export function GrowthAcquisitionPanel() {
 
   async function savePolicy(){
     const result=await createGrowthGateway().saveRewardPolicy(policyDraft);
-    setActionNotice(result.status==="ok"?"Política guardada.":result.status==="not_connected"?"Conexión segura pendiente: la política no fue guardada.":"No pudimos guardar la política.");
+    setActionNotice(result.status==="ok"?"Política guardada.":result.status==="step_up_required"?"Verificación adicional requerida: la política no fue modificada.":result.status==="not_connected"?"Conexión segura pendiente: la política no fue guardada.":"No pudimos guardar la política.");
   }
 
   async function saveLevel(){
     const result=await createGrowthGateway().saveAdvisorLevel(levelDraft);
-    setActionNotice(result.status==="ok"?"Nivel guardado.":result.status==="not_connected"?"Conexión segura pendiente: el nivel no fue guardado.":"No pudimos guardar el nivel.");
+    setActionNotice(result.status==="ok"?"Nivel guardado.":result.status==="step_up_required"?"Verificación adicional requerida: el nivel no fue modificado.":result.status==="not_connected"?"Conexión segura pendiente: el nivel no fue guardado.":"No pudimos guardar el nivel.");
   }
 
   async function reviewApplication(applicationId:string,decision:"APPROVED"|"REJECTED"){
     const result=await createGrowthGateway().reviewAdvisorApplication(applicationId,decision);
-    setActionNotice(result.status==="ok"?"Solicitud actualizada.":result.status==="not_connected"?"Conexión segura pendiente: la solicitud no fue modificada.":"No pudimos revisar la solicitud.");
+    setActionNotice(result.status==="ok"?"Solicitud actualizada.":result.status==="step_up_required"?"Verificación adicional requerida: la solicitud no fue modificada.":result.status==="not_connected"?"Conexión segura pendiente: la solicitud no fue modificada.":"No pudimos revisar la solicitud.");
   }
 
   const funnelSteps=[
