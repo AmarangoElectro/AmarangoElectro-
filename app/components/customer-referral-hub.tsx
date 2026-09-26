@@ -80,7 +80,18 @@ export function CustomerReferralHub() {
           <article><TrendingUp/><small>COMPRAS GENERADAS</small><strong>{snapshot.summary.generatedSalesCount}</strong></article>
           <article><Gift/><small>BENEFICIOS PENDIENTES</small><strong>{snapshot.summary.pendingBenefitsCount}</strong></article>
           <article><WalletCards/><small>DISPONIBLES</small><strong>{snapshot.summary.availableBenefitsCount}</strong></article>
+          <article><Gift/><small>UTILIZADOS</small><strong>{snapshot.summary.usedBenefitsCount}</strong></article>
         </div>
+
+        <section className="customer-referral-history">
+          <div className="growth-section-heading"><Link2/><div><small>HISTORIAL DE RECOMENDACIONES</small><strong>Seguimiento de tus referidos</strong></div></div>
+          {snapshot.referrals.length===0
+            ? <p className="growth-empty">Todavía no hay recomendaciones registradas.</p>
+            : <div className="growth-referral-history-list">{snapshot.referrals.map(referral=><article key={referral.referralId}>
+                <div><strong>{referral.productId ? "Producto recomendado" : "Recomendación Amarango"}</strong><small>{referral.productId ? `Producto ${referral.productId}` : referral.referralCode}</small></div>
+                <div><span>{referral.status}</span><small>{referral.updatedAt}</small></div>
+              </article>)}</div>}
+        </section>
 
         <section className="customer-benefit-wallet">
           <div className="growth-section-heading"><WalletCards/><div><small>MIS BENEFICIOS</small><strong>Saldo, promociones y vencimientos</strong></div></div>
