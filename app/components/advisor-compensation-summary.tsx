@@ -43,6 +43,10 @@ export function AdvisorCompensationSummary() {
             <div><small>{progress.equivalentSales>=20?"PRÓXIMA VENTA ADICIONAL":"PRÓXIMA META"}</small><b>{progress.nextTarget ? `${progress.nextTarget} ventas → ${money(progress.nextBonusArs??0)}` : "—"}</b></div>
             <div><small>TE FALTAN</small><b>{progress.remainingEquivalentSales.toLocaleString("es-AR")} ventas equivalentes</b></div>
           </div>
+          {progress.equivalentSales>=20&&<div className="advisor-main-goal-complete">
+            <strong>Meta principal alcanzada — {money(100000)}</strong>
+            <span>Adicional por ventas posteriores: +{money(progress.extraBonusAfter20Ars)}</span>
+          </div>}
         </div>
 
         <div className="advisor-compensation-grid">
