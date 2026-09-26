@@ -20,6 +20,7 @@ export interface GrowthGateway {
   getAcquisitionFunnel(): Promise<GrowthGatewayResult<AcquisitionFunnelRow>>;
   listAdvisorLevels(): Promise<GrowthGatewayResult<readonly AdvisorGrowthLevelRule[]>>;
   getAdvisorGrowthStates(): Promise<GrowthGatewayResult<readonly AdvisorGrowthState[]>>;
+  getCurrentAdvisorGrowth(): Promise<GrowthGatewayResult<AdvisorGrowthState>>;
   requestAdvisorApplication(): Promise<GrowthGatewayResult<AdvisorApplication>>;
 }
 
@@ -33,6 +34,7 @@ export const NOT_CONNECTED_GROWTH_GATEWAY: GrowthGateway = Object.freeze({
   async getAcquisitionFunnel(){ return {status:"not_connected"}; },
   async listAdvisorLevels(){ return {status:"not_connected"}; },
   async getAdvisorGrowthStates(){ return {status:"not_connected"}; },
+  async getCurrentAdvisorGrowth(){ return {status:"not_connected"}; },
   async requestAdvisorApplication(){ return {status:"not_connected"}; },
 });
 
