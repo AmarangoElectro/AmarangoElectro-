@@ -25,7 +25,7 @@ export function AdvisorCompensationSummary() {
   const progress=useMemo(()=>projectAdvisorMonthlyProgress(snapshot?.equivalentSales??0),[snapshot?.equivalentSales]);
 
   return (
-    <section className="advisor-compensation-summary" aria-labelledby="advisor-comp-title">
+    <section id="advisor-compensation" className="advisor-compensation-summary" aria-labelledby="advisor-comp-title">
       <div className="advisor-compensation-heading">
         <div><small>🏆 TU MES</small><h2 id="advisor-comp-title">Comisiones y premio mensual</h2></div>
         <Award aria-hidden="true"/>
