@@ -110,10 +110,24 @@ test("Plan Protegido protects the initial above every later installment without 
     assert.ok(q.plan3.schedule.laterPesos.every(payment=>q.plan3.schedule.initialPesos>payment));
     assert.ok(q.plan6.schedule.laterPesos.every(payment=>q.plan6.schedule.initialPesos>payment));
     assert.ok(Math.abs(q.cashCommission.totalExact-q.cashPriceExact*.10)<0.011);
-    assert.ok(Math.abs(q.plan3.commission.totalExact-q.cashPriceExact*.15)<0.011);
-    assert.ok(Math.abs(q.plan6.commission.totalExact-q.cashPriceExact*.15)<0.011);
+    const expectedCommission = q.cashPriceExact < 50000 ? 7500
+      : q.cashPriceExact < 100000 ? 12000
+      : q.cashPriceExact < 150000 ? 16000
+      : q.cashPriceExact < 200000 ? 20000
+      : q.cashPriceExact < 250000 ? 24000
+      : q.cashPriceExact < 300000 ? 28000
+      : q.cashPriceExact < 400000 ? 37500
+      : q.cashPriceExact < 500000 ? 45000
+      : q.cashPriceExact < 600000 ? 52500
+      : q.cashPriceExact < 700000 ? 60000
+      : q.cashPriceExact < 800000 ? 70000
+      : q.cashPriceExact < 900000 ? 80000
+      : q.cashPriceExact < 1000000 ? 90000
+      : 100000;
+    assert.equal(q.plan3.commission.totalExact,expectedCommission);
+    assert.equal(q.plan6.commission.totalExact,expectedCommission);
     assert.equal(q.plan3.commission.paymentCount,2);
-    assert.equal(q.plan6.commission.paymentCount,3);
+    assert.equal(q.plan6.commission.paymentCount,2);
     assert.equal(q.plan6.surchargePercent,78);
     assert.ok(Math.abs(q.cashAmarangoNetExact-(q.cashPriceExact-q.costExact-q.cashCommission.totalExact))<0.011);
     assert.ok(Math.abs(q.plan3.amarangoNetExact-(q.plan3.totalExact-q.costExact-q.plan3.commission.totalExact))<0.011);
