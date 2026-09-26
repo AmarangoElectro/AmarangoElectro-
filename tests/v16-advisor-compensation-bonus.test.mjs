@@ -175,3 +175,61 @@ test("Plan Protegido uses the same fixed financed commission for Plan 3 and Plan
     assert.ok(row.plan6Total>row.plan3Total);
   }
 });
+
+
+test("financed commission tiers are contiguous monotonic and split into two exactly equal payments",async()=>{
+  const result=await runTs(`
+    import {ADVISOR_FINANCED_COMMISSION_TIERS,quoteFinancedAdvisorCommission} from './lib/internal/finance/advisor-compensation.ts';
+    const rows=ADVISOR_FINANCED_COMMISSION_TIERS.map((tier,index)=>({
+      ...tier,
+      index,
+      quote:quoteFinancedAdvisorCommission(tier.minCashPriceArs || 1),
+    }));
+    process.stdout.write(JSON.stringify(rows));
+  `);
+  assert.equal(result.length,14);
+  for(let i=0;i<result.length;i++){
+    const row=result[i];
+    assert.ok(row.commissionArs>0);
+    assert.equal(row.quote.paymentArs.length,2);
+    assert.equal(row.quote.paymentArs[0],row.quote.paymentArs[1]);
+    if(i>0){
+      const previous=result[i-1];
+      assert.equal(previous.maxCashPriceArs+1,row.minCashPriceArs);
+      assert.ok(row.commissionArs>=previous.commissionArs);
+    }
+  }
+  assert.equal(result.at(-1).maxCashPriceArs,null);
+});
+
+test("active V16 advisor and calculator surfaces cannot fall back to legacy financedPercent",async()=>{
+  const {readFile}=await import("node:fs/promises");
+  const root=new URL("../",import.meta.url);
+  const files=await Promise.all([
+    "lib/internal/finance/plan-protegido.ts",
+    "components/internal/admin/amarango-calculator-panel.tsx",
+    "app/components/advisor-workspace.tsx",
+    "app/components/advisor-sale-draft-panel.tsx",
+  ].map(file=>readFile(new URL(file,root),"utf8")));
+  const active=files.join("\n");
+  assert.doesNotMatch(active,/commission\.financedPercent|financedPercent/);
+  assert.match(active,/quoteFinancedAdvisorCommission/);
+  assert.doesNotMatch(active,/Comisión total 15%|Comisión 15% contado|15% financiado/i);
+});
+
+test("bonus after 20 advances only on completed equivalent sales, preserving half-sale progress",async()=>{
+  const result=await runTs(`
+    import {monthlyBonusForEquivalentSales,projectAdvisorMonthlyProgress} from './lib/internal/finance/advisor-compensation.ts';
+    const values=[20,20.5,21,21.5,22];
+    process.stdout.write(JSON.stringify(values.map(value=>({
+      value,
+      bonus:monthlyBonusForEquivalentSales(value),
+      progress:projectAdvisorMonthlyProgress(value),
+    }))));
+  `);
+  assert.deepEqual(result.map(row=>row.bonus),[100000,100000,107500,107500,115000]);
+  assert.equal(result[1].progress.nextTarget,21);
+  assert.equal(result[1].progress.remainingEquivalentSales,0.5);
+  assert.equal(result[3].progress.nextTarget,22);
+  assert.equal(result[3].progress.remainingEquivalentSales,0.5);
+});
