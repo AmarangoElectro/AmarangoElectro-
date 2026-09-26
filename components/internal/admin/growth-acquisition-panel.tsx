@@ -35,6 +35,11 @@ export function GrowthAcquisitionPanel() {
   const [applications,setApplications]=useState<GrowthGatewayResult<readonly AdvisorApplication[]>>({status:"not_connected"});
   const [source,setSource]=useState("ALL");
   const [period,setPeriod]=useState<"7d"|"30d"|"90d">("30d");
+  const [campaignId,setCampaignId]=useState("");
+  const [advisorId,setAdvisorId]=useState("");
+  const [referrerCustomerId,setReferrerCustomerId]=useState("");
+  const [productId,setProductId]=useState("");
+  const [categoryId,setCategoryId]=useState("");
   const [actionNotice,setActionNotice]=useState("");
   const [policyDraft,setPolicyDraft]=useState<RewardPolicy>({
     policyId:"draft",name:"",active:true,rewardType:"AMARANGO_BALANCE",
@@ -52,7 +57,15 @@ export function GrowthAcquisitionPanel() {
   useEffect(()=>{
     let cancelled=false;
     const gateway=createGrowthGateway();
-    const filters={source:source==="ALL"?null:source as AcquisitionSource,periodPreset:period};
+    const filters={
+      source:source==="ALL"?null:source as AcquisitionSource,
+      periodPreset:period,
+      campaignId:campaignId.trim()||null,
+      advisorId:advisorId.trim()||null,
+      referrerCustomerId:referrerCustomerId.trim()||null,
+      productId:productId.trim()||null,
+      categoryId:categoryId.trim()||null,
+    };
     Promise.all([
       gateway.getAcquisitionFunnel(filters),
       gateway.listRewardPolicies(),
@@ -62,7 +75,7 @@ export function GrowthAcquisitionPanel() {
       gateway.listAdvisorApplications(),
     ]).then(([a,b,c,d,e,g])=>{if(!cancelled){setFunnel(a);setPolicies(b);setLevels(c);setAdvisors(d);setReferrals(e);setApplications(g);}});
     return()=>{cancelled=true;};
-  },[source,period]);
+  },[source,period,campaignId,advisorId,referrerCustomerId,productId,categoryId]);
 
   const funnelData=funnel.status==="ok"?funnel.data:null;
   const policyRows=policies.status==="ok"?policies.data:[];
@@ -107,8 +120,13 @@ export function GrowthAcquisitionPanel() {
         <select value={source} onChange={event=>setSource(event.target.value)} aria-label="Fuente">
           <option value="ALL">Todas las fuentes</option><option>DIRECT</option><option>WHATSAPP</option><option>INSTAGRAM</option><option>FACEBOOK</option><option>META_ADS</option><option>CLIENT_REFERRAL</option><option>ADVISOR</option><option>ORGANIC</option><option>CAMPAIGN</option><option>OTHER</option>
         </select>
-        <select value={period} onChange={event=>setPeriod(event.target.value)} aria-label="Período"><option value="7d">7 días</option><option value="30d">30 días</option><option value="90d">90 días</option></select>
-        <small>Filtros preparados: fuente · campaña · asesor · referidor · producto · categoría · período</small>
+        <select value={period} onChange={event=>setPeriod(event.target.value as "7d"|"30d"|"90d")} aria-label="Período"><option value="7d">7 días</option><option value="30d">30 días</option><option value="90d">90 días</option></select>
+        <input value={campaignId} onChange={event=>setCampaignId(event.target.value)} placeholder="Campaña" aria-label="Campaña" />
+        <input value={advisorId} onChange={event=>setAdvisorId(event.target.value)} placeholder="Asesor" aria-label="Asesor" />
+        <input value={referrerCustomerId} onChange={event=>setReferrerCustomerId(event.target.value)} placeholder="Referidor" aria-label="Referidor" />
+        <input value={productId} onChange={event=>setProductId(event.target.value)} placeholder="Producto" aria-label="Producto" />
+        <input value={categoryId} onChange={event=>setCategoryId(event.target.value)} placeholder="Categoría" aria-label="Categoría" />
+        <small>Fuente · campaña · asesor · referidor · producto · categoría · período</small>
       </div>
 
       <Status results={[funnel,policies,levels,advisors,referrals,applications]}/>
@@ -158,6 +176,7 @@ export function GrowthAcquisitionPanel() {
         <div className="growth-section-heading"><Gift/><div><small>EDITAR BENEFICIO</small><strong>Política adaptable al margen real.</strong></div></div>
         <div className="growth-config-grid">
           <label>Nombre<input value={policyDraft.name} onChange={e=>setPolicyDraft({...policyDraft,name:e.target.value})}/></label>
+          <label className="growth-check"><input type="checkbox" checked={policyDraft.active} onChange={e=>setPolicyDraft({...policyDraft,active:e.target.checked})}/> Política activa</label>
           <label>Tipo<select value={policyDraft.rewardType} onChange={e=>setPolicyDraft({...policyDraft,rewardType:e.target.value as RewardType})}>{["AMARANGO_BALANCE","NEXT_PURCHASE_DISCOUNT","COUPON","GIFT","SPECIAL_BENEFIT","SHIPPING_BENEFIT","OTHER"].map(x=><option key={x}>{x}</option>)}</select></label>
           <label>Valor fijo<input type="number" value={policyDraft.fixedValueArs??""} onChange={e=>setPolicyDraft({...policyDraft,fixedValueArs:e.target.value?Number(e.target.value):null})}/></label>
           <label>Porcentaje<input type="number" value={policyDraft.percentValue??""} onChange={e=>setPolicyDraft({...policyDraft,percentValue:e.target.value?Number(e.target.value):null})}/></label>
@@ -166,6 +185,8 @@ export function GrowthAcquisitionPanel() {
           <label>Vence en días<input type="number" value={policyDraft.expiresAfterDays??""} onChange={e=>setPolicyDraft({...policyDraft,expiresAfterDays:e.target.value?Number(e.target.value):null})}/></label>
           <label>Condición<select value={policyDraft.releaseCondition} onChange={e=>setPolicyDraft({...policyDraft,releaseCondition:e.target.value as RewardReleaseCondition})}>{["FIRST_VALID_PAYMENT","MINIMUM_PAID_AMOUNT","DELIVERY_AND_VALID_PAYMENT","SALE_PAID_IN_FULL","ADMIN_APPROVAL"].map(x=><option key={x}>{x}</option>)}</select></label>
           <label>Mínimo cobrado<input type="number" value={policyDraft.minimumPaidAmountArs??""} onChange={e=>setPolicyDraft({...policyDraft,minimumPaidAmountArs:e.target.value?Number(e.target.value):null})}/></label>
+          <label>Productos habilitados<input value={(policyDraft.allowedProductIds??[]).join(", ")} onChange={e=>setPolicyDraft({...policyDraft,allowedProductIds:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)})} placeholder="IDs separados por coma"/></label>
+          <label>Categorías habilitadas<input value={(policyDraft.allowedCategoryIds??[]).join(", ")} onChange={e=>setPolicyDraft({...policyDraft,allowedCategoryIds:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)})} placeholder="IDs separados por coma"/></label>
         </div>
         <button className="growth-admin-save" type="button" onClick={savePolicy}>Guardar política segura</button>
       </section>
@@ -184,6 +205,7 @@ export function GrowthAcquisitionPanel() {
           <label>Antigüedad mínima días<input type="number" value={levelDraft.minimumTenureDays} onChange={e=>setLevelDraft({...levelDraft,minimumTenureDays:Number(e.target.value)})}/></label>
           <label className="growth-check"><input type="checkbox" checked={levelDraft.requiresCorrectDocumentation} onChange={e=>setLevelDraft({...levelDraft,requiresCorrectDocumentation:e.target.checked})}/> Documentación correcta</label>
           <label className="growth-check"><input type="checkbox" checked={levelDraft.requiresAdminApproval} onChange={e=>setLevelDraft({...levelDraft,requiresAdminApproval:e.target.checked})}/> Aprobación administrativa</label>
+          <label>Beneficios del nivel<input value={(levelDraft.benefits??[]).join(", ")} onChange={e=>setLevelDraft({...levelDraft,benefits:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)})} placeholder="Ej. Mayor capacidad, prioridad"/></label>
         </div>
         <button className="growth-admin-save" type="button" onClick={saveLevel}>Guardar nivel seguro</button>
       </section>
