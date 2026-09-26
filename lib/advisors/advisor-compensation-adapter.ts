@@ -1,12 +1,15 @@
 import type {
   AdvisorCompensationResult,
   AdvisorMonthlyCompensationAdminRow,
+  AdvisorMonthlyCompensationOperation,
   AdvisorMonthlyCompensationSnapshot,
 } from "./advisor-compensation-contract";
 
 export interface AdvisorCompensationAdapter {
   getCurrentMonth(): Promise<AdvisorCompensationResult<AdvisorMonthlyCompensationSnapshot>>;
   listCurrentMonthAdmin(): Promise<AdvisorCompensationResult<readonly AdvisorMonthlyCompensationAdminRow[]>>;
+  listCurrentMonthOperations(): Promise<AdvisorCompensationResult<readonly AdvisorMonthlyCompensationOperation[]>>;
+  listCurrentMonthOperationsAdmin(advisorId?: string): Promise<AdvisorCompensationResult<readonly AdvisorMonthlyCompensationOperation[]>>;
 }
 
 /**
@@ -17,6 +20,8 @@ export interface AdvisorCompensationAdapter {
 export const NOT_CONNECTED_ADVISOR_COMPENSATION_ADAPTER: AdvisorCompensationAdapter = Object.freeze({
   async getCurrentMonth(){ return {status:"not_connected"}; },
   async listCurrentMonthAdmin(){ return {status:"not_connected"}; },
+  async listCurrentMonthOperations(){ return {status:"not_connected"}; },
+  async listCurrentMonthOperationsAdmin(){ return {status:"not_connected"}; },
 });
 
 export function createAdvisorCompensationAdapter(): AdvisorCompensationAdapter {
