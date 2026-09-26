@@ -146,3 +146,58 @@ test("growth contract includes universal source attribution statuses reward type
   for(const token of ["PRODUCT_DELIVERED","VALID_PAYMENT_CONFIRMED","CREDIT_COMPLETED","CUSTOMER_LEVEL_CHANGED","BENEFIT_AVAILABLE"]) assert.match(contract,new RegExp(token));
   assert.match(events,/amarango:growth-domain-event/);
 });
+
+
+test("Admin growth contract exposes every requested segmentation and secure configuration action",async()=>{
+  const [contract,gateway,admin]=await Promise.all([
+    source("lib/growth/referral-growth-contract.ts"),
+    source("lib/growth/growth-gateway.ts"),
+    source("components/internal/admin/growth-acquisition-panel.tsx"),
+  ]);
+  for(const token of ["campaignId","advisorId","referrerCustomerId","productId","categoryId","periodPreset","periodFrom","periodTo"]) assert.match(contract,new RegExp(token));
+  for(const token of ["saveRewardPolicy","saveAdvisorLevel","listAdvisorApplications","reviewAdvisorApplication","listReferrals"]) assert.match(gateway,new RegExp(token));
+  for(const token of ["Campaña","Asesor","Referidor","Producto","Categoría","Política activa","Productos habilitados","Categorías habilitadas","Beneficios del nivel","Aprobar","Rechazar"]) assert.match(admin,new RegExp(token));
+  assert.doesNotMatch(gateway,/fetch\s*\(|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(|\.rpc\s*\(/i);
+});
+
+test("Mi Amarango exposes referral history wallet available pending and used benefits without fake values",async()=>{
+  const hub=await source("app/components/customer-referral-hub.tsx");
+  for(const token of ["RECOMENDACIONES","COMPRAS GENERADAS","BENEFICIOS PENDIENTES","DISPONIBLES","UTILIZADOS","HISTORIAL DE RECOMENDACIONES","MIS BENEFICIOS"]) assert.match(hub,new RegExp(token));
+  assert.match(hub,/getCurrentCustomerGrowth/);
+  assert.doesNotMatch(hub,/Math\.random|fake|demoReferral|mockReferral/i);
+});
+
+test("growth authority remains provider-neutral and referral code is never treated as a customer identity locally",async()=>{
+  const [capture,gateway,events]=await Promise.all([
+    source("lib/growth/referral-attribution-client.ts"),
+    source("lib/growth/growth-gateway.ts"),
+    source("lib/growth/growth-events.ts"),
+  ]);
+  assert.match(capture,/sessionStorage/);
+  assert.match(capture,/referralCode/);
+  assert.doesNotMatch(capture,/dni|referredDni|referrerDni|telefono|referrerPhone|referredPhone/i);
+  assert.match(gateway,/not_connected/);
+  assert.match(events,/amarango:growth-domain-event/);
+  assert.doesNotMatch(events,/whatsapp|margarita|twilio|meta/i);
+});
+
+test("runtime advisor levels do not hardcode the former product-price thresholds",async()=>{
+  const [contract,engine,admin]=await Promise.all([
+    source("lib/growth/referral-growth-contract.ts"),
+    source("lib/growth/referral-growth-engine.ts"),
+    source("components/internal/admin/growth-acquisition-panel.tsx"),
+  ]);
+  const runtime=[contract,engine,admin].join("\n");
+  for(const amount of ["50_000","100_000","250_000","350_000","50000","100000","250000","350000"]) assert.doesNotMatch(runtime,new RegExp(amount));
+  assert.match(contract,/maxExposurePerSaleArs/);
+  assert.match(contract,/maxOpenExposureArs/);
+});
+
+test("reward policy is configurable rather than a fixed ten-percent referral reward",async()=>{
+  const [contract,admin]=await Promise.all([
+    source("lib/growth/referral-growth-contract.ts"),
+    source("components/internal/admin/growth-acquisition-panel.tsx"),
+  ]);
+  for(const token of ["fixedValueArs","percentValue","maxValueArs","minimumPurchaseArs","expiresAfterDays","allowedProductIds","allowedCategoryIds","releaseCondition"]) assert.match(contract,new RegExp(token));
+  assert.doesNotMatch([contract,admin].join("\n"),/referralReward\s*=\s*10|rewardPercent\s*=\s*10/i);
+});
