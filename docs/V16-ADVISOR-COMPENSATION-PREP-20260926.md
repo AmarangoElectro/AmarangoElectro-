@@ -9,11 +9,11 @@ Branch:
 Base:
 `65eb51691c86226a25b59850f0015666bcd8291b`
 
-Current HEAD at handoff creation:
-`3b399739b44b23a7fe2f262af9a65d1c528e0dac`
+Current HEAD at latest handoff update:
+`838eb032d52c3a9279cf9d7b73dcaac8fdcf3fec`
 
 Current TREE:
-`e08021131b006361df9a31604e6831358c15be1e`
+`25b701996a82e0a1a651b93d74aadd484497123b`
 
 This branch MUST NOT replace Work's unpublished local checkpoint `568423661eeb98144177658da0b1061df8dd53c9`.
 Integrate only after that checkpoint is safely published.
@@ -164,3 +164,30 @@ Resolve any overlapping finance/docs/tests deliberately.
 5. build/test execution;
 6. final browser QA;
 7. deployment only after explicit authorization.
+
+
+### Per-operation detail contract
+Prepared without inventing backend data:
+- `app/components/advisor-compensation-operations.tsx`
+- `AdvisorMonthlyCompensationOperation`
+- advisor adapter read methods for current-month operation detail.
+
+When secure data exists, the advisor can see:
+- product;
+- definitive cash price;
+- cash/financed modality;
+- commission total;
+- payment count and amount;
+- commission paid/pending;
+- equivalent-sale contribution;
+- validation status/reason.
+
+The surface returns nothing while the compensation adapter is `not_connected`.
+No product cost/markup is exposed.
+
+### Additional guards
+- active calculator/advisor surfaces are forbidden by QA from reading legacy `commission.financedPercent`;
+- financed tier table is checked for contiguous boundaries and no overlaps;
+- each financed commission splits into two exactly equal payments;
+- half-sale progress after 20 does not release the +7,500 until a complete equivalent sale is reached;
+- Classic customer installment totals remain 1.15 / 1.55 / 1.78 of definitive cash price and are unaffected by advisor commission changes.
