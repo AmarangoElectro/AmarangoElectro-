@@ -87,7 +87,7 @@ export function projectAdvisorGrowth(
   levels: readonly AdvisorGrowthLevelRule[],
 ): AdvisorGrowthProjection {
   const ordered = [...levels].sort((a,b)=>a.order-b.order);
-  const current = ordered.find(level=>level.levelId===state.currentLevelId);
+  const current = state.currentLevelId ? ordered.find(level=>level.levelId===state.currentLevelId) : ordered[0];
   if (!current) throw new Error("Current advisor level is not configured");
   const next = ordered.find(level=>level.order>current.order) ?? null;
   const availableOpenExposureArs = Math.max(0,current.maxOpenExposureArs-state.openExposureArs);
@@ -96,8 +96,8 @@ export function projectAdvisorGrowth(
   const checks = [
     { ok: state.paidSales >= next.minimumPaidSales, label:"Ventas cobradas" },
     { ok: state.completedOperations >= next.minimumCompletedOperations, label:"Operaciones completadas" },
-    { ok: state.portfolioQuality >= next.minimumPortfolioQuality, label:"Calidad de cartera" },
-    { ok: state.delinquencyRate <= next.maximumDelinquencyRate, label:"Mora" },
+    { ok: state.portfolioQuality !== null && state.portfolioQuality >= next.minimumPortfolioQuality, label: state.portfolioQuality === null ? "Calidad de cartera sin evaluar" : "Calidad de cartera" },
+    { ok: state.delinquencyRate !== null && state.delinquencyRate <= next.maximumDelinquencyRate, label: state.delinquencyRate === null ? "Mora sin evaluar" : "Mora" },
     { ok: state.recurringClients >= next.minimumRecurringClients, label:"Clientes recurrentes" },
     { ok: state.tenureDays >= next.minimumTenureDays, label:"Antigüedad" },
     { ok: !next.requiresCorrectDocumentation || state.correctDocumentation, label:"Documentación" },
