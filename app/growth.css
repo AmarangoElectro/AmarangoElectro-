@@ -16,3 +16,22 @@
 
 .advisor-growth-summary{margin:18px 0;padding:20px;border:1px solid var(--border);border-radius:22px;background:var(--card)}.advisor-growth-summary>p{color:var(--muted);font-size:13px;line-height:1.55}.advisor-growth-grid{margin-top:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.advisor-growth-grid article{padding:14px;display:flex;flex-direction:column;gap:6px;border:1px solid var(--border);border-radius:16px}.advisor-growth-grid svg{color:var(--blue)}.advisor-growth-grid small{color:var(--muted);font-size:9px;font-weight:900}.advisor-growth-benefits{margin-top:12px;padding:13px;display:flex;gap:10px;border-radius:15px;background:var(--secondary)}.advisor-growth-benefits>svg{color:var(--orange);flex:none}.advisor-growth-benefits div{display:grid;gap:3px}.advisor-growth-benefits p,.advisor-growth-blockers{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
 @media(max-width:760px){.advisor-growth-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Growth configuration + history */
+.growth-admin-filters input{min-height:40px;min-width:130px;padding:0 12px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--foreground)}
+.growth-config-grid{margin-top:15px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.growth-config-grid label{display:grid;gap:6px;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.4px}
+.growth-config-grid input,.growth-config-grid select{width:100%;min-height:42px;padding:0 11px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--foreground)}
+.growth-config-grid .growth-check{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 11px;border:1px solid var(--border);border-radius:12px;background:var(--secondary)}
+.growth-config-grid .growth-check input{width:auto;min-height:0}
+.growth-admin-save{margin-top:13px;min-height:43px;padding:0 16px;border:0;border-radius:999px;background:#07111f;color:#fff;font-weight:900;cursor:pointer}
+.growth-policy-list button{min-height:32px;padding:0 9px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--foreground);font-size:11px;font-weight:800;cursor:pointer}
+.customer-referral-history{margin-top:18px;padding:20px;border:1px solid var(--border);border-radius:20px}
+.growth-referral-history-list{margin-top:14px;display:grid;gap:8px}
+.growth-referral-history-list article{padding:13px 14px;display:flex;justify-content:space-between;gap:12px;border:1px solid var(--border);border-radius:14px}
+.growth-referral-history-list article>div{display:grid;gap:3px}
+.growth-referral-history-list small{color:var(--muted);font-size:11px}
+.growth-referral-history-list span{color:var(--blue);font-size:11px;font-weight:900}
+@media(max-width:900px){.growth-config-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.growth-config-grid{grid-template-columns:1fr}.growth-admin-filters input,.growth-admin-filters select{width:100%}.growth-referral-history-list article{flex-direction:column}.growth-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
