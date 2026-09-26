@@ -124,8 +124,11 @@ test("growth UI is native to V16 but never fabricates backend success",async()=>
     source("lib/integration/sale-snapshot.ts"),
     source("app/layout.tsx"),
   ]);
+  assert.match(gateway,/SupabaseGrowthGateway/);
+  assert.match(gateway,/getCrmAccessConfig/);
   assert.match(gateway,/NOT_CONNECTED_GROWTH_GATEWAY/);
-  assert.doesNotMatch(gateway,/fetch\s*\(|createClient|\.insert\s*\(|\.upsert\s*\(|\.rpc\s*\(/i);
+  assert.match(gateway,/\/rest\/v1\/rpc\//);
+  assert.doesNotMatch(gateway,/from\(["'][^"']+["']\)|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/i);
   assert.match(admin,/MÉTRICA PRINCIPAL/);
   assert.match(admin,/No es multinivel/);
   assert.match(hub,/RECOMENDÁ Y GANÁ/);
@@ -157,7 +160,9 @@ test("Admin growth contract exposes every requested segmentation and secure conf
   for(const token of ["campaignId","advisorId","referrerCustomerId","productId","categoryId","periodPreset","periodFrom","periodTo"]) assert.match(contract,new RegExp(token));
   for(const token of ["saveRewardPolicy","saveAdvisorLevel","listAdvisorApplications","reviewAdvisorApplication","listReferrals"]) assert.match(gateway,new RegExp(token));
   for(const token of ["Campaña","Asesor","Referidor","Producto","Categoría","Política activa","Productos habilitados","Categorías habilitadas","Beneficios del nivel","Aprobar","Rechazar"]) assert.match(admin,new RegExp(token));
-  assert.doesNotMatch(gateway,/fetch\s*\(|createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(|\.rpc\s*\(/i);
+  assert.match(gateway,/v16_growth_save_reward_policy/);
+  assert.match(gateway,/v16_growth_save_advisor_level/);
+  assert.doesNotMatch(gateway,/createClient|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/i);
 });
 
 test("Mi Amarango exposes referral history wallet available pending and used benefits without fake values",async()=>{
@@ -177,6 +182,7 @@ test("growth authority remains provider-neutral and referral code is never treat
   assert.match(capture,/referralCode/);
   assert.doesNotMatch(capture,/dni|referredDni|referrerDni|telefono|referrerPhone|referredPhone/i);
   assert.match(gateway,/not_connected/);
+  assert.match(gateway,/getCrmAccessConfig/);
   assert.match(events,/amarango:growth-domain-event/);
   assert.doesNotMatch(events,/whatsapp|margarita|twilio|meta/i);
 });
@@ -200,4 +206,31 @@ test("reward policy is configurable rather than a fixed ten-percent referral rew
   ]);
   for(const token of ["fixedValueArs","percentValue","maxValueArs","minimumPurchaseArs","expiresAfterDays","allowedProductIds","allowedCategoryIds","releaseCondition"]) assert.match(contract,new RegExp(token));
   assert.doesNotMatch([contract,admin].join("\n"),/referralReward\s*=\s*10|rewardPercent\s*=\s*10/i);
+});
+
+
+test("unevaluated advisor quality and delinquency block progression instead of receiving favorable defaults",async()=>{
+  const result=await runTs(`
+    import {projectAdvisorGrowth} from './lib/growth/referral-growth-engine.ts';
+    const levels=[
+      {levelId:'base',label:'Base',order:1,active:true,maxExposurePerSaleArs:1,maxOpenExposureArs:1,minimumPaidSales:0,minimumCompletedOperations:0,minimumPortfolioQuality:0,maximumDelinquencyRate:1,minimumRecurringClients:0,minimumTenureDays:0,requiresCorrectDocumentation:false,requiresAdminApproval:false},
+      {levelId:'next',label:'Next',order:2,active:true,maxExposurePerSaleArs:2,maxOpenExposureArs:2,minimumPaidSales:0,minimumCompletedOperations:0,minimumPortfolioQuality:.8,maximumDelinquencyRate:.1,minimumRecurringClients:0,minimumTenureDays:0,requiresCorrectDocumentation:false,requiresAdminApproval:false},
+    ];
+    const state={advisorId:'a',currentLevelId:'base',openExposureArs:0,openOperations:0,portfolioQuality:null,delinquencyRate:null,paidSales:9,completedOperations:9,recurringClients:9,tenureDays:999,correctDocumentation:true};
+    process.stdout.write(JSON.stringify(projectAdvisorGrowth(state,levels)));
+  `);
+  assert.ok(result.blockers.includes("Calidad de cartera sin evaluar"));
+  assert.ok(result.blockers.includes("Mora sin evaluar"));
+  assert.ok(result.progressPercent<100);
+});
+
+test("Growth gateway names match the secure Supabase backend contract and remain fail-closed without session config",async()=>{
+  const [gateway,bridge]=await Promise.all([
+    source("lib/growth/growth-gateway.ts"),
+    source("lib/internal/auth/secure-rpc-session-bridge-contract.ts"),
+  ]);
+  const rpcNames=[...new Set([...gateway.matchAll(/"(v16_growth_[a-z0-9_]+)"/g)].map(m=>m[1]))];
+  for(const name of rpcNames) assert.match(bridge,new RegExp(name));
+  assert.match(gateway,/new SupabaseGrowthGateway\(getCrmAccessConfig\(\)\)/);
+  assert.match(gateway,/new SupabaseGrowthGateway\(null\)/);
 });
