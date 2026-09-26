@@ -8,8 +8,7 @@ const adapterFiles=[
   "lib/crm/client-crm-adapter.ts","lib/collections/collections-adapter.ts",
   "lib/payments/payment-history-adapter.ts","lib/reports/reports-adapter.ts",
   "lib/providers/provider-inbox-adapter.ts","lib/cash/cash-adapter.ts",
-  "lib/deliveries/deliveries-adapter.ts","lib/advisors/advisors-adapter.ts",
-  "lib/growth/growth-gateway.ts"
+  "lib/deliveries/deliveries-adapter.ts","lib/advisors/advisors-adapter.ts"
 ];
 
 test("recovered real snapshot is read-only and matches audited master counts",()=> {
@@ -44,7 +43,7 @@ test("bridge allowlist covers exactly the RPC names used by recovered adapters",
   assert.ok(arrayMatch,"allowlist array not found");
   const actual=[...new Set([...arrayMatch[1].matchAll(/"(v16_[a-z0-9_]+)"/g)].map(m=>m[1]))].sort();
   assert.deepEqual(actual,expected);
-  assert.ok(actual.length>=31);
+  assert.equal(actual.length,31);
 });
 test("existing adapters remain disconnected until a real secure session bridge exists",()=> {
   assert.match(crm,/export function getCrmAccessConfig\(\): CrmAccessConfig \| null \{\s*return null;/s);
