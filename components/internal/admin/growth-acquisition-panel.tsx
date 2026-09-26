@@ -48,7 +48,7 @@ export function GrowthAcquisitionPanel() {
     releaseCondition:"FIRST_VALID_PAYMENT",minimumPaidAmountArs:null,
   });
   const [levelDraft,setLevelDraft]=useState<AdvisorGrowthLevelRule>({
-    levelId:"draft",label:"",order:1,maxExposurePerSaleArs:0,maxOpenExposureArs:0,
+    levelId:"draft",label:"",order:1,active:false,maxExposurePerSaleArs:0,maxOpenExposureArs:0,
     minimumPaidSales:0,minimumCompletedOperations:0,minimumPortfolioQuality:0,
     maximumDelinquencyRate:1,minimumRecurringClients:0,minimumTenureDays:0,
     requiresCorrectDocumentation:true,requiresAdminApproval:true,benefits:[],
@@ -195,6 +195,7 @@ export function GrowthAcquisitionPanel() {
         <div className="growth-section-heading"><UsersRound/><div><small>CONFIGURAR NIVEL</small><strong>Límites y calidad de cartera.</strong></div></div>
         <div className="growth-config-grid">
           <label>Nombre<input value={levelDraft.label} onChange={e=>setLevelDraft({...levelDraft,label:e.target.value})}/></label>
+          <label className="growth-check"><input type="checkbox" checked={Boolean(levelDraft.active)} onChange={e=>setLevelDraft({...levelDraft,active:e.target.checked})}/> Nivel activo</label>
           <label>Exposición máx. por venta<input type="number" value={levelDraft.maxExposurePerSaleArs} onChange={e=>setLevelDraft({...levelDraft,maxExposurePerSaleArs:Number(e.target.value)})}/></label>
           <label>Exposición abierta máx.<input type="number" value={levelDraft.maxOpenExposureArs} onChange={e=>setLevelDraft({...levelDraft,maxOpenExposureArs:Number(e.target.value)})}/></label>
           <label>Ventas cobradas mín.<input type="number" value={levelDraft.minimumPaidSales} onChange={e=>setLevelDraft({...levelDraft,minimumPaidSales:Number(e.target.value)})}/></label>
