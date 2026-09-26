@@ -1,3 +1,4 @@
+import { getCrmAccessConfig, type CrmAccessConfig } from "@/lib/crm/client-crm-adapter";
 import type {
   AcquisitionFilters,
   AcquisitionFunnelRow,
@@ -31,25 +32,284 @@ export interface GrowthGateway {
   reviewAdvisorApplication(applicationId: string, decision: "APPROVED" | "REJECTED"): Promise<GrowthGatewayResult<AdvisorApplication>>;
 }
 
-/**
- * Deliberately disconnected until a frozen/authenticated backend contract exists.
- * Never fabricate referral codes, rewards, advisor limits, or funnel metrics.
- */
-export const NOT_CONNECTED_GROWTH_GATEWAY: GrowthGateway = Object.freeze({
-  async getCurrentCustomerGrowth(){ return {status:"not_connected"}; },
-  async listRewardPolicies(){ return {status:"not_connected"}; },
-  async saveRewardPolicy(){ return {status:"not_connected"}; },
-  async getAcquisitionFunnel(){ return {status:"not_connected"}; },
-  async listReferrals(){ return {status:"not_connected"}; },
-  async listAdvisorLevels(){ return {status:"not_connected"}; },
-  async saveAdvisorLevel(){ return {status:"not_connected"}; },
-  async getAdvisorGrowthStates(){ return {status:"not_connected"}; },
-  async getCurrentAdvisorGrowth(){ return {status:"not_connected"}; },
-  async requestAdvisorApplication(){ return {status:"not_connected"}; },
-  async listAdvisorApplications(){ return {status:"not_connected"}; },
-  async reviewAdvisorApplication(){ return {status:"not_connected"}; },
-});
+type GrowthRpcName =
+  | "v16_growth_current_customer_snapshot"
+  | "v16_growth_reward_policies_list"
+  | "v16_growth_save_reward_policy"
+  | "v16_growth_acquisition_funnel"
+  | "v16_growth_referrals_list"
+  | "v16_growth_advisor_levels_list"
+  | "v16_growth_save_advisor_level"
+  | "v16_growth_advisor_states_list"
+  | "v16_growth_current_advisor_state"
+  | "v16_growth_request_advisor_application"
+  | "v16_growth_advisor_applications_list"
+  | "v16_growth_review_advisor_application";
+
+async function rpc(config: CrmAccessConfig, name: GrowthRpcName, args: Record<string, unknown> = {}) {
+  let response: Response;
+  try {
+    response = await fetch(new URL(`/rest/v1/rpc/${name}`, config.url), {
+      method: "POST",
+      headers: {
+        apikey: config.accessToken,
+        Authorization: `Bearer ${config.accessToken}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(args),
+      cache: "no-store",
+    });
+  } catch {
+    return { status:"not_connected" } as const;
+  }
+
+  if (response.status === 401 || response.status === 403) return { status:"unauthorized" } as const;
+  if (!response.ok) {
+    let message=`RPC ${name} failed (${response.status})`;
+    try {
+      const body=await response.json() as { code?:string; message?:string };
+      if (body.code==="step_up_required" || body.message==="step_up_required") return {status:"step_up_required"} as const;
+      message=body.message || message;
+    } catch {}
+    return {status:"error",message} as const;
+  }
+
+  try {
+    return {status:"ok",data:await response.json()} as const;
+  } catch {
+    return {status:"error",message:`RPC ${name} returned non-JSON`} as const;
+  }
+}
+
+const n=(value:unknown)=>typeof value==="number"?value:Number(value ?? 0);
+const nullableN=(value:unknown)=>value===null||value===undefined?null:n(value);
+const s=(value:unknown)=>value===null||value===undefined?null:String(value);
+const uuidOrNull=(value:string|undefined|null)=>value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)?value:null;
+const first=<T>(value:unknown):T|null=>Array.isArray(value)?(value[0] as T??null):(value as T??null);
+
+function policy(row:any):RewardPolicy {
+  return {
+    policyId:String(row.policy_id),
+    name:String(row.name),
+    active:Boolean(row.active),
+    rewardType:row.reward_type,
+    fixedValueArs:nullableN(row.fixed_value_ars),
+    percentValue:nullableN(row.percent_value),
+    maxValueArs:nullableN(row.max_value_ars),
+    minimumPurchaseArs:nullableN(row.minimum_purchase_ars),
+    expiresAfterDays:row.expires_after_days==null?null:n(row.expires_after_days),
+    allowedProductIds:Array.isArray(row.allowed_product_ids)?row.allowed_product_ids.map(String):[],
+    allowedCategoryIds:Array.isArray(row.allowed_category_ids)?row.allowed_category_ids.map(String):[],
+    releaseCondition:row.release_condition,
+    minimumPaidAmountArs:nullableN(row.minimum_paid_amount_ars),
+    priority:n(row.priority ?? 100),
+  };
+}
+
+function level(row:any):AdvisorGrowthLevelRule {
+  return {
+    levelId:String(row.level_id),
+    label:String(row.label),
+    order:n(row.sort_order),
+    active:Boolean(row.active),
+    maxExposurePerSaleArs:n(row.max_exposure_per_sale_ars),
+    maxOpenExposureArs:n(row.max_open_exposure_ars),
+    minimumPaidSales:n(row.minimum_paid_sales),
+    minimumCompletedOperations:n(row.minimum_completed_operations),
+    minimumPortfolioQuality:n(row.minimum_portfolio_quality),
+    maximumDelinquencyRate:n(row.maximum_delinquency_rate),
+    minimumRecurringClients:n(row.minimum_recurring_clients),
+    minimumTenureDays:n(row.minimum_tenure_days),
+    requiresCorrectDocumentation:Boolean(row.requires_correct_documentation),
+    requiresAdminApproval:Boolean(row.requires_admin_approval),
+    benefits:Array.isArray(row.benefits)?row.benefits.map(String):[],
+  };
+}
+
+function advisorState(row:any):AdvisorGrowthState {
+  return {
+    advisorId:String(row.advisor_id),
+    currentLevelId:s(row.current_level_id),
+    openExposureArs:n(row.open_exposure_ars),
+    openOperations:n(row.open_operations),
+    portfolioQuality:nullableN(row.portfolio_quality),
+    delinquencyRate:nullableN(row.delinquency_rate),
+    paidSales:n(row.paid_sales),
+    completedOperations:n(row.completed_operations),
+    recurringClients:n(row.recurring_clients),
+    tenureDays:n(row.tenure_days),
+    correctDocumentation:Boolean(row.correct_documentation),
+  };
+}
+
+function referral(row:any):ReferralRecord {
+  return {
+    referralId:String(row.referral_id),
+    referralCode:String(row.referral_code),
+    referrerCustomerId:String(row.referrer_customer_id),
+    referrerDisplayName:s(row.referrer_display_name),
+    referredCustomerId:s(row.referred_customer_id),
+    referredDisplayName:null,
+    leadId:s(row.lead_id),
+    saleId:s(row.sale_id),
+    productId:s(row.product_id),
+    source:"CLIENT_REFERRAL",
+    status:row.status,
+    enteredAt:String(row.entered_at),
+    updatedAt:String(row.updated_at),
+  };
+}
+
+function application(row:any):AdvisorApplication {
+  return {
+    applicationId:String(row.application_id),
+    customerId:String(row.customer_id),
+    customerName:s(row.customer_name),
+    status:row.status,
+    createdAt:String(row.created_at),
+    reviewedAt:s(row.reviewed_at),
+    reviewedBy:s(row.reviewed_by),
+  };
+}
+
+function periodFrom(filters:AcquisitionFilters) {
+  if (filters.periodFrom) return filters.periodFrom;
+  const days=filters.periodPreset==="7d"?7:filters.periodPreset==="90d"?90:30;
+  return new Date(Date.now()-days*86400000).toISOString();
+}
+
+export class SupabaseGrowthGateway implements GrowthGateway {
+  constructor(private readonly config:CrmAccessConfig|null){}
+
+  private disconnected<T>():GrowthGatewayResult<T>{ return {status:"not_connected"}; }
+
+  async getCurrentCustomerGrowth() {
+    if(!this.config)return this.disconnected<CustomerGrowthSnapshot>();
+    const result=await rpc(this.config,"v16_growth_current_customer_snapshot");
+    if(result.status!=="ok")return result;
+    return {status:"ok",data:result.data as CustomerGrowthSnapshot};
+  }
+
+  async listRewardPolicies() {
+    if(!this.config)return this.disconnected<readonly RewardPolicy[]>();
+    const result=await rpc(this.config,"v16_growth_reward_policies_list");
+    if(result.status!=="ok")return result;
+    return {status:"ok",data:(Array.isArray(result.data)?result.data:[]).map(policy)};
+  }
+
+  async saveRewardPolicy(input:RewardPolicy) {
+    if(!this.config)return this.disconnected<RewardPolicy>();
+    const result=await rpc(this.config,"v16_growth_save_reward_policy",{
+      p_policy_id:uuidOrNull(input.policyId),p_name:input.name,p_active:input.active,p_reward_type:input.rewardType,
+      p_fixed_value_ars:input.fixedValueArs??null,p_percent_value:input.percentValue??null,p_max_value_ars:input.maxValueArs??null,
+      p_minimum_purchase_ars:input.minimumPurchaseArs??null,p_expires_after_days:input.expiresAfterDays??null,
+      p_allowed_product_ids:input.allowedProductIds??[],p_allowed_category_ids:input.allowedCategoryIds??[],
+      p_release_condition:input.releaseCondition,p_minimum_paid_amount_ars:input.minimumPaidAmountArs??null,p_priority:input.priority??100,
+    });
+    if(result.status!=="ok")return result;
+    const row=first<any>(result.data); if(!row)return {status:"error",message:"Policy RPC returned no row"};
+    return {status:"ok",data:policy(row)};
+  }
+
+  async getAcquisitionFunnel(filters:AcquisitionFilters={}) {
+    if(!this.config)return this.disconnected<AcquisitionFunnelRow>();
+    const result=await rpc(this.config,"v16_growth_acquisition_funnel",{
+      p_source:filters.source??null,p_campaign_id:filters.campaignId??null,p_advisor_id:uuidOrNull(filters.advisorId),
+      p_referrer_customer_id:filters.referrerCustomerId??null,p_product_id:filters.productId??null,p_category_id:filters.categoryId??null,
+      p_period_preset:filters.periodPreset??"30d",p_period_from:filters.periodFrom??null,p_period_to:filters.periodTo??null,
+    });
+    if(result.status!=="ok")return result;
+    const row=first<any>(result.data); if(!row)return {status:"error",message:"Funnel RPC returned no row"};
+    return {status:"ok",data:{
+      visits:n(row.visits),leads:n(row.leads),evaluations:n(row.evaluations),approved:n(row.approved),sales:n(row.sales),paid:n(row.paid),
+      recurringCustomers:n(row.recurring_customers),referralsGenerated:n(row.referrals_generated),
+      costPerLeadArs:nullableN(row.cost_per_lead_ars),costPerCustomerArs:nullableN(row.cost_per_customer_ars),
+      approvalRate:nullableN(row.approval_rate),conversionRate:nullableN(row.conversion_rate),
+      marginGeneratedArs:n(row.margin_generated_ars),marginCollectedArs:n(row.margin_collected_ars),
+      delinquencyRate:nullableN(row.delinquency_rate),exposedCapitalArs:n(row.exposed_capital_ars),
+      referralsPerCustomer:nullableN(row.referrals_per_customer),salesPerReferral:nullableN(row.sales_per_referral),
+      collectedMarginOnExposure:nullableN(row.collected_margin_on_exposure),
+    }};
+  }
+
+  async listReferrals(filters:AcquisitionFilters={}) {
+    if(!this.config)return this.disconnected<readonly ReferralRecord[]>();
+    const result=await rpc(this.config,"v16_growth_referrals_list",{
+      p_source:filters.source??null,p_campaign_id:filters.campaignId??null,p_advisor_id:uuidOrNull(filters.advisorId),
+      p_referrer_customer_id:filters.referrerCustomerId??null,p_product_id:filters.productId??null,p_category_id:filters.categoryId??null,
+      p_period_from:periodFrom(filters),p_period_to:filters.periodTo??null,p_row_limit:200,p_row_offset:0,
+    });
+    if(result.status!=="ok")return result;
+    return {status:"ok",data:(Array.isArray(result.data)?result.data:[]).map(referral)};
+  }
+
+  async listAdvisorLevels() {
+    if(!this.config)return this.disconnected<readonly AdvisorGrowthLevelRule[]>();
+    const result=await rpc(this.config,"v16_growth_advisor_levels_list");
+    if(result.status!=="ok")return result;
+    return {status:"ok",data:(Array.isArray(result.data)?result.data:[]).map(level)};
+  }
+
+  async saveAdvisorLevel(input:AdvisorGrowthLevelRule) {
+    if(!this.config)return this.disconnected<AdvisorGrowthLevelRule>();
+    const result=await rpc(this.config,"v16_growth_save_advisor_level",{
+      p_level_id:uuidOrNull(input.levelId),p_label:input.label,p_sort_order:input.order,p_active:input.active??false,
+      p_max_exposure_per_sale_ars:input.maxExposurePerSaleArs,p_max_open_exposure_ars:input.maxOpenExposureArs,
+      p_minimum_paid_sales:input.minimumPaidSales,p_minimum_completed_operations:input.minimumCompletedOperations,
+      p_minimum_portfolio_quality:input.minimumPortfolioQuality,p_maximum_delinquency_rate:input.maximumDelinquencyRate,
+      p_minimum_recurring_clients:input.minimumRecurringClients,p_minimum_tenure_days:input.minimumTenureDays,
+      p_requires_correct_documentation:input.requiresCorrectDocumentation,p_requires_admin_approval:input.requiresAdminApproval,
+      p_benefits:input.benefits??[],
+    });
+    if(result.status!=="ok")return result;
+    const row=first<any>(result.data); if(!row)return {status:"error",message:"Advisor level RPC returned no row"};
+    return {status:"ok",data:level(row)};
+  }
+
+  async getAdvisorGrowthStates() {
+    if(!this.config)return this.disconnected<readonly AdvisorGrowthState[]>();
+    const result=await rpc(this.config,"v16_growth_advisor_states_list");
+    if(result.status!=="ok")return result;
+    return {status:"ok",data:(Array.isArray(result.data)?result.data:[]).map(advisorState)};
+  }
+
+  async getCurrentAdvisorGrowth() {
+    if(!this.config)return this.disconnected<AdvisorGrowthState>();
+    const result=await rpc(this.config,"v16_growth_current_advisor_state");
+    if(result.status!=="ok")return result;
+    const row=first<any>(result.data); if(!row)return {status:"error",message:"Advisor state RPC returned no row"};
+    return {status:"ok",data:advisorState(row)};
+  }
+
+  async requestAdvisorApplication() {
+    if(!this.config)return this.disconnected<AdvisorApplication>();
+    const result=await rpc(this.config,"v16_growth_request_advisor_application");
+    if(result.status!=="ok")return result;
+    const row=first<any>(result.data); if(!row)return {status:"error",message:"Advisor application RPC returned no row"};
+    return {status:"ok",data:application(row)};
+  }
+
+  async listAdvisorApplications() {
+    if(!this.config)return this.disconnected<readonly AdvisorApplication[]>();
+    const result=await rpc(this.config,"v16_growth_advisor_applications_list");
+    if(result.status!=="ok")return result;
+    return {status:"ok",data:(Array.isArray(result.data)?result.data:[]).map(application)};
+  }
+
+  async reviewAdvisorApplication(applicationId:string,decision:"APPROVED"|"REJECTED") {
+    if(!this.config)return this.disconnected<AdvisorApplication>();
+    const result=await rpc(this.config,"v16_growth_review_advisor_application",{
+      p_application_id:applicationId,p_decision:decision,p_note:null,
+    });
+    if(result.status!=="ok")return result;
+    const row=first<any>(result.data); if(!row)return {status:"error",message:"Advisor review RPC returned no row"};
+    return {status:"ok",data:application(row)};
+  }
+}
+
+export const NOT_CONNECTED_GROWTH_GATEWAY: GrowthGateway = new SupabaseGrowthGateway(null);
 
 export function createGrowthGateway(): GrowthGateway {
-  return NOT_CONNECTED_GROWTH_GATEWAY;
+  return new SupabaseGrowthGateway(getCrmAccessConfig());
 }
