@@ -1,5 +1,6 @@
 import { quoteInstallmentPlan, type CommercePolicy } from "./calculator-engine";
 import { AMARANGO_CURRENT_POLICY } from "./amarango-policy";
+import { quoteFinancedAdvisorCommission } from "./advisor-compensation";
 import {
   fromMoneyCents,
   markupForRealCost,
@@ -9,7 +10,7 @@ import {
   type CoherentCashPriceQuote,
 } from "./coherent-pricing";
 
-export const PLAN_PROTEGIDO_VERSION = "2026-09-25-coherencia";
+export const PLAN_PROTEGIDO_VERSION = "2026-09-26-coherencia-comision-fija";
 export const PLAN_PROTEGIDO_THREE_SURCHARGE_PERCENT = 35;
 
 export interface ProtectedPaymentSchedule {
@@ -23,7 +24,8 @@ export interface ProtectedPaymentSchedule {
 }
 
 export interface ProtectedCommissionSchedule {
-  percent: number;
+  basis: "cash_percent" | "financed_fixed_tier";
+  percent: number | null;
   totalExact: number;
   totalPesos: number;
   paymentCount: number;
@@ -201,6 +203,7 @@ function quoteProtectedCommissionFromCents(
   paymentPesos[paymentPesos.length - 1] = totalPesos - standardPesos * (paymentCount - 1);
 
   return Object.freeze({
+    basis: "cash_percent" as const,
     percent,
     totalExact: fromMoneyCents(totalCents),
     totalPesos,
@@ -209,6 +212,20 @@ function quoteProtectedCommissionFromCents(
     paymentPesos: Object.freeze(paymentPesos),
   });
 }
+
+function quoteProtectedFinancedCommission(cashPriceArs: number): ProtectedCommissionSchedule {
+  const quote = quoteFinancedAdvisorCommission(cashPriceArs);
+  return Object.freeze({
+    basis: "financed_fixed_tier" as const,
+    percent: null,
+    totalExact: quote.commissionArs,
+    totalPesos: quote.commissionArs,
+    paymentCount: quote.paymentCount,
+    paymentExact: quote.commissionArs / quote.paymentCount,
+    paymentPesos: quote.paymentArs,
+  });
+}
+
 
 export function quotePlanProtegido(
   cost: number,
@@ -224,8 +241,8 @@ export function quotePlanProtegido(
   const initialCapCents = Math.round(cashPriceCents * 55 / 100);
 
   const cashCommission = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.cashPercent, 1);
-  const financedCommission3 = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.financedPercent, 2);
-  const financedCommission6 = quoteProtectedCommissionFromCents(cashPriceCents, policy.commission.financedPercent, 3);
+  const financedCommission3 = quoteProtectedFinancedCommission(pricing.commercialPrice);
+  const financedCommission6 = quoteProtectedFinancedCommission(pricing.commercialPrice);
 
   const total3Cents = Math.round(cashPriceCents * (100 + PLAN_PROTEGIDO_THREE_SURCHARGE_PERCENT) / 100);
 
