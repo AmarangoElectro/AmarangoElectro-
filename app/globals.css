@@ -9345,3 +9345,20 @@ html[data-theme="dark"] .route-skeleton-home-hero {
   .admin-protected-base-metrics { grid-template-columns: 1fr 1fr; }
   .admin-protected-commercial pre { font-size: 9px; }
 }
+
+
+/* V16 advisor commissions + monthly bonus */
+#advisor-compensation{scroll-margin-top:92px}
+.advisor-compensation-summary{max-width:1460px;margin:24px auto;padding:24px;border:1px solid var(--border);border-radius:25px;background:var(--card);box-shadow:0 14px 42px rgba(7,20,38,.06)}
+.advisor-compensation-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.advisor-compensation-heading>div{display:grid;gap:4px}.advisor-compensation-heading small{color:var(--orange);font-size:10px;font-weight:950;letter-spacing:.08em}.advisor-compensation-heading h2{margin:0;color:var(--foreground);font-size:clamp(24px,3vw,36px);letter-spacing:-1.4px}.advisor-compensation-heading>svg{width:36px;height:36px;color:var(--orange)}
+.advisor-compensation-not-connected{margin-top:16px;padding:16px 18px;border:1px solid var(--border);border-radius:18px;background:var(--soft)}.advisor-compensation-not-connected strong{display:block;color:var(--foreground);font-size:13px}.advisor-compensation-not-connected p{margin:5px 0 0;color:var(--muted-foreground);font-size:12px;line-height:1.5}
+.advisor-month-progress{margin-top:16px;padding:18px;border-radius:20px;background:#07111f;color:#fff}.advisor-month-progress__top{display:flex;justify-content:space-between;gap:12px}.advisor-month-progress__top strong{font-size:16px}.advisor-month-progress__top span{font-size:13px;font-weight:900;color:#ff9b61}.advisor-month-progress__bar{height:10px;margin-top:11px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.14)}.advisor-month-progress__bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#ff7b2c,#ffb26f)}.advisor-month-progress__copy{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.advisor-month-progress__copy>div{display:grid;gap:3px}.advisor-month-progress__copy small{color:#aab8c8;font-size:9px;font-weight:900}.advisor-month-progress__copy b{font-size:13px}
+.advisor-compensation-grid{margin-top:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.advisor-compensation-grid article{min-height:108px;padding:14px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--border);border-radius:17px}.advisor-compensation-grid svg{color:var(--blue)}.advisor-compensation-grid small{color:var(--muted-foreground);font-size:9px;font-weight:900}.advisor-compensation-grid strong{color:var(--foreground);font-size:18px}
+.advisor-compensation-pending{margin:10px 0 0;color:#a05b12;font-size:12px;font-weight:800}
+.advisor-bonus-targets{margin-top:14px;display:flex;flex-wrap:wrap;gap:7px}.advisor-bonus-targets span{padding:8px 10px;border:1px solid var(--border);border-radius:999px;background:var(--soft);color:var(--foreground);font-size:11px}.advisor-bonus-targets b{color:var(--orange)}.advisor-bonus-targets strong{color:var(--blue)}
+.advisor-compensation-rule{margin:12px 0 0;color:var(--muted-foreground);font-size:11px;line-height:1.5}
+.advisor-product-commission{min-height:0!important;margin:6px 0 8px!important;padding:8px 9px;border-radius:11px;background:color-mix(in srgb,var(--blue) 8%,transparent);color:var(--foreground)!important;line-height:1.35}.advisor-product-commission b{color:var(--blue)}
+html[data-theme="dark"] .advisor-compensation-summary{background:var(--card)}
+html[data-theme="dark"] .advisor-product-commission{background:color-mix(in srgb,var(--blue) 14%,transparent)}
+@media(max-width:760px){#advisor-compensation{scroll-margin-top:78px}.advisor-compensation-summary{width:calc(100% - 24px);margin:14px auto;padding:17px;border-radius:21px}.advisor-month-progress__copy{grid-template-columns:1fr}.advisor-compensation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.advisor-bonus-targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.advisor-bonus-targets span{border-radius:13px}}
