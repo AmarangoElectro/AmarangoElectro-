@@ -56,6 +56,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
       </section>
       <nav className="advisor-section-nav" aria-label="Navegación de Mi Amarango">
         <a href="#advisor-tools">Resumen</a>
+        <a href="#advisor-compensation">Tu mes</a>
         <a href="#advisor-sale-draft">Nueva venta</a>
         <a href="#advisor-offers">Ofertas</a>
         <a href="#advisor-catalog">Catálogo</a>
