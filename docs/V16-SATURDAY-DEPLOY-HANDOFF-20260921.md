@@ -7,7 +7,8 @@
 - Minimum app-code HEAD covered by this handoff: `a6d18d34b5d1eecf5eba4e91423212e338bd88c8`
 - Correct preview target: `https://amarango-v16-preview-rama-20260919.amarango-electro.chatgpt.site/`
 - Do not rebuild the store.
-- Do not touch `main`, Supabase, production, or approved global banners/photos/theme system.
+- Do not touch `main`, production, or approved global banners/photos/theme system.
+- Growth/Referidos backend migrations were already applied to Supabase on 2026-09-25 under the authorized Growth gate. Do not apply additional Supabase changes during deployment unless explicitly authorized.
 
 ## Current GitHub state prepared for deployment
 
@@ -324,3 +325,20 @@ Current active catalog composition is deduplicated and read-only:
 - QA source: `docs/V16-PRICE-COHERENCE-CALCULATORS-QA-20260925.md`.
 - Important commercial note: the definitive MIN(75% cost, 55% cash) initial can be lower than a later Plan-3 installment at some low costs; no hidden override was added.
 - No main, Supabase, production, catalog, Home, banners, images or automatic deploy.
+
+
+### 2026-09-25 Growth / Referidos secure-backend delta
+- Native referrals/benefits/acquisition/escalation UI is present on this branch.
+- Authoritative Growth backend has been added to Supabase through additive migrations only; no example reward policy, advisor level, referral, benefit, acquisition cost or risk snapshot was seeded.
+- Referral lifecycle is server-authoritative and reward availability is tied to the real `v16_payment_events` ledger; payment reversals re-evaluate eligibility.
+- Source attribution persists server-side and propagates lead → client → sale → payment for referral-origin operations.
+- Advisor exposure is based on cost real + direct costs + committed commissions − actual net paid; risk snapshots are idempotent and reject conflicting rewrites.
+- Funnel paid count uses current net ledger state rather than append-only payment events, so reversed payments do not remain counted as paid.
+- Growth browser code now calls same-origin `POST /api/v16/growth`; it does not receive a Supabase token or secret.
+- The Site server route requires hosted secret `SUPABASE_SECRET_KEY`. Configure it only in Site Settings → Environment Variables; never commit or paste it into source.
+- The ChatGPT→Supabase DB bridge is `service_role`-only, resolves the authenticated ChatGPT email to existing `auth.users`/`v16_user_access`, and always injects `aal1`.
+- Admin writes that require AAL2 intentionally remain `step_up_required`; do not weaken those checks for deployment.
+- Existing owners are mapped. Ordinary customer identity enrolment remains a separate gate; do not auto-link customers by approximate personal-data matches.
+- Regression/security coverage: `tests/v16-growth-referrals-system.test.mjs`.
+- Detailed handoff: `docs/V16-GROWTH-REFERRALS-SYSTEM-20260925.md`.
+- No Site deployment has been performed from this session.
