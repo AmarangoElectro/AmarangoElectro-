@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Coins, ImagePlus, LayoutGrid, ListFilter, MoreHorizontal, PackageCheck, Save, ShieldCheck, Smartphone, Sparkles, Tag, Truck, UserCog, Users, Wallet } from "lucide-react";
+import { BarChart3, Coins, ImagePlus, LayoutGrid, ListFilter, MoreHorizontal, Network, PackageCheck, Save, ShieldCheck, Smartphone, Sparkles, Tag, Truck, UserCog, Users, Wallet } from "lucide-react";
 import { AmarangoCalculatorPanel } from "@/components/internal/admin/amarango-calculator-panel";
 import { PlatesPanel } from "@/components/internal/admin/plates-panel";
 import { AdminProductGrid } from "@/components/internal/admin/admin-product-grid";
@@ -15,6 +15,7 @@ import { ProvidersAreaPanel } from "@/components/internal/admin/providers-area-p
 import { CashPanel } from "@/components/internal/admin/cash-panel";
 import { DeliveriesPanel } from "@/components/internal/admin/deliveries-panel";
 import { AdvisorsPanel } from "@/components/internal/admin/advisors-panel";
+import { GrowthAcquisitionPanel } from "@/components/internal/admin/growth-acquisition-panel";
 import { SectorGuide } from "@/app/components/sector-guide";
 import { findSectorGuide } from "@/lib/onboarding/sector-guides";
 import { defaultLabOffer, parseLabOffer, saveLabOffer, type LabOfferState, type OfferKind } from "@/lib/os-lab/offers-store";
@@ -47,12 +48,13 @@ const adminTabIds = [
   "cash",
   "deliveries",
   "advisors",
+  "growth",
   "calculator",
   "plates",
   "offers",
 ] as const;
 type AdminTab = (typeof adminTabIds)[number];
-const moreAdminTabs: readonly AdminTab[] = ["crm", "collections", "reports", "providers", "cash", "deliveries", "advisors", "offers"];
+const moreAdminTabs: readonly AdminTab[] = ["crm", "collections", "reports", "providers", "cash", "deliveries", "advisors", "growth", "offers"];
 const adminTabHash: Record<AdminTab, string> = {
   catalog: "catalogo",
   storefront: "tienda",
@@ -64,6 +66,7 @@ const adminTabHash: Record<AdminTab, string> = {
   cash: "caja",
   deliveries: "entregas",
   advisors: "asesores",
+  growth: "adquisicion",
   calculator: "calculadora",
   plates: "placas",
   offers: "ofertas",
@@ -146,6 +149,7 @@ export function AdminConsolidatedWorkspace() {
             <button aria-pressed={tab === "cash"} onClick={() => openAdminTab("cash")}><Coins /> Caja</button>
             <button aria-pressed={tab === "deliveries"} onClick={() => openAdminTab("deliveries")}><PackageCheck /> Entregas</button>
             <button aria-pressed={tab === "advisors"} onClick={() => openAdminTab("advisors")}><UserCog /> Asesores</button>
+            <button aria-pressed={tab === "growth"} onClick={() => openAdminTab("growth")}><Network /> Adquisición / Referidos</button>
             <button aria-pressed={tab === "offers"} onClick={() => openAdminTab("offers")}><Tag /> Ofertas · borrador</button>
           </div>
         </details>
@@ -169,6 +173,7 @@ export function AdminConsolidatedWorkspace() {
       {tab === "cash" && <>{cashGuide && <SectorGuide guide={cashGuide} />}<CashPanel /></>}
       {tab === "deliveries" && <>{deliveriesGuide && <SectorGuide guide={deliveriesGuide} />}<DeliveriesPanel /></>}
       {tab === "advisors" && <>{advisorsGuide && <SectorGuide guide={advisorsGuide} />}<AdvisorsPanel /></>}
+      {tab === "growth" && <GrowthAcquisitionPanel />}
       {tab === "calculator" && <AmarangoCalculatorPanel />}
       {tab === "plates" && <PlatesPanel />}
       {tab === "offers" && <section className="offer-admin-editor"><div><p className="eyebrow orange">OFERTAS & OUTLET</p><h2>Control local del sector comercial</h2><p>No usa la calculadora habitual ni altera el catálogo maestro.</p></div><div className="offer-admin-form"><label className="toggle-row"><span>Sector activo</span><input type="checkbox" checked={offer.enabled} onChange={(event) => updateOffer("enabled", event.target.checked)} /></label><label>Tipo<select value={offer.kind} onChange={(event) => updateOffer("kind", event.target.value as OfferKind)}>{["Oferta del día","Contado especial","2 cuotas sin interés","3 cuotas sin interés","Outlet"].map((kind) => <option key={kind}>{kind}</option>)}</select></label><label>Producto<input value={offer.productName} onChange={(event) => updateOffer("productName", event.target.value)} /></label><label>Imagen del producto<input value={offer.imageSrc} onChange={(event) => updateOffer("imageSrc", event.target.value)} placeholder="/assets/productos/imagen.webp" /></label><label>Precio anterior ARS<input type="number" value={offer.previousPriceArs} onChange={(event) => updateOffer("previousPriceArs", Number(event.target.value))} /></label><label>Precio promocional ARS<input type="number" value={offer.promotionalPriceArs} onChange={(event) => updateOffer("promotionalPriceArs", Number(event.target.value))} /></label><label>Stock de referencia<input type="number" min="0" value={offer.stock} onChange={(event) => updateOffer("stock", Number(event.target.value))} /></label><button type="button" onClick={() => saveLabOffer(offer)}><Save /> Guardar solo en este dispositivo</button></div></section>}
