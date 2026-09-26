@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { AdvisorGrowthSummary } from "./advisor-growth-summary";
 import { AdvisorCompensationSummary } from "./advisor-compensation-summary";
+import { AdvisorCompensationOperations } from "./advisor-compensation-operations";
 import { quoteFinancedAdvisorCommission } from "@/lib/internal/finance/advisor-compensation";
 
 const advisorGuide = findSectorGuide("asesor", "mi-amarango");
@@ -67,6 +68,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <a className="advisor-quick-card advisor-quick-card--sale" href="#advisor-sale-draft"><ClipboardList /><span><small>NUEVA VENTA</small><strong>Preparar operación</strong></span></a>
       </section>
       <AdvisorCompensationSummary />
+      <AdvisorCompensationOperations />
       <AdvisorGrowthSummary />
       <AdvisorSaleDraftPanel products={products} />
       <div id="advisor-offers" className="advisor-offers-anchor"><OffersShowcase advisor /></div>
