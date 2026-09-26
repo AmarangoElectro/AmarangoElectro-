@@ -36,18 +36,6 @@ export type V16SecureRpcName =
   "v16_reports_sales_by_responsible" |
   "v16_reports_sales_summary" |
   "v16_reverse_cash_movement" |
-  "v16_growth_current_customer_snapshot" |
-  "v16_growth_reward_policies_list" |
-  "v16_growth_save_reward_policy" |
-  "v16_growth_acquisition_funnel" |
-  "v16_growth_referrals_list" |
-  "v16_growth_advisor_levels_list" |
-  "v16_growth_save_advisor_level" |
-  "v16_growth_advisor_states_list" |
-  "v16_growth_current_advisor_state" |
-  "v16_growth_request_advisor_application" |
-  "v16_growth_advisor_applications_list" |
-  "v16_growth_review_advisor_application" |
   "v16_transition_delivery";
 
 export const V16_SECURE_RPC_ALLOWLIST = Object.freeze([
@@ -81,18 +69,6 @@ export const V16_SECURE_RPC_ALLOWLIST = Object.freeze([
   "v16_reports_sales_by_responsible",
   "v16_reports_sales_summary",
   "v16_reverse_cash_movement",
-  "v16_growth_current_customer_snapshot",
-  "v16_growth_reward_policies_list",
-  "v16_growth_save_reward_policy",
-  "v16_growth_acquisition_funnel",
-  "v16_growth_referrals_list",
-  "v16_growth_advisor_levels_list",
-  "v16_growth_save_advisor_level",
-  "v16_growth_advisor_states_list",
-  "v16_growth_current_advisor_state",
-  "v16_growth_request_advisor_application",
-  "v16_growth_advisor_applications_list",
-  "v16_growth_review_advisor_application",
   "v16_transition_delivery",
 ] as const);
 
