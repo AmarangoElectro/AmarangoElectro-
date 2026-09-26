@@ -5,6 +5,7 @@ import { ClipboardCopy, ClipboardPaste, LockKeyhole, Search, ShoppingBag } from 
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog/types";
 import { normalizeCatalogText } from "@/lib/catalog/search";
+import { quoteCashAdvisorCommission, quoteFinancedAdvisorCommission } from "@/lib/internal/finance/advisor-compensation";
 
 type PaymentPlan = 0 | 2 | 4 | 6;
 
@@ -57,6 +58,11 @@ export function AdvisorSaleDraftPanel({ products }: { products: readonly Product
   const depositAmount = cleanNumber(deposit);
   const balance = saleTotal !== null ? Math.max(0, saleTotal - depositAmount) : null;
   const financed = plan > 0;
+  const advisorCommission = selectedProduct?.price
+    ? (financed
+        ? quoteFinancedAdvisorCommission(selectedProduct.price.amount)
+        : quoteCashAdvisorCommission(selectedProduct.price.amount))
+    : null;
 
   function selectProduct(product: Product) {
     setProductId(product.id);
@@ -192,6 +198,7 @@ export function AdvisorSaleDraftPanel({ products }: { products: readonly Product
           <div className="advisor-sale-quote" aria-live="polite">
             <div><small>TOTAL</small><strong>{money(saleTotal)}</strong></div>
             {plan > 0 && <div><small>CADA CUOTA</small><strong>{money(installmentAmount)}</strong></div>}
+            {advisorCommission && <div><small>MI COMISIÓN</small><strong>{money(advisorCommission.commissionArs)}</strong><span>{financed ? `2 pagos de ${money(advisorCommission.paymentArs[0])}` : "Pago único · contado"}</span></div>}
             {plan > 0 && !selectedFinancing && <p>Este producto todavía no tiene una cuota validada en el catálogo. Administración debe confirmar el importe.</p>}
           </div>
 
