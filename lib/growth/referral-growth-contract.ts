@@ -96,6 +96,7 @@ export interface RewardPolicy {
   allowedCategoryIds?: readonly string[];
   releaseCondition: RewardReleaseCondition;
   minimumPaidAmountArs?: number | null;
+  priority?: number;
 }
 
 export interface CustomerBenefit {
@@ -137,11 +138,11 @@ export interface AdvisorGrowthLevelRule {
 
 export interface AdvisorGrowthState {
   advisorId: string;
-  currentLevelId: string;
+  currentLevelId: string | null;
   openExposureArs: number;
   openOperations: number;
-  portfolioQuality: number;
-  delinquencyRate: number;
+  portfolioQuality: number | null;
+  delinquencyRate: number | null;
   paidSales: number;
   completedOperations: number;
   recurringClients: number;
@@ -244,6 +245,7 @@ export interface AdvisorApplication {
   createdAt: string;
   reviewedAt: string | null;
   reviewedBy: string | null;
+  customerName?: string | null;
 }
 
 export const REFERRAL_STATUS_FLOW: Readonly<Record<ReferralStatus, readonly ReferralStatus[]>> = Object.freeze({
