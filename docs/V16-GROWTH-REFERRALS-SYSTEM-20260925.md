@@ -65,3 +65,45 @@ Margarita, WhatsApp u otros servicios pueden consumir eventos posteriormente; no
 - eventos;
 - ausencia de write-path falso;
 - integración Mi Amarango / Admin / compartir / snapshot.
+
+
+## Segunda pasada — superficies completas de operación
+Se completó además:
+- filtros de Admin realmente conectados al contrato por fuente, campaña, asesor, referidor, producto, categoría y período;
+- lista trazable de referidos con copy seguro "Vino recomendado por [nombre]" cuando el backend autorice un display name;
+- editor Admin de política de beneficio: activo/pausado, tipo, valor fijo, porcentaje, tope, compra mínima, vencimiento, condición de liberación, mínimo cobrado, productos y categorías habilitados;
+- editor Admin de nivel de asesor: exposición por venta, exposición abierta, ventas cobradas, operaciones completas, calidad, mora, recurrentes, antigüedad, documentación, aprobación administrativa y beneficios;
+- bandeja de solicitudes cliente → asesor con acciones Aprobar / Rechazar por Gateway seguro;
+- Mi Amarango muestra recomendados, compras generadas, beneficios pendientes/disponibles/usados, wallet e historial de recomendaciones;
+- vista del asesor con nivel actual, progreso, capacidad disponible, próximo nivel, beneficios y bloqueos;
+- source attribution opcional preservada en PurchaseIntent y SaleItemSnapshot;
+- estilos responsive separados en `app/growth.css`.
+
+## Contrato backend requerido para activación real
+La UI no debe pasar a "operativa" hasta que exista un contrato autenticado y congelado que resuelva, como mínimo:
+1. identidad cliente → referralCode único e inmutable;
+2. referralCode público → customerId interno únicamente en backend;
+3. first-touch/source attribution persistida al crear lead y propagada por lead → cliente → venta → cobranza;
+4. transición de estados de referido con auditoría;
+5. validación antifraude de customerId/DNI/teléfono en backend;
+6. señal device/IP como revisión, nunca rechazo automático aislado;
+7. creación de reward únicamente después del evento de cobro configurado;
+8. consumo de reward idempotente y auditable;
+9. CRUD AAL2/admin para RewardPolicy y AdvisorGrowthLevelRule;
+10. solicitud y aprobación explícita de customer → advisor;
+11. cálculo servidor de open exposure y límites de asesor;
+12. funnel segmentable y KPI collected margin / exposed capital;
+13. outbox/event stream provider-neutral para PRODUCT_DELIVERED, VALID_PAYMENT_CONFIRMED, CREDIT_COMPLETED, CUSTOMER_LEVEL_CHANGED, BENEFIT_AVAILABLE, REFERRAL_STATUS_CHANGED y ADVISOR_LEVEL_CHANGED.
+
+No se debe usar localStorage/sessionStorage como autoridad para ninguno de esos puntos. La única persistencia temporal cliente implementada es la atribución de navegación/código público en `sessionStorage`.
+
+## Estado de activación
+- Dominio V16: IMPLEMENTADO.
+- UI Mi Amarango: IMPLEMENTADA con fail-closed cuando no hay backend.
+- Producto/deep-links: IMPLEMENTADOS.
+- Admin adquisición/configuración/aprobaciones: IMPLEMENTADO con fail-closed.
+- Escalamiento/riesgo: motor y UI IMPLEMENTADOS; datos reales pendientes de backend.
+- Automatizaciones: eventos provider-neutral IMPLEMENTADOS; transporte externo pendiente.
+- Persistencia autoritativa: PENDIENTE DE CONTRATO BACKEND SEGURO.
+- Supabase: NO MODIFICADO.
+- Producción: NO MODIFICADA / NO PUBLICADA.
