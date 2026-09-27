@@ -4,6 +4,8 @@ import { InternalSpaceHeader } from "@/app/components/internal-space-header";
 import { AdvisorWorkspace } from "@/app/components/advisor-workspace";
 import { CustomerReferralHub } from "@/app/components/customer-referral-hub";
 
+export const dynamic = "force-dynamic";
+
 export default async function MiAmarangoPage() {
   await requireChatGPTUser("/mi-amarango");
   const products = await catalog.listProducts({ visibleOnly: true });
