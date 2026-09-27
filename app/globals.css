@@ -9388,3 +9388,121 @@ html[data-theme="dark"] .route-skeleton-home-hero {
   .admin-protected-base-metrics { grid-template-columns: 1fr 1fr; }
   .admin-protected-commercial pre { font-size: 9px; }
 }
+
+/* V16 Home final — una sola columna de banners de sector, sin lienzo exterior. */
+.home-final-sectors {
+  scroll-margin-top: 132px;
+  margin-bottom: clamp(34px, 5vw, 64px);
+}
+.home-final-sectors .section-intro.split { display: block; }
+.home-final-sectors .featured-sectors-grid {
+  width: 100%;
+  max-width: 1180px;
+  margin: 18px auto 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(11px, 1.35vw, 16px);
+}
+.home-final-sectors .featured-sector-card {
+  width: 100%;
+  height: clamp(112px, 12vw, 154px);
+  min-height: 0;
+  aspect-ratio: auto;
+  padding: 0;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  border: 1px solid rgba(13, 54, 98, .11);
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: 0 14px 34px rgba(5, 22, 49, .1);
+}
+.home-final-sectors .featured-sector-card img {
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.035);
+  filter: saturate(.96) contrast(1.025) brightness(1.03);
+}
+.home-final-sectors .featured-sector-card[data-home-sector="electrodomesticos"] img,
+.home-final-sectors .featured-sector-card[data-home-sector="herramientas"] img {
+  object-position: 72% 50%;
+  transform: scale(1.11);
+}
+.home-final-sectors .featured-sector-shade {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, .995) 0%,
+    rgba(255, 255, 255, .97) 34%,
+    rgba(255, 255, 255, .78) 49%,
+    rgba(255, 255, 255, .2) 70%,
+    rgba(255, 255, 255, .02) 100%);
+}
+.home-final-sectors .featured-sector-copy {
+  padding: 18px 10px 18px clamp(24px, 4.5vw, 54px);
+  gap: 5px;
+}
+.home-final-sectors .featured-sector-copy strong {
+  max-width: min(62vw, 620px);
+  color: #081a33;
+  font-size: clamp(21px, 3.1vw, 34px);
+  letter-spacing: -.045em;
+}
+.home-final-sectors .featured-sector-copy small {
+  max-width: min(62vw, 660px);
+  color: #5b6879;
+  font-size: clamp(12px, 1.45vw, 15px);
+  font-weight: 650;
+}
+.home-final-sectors .featured-sector-arrow {
+  width: 48px;
+  height: 48px;
+  margin-right: 12px;
+}
+.home-final-sectors .featured-sector-more {
+  appearance: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+html[data-theme="dark"] .home-final-sectors .featured-sector-card {
+  border-color: rgba(112, 151, 197, .2);
+  background: transparent;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, .32);
+}
+html[data-theme="dark"] .home-final-sectors .featured-sector-card img {
+  filter: saturate(.98) contrast(1.08) brightness(.68);
+}
+html[data-theme="dark"] .home-final-sectors .featured-sector-shade {
+  background: linear-gradient(90deg,
+    rgba(2, 9, 20, .995) 0%,
+    rgba(2, 9, 20, .97) 35%,
+    rgba(2, 9, 20, .78) 51%,
+    rgba(2, 9, 20, .24) 72%,
+    rgba(2, 9, 20, .03) 100%);
+}
+html[data-theme="dark"] .home-final-sectors .featured-sector-copy strong { color: #f7faff; }
+html[data-theme="dark"] .home-final-sectors .featured-sector-copy small { color: #aab8ca; }
+
+@media (max-width: 620px) {
+  .home-final-sectors { scroll-margin-top: 104px; }
+  .home-final-sectors .featured-sectors-grid { gap: 10px; }
+  .home-final-sectors .featured-sector-card {
+    height: 108px;
+    grid-template-columns: minmax(0, 1fr) 52px;
+  }
+  .home-final-sectors .featured-sector-copy { padding: 14px 6px 14px 24px; }
+  .home-final-sectors .featured-sector-copy strong {
+    max-width: 64vw;
+    font-size: clamp(19px, 6.1vw, 25px);
+  }
+  .home-final-sectors .featured-sector-copy small {
+    max-width: 62vw;
+    font-size: 12px;
+  }
+  .home-final-sectors .featured-sector-arrow {
+    width: 42px;
+    height: 42px;
+    margin-right: 8px;
+  }
+}

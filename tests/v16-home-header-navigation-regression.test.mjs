@@ -6,24 +6,22 @@ const root = new URL("../", import.meta.url);
 const source = (file) => readFile(new URL(file, root), "utf8");
 
 test("Home header navigation points only to real destinations", async () => {
-  const [header, home, products, offers, footer] = await Promise.all([
+  const [header, home, footer] = await Promise.all([
     source("app/components/site-header.tsx"),
     source("app/page.tsx"),
-    source("app/components/home-products-preview.tsx"),
-    source("app/components/offers-showcase.tsx"),
     source("app/components/site-footer.tsx"),
   ]);
 
-  for (const href of ['"/#productos"', '"/#ofertas"', '"/#experiencia"']) {
+  for (const href of ['"/#sectores"', '"/buscar"', '"/#experiencia"']) {
     assert.ok(header.includes(href), href);
   }
 
   assert.match(home, /id="experiencia"/);
   assert.match(home, /id="financiacion"/);
-  assert.match(products, /id="productos"/);
-  assert.ok(offers.includes('id={advisor ? undefined : "ofertas"}'));
+  assert.doesNotMatch(home, /HomeProductsPreview|OffersShowcase|BrandLogoRail|RecentlyViewedRail/);
 
   assert.doesNotMatch([header, footer].join("\n"), /#como-comprar/);
+  assert.doesNotMatch([header, footer].join("\n"), /#productos|#ofertas/);
   assert.doesNotMatch(header, /categoria\/celulares\?favoritos=1/);
   assert.match(header, /\/buscar\?favoritos=1#catalogo/);
   assert.match(header, /> Espacios internos<\/Link>|>Espacios internos<\/Link>/);
@@ -49,6 +47,33 @@ test("Home featured sectors do not restore retired slogans", async () => {
   }
 });
 
+test("Home final renders only the nine uniform sector capsules", async () => {
+  const [home, featured, css] = await Promise.all([
+    source("app/page.tsx"),
+    source("app/components/featured-sectors-grid.tsx"),
+    source("app/globals.css"),
+  ]);
+
+  for (const slug of [
+    "celulares",
+    "smart-tv",
+    "electrodomesticos",
+    "audio",
+    "hogar",
+    "herramientas",
+    "gaming",
+    "descanso",
+  ]) assert.ok(featured.includes(`slug: "${slug}"`), slug);
+  for (const label of ["Hogar y Deco", "Más sectores"]) assert.ok(featured.includes(label), label);
+
+  assert.doesNotMatch(home, /HomeProductsPreview|OffersShowcase|BrandLogoRail|RecentlyViewedRail/);
+  assert.match(featured, /id="sectores"/);
+  assert.match(featured, /featured-sector-more/);
+  assert.match(css, /\.home-final-sectors \.featured-sectors-grid\s*\{[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\)/);
+  assert.match(css, /\.home-final-sectors \.featured-sector-card\s*\{[\s\S]*?height:\s*clamp\(112px, 12vw, 154px\)[\s\S]*?border-radius:\s*999px/);
+  assert.match(css, /html\[data-theme="dark"\] \.home-final-sectors \.featured-sector-shade/);
+});
+
 test("mobile Home navigation keeps sticky-header offsets and safe drawer spacing", async () => {
   const css = await source("app/globals.css");
 
@@ -62,7 +87,7 @@ test("mobile Home navigation keeps sticky-header offsets and safe drawer spacing
 test("footer routes to actual Home sections and advisor space", async () => {
   const footer = await source("app/components/site-footer.tsx");
 
-  for (const href of ["/#productos", "/#experiencia", "/#financiacion", "/mi-amarango"]) {
+  for (const href of ["/#sectores", "/#experiencia", "/#financiacion", "/mi-amarango"]) {
     assert.ok(footer.includes(`href="${href}"`), href);
   }
 });

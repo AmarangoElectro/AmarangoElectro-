@@ -15,7 +15,7 @@ export function SiteFooter() {
         </div>
         <div>
           <h3>Descubrir</h3>
-          <Link href="/#productos">Productos</Link>
+          <Link href="/#sectores">Sectores</Link>
           <Link href="/buscar">Catálogo completo</Link>
           <Link href="/categoria/celulares">Celulares</Link>
         </div>

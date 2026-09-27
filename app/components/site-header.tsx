@@ -12,8 +12,8 @@ import { openSectorsSheet } from "@/lib/ux/sectors-sheet";
 import { useEffect, useState } from "react";
 
 const navigation = [
-  { href: "/#productos", label: "Productos" },
-  { href: "/#ofertas", label: "Ofertas & Outlet" },
+  { href: "/#sectores", label: "Sectores" },
+  { href: "/buscar", label: "Catálogo completo" },
   { href: "/#experiencia", label: "Atención y compra" },
 ];
 

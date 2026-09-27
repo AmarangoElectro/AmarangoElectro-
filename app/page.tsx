@@ -2,16 +2,10 @@ import { HeroSlider } from "./components/hero-slider";
 import { MiBalanceReferralWelcome } from "./components/mi-balance-referral-welcome";
 import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
-import { RecentlyViewedRail } from "./components/recently-viewed-rail";
-import { BrandLogoRail } from "./components/brand-logo-rail";
 import { FeaturedSectorsGrid } from "./components/featured-sectors-grid";
-import { HomeProductsPreview } from "./components/home-products-preview";
 import { AllSectorsSheet } from "./components/all-sectors-sheet";
-import { OffersShowcase } from "./components/offers-showcase";
-import { catalog } from "@/lib/catalog";
 
-export default async function Home() {
-  const recentCandidates = await catalog.listProducts({ visibleOnly: true });
+export default function Home() {
   return (
     <>
       <SiteHeader />
@@ -27,10 +21,6 @@ export default async function Home() {
         </section>
 
         <FeaturedSectorsGrid />
-        <HomeProductsPreview products={recentCandidates} />
-        <BrandLogoRail />
-        <OffersShowcase />
-        <RecentlyViewedRail products={recentCandidates} />
       </main>
       <SiteFooter />
       <AllSectorsSheet />
