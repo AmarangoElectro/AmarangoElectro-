@@ -1,4 +1,11 @@
+export type V16StoredPlatformRole = "owner" | "admin" | "asesor" | "cliente";
 export type V16PlatformRole = "owner" | "admin" | "advisor" | "customer";
+
+export function normalizeStoredPlatformRole(role: V16StoredPlatformRole): V16PlatformRole {
+  if (role === "asesor") return "advisor";
+  if (role === "cliente") return "customer";
+  return role;
+}
 export type V16PlatformCapability =
   | "admin.access" | "advisors.access"
   | "crm.read" | "crm.write"
