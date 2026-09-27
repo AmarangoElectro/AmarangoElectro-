@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Calculator, Check, CircleDollarSign, Copy, ShieldCheck, TrendingUp, WalletCards } from "lucide-react";
 import { quoteAmarangoCalculator } from "../../../lib/internal/finance/amarango-calculator";
 import { AMARANGO_POLICY_VERSION } from "../../../lib/internal/finance/amarango-policy";
+import { quoteAdvisorOperationCommission } from "../../../lib/internal/finance/advisor-compensation-engine";
 import {
   buildPlanProtegidoCommercialMessage,
   PLAN_PROTEGIDO_VERSION,
@@ -40,6 +41,10 @@ export function AmarangoCalculatorPanel() {
   const quote = useMemo(() => {
     try { return quoteAmarangoCalculator({ mode, amount, fxRate, installmentPlans:[2,4,6] }); } catch { return null; }
   }, [mode, amount, fxRate]);
+  const classicFinancedCommission = useMemo(
+    () => quote ? quoteAdvisorOperationCommission(quote.salePrice, "financed") : null,
+    [quote],
+  );
 
   // Plan Protegido: comparte exactamente el mismo precio contado definitivo.
   const [protectedCost, setProtectedCost] = useState(150000);
@@ -98,7 +103,7 @@ export function AmarangoCalculatorPanel() {
               <div><small>Ganancia neta contado</small><strong>{money(quote.salePrice - quote.costArs - quote.salePrice * .10)}</strong></div>
               <div><small>Política financiera</small><strong>{AMARANGO_POLICY_VERSION}</strong></div>
             </div>
-            <div className="admin-installment-grid"><div className="admin-finance-section-label"><TrendingUp /><span>Opciones clásicas</span></div>{quote.installments.map((plan) => <article key={plan.installments}><small>{plan.installments} CUOTAS</small><strong>{money(plan.installmentAmount)}</strong><span>Total {money(plan.total)}</span><span>Comisión 15% contado: {money(quote.salePrice * .15)}</span><span>Ganancia Amarango: {money(plan.total - quote.costArs - quote.salePrice * .15)}</span></article>)}</div>
+            <div className="admin-installment-grid"><div className="admin-finance-section-label"><TrendingUp /><span>Opciones clásicas</span></div>{quote.installments.map((plan) => <article key={plan.installments}><small>{plan.installments} CUOTAS</small><strong>{money(plan.installmentAmount)}</strong><span>Total {money(plan.total)}</span><span>Comisión fija por contado: {money(classicFinancedCommission?.totalCommissionArs ?? 0)}</span><span>{classicFinancedCommission ? `2 pagos de ${money(classicFinancedCommission.paymentsArs[0])}` : "—"}</span><span>Ganancia Amarango: {money(plan.total - quote.costArs - (classicFinancedCommission?.totalCommissionArs ?? 0))}</span></article>)}</div>
           </div>}
         </div>
       ) : (
@@ -161,7 +166,7 @@ export function AmarangoCalculatorPanel() {
                   <strong>Total financiado {money(protectedQuote.plan3.totalExact)}</strong>
                   <span>Inicial: {money(protectedQuote.plan3.schedule.initialPesos)}</span>
                   <span>Posteriores: {paymentSummary(protectedQuote.plan3.schedule)}</span>
-                  <span>Comisión total 15%: {money(protectedQuote.plan3.commission.totalExact)}</span>
+                  <span>Comisión fija según contado: {money(protectedQuote.plan3.commission.totalExact)}</span>
                   <span>{commissionSummary(protectedQuote.plan3.commission)}</span>
                   <span>Ganancia neta Amarango: {money(protectedQuote.plan3.amarangoNetExact)}</span>
                 </article>
@@ -171,7 +176,7 @@ export function AmarangoCalculatorPanel() {
                   <span>Recargo vigente Fórmula 1: {protectedQuote.plan6.surchargePercent}%</span>
                   <span>Inicial: {money(protectedQuote.plan6.schedule.initialPesos)}</span>
                   <span>Posteriores: {paymentSummary(protectedQuote.plan6.schedule)}</span>
-                  <span>Comisión total 15%: {money(protectedQuote.plan6.commission.totalExact)}</span>
+                  <span>Comisión fija según contado: {money(protectedQuote.plan6.commission.totalExact)}</span>
                   <span>{commissionSummary(protectedQuote.plan6.commission)}</span>
                   <span>Ganancia neta Amarango: {money(protectedQuote.plan6.amarangoNetExact)}</span>
                 </article>
