@@ -325,6 +325,76 @@ create trigger v16_payment_event_sync_sale_next_amount
 after insert on public.v16_payment_events
 for each row execute function public.v16_sync_sale_next_payment_amount();
 
+create or replace function public.v16_resolve_operational_product_quote_source(p_product_id text)
+returns table(
+  source_product_id text,
+  product_name text,
+  product_model text,
+  current_sale_price numeric,
+  cost_ars numeric,
+  source_updated_at timestamptz
+)
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_requested text:=btrim(coalesce(p_product_id,''));
+  v_source_id text;
+  v_canonical_name text;
+  v_row public.tienda_productos_incremental%rowtype;
+  v_matches integer;
+begin
+  if auth.role()<>'service_role' then raise exception 'service_role_required'; end if;
+  if v_requested='' then raise exception 'product_id_required'; end if;
+
+  if v_requested like 'v16-cell:%' then
+    select c.metadata->>'name' into v_canonical_name
+    from public.v16_canonical_product_identity c
+    where c.canonical_product_key=v_requested
+    limit 1;
+    if nullif(btrim(coalesce(v_canonical_name,'')),'') is null then raise exception 'product_source_not_found'; end if;
+
+    select count(*) into v_matches
+    from public.tienda_productos_incremental t
+    where not t.eliminado
+      and lower(regexp_replace(btrim(coalesce(t.datos->>'nombre','')),'\s+',' ','g'))
+        = lower(regexp_replace(btrim(v_canonical_name),'\s+',' ','g'));
+    if v_matches<>1 then raise exception 'product_source_ambiguous_or_missing'; end if;
+
+    select * into v_row
+    from public.tienda_productos_incremental t
+    where not t.eliminado
+      and lower(regexp_replace(btrim(coalesce(t.datos->>'nombre','')),'\s+',' ','g'))
+        = lower(regexp_replace(btrim(v_canonical_name),'\s+',' ','g'))
+    limit 1;
+  else
+    if v_requested ~ '^(electro|exp63|exp5|exp31|exp50|exp99|cohort0|v411-evidence):' then
+      v_source_id:=regexp_replace(v_requested,'^[^:]+:','');
+    elsif position(':' in v_requested)>0 then
+      raise exception 'unsupported_product_id_namespace';
+    else
+      v_source_id:=v_requested;
+    end if;
+
+    select * into v_row
+    from public.tienda_productos_incremental t
+    where t.producto_id=v_source_id and not t.eliminado
+    limit 1;
+    if not found then raise exception 'product_source_not_found'; end if;
+  end if;
+
+  if nullif(v_row.datos->>'venta','') is null or (v_row.datos->>'venta')::numeric<=0 then
+    raise exception 'product_sale_price_unavailable';
+  end if;
+
+  return query select
+    v_row.producto_id,
+    coalesce(nullif(btrim(v_row.datos->>'nombre'),''),'Producto'),
+    nullif(btrim(coalesce(v_row.datos->>'modelo','')),''),
+    (v_row.datos->>'venta')::numeric,
+    case when nullif(v_row.datos->>'costo','') is not null and (v_row.datos->>'costo')::numeric>0
+      then (v_row.datos->>'costo')::numeric else null::numeric end,
+    v_row.actualizado;
+end $$;
+
 create or replace function public.v16_issue_authorized_sale_quote(
   p_canonical_product_id text,p_product_name text,p_product_model text,p_payment_mode text,p_financing_mode text,
   p_cash_price numeric,p_initial_payment numeric,p_installments integer,p_installment_amount numeric,p_financed_total numeric,
@@ -352,6 +422,30 @@ begin
   insert into public.v16_authorized_sale_quotes(canonical_product_id,product_name,product_model,payment_mode,financing_mode,cash_price,initial_payment,installments,installment_amount,financed_total,payment_amounts,commission,commission_policy_version,pricing_policy_version,commercial_snapshot,issued_by,expires_at)
   values(p_canonical_product_id,p_product_name,p_product_model,upper(p_payment_mode),upper(p_financing_mode),p_cash_price,p_initial_payment,p_installments,p_installment_amount,p_financed_total,p_payment_amounts,v_commission,p_commission_policy_version,p_pricing_policy_version,p_commercial_snapshot,p_issued_for,p_expires_at)
   returning quote_id into v_quote; return v_quote;
+end $$;
+
+create or replace function public.v16_chatgpt_issue_authorized_sale_quote(
+  p_email text,p_canonical_product_id text,p_product_name text,p_product_model text,p_payment_mode text,p_financing_mode text,
+  p_cash_price numeric,p_initial_payment numeric,p_installments integer,p_installment_amount numeric,p_financed_total numeric,
+  p_payment_amounts jsonb,p_commission_policy_version text,p_pricing_policy_version text,p_commercial_snapshot jsonb,p_expires_at timestamptz
+) returns uuid language plpgsql security definer set search_path = '' as $$
+declare v_email text:=lower(btrim(coalesce(p_email,''))); v_user uuid; v_quote uuid;
+begin
+  if auth.role()<>'service_role' then raise exception 'service_role_required'; end if;
+  select u.id into v_user
+  from auth.users u
+  join public.v16_user_access a on a.user_id=u.id and a.active
+  where lower(u.email)=v_email
+  order by u.created_at
+  limit 1;
+  if v_user is null then raise exception 'identity_not_mapped'; end if;
+
+  v_quote:=public.v16_issue_authorized_sale_quote(
+    p_canonical_product_id,p_product_name,p_product_model,p_payment_mode,p_financing_mode,
+    p_cash_price,p_initial_payment,p_installments,p_installment_amount,p_financed_total,
+    p_payment_amounts,p_commission_policy_version,p_pricing_policy_version,p_commercial_snapshot,v_user,p_expires_at
+  );
+  return v_quote;
 end $$;
 
 create or replace function public.v16_confirm_sale(p_client_id text,p_authorized_quote_id uuid,p_source text,p_idempotency_key text)
@@ -619,12 +713,16 @@ revoke execute on function public.v16_get_active_financing_mode() from public,an
 revoke execute on function public.v16_set_active_financing_mode(text,text,text,text) from public,anon,authenticated;
 revoke execute on function public.v16_build_sale_payment_schedule(jsonb,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_sync_sale_next_payment_amount() from public,anon,authenticated;
+revoke execute on function public.v16_resolve_operational_product_quote_source(text) from public,anon,authenticated;
 revoke execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,uuid,timestamptz) from public,anon,authenticated;
+revoke execute on function public.v16_chatgpt_issue_authorized_sale_quote(text,text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_confirm_sale(text,uuid,text,text) from public,anon,authenticated;
 revoke execute on function public.v16_advisor_operation_close_fact(text,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_close_advisor_month(uuid,date,text) from public,anon,authenticated;
 revoke execute on function public.v16_chatgpt_operational_bridge(text,text,jsonb,text) from public,anon,authenticated;
+grant execute on function public.v16_resolve_operational_product_quote_source(text) to service_role;
 grant execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,uuid,timestamptz) to service_role;
+grant execute on function public.v16_chatgpt_issue_authorized_sale_quote(text,text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,timestamptz) to service_role;
 grant execute on function public.v16_chatgpt_operational_bridge(text,text,jsonb,text) to service_role;
 
 commit;
