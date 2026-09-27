@@ -90,14 +90,16 @@ Las fuentes activas son fixtures sanitizados versionados. No consultan ni escrib
 - La inicial debe ser estrictamente mayor que cada cuota posterior.
 - El total exacto se conserva; la última cuota absorbe diferencias de redondeo.
 
-## Comisiones vigentes al crear este checkpoint
+## Comisiones y premio mensual
 
-- Contado: 10%.
-- Financiado: 15%.
-- Plan 3 distribuye la comisión financiada en 2 pagos.
-- Plan 6 la distribuye en 3 pagos.
-- Fuente: `AMARANGO_CURRENT_POLICY`, versión `2026-07-19`.
-- No modificar hasta abrir un gate separado y explícito.
+- El gate separado `V16_ADVISOR_COMMISSIONS_AND_MONTHLY_BONUS` reemplazó el 15% financiado por rangos fijos según el precio contado definitivo.
+- Los rangos viven una sola vez en `lib/internal/finance/advisor-compensation-policy.ts`.
+- Toda comisión financiada se divide en 2 pagos; Contado conserva el 10% vigente.
+- El premio mensual no acumula escalones: $10.000 a 5 equivalentes, $35.000 a 10, $65.000 a 15, $100.000 a 20 y $7.500 por cada equivalente posterior.
+- Un producto de contado menor a $50.000 vale 0,5 venta equivalente; desde $50.000 vale 1.
+- El motor puro y el cierre inmutable/auditable viven en `lib/internal/finance/advisor-compensation-engine.ts`.
+- Mi Amarango y Administración tienen superficies de lectura fail-closed: sin cierre real autorizado no muestran cifras simuladas.
+- Bloqueo backend conocido: no existe en este repo un contrato RPC congelado para el ledger de comisión/premio ni para persistir el cierre mensual. Este gate no agrega migraciones Supabase; la conexión productiva queda para un gate backend expresamente autorizado.
 
 ## Growth / Referidos
 
