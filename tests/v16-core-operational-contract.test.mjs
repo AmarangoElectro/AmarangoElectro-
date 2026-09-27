@@ -37,7 +37,8 @@ test("consolidated migration is prepared but not wired into runtime migration ex
   for (const object of [
     "v16_create_client", "v16_get_active_financing_mode", "v16_set_active_financing_mode",
     "v16_authorized_sale_quotes", "v16_confirm_sale", "v16_sale_snapshots",
-    "v16_advisor_commission_ledger", "v16_advisor_monthly_closes", "v16_chatgpt_operational_bridge",
+    "v16_advisor_commission_ledger", "v16_advisor_monthly_closes",
+    "v16_advisor_monthly_close_operations", "v16_chatgpt_operational_bridge",
   ]) assert.match(sql, new RegExp(`\\b${object}\\b`));
   assert.match(sql, /enable row level security/);
   assert.match(sql, /revoke execute[\s\S]*anon,authenticated/);
@@ -55,7 +56,7 @@ test("write idempotency serializes retries and rejects the same key with another
   assert.match(sql, /v_claim\.payload_fingerprint<>v_fingerprint/);
   assert.match(sql, /pg_advisory_xact_lock[\s\S]*v16-client-request:/);
   assert.match(sql, /pg_advisory_xact_lock[\s\S]*v16-confirm-sale:/);
-  assert.match(sql, /v_existing\.authorized_quote_id<>p_authorized_quote_id/);
+  assert.match(sql, /v_existing\.authorized_quote_id is distinct from p_authorized_quote_id/);
   for (const rpc of ["v16_register_customer_payment", "v16_reverse_customer_payment", "v16_confirm_sale"]) {
     assert.match(sql, new RegExp(`v16_core_claim_idempotency[\\s\\S]*${rpc}`));
   }
@@ -120,8 +121,61 @@ test("payment, delivery and CRM adapters select the same-origin bridge when dire
 
 test("commercial snapshot freezes financing, pricing and commission versions", async () => {
   const snapshot = await source("lib/integration/sale-snapshot.ts");
-  for (const field of ["financingMode", "cashPrice", "initialPayment", "installments", "installmentAmount", "financedTotal", "commission", "commissionPolicyVersion", "pricingPolicyVersion", "soldAt"]) {
+  for (const field of ["financingMode", "cashPrice", "initialPayment", "installments", "installmentAmount", "financedTotal", "paymentSchedule", "commission", "commissionPolicyVersion", "pricingPolicyVersion", "soldAt"]) {
     assert.match(snapshot, new RegExp(`\\b${field}\\b`));
   }
   assert.match(snapshot, /Object\.freeze/);
+});
+
+test("prepared operational SQL uses the canonical stored V16 role vocabulary", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.doesNotMatch(sql, /v_role\s*=\s*['"]advisor['"]/);
+  assert.doesNotMatch(sql, /v_role\s*=\s*['"]customer['"]/);
+  assert.match(sql, /v_role\s*=\s*['"]asesor['"]/);
+  assert.match(sql, /v_role\s+in\s*\(['"]owner['"],['"]admin['"]\)/);
+});
+
+test("sale idempotency rejects a reused key with a different client quote or source", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /idempotency_key_conflict/);
+  assert.match(sql, /v_existing\.client_id\s+is\s+distinct\s+from\s+btrim\(p_client_id\)/i);
+  assert.match(sql, /v_existing\.authorized_quote_id\s+is\s+distinct\s+from\s+p_authorized_quote_id/i);
+  assert.match(sql, /v_existing\.source\s+is\s+distinct\s+from\s+btrim\(p_source\)/i);
+});
+
+test("monthly advisor close is fail-closed until delivery and collection facts are resolved", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /v16_advisor_operation_close_fact/);
+  assert.match(sql, /v_delivery\.status<>'ENTREGADA'/);
+  assert.match(sql, /Financiación en mora al cierre/);
+  assert.match(sql, /Cobranza pendiente de validación/);
+  assert.match(sql, /advisor_month_has_pending_operations/);
+  assert.match(sql, /v16_advisor_monthly_close_operations/);
+  assert.match(sql, /validation in \('ACCEPTED','EXCLUDED'\)/);
+  assert.match(sql, /floor\(v_equiv-20\)\*7500/);
+});
+
+test("advisor close evaluates immutable schedule and append-only payment events at close time", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /p\.payment_kind='PAYMENT'/);
+  assert.match(sql, /p\.contractual_amount=v_expected_amount/);
+  assert.match(sql, /p\.paid_at<=p_close_at/);
+  assert.match(sql, /r\.reverses_payment_id=p\.payment_id/);
+  assert.match(sql, /r\.paid_at<=p_close_at/);
+  assert.match(sql, /America\/Argentina\/Buenos_Aires/);
+});
+
+test("application role contract explicitly normalizes stored asesor and cliente roles", async () => {
+  const auth = await source("lib/internal/auth/user-access-contract.ts");
+  assert.match(auth, /V16StoredPlatformRole = "owner" \| "admin" \| "asesor" \| "cliente"/);
+  assert.match(auth, /role === "asesor"\) return "advisor"/);
+  assert.match(auth, /role === "cliente"\) return "customer"/);
+});
+
+test("new V16 payment and delivery writes derive client scope from the sale", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /v16_register_customer_payment\(p_args->>'p_sale_id'/);
+  assert.match(sql, /v16_create_delivery\(p_args->>'p_sale_id'/);
+  assert.doesNotMatch(sql, /v16_register_customer_payment\([^;\n]*p_client_id/);
+  assert.doesNotMatch(sql, /v16_create_delivery\([^;\n]*p_client_id/);
 });

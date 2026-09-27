@@ -65,6 +65,7 @@ create table if not exists public.v16_authorized_sale_quotes (
   installments integer not null check (installments > 0),
   installment_amount numeric not null check (installment_amount >= 0),
   financed_total numeric not null check (financed_total > 0),
+  payment_amounts jsonb not null check (jsonb_typeof(payment_amounts) = 'array'),
   commission numeric not null check (commission >= 0),
   commission_policy_version text not null,
   pricing_policy_version text not null,
@@ -91,6 +92,7 @@ create table if not exists public.v16_sale_snapshots (
   installments integer not null,
   installment_amount numeric not null,
   financed_total numeric not null,
+  payment_schedule jsonb not null check (jsonb_typeof(payment_schedule) = 'array'),
   commission numeric not null,
   commission_policy_version text not null,
   pricing_policy_version text not null,
@@ -138,6 +140,18 @@ create table if not exists public.v16_advisor_monthly_closes (
   unique (advisor_id, period_month)
 );
 
+create table if not exists public.v16_advisor_monthly_close_operations (
+  close_id bigint not null references public.v16_advisor_monthly_closes(close_id),
+  sale_id text not null references public.v16_sale_snapshots(sale_id),
+  advisor_id uuid not null,
+  validation text not null check (validation in ('ACCEPTED','EXCLUDED')),
+  validation_reason text not null,
+  counts_for_bonus boolean not null,
+  sale_equivalent numeric not null check (sale_equivalent in (0,0.5,1)),
+  captured_at timestamptz not null,
+  primary key (close_id,sale_id)
+);
+
 alter table public.v16_client_operational_profiles enable row level security;
 alter table public.v16_client_create_requests enable row level security;
 alter table public.v16_operational_idempotency_guard enable row level security;
@@ -146,12 +160,13 @@ alter table public.v16_authorized_sale_quotes enable row level security;
 alter table public.v16_sale_snapshots enable row level security;
 alter table public.v16_advisor_commission_ledger enable row level security;
 alter table public.v16_advisor_monthly_closes enable row level security;
+alter table public.v16_advisor_monthly_close_operations enable row level security;
 
 revoke all on public.v16_client_operational_profiles, public.v16_client_create_requests,
   public.v16_operational_idempotency_guard,
   public.v16_financing_mode_history, public.v16_authorized_sale_quotes,
   public.v16_sale_snapshots, public.v16_advisor_commission_ledger,
-  public.v16_advisor_monthly_closes from anon, authenticated;
+  public.v16_advisor_monthly_closes, public.v16_advisor_monthly_close_operations from anon, authenticated;
 
 create or replace function public.v16_core_reject_mutation()
 returns trigger language plpgsql set search_path = '' as $$
@@ -165,6 +180,9 @@ create trigger v16_commission_ledger_immutable before update or delete on public
 for each row execute function public.v16_core_reject_mutation();
 drop trigger if exists v16_monthly_closes_immutable on public.v16_advisor_monthly_closes;
 create trigger v16_monthly_closes_immutable before update or delete on public.v16_advisor_monthly_closes
+for each row execute function public.v16_core_reject_mutation();
+drop trigger if exists v16_monthly_close_operations_immutable on public.v16_advisor_monthly_close_operations;
+create trigger v16_monthly_close_operations_immutable before update or delete on public.v16_advisor_monthly_close_operations
 for each row execute function public.v16_core_reject_mutation();
 drop trigger if exists v16_financing_mode_history_immutable on public.v16_financing_mode_history;
 create trigger v16_financing_mode_history_immutable before update or delete on public.v16_financing_mode_history
@@ -226,7 +244,7 @@ declare
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
   if not ((v_role in ('owner','admin') and public.v16_has_capability('admin.access'))
-      or (v_role='advisor' and public.v16_has_capability('advisors.access'))) then
+      or (v_role='asesor' and public.v16_has_capability('advisors.access'))) then
     raise exception 'client_create_not_authorized';
   end if;
   if nullif(btrim(p_nombre),'') is null or length(v_phone) < 8 then raise exception 'client_identity_invalid'; end if;
@@ -265,7 +283,7 @@ begin
     select c.id into v_existing from public.clientes c where regexp_replace(coalesce(c.telefono,''),'[^0-9]','','g')=v_phone limit 1;
   end if;
   if v_existing is not null then
-    if v_role='advisor' and not public.v16_advisor_can_access_client(v_existing) then
+    if v_role='asesor' and not public.v16_advisor_can_access_client(v_existing) then
       raise exception 'client_duplicate_outside_advisor_scope';
     end if;
     insert into public.v16_client_create_requests
@@ -287,7 +305,7 @@ begin
   insert into public.v16_client_operational_profiles
     (client_id,occupation_activity,notes,source,created_by,created_at)
   values(v_id,nullif(btrim(p_ocupacion_actividad),''),nullif(btrim(p_observaciones),''),btrim(p_source),v_user,v_created_at);
-  if v_role='advisor' then
+  if v_role='asesor' then
     if v_advisor is null then raise exception 'advisor_identity_required'; end if;
     insert into public.v16_advisor_client_portfolio
       (advisor_id,client_id,active,assigned_at,assigned_by,metadata)
@@ -329,29 +347,217 @@ begin
   return query select v_new.active_financing_mode,v_new.policy_version,v_new.effective_from,v_new.created_at;
 end $$;
 
+create or replace function public.v16_build_sale_payment_schedule(p_payment_amounts jsonb,p_sold_at timestamptz)
+returns jsonb language plpgsql immutable set search_path = '' as $$
+declare
+  v_base_date date := (p_sold_at at time zone 'America/Argentina/Buenos_Aires')::date;
+  v_base_month date := date_trunc('month',v_base_date)::date;
+  v_day integer := extract(day from v_base_date)::integer;
+  v_result jsonb := '[]'::jsonb;
+  v_value jsonb;
+  v_index integer := 0;
+  v_month_start date;
+  v_due date;
+  v_amount numeric;
+begin
+  if p_sold_at is null or jsonb_typeof(p_payment_amounts)<>'array' or jsonb_array_length(p_payment_amounts)<1 then
+    raise exception 'payment_schedule_invalid';
+  end if;
+  for v_value in select value from jsonb_array_elements(p_payment_amounts)
+  loop
+    if jsonb_typeof(v_value)<>'number' then raise exception 'payment_schedule_invalid'; end if;
+    v_amount := (v_value #>> '{}')::numeric;
+    if v_amount<=0 then raise exception 'payment_schedule_invalid'; end if;
+    v_month_start := (v_base_month + make_interval(months=>v_index))::date;
+    v_due := least(
+      (v_month_start + (v_day - 1))::date,
+      (v_month_start + interval '1 month - 1 day')::date
+    );
+    v_result := v_result || jsonb_build_array(jsonb_build_object(
+      'sequence',v_index+1,
+      'amount',v_amount,
+      'dueDate',v_due::text,
+      'graceThrough',(v_due+3)::text
+    ));
+    v_index := v_index+1;
+  end loop;
+  return v_result;
+end $$;
+
+create or replace function public.v16_sync_sale_next_payment_amount()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  v_schedule jsonb;
+  v_amount numeric;
+  v_target_sequence integer;
+begin
+  select s.payment_schedule into v_schedule
+  from public.v16_sale_snapshots s
+  where s.sale_id=new.sale_id;
+
+  if not found then return new; end if;
+
+  if new.payment_kind='PAYMENT' then
+    v_target_sequence := new.installment_number+1;
+  elsif new.payment_kind='REVERSAL' then
+    v_target_sequence := new.installment_number;
+  else
+    return new;
+  end if;
+
+  if v_target_sequence>=1 and v_target_sequence<=jsonb_array_length(v_schedule) then
+    v_amount := (v_schedule->(v_target_sequence-1)->>'amount')::numeric;
+  else
+    v_amount := null;
+  end if;
+
+  update public.ventas set "montoCuota"=v_amount where id=new.sale_id;
+  return new;
+end $$;
+
+drop trigger if exists v16_payment_event_sync_sale_next_amount on public.v16_payment_events;
+create trigger v16_payment_event_sync_sale_next_amount
+after insert on public.v16_payment_events
+for each row execute function public.v16_sync_sale_next_payment_amount();
+
+create or replace function public.v16_resolve_operational_product_quote_source(p_product_id text)
+returns table(
+  source_product_id text,
+  product_name text,
+  product_model text,
+  current_sale_price numeric,
+  cost_ars numeric,
+  source_updated_at timestamptz
+)
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_requested text:=btrim(coalesce(p_product_id,''));
+  v_source_id text;
+  v_canonical_name text;
+  v_row public.tienda_productos_incremental%rowtype;
+  v_matches integer;
+begin
+  if coalesce(auth.jwt()->>'role','')<>'service_role' then raise exception 'service_role_required'; end if;
+  if v_requested='' then raise exception 'product_id_required'; end if;
+
+  if v_requested like 'v16-cell:%' then
+    select c.metadata->>'name' into v_canonical_name
+    from public.v16_canonical_product_identity c
+    where c.canonical_product_key=v_requested
+    limit 1;
+    if nullif(btrim(coalesce(v_canonical_name,'')),'') is null then raise exception 'product_source_not_found'; end if;
+
+    select count(*) into v_matches
+    from public.tienda_productos_incremental t
+    where not t.eliminado
+      and lower(regexp_replace(btrim(coalesce(t.datos->>'nombre','')),'\s+',' ','g'))
+        = lower(regexp_replace(btrim(v_canonical_name),'\s+',' ','g'));
+    if v_matches<>1 then raise exception 'product_source_ambiguous_or_missing'; end if;
+
+    select * into v_row
+    from public.tienda_productos_incremental t
+    where not t.eliminado
+      and lower(regexp_replace(btrim(coalesce(t.datos->>'nombre','')),'\s+',' ','g'))
+        = lower(regexp_replace(btrim(v_canonical_name),'\s+',' ','g'))
+    limit 1;
+  else
+    if v_requested ~ '^(electro|exp63|exp5|exp31|exp50|exp99|cohort0|v411-evidence):' then
+      v_source_id:=regexp_replace(v_requested,'^[^:]+:','');
+    else
+      raise exception 'unsupported_product_id_namespace';
+    end if;
+
+    select * into v_row
+    from public.tienda_productos_incremental t
+    where t.producto_id=v_source_id and not t.eliminado
+    limit 1;
+    if not found then raise exception 'product_source_not_found'; end if;
+  end if;
+
+  if nullif(v_row.datos->>'venta','') is null or (v_row.datos->>'venta')::numeric<=0 then
+    raise exception 'product_sale_price_unavailable';
+  end if;
+
+  return query select
+    v_row.producto_id,
+    coalesce(nullif(btrim(v_row.datos->>'nombre'),''),'Producto'),
+    nullif(btrim(coalesce(v_row.datos->>'modelo','')),''),
+    (v_row.datos->>'venta')::numeric,
+    case when nullif(v_row.datos->>'costo','') is not null and (v_row.datos->>'costo')::numeric>0
+      then (v_row.datos->>'costo')::numeric else null::numeric end,
+    v_row.actualizado;
+end $$;
+
 create or replace function public.v16_issue_authorized_sale_quote(
   p_canonical_product_id text,p_product_name text,p_product_model text,p_payment_mode text,p_financing_mode text,
   p_cash_price numeric,p_initial_payment numeric,p_installments integer,p_installment_amount numeric,p_financed_total numeric,
-  p_commission_policy_version text,p_pricing_policy_version text,p_commercial_snapshot jsonb,p_issued_for uuid,p_expires_at timestamptz
+  p_payment_amounts jsonb,p_commission_policy_version text,p_pricing_policy_version text,p_commercial_snapshot jsonb,p_issued_for uuid,p_expires_at timestamptz
 ) returns uuid language plpgsql security definer set search_path = '' as $$
-declare v_quote uuid; v_commission numeric;
+declare v_quote uuid; v_commission numeric; v_payment_total numeric; v_first_payment numeric;
 begin
-  if auth.role()<>'service_role' then raise exception 'service_role_required'; end if;
+  if coalesce(auth.jwt()->>'role','')<>'service_role' then raise exception 'service_role_required'; end if;
   if p_issued_for is null or p_expires_at<=clock_timestamp() then raise exception 'quote_identity_or_expiry_invalid'; end if;
+  if p_installments<1 or jsonb_typeof(p_payment_amounts)<>'array' or jsonb_array_length(p_payment_amounts)<>p_installments then
+    raise exception 'payment_schedule_invalid';
+  end if;
+  if exists(select 1 from jsonb_array_elements(p_payment_amounts) x where jsonb_typeof(x)<>'number' or (x#>>'{}')::numeric<=0) then
+    raise exception 'payment_schedule_invalid';
+  end if;
+  select coalesce(sum((x#>>'{}')::numeric),0) into v_payment_total from jsonb_array_elements(p_payment_amounts) x;
+  v_first_payment := (p_payment_amounts->>0)::numeric;
+  if abs(v_payment_total-p_financed_total)>0.01 or abs(v_first_payment-p_initial_payment)>0.01 then
+    raise exception 'payment_schedule_total_mismatch';
+  end if;
+  if upper(p_payment_mode)='CASH' and (p_installments<>1 or abs(p_financed_total-p_cash_price)>0.01) then
+    raise exception 'cash_quote_schedule_invalid';
+  end if;
   if upper(p_payment_mode)='CASH' then v_commission:=round(p_cash_price*0.10,2); else v_commission:=public.v16_financed_commission_for_cash_price(p_cash_price); end if;
-  insert into public.v16_authorized_sale_quotes(canonical_product_id,product_name,product_model,payment_mode,financing_mode,cash_price,initial_payment,installments,installment_amount,financed_total,commission,commission_policy_version,pricing_policy_version,commercial_snapshot,issued_by,expires_at)
-  values(p_canonical_product_id,p_product_name,p_product_model,upper(p_payment_mode),upper(p_financing_mode),p_cash_price,p_initial_payment,p_installments,p_installment_amount,p_financed_total,v_commission,p_commission_policy_version,p_pricing_policy_version,p_commercial_snapshot,p_issued_for,p_expires_at)
+  insert into public.v16_authorized_sale_quotes(canonical_product_id,product_name,product_model,payment_mode,financing_mode,cash_price,initial_payment,installments,installment_amount,financed_total,payment_amounts,commission,commission_policy_version,pricing_policy_version,commercial_snapshot,issued_by,expires_at)
+  values(p_canonical_product_id,p_product_name,p_product_model,upper(p_payment_mode),upper(p_financing_mode),p_cash_price,p_initial_payment,p_installments,p_installment_amount,p_financed_total,p_payment_amounts,v_commission,p_commission_policy_version,p_pricing_policy_version,p_commercial_snapshot,p_issued_for,p_expires_at)
   returning quote_id into v_quote; return v_quote;
 end $$;
 
+create or replace function public.v16_chatgpt_issue_authorized_sale_quote(
+  p_email text,p_canonical_product_id text,p_product_name text,p_product_model text,p_payment_mode text,p_financing_mode text,
+  p_cash_price numeric,p_initial_payment numeric,p_installments integer,p_installment_amount numeric,p_financed_total numeric,
+  p_payment_amounts jsonb,p_commission_policy_version text,p_pricing_policy_version text,p_commercial_snapshot jsonb,p_expires_at timestamptz
+) returns uuid language plpgsql security definer set search_path = '' as $$
+declare v_email text:=lower(btrim(coalesce(p_email,''))); v_user uuid; v_quote uuid;
+begin
+  if coalesce(auth.jwt()->>'role','')<>'service_role' then raise exception 'service_role_required'; end if;
+  select u.id into v_user
+  from auth.users u
+  join public.v16_user_access a on a.user_id=u.id and a.active
+  where lower(u.email)=v_email
+  order by u.created_at
+  limit 1;
+  if v_user is null then raise exception 'identity_not_mapped'; end if;
+
+  v_quote:=public.v16_issue_authorized_sale_quote(
+    p_canonical_product_id,p_product_name,p_product_model,p_payment_mode,p_financing_mode,
+    p_cash_price,p_initial_payment,p_installments,p_installment_amount,p_financed_total,
+    p_payment_amounts,p_commission_policy_version,p_pricing_policy_version,p_commercial_snapshot,v_user,p_expires_at
+  );
+  return v_quote;
+end $$;
+
 create or replace function public.v16_confirm_sale(p_client_id text,p_authorized_quote_id uuid,p_source text,p_idempotency_key text)
-returns table(sale_id text,client_id text,canonical_product_id text,product_name text,product_model text,payment_mode text,financing_mode text,cash_price numeric,initial_payment numeric,installments integer,installment_amount numeric,financed_total numeric,commission numeric,commission_policy_version text,pricing_policy_version text,sold_at timestamptz)
+returns table(sale_id text,client_id text,canonical_product_id text,product_name text,product_model text,payment_mode text,financing_mode text,cash_price numeric,initial_payment numeric,installments integer,installment_amount numeric,financed_total numeric,payment_schedule jsonb,commission numeric,commission_policy_version text,pricing_policy_version text,sold_at timestamptz)
 language plpgsql security definer set search_path = '' as $$
-declare v_user uuid:=auth.uid(); v_role text:=public.v16_current_role(); v_advisor uuid:=public.v16_current_advisor_id(); v_quote public.v16_authorized_sale_quotes%rowtype; v_existing public.v16_sale_snapshots%rowtype; v_mode text; v_sale text; v_sold timestamptz:=clock_timestamp();
+declare
+  v_user uuid:=auth.uid();
+  v_role text:=public.v16_current_role();
+  v_advisor uuid:=public.v16_current_advisor_id();
+  v_quote public.v16_authorized_sale_quotes%rowtype;
+  v_existing public.v16_sale_snapshots%rowtype;
+  v_mode text;
+  v_sale text;
+  v_sold timestamptz:=clock_timestamp();
+  v_payment_schedule jsonb;
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
-  if not ((v_role in ('owner','admin') and public.v16_has_capability('admin.access')) or (v_role='advisor' and public.v16_has_capability('advisors.access'))) then raise exception 'sale_create_not_authorized'; end if;
-  if v_role='advisor' and v_advisor is null then raise exception 'advisor_identity_required'; end if;
+  if not ((v_role in ('owner','admin') and public.v16_has_capability('admin.access')) or (v_role='asesor' and public.v16_has_capability('advisors.access'))) then raise exception 'sale_create_not_authorized'; end if;
+  if v_role='asesor' and v_advisor is null then raise exception 'advisor_identity_required'; end if;
   if nullif(btrim(coalesce(p_client_id,'')),'') is null or p_authorized_quote_id is null then raise exception 'sale_identity_required'; end if;
   if nullif(btrim(coalesce(p_source,'')),'') is null then raise exception 'sale_source_required'; end if;
   if nullif(btrim(p_idempotency_key),'') is null then raise exception 'idempotency_key_required'; end if;
@@ -360,64 +566,246 @@ begin
   );
   select * into v_existing from public.v16_sale_snapshots s where s.idempotency_key=btrim(p_idempotency_key);
   if found then
-    if v_existing.client_id<>btrim(p_client_id)
-       or v_existing.authorized_quote_id<>p_authorized_quote_id
-       or v_existing.source<>btrim(p_source) then
+    if v_existing.client_id is distinct from btrim(p_client_id)
+       or v_existing.authorized_quote_id is distinct from p_authorized_quote_id
+       or v_existing.source is distinct from btrim(p_source) then
       raise exception 'idempotency_key_conflict';
     end if;
-    return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_existing.sale_id;
+    return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.payment_schedule,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_existing.sale_id;
     return;
   end if;
   if not exists(select 1 from public.clientes c where c.id=btrim(p_client_id)) then raise exception 'client_not_found'; end if;
-  if v_role='advisor' and not public.v16_advisor_can_access_client(btrim(p_client_id)) then raise exception 'advisor_client_scope_denied'; end if;
+  if v_role='asesor' and not public.v16_advisor_can_access_client(btrim(p_client_id)) then raise exception 'advisor_client_scope_denied'; end if;
   select * into v_quote from public.v16_authorized_sale_quotes q where q.quote_id=p_authorized_quote_id for update;
   if not found or v_quote.issued_by<>v_user or v_quote.used_at is not null or v_quote.expires_at<=v_sold then raise exception 'authorized_quote_invalid'; end if;
   select m.active_financing_mode into v_mode from public.v16_get_active_financing_mode() m;
   if v_mode<>v_quote.financing_mode then raise exception 'financing_mode_changed_requote_required'; end if;
+  v_payment_schedule:=public.v16_build_sale_payment_schedule(v_quote.payment_amounts,v_sold);
+  if jsonb_array_length(v_payment_schedule)<>v_quote.installments
+     or abs((v_payment_schedule->0->>'amount')::numeric-v_quote.initial_payment)>0.01 then
+    raise exception 'payment_schedule_invalid';
+  end if;
   v_sale:='v16s_'||replace(gen_random_uuid()::text,'-','');
-  insert into public.ventas(id,\"clienteId\",producto,\"precioVenta\",responsable,fecha,cuotas,pagadas,tipo,total,precio,archivada,\"montoCuota\")
-  values(v_sale,btrim(p_client_id),v_quote.product_name,v_quote.cash_price,coalesce(v_advisor::text,v_user::text),v_sold::text,v_quote.installments,0,v_quote.payment_mode,v_quote.financed_total,v_quote.cash_price,false,v_quote.installment_amount);
-  insert into public.v16_sale_snapshots values(v_sale,btrim(p_client_id),v_quote.canonical_product_id,v_quote.product_name,v_quote.product_model,v_advisor,v_quote.payment_mode,v_quote.financing_mode,v_quote.cash_price,v_quote.initial_payment,v_quote.installments,v_quote.installment_amount,v_quote.financed_total,v_quote.commission,v_quote.commission_policy_version,v_quote.pricing_policy_version,v_sold,v_user,btrim(p_source),btrim(p_idempotency_key),v_quote.quote_id,v_quote.commercial_snapshot,v_sold);
+  insert into public.ventas(id,"clienteId",producto,"precioVenta",responsable,fecha,cuotas,pagadas,tipo,total,precio,archivada,"montoCuota")
+  values(v_sale,btrim(p_client_id),v_quote.product_name,v_quote.cash_price,coalesce(v_advisor::text,v_user::text),v_sold::text,v_quote.installments,0,v_quote.payment_mode,v_quote.financed_total,v_quote.cash_price,false,v_quote.initial_payment);
+  insert into public.v16_sale_snapshots(
+    sale_id,client_id,canonical_product_id,product_name,product_model,advisor_id,payment_mode,financing_mode,
+    cash_price,initial_payment,installments,installment_amount,financed_total,payment_schedule,commission,
+    commission_policy_version,pricing_policy_version,sold_at,actor_id,source,idempotency_key,authorized_quote_id,
+    commercial_snapshot,created_at
+  ) values(
+    v_sale,btrim(p_client_id),v_quote.canonical_product_id,v_quote.product_name,v_quote.product_model,v_advisor,
+    v_quote.payment_mode,v_quote.financing_mode,v_quote.cash_price,v_quote.initial_payment,v_quote.installments,
+    v_quote.installment_amount,v_quote.financed_total,v_payment_schedule,v_quote.commission,
+    v_quote.commission_policy_version,v_quote.pricing_policy_version,v_sold,v_user,btrim(p_source),
+    btrim(p_idempotency_key),v_quote.quote_id,
+    jsonb_set(v_quote.commercial_snapshot,'{paymentSchedule}',v_payment_schedule,true),v_sold
+  );
   if v_advisor is not null then
     insert into public.v16_advisor_commission_ledger(sale_id,advisor_id,cash_price,payment_mode,commission_total,payment_count,payment_schedule,policy_version,sale_equivalent,created_by)
     values(v_sale,v_advisor,v_quote.cash_price,v_quote.payment_mode,v_quote.commission,case when v_quote.payment_mode='CASH' then 1 else 2 end,
       jsonb_build_object('payments',case when v_quote.payment_mode='CASH' then jsonb_build_array(v_quote.commission) else jsonb_build_array(v_quote.commission/2,v_quote.commission/2) end),v_quote.commission_policy_version,case when v_quote.cash_price<50000 then 0.5 else 1 end,v_user);
   end if;
   update public.v16_authorized_sale_quotes set used_at=v_sold where quote_id=v_quote.quote_id;
-  return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_sale;
+  return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.payment_schedule,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_sale;
+end $$;
+
+create or replace function public.v16_advisor_operation_close_fact(p_sale_id text,p_close_at timestamptz)
+returns table(validation text,validation_reason text,counts_for_bonus boolean)
+language plpgsql stable security definer set search_path = '' as $$
+declare
+  v_snapshot public.v16_sale_snapshots%rowtype;
+  v_sale public.ventas%rowtype;
+  v_delivery public.v16_deliveries%rowtype;
+  v_entry jsonb;
+  v_sequence integer;
+  v_due date;
+  v_grace date;
+  v_expected_amount numeric;
+  v_close_date date;
+  v_paid boolean;
+  v_pending boolean := false;
+  v_overdue boolean := false;
+begin
+  if p_close_at is null then
+    return query select 'PENDING'::text,'Fecha de cierre no disponible'::text,false;
+    return;
+  end if;
+  v_close_date := (p_close_at at time zone 'America/Argentina/Buenos_Aires')::date;
+
+  select * into v_snapshot from public.v16_sale_snapshots s where s.sale_id=p_sale_id;
+  select * into v_sale from public.ventas v where v.id=p_sale_id;
+  if not found or v_snapshot.sale_id is null then
+    return query select 'PENDING'::text,'Snapshot de venta incompleto'::text,false;
+    return;
+  end if;
+
+  if coalesce(v_sale.archivada,false) or upper(coalesce(v_sale.estado,'')) in ('CANCELADA','ANULADA','RECHAZADA') then
+    return query select 'EXCLUDED'::text,'Operación cancelada'::text,false;
+    return;
+  end if;
+
+  select * into v_delivery from public.v16_deliveries d where d.sale_id=p_sale_id limit 1;
+  if not found then
+    return query select 'PENDING'::text,'Entrega pendiente de validación'::text,false;
+    return;
+  end if;
+  if v_delivery.status='CANCELADA' then
+    return query select 'EXCLUDED'::text,'Entrega cancelada'::text,false;
+    return;
+  end if;
+  if v_delivery.status<>'ENTREGADA' or v_delivery.delivered_at is null or v_delivery.delivered_at>p_close_at then
+    return query select 'PENDING'::text,'Entrega pendiente'::text,false;
+    return;
+  end if;
+
+  if jsonb_typeof(v_snapshot.payment_schedule)<>'array'
+     or jsonb_array_length(v_snapshot.payment_schedule)<>v_snapshot.installments then
+    return query select 'PENDING'::text,'Cronograma de pagos incompleto'::text,false;
+    return;
+  end if;
+
+  for v_entry in select value from jsonb_array_elements(v_snapshot.payment_schedule)
+  loop
+    begin
+      v_sequence := (v_entry->>'sequence')::integer;
+      v_due := (v_entry->>'dueDate')::date;
+      v_grace := (v_entry->>'graceThrough')::date;
+      v_expected_amount := (v_entry->>'amount')::numeric;
+    exception when others then
+      return query select 'PENDING'::text,'Cronograma de pagos inválido'::text,false;
+      return;
+    end;
+
+    if v_due<=v_close_date then
+      select exists(
+        select 1
+        from public.v16_payment_events p
+        where p.sale_id=p_sale_id
+          and p.installment_number=v_sequence
+          and p.payment_kind='PAYMENT'
+          and p.contractual_amount=v_expected_amount
+          and p.paid_at<=p_close_at
+          and not exists(
+            select 1 from public.v16_payment_events r
+            where r.reverses_payment_id=p.payment_id
+              and r.paid_at<=p_close_at
+          )
+      ) into v_paid;
+
+      if not v_paid then
+        if v_snapshot.payment_mode='FINANCED' and v_grace<v_close_date then
+          v_overdue:=true;
+        else
+          v_pending:=true;
+        end if;
+      end if;
+    end if;
+  end loop;
+
+  if v_overdue then
+    return query select 'EXCLUDED'::text,'Financiación en mora al cierre'::text,false;
+    return;
+  end if;
+  if v_pending then
+    return query select 'PENDING'::text,'Cobranza pendiente de validación'::text,false;
+    return;
+  end if;
+
+  return query select 'ACCEPTED'::text,'Venta, entrega y cobranza validadas'::text,true;
 end $$;
 
 create or replace function public.v16_close_advisor_month(p_advisor_id uuid,p_period_month date,p_policy_version text)
 returns table(close_id bigint,advisor_id uuid,period_month date,equivalent_sales numeric,base_bonus numeric,additional_bonus numeric,total_bonus numeric,policy_version text,closed_at timestamptz)
 language plpgsql security definer set search_path = '' as $$
-declare v_user uuid:=auth.uid(); v_role text:=public.v16_current_role(); v_existing public.v16_advisor_monthly_closes%rowtype; v_equiv numeric; v_base numeric; v_extra numeric; v_close public.v16_advisor_monthly_closes%rowtype;
+declare
+  v_user uuid:=auth.uid();
+  v_role text:=public.v16_current_role();
+  v_existing public.v16_advisor_monthly_closes%rowtype;
+  v_equiv numeric;
+  v_base numeric;
+  v_extra numeric;
+  v_close public.v16_advisor_monthly_closes%rowtype;
+  v_close_at timestamptz:=clock_timestamp();
+  v_pending_count bigint;
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
   if v_role not in ('owner','admin') or not public.v16_has_capability('admin.access') then raise exception 'commission_close_not_authorized'; end if;
   if coalesce(auth.jwt()->>'aal','')<>'aal2' then raise exception 'step_up_required'; end if;
-  if p_advisor_id is null or p_period_month<>date_trunc('month',p_period_month)::date or p_period_month>=date_trunc('month',current_date)::date then raise exception 'closed_month_required'; end if;
-  select * into v_existing from public.v16_advisor_monthly_closes c where c.advisor_id=p_advisor_id and c.period_month=p_period_month;
-  if found then return query select v_existing.close_id,v_existing.advisor_id,v_existing.period_month,v_existing.equivalent_sales,v_existing.base_bonus,v_existing.additional_bonus,v_existing.total_bonus,v_existing.policy_version,v_existing.closed_at; return; end if;
-  select coalesce(sum(l.sale_equivalent),0) into v_equiv
+  if p_advisor_id is null
+     or p_period_month<>date_trunc('month',p_period_month)::date
+     or p_period_month>=date_trunc('month',(now() at time zone 'America/Argentina/Buenos_Aires')::date)::date
+     or nullif(btrim(coalesce(p_policy_version,'')),'') is null then
+    raise exception 'closed_month_required';
+  end if;
+
+  perform pg_catalog.pg_advisory_xact_lock(
+    pg_catalog.hashtextextended('v16-advisor-close:'||p_advisor_id::text||':'||p_period_month::text,0)
+  );
+  select * into v_existing
+  from public.v16_advisor_monthly_closes c
+  where c.advisor_id=p_advisor_id and c.period_month=p_period_month;
+  if found then
+    if v_existing.policy_version is distinct from btrim(p_policy_version) then
+      raise exception 'commission_close_policy_conflict';
+    end if;
+    return query select v_existing.close_id,v_existing.advisor_id,v_existing.period_month,v_existing.equivalent_sales,
+      v_existing.base_bonus,v_existing.additional_bonus,v_existing.total_bonus,v_existing.policy_version,v_existing.closed_at;
+    return;
+  end if;
+
+  select count(*) into v_pending_count
   from public.v16_advisor_commission_ledger l
   join public.v16_sale_snapshots s on s.sale_id=l.sale_id
-  join public.ventas v on v.id=s.sale_id
-  where l.advisor_id=p_advisor_id and l.status='ACCRUED'
-    and s.sold_at>=p_period_month and s.sold_at<(p_period_month+interval '1 month')
-    and not coalesce(v.archivada,false)
-    and upper(coalesce(v.estado,'CONFIRMADA')) not in ('CANCELADA','ANULADA','RECHAZADA');
+  cross join lateral public.v16_advisor_operation_close_fact(s.sale_id,v_close_at) f
+  where l.advisor_id=p_advisor_id
+    and l.status='ACCRUED'
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date>=p_period_month
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date<(p_period_month+interval '1 month')::date
+    and f.validation='PENDING';
+
+  if v_pending_count>0 then raise exception 'advisor_month_has_pending_operations'; end if;
+
+  select coalesce(sum(case when f.validation='ACCEPTED' and f.counts_for_bonus then l.sale_equivalent else 0 end),0)
+  into v_equiv
+  from public.v16_advisor_commission_ledger l
+  join public.v16_sale_snapshots s on s.sale_id=l.sale_id
+  cross join lateral public.v16_advisor_operation_close_fact(s.sale_id,v_close_at) f
+  where l.advisor_id=p_advisor_id
+    and l.status='ACCRUED'
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date>=p_period_month
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date<(p_period_month+interval '1 month')::date;
+
   v_base:=case when v_equiv>=20 then 100000 when v_equiv>=15 then 65000 when v_equiv>=10 then 35000 when v_equiv>=5 then 10000 else 0 end;
   v_extra:=case when v_equiv>=21 then floor(v_equiv-20)*7500 else 0 end;
-  insert into public.v16_advisor_monthly_closes(advisor_id,period_month,equivalent_sales,base_bonus,additional_bonus,total_bonus,policy_version,closed_by)
-  values(p_advisor_id,p_period_month,v_equiv,v_base,v_extra,v_base+v_extra,p_policy_version,v_user) returning * into v_close;
-  return query select v_close.close_id,v_close.advisor_id,v_close.period_month,v_close.equivalent_sales,v_close.base_bonus,v_close.additional_bonus,v_close.total_bonus,v_close.policy_version,v_close.closed_at;
+
+  insert into public.v16_advisor_monthly_closes(advisor_id,period_month,equivalent_sales,base_bonus,additional_bonus,total_bonus,policy_version,closed_by,closed_at)
+  values(p_advisor_id,p_period_month,v_equiv,v_base,v_extra,v_base+v_extra,btrim(p_policy_version),v_user,v_close_at)
+  returning * into v_close;
+
+  insert into public.v16_advisor_monthly_close_operations(
+    close_id,sale_id,advisor_id,validation,validation_reason,counts_for_bonus,sale_equivalent,captured_at
+  )
+  select v_close.close_id,s.sale_id,l.advisor_id,f.validation,f.validation_reason,f.counts_for_bonus,
+    case when f.counts_for_bonus then l.sale_equivalent else 0 end,v_close_at
+  from public.v16_advisor_commission_ledger l
+  join public.v16_sale_snapshots s on s.sale_id=l.sale_id
+  cross join lateral public.v16_advisor_operation_close_fact(s.sale_id,v_close_at) f
+  where l.advisor_id=p_advisor_id
+    and l.status='ACCRUED'
+    and f.validation in ('ACCEPTED','EXCLUDED')
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date>=p_period_month
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date<(p_period_month+interval '1 month')::date;
+
+  return query select v_close.close_id,v_close.advisor_id,v_close.period_month,v_close.equivalent_sales,
+    v_close.base_bonus,v_close.additional_bonus,v_close.total_bonus,v_close.policy_version,v_close.closed_at;
 end $$;
 
 create or replace function public.v16_chatgpt_operational_bridge(p_email text,p_rpc text,p_args jsonb default '{}'::jsonb,p_aal text default 'aal1')
 returns jsonb language plpgsql security definer set search_path = '' as $$
 declare v_email text:=lower(btrim(coalesce(p_email,''))); v_user uuid; v_access public.v16_user_access%rowtype; v_claims jsonb; v_result jsonb;
 begin
-  if auth.role()<>'service_role' then raise exception 'service_role_required'; end if;
+  if coalesce(auth.jwt()->>'role','')<>'service_role' then raise exception 'service_role_required'; end if;
   select u.id into v_user from auth.users u where lower(u.email)=v_email order by u.created_at limit 1;
   if v_user is null then raise exception 'identity_not_mapped'; end if;
   select * into v_access from public.v16_user_access a where a.user_id=v_user and a.active;
@@ -456,11 +844,18 @@ revoke execute on function public.v16_financed_commission_for_cash_price(numeric
 revoke execute on function public.v16_create_client(text,text,text,text,text,text,text,text,text,text) from public,anon,authenticated;
 revoke execute on function public.v16_get_active_financing_mode() from public,anon,authenticated;
 revoke execute on function public.v16_set_active_financing_mode(text,text,text,text) from public,anon,authenticated;
-revoke execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,text,text,jsonb,uuid,timestamptz) from public,anon,authenticated;
+revoke execute on function public.v16_build_sale_payment_schedule(jsonb,timestamptz) from public,anon,authenticated;
+revoke execute on function public.v16_sync_sale_next_payment_amount() from public,anon,authenticated;
+revoke execute on function public.v16_resolve_operational_product_quote_source(text) from public,anon,authenticated;
+revoke execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,uuid,timestamptz) from public,anon,authenticated;
+revoke execute on function public.v16_chatgpt_issue_authorized_sale_quote(text,text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_confirm_sale(text,uuid,text,text) from public,anon,authenticated;
+revoke execute on function public.v16_advisor_operation_close_fact(text,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_close_advisor_month(uuid,date,text) from public,anon,authenticated;
 revoke execute on function public.v16_chatgpt_operational_bridge(text,text,jsonb,text) from public,anon,authenticated;
-grant execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,text,text,jsonb,uuid,timestamptz) to service_role;
+grant execute on function public.v16_resolve_operational_product_quote_source(text) to service_role;
+grant execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,uuid,timestamptz) to service_role;
+grant execute on function public.v16_chatgpt_issue_authorized_sale_quote(text,text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,timestamptz) to service_role;
 grant execute on function public.v16_chatgpt_operational_bridge(text,text,jsonb,text) to service_role;
 
 commit;

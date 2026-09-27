@@ -26,7 +26,7 @@ The addendum audit also verified the live payment constraints and indexes: `idem
 - no canonical advisor commission ledger or monthly close;
 - no generic operational ChatGPT-session bridge;
 - the current ChatGPT application headers prove email identity but do not expose a trusted AAL2 assertion;
-- no server-side canonical cost/price source is connected to issue a `PROTECTED` authorized quote. Browser totals therefore remain non-authoritative and sale confirmation remains blocked.
+- no server-side canonical cost/price source is active in the live backend yet. The prepared migration and same-origin quote route now define that source, but sale confirmation remains blocked until the owner authorizes and validates the migration.
 
 ## Prepared code
 
@@ -36,7 +36,12 @@ The addendum audit also verified the live payment constraints and indexes: `idem
 - The prepared bridge adds a transaction-scoped payload fingerprint guard around payment retries. It serializes concurrent reuse of a key, lets an identical retry converge on the existing live event, and rejects reuse of that key with a different payload.
 - Prepared client/sale writes use advisory transaction locks, full request comparison and canonical advisor portfolio checks. A client created by an advisor is assigned through the existing portfolio table; finding another advisor's duplicate never grants access or returns the client ID.
 - Client create, global financing mode and sale confirmation contracts are typed. The browser sale request contains an authorized quote ID, never advisor identity or authoritative totals.
-- `sale-snapshot.ts` now defines the immutable commercial snapshot required to freeze history.
+- Persisted roles use owner/admin/asesor/cliente; the application boundary explicitly normalizes asesor to advisor and cliente to customer.
+- The same-origin sale quote route accepts only product ID, payment mode and payment count. It resolves the active mode and private product facts server-side, issues a short-lived quote, and never returns cost, supplier, markup or margin.
+- Source-prefixed catalog IDs resolve against tienda_productos_incremental; canonical cellular IDs resolve by unique normalized name. PROTECTED fails closed with no server-certified cost.
+- sale-snapshot.ts now freezes the exact dated paymentSchedule, including a distinct protected initial payment and three-day grace date in America/Argentina/Buenos_Aires.
+- Sale confirmation preserves the existing advisory lock, payload-conflict checks and advisor portfolio scope while storing the exact schedule and projecting only the next contractual amount to legacy ventas.montoCuota.
+- Monthly advisor closure classifies each real operation from immutable sale, delivery and append-only payment facts. Any PENDING operation blocks the close; accepted/excluded evidence is captured immutably.
 
 ## Prepared migration — not applied
 
@@ -54,6 +59,7 @@ Path: `supabase/migrations/20260927_v16_core_operational_prepared.sql`
 - `v16_sale_snapshots`
 - `v16_advisor_commission_ledger`
 - `v16_advisor_monthly_closes`
+- `v16_advisor_monthly_close_operations`
 
 ### Functions added
 
@@ -61,7 +67,12 @@ Path: `supabase/migrations/20260927_v16_core_operational_prepared.sql`
 - `v16_get_active_financing_mode`
 - `v16_set_active_financing_mode`
 - `v16_issue_authorized_sale_quote` (service-role only; not exposed through the browser bridge)
+- `v16_chatgpt_issue_authorized_sale_quote` (service-role-only identity wrapper)
+- `v16_resolve_operational_product_quote_source` (service-role-only private source)
+- `v16_build_sale_payment_schedule`
+- `v16_sync_sale_next_payment_amount`
 - `v16_confirm_sale`
+- `v16_advisor_operation_close_fact`
 - `v16_close_advisor_month`
 - `v16_financed_commission_for_cash_price`
 - `v16_chatgpt_operational_bridge`
@@ -73,6 +84,8 @@ Path: `supabase/migrations/20260927_v16_core_operational_prepared.sql`
 - Only the server bridge and quote issuer are granted to `service_role`.
 - The bridge resolves email to `auth.users`, requires an active `v16_user_access` row, injects the mapped `sub` and fixed trusted AAL, then calls a literal allowlist.
 - Sale snapshots, commission ledger and monthly closes reject update/delete.
+- Monthly close operation evidence rejects update/delete.
+- Exact payment schedules are authoritative for new V16 sales; legacy sales are not backfilled.
 - Financing-mode history is append-only. A mode switch never updates a historical sale snapshot.
 - Advisor identity comes from `v16_current_advisor_id()`; the browser contract has no advisor ID field.
 - Returned operational DTO schemas omit cost, markup, profit, private supplier and investor fields.
@@ -102,7 +115,9 @@ Additive schema objects plus inserts into legacy `clientes`/`ventas` only throug
 - Prove the second reversal of one payment is rejected, while an identical retry of the first reversal key returns the existing reversal.
 - Prove quote mode race rejects confirmation and historical snapshots remain byte-for-byte unchanged after a mode switch.
 - Prove the frozen monthly bonus edges: `20.5 = 100000`, `21 = 107500`; cancelled operations contribute no equivalent units; commission and bonus remain separate.
-- Prove sale quote issuance recalculates from an authoritative server-side product/cost source for both `CLASSIC` and `PROTECTED`.
+- Prove sale quote issuance recalculates from tienda_productos_incremental for both CLASSIC and PROTECTED, including fail-closed PROTECTED_REQUIRES_SERVER_CERTIFIED_COST.
+- Prove every new schedule has entries equal to installments, first amount equal to initial payment, exact total reconciliation, frozen due dates and three-day grace.
+- Prove delivery-pending and unresolved-collection operations block monthly close; delivered/current operations count; cancelled/delinquent operations are excluded with immutable evidence.
 - Run cash and financed end-to-end cases through payment, delivery, CRM and commission ledger.
 
 ## Activation boundary
