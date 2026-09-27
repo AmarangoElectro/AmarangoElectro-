@@ -67,3 +67,12 @@ test("prepared operational SQL uses the canonical stored V16 role vocabulary", a
   assert.match(sql, /v_role\s*=\s*['"]asesor['"]/);
   assert.match(sql, /v_role\s+in\s*\(['"]owner['"],['"]admin['"]\)/);
 });
+
+
+test("sale idempotency rejects a reused key with a different client quote or source", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /idempotency_key_conflict/);
+  assert.match(sql, /s\.client_id\s+is\s+distinct\s+from\s+p_client_id/i);
+  assert.match(sql, /s\.authorized_quote_id\s+is\s+distinct\s+from\s+p_authorized_quote_id/i);
+  assert.match(sql, /s\.source\s+is\s+distinct\s+from\s+p_source/i);
+});
