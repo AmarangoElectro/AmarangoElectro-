@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import StoreLink from "@/app/components/store-link";
 import { chatGPTSignInPath, getChatGPTUser } from "@/app/chatgpt-auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function ChatGPTAuthRetryPage() {
   const user = await getChatGPTUser();
   if (user) redirect("/mi-amarango");
