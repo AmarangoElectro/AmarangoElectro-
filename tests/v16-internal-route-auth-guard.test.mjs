@@ -39,3 +39,10 @@ test("identity-aware pages are forced dynamic per request",()=>{
   assert.match(advisor,/export const dynamic = "force-dynamic"/);
   assert.match(retry,/export const dynamic = "force-dynamic"/);
 });
+
+test("protected auth routes force per-request dynamic rendering",()=>{
+  for(const page of [admin,advisor,retry]){
+    assert.match(page,/export const dynamic = "force-dynamic"/);
+    assert.match(page,/export const revalidate = 0/);
+  }
+});
