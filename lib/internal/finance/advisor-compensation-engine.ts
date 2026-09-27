@@ -201,7 +201,9 @@ export function quoteAdvisorMonthlyBonus(equivalentSales: number): AdvisorMonthl
   const mainGoal = MONTHLY_BONUS_TIERS[MONTHLY_BONUS_TIERS.length - 1];
   const achieved = [...MONTHLY_BONUS_TIERS].reverse().find((tier) => normalized >= tier.equivalentSales);
   const mainGoalReached = normalized >= mainGoal.equivalentSales;
-  const additionalEquivalentSales = mainGoalReached ? normalized - mainGoal.equivalentSales : 0;
+  const additionalEquivalentSales = mainGoalReached
+    ? Math.max(0, Math.floor(normalized - mainGoal.equivalentSales))
+    : 0;
   const additionalBonusArs = additionalEquivalentSales * MONTHLY_BONUS_AFTER_TWENTY_ARS;
   const bonusArs = mainGoalReached
     ? mainGoal.bonusArs + additionalBonusArs
