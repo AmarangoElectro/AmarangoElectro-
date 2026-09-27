@@ -12,6 +12,7 @@ import { findSectorGuide } from "@/lib/onboarding/sector-guides";
 import { toast } from "sonner";
 import Image from "next/image";
 import { AdvisorGrowthSummary } from "./advisor-growth-summary";
+import { AdvisorMonthDashboard } from "./advisor-month-dashboard";
 
 const advisorGuide = findSectorGuide("asesor", "mi-amarango");
 const liveStockSuppliers = new Set(["mega electro", "electro impacto"]);
@@ -54,6 +55,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
       </section>
       <nav className="advisor-section-nav" aria-label="Navegación de Mi Amarango">
         <a href="#advisor-tools">Resumen</a>
+        <a href="#advisor-month">Tu mes</a>
         <a href="#advisor-sale-draft">Nueva venta</a>
         <a href="#advisor-offers">Ofertas</a>
         <a href="#advisor-catalog">Catálogo</a>
@@ -63,6 +65,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <article><WalletCards /><span><small>CUOTAS</small><strong>Conexión segura pendiente</strong></span></article>
         <a className="advisor-quick-card advisor-quick-card--sale" href="#advisor-sale-draft"><ClipboardList /><span><small>NUEVA VENTA</small><strong>Preparar operación</strong></span></a>
       </section>
+      <AdvisorMonthDashboard />
       <AdvisorGrowthSummary />
       <AdvisorSaleDraftPanel products={products} />
       <div id="advisor-offers" className="advisor-offers-anchor"><OffersShowcase advisor /></div>
