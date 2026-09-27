@@ -23,6 +23,9 @@ const currentContracts = [
   "tests/v16-correct-visual-model.test.mjs",
   "tests/v16-product-data-truth-audit.test.mjs",
   "tests/v16-core-operational-contract.test.mjs",
+  "tests/v16-sale-payment-schedule.test.mjs",
+  "tests/v16-authorized-sale-quote-engine.test.mjs",
+  "tests/v16-authorized-sale-quote-route.test.mjs",
 ];
 
 function run(command, args) {
