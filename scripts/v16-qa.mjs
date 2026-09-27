@@ -8,6 +8,7 @@ const currentContracts = [
   "tests/v16-product-card-catalog-parity.test.mjs",
   "tests/v16-catalog-category-normalization-audit.test.mjs",
   "tests/v16-plan-protegido-calculator.test.mjs",
+  "tests/v16-advisor-commissions-monthly-bonus.test.mjs",
   "tests/v16-price-coherence-calculators.test.mjs",
   "tests/v16-crm-contract-integration.test.mjs",
   "tests/v16-growth-referrals-system.test.mjs",
