@@ -1,4 +1,5 @@
 import type { CommercePolicy } from "./calculator-engine";
+import { FINANCED_COMMISSION_TIERS } from "./advisor-compensation-policy";
 
 /**
  * Most recent AmarangoElectro internal pricing policy audited in the Legacy
@@ -29,7 +30,7 @@ export const AMARANGO_CURRENT_POLICY: CommercePolicy = Object.freeze({
     Object.freeze({ installments: 11, surchargePercent: 111, active: false }),
     Object.freeze({ installments: 12, surchargePercent: 117, active: false }),
   ]),
-  commission: Object.freeze({ cashPercent: 10, financedPercent: 15 }),
+  commission: Object.freeze({ cashPercent: 10, financedFixedTiers: FINANCED_COMMISSION_TIERS }),
   rounding: Object.freeze({ sale: 500, installment: 1_000, commission: 500 }),
 });
 
