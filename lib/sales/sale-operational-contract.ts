@@ -1,4 +1,5 @@
 import type { ActiveFinancingMode } from "@/lib/internal/finance/active-financing-mode-contract";
+import type { CommercialPaymentScheduleEntry } from "@/lib/integration/sale-snapshot";
 
 export type V16SalePaymentMode = "CASH" | "FINANCED";
 
@@ -23,6 +24,7 @@ export interface V16ConfirmedSaleRow {
   installments: number;
   installment_amount: number;
   financed_total: number;
+  payment_schedule: readonly CommercialPaymentScheduleEntry[];
   commission: number;
   commission_policy_version: string;
   pricing_policy_version: string;
