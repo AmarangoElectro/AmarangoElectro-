@@ -98,3 +98,11 @@ test("advisor close evaluates active append-only payment events as of the close 
   assert.match(sql, /r\.paid_at<=p_close_at/);
   assert.match(sql, /America\/Argentina\/Buenos_Aires/);
 });
+
+
+test("application role contract explicitly normalizes stored asesor and cliente roles", async () => {
+  const auth = await source("lib/internal/auth/user-access-contract.ts");
+  assert.match(auth, /V16StoredPlatformRole = "owner" \| "admin" \| "asesor" \| "cliente"/);
+  assert.match(auth, /role === "asesor"\) return "advisor"/);
+  assert.match(auth, /role === "cliente"\) return "customer"/);
+});
