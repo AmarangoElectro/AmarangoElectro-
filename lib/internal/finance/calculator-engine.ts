@@ -9,13 +9,21 @@ export interface InstallmentPlanPolicy {
   active: boolean;
 }
 
+export interface FinancedCommissionTierPolicy {
+  minCashPriceArs: number;
+  maxCashPriceArs: number | null;
+  commissionArs: number;
+}
+
 export interface CommercePolicy {
   currency: "ARS";
   pricingTiers: readonly PricingTier[];
   installmentPlans: readonly InstallmentPlanPolicy[];
   commission: {
     cashPercent: number;
-    financedPercent: number;
+    /** Legacy/custom policies may still use a percentage. V16 uses fixed tiers. */
+    financedPercent?: number;
+    financedFixedTiers?: readonly FinancedCommissionTierPolicy[];
   };
   rounding: {
     sale: number;
@@ -41,7 +49,8 @@ export interface InstallmentQuote {
 export interface CommissionQuote {
   basePrice: number;
   financed: boolean;
-  percent: number;
+  percent: number | null;
+  calculation: "percentage" | "fixed_tier";
   commission: number;
 }
 
@@ -96,7 +105,31 @@ export function validateCommercePolicy(policy: CommercePolicy): void {
   }
 
   nonNegativeFinite(policy.commission.cashPercent, "cashPercent");
-  nonNegativeFinite(policy.commission.financedPercent, "financedPercent");
+  const hasFinancedPercent = policy.commission.financedPercent !== undefined;
+  const hasFinancedTiers = Boolean(policy.commission.financedFixedTiers?.length);
+  if (hasFinancedPercent === hasFinancedTiers) {
+    throw new Error("Commission policy requires exactly one financed calculation model");
+  }
+  if (hasFinancedPercent) nonNegativeFinite(policy.commission.financedPercent ?? 0, "financedPercent");
+  if (hasFinancedTiers) {
+    let previousMax = -1;
+    let sawOpenEndedTier = false;
+    for (const tier of policy.commission.financedFixedTiers ?? []) {
+      if (sawOpenEndedTier) throw new Error("No financed commission tier may follow the open-ended tier");
+      nonNegativeFinite(tier.minCashPriceArs, "minCashPriceArs");
+      nonNegativeFinite(tier.commissionArs, "commissionArs");
+      if (tier.minCashPriceArs !== previousMax + 1) throw new Error("Financed commission tiers must be contiguous");
+      if (tier.maxCashPriceArs === null) {
+        sawOpenEndedTier = true;
+      } else {
+        if (!Number.isInteger(tier.maxCashPriceArs) || tier.maxCashPriceArs < tier.minCashPriceArs) {
+          throw new Error("Invalid financed commission tier range");
+        }
+        previousMax = tier.maxCashPriceArs;
+      }
+    }
+    if (!sawOpenEndedTier) throw new Error("Financed commission tiers require a final open-ended tier");
+  }
   positiveFinite(policy.rounding.sale, "sale rounding");
   positiveFinite(policy.rounding.installment, "installment rounding");
   positiveFinite(policy.rounding.commission, "commission rounding");
@@ -150,11 +183,27 @@ export function quoteAdvisorCommission(
 ): CommissionQuote {
   positiveFinite(basePrice, "basePrice");
   validateCommercePolicy(policy);
-  const percent = financed ? policy.commission.financedPercent : policy.commission.cashPercent;
+  if (financed && policy.commission.financedFixedTiers?.length) {
+    const wholePesos = Math.floor(basePrice);
+    const tier = policy.commission.financedFixedTiers.find((candidate) =>
+      wholePesos >= candidate.minCashPriceArs &&
+      (candidate.maxCashPriceArs === null || wholePesos <= candidate.maxCashPriceArs),
+    );
+    if (!tier) throw new Error("No financed commission tier matched the final cash price");
+    return {
+      basePrice,
+      financed,
+      percent: null,
+      calculation: "fixed_tier",
+      commission: tier.commissionArs,
+    };
+  }
+  const percent = financed ? policy.commission.financedPercent ?? 0 : policy.commission.cashPercent;
   return {
     basePrice,
     financed,
     percent,
+    calculation: "percentage",
     commission: roundTo(basePrice * percent / 100, policy.rounding.commission),
   };
 }
