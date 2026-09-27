@@ -36,6 +36,12 @@ function knownFailure(message: string) {
   if (message.includes("not_authorized") || message.includes("_not_authorized")) {
     return { http: 403, status: "unauthorized" } as const;
   }
+  if (message.includes("scope_denied") || message.includes("outside_advisor_scope")) {
+    return { http: 403, status: "unauthorized" } as const;
+  }
+  if (message.includes("idempotency_key_conflict")) {
+    return { http: 409, status: "error", message: "Idempotency key conflicts with another request" } as const;
+  }
   return null;
 }
 
@@ -85,7 +91,7 @@ export async function POST(request: Request) {
       upstreamMessage = body.message ?? body.code ?? "";
     } catch {}
     const failure = knownFailure(upstreamMessage);
-    if (failure) return json(failure.http, { status: failure.status });
+    if (failure) return json(failure.http, { status: failure.status, ...("message" in failure ? { message: failure.message } : {}) });
     if (upstream.status === 404) return json(503, { status: "not_connected" });
     return json(upstream.status >= 500 ? 502 : 400, { status: "error", message: "Operational RPC failed" });
   }

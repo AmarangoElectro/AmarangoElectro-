@@ -16,6 +16,8 @@ Project `zctaukyrhsmpjkcddcqq` was inspected through catalog metadata only. No D
 
 Payment and delivery write RPCs already derive `auth.uid()` and role/capabilities in PostgreSQL. Payment reversal additionally requires AAL2. Payment reversals append a reversal event and cash movement; they do not delete or rewrite the original event.
 
+The addendum audit also verified the live payment constraints and indexes: `idempotency_key` is unique when present, `reverses_payment_id` is unique when present, and the original payment is locked before reversal. `v16_register_customer_payment` accepts only `sale_id` and derives `client_id` from the locked sale, so a browser cannot submit Sale A with Client B. The live `v16_advisor_can_access_client` resolves `auth.uid()` through active `v16_user_access` and active `v16_advisor_client_portfolio`; `v16_assign_advisor_client` is the existing canonical assignment capability.
+
 ### Missing capabilities
 
 - no V16 client-create RPC;
@@ -31,6 +33,8 @@ Payment and delivery write RPCs already derive `auth.uid()` and role/capabilitie
 - `/api/v16/rpc` is same-origin, derives the current application user on the server, keeps `SUPABASE_SECRET_KEY` server-only, allowlists RPC names and sanitizes error responses.
 - Existing CRM, Collections, Payment History and Delivery adapters can use the same-origin bridge while preserving their direct-config fail-closed test seam.
 - Payment register/reverse contracts use the live audited signatures and mandatory idempotency keys.
+- The prepared bridge adds a transaction-scoped payload fingerprint guard around payment retries. It serializes concurrent reuse of a key, lets an identical retry converge on the existing live event, and rejects reuse of that key with a different payload.
+- Prepared client/sale writes use advisory transaction locks, full request comparison and canonical advisor portfolio checks. A client created by an advisor is assigned through the existing portfolio table; finding another advisor's duplicate never grants access or returns the client ID.
 - Client create, global financing mode and sale confirmation contracts are typed. The browser sale request contains an authorized quote ID, never advisor identity or authoritative totals.
 - `sale-snapshot.ts` now defines the immutable commercial snapshot required to freeze history.
 
@@ -44,6 +48,7 @@ Path: `supabase/migrations/20260927_v16_core_operational_prepared.sql`
 
 - `v16_client_operational_profiles`
 - `v16_client_create_requests`
+- `v16_operational_idempotency_guard`
 - `v16_financing_mode_history`
 - `v16_authorized_sale_quotes`
 - `v16_sale_snapshots`
@@ -68,7 +73,9 @@ Path: `supabase/migrations/20260927_v16_core_operational_prepared.sql`
 - Only the server bridge and quote issuer are granted to `service_role`.
 - The bridge resolves email to `auth.users`, requires an active `v16_user_access` row, injects the mapped `sub` and fixed trusted AAL, then calls a literal allowlist.
 - Sale snapshots, commission ledger and monthly closes reject update/delete.
+- Financing-mode history is append-only. A mode switch never updates a historical sale snapshot.
 - Advisor identity comes from `v16_current_advisor_id()`; the browser contract has no advisor ID field.
+- Returned operational DTO schemas omit cost, markup, profit, private supplier and investor fields.
 
 ### Impact
 
@@ -88,8 +95,13 @@ Additive schema objects plus inserts into legacy `clientes`/`ventas` only throug
 - Prove Owner/Admin, Advisor, Customer and unauthorized matrices for every RPC.
 - Prove AAL1 rejects reversal/mode change and AAL2 accepts only authorized actors.
 - Prove idempotent retries and conflicting-key rejection.
+- Prove two concurrent sale/payment requests with the same key create one canonical operation and both identical callers converge on it.
+- Prove the same idempotency key with any changed payload field is rejected.
 - Prove Client A/Sale A cannot observe or mutate Client B/Sale B.
+- Prove Advisor A cannot read or write Advisor B's active portfolio.
+- Prove the second reversal of one payment is rejected, while an identical retry of the first reversal key returns the existing reversal.
 - Prove quote mode race rejects confirmation and historical snapshots remain byte-for-byte unchanged after a mode switch.
+- Prove the frozen monthly bonus edges: `20.5 = 100000`, `21 = 107500`; cancelled operations contribute no equivalent units; commission and bonus remain separate.
 - Prove sale quote issuance recalculates from an authoritative server-side product/cost source for both `CLASSIC` and `PROTECTED`.
 - Run cash and financed end-to-end cases through payment, delivery, CRM and commission ledger.
 
