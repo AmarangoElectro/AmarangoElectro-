@@ -129,6 +129,18 @@ create table if not exists public.v16_advisor_monthly_closes (
   unique (advisor_id, period_month)
 );
 
+create table if not exists public.v16_advisor_monthly_close_operations (
+  close_id bigint not null references public.v16_advisor_monthly_closes(close_id),
+  sale_id text not null references public.v16_sale_snapshots(sale_id),
+  advisor_id uuid not null,
+  validation text not null check (validation in ('ACCEPTED','EXCLUDED')),
+  validation_reason text not null,
+  counts_for_bonus boolean not null,
+  sale_equivalent numeric not null check (sale_equivalent in (0,0.5,1)),
+  captured_at timestamptz not null,
+  primary key (close_id,sale_id)
+);
+
 alter table public.v16_client_operational_profiles enable row level security;
 alter table public.v16_client_create_requests enable row level security;
 alter table public.v16_financing_mode_history enable row level security;
@@ -136,11 +148,12 @@ alter table public.v16_authorized_sale_quotes enable row level security;
 alter table public.v16_sale_snapshots enable row level security;
 alter table public.v16_advisor_commission_ledger enable row level security;
 alter table public.v16_advisor_monthly_closes enable row level security;
+alter table public.v16_advisor_monthly_close_operations enable row level security;
 
 revoke all on public.v16_client_operational_profiles, public.v16_client_create_requests,
   public.v16_financing_mode_history, public.v16_authorized_sale_quotes,
   public.v16_sale_snapshots, public.v16_advisor_commission_ledger,
-  public.v16_advisor_monthly_closes from anon, authenticated;
+  public.v16_advisor_monthly_closes, public.v16_advisor_monthly_close_operations from anon, authenticated;
 
 create or replace function public.v16_core_reject_mutation()
 returns trigger language plpgsql set search_path = '' as $$
@@ -154,6 +167,9 @@ create trigger v16_commission_ledger_immutable before update or delete on public
 for each row execute function public.v16_core_reject_mutation();
 drop trigger if exists v16_monthly_closes_immutable on public.v16_advisor_monthly_closes;
 create trigger v16_monthly_closes_immutable before update or delete on public.v16_advisor_monthly_closes
+for each row execute function public.v16_core_reject_mutation();
+drop trigger if exists v16_monthly_close_operations_immutable on public.v16_advisor_monthly_close_operations;
+create trigger v16_monthly_close_operations_immutable before update or delete on public.v16_advisor_monthly_close_operations
 for each row execute function public.v16_core_reject_mutation();
 
 create or replace function public.v16_financed_commission_for_cash_price(p_cash_price numeric)
@@ -382,30 +398,184 @@ begin
   return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.payment_schedule,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_sale;
 end $$;
 
+create or replace function public.v16_advisor_operation_close_fact(p_sale_id text,p_close_at timestamptz)
+returns table(validation text,validation_reason text,counts_for_bonus boolean)
+language plpgsql stable security definer set search_path = '' as $
+declare
+  v_snapshot public.v16_sale_snapshots%rowtype;
+  v_sale public.ventas%rowtype;
+  v_delivery public.v16_deliveries%rowtype;
+  v_entry jsonb;
+  v_sequence integer;
+  v_due date;
+  v_grace date;
+  v_close_date date := (p_close_at at time zone 'America/Argentina/Buenos_Aires')::date;
+  v_paid boolean;
+  v_pending boolean := false;
+  v_overdue boolean := false;
+begin
+  if p_close_at is null then
+    return query select 'PENDING'::text,'Fecha de cierre no disponible'::text,false;
+    return;
+  end if;
+
+  select * into v_snapshot from public.v16_sale_snapshots s where s.sale_id=p_sale_id;
+  select * into v_sale from public.ventas v where v.id=p_sale_id;
+  if not found or v_snapshot.sale_id is null then
+    return query select 'PENDING'::text,'Snapshot de venta incompleto'::text,false;
+    return;
+  end if;
+
+  if coalesce(v_sale.archivada,false) or upper(coalesce(v_sale.estado,'')) in ('CANCELADA','ANULADA','RECHAZADA') then
+    return query select 'EXCLUDED'::text,'Operación cancelada'::text,false;
+    return;
+  end if;
+
+  select * into v_delivery from public.v16_deliveries d where d.sale_id=p_sale_id limit 1;
+  if not found then
+    return query select 'PENDING'::text,'Entrega pendiente de validación'::text,false;
+    return;
+  end if;
+  if v_delivery.status='CANCELADA' then
+    return query select 'EXCLUDED'::text,'Entrega cancelada'::text,false;
+    return;
+  end if;
+  if v_delivery.status<>'ENTREGADA' or v_delivery.delivered_at is null or v_delivery.delivered_at>p_close_at then
+    return query select 'PENDING'::text,'Entrega pendiente'::text,false;
+    return;
+  end if;
+
+  if jsonb_typeof(v_snapshot.payment_schedule)<>'array'
+     or jsonb_array_length(v_snapshot.payment_schedule)<>v_snapshot.installments then
+    return query select 'PENDING'::text,'Cronograma de pagos incompleto'::text,false;
+    return;
+  end if;
+
+  for v_entry in select value from jsonb_array_elements(v_snapshot.payment_schedule)
+  loop
+    begin
+      v_sequence := (v_entry->>'sequence')::integer;
+      v_due := (v_entry->>'dueDate')::date;
+      v_grace := (v_entry->>'graceThrough')::date;
+    exception when others then
+      return query select 'PENDING'::text,'Cronograma de pagos inválido'::text,false;
+      return;
+    end;
+
+    if v_due<=v_close_date then
+      select exists(
+        select 1
+        from public.v16_payment_events p
+        where p.sale_id=p_sale_id
+          and p.installment_number=v_sequence
+          and p.payment_kind='PAYMENT'
+          and p.paid_at<=p_close_at
+          and not exists(
+            select 1 from public.v16_payment_events r
+            where r.reverses_payment_id=p.payment_id
+              and r.paid_at<=p_close_at
+          )
+      ) into v_paid;
+
+      if not v_paid then
+        if v_snapshot.payment_mode='FINANCED' and v_grace<v_close_date then
+          v_overdue:=true;
+        else
+          v_pending:=true;
+        end if;
+      end if;
+    end if;
+  end loop;
+
+  if v_overdue then
+    return query select 'EXCLUDED'::text,'Financiación en mora al cierre'::text,false;
+    return;
+  end if;
+  if v_pending then
+    return query select 'PENDING'::text,'Cobranza pendiente de validación'::text,false;
+    return;
+  end if;
+
+  return query select 'ACCEPTED'::text,'Venta, entrega y cobranza validadas'::text,true;
+end $;
+
 create or replace function public.v16_close_advisor_month(p_advisor_id uuid,p_period_month date,p_policy_version text)
 returns table(close_id bigint,advisor_id uuid,period_month date,equivalent_sales numeric,base_bonus numeric,additional_bonus numeric,total_bonus numeric,policy_version text,closed_at timestamptz)
 language plpgsql security definer set search_path = '' as $$
-declare v_user uuid:=auth.uid(); v_role text:=public.v16_current_role(); v_existing public.v16_advisor_monthly_closes%rowtype; v_equiv numeric; v_base numeric; v_extra numeric; v_close public.v16_advisor_monthly_closes%rowtype;
+declare
+  v_user uuid:=auth.uid();
+  v_role text:=public.v16_current_role();
+  v_existing public.v16_advisor_monthly_closes%rowtype;
+  v_equiv numeric;
+  v_base numeric;
+  v_extra numeric;
+  v_close public.v16_advisor_monthly_closes%rowtype;
+  v_close_at timestamptz:=clock_timestamp();
+  v_pending_count bigint;
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
   if v_role not in ('owner','admin') or not public.v16_has_capability('admin.access') then raise exception 'commission_close_not_authorized'; end if;
   if coalesce(auth.jwt()->>'aal','')<>'aal2' then raise exception 'step_up_required'; end if;
-  if p_advisor_id is null or p_period_month<>date_trunc('month',p_period_month)::date or p_period_month>=date_trunc('month',current_date)::date then raise exception 'closed_month_required'; end if;
-  select * into v_existing from public.v16_advisor_monthly_closes c where c.advisor_id=p_advisor_id and c.period_month=p_period_month;
-  if found then return query select v_existing.close_id,v_existing.advisor_id,v_existing.period_month,v_existing.equivalent_sales,v_existing.base_bonus,v_existing.additional_bonus,v_existing.total_bonus,v_existing.policy_version,v_existing.closed_at; return; end if;
-  select coalesce(sum(l.sale_equivalent),0) into v_equiv
+  if p_advisor_id is null
+     or p_period_month<>date_trunc('month',p_period_month)::date
+     or p_period_month>=date_trunc('month',(now() at time zone 'America/Argentina/Buenos_Aires')::date)::date then
+    raise exception 'closed_month_required';
+  end if;
+
+  select * into v_existing
+  from public.v16_advisor_monthly_closes c
+  where c.advisor_id=p_advisor_id and c.period_month=p_period_month;
+  if found then
+    return query select v_existing.close_id,v_existing.advisor_id,v_existing.period_month,v_existing.equivalent_sales,
+      v_existing.base_bonus,v_existing.additional_bonus,v_existing.total_bonus,v_existing.policy_version,v_existing.closed_at;
+    return;
+  end if;
+
+  select count(*) into v_pending_count
   from public.v16_advisor_commission_ledger l
   join public.v16_sale_snapshots s on s.sale_id=l.sale_id
-  join public.ventas v on v.id=s.sale_id
-  where l.advisor_id=p_advisor_id and l.status='ACCRUED'
-    and s.sold_at>=p_period_month and s.sold_at<(p_period_month+interval '1 month')
-    and not coalesce(v.archivada,false)
-    and upper(coalesce(v.estado,'CONFIRMADA')) not in ('CANCELADA','ANULADA','RECHAZADA');
+  cross join lateral public.v16_advisor_operation_close_fact(s.sale_id,v_close_at) f
+  where l.advisor_id=p_advisor_id
+    and l.status='ACCRUED'
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date>=p_period_month
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date<(p_period_month+interval '1 month')::date
+    and f.validation='PENDING';
+
+  if v_pending_count>0 then raise exception 'advisor_month_has_pending_operations'; end if;
+
+  select coalesce(sum(case when f.validation='ACCEPTED' and f.counts_for_bonus then l.sale_equivalent else 0 end),0)
+  into v_equiv
+  from public.v16_advisor_commission_ledger l
+  join public.v16_sale_snapshots s on s.sale_id=l.sale_id
+  cross join lateral public.v16_advisor_operation_close_fact(s.sale_id,v_close_at) f
+  where l.advisor_id=p_advisor_id
+    and l.status='ACCRUED'
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date>=p_period_month
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date<(p_period_month+interval '1 month')::date;
+
   v_base:=case when v_equiv>=20 then 100000 when v_equiv>=15 then 65000 when v_equiv>=10 then 35000 when v_equiv>=5 then 10000 else 0 end;
   v_extra:=case when v_equiv>=21 then floor(v_equiv-20)*7500 else 0 end;
-  insert into public.v16_advisor_monthly_closes(advisor_id,period_month,equivalent_sales,base_bonus,additional_bonus,total_bonus,policy_version,closed_by)
-  values(p_advisor_id,p_period_month,v_equiv,v_base,v_extra,v_base+v_extra,p_policy_version,v_user) returning * into v_close;
-  return query select v_close.close_id,v_close.advisor_id,v_close.period_month,v_close.equivalent_sales,v_close.base_bonus,v_close.additional_bonus,v_close.total_bonus,v_close.policy_version,v_close.closed_at;
+
+  insert into public.v16_advisor_monthly_closes(advisor_id,period_month,equivalent_sales,base_bonus,additional_bonus,total_bonus,policy_version,closed_by,closed_at)
+  values(p_advisor_id,p_period_month,v_equiv,v_base,v_extra,v_base+v_extra,p_policy_version,v_user,v_close_at)
+  returning * into v_close;
+
+  insert into public.v16_advisor_monthly_close_operations(
+    close_id,sale_id,advisor_id,validation,validation_reason,counts_for_bonus,sale_equivalent,captured_at
+  )
+  select v_close.close_id,s.sale_id,l.advisor_id,f.validation,f.validation_reason,f.counts_for_bonus,
+    case when f.counts_for_bonus then l.sale_equivalent else 0 end,v_close_at
+  from public.v16_advisor_commission_ledger l
+  join public.v16_sale_snapshots s on s.sale_id=l.sale_id
+  cross join lateral public.v16_advisor_operation_close_fact(s.sale_id,v_close_at) f
+  where l.advisor_id=p_advisor_id
+    and l.status='ACCRUED'
+    and f.validation in ('ACCEPTED','EXCLUDED')
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date>=p_period_month
+    and (s.sold_at at time zone 'America/Argentina/Buenos_Aires')::date<(p_period_month+interval '1 month')::date;
+
+  return query select v_close.close_id,v_close.advisor_id,v_close.period_month,v_close.equivalent_sales,
+    v_close.base_bonus,v_close.additional_bonus,v_close.total_bonus,v_close.policy_version,v_close.closed_at;
 end $$;
 
 create or replace function public.v16_chatgpt_operational_bridge(p_email text,p_rpc text,p_args jsonb default '{}'::jsonb,p_aal text default 'aal1')
@@ -451,6 +621,7 @@ revoke execute on function public.v16_build_sale_payment_schedule(jsonb,timestam
 revoke execute on function public.v16_sync_sale_next_payment_amount() from public,anon,authenticated;
 revoke execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,uuid,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_confirm_sale(text,uuid,text,text) from public,anon,authenticated;
+revoke execute on function public.v16_advisor_operation_close_fact(text,timestamptz) from public,anon,authenticated;
 revoke execute on function public.v16_close_advisor_month(uuid,date,text) from public,anon,authenticated;
 revoke execute on function public.v16_chatgpt_operational_bridge(text,text,jsonb,text) from public,anon,authenticated;
 grant execute on function public.v16_issue_authorized_sale_quote(text,text,text,text,text,numeric,numeric,integer,numeric,numeric,jsonb,text,text,jsonb,uuid,timestamptz) to service_role;
