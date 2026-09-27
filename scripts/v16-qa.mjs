@@ -22,6 +22,7 @@ const currentContracts = [
   "tests/v16-final-banner-brand-integration.test.mjs",
   "tests/v16-correct-visual-model.test.mjs",
   "tests/v16-product-data-truth-audit.test.mjs",
+  "tests/v16-core-operational-contract.test.mjs",
 ];
 
 function run(command, args) {
