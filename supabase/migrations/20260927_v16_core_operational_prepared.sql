@@ -253,7 +253,7 @@ begin
 end $$;
 
 create or replace function public.v16_build_sale_payment_schedule(p_payment_amounts jsonb,p_sold_at timestamptz)
-returns jsonb language plpgsql immutable set search_path = '' as $
+returns jsonb language plpgsql immutable set search_path = '' as $$
 declare
   v_base_date date := (p_sold_at at time zone 'America/Argentina/Buenos_Aires')::date;
   v_base_month date := date_trunc('month',v_base_date)::date;
@@ -287,10 +287,10 @@ begin
     v_index := v_index+1;
   end loop;
   return v_result;
-end $;
+end $$;
 
 create or replace function public.v16_sync_sale_next_payment_amount()
-returns trigger language plpgsql security definer set search_path = '' as $
+returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   v_schedule jsonb;
   v_amount numeric;
@@ -318,7 +318,7 @@ begin
 
   update public.ventas set "montoCuota"=v_amount where id=new.sale_id;
   return new;
-end $;
+end $$;
 
 drop trigger if exists v16_payment_event_sync_sale_next_amount on public.v16_payment_events;
 create trigger v16_payment_event_sync_sale_next_amount
@@ -329,7 +329,7 @@ create or replace function public.v16_issue_authorized_sale_quote(
   p_canonical_product_id text,p_product_name text,p_product_model text,p_payment_mode text,p_financing_mode text,
   p_cash_price numeric,p_initial_payment numeric,p_installments integer,p_installment_amount numeric,p_financed_total numeric,
   p_payment_amounts jsonb,p_commission_policy_version text,p_pricing_policy_version text,p_commercial_snapshot jsonb,p_issued_for uuid,p_expires_at timestamptz
-) returns uuid language plpgsql security definer set search_path = '' as $
+) returns uuid language plpgsql security definer set search_path = '' as $$
 declare v_quote uuid; v_commission numeric; v_payment_total numeric; v_first_payment numeric;
 begin
   if auth.role()<>'service_role' then raise exception 'service_role_required'; end if;
@@ -352,11 +352,11 @@ begin
   insert into public.v16_authorized_sale_quotes(canonical_product_id,product_name,product_model,payment_mode,financing_mode,cash_price,initial_payment,installments,installment_amount,financed_total,payment_amounts,commission,commission_policy_version,pricing_policy_version,commercial_snapshot,issued_by,expires_at)
   values(p_canonical_product_id,p_product_name,p_product_model,upper(p_payment_mode),upper(p_financing_mode),p_cash_price,p_initial_payment,p_installments,p_installment_amount,p_financed_total,p_payment_amounts,v_commission,p_commission_policy_version,p_pricing_policy_version,p_commercial_snapshot,p_issued_for,p_expires_at)
   returning quote_id into v_quote; return v_quote;
-end $;
+end $$;
 
 create or replace function public.v16_confirm_sale(p_client_id text,p_authorized_quote_id uuid,p_source text,p_idempotency_key text)
 returns table(sale_id text,client_id text,canonical_product_id text,product_name text,product_model text,payment_mode text,financing_mode text,cash_price numeric,initial_payment numeric,installments integer,installment_amount numeric,financed_total numeric,payment_schedule jsonb,commission numeric,commission_policy_version text,pricing_policy_version text,sold_at timestamptz)
-language plpgsql security definer set search_path = '' as $
+language plpgsql security definer set search_path = '' as $$
 declare v_user uuid:=auth.uid(); v_role text:=public.v16_current_role(); v_advisor uuid:=public.v16_current_advisor_id(); v_quote public.v16_authorized_sale_quotes%rowtype; v_mode text; v_sale text; v_sold timestamptz:=clock_timestamp(); v_payment_schedule jsonb;
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
@@ -400,7 +400,7 @@ end $$;
 
 create or replace function public.v16_advisor_operation_close_fact(p_sale_id text,p_close_at timestamptz)
 returns table(validation text,validation_reason text,counts_for_bonus boolean)
-language plpgsql stable security definer set search_path = '' as $
+language plpgsql stable security definer set search_path = '' as $$
 declare
   v_snapshot public.v16_sale_snapshots%rowtype;
   v_sale public.ventas%rowtype;
@@ -497,7 +497,7 @@ begin
   end if;
 
   return query select 'ACCEPTED'::text,'Venta, entrega y cobranza validadas'::text,true;
-end $;
+end $$;
 
 create or replace function public.v16_close_advisor_month(p_advisor_id uuid,p_period_month date,p_policy_version text)
 returns table(close_id bigint,advisor_id uuid,period_month date,equivalent_sales numeric,base_bonus numeric,additional_bonus numeric,total_bonus numeric,policy_version text,closed_at timestamptz)
