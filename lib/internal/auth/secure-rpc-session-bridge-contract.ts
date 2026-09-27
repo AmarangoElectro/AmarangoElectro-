@@ -1,10 +1,4 @@
-/**
- * V16 secure RPC session bridge — SOURCE-ONLY PREFLIGHT CONTRACT.
- *
- * This file does not connect Supabase and contains no credentials.
- * Browser code must never receive a privileged database credential as a
- * workaround for the missing session bridge.
- */
+/** V16 secure RPC session bridge — browser contract for the same-origin route. */
 export type V16SecureRpcName =
   "v16_advisor_portfolio_list" |
   "v16_advisor_portfolio_summary" |
@@ -14,15 +8,19 @@ export type V16SecureRpcName =
   "v16_collections_list" |
   "v16_collections_summary" |
   "v16_create_advisor_profile" |
+  "v16_create_client" |
   "v16_create_delivery" |
+  "v16_confirm_sale" |
   "v16_crm_client_360" |
   "v16_crm_client_sales" |
   "v16_crm_list_clients" |
   "v16_deliveries_list" |
   "v16_delivery_detail" |
   "v16_end_advisor_client_assignment" |
+  "v16_get_active_financing_mode" |
   "v16_payment_history_list" |
   "v16_payment_history_summary" |
+  "v16_register_customer_payment" |
   "v16_post_cash_movement" |
   "v16_provider_inbox_append_message" |
   "v16_provider_inbox_create_thread" |
@@ -36,6 +34,8 @@ export type V16SecureRpcName =
   "v16_reports_sales_by_responsible" |
   "v16_reports_sales_summary" |
   "v16_reverse_cash_movement" |
+  "v16_reverse_customer_payment" |
+  "v16_set_active_financing_mode" |
   "v16_transition_delivery";
 
 export const V16_SECURE_RPC_ALLOWLIST = Object.freeze([
@@ -47,15 +47,19 @@ export const V16_SECURE_RPC_ALLOWLIST = Object.freeze([
   "v16_collections_list",
   "v16_collections_summary",
   "v16_create_advisor_profile",
+  "v16_create_client",
   "v16_create_delivery",
+  "v16_confirm_sale",
   "v16_crm_client_360",
   "v16_crm_client_sales",
   "v16_crm_list_clients",
   "v16_deliveries_list",
   "v16_delivery_detail",
   "v16_end_advisor_client_assignment",
+  "v16_get_active_financing_mode",
   "v16_payment_history_list",
   "v16_payment_history_summary",
+  "v16_register_customer_payment",
   "v16_post_cash_movement",
   "v16_provider_inbox_append_message",
   "v16_provider_inbox_create_thread",
@@ -69,6 +73,8 @@ export const V16_SECURE_RPC_ALLOWLIST = Object.freeze([
   "v16_reports_sales_by_responsible",
   "v16_reports_sales_summary",
   "v16_reverse_cash_movement",
+  "v16_reverse_customer_payment",
+  "v16_set_active_financing_mode",
   "v16_transition_delivery",
 ] as const);
 
@@ -90,6 +96,39 @@ export interface V16SecureRpcBridge {
 export const NOT_CONNECTED_SECURE_RPC_BRIDGE: V16SecureRpcBridge = {
   async call<T>(): Promise<V16RpcBridgeResult<T>> {
     return { status: "not_connected" };
+  },
+};
+
+/**
+ * The only browser transport. It sends no Supabase key or user/advisor id.
+ * The server derives identity from the authenticated application request.
+ */
+export const SAME_ORIGIN_SECURE_RPC_BRIDGE: V16SecureRpcBridge = {
+  async call<T>(rpc: V16SecureRpcName, args: Readonly<Record<string, unknown>>): Promise<V16RpcBridgeResult<T>> {
+    let response: Response;
+    try {
+      response = await fetch("/api/v16/rpc", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ rpc, args }),
+        cache: "no-store",
+      });
+    } catch {
+      return { status: "not_connected" };
+    }
+
+    let payload: unknown;
+    try {
+      payload = await response.json();
+    } catch {
+      return { status: "error", message: "Secure RPC bridge returned a non-JSON response" };
+    }
+
+    if (!payload || typeof payload !== "object" || !("status" in payload)) {
+      return { status: "error", message: "Secure RPC bridge returned an invalid response" };
+    }
+    return payload as V16RpcBridgeResult<T>;
   },
 };
 

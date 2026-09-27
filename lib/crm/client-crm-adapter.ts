@@ -1,5 +1,10 @@
 import { z } from "zod";
 import {
+  NOT_CONNECTED_SECURE_RPC_BRIDGE,
+  SAME_ORIGIN_SECURE_RPC_BRIDGE,
+  type V16SecureRpcBridge,
+} from "@/lib/internal/auth/secure-rpc-session-bridge-contract";
+import {
   V16_CRM_LIST_CLIENTS_DEFAULTS,
   type V16CrmClient360Row,
   type V16CrmClientListRow,
@@ -132,30 +137,41 @@ async function callRpc<T>(
 }
 
 export class CrmReadOnlyAdapter {
-  constructor(private readonly config: CrmAccessConfig | null) {}
+  constructor(
+    private readonly config: CrmAccessConfig | null,
+    private readonly bridge: V16SecureRpcBridge = NOT_CONNECTED_SECURE_RPC_BRIDGE,
+  ) {}
+
+  private async secureRows<T>(name: "v16_crm_list_clients" | "v16_crm_client_360" | "v16_crm_client_sales", args: Record<string, unknown>, schema: z.ZodType<T>): Promise<CrmReadResult<T[]>> {
+    const result = await this.bridge.call<unknown>(name, args);
+    if (result.status === "unauthenticated" || result.status === "step_up_required") return { status: "unauthorized" };
+    if (result.status !== "ok") return result;
+    const parsed = z.array(schema).safeParse(result.data);
+    return parsed.success ? { status: "ok", data: parsed.data } : { status: "error", message: `RPC ${name} response did not match the frozen contract` };
+  }
 
   async listClients(params: V16CrmListClientsParams = {}): Promise<CrmReadResult<V16CrmClientListRow[]>> {
-    if (!this.config) return { status: "not_connected" };
-    return callRpc(this.config, "v16_crm_list_clients", {
+    const args = {
       search_text: params.search_text ?? V16_CRM_LIST_CLIENTS_DEFAULTS.search_text,
       row_limit: params.row_limit ?? V16_CRM_LIST_CLIENTS_DEFAULTS.row_limit,
       row_offset: params.row_offset ?? V16_CRM_LIST_CLIENTS_DEFAULTS.row_offset,
-    }, clientListRowSchema);
+    };
+    return this.config ? callRpc(this.config, "v16_crm_list_clients", args, clientListRowSchema) : this.secureRows("v16_crm_list_clients", args, clientListRowSchema);
   }
 
   async getClient360(clientId: string): Promise<CrmReadResult<V16CrmClient360Row | null>> {
-    if (!this.config) return { status: "not_connected" };
-    const result = await callRpc(this.config, "v16_crm_client_360", { p_client_id: clientId }, client360RowSchema);
+    const args = { p_client_id: clientId };
+    const result = this.config ? await callRpc(this.config, "v16_crm_client_360", args, client360RowSchema) : await this.secureRows("v16_crm_client_360", args, client360RowSchema);
     if (result.status !== "ok") return result;
     return { status: "ok", data: result.data[0] ?? null };
   }
 
   async getClientSales(clientId: string): Promise<CrmReadResult<V16CrmClientSaleRow[]>> {
-    if (!this.config) return { status: "not_connected" };
-    return callRpc(this.config, "v16_crm_client_sales", { p_client_id: clientId }, clientSaleRowSchema);
+    const args = { p_client_id: clientId };
+    return this.config ? callRpc(this.config, "v16_crm_client_sales", args, clientSaleRowSchema) : this.secureRows("v16_crm_client_sales", args, clientSaleRowSchema);
   }
 }
 
 export function createCrmReadOnlyAdapter(): CrmReadOnlyAdapter {
-  return new CrmReadOnlyAdapter(getCrmAccessConfig());
+  return new CrmReadOnlyAdapter(getCrmAccessConfig(), SAME_ORIGIN_SECURE_RPC_BRIDGE);
 }

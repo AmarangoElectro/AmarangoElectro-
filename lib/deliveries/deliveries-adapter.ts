@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getCrmAccessConfig, type CrmAccessConfig } from "@/lib/crm/client-crm-adapter";
+import { NOT_CONNECTED_SECURE_RPC_BRIDGE, SAME_ORIGIN_SECURE_RPC_BRIDGE, type V16SecureRpcBridge } from "@/lib/internal/auth/secure-rpc-session-bridge-contract";
 import {
   type V16DeliveriesListParams,
   type V16DeliveryCreateParams,
@@ -132,25 +133,33 @@ async function callRpc<T>(
 }
 
 export class DeliveriesAdapter {
-  constructor(private readonly config: CrmAccessConfig | null) {}
+  constructor(private readonly config: CrmAccessConfig | null, private readonly bridge: V16SecureRpcBridge = NOT_CONNECTED_SECURE_RPC_BRIDGE) {}
+
+  private async secureRows<T>(name: RpcName, args: Record<string, unknown>, schema: z.ZodType<T>): Promise<DeliveriesReadResult<T[]>> {
+    const result = await this.bridge.call<unknown>(name, args);
+    if (result.status === "unauthenticated") return { status: "unauthorized" };
+    if (result.status !== "ok") return result.status === "error" ? { ...result, code: null } : result;
+    const parsed = z.array(schema).safeParse(result.data);
+    return parsed.success ? { status: "ok", data: parsed.data } : { status: "error", code: null, message: `RPC ${name} response did not match the frozen contract` };
+  }
 
   /** Read. `v16_deliveries_list` args are NOT `p_`-prefixed, per the frozen contract. */
   async listDeliveries(params: V16DeliveriesListParams = {}): Promise<DeliveriesReadResult<V16DeliveryRow[]>> {
-    if (!this.config) return { status: "not_connected" };
-    return callRpc(this.config, "v16_deliveries_list", {
+    const args = {
       status_filter: params.statusFilter ?? null,
       search_text: params.searchText ?? null,
       row_limit: params.rowLimit ?? 100,
       row_offset: params.rowOffset ?? 0,
-    }, deliveryRowSchema);
+    };
+    return this.config ? callRpc(this.config, "v16_deliveries_list", args, deliveryRowSchema) : this.secureRows("v16_deliveries_list", args, deliveryRowSchema);
   }
 
   /** Read. `v16_delivery_detail` args ARE `p_`-prefixed, per the frozen contract. */
   async getDetail(params: V16DeliveryDetailParams): Promise<DeliveriesReadResult<V16DeliveryRow | null>> {
-    if (!this.config) return { status: "not_connected" };
-    const result = await callRpc(this.config, "v16_delivery_detail", {
+    const args = {
       p_delivery_id: params.deliveryId,
-    }, deliveryRowSchema);
+    };
+    const result = this.config ? await callRpc(this.config, "v16_delivery_detail", args, deliveryRowSchema) : await this.secureRows("v16_delivery_detail", args, deliveryRowSchema);
     if (result.status !== "ok") return result;
     return { status: "ok", data: result.data[0] ?? null };
   }
@@ -161,13 +170,13 @@ export class DeliveriesAdapter {
    * Returns the server's literal parsed response on success; never faked.
    */
   async createDelivery(params: V16DeliveryCreateParams): Promise<DeliveriesReadResult<V16DeliveryCreateResultRow | null>> {
-    if (!this.config) return { status: "not_connected" };
-    const result = await callRpc(this.config, "v16_create_delivery", {
+    const args = {
       p_sale_id: params.saleId,
       p_scheduled_at: params.scheduledAt ?? null,
       p_address_snapshot: params.addressSnapshot ?? null,
       p_notes: params.notes ?? null,
-    }, createResultRowSchema);
+    };
+    const result = this.config ? await callRpc(this.config, "v16_create_delivery", args, createResultRowSchema) : await this.secureRows("v16_create_delivery", args, createResultRowSchema);
     if (result.status !== "ok") return result;
     return { status: "ok", data: result.data[0] ?? null };
   }
@@ -180,8 +189,7 @@ export class DeliveriesAdapter {
    * response on success; never faked.
    */
   async transitionDelivery(params: V16DeliveryTransitionParams): Promise<DeliveriesReadResult<V16DeliveryTransitionResultRow | null>> {
-    if (!this.config) return { status: "not_connected" };
-    const result = await callRpc(this.config, "v16_transition_delivery", {
+    const args = {
       p_delivery_id: params.deliveryId,
       p_target_status: params.targetStatus,
       p_expected_current_status: params.expectedCurrentStatus ?? null,
@@ -189,12 +197,13 @@ export class DeliveriesAdapter {
       p_address_snapshot: params.addressSnapshot ?? null,
       p_note: params.note ?? null,
       p_transitioned_at: params.transitionedAt ?? null,
-    }, transitionResultRowSchema);
+    };
+    const result = this.config ? await callRpc(this.config, "v16_transition_delivery", args, transitionResultRowSchema) : await this.secureRows("v16_transition_delivery", args, transitionResultRowSchema);
     if (result.status !== "ok") return result;
     return { status: "ok", data: result.data[0] ?? null };
   }
 }
 
 export function createDeliveriesAdapter(): DeliveriesAdapter {
-  return new DeliveriesAdapter(getCrmAccessConfig());
+  return new DeliveriesAdapter(getCrmAccessConfig(), SAME_ORIGIN_SECURE_RPC_BRIDGE);
 }

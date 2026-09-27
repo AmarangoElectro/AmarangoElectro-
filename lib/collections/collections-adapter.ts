@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getCrmAccessConfig, type CrmAccessConfig } from "@/lib/crm/client-crm-adapter";
+import { NOT_CONNECTED_SECURE_RPC_BRIDGE, SAME_ORIGIN_SECURE_RPC_BRIDGE, type V16SecureRpcBridge } from "@/lib/internal/auth/secure-rpc-session-bridge-contract";
 import {
   V16_COLLECTIONS_LIST_DEFAULTS,
   type V16CollectionsListParams,
@@ -96,27 +97,34 @@ async function callRpc<T>(
 }
 
 export class CollectionsReadOnlyAdapter {
-  constructor(private readonly config: CrmAccessConfig | null) {}
+  constructor(private readonly config: CrmAccessConfig | null, private readonly bridge: V16SecureRpcBridge = NOT_CONNECTED_SECURE_RPC_BRIDGE) {}
+
+  private async secureRows<T>(name: "v16_collections_list" | "v16_collections_summary", args: Record<string, unknown>, schema: z.ZodType<T>): Promise<CollectionsReadResult<T[]>> {
+    const result = await this.bridge.call<unknown>(name, args);
+    if (result.status === "unauthenticated" || result.status === "step_up_required") return { status: "unauthorized" };
+    if (result.status !== "ok") return result;
+    const parsed = z.array(schema).safeParse(result.data);
+    return parsed.success ? { status: "ok", data: parsed.data } : { status: "error", message: `RPC ${name} response did not match the frozen contract` };
+  }
 
   async listCollections(params: V16CollectionsListParams = {}): Promise<CollectionsReadResult<V16CollectionsListRow[]>> {
-    if (!this.config) return { status: "not_connected" };
-    return callRpc(this.config, "v16_collections_list", {
+    const args = {
       search_text: params.search_text ?? V16_COLLECTIONS_LIST_DEFAULTS.search_text,
       status_filter: params.status_filter ?? V16_COLLECTIONS_LIST_DEFAULTS.status_filter,
       include_complete: params.include_complete ?? V16_COLLECTIONS_LIST_DEFAULTS.include_complete,
       row_limit: params.row_limit ?? V16_COLLECTIONS_LIST_DEFAULTS.row_limit,
       row_offset: params.row_offset ?? V16_COLLECTIONS_LIST_DEFAULTS.row_offset,
-    }, collectionsListRowSchema);
+    };
+    return this.config ? callRpc(this.config, "v16_collections_list", args, collectionsListRowSchema) : this.secureRows("v16_collections_list", args, collectionsListRowSchema);
   }
 
   async getSummary(): Promise<CollectionsReadResult<V16CollectionsSummaryRow | null>> {
-    if (!this.config) return { status: "not_connected" };
-    const result = await callRpc(this.config, "v16_collections_summary", {}, collectionsSummaryRowSchema);
+    const result = this.config ? await callRpc(this.config, "v16_collections_summary", {}, collectionsSummaryRowSchema) : await this.secureRows("v16_collections_summary", {}, collectionsSummaryRowSchema);
     if (result.status !== "ok") return result;
     return { status: "ok", data: result.data[0] ?? null };
   }
 }
 
 export function createCollectionsReadOnlyAdapter(): CollectionsReadOnlyAdapter {
-  return new CollectionsReadOnlyAdapter(getCrmAccessConfig());
+  return new CollectionsReadOnlyAdapter(getCrmAccessConfig(), SAME_ORIGIN_SECURE_RPC_BRIDGE);
 }

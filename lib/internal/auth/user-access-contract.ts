@@ -1,5 +1,13 @@
 export type V16PlatformRole = "owner" | "admin" | "advisor" | "customer";
-export type V16PlatformCapability = "admin.access" | "advisors.access" | "crm.read" | "collections.read" | "reports.read" | "providers.read" | "cash.read" | "deliveries.read";
+export type V16PlatformCapability =
+  | "admin.access" | "advisors.access"
+  | "crm.read" | "crm.write"
+  | "sales.read" | "sales.write"
+  | "collections.read" | "collections.write"
+  | "reports.read" | "providers.read"
+  | "cash.read" | "cash.manage"
+  | "deliveries.read" | "delivery.write"
+  | "finance.mode.read" | "finance.mode.write";
 export type V16UserAccess =
   | { status: "ok"; role: V16PlatformRole; capabilities: readonly V16PlatformCapability[]; advisorId: string | null }
   | { status: "unauthenticated" }
