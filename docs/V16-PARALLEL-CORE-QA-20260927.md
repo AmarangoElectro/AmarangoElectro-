@@ -82,3 +82,70 @@ No Supabase migration was applied.
 No production deploy.
 No main update.
 No force push.
+
+
+## Additional parallel implementation prepared
+
+### Exact payment schedule
+New V16 sales now have a prepared immutable payment schedule contract:
+- each payment has sequence, exact amount, due date and grace-through date;
+- the first payment must equal `initialPayment`;
+- the schedule total must equal `financedTotal`;
+- the number of schedule entries must equal `installments`;
+- due dates use `America/Argentina/Buenos_Aires` and freeze the existing 3-day tolerance;
+- a payment-event trigger updates legacy `ventas.montoCuota` to the next contractual amount for V16 snapshot sales only, preserving historical fallback behavior.
+
+This specifically prevents Plan Protegido from being treated as if every payment had the same amount.
+
+### Advisor month close hardening
+Prepared month close now:
+- derives operation facts from immutable sale schedule, delivery and append-only payment/reversal events;
+- requires delivery `ENTREGADA`;
+- excludes cancelled operations;
+- excludes financed operations that are overdue at close;
+- leaves unresolved delivery/collection as `PENDING`;
+- refuses to freeze the month while any operation is pending;
+- persists accepted/excluded operation decisions in `v16_advisor_monthly_close_operations`;
+- preserves 20.5 = ARS 100,000 and 21 = ARS 107,500.
+
+### Trusted server quote path
+Prepared components:
+- `lib/operations/authorized-sale-quote-engine.ts`
+- `app/api/v16/sale-quote/route.ts`
+- service-role-only `v16_resolve_operational_product_quote_source`
+- service-role-only `v16_chatgpt_issue_authorized_sale_quote`
+
+Browser input is restricted to product identity plus payment selection. Cost, authoritative price, commission, actor and active financing mode are derived server-side.
+
+The quote response deliberately omits cost, supplier, markup and margin.
+
+### Product source facts verified read-only
+`tienda_productos_incremental`:
+- 1,583 non-deleted rows;
+- 1,491 with positive cost;
+- 1,583 with positive sale price;
+- 1,491 with both;
+- 535 currently marked visible.
+
+Known V16 prefixes map to the source row by stripping their namespace:
+`electro:`, `exp63:`, `exp5:`, `exp31:`, `exp50:`, `exp99:`, `cohort0:`, `v411-evidence:`.
+
+Canonical phones `v16-cell:<n>` resolve through `v16_canonical_product_identity` by unique normalized name. All 90 currently have a unique match, but those matched rows do not have a certified positive cost. Therefore:
+- CLASSIC may use the server-certified sale price fallback;
+- PROTECTED remains fail-closed for those phones until certified cost exists.
+
+### QA added
+The current V16 QA list on this parallel branch includes:
+- `v16-sale-payment-schedule.test.mjs`
+- `v16-authorized-sale-quote-engine.test.mjs`
+- `v16-authorized-sale-quote-route.test.mjs`
+
+Static consistency check confirms:
+- no malformed single-dollar PL/pgSQL delimiters;
+- source resolver and quote issuer wrapper exist;
+- service-role grant is present;
+- exact payment schedule exists;
+- monthly close operation evidence exists;
+- all new tests are registered in `scripts/v16-qa.mjs`.
+
+These tests have been prepared and registered; full Node/build execution still must run in the integration environment before merge.
