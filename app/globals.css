@@ -3385,6 +3385,45 @@ html[data-performance-profile="lean"] .product-detail { box-shadow: 0 8px 24px r
 .advisor-quick-grid small { color: #ef7422; font-size: 8px; font-weight: 950; }
 .advisor-quick-grid strong { color: #162b47; font-size: 12px; }
 .advisor-workspace .offers-showcase { margin-block: 24px; }
+.advisor-month { max-width: 1460px; margin: 0 auto 24px; padding: clamp(20px,3vw,34px); border: 1px solid #dfe5ed; border-radius: 26px; background: linear-gradient(145deg,#071a39,#0c3e79); color: #fff; box-shadow: 0 20px 48px rgba(6,26,58,.14); }
+.advisor-month-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; }
+.advisor-month-heading h2 { margin: 4px 0 0; font-size: clamp(26px,3vw,42px); letter-spacing: -1.7px; }
+.advisor-month-heading > span { color: #b9c9dc; font-size: 10px; }
+.advisor-month-disconnected { margin-top: 19px; padding: 19px; display: flex; align-items: flex-start; gap: 13px; border: 1px solid rgba(255,255,255,.14); border-radius: 18px; background: rgba(255,255,255,.075); }
+.advisor-month-disconnected > svg { flex: 0 0 auto; color: #ff8a45; }
+.advisor-month-disconnected strong { display: block; font-size: 13px; }
+.advisor-month-disconnected p { margin: 5px 0 0; color: #c0cee0; font-size: 10px; line-height: 1.6; }
+.advisor-month-grid { margin-top: 20px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 11px; }
+.advisor-month-grid article { min-width: 0; padding: 18px; display: grid; gap: 6px; border: 1px solid rgba(255,255,255,.13); border-radius: 18px; background: rgba(255,255,255,.07); }
+.advisor-month-grid article > svg { color: #ff8a45; }
+.advisor-month-grid small,.advisor-operation-list small { color: #aebdd0; font-size: 8px; font-weight: 900; letter-spacing: .7px; }
+.advisor-month-grid strong { font-size: 22px; }
+.advisor-month-grid p { margin: 0; color: #c0cee0; font-size: 9px; line-height: 1.45; }
+.advisor-progress-track { height: 8px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.12); }
+.advisor-progress-track span { height: 100%; display: block; border-radius: inherit; background: linear-gradient(90deg,#ff7a24,#ffb36d); }
+.advisor-month-validation { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 7px; }
+.advisor-month-validation span { padding: 7px 9px; border-radius: 999px; background: rgba(255,255,255,.08); color: #c9d4e2; font-size: 8px; }
+.advisor-month-validation b { color: #fff; }
+.advisor-operation-list { display: grid; gap: 8px; }
+.advisor-operation-list article { padding: 13px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; border: 1px solid rgba(255,255,255,.11); border-radius: 15px; background: rgba(2,12,29,.32); }
+.advisor-operation-list article > div { min-width: 0; display: grid; align-content: start; gap: 4px; }
+.advisor-operation-list strong { overflow-wrap: anywhere; font-size: 10px; }
+.advisor-operation-list span { color: #b6c5d8; font-size: 8px; line-height: 1.4; }
+.advisor-validation.is-accepted { color: #8bd9b2; }
+.advisor-validation.is-pending { color: #ffd081; }
+.advisor-validation.is-excluded { color: #ff9b9b; }
+.advisor-operation-empty { margin: 0; padding: 20px; color: #b9c7d8; text-align: center; }
+.advisor-month-footnote { margin: 13px 0 0; color: #93a6bf; font-size: 8px; }
+.advisor-comp-admin { padding: 18px; display: grid; gap: 13px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); }
+.advisor-comp-admin > header { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.advisor-comp-admin h3 { margin: 3px 0 0; color: var(--foreground); font-size: 20px; }
+.advisor-comp-admin > header > svg { color: #ef7422; }
+.advisor-comp-admin-list { display: grid; gap: 8px; }
+.advisor-comp-admin-list article { padding: 12px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); }
+.advisor-comp-admin-list article > div { min-width: 0; display: grid; gap: 3px; }
+.advisor-comp-admin-list small { color: var(--muted-foreground); font-size: 8px; font-weight: 900; }
+.advisor-comp-admin-list strong { color: var(--foreground); font-size: 11px; overflow-wrap: anywhere; }
+.advisor-comp-admin-list span { color: var(--muted-foreground); font-size: 8px; line-height: 1.4; }
 .advisor-catalog { max-width: 1460px; margin: 24px auto 0; padding: 24px; border: 1px solid #dfe5ed; border-radius: 25px; background: #fff; }
 .advisor-catalog-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; }
 .advisor-catalog-heading h2 { margin: 0; color: #071a39; font-size: 32px; letter-spacing: -1.6px; }
@@ -3492,6 +3531,10 @@ html[data-performance-profile="lean"] .product-detail { box-shadow: 0 8px 24px r
   .internal-hero,.admin-command-hero { padding: 27px 20px; border-radius: 22px; }
   .internal-hero h1,.admin-command-hero h1 { font-size: clamp(34px,11vw,48px); letter-spacing: -2.5px; }
   .advisor-quick-grid { grid-template-columns: 1fr; }
+  .advisor-month { padding: 18px 13px; border-radius: 21px; }
+  .advisor-month-heading { display: grid; }
+  .advisor-month-grid { grid-template-columns: 1fr; }
+  .advisor-operation-list article,.advisor-comp-admin-list article { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .advisor-catalog { padding: 16px 12px; border-radius: 20px; }
   .advisor-catalog-heading { display: grid; }
   .advisor-catalog-heading label { width: 100%; }
