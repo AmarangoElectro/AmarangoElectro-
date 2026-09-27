@@ -6,10 +6,18 @@ import type { V16ConfirmSaleParams, V16ConfirmedSaleRow } from "@/lib/sales/sale
 
 const clientRow = z.object({ client_id: z.string(), created: z.boolean(), duplicate_reason: z.enum(["dni", "phone"]).nullable(), created_at: z.string() }).strict();
 const financingRow = z.object({ active_financing_mode: z.enum(["CLASSIC", "PROTECTED"]), policy_version: z.string(), effective_from: z.string(), updated_at: z.string() }).strict();
+const paymentScheduleEntry = z.object({
+  sequence: z.number().int().positive(),
+  amount: z.number().positive(),
+  dueDate: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/),
+  graceThrough: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/),
+}).strict();
+
 const saleRow = z.object({
   sale_id: z.string(), client_id: z.string(), canonical_product_id: z.string(), product_name: z.string(), product_model: z.string().nullable(),
   payment_mode: z.enum(["CASH", "FINANCED"]), financing_mode: z.enum(["CLASSIC", "PROTECTED"]), cash_price: z.number(),
-  initial_payment: z.number(), installments: z.number(), installment_amount: z.number(), financed_total: z.number(), commission: z.number(),
+  initial_payment: z.number(), installments: z.number(), installment_amount: z.number(), financed_total: z.number(),
+  payment_schedule: z.array(paymentScheduleEntry), commission: z.number(),
   commission_policy_version: z.string(), pricing_policy_version: z.string(), sold_at: z.string(),
 }).strict();
 
