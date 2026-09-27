@@ -49,9 +49,10 @@ export function chatGPTSignInPath(returnTo: string): string {
   return `${SIGN_IN_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
 }
 
-export function chatGPTSignOutPath(returnTo = "/"): string {
-  const safeReturnTo = safeRelativeReturnPath(returnTo);
-  return `${SIGN_OUT_PATH}?return_to=${encodeURIComponent(safeReturnTo)}`;
+export function chatGPTSignOutPath(_returnTo = "/"): string {
+  // ChatGPT Sites owns the production sign-out route. Keep the hosted path
+  // exact so mobile/embedded browsers do not fail on a return_to query.
+  return SIGN_OUT_PATH;
 }
 
 function safeRelativeReturnPath(value: string): string {
