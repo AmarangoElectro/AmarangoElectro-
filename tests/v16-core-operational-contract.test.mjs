@@ -58,3 +58,12 @@ test("commercial snapshot freezes financing, pricing and commission versions", a
   }
   assert.match(snapshot, /Object\.freeze/);
 });
+
+
+test("prepared operational SQL uses the canonical stored V16 role vocabulary", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.doesNotMatch(sql, /v_role\s*=\s*['"]advisor['"]/);
+  assert.doesNotMatch(sql, /v_role\s*=\s*['"]customer['"]/);
+  assert.match(sql, /v_role\s*=\s*['"]asesor['"]/);
+  assert.match(sql, /v_role\s+in\s*\(['"]owner['"],['"]admin['"]\)/);
+});
