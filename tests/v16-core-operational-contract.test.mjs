@@ -76,3 +76,25 @@ test("sale idempotency rejects a reused key with a different client quote or sou
   assert.match(sql, /s\.authorized_quote_id\s+is\s+distinct\s+from\s+p_authorized_quote_id/i);
   assert.match(sql, /s\.source\s+is\s+distinct\s+from\s+p_source/i);
 });
+
+
+test("monthly advisor close is fail-closed until delivery and collection facts are resolved", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /v16_advisor_operation_close_fact/);
+  assert.match(sql, /v_delivery\.status<>'ENTREGADA'/);
+  assert.match(sql, /Financiación en mora al cierre/);
+  assert.match(sql, /Cobranza pendiente de validación/);
+  assert.match(sql, /advisor_month_has_pending_operations/);
+  assert.match(sql, /v16_advisor_monthly_close_operations/);
+  assert.match(sql, /validation in \('ACCEPTED','EXCLUDED'\)/);
+  assert.match(sql, /floor\(v_equiv-20\)\*7500/);
+});
+
+test("advisor close evaluates active append-only payment events as of the close timestamp", async () => {
+  const sql = await source("supabase/migrations/20260927_v16_core_operational_prepared.sql");
+  assert.match(sql, /p\.payment_kind='PAYMENT'/);
+  assert.match(sql, /p\.paid_at<=p_close_at/);
+  assert.match(sql, /r\.reverses_payment_id=p\.payment_id/);
+  assert.match(sql, /r\.paid_at<=p_close_at/);
+  assert.match(sql, /America\/Argentina\/Buenos_Aires/);
+});
