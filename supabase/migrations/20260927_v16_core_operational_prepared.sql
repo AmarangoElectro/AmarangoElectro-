@@ -259,7 +259,22 @@ begin
   if v_role='asesor' and v_advisor is null then raise exception 'advisor_identity_required'; end if;
   if nullif(btrim(p_idempotency_key),'') is null then raise exception 'idempotency_key_required'; end if;
   select s.sale_id into v_sale from public.v16_sale_snapshots s where s.idempotency_key=btrim(p_idempotency_key);
-  if found then return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_sale; return; end if;
+  if found then
+    if exists (
+      select 1
+      from public.v16_sale_snapshots s
+      where s.sale_id=v_sale
+        and (
+          s.client_id is distinct from p_client_id
+          or s.authorized_quote_id is distinct from p_authorized_quote_id
+          or s.source is distinct from p_source
+        )
+    ) then
+      raise exception 'idempotency_key_conflict';
+    end if;
+    return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_sale;
+    return;
+  end if;
   if not exists(select 1 from public.clientes c where c.id=p_client_id) then raise exception 'client_not_found'; end if;
   select * into v_quote from public.v16_authorized_sale_quotes q where q.quote_id=p_authorized_quote_id for update;
   if not found or v_quote.issued_by<>v_user or v_quote.used_at is not null or v_quote.expires_at<=v_sold then raise exception 'authorized_quote_invalid'; end if;
