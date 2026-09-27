@@ -27,3 +27,15 @@ test("internal spaces do not invoke the platform signout route",()=>{
   assert.match(internalHeader,/href="\/"|href=\{"\/"\}/);
   assert.match(internalHeader,/sin cerrar tu acceso/);
 });
+
+
+test("hosted sign-out uses the exact platform route without return_to query",()=>{
+  assert.match(auth,/export function chatGPTSignOutPath/);
+  assert.match(auth,/return SIGN_OUT_PATH/);
+  assert.doesNotMatch(auth,/SIGN_OUT_PATH\}\?return_to|SIGN_OUT_PATH\?return_to/);
+});
+test("identity-aware pages are forced dynamic per request",()=>{
+  assert.match(admin,/export const dynamic = "force-dynamic"/);
+  assert.match(advisor,/export const dynamic = "force-dynamic"/);
+  assert.match(retry,/export const dynamic = "force-dynamic"/);
+});
