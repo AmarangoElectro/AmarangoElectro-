@@ -58,18 +58,19 @@ test("cash commission remains the existing 10 percent model", async () => {
 });
 
 test("monthly bonus is non-cumulative, keeps half sales, and has no fake post-20 target", async () => {
-  const values = [0,4.5,5,9.5,10,14.5,15,19.5,20,21,25];
+  const values = [0,4.5,5,9.5,10,14.5,15,19.5,20,20.5,21,25];
   const result = await runTs(`
     import { quoteAdvisorMonthlyBonus } from './lib/internal/finance/advisor-compensation-engine.ts';
     const values=${JSON.stringify(values)};
     process.stdout.write(JSON.stringify(values.map(value=>quoteAdvisorMonthlyBonus(value))));
   `);
-  assert.deepEqual(result.map((quote) => quote.bonusArs), [0,0,10_000,10_000,35_000,35_000,65_000,65_000,100_000,107_500,137_500]);
+  assert.deepEqual(result.map((quote) => quote.bonusArs), [0,0,10_000,10_000,35_000,35_000,65_000,65_000,100_000,100_000,107_500,137_500]);
   assert.deepEqual(result.slice(0,8).map((quote) => quote.nextGoalEquivalentSales), [5,5,10,10,15,15,20,20]);
   assert.equal(result[8].mainGoalReached, true);
   assert.equal(result[8].nextGoalEquivalentSales, null);
-  assert.equal(result[9].additionalEquivalentSales, 1);
-  assert.equal(result[10].additionalEquivalentSales, 5);
+  assert.equal(result[9].additionalEquivalentSales, 0);
+  assert.equal(result[10].additionalEquivalentSales, 1);
+  assert.equal(result[11].additionalEquivalentSales, 5);
 });
 
 test("two products below 50k equal one sale and exactly 50k equals one sale", async () => {
