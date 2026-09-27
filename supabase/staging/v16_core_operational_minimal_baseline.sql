@@ -263,3 +263,205 @@ revoke execute on function public.v16_has_capability(text) from public,anon,auth
 revoke execute on function public.v16_advisor_can_access_client(text) from public,anon,authenticated;
 
 commit;
+
+
+-- Canonical payment register RPC required by the V16 staging E2E.
+-- Matches the production signature expected by Work.
+create or replace function public.v16_register_customer_payment(
+  p_sale_id text,
+  p_amount_received numeric,
+  p_paid_at timestamptz default now(),
+  p_payment_method text default null,
+  p_payment_reference text default null,
+  p_idempotency_key text default null,
+  p_adjustment_amount numeric default 0,
+  p_adjustment_reason text default null,
+  p_note text default null
+)
+returns table(
+  payment_id bigint,
+  cash_movement_id bigint,
+  sale_id text,
+  client_id text,
+  installment_number integer,
+  installments_paid integer,
+  installments_total integer,
+  amount_received numeric,
+  amount_source text,
+  paid_at timestamptz
+)
+language plpgsql
+security definer
+set search_path='public','pg_temp'
+as $$
+declare
+  v_role text;
+  v_user_id uuid;
+  v_sale public.ventas%rowtype;
+  v_contractual_amount numeric;
+  v_amount_source text;
+  v_installment_number integer;
+  v_cash_id bigint;
+  v_payment_id bigint;
+  v_existing public.v16_payment_events%rowtype;
+  v_adjustment numeric := coalesce(p_adjustment_amount,0);
+begin
+  v_user_id := auth.uid();
+  v_role := public.v16_current_role();
+
+  if v_user_id is null then raise exception 'authentication_required'; end if;
+  if v_role not in ('owner','admin')
+     or not public.v16_has_capability('collections.write')
+     or not public.v16_has_capability('cash.manage')
+  then raise exception 'payment_register_not_authorized'; end if;
+
+  if nullif(btrim(coalesce(p_sale_id,'')),'') is null then raise exception 'sale_id_required'; end if;
+  if p_amount_received is null or p_amount_received <= 0 then raise exception 'amount_received_must_be_positive'; end if;
+  if p_paid_at is null then raise exception 'paid_at_required'; end if;
+  if v_adjustment <> 0 and nullif(btrim(coalesce(p_adjustment_reason,'')),'') is null then
+    raise exception 'adjustment_reason_required';
+  end if;
+
+  if nullif(btrim(coalesce(p_idempotency_key,'')),'') is not null then
+    select * into v_existing
+    from public.v16_payment_events pe
+    where pe.idempotency_key=btrim(p_idempotency_key)
+    limit 1;
+
+    if found then
+      if v_existing.payment_kind<>'PAYMENT'
+         or v_existing.sale_id<>p_sale_id
+         or v_existing.amount_received<>p_amount_received
+      then raise exception 'idempotency_key_conflict'; end if;
+
+      select v_existing.payment_id,
+             v_existing.cash_movement_id,
+             v_existing.sale_id,
+             v_existing.client_id,
+             v_existing.installment_number,
+             s.pagadas,
+             s.cuotas,
+             v_existing.amount_received,
+             v_existing.amount_source,
+             v_existing.paid_at
+      into payment_id,cash_movement_id,sale_id,client_id,installment_number,
+           installments_paid,installments_total,amount_received,amount_source,paid_at
+      from public.ventas s
+      where s.id=v_existing.sale_id;
+
+      return next;
+      return;
+    end if;
+  end if;
+
+  if nullif(btrim(coalesce(p_payment_reference,'')),'') is not null
+     and exists(
+       select 1 from public.v16_payment_events pe
+       where pe.payment_reference=btrim(p_payment_reference)
+     )
+  then raise exception 'payment_reference_already_registered'; end if;
+
+  select * into v_sale
+  from public.ventas v
+  where v.id=p_sale_id
+  for update;
+
+  if not found then raise exception 'sale_not_found'; end if;
+  if coalesce(v_sale.archivada,false) then raise exception 'sale_archived'; end if;
+
+  if v_sale.cuotas is null or v_sale.cuotas<=0
+     or v_sale.pagadas is null or v_sale.pagadas<0
+     or v_sale.pagadas>v_sale.cuotas
+  then raise exception 'sale_installment_state_invalid'; end if;
+
+  if v_sale.pagadas>=v_sale.cuotas then raise exception 'sale_already_complete'; end if;
+
+  v_installment_number:=v_sale.pagadas+1;
+
+  if v_sale."montoCuota" is not null and v_sale."montoCuota">0 then
+    v_contractual_amount:=v_sale."montoCuota";
+    v_amount_source:='SOURCE_CERTIFIED';
+    if p_amount_received<>v_contractual_amount+v_adjustment then
+      raise exception 'amount_does_not_match_contractual_plus_adjustment';
+    end if;
+  else
+    v_contractual_amount:=null;
+    v_amount_source:='MANUAL_CONFIRMED';
+    if v_adjustment<>0 then raise exception 'adjustment_requires_contractual_amount'; end if;
+  end if;
+
+  insert into public.v16_cash_movements(
+    occurred_at,movement_type,direction,amount,sale_id,client_id,source_reference,note,created_by,metadata
+  ) values(
+    p_paid_at,'CUSTOMER_PAYMENT','IN',p_amount_received,v_sale.id,v_sale."clienteId",
+    coalesce(
+      nullif(btrim(coalesce(p_payment_reference,'')),''),
+      nullif(btrim(coalesce(p_idempotency_key,'')),''),
+      'sale:'||v_sale.id||':installment:'||v_installment_number::text
+    ),
+    p_note,v_user_id,
+    jsonb_build_object('source','v16_register_customer_payment','installment_number',v_installment_number)
+  )
+  returning movement_id into v_cash_id;
+
+  insert into public.v16_payment_events(
+    sale_id,client_id,installment_number,payment_kind,contractual_amount,adjustment_amount,
+    adjustment_reason,amount_received,amount_source,paid_at,payment_method,payment_reference,
+    idempotency_key,cash_movement_id,note,created_by,metadata
+  ) values(
+    v_sale.id,v_sale."clienteId",v_installment_number,'PAYMENT',
+    v_contractual_amount,v_adjustment,
+    nullif(btrim(coalesce(p_adjustment_reason,'')),''),
+    p_amount_received,v_amount_source,p_paid_at,
+    nullif(btrim(coalesce(p_payment_method,'')),''),
+    nullif(btrim(coalesce(p_payment_reference,'')),''),
+    nullif(btrim(coalesce(p_idempotency_key,'')),''),
+    v_cash_id,p_note,v_user_id,
+    jsonb_build_object('source','v16_register_customer_payment')
+  )
+  returning public.v16_payment_events.payment_id into v_payment_id;
+
+  update public.ventas
+  set pagadas=pagadas+1
+  where id=v_sale.id and pagadas=v_sale.pagadas;
+
+  if not found then raise exception 'sale_payment_counter_concurrent_change'; end if;
+
+  insert into public.auditoria(aid,quien,accion,tipo,detalle,ts)
+  values(
+    'v16-payment:'||v_payment_id::text,
+    v_user_id::text,
+    'registró',
+    'pago_v16',
+    jsonb_build_object(
+      'payment_id',v_payment_id,
+      'cash_movement_id',v_cash_id,
+      'sale_id',v_sale.id,
+      'installment_number',v_installment_number,
+      'amount_received',p_amount_received,
+      'amount_source',v_amount_source
+    )::text,
+    floor(extract(epoch from clock_timestamp())*1000)::bigint
+  );
+
+  payment_id:=v_payment_id;
+  cash_movement_id:=v_cash_id;
+  sale_id:=v_sale.id;
+  client_id:=v_sale."clienteId";
+  installment_number:=v_installment_number;
+  installments_paid:=v_sale.pagadas+1;
+  installments_total:=v_sale.cuotas;
+  amount_received:=p_amount_received;
+  amount_source:=v_amount_source;
+  paid_at:=p_paid_at;
+  return next;
+end;
+$$;
+
+revoke execute on function public.v16_register_customer_payment(
+  text,numeric,timestamptz,text,text,text,numeric,text,text
+) from public,anon;
+
+grant execute on function public.v16_register_customer_payment(
+  text,numeric,timestamptz,text,text,text,numeric,text,text
+) to authenticated,service_role;
