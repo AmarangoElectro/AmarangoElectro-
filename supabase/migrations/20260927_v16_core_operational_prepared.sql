@@ -180,7 +180,7 @@ declare
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
   if not ((v_role in ('owner','admin') and public.v16_has_capability('admin.access'))
-      or (v_role='advisor' and public.v16_has_capability('advisors.access'))) then
+      or (v_role='asesor' and public.v16_has_capability('advisors.access'))) then
     raise exception 'client_create_not_authorized';
   end if;
   if nullif(btrim(p_nombre),'') is null or length(v_phone) < 8 then raise exception 'client_identity_invalid'; end if;
@@ -255,8 +255,8 @@ language plpgsql security definer set search_path = '' as $$
 declare v_user uuid:=auth.uid(); v_role text:=public.v16_current_role(); v_advisor uuid:=public.v16_current_advisor_id(); v_quote public.v16_authorized_sale_quotes%rowtype; v_mode text; v_sale text; v_sold timestamptz:=clock_timestamp();
 begin
   if v_user is null then raise exception 'authentication_required'; end if;
-  if not ((v_role in ('owner','admin') and public.v16_has_capability('admin.access')) or (v_role='advisor' and public.v16_has_capability('advisors.access'))) then raise exception 'sale_create_not_authorized'; end if;
-  if v_role='advisor' and v_advisor is null then raise exception 'advisor_identity_required'; end if;
+  if not ((v_role in ('owner','admin') and public.v16_has_capability('admin.access')) or (v_role='asesor' and public.v16_has_capability('advisors.access'))) then raise exception 'sale_create_not_authorized'; end if;
+  if v_role='asesor' and v_advisor is null then raise exception 'advisor_identity_required'; end if;
   if nullif(btrim(p_idempotency_key),'') is null then raise exception 'idempotency_key_required'; end if;
   select s.sale_id into v_sale from public.v16_sale_snapshots s where s.idempotency_key=btrim(p_idempotency_key);
   if found then return query select s.sale_id,s.client_id,s.canonical_product_id,s.product_name,s.product_model,s.payment_mode,s.financing_mode,s.cash_price,s.initial_payment,s.installments,s.installment_amount,s.financed_total,s.commission,s.commission_policy_version,s.pricing_policy_version,s.sold_at from public.v16_sale_snapshots s where s.sale_id=v_sale; return; end if;
