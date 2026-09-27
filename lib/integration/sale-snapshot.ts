@@ -1,5 +1,6 @@
 import type { ProductBridgeItem } from "./product-bridge";
 import type { SourceAttribution } from "@/lib/growth/referral-growth-contract";
+import type { ActiveFinancingMode } from "@/lib/internal/finance/active-financing-mode-contract";
 
 export interface SaleItemSnapshot {
   readonly snapshotVersion: "amarango-sale-item/v1";
@@ -43,4 +44,27 @@ export function createSaleItemSnapshot(input: Readonly<SaleItemSnapshotInput>): 
     soldAt: input.soldAt,
     sourceAttribution: input.sourceAttribution ?? null,
   });
+}
+
+export interface ImmutableCommercialSaleSnapshot {
+  readonly snapshotVersion: "amarango-commercial-sale/v16";
+  readonly financingMode: ActiveFinancingMode;
+  readonly cashPrice: number;
+  readonly initialPayment: number;
+  readonly installments: number;
+  readonly installmentAmount: number;
+  readonly financedTotal: number;
+  readonly commission: number;
+  readonly commissionPolicyVersion: string;
+  readonly pricingPolicyVersion: string;
+  readonly soldAt: string;
+}
+
+export function createImmutableCommercialSaleSnapshot(input: Omit<ImmutableCommercialSaleSnapshot, "snapshotVersion">): ImmutableCommercialSaleSnapshot {
+  for (const [field, value] of Object.entries(input)) {
+    if (typeof value === "number" && (!Number.isFinite(value) || value < 0)) throw new Error(`${field} inválido`);
+  }
+  if (!Number.isInteger(input.installments) || input.installments < 1) throw new Error("installments inválido");
+  if (!input.commissionPolicyVersion.trim() || !input.pricingPolicyVersion.trim() || !input.soldAt.trim()) throw new Error("versiones y soldAt requeridos");
+  return Object.freeze({ snapshotVersion: "amarango-commercial-sale/v16", ...input });
 }
