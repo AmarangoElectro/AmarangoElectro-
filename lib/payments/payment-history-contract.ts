@@ -40,7 +40,7 @@
 export const V16_PAYMENT_HISTORY_CONTRACT_VERSION = "V16_PAYMENT_HISTORY_UI_CONTRACT_FROZEN_CORRECTIVE_1" as const;
 
 export interface V16PaymentHistoryRow {
-  payment_id: string;
+  payment_id: number;
   sale_id: string;
   client_id: string;
   client_name: string | null;
@@ -53,7 +53,7 @@ export interface V16PaymentHistoryRow {
   amount_received: number | null;
   paid_at: string | null;
   payment_method: string | null;
-  reverses_payment_id: string | null;
+  reverses_payment_id: number | null;
   created_at: string | null;
 }
 
@@ -101,3 +101,48 @@ export const V16_PAYMENT_HISTORY_LIST_DEFAULTS = Object.freeze({
 export const V16_PAYMENT_HISTORY_NEVER_EXPOSED = Object.freeze([
   "idempotency_key", "cash_movement_id", "note", "metadata", "created_by", "payment_reference", "amount_source",
 ] as const);
+
+export interface V16RegisterCustomerPaymentParams {
+  saleId: string;
+  amountReceived: number;
+  paidAt?: string | null;
+  paymentMethod?: string | null;
+  paymentReference?: string | null;
+  idempotencyKey: string;
+  adjustmentAmount?: number;
+  adjustmentReason?: string | null;
+  note?: string | null;
+}
+
+export interface V16RegisterCustomerPaymentResult {
+  payment_id: number;
+  cash_movement_id: number;
+  sale_id: string;
+  client_id: string;
+  installment_number: number;
+  installments_paid: number;
+  installments_total: number;
+  amount_received: number;
+  amount_source: string;
+  paid_at: string;
+}
+
+export interface V16ReverseCustomerPaymentParams {
+  paymentId: number;
+  reason: string;
+  reversedAt?: string | null;
+  idempotencyKey: string;
+}
+
+export interface V16ReverseCustomerPaymentResult {
+  reversal_payment_id: number;
+  reversal_cash_movement_id: number;
+  original_payment_id: number;
+  sale_id: string;
+  client_id: string;
+  installment_number: number;
+  installments_paid: number;
+  installments_total: number;
+  amount_reversed: number;
+  reversed_at: string;
+}

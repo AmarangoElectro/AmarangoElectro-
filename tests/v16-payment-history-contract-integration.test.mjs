@@ -41,15 +41,17 @@ test("Payment History never requests or renders a field the contract says is int
   }
 });
 
-test("Payment History adapter is read-only, never reads public.ventas directly, no local success faking", async () => {
+test("Payment History uses only audited RPCs for reads and writes, never physical tables or local success faking", async () => {
   const adapter = await source("lib/payments/payment-history-adapter.ts");
   assert.doesNotMatch(adapter, /rest\/v1\/ventas|from\(["']ventas["']\)/i);
   assert.doesNotMatch(adapter, /\.(?:insert|upsert|update|delete)\s*\(/i);
   assert.match(adapter, /rest\/v1\/rpc\//);
   assert.doesNotMatch(adapter, /createClient/);
   assert.match(adapter, /"not_connected"/);
-  const adapterCodeOnly = adapter.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-  assert.doesNotMatch(adapterCodeOnly, /v16_register_customer_payment|v16_reverse_customer_payment/, "this correction does not add the write contract");
+  assert.match(adapter, /v16_register_customer_payment/);
+  assert.match(adapter, /v16_reverse_customer_payment/);
+  assert.match(adapter, /p_idempotency_key/);
+  assert.match(adapter, /step_up_required/);
 });
 
 test("Payment History UI never fabricates/backfills events and uses the exact frozen empty-state + summary wording", async () => {
