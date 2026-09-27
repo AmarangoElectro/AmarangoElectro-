@@ -46,6 +46,13 @@ export function createSaleItemSnapshot(input: Readonly<SaleItemSnapshotInput>): 
   });
 }
 
+export interface CommercialPaymentScheduleEntry {
+  readonly sequence: number;
+  readonly amount: number;
+  readonly dueDate: string;
+  readonly graceThrough: string;
+}
+
 export interface ImmutableCommercialSaleSnapshot {
   readonly snapshotVersion: "amarango-commercial-sale/v16";
   readonly financingMode: ActiveFinancingMode;
@@ -54,6 +61,7 @@ export interface ImmutableCommercialSaleSnapshot {
   readonly installments: number;
   readonly installmentAmount: number;
   readonly financedTotal: number;
+  readonly paymentSchedule: readonly CommercialPaymentScheduleEntry[];
   readonly commission: number;
   readonly commissionPolicyVersion: string;
   readonly pricingPolicyVersion: string;
@@ -66,5 +74,27 @@ export function createImmutableCommercialSaleSnapshot(input: Omit<ImmutableComme
   }
   if (!Number.isInteger(input.installments) || input.installments < 1) throw new Error("installments inválido");
   if (!input.commissionPolicyVersion.trim() || !input.pricingPolicyVersion.trim() || !input.soldAt.trim()) throw new Error("versiones y soldAt requeridos");
-  return Object.freeze({ snapshotVersion: "amarango-commercial-sale/v16", ...input });
+  if (input.paymentSchedule.length !== input.installments) throw new Error("paymentSchedule debe coincidir con installments");
+
+  const paymentSchedule = input.paymentSchedule.map((entry, index) => {
+    if (!Number.isInteger(entry.sequence) || entry.sequence !== index + 1) throw new Error("paymentSchedule.sequence inválido");
+    if (!Number.isFinite(entry.amount) || entry.amount <= 0) throw new Error("paymentSchedule.amount inválido");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(entry.dueDate) || !/^\d{4}-\d{2}-\d{2}$/.test(entry.graceThrough)) {
+      throw new Error("paymentSchedule fecha inválida");
+    }
+    if (entry.graceThrough < entry.dueDate) throw new Error("paymentSchedule gracia inválida");
+    return Object.freeze({ ...entry });
+  });
+
+  const totalCents = paymentSchedule.reduce((total, entry) => total + Math.round(entry.amount * 100), 0);
+  if (totalCents !== Math.round(input.financedTotal * 100)) throw new Error("paymentSchedule no coincide con financedTotal");
+  if (Math.round(paymentSchedule[0].amount * 100) !== Math.round(input.initialPayment * 100)) {
+    throw new Error("paymentSchedule inicial no coincide con initialPayment");
+  }
+
+  return Object.freeze({
+    snapshotVersion: "amarango-commercial-sale/v16",
+    ...input,
+    paymentSchedule: Object.freeze(paymentSchedule),
+  });
 }
