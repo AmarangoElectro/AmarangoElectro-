@@ -28,3 +28,11 @@ test("photo framing keeps contain and adapts by product shape", async () => {
   assert.match(css, /\.product-card-premium \.product-image\s*\{[^}]*object-fit:\s*contain/);
   assert.match(css, /\.detail-product-image\s*\{[^}]*object-fit:\s*contain/);
 });
+
+test("full-card photo zoom never blurs the supplier flyer underneath", async () => {
+  const css = await source("app/globals.css");
+  assert.match(
+    css,
+    /\.product-card-premium \.card-photo-zoom\s*\{[^}]*backdrop-filter:\s*none;[^}]*-webkit-backdrop-filter:\s*none;/,
+  );
+});
