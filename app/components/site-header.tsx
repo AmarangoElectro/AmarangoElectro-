@@ -10,6 +10,7 @@ import { ShareStoreButton } from "./share-store-button";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { openSectorsSheet } from "@/lib/ux/sectors-sheet";
 import { useEffect, useState } from "react";
+import { ProtectedSpaceLink } from "./protected-space-link";
 
 const navigation = [
   { href: "/#sectores", label: "Sectores" },
@@ -101,9 +102,9 @@ export function SiteHeader() {
           </section>
           <section className="authorized-access" aria-label="Acceso autorizado">
             <div><ShieldCheck size={18} /><span><small>ACCESO AUTORIZADO</small><strong>Espacios internos preparados</strong></span></div>
-            <Link href="/mi-amarango" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><UsersRound size={18} /> Mi Amarango · Asesores</Link>
-            <Link href="/administracion" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><ShieldCheck size={18} /> Administración</Link>
-            <Link href="/plataforma" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><Store size={18} /> Espacios internos</Link>
+            <ProtectedSpaceLink href="/mi-amarango" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><UsersRound size={18} /> Mi Amarango · Asesores</ProtectedSpaceLink>
+            <ProtectedSpaceLink href="/administracion" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><ShieldCheck size={18} /> Administración</ProtectedSpaceLink>
+            <ProtectedSpaceLink href="/plataforma" tabIndex={open ? 0 : -1} onClick={() => setOpen(false)}><Store size={18} /> Espacios internos</ProtectedSpaceLink>
             <p>Estos espacios requieren una sesión autorizada.</p>
           </section>
         </aside>
