@@ -4,6 +4,8 @@ const admin=fs.readFileSync("app/administracion/page.tsx","utf8");
 const advisor=fs.readFileSync("app/mi-amarango/page.tsx","utf8");
 const retry=fs.readFileSync("app/auth-retry/page.tsx","utf8");
 const internalHeader=fs.readFileSync("app/components/internal-space-header.tsx","utf8");
+const siteHeader=fs.readFileSync("app/components/site-header.tsx","utf8");
+const protectedLink=fs.readFileSync("app/components/protected-space-link.tsx","utf8");
 
 test("repo has server-side authenticated-user primitive",()=>{
   assert.match(auth,/export async function requireChatGPTUser/);
@@ -61,4 +63,13 @@ test("identity-aware pages are forced dynamic per request",()=>{
   assert.match(admin,/export const dynamic = "force-dynamic"/);
   assert.match(advisor,/export const dynamic = "force-dynamic"/);
   assert.match(retry,/export const dynamic = "force-dynamic"/);
+});
+
+test("protected space navigation stays inside the active Sites session",()=>{
+  assert.match(protectedLink,/from "next\/link"/);
+  assert.match(protectedLink,/prefetch=\{false\}/);
+  assert.match(siteHeader,/ProtectedSpaceLink href="\/mi-amarango"/);
+  assert.match(siteHeader,/ProtectedSpaceLink href="\/administracion"/);
+  assert.match(internalHeader,/ProtectedSpaceLink href="\/"/);
+  assert.doesNotMatch(internalHeader,/signout-with-chatgpt|chatGPTSignOutPath|Cerrar sesión/);
 });
