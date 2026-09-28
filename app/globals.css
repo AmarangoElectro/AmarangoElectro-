@@ -9541,3 +9541,38 @@ html[data-theme="dark"] .home-final-sectors .featured-sector-copy small { color:
     overflow-wrap: anywhere;
   }
 }
+.product-card-premium .card-photo-zoom {
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  box-shadow: none;
+  font-size: .64rem;
+  letter-spacing: 0;
+}
+.product-card-premium .card-photo-zoom svg,
+.product-card-premium .card-photo-zoom span {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 5px #061a37);
+}
+.product-card-premium .card-photo-zoom span {
+  padding: 6px 8px 6px 0;
+  border-radius: 0 999px 999px 0;
+  background: rgba(6, 26, 55, .82);
+}
+.product-card-premium .card-photo-zoom svg {
+  box-sizing: content-box;
+  padding: 6px 0 6px 8px;
+  border-radius: 999px 0 0 999px;
+  background: rgba(6, 26, 55, .82);
+}
+.product-card-premium .card-photo-zoom svg { width: 13px; height: 13px; }
+.product-card-premium .card-photo-zoom:hover { box-shadow: none; transform: none; }

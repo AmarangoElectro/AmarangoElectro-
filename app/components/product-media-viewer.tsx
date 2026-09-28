@@ -6,21 +6,23 @@ import { useEffect, useRef, useState } from "react";
 import type { ProductImage } from "@/lib/catalog/types";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
-export function ProductMediaViewer({ image, productName }: { image: ProductImage; productName: string }) {
+export function ProductMediaViewer({ image, productName, card = false }: { image: ProductImage; productName: string; card?: boolean }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [zoomed, setZoomed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    const handleClose = () => setZoomed(false);
+    if (mounted && !dialog.open) dialog.showModal();
+    const handleClose = () => { setZoomed(false); setMounted(false); };
     dialog.addEventListener("close", handleClose);
     return () => dialog.removeEventListener("close", handleClose);
-  }, []);
+  }, [mounted]);
 
   function open() {
     playSonicCue("tap");
-    dialogRef.current?.showModal();
+    setMounted(true);
   }
 
   function close() {
@@ -34,11 +36,11 @@ export function ProductMediaViewer({ image, productName }: { image: ProductImage
 
   return (
     <>
-      <button className="detail-zoom-trigger" type="button" onClick={open} aria-label={`Ampliar imagen de ${productName}`}>
+      <button className={`detail-zoom-trigger${card ? " card-photo-zoom" : ""}`} type="button" onClick={open} aria-label={`Ampliar imagen de ${productName}`}>
         <Maximize2 size={17} aria-hidden="true" />
         <span>Ampliar</span>
       </button>
-      <dialog
+      {mounted && <dialog
         ref={dialogRef}
         className="product-lightbox"
         aria-label={`Vista ampliada de ${productName}`}
@@ -70,7 +72,7 @@ export function ProductMediaViewer({ image, productName }: { image: ProductImage
           </div>
           <p className="product-lightbox-hint">En móvil podés usar el gesto de pellizcar del navegador y también tocar dos veces para alternar el zoom.</p>
         </div>
-      </dialog>
+      </dialog>}
     </>
   );
 }

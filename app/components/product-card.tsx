@@ -10,6 +10,7 @@ import { shareProductLink } from "@/lib/commerce/share-product";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { getAuthorizedReferralShareCode } from "@/lib/growth/referral-attribution-client";
 import { getProductCardVisualTheme, type ProductCardVisualContext } from "@/lib/theme/product-card-theme";
+import { ProductMediaViewer } from "./product-media-viewer";
 import {
   getFavoritesServerSnapshot,
   getFavoritesSnapshot,
@@ -111,6 +112,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
           </button>
           <button type="button" aria-label="Compartir producto" onClick={share}><Share2 size={18} /></button>
         </div>
+        {product.image ? <ProductMediaViewer image={product.image} productName={product.name} card /> : null}
       </div>
       <div className="catalog-card-body">
         <p className="product-brand">{product.brand}</p>
