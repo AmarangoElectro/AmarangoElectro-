@@ -9554,6 +9554,8 @@ html[data-theme="dark"] .home-final-sectors .featured-sector-copy small { color:
   background: transparent;
   color: #fff;
   box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   font-size: .64rem;
   letter-spacing: 0;
 }
