@@ -100,6 +100,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
             <BrandProductAccordion categorySlug={category.slug} products={categoryProducts} brands={activeSubcategories.filter((subcategory) => Boolean(subcategory.brand))} />
           ) : products.length > 0 ? (
             <CatalogClient
+              key={`${category.slug}:${activeSector?.slug ?? "all"}:${requestedCampaignBrand ?? "all"}`}
               products={products}
               initialBrand={initialBrand}
               initialSearch={initialSearch}
@@ -109,6 +110,8 @@ export default async function CategoryPage({ params, searchParams }: { params: P
               initialAvailableOnly={initialAvailableOnly}
               categoryTitle={activeSector?.title ?? brandLocale?.title ?? requestedCampaignBrand ?? category.title}
               compactBrandMode={Boolean(requestedCampaignBrand)}
+              categorySlug={category.slug}
+              sectorSlug={activeSector?.slug}
             />
           ) : (
             <section className={`catalog-coming${requestedCampaignBrand ? " is-brand-empty" : ""}`}>

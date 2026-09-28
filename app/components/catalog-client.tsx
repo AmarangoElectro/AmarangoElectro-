@@ -26,6 +26,8 @@ import {
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-banner";
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
+import { getFacetScope, matchesFacets, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
+import { SmartFacetDrawer } from "./smart-facet-drawer";
 
 const brandProfiles = {
   Todos: {
@@ -79,6 +81,8 @@ interface CatalogClientProps {
   categoryTitle?: string;
   showCategoryFilter?: boolean;
   compactBrandMode?: boolean;
+  categorySlug?: string;
+  sectorSlug?: string;
 }
 
 export function CatalogClient({
@@ -94,7 +98,13 @@ export function CatalogClient({
   categoryTitle = "Celulares",
   showCategoryFilter = false,
   compactBrandMode = false,
+  categorySlug = "",
+  sectorSlug,
 }: CatalogClientProps) {
+  const facetScope = getFacetScope(categorySlug, sectorSlug);
+  const facetStorageKey = `amarango-facets:${categorySlug}:${sectorSlug ?? "all"}`;
+  const [facetSelection, setFacetSelection] = useState<FacetSelection>({});
+  const [facetReady, setFacetReady] = useState(false);
   const brands = useMemo(() => ["Todos", ...new Set(products.map((product) => product.brand))], [products]);
   const categoryOptions = useMemo(() => ["Todas", ...new Set(products.map((product) => product.category))], [products]);
   const [brand, setBrand] = useState(() => {
@@ -118,6 +128,7 @@ export function CatalogClient({
   const deferredFavoritesOnly = useDeferredValue(favoritesOnly);
   const deferredMaxPrice = useDeferredValue(maxPrice);
   const deferredAvailableOnly = useDeferredValue(availableOnly);
+  const deferredFacets = useDeferredValue(facetSelection);
   const favoritesSnapshot = useSyncExternalStore(subscribeFavorites, getFavoritesSnapshot, getFavoritesServerSnapshot);
   const favoriteIds = useMemo(() => parseFavoritesSnapshot(favoritesSnapshot), [favoritesSnapshot]);
   const compareSnapshot = useSyncExternalStore(subscribeCompare, getCompareSnapshot, getCompareServerSnapshot);
@@ -139,7 +150,7 @@ export function CatalogClient({
       const availableMatches = !deferredAvailableOnly || product.stock.status === "in_stock";
       const parsedMaxPrice = Number(deferredMaxPrice);
       const priceMatches = !deferredMaxPrice || (Number.isFinite(parsedMaxPrice) && product.price !== null && product.price.amount <= parsedMaxPrice);
-      return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches;
+      return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches && matchesFacets(product, facetScope, deferredFacets);
     });
     const result = rankProductsForSearch(candidates, deferredSearch.trim());
     if (deferredSort === "brand") return [...result].sort((a, b) => a.brand.localeCompare(b.brand, "es"));
@@ -147,7 +158,20 @@ export function CatalogClient({
     if (deferredSort === "price-asc") return [...result].sort((a, b) => (a.price?.amount ?? Number.POSITIVE_INFINITY) - (b.price?.amount ?? Number.POSITIVE_INFINITY));
     if (deferredSort === "price-desc") return [...result].sort((a, b) => (b.price?.amount ?? Number.NEGATIVE_INFINITY) - (a.price?.amount ?? Number.NEGATIVE_INFINITY));
     return result;
-  }, [compactBrandMode, deferredAvailableOnly, deferredBrand, deferredCategory, deferredFavoritesOnly, deferredMaxPrice, deferredSearch, deferredSort, favoriteIds, products]);
+  }, [compactBrandMode, deferredAvailableOnly, deferredBrand, deferredCategory, deferredFavoritesOnly, deferredFacets, deferredMaxPrice, deferredSearch, deferredSort, facetScope, favoriteIds, products]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let saved: FacetSelection = {};
+    try { saved = JSON.parse(window.sessionStorage.getItem(facetStorageKey) || "{}"); } catch { saved = {}; }
+    const next: FacetSelection = {};
+    for (const key of ["measure", "storage", "capacity", "kind", "liters", "burners", "size"] as FacetKey[]) {
+      const value = params.get(`f_${key}`) ?? saved[key];
+      if (typeof value === "string" && products.some((product) => matchesFacets(product, facetScope, { [key]: value }))) next[key] = value;
+    }
+    setFacetSelection(next);
+    setFacetReady(true);
+  }, [facetScope, facetStorageKey, products]);
 
   const correction = useMemo(
     () => (filtered.length === 0 && deferredSearch.trim() ? suggestCatalogCorrection(products, deferredSearch) : null),
@@ -161,6 +185,7 @@ export function CatalogClient({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!facetReady) return;
     const params = new URLSearchParams(window.location.search);
     if (deferredBrand !== "Todos") params.set("marca", deferredBrand); else params.delete("marca");
     if (showCategoryFilter && deferredCategory !== "Todas") params.set("categoria", deferredCategory); else params.delete("categoria");
@@ -169,10 +194,14 @@ export function CatalogClient({
     if (deferredFavoritesOnly) params.set("favoritos", "1"); else params.delete("favoritos");
     if (deferredMaxPrice) params.set("precioMax", deferredMaxPrice); else params.delete("precioMax");
     if (deferredAvailableOnly) params.set("disponible", "1"); else params.delete("disponible");
+    for (const key of ["measure", "storage", "capacity", "kind", "liters", "burners", "size"] as FacetKey[]) {
+      if (deferredFacets[key]) params.set(`f_${key}`, deferredFacets[key]); else params.delete(`f_${key}`);
+    }
+    window.sessionStorage.setItem(facetStorageKey, JSON.stringify(deferredFacets));
     const query = params.toString();
     const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || "#catalogo"}`;
     window.history.replaceState({}, "", next);
-  }, [deferredAvailableOnly, deferredBrand, deferredCategory, deferredFavoritesOnly, deferredMaxPrice, deferredSearch, deferredSort, showCategoryFilter]);
+  }, [deferredAvailableOnly, deferredBrand, deferredCategory, deferredFacets, deferredFavoritesOnly, deferredMaxPrice, deferredSearch, deferredSort, facetReady, facetStorageKey, showCategoryFilter]);
 
   const profile = categoryTitle === "Celulares"
     ? brandProfiles[brand as keyof typeof brandProfiles] ?? brandProfiles.Todos
@@ -182,8 +211,8 @@ export function CatalogClient({
         description: "Un solo catálogo, siempre actualizado, para encontrar lo que buscás sin vueltas.",
         badges: ["Información clara", "Catálogo curado", "Sin duplicados"],
       };
-  const activeFilterCount = Number(brand !== "Todos") + Number(category !== "Todas") + Number(Boolean(search.trim())) + Number(sort !== "recommended") + Number(favoritesOnly) + Number(Boolean(maxPrice)) + Number(availableOnly);
-  const catalogUpdating = deferredSearch !== search || deferredBrand !== brand || deferredCategory !== category || deferredSort !== sort || deferredFavoritesOnly !== favoritesOnly || deferredMaxPrice !== maxPrice || deferredAvailableOnly !== availableOnly;
+  const activeFilterCount = Number(brand !== "Todos") + Number(category !== "Todas") + Number(Boolean(search.trim())) + Number(sort !== "recommended") + Number(favoritesOnly) + Number(Boolean(maxPrice)) + Number(availableOnly) + Object.values(facetSelection).filter(Boolean).length;
+  const catalogUpdating = deferredSearch !== search || deferredBrand !== brand || deferredCategory !== category || deferredSort !== sort || deferredFavoritesOnly !== favoritesOnly || deferredMaxPrice !== maxPrice || deferredAvailableOnly !== availableOnly || deferredFacets !== facetSelection;
   const hasBrandCampaign = brand !== "Todos" && hasCompleteBrandCampaign(brand);
 
   function clearFilters() {
@@ -194,6 +223,7 @@ export function CatalogClient({
     setFavoritesOnly(false);
     setMaxPrice("");
     setAvailableOnly(false);
+    setFacetSelection({});
     setSearchOpen(false);
   }
 
@@ -416,6 +446,8 @@ export function CatalogClient({
         </div>
       </div>
 
+      {categorySlug && <SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />}
+
       {activeFilterCount > 0 && <div className="catalog-active-filters" aria-live="polite">
         <div>
           <SlidersHorizontal size={16} aria-hidden="true" />
@@ -430,6 +462,7 @@ export function CatalogClient({
           {favoritesOnly && <span>Solo favoritos</span>}
           {maxPrice && <span>Hasta ${Number(maxPrice).toLocaleString("es-AR")}</span>}
           {availableOnly && <span>Stock confirmado</span>}
+          {Object.entries(facetSelection).filter(([, value]) => value).map(([key, value]) => <span key={key}>{value}</span>)}
         </div>
         {activeFilterCount > 0 && (
           <button type="button" className="catalog-clear" onClick={() => { playSonicCue("tap"); clearFilters(); }}>

@@ -1,0 +1,37 @@
+.smart-facets { margin: 10px 0 14px; border: 1px solid var(--line, #dce5ef); border-radius: 18px; background: var(--card, #fff); color: var(--foreground, #071a39); box-shadow: 0 8px 25px rgba(5, 22, 49, .045); }
+.smart-facets-trigger { width: 100%; min-height: 52px; padding: 9px 14px; display: flex; align-items: center; gap: 9px; border: 0; border-radius: inherit; background: transparent; color: inherit; font: inherit; font-weight: 800; text-align: left; cursor: pointer; }
+.smart-facets-trigger > span { flex: 1; }
+.smart-facets-trigger > small { color: var(--muted-foreground, #617087); font-size: 12px; font-weight: 600; }
+.smart-facets-trigger > b { min-width: 22px; padding: 2px 5px; border-radius: 8px; background: #ec7828; color: #fff; font-size: 12px; text-align: center; }
+.smart-facets-trigger > svg:last-child { transition: transform .2s ease; }
+.smart-facets-trigger > svg.is-open { transform: rotate(180deg); }
+.smart-facets-content { display: grid; gap: 7px; padding: 0 12px 12px; }
+.smart-facet-group { min-width: 0; border: 1px solid var(--line, #dce5ef); border-radius: 12px; background: var(--soft, #f7f9fc); }
+.smart-facet-group > summary { min-height: 43px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; list-style: none; font-weight: 750; cursor: pointer; }
+.smart-facet-group > summary::-webkit-details-marker { display: none; }
+.smart-facet-group > summary strong { margin-left: auto; color: #d96a1d; font-size: 12px; }
+.smart-facet-group > summary svg { margin-left: auto; transition: transform .2s; }
+.smart-facet-group[open] > summary svg { transform: rotate(180deg); }
+.smart-facet-options { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 10px 11px; }
+.smart-facet-options button, .smart-facet-availability { min-height: 37px; padding: 7px 10px; border: 1px solid var(--line, #dce5ef); border-radius: 999px; background: var(--card, #fff); color: var(--foreground, #071a39); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.smart-facet-options button small { margin-left: 6px; opacity: .7; }
+.smart-facet-options button[aria-pressed="true"], .smart-facet-availability[aria-pressed="true"] { border-color: #e87520; background: #e87520; color: #fff; }
+.smart-facet-options button:disabled { opacity: .38; cursor: not-allowed; }
+.smart-facet-availability { justify-self: start; }
+.smart-facets-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 7px; }
+.smart-facets-footer span { margin-right: auto; color: var(--muted-foreground, #617087); font-size: 13px; }
+.smart-facets-footer button { min-height: 38px; padding: 7px 11px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line, #dce5ef); border-radius: 10px; background: var(--soft, #f7f9fc); color: inherit; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.smart-facets-footer button:last-child { background: #071a39; color: #fff; }
+.smart-facets-footer button:disabled { opacity: .4; cursor: not-allowed; }
+.brand-product-drawer-panel .smart-facets { margin: 10px 0 16px; }
+.floating-scroll-top { display: none; }
+@media (max-width: 760px) {
+  .floating-scroll-top { position: fixed; z-index: 45; left: 14px; bottom: calc(91px + env(safe-area-inset-bottom)); width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; background: #f47b25; color: #fff; box-shadow: 0 12px 28px rgba(5,22,49,.22); cursor: pointer; }
+  .smart-facets { margin: 8px 0 12px; }
+  .smart-facets-trigger { min-height: 48px; }
+}
+html[data-theme="dark"] .smart-facets, html[data-theme="dark"] .smart-facet-group { border-color: #293b52; background: #0d182a; color: #f6f8fc; }
+html[data-theme="dark"] .smart-facet-options button, html[data-theme="dark"] .smart-facet-availability, html[data-theme="dark"] .smart-facets-footer button { border-color: #31445c; background: #14233a; color: #f6f8fc; }
+html[data-theme="dark"] .smart-facet-options button[aria-pressed="true"], html[data-theme="dark"] .smart-facet-availability[aria-pressed="true"] { border-color: #f47b25; background: #f47b25; color: #071426; }
+html[data-theme="dark"] .floating-scroll-top { background: #e87520; color: #061426; border-color: #f49b59; }
+@media (prefers-reduced-motion: reduce) { .smart-facets-trigger > svg:last-child, .smart-facet-group > summary svg { transition: none; } }

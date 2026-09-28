@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/catalog";
 import type { SubcategoryDefinition } from "@/lib/catalog/categories";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
@@ -10,6 +10,32 @@ import { ProductCard } from "./product-card";
 import Link from "./store-link";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
+import { matchesFacets, type FacetSelection } from "@/lib/catalog/smart-facets";
+import { SmartFacetDrawer } from "./smart-facet-drawer";
+
+function BrandFilteredPanel({ products, brandSlug }: { products: Product[]; brandSlug: string }) {
+  const storageKey = `amarango-facets:celulares:${brandSlug}`;
+  const [selected, setSelected] = useState<FacetSelection>({});
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(storageKey) || "{}");
+      if (typeof saved.storage === "string" && products.some((product) => matchesFacets(product, "celulares", { storage: saved.storage }))) setSelected({ storage: saved.storage });
+      setAvailableOnly(saved.availableOnly === true);
+    } catch { /* Ignore stale local preferences. */ }
+    setReady(true);
+  }, [products, storageKey]);
+  useEffect(() => { if (ready) sessionStorage.setItem(storageKey, JSON.stringify({ ...selected, availableOnly })); }, [availableOnly, ready, selected, storageKey]);
+  const filtered = useMemo(() => products.filter((product) => matchesFacets(product, "celulares", selected) && (!availableOnly || product.stock.status === "in_stock")), [availableOnly, products, selected]);
+  return <>
+    <SmartFacetDrawer products={products} scope="celulares" selected={selected} onSelect={(key, value) => setSelected((current) => ({ ...current, [key]: value }))} onClear={() => { setSelected({}); setAvailableOnly(false); }} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />
+    <div className="brand-product-drawer-grid">
+      {filtered.map((product) => <ProductCard key={product.id} product={product} visualContext="brand" />)}
+    </div>
+    {!filtered.length && <div className="brand-product-drawer-empty">No hay productos con esta combinación. Limpiá los filtros para ver todos.</div>}
+  </>;
+}
 
 type BrandProductAccordionProps = {
   categorySlug: string;
@@ -83,9 +109,7 @@ export function BrandProductAccordion({ categorySlug, products, brands }: BrandP
                     <Link href={`/categoria/${categorySlug}?marca=${encodeURIComponent(brand.brand)}#catalogo`}>Ver tienda completa <span aria-hidden="true">→</span></Link>
                   </header>
                   {brandProducts.length ? (
-                    <div className="brand-product-drawer-grid">
-                      {brandProducts.map((product) => <ProductCard key={product.id} product={product} visualContext="brand" />)}
-                    </div>
+                    <BrandFilteredPanel products={brandProducts} brandSlug={brand.slug} />
                   ) : (
                     <div className="brand-product-drawer-empty">
                       <strong>El espacio visual ya está listo.</strong>

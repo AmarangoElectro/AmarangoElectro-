@@ -2,8 +2,10 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./growth.css";
 import "./professional-app-ux.css";
+import "./smart-navigation.css";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";
+import { FloatingScrollTop } from "./components/floating-scroll-top";
 import { PerformanceBudget } from "./components/performance-budget";
 import { PwaManager } from "./components/pwa-manager";
 import { ScrollQualityManager } from "./components/scroll-quality-manager";
@@ -36,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <ScrollQualityManager />
         <PwaManager />
         <RouteScrollReset />
+        <FloatingScrollTop />
         <GrowthAttributionCapture />
         {children}
         <Toaster position="bottom-center" richColors />
