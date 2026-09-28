@@ -2,7 +2,7 @@
 
 import Link from "./store-link";
 import Image from "next/image";
-import { Heart, HelpCircle, Menu, Search, ShieldCheck, Store, UsersRound, X } from "lucide-react";
+import { ArrowUp, HelpCircle, Menu, Search, ShieldCheck, Store, UsersRound, X } from "lucide-react";
 import { SoundToggle } from "./sound-toggle";
 import { ThemeToggle } from "./theme-toggle";
 import { InstallAppButton } from "./install-app-button";
@@ -19,6 +19,14 @@ const navigation = [
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [canScrollTop, setCanScrollTop] = useState(false);
+
+  useEffect(() => {
+    const syncScrollTop = () => setCanScrollTop(window.scrollY > 360);
+    syncScrollTop();
+    window.addEventListener("scroll", syncScrollTop, { passive: true });
+    return () => window.removeEventListener("scroll", syncScrollTop);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -28,6 +36,11 @@ export function SiteHeader() {
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [open]);
+
+  function scrollToTop() {
+    playSonicCue("navigate");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   return (
     <>
@@ -50,9 +63,16 @@ export function SiteHeader() {
           <Link className="header-help-link" href="/#experiencia" aria-label="Ayuda para comprar" onClick={() => playSonicCue("navigate")}>
             <HelpCircle size={20} strokeWidth={1.8} />
           </Link>
-          <Link className="header-favorites-link" href="/buscar?favoritos=1#catalogo" aria-label="Ver favoritos guardados en este dispositivo" onClick={() => playSonicCue("navigate")}>
-            <Heart size={20} strokeWidth={1.8} />
-          </Link>
+          <button
+            className={`header-scroll-top ${canScrollTop ? "is-active" : ""}`}
+            type="button"
+            aria-label="Volver arriba"
+            title="Volver arriba"
+            disabled={!canScrollTop}
+            onClick={scrollToTop}
+          >
+            <ArrowUp size={20} strokeWidth={1.9} />
+          </button>
           <button
             className="store-menu-button"
             type="button"

@@ -1,0 +1,140 @@
+/*
+ * V16 professional mobile interaction layer.
+ * The storefront behaves like an app: general chrome/copy is not selectable,
+ * while editable and explicitly copyable surfaces remain selectable.
+ */
+
+body,
+body * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+[contenteditable="true"],
+[data-copyable="true"],
+.app-copyable {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default;
+}
+
+/* Keep form editing and native text entry fully usable. */
+input,
+textarea {
+  cursor: text;
+}
+
+/* Header scroll-to-top: occupies the former favorites shortcut. */
+.header-scroll-top {
+  transition:
+    opacity .18s ease,
+    transform .18s ease,
+    background-color .18s ease,
+    color .18s ease;
+}
+
+.header-scroll-top:disabled {
+  opacity: .32;
+  cursor: default;
+}
+
+.header-scroll-top.is-active {
+  opacity: 1;
+}
+
+.header-scroll-top.is-active:hover,
+.header-scroll-top.is-active:focus-visible {
+  background: color-mix(in srgb, var(--orange) 10%, var(--secondary));
+  color: var(--orange);
+  transform: translateY(-1px);
+}
+
+.header-scroll-top:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--orange) 65%, #fff);
+  outline-offset: 2px;
+}
+
+/* Amarango toast surface: no generic grey browser-card feel. */
+.toaster [data-sonner-toast] {
+  border: 1px solid color-mix(in srgb, var(--orange) 20%, var(--border)) !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(145deg,
+      color-mix(in srgb, var(--card) 96%, var(--orange) 4%),
+      var(--card)) !important;
+  color: var(--card-foreground) !important;
+  box-shadow: 0 18px 52px rgba(6, 26, 55, .18) !important;
+  backdrop-filter: blur(18px);
+}
+
+.toaster [data-sonner-toast] [data-icon] {
+  color: var(--orange) !important;
+}
+
+.toaster [data-sonner-toast] [data-title] {
+  font-weight: 850 !important;
+  letter-spacing: -.01em;
+}
+
+.toaster [data-sonner-toast] [data-description] {
+  color: var(--muted-foreground) !important;
+}
+
+/* Dialogs and confirmations follow the same application surface in both themes. */
+[data-slot="dialog-content"],
+[data-slot="alert-dialog-content"] {
+  border: 1px solid color-mix(in srgb, var(--orange) 16%, var(--border)) !important;
+  border-radius: 22px !important;
+  background:
+    linear-gradient(155deg,
+      color-mix(in srgb, var(--card) 97%, var(--orange) 3%),
+      var(--card)) !important;
+  color: var(--card-foreground) !important;
+  box-shadow: 0 28px 90px rgba(5, 20, 42, .24) !important;
+}
+
+[data-slot="dialog-overlay"],
+[data-slot="alert-dialog-overlay"] {
+  background: rgba(3, 10, 22, .62) !important;
+  backdrop-filter: blur(5px);
+}
+
+[data-slot="dialog-title"],
+[data-slot="alert-dialog-title"] {
+  color: var(--foreground) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.025em;
+}
+
+[data-slot="dialog-description"],
+[data-slot="alert-dialog-description"] {
+  color: var(--muted-foreground) !important;
+  line-height: 1.55;
+}
+
+html[data-theme="dark"] .toaster [data-sonner-toast],
+html[data-theme="dark"] [data-slot="dialog-content"],
+html[data-theme="dark"] [data-slot="alert-dialog-content"] {
+  border-color: color-mix(in srgb, var(--orange) 30%, #26364b) !important;
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, #071426 94%, var(--orange) 6%),
+      #050d18) !important;
+  color: #f8fbff !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, .46) !important;
+}
+
+html[data-theme="dark"] .toaster [data-sonner-toast] [data-description],
+html[data-theme="dark"] [data-slot="dialog-description"],
+html[data-theme="dark"] [data-slot="alert-dialog-description"] {
+  color: #aab8ca !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-scroll-top {
+    transition: none;
+  }
+}
