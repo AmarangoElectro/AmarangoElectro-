@@ -9506,3 +9506,38 @@ html[data-theme="dark"] .home-final-sectors .featured-sector-copy small { color:
     margin-right: 8px;
   }
 }
+/* The supplier flyer is the source of product details. Keep its native ratio
+   instead of squeezing it into the fixed portrait thumbnail viewport. */
+.product-card-premium .product-visual,
+.home-products-grid .product-card-premium .product-visual,
+.category-page .product-card-premium .product-visual {
+  height: auto;
+  aspect-ratio: auto;
+}
+.product-card-premium .product-image,
+.product-card-premium[data-product-category] .product-image {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  padding: 0;
+  object-fit: contain;
+  object-position: center;
+  transform: none;
+}
+@media (max-width: 680px) {
+  .category-page .product-card-premium .feature-chips,
+  .product-card-premium .feature-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .product-card-premium .feature-chips span {
+    padding: 4px 6px;
+    font-size: .62rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+}

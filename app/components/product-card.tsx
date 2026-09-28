@@ -98,7 +98,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
       <div className="product-visual">
         <span className="product-card-watermark" aria-hidden="true">{visualTheme.watermarkLabel}</span>
         {product.image ? (
-          <Image className="product-image" src={product.image.src} alt={product.image.alt} fill sizes="(max-width: 680px) 50vw, (max-width: 1100px) 50vw, 33vw" loading="lazy" unoptimized />
+          <Image className="product-image" src={product.image.src} alt={product.image.alt} width={900} height={1200} sizes="(max-width: 680px) 50vw, (max-width: 1100px) 50vw, 33vw" loading="lazy" unoptimized />
         ) : (
           <>
             <div className="product-monogram" aria-hidden="true"><span>{initials}</span></div>
@@ -117,7 +117,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         <h3>{product.name}</h3>
         {product.description ? <p className="product-description">{product.description}</p> : null}
         {product.model ? <dl className="product-card-specs"><div><dt>Modelo</dt><dd>{product.model}</dd></div></dl> : null}
-        {product.features.length > 0 ? <div className="feature-chips">{product.features.slice(0, 3).map((feature) => <span key={feature}>{feature}</span>)}</div> : null}
+        {product.features.length > 0 ? <div className="feature-chips" aria-label="Características del producto">{product.features.slice(0, 5).map((feature) => <span key={feature}>{feature}</span>)}</div> : null}
         <div className={`product-card-commerce ${priceLabel ? "has-price" : "price-pending"}`}>
           {priceLabel ? <strong className="product-card-price">{priceLabel}</strong> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
           {sixInstallmentsLabel ? <span className="product-card-installments">{sixInstallmentsLabel}</span> : priceLabel ? <span className="product-card-installments">Consultá opciones de pago y disponibilidad</span> : null}

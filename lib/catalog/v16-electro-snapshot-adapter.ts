@@ -71,6 +71,11 @@ function slugPart(value: string) {
     .replace(/^-|-$/g, "");
 }
 
+function explicitFeatures(value: string | null): string[] {
+  if (!value) return [];
+  return value.split(/\s*\*\s*|\s*[;\n]\s*/).map((part) => part.trim()).filter(Boolean).slice(0, 5);
+}
+
 function freezeProduct(product: Product) {
   Object.freeze(product.features);
   Object.freeze(product.specifications);
@@ -101,7 +106,7 @@ const products = Object.freeze(
           quantity: null,
           label: row.stock_label,
         },
-        features: [],
+        features: explicitFeatures(row.characteristics),
         specifications: {},
         description: row.characteristics,
         warranty: null,
