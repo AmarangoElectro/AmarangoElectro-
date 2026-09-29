@@ -879,6 +879,19 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
   .storePromoContent>p{font-size:9px!important}
   .storePromoCta{width:calc(100% + 50%);font-size:9px;min-height:40px}
 }
+
+/* Expense flow — simple enough to understand at a glance */
+.expenseSimpleSheet .cats{margin-top:8px}
+.expenseStep{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:12px}
+.expenseStep b{font-size:12px;color:var(--foreground)}
+.expenseStep small{font-size:9px;color:var(--muted);text-align:right}
+.expenseAmountStep{margin-top:15px}
+.expenseMore{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--soft);padding:0 10px 10px}
+.expenseMore summary{cursor:pointer;list-style:none;padding:11px 2px 2px;font-size:10px;font-weight:900;color:var(--muted)}
+.expenseMore summary::-webkit-details-marker{display:none}
+.expenseMore summary:after{content:" +";color:var(--orange)}
+.expenseMore[open] summary:after{content:" −"}
+.expenseSimpleSheet .cat.on{outline:2px solid var(--orange);outline-offset:1px}
 </style>
 </head>
 <body>
@@ -1156,7 +1169,22 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
   <button class="secondary" onclick="closeM('expensesModal')">Cerrar</button>
 </div></div>
 
-<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet"><h3 id="expenseTitle">Agregar gasto</h3><div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" placeholder="0"></div><div id="catGrid" class="cats"></div><input id="note" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px"><label class="fieldLabel" for="expenseDate">Fecha</label><input id="expenseDate" type="date"><label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div><label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label><button id="expenseSaveBtn" class="primary" onclick="saveExpense()">+ Guardar gasto</button><button class="secondary" onclick="closeM('expenseModal')">Cancelar</button></div></div>
+<div id="expenseModal" class="modal" onclick="backdrop(event,'expenseModal')"><div class="sheet expenseSimpleSheet">
+  <h3 id="expenseTitle">Agregar gasto</h3>
+  <div class="expenseStep"><b>1. Elegí el gasto</b><small>Tocá una categoría.</small></div>
+  <div id="catGrid" class="cats"></div>
+  <div class="expenseStep expenseAmountStep"><b>2. Anotá el monto</b><small id="expenseFlowHelp">Después tocá OK en el teclado y se guarda.</small></div>
+  <div class="amount"><span id="expenseCurrencySymbol">$</span><input id="expenseAmount" type="number" inputmode="decimal" enterkeyhint="done" placeholder="0" onkeydown="handleExpenseAmountKey(event)"></div>
+  <input id="note" enterkeyhint="done" placeholder="Nota opcional: alfajor, atado, café..." style="margin-top:13px" onkeydown="handleExpenseNoteKey(event)">
+  <details class="expenseMore">
+    <summary>Más opciones</summary>
+    <label class="fieldLabel" for="expenseDate">Fecha</label><input id="expenseDate" type="date">
+    <label class="fieldLabel">¿Qué tipo de gasto es?</label><div id="frequencyRow" class="frequencyRow"><button class="freqBtn on" data-freq="once" onclick="setExpenseFrequency('once')">Una vez</button><button class="freqBtn" data-freq="daily" onclick="setExpenseFrequency('daily')">Diario</button><button class="freqBtn" data-freq="weekly" onclick="setExpenseFrequency('weekly')">Semanal</button><button class="freqBtn" data-freq="monthly" onclick="setExpenseFrequency('monthly')">Mensual</button></div>
+  </details>
+  <label id="rememberQuickRow" class="rememberRow hidden"><input id="rememberQuickAmount" type="checkbox"><span><b>Recordar este importe como “el de siempre”</b><br>Después vas a poder sumarlo con un solo toque.</span></label>
+  <button id="expenseSaveBtn" class="primary" onclick="saveExpense()">Guardar</button>
+  <button class="secondary" onclick="closeM('expenseModal')">Cancelar</button>
+</div></div>
 
 <div id="quickItemMenuModal" class="modal" onclick="backdrop(event,'quickItemMenuModal')"><div class="sheet quickItemMenuSheet">
   <div class="dailyHandle"></div>
@@ -1292,7 +1320,7 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 </div>
 
 <script>
-const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🛒","Supermercado"],["🏪","Almacén"],["🚌","Viáticos"],["🚗","Uber"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["📱","Teléfono"],["🤖","IA"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍦","Helados"],["🍷","Alcohol"],["🧩","Hábitos a reducir"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
+const cats=[["☕","Café"],["🍫","Kiosco"],["🚬","Cigarrillos"],["🍺","Cerveza"],["🥤","Bebidas"],["🍽️","Comida"],["🛒","Supermercado"],["🏪","Almacén"],["🚌","Viáticos"],["🚗","Uber"],["💸","Deudas"],["🏠","Alquiler"],["💧","Agua"],["💡","Luz"],["🔥","Gas"],["📶","Internet"],["📱","Teléfono"],["🤖","IA"],["🏋️","Gimnasio"],["🍴","Restaurantes"],["🍬","Golosinas"],["🍦","Helados"],["🍷","Alcohol"],["🧩","Hábitos a reducir"],["🎉","Salidas"],["⛽","Nafta"],["📺","Streaming"],["💳","Cuotas"],["👕","Ropa"],["💊","Salud"],["🛍️","Compras"],["➕","Otros"]];
 const DEFAULT_QUICK_VISIBLE=["Café","Kiosco","Comida","Viáticos","Bebidas","Otros"];
 const GOAL_KEYS=["week","month","year","five","ten"];
 const CURRENCIES={ARS:{symbol:"$",digits:0},USD:{symbol:"US$",digits:2},EUR:{symbol:"€",digits:2},BRL:{symbol:"R$",digits:2},UYU:{symbol:"$U",digits:0},CLP:{symbol:"CLP$",digits:0},GBP:{symbol:"£",digits:2},PYG:{symbol:"₲",digits:0}};
@@ -1324,7 +1352,31 @@ function dateInputFromTs(ts){const d=new Date(Number(ts)||Date.now()),y=d.getFul
 function tsFromDateInput(v,fallback=Date.now()){if(!v)return Number(fallback)||Date.now();const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d,12,0,0,0).getTime()}
 function microSpendFor(list){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Helados","Alcohol","Hábitos a reducir","Streaming","Restaurantes","Salidas"]);return list.reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
 function microSpend(){const micro=new Set(["Café","Kiosco","Cigarrillos","Cerveza","Bebidas","Golosinas","Helados","Alcohol","Hábitos a reducir","Streaming","Restaurantes","Salidas"]);return monthExpenses().reduce((a,e)=>a+(micro.has(e.category)?Number(e.amount||0):0),0)}
-function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>{selected=n;renderCats()};catGrid.appendChild(b)})}
+function renderCats(){catGrid.innerHTML="";cats.forEach(([e,n])=>{let b=document.createElement("button");b.className="cat"+(n===selected?" on":"");b.innerHTML='<div style="font-size:21px">'+e+'</div><b>'+n+'</b>';b.onclick=()=>selectExpenseCategory(n);catGrid.appendChild(b)})}
+function updateExpenseNoteMode(){
+  const n=$("note"),help=$("expenseFlowHelp");if(!n)return;
+  if(selected==="Deudas"){
+    n.placeholder="¿A quién le debés? Ej: Ángela, Marcelo...";
+    if(help)help.textContent="Poné el monto, tocá OK y después escribí el nombre."
+  }else{
+    n.placeholder="Nota opcional: alfajor, atado, café...";
+    if(help)help.textContent="Después tocá OK en el teclado y se guarda."
+  }
+}
+function selectExpenseCategory(name){
+  selected=name;renderCats();updateExpenseNoteMode();
+  setTimeout(()=>{if($("expenseAmount")){expenseAmount.focus();try{expenseAmount.select()}catch(e){}}},50)
+}
+function handleExpenseAmountKey(e){
+  if(e.key!=="Enter")return;e.preventDefault();
+  if(!selected){notify("Primero elegí qué gasto es.","warn");return}
+  if(selected==="Deudas"&&!note.value.trim()){note.focus();return}
+  saveExpense()
+}
+function handleExpenseNoteKey(e){
+  if(e.key!=="Enter")return;e.preventDefault();
+  saveExpense()
+}
 function categoryEmoji(name){return (cats.find(c=>c[1]===name)||["🧾"])[0]}
 function monthCategoryCount(cat){return monthExpenses().filter(e=>e.category===cat).length}
 function monthQuickUsualCount(cat){
@@ -1719,8 +1771,8 @@ function stayInApp(){closeM("exitConfirmModal")}
 function confirmAppExit(){closeM("exitConfirmModal");allowNativeExit=true;history.back()}
 function setExpenseFrequency(freq){expenseFrequency=freq||"once";document.querySelectorAll("#frequencyRow .freqBtn").forEach(b=>b.classList.toggle("on",b.dataset.freq===expenseFrequency))}
 function frequencyLabel(freq){return freq==="daily"?"Diario":freq==="weekly"?"Semanal":freq==="monthly"?"Mensual":""}
-function openExpense(){editingExpenseIndex=null;quickContext=null;selected="Otros";expenseFrequency="once";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="+ Guardar gasto";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(Date.now());if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");setExpenseFrequency("once");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
-function openQuick(cat){editingExpenseIndex=null;quickContext=cat;selected=cat;expenseFrequency="daily";if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="+ Guardar gasto";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(Date.now());const preset=Number(state.quickPresets?.[cat]?.amount)||0;expenseAmount.value=preset||"";if($("rememberQuickRow"))$("rememberQuickRow").classList.remove("hidden");if($("rememberQuickAmount"))$("rememberQuickAmount").checked=!preset;setExpenseFrequency("daily");renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
+function openExpense(){editingExpenseIndex=null;quickContext=null;selected="";expenseFrequency="once";if($("expenseTitle"))$("expenseTitle").textContent="Agregar gasto";if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="Guardar";expenseAmount.value="";note.value="";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(Date.now());if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");setExpenseFrequency("once");renderCats();updateExpenseNoteMode();openM("expenseModal")}
+function openQuick(cat){editingExpenseIndex=null;quickContext=cat;selected=cat;expenseFrequency="daily";if($("expenseTitle"))$("expenseTitle").textContent="Gasto rápido · "+cat;if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="+ Guardar gasto";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(Date.now());const preset=Number(state.quickPresets?.[cat]?.amount)||0;expenseAmount.value=preset||"";if($("rememberQuickRow"))$("rememberQuickRow").classList.remove("hidden");if($("rememberQuickAmount"))$("rememberQuickAmount").checked=!preset;setExpenseFrequency("daily");renderCats();updateExpenseNoteMode();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)}
 function editExpense(i){
   const e=state.expenses[i];if(!e)return;
   editingExpenseIndex=i;quickContext=null;selected=e.category||"Otros";expenseFrequency=e.frequency||"once";
@@ -1728,7 +1780,7 @@ function editExpense(i){
   if($("expenseSaveBtn"))$("expenseSaveBtn").textContent="Guardar cambios";
   expenseAmount.value=Number(e.amount)||"";note.value=e.note||"";if($("expenseDate"))$("expenseDate").value=dateInputFromTs(e.ts);
   if($("rememberQuickRow"))$("rememberQuickRow").classList.add("hidden");
-  setExpenseFrequency(expenseFrequency);renderCats();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)
+  setExpenseFrequency(expenseFrequency);renderCats();updateExpenseNoteMode();openM("expenseModal");setTimeout(()=>expenseAmount.focus(),120)
 }
 function openIncome(){incomeInput.value=state.income||"";savingPct.value=state.savingPct;openM("incomeModal")}
 function openGoal(target=""){
@@ -1741,7 +1793,9 @@ function openGoal(target=""){
 function loadGoalPeriod(){}
 function chooseGoalSuggestion(name,icon,period){goalPeriod.value=period;goalName.value=name;goalIcon.value=icon;goalAmount.value="";setTimeout(()=>goalAmount.focus(),80)}
 function saveExpense(){
-  const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");return}
+  if(!selected){notify("Primero elegí qué gasto es.","warn");return}
+  const a=Number(expenseAmount.value);if(!a||a<=0){notify("Ingresá un importe válido.","warn");expenseAmount.focus();return}
+  if(selected==="Deudas"&&!note.value.trim()){notify("Poné a quién corresponde la deuda. Ej: Ángela o Marcelo.","warn");note.focus();return}
   if(editingExpenseIndex!==null){
     const old=state.expenses[editingExpenseIndex];if(!old)return;
     state.expenses[editingExpenseIndex]={...old,amount:a,category:selected,note:note.value.trim(),frequency:expenseFrequency||"once",ts:tsFromDateInput($("expenseDate")?.value,old.ts)};
@@ -2060,7 +2114,7 @@ function finishGuide(mark=true){
 }
 addEventListener("resize",()=>{if($("guideLayer")&&$("guideLayer").classList.contains("show"))showGuideStep()});
 
-const APP_BUILD="mi-balance-v33-promo-legibility-uber";
+const APP_BUILD="mi-balance-v34-deudas-simple-expense-flow";
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
