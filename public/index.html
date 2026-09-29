@@ -895,6 +895,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="ruletaEditarAbrir()">🎰 Editar premios de la ruleta</button>
     <button id="tienda-btn-fmtcuota" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="tiendaToggleFormatoCuota()">💳 Formato de cuotas: Cajita</button>
+    <button id="tienda-btn-sistema-precios" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#0B2D6B,#FF7A00);"
+      onclick="abrirSistemaPrecios()">🧮 Sistema de precios: Clásica</button>
     <button id="tienda-btn-subs" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="verSuscriptores()">📧 Ver correos suscritos</button>
     <button id="tienda-btn-pdf" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#c0392b;"
@@ -1156,6 +1158,52 @@ function armarCuotasLines(precio, prod){
     lines.push("💳 "+n+" cuotas fijas de "+fmt(valorCuota));
   });
   return lines;
+}
+function armarMensajePlanProtegido(nombre,datos,link){
+  if(!datos||datos.modo!=='protegida')return '';
+  var cuota3=datos.plan3.cuotas[0]||0;
+  var cuota6=datos.plan6.cuotas[0]||0;
+  var msg='*'+String(nombre||'PRODUCTO').toUpperCase()+'*\n\n'
+    +'🤝 Retiralo por solo *'+fmt(datos.inicial)+'*\n\n'
+    +'🚀 *3 pagos*\n🔸 Inicial + 2 cuotas de *'+fmt(cuota3)+'*\n\n'
+    +'💥 *6 pagos*\n🔸 Inicial + 5 cuotas de *'+fmt(cuota6)+'*\n\n'
+    +'Contado ➡️ *'+fmt(datos.contado)+'*';
+  if(link)msg+='\n\n'+link;
+  return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
+}
+function armarMensajeProductoPorModo(p,modo,link){
+  var datos=tiendaDatosPrecio(p,modo);
+  if(modo==='protegida'&&datos.modo!=='protegida')return '';
+  if(datos.modo==='protegida')return armarMensajePlanProtegido(p.nombre,datos,link);
+  var clasico=armarMensajeAmarango(p.nombre,Number(p.venta)||0,armarCuotasLines(Number(p.venta)||0,p));
+  return clasico+(link?'\n\n🛒 Miralo acá: '+link:'');
+}
+function armarMensajeProductoAmbos(p,link){
+  var protegido=armarMensajeProductoPorModo(p,'protegida',link);
+  if(!protegido)return '';
+  return '🐝 *OPCIÓN CALCULADORA CLÁSICA*\n\n'+armarMensajeProductoPorModo(p,'clasica','')
+    +'\n\n━━━━━━━━━━━━━\n\n🛡️ *OPCIÓN PLAN PROTEGIDO*\n\n'+protegido;
+}
+function htmlPlanProtegidoResumen(datos,administrativo){
+  if(!datos)return '<div style="padding:12px;color:#B91C1C;background:#FEF2F2;border-radius:10px;">Este producto no tiene costo real para calcular el Plan Protegido.</div>';
+  var c3=datos.plan3.cuotas, c6=datos.plan6.cuotas;
+  var html='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:14px;padding:14px;margin-bottom:10px;color:#fff;box-shadow:0 5px 16px rgba(11,45,107,.22);">'
+    +'<div style="font-size:.65rem;font-weight:900;color:#FFD7B0;letter-spacing:.6px;">🤝 RETIRALO POR SOLO</div>'
+    +'<div style="font-size:2rem;font-weight:900;color:var(--nar);line-height:1.1;margin:4px 0 10px;">'+fmt(datos.inicial)+'</div>'
+    +'<div style="font-size:.73rem;font-weight:800;margin-bottom:5px;">🚀 3 pagos</div><div style="font-size:.7rem;opacity:.9;margin-bottom:9px;">Inicial + 2 cuotas de <b>'+fmt(c3[0])+'</b>'+(c3[1]!==c3[0]?' · última '+fmt(c3[1]):'')+'</div>'
+    +'<div style="font-size:.73rem;font-weight:800;margin-bottom:5px;">💥 6 pagos</div><div style="font-size:.7rem;opacity:.9;">Inicial + 5 cuotas de <b>'+fmt(c6[0])+'</b>'+(c6[4]!==c6[0]?' · última '+fmt(c6[4]):'')+'</div>'
+    +'<div style="height:1px;background:rgba(255,255,255,.16);margin:10px 0 8px;"></div><div style="font-size:.72rem;">Contado ➡️ <b>'+fmt(datos.contado)+'</b></div>'
+    +'</div>'
+    +'<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:9px 11px;font-size:.67rem;color:#08783E;line-height:1.55;margin-bottom:10px;">✅ Cuotas fijas<br>✅ Una sola inicial<br>✅ Después cuotas más bajas</div>';
+  if(administrativo){
+    html+='<div style="background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:10px 12px;font-size:.68rem;color:var(--az);line-height:1.65;margin-bottom:10px;">'
+      +'<b>Detalle administrativo</b><br>Costo real: '+fmt(datos.costo)+' · Margen: '+datos.margen+'%<br>'
+      +'Contado: '+fmt(datos.contado)+'<br>Total Plan 3: '+fmt(datos.plan3.total)+' · Inicial: '+fmt(datos.inicial)+'<br>'
+      +'Cuotas Plan 3: '+c3.map(fmt).join(' + ')+'<br>'
+      +'Total Plan 6: '+fmt(datos.plan6.total)+' · Inicial: '+fmt(datos.inicial)+'<br>'
+      +'Cuotas Plan 6: '+c6.map(fmt).join(' + ')+'</div>';
+  }
+  return html;
 }
 var TC=1500;
 var ADMIN_PASS="Amara4";
@@ -1970,6 +2018,161 @@ function calcularTotalPlan(precioVenta,n){
   return precioVenta*(1+pct/100);
 }
 
+// ═══ SISTEMA DE PRECIOS: CLÁSICA + PLAN PROTEGIDO ═══
+// La selección vive fuera del catálogo: nunca modifica costo, venta, stock ni
+// datos de proveedores. Sólo decide cómo se calculan y muestran los importes.
+var SISTEMA_PRECIOS_ID='sistema_precios';
+var SISTEMA_PRECIOS_PRODUCTOS_ID='sistema_precios_productos';
+var SISTEMA_PRECIOS_KEY='ae_sistema_precios';
+var SISTEMA_PRECIOS_PRODUCTOS_KEY='ae_sistema_precios_productos';
+var sistemaPreciosGlobal=(function(){
+  try{return localStorage.getItem(SISTEMA_PRECIOS_KEY)==='protegida'?'protegida':'clasica';}catch(e){return 'clasica';}
+})();
+var sistemaPreciosProductos=(function(){
+  try{return JSON.parse(localStorage.getItem(SISTEMA_PRECIOS_PRODUCTOS_KEY)||'{}')||{};}catch(e){return {};}
+})();
+
+function planProtegidoMargen(costo){
+  costo=Number(costo)||0;
+  if(costo<50000)return 80;
+  if(costo<100000)return 60;
+  if(costo<250000)return 50;
+  if(costo<350000)return 40;
+  return 30;
+}
+function planProtegidoPiso(costo){
+  costo=Number(costo)||0;
+  if(costo>=350000)return 489998.60;
+  if(costo>=250000)return 374998.50;
+  if(costo>=100000)return 159998.40;
+  if(costo>=50000)return 89998.20;
+  return 0;
+}
+function planProtegidoRedondear(valor){return Math.ceil((Number(valor)||0)/500)*500;}
+function planProtegidoCuotas(total,inicial,cantidad){
+  var saldo=Math.max(0,Math.round(total)-Math.round(inicial));
+  var cuotaBase=Math.ceil(saldo/cantidad);
+  var cuotas=[];
+  for(var i=0;i<cantidad-1;i++)cuotas.push(cuotaBase);
+  cuotas.push(saldo-cuotaBase*(cantidad-1));
+  return cuotas;
+}
+function calcularPlanProtegidoDesdeTotales(costo,contadoForzado){
+  costo=Math.round(Number(costo)||0);
+  if(costo<=0)return null;
+  var margen=planProtegidoMargen(costo);
+  var precioBase=costo*(1+margen/100);
+  var coherente=Math.max(precioBase,planProtegidoPiso(costo));
+  var contado=Number(contadoForzado)>0?Math.round(Number(contadoForzado)):planProtegidoRedondear(coherente);
+  var total3=Math.round(contado*1.35);
+  var total6=Math.round(contado*1.78);
+  var techo=Math.floor(contado*0.55);
+  var inicialBase=Math.min(costo*0.75,contado*0.55);
+  var inicial=Math.ceil(Math.max(inicialBase,total3/3,total6/6));
+  if(inicial>techo)inicial=techo;
+  var cuotas3=planProtegidoCuotas(total3,inicial,2);
+  var cuotas6=planProtegidoCuotas(total6,inicial,5);
+  while(inicial<techo && (cuotas3.some(function(x){return inicial<=x;}) || cuotas6.some(function(x){return inicial<=x;}))){
+    inicial++;
+    cuotas3=planProtegidoCuotas(total3,inicial,2);
+    cuotas6=planProtegidoCuotas(total6,inicial,5);
+  }
+  return {
+    modo:'protegida',costo:costo,margen:margen,precioBase:precioBase,
+    precioCoherente:coherente,contado:contado,inicial:inicial,
+    plan3:{total:total3,cuotas:cuotas3},plan6:{total:total6,cuotas:cuotas6},
+    techoInicial:techo
+  };
+}
+function calcularPlanProtegido(costo){return calcularPlanProtegidoDesdeTotales(costo,0);}
+function sistemaPrecioOverride(id){
+  var v=sistemaPreciosProductos[String(id)]||'general';
+  return /^(clasica|protegida)$/.test(v)?v:'general';
+}
+function sistemaPrecioProducto(p){
+  if(!p)return 'clasica';
+  var ov=sistemaPrecioOverride(p.id);
+  var modo=ov==='general'?sistemaPreciosGlobal:ov;
+  // Nunca inventar el protegido desde la venta. Sin costo real, usa Clásica.
+  if(modo==='protegida' && !(Number(p.costo)>0))return 'clasica';
+  return modo;
+}
+function tiendaDatosPrecio(p,modoForzado){
+  if(!p)return {modo:'clasica',contado:0};
+  var modo=/^(clasica|protegida)$/.test(modoForzado||'')?modoForzado:sistemaPrecioProducto(p);
+  if(modo==='protegida'){
+    var protegido=calcularPlanProtegido(p.costo);
+    if(protegido)return protegido;
+  }
+  return {modo:'clasica',contado:Number(p.venta)||0,costo:Number(p.costo)||0};
+}
+function tiendaPrecioContado(p,modoForzado){return tiendaDatosPrecio(p,modoForzado).contado;}
+function tiendaGuardarSistemaLocal(){
+  try{localStorage.setItem(SISTEMA_PRECIOS_KEY,sistemaPreciosGlobal);}catch(e){}
+  try{localStorage.setItem(SISTEMA_PRECIOS_PRODUCTOS_KEY,JSON.stringify(sistemaPreciosProductos));}catch(e){}
+}
+function tiendaActualizarBotonSistemaPrecios(){
+  var b=document.getElementById('tienda-btn-sistema-precios');
+  if(b)b.textContent='🧮 Sistema de precios: '+(sistemaPreciosGlobal==='protegida'?'Plan Protegido':'Clásica');
+}
+function bajarSistemaPreciosNube(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
+  return Promise.all([
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',SISTEMA_PRECIOS_ID).maybeSingle(),
+    sbCalc.from('tienda_catalogo').select('datos').eq('id',SISTEMA_PRECIOS_PRODUCTOS_ID).maybeSingle()
+  ]).then(function(res){
+    if(res[0]&&res[0].error)throw res[0].error;
+    if(res[1]&&res[1].error)throw res[1].error;
+    var g=res[0]&&res[0].data&&res[0].data.datos;
+    var m=res[1]&&res[1].data&&res[1].data.datos;
+    if(g&&g.modo)sistemaPreciosGlobal=g.modo==='protegida'?'protegida':'clasica';
+    if(m&&typeof m==='object'&&!Array.isArray(m))sistemaPreciosProductos=m;
+    tiendaGuardarSistemaLocal();tiendaActualizarBotonSistemaPrecios();
+    if(typeof tiendaRender==='function')tiendaRender();
+    var entradaContado=document.getElementById('inp-contado');
+    if(entradaContado&&entradaContado.value&&typeof calcContado==='function')calcContado();
+    return true;
+  }).catch(function(err){console.warn('No se pudo bajar el sistema de precios.',err);return false;});
+}
+function guardarSistemaPreciosNube(){
+  tiendaGuardarSistemaLocal();
+  if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión con Supabase'));
+  return Promise.all([
+    Promise.resolve(sbCalc.from('tienda_catalogo').upsert({id:SISTEMA_PRECIOS_ID,datos:{modo:sistemaPreciosGlobal},actualizado:new Date().toISOString()}).select('datos')),
+    Promise.resolve(sbCalc.from('tienda_catalogo').upsert({id:SISTEMA_PRECIOS_PRODUCTOS_ID,datos:sistemaPreciosProductos,actualizado:new Date().toISOString()}).select('datos'))
+  ]).then(function(res){
+    var fallo=(res||[]).find(function(x){return x&&x.error;});if(fallo)throw fallo.error;return true;
+  });
+}
+function abrirSistemaPrecios(){
+  if(!tiendaEsAdmin)return;
+  var protegida=sistemaPreciosGlobal==='protegida';
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">🧮 Sistema de precios</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);line-height:1.5;margin:6px 0 14px;">Esta selección se aplica a clientes y vendedores en toda la aplicación. Los productos con una excepción propia conservan esa elección.</p>'
+    +'<button class="calc-btn" style="width:100%;margin-bottom:9px;background:'+(!protegida?'var(--az)':'var(--bg)')+';color:'+(!protegida?'#fff':'var(--az)')+';border:2px solid var(--az);" onclick="cambiarSistemaPrecios(\'clasica\')">'+(!protegida?'✅ ':'')+'Calculadora 1 — Clásica</button>'
+    +'<button class="calc-btn" style="width:100%;margin-bottom:9px;background:'+(protegida?'var(--nar)':'var(--bg)')+';color:'+(protegida?'#fff':'var(--nar)')+';border:2px solid var(--nar);" onclick="cambiarSistemaPrecios(\'protegida\')">'+(protegida?'✅ ':'')+'Calculadora 2 — Plan Protegido</button>'
+    +'<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 12px;font-size:.68rem;color:#9A4A00;line-height:1.5;">El Plan Protegido sólo se calcula cuando existe un costo real. Si falta, ese producto continúa en Clásica.</div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:12px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  tiendaModalAbrir(html);
+}
+function cambiarSistemaPrecios(modo){
+  if(!tiendaEsAdmin||!/^(clasica|protegida)$/.test(modo))return;
+  var nombre=modo==='protegida'?'Plan Protegido':'Calculadora Clásica';
+  if(!confirm('¿Activar '+nombre+' en toda la aplicación?\n\nClientes y vendedores verán esta modalidad, salvo excepciones configuradas por producto.'))return;
+  sistemaPreciosGlobal=modo;tiendaGuardarSistemaLocal();tiendaActualizarBotonSistemaPrecios();tiendaRender();
+  var entradaContado=document.getElementById('inp-contado');
+  if(entradaContado&&entradaContado.value&&typeof calcContado==='function')calcContado();
+  guardarSistemaPreciosNube().then(function(){mostrarToast('✅ '+nombre+' activado para todos');abrirSistemaPrecios();})
+    .catch(function(err){alert('⚠️ El cambio quedó en este dispositivo, pero la nube no lo confirmó.\n\n'+(err.message||err));});
+}
+function guardarSistemaPrecioProducto(id,modo){
+  modo=/^(clasica|protegida)$/.test(modo)?modo:'general';
+  if(modo==='general')delete sistemaPreciosProductos[String(id)];
+  else sistemaPreciosProductos[String(id)]=modo;
+  tiendaGuardarSistemaLocal();
+  return guardarSistemaPreciosNube();
+}
+
 /* =========================================================
    TIENDA REVENDEDORES — Etapa 1 (catálogo local + buscador + cuotas)
    ========================================================= */
@@ -2267,6 +2470,7 @@ function tiendaInit(){
     function(){ try{ bajarBancoFotosNube(); }catch(e){} },
     function(){ try{ bajarPremiosRuletaNube(); }catch(e){} },
     function(){ try{ bajarCuponesNube(); }catch(e){} },
+    function(){ try{ bajarSistemaPreciosNube(); }catch(e){} },
     function(){ try{ bajarClientesNube(); }catch(e){} },
     function(){ try{ bajarHistorialNube(); }catch(e){} },
     function(){ try{ if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','formatocuota').maybeSingle().then(function(r){ if(r&&r.data&&r.data.datos){ try{ localStorage.setItem('ae_formato_cuota', r.data.datos); }catch(e){} tiendaRender(); } }).catch(function(){}); } }catch(e){} }
@@ -4022,6 +4226,7 @@ function tiendaAplicarModo(){
   var btnSalirFotos=document.getElementById('tienda-btn-auth-fotos-salir'); if(btnSalirFotos && !tiendaEsAdmin)btnSalirFotos.style.display='none';
   var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
   var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Formato de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
+  var btnSP=document.getElementById('tienda-btn-sistema-precios'); if(btnSP){ btnSP.style.display=tiendaEsAdmin?'block':'none'; tiendaActualizarBotonSistemaPrecios(); }
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
   var btnSub=document.getElementById('tienda-btn-subs'); if(btnSub)btnSub.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
@@ -6335,14 +6540,17 @@ function tiendaRender(){
   var pDia=universo.find(function(p){return p.delDia;});
   if(pDia && verSoloOfertas && !tiendaCategoriaActiva && !qDia){
     var pidDia="'"+pDia.id+"'";
-    var cdDia=mejorCuotaDatos(pDia.venta, pDia);
+    var datosDia=tiendaDatosPrecio(pDia);
+    var cdDia=datosDia.modo==='clasica'?mejorCuotaDatos(pDia.venta, pDia):null;
     diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);border:2px solid #f0c040;position:relative;overflow:hidden;">'
       +'<div style="position:absolute;top:0;right:0;background:#f0c040;color:#1a1a2e;font-size:.6rem;font-weight:900;padding:3px 12px;border-radius:0 14px 0 12px;">🌟 PRODUCTO DEL DÍA</div>'
       +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDelDia('+pidDia+')" title="Quitar de producto del día" style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,.9);border:none;width:26px;height:26px;border-radius:50%;font-size:.85rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
       +(pDia.foto?'<img loading="lazy" decoding="async" src="'+fotoOpt(pDia.foto,180).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(pDia.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" style="width:90px;height:90px;border-radius:12px;object-fit:cover;background:#fff;flex-shrink:0;display:block;">':'<div style="font-size:3rem;flex-shrink:0;">'+catProd(pDia).split(' ')[0]+'</div>')
       +'<div style="flex:1;min-width:0;">'
         +'<div style="color:#fff;font-size:.85rem;font-weight:800;line-height:1.2;margin-top:8px;">'+pDia.nombre+'</div>'
-        +(cdDia
+        +(datosDia.modo==='protegida'
+          ? '<div style="color:#f0c040;font-size:1.35rem;font-weight:900;line-height:1.05;margin-top:3px;">Inicial '+fmt(datosDia.inicial)+'</div><div style="color:#7fe8a0;font-size:.64rem;font-weight:800;">Plan 3 o Plan 6</div><div style="color:rgba(255,255,255,.6);font-size:.66rem;">Contado: '+fmt(datosDia.contado)+'</div>'
+          : cdDia
           ? '<div style="color:#f0c040;font-size:1.5rem;font-weight:900;line-height:1.05;margin-top:2px;">'+fmt(cdDia.valor)+'</div>'
             +'<div style="color:#7fe8a0;font-size:.66rem;font-weight:800;">en '+cdDia.n+(cdDia.sinInteres?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
             +'<div style="color:rgba(255,255,255,.6);font-size:.66rem;">Contado: '+fmt(pDia.venta)+'</div>'
@@ -6362,13 +6570,15 @@ function tiendaRender(){
     dh+='<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;">';
     destacados.forEach(function(p){
       var pid="'"+p.id+"'";
-      var cuota=mejorCuotaTexto(p.venta);
+      var datosDestacado=tiendaDatosPrecio(p);
+      var cuota=datosDestacado.modo==='protegida'?'Inicial '+fmt(datosDestacado.inicial):mejorCuotaTexto(p.venta);
       dh+='<div onclick="tiendaVerDetalle('+pid+')" style="flex:0 0 auto;width:150px;background:var(--wh);border:2px solid var(--nar);border-radius:14px;padding:10px;cursor:pointer;box-shadow:0 2px 8px rgba(255,122,0,.15);position:relative;">'
         +'<div style="position:absolute;top:-1px;left:-1px;background:var(--nar);color:#fff;font-size:.58rem;font-weight:800;padding:2px 8px;border-radius:12px 0 12px 0;">⭐ DESTACADO</div>'
         +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDestacado('+pid+')" title="Quitar de destacados" style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.95);border:1px solid #FECACA;width:24px;height:24px;border-radius:50%;font-size:.75rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
         +(p.foto?'<img loading="lazy" decoding="async" src="'+fotoOpt(p.foto,180).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" style="width:100%;height:90px;border-radius:8px;object-fit:cover;background:#f0f2f8;margin:14px 0 6px;display:block;">':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
         +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
         +(function(){
+          if(datosDestacado.modo==='protegida')return '<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(datosDestacado.inicial)+'</div><div style="font-size:.56rem;font-weight:700;color:#0a8a3f;">inicial · Plan 3 o 6</div><div style="font-size:.58rem;color:var(--sub);">Contado: '+fmt(datosDestacado.contado)+'</div>';
           var cd=mejorCuotaDatos(p.venta, p);
           if(cd)return '<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div><div style="font-size:.56rem;font-weight:700;color:'+(cd.sinInteres?'var(--nar)':'#0a8a3f')+';">en '+cd.n+(cd.sinInteres?' ✨ s/interés':' cuotas')+'</div><div style="font-size:.58rem;color:var(--sub);">Contado: '+fmt(p.venta)+'</div>';
           return '<div style="font-size:.95rem;font-weight:900;color:var(--nar);margin-top:2px;">'+fmt(p.venta)+'</div>';
@@ -6450,7 +6660,7 @@ function tiendaRender(){
     var okBusq=pj>0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
     var okSubtipo=!tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
-    var okPrecio=!maxPrecio || p.venta<=maxPrecio;
+    var okPrecio=!maxPrecio || tiendaPrecioContado(p)<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
     var okViejo=!verSoloPreciosViejos || (!p.esCelu && !tiendaEsAutomatico(p) && ((diasPrecio(p)===null)||(diasPrecio(p)>=30)));
@@ -6473,8 +6683,8 @@ function tiendaRender(){
   if(palabras.length && (!orden || orden==='' || orden==='relevancia' || orden==='destacado')){
     lista.sort(function(a,b){ return (b._pj||0)-(a._pj||0); });
   }
-  else if(orden==='menor')      lista.sort(function(a,b){return a.venta-b.venta;});
-  else if(orden==='mayor') lista.sort(function(a,b){return b.venta-a.venta;});
+  else if(orden==='menor')      lista.sort(function(a,b){return tiendaPrecioContado(a)-tiendaPrecioContado(b);});
+  else if(orden==='mayor') lista.sort(function(a,b){return tiendaPrecioContado(b)-tiendaPrecioContado(a);});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
   else if(orden==='nuevos')lista.sort(function(a,b){return (b.creado||0)-(a.creado||0);});
   else if(orden==='sininteres')lista.sort(function(a,b){return (b.sinInteres?1:0)-(a.sinInteres?1:0);});
@@ -6539,6 +6749,9 @@ function tiendaRender(){
 // genera el HTML de un lote de cards (se llama por lotes para no trabar)
 function tiendaCardsHtml(sublista){
   return sublista.map(function(p, _idx){
+    var datosPrecioCard=tiendaDatosPrecio(p);
+    var precioVistaCard=datosPrecioCard.contado;
+    var esVendedorCard=!tiendaEsAdmin&&!vistaPreviaCliente&&revUnlocked;
     var pid="'"+p.id+"'"; // id entre comillas (sirve para número y para celu_N)
     var selMarcado=tiendaSelecSet[p.id];
     var fadeClass = tiendaYaAnimo ? '' : ' card-fade';
@@ -6623,6 +6836,14 @@ function tiendaCardsHtml(sublista){
         +'<span style="color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'rgba(255,255,255,.72)':'#fff')+';border-radius:20px;padding:2px 6px;white-space:nowrap;">'+textoStock+'</span>'
         +'</div>';
     }
+    if(esVendedorCard && esProdAutomatico){
+      var stockVendedor=tiendaLeerStockProveedor(p);
+      var sinStockVendedor=(p.sinStock===true||p.estadoProveedor==='sin_stock'||(stockVendedor.informado&&stockVendedor.valor<=0));
+      var textoStockVendedor=sinStockVendedor?'⛔ Sin stock':(stockVendedor.informado?'📦 Stock: '+stockVendedor.valor:'✅ Stock disponible');
+      card+='<div style="font-size:.62rem;font-weight:900;margin-top:5px;color:'+(sinStockVendedor?'#B91C1C':'#08783E')+';background:'+(sinStockVendedor?'#FEF2F2':'#F0FDF4')+';border:1px solid '+(sinStockVendedor?'#FECACA':'#BBF7D0')+';border-radius:8px;padding:5px 7px;">'+textoStockVendedor+'</div>';
+    }else if(esVendedorCard && !esProdAutomatico){
+      card+=etiquetaPrecioVendedor(p);
+    }
     // 💵 PRECIO USD (solo admin): muestra el valor original del proveedor y
     // permite cambiar la cotización. El sincronizador conserva este ajuste.
     var esUSDProveedor=tiendaProductoPareceUSD(p);
@@ -6643,6 +6864,14 @@ function tiendaCardsHtml(sublista){
       +'</div>'
       +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.62rem;font-weight:900;color:'+cm.txt+';background:'+cm.bg+';border:1.5px solid '+cm.bor+';border-radius:7px;padding:3px 8px;margin-bottom:4px;display:inline-block;box-shadow:inset 0 -5px 0 rgba(255,255,255,.18);">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
+        if(datosPrecioCard.modo==='protegida'){
+          return '<div style="background:linear-gradient(135deg,#0B2D6B,#173f8c);color:#fff;border-radius:9px;padding:8px 9px;margin-bottom:4px;">'
+            +'<div style="font-size:.58rem;font-weight:900;color:#FFD7B0;">🤝 RETIRALO POR</div>'
+            +'<div style="font-size:1.25rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(datosPrecioCard.inicial)+'</div>'
+            +'<div style="font-size:.59rem;margin-top:4px;">3 pagos: luego 2 de '+fmt(datosPrecioCard.plan3.cuotas[0])+'</div>'
+            +'<div style="font-size:.59rem;">6 pagos: luego 5 de '+fmt(datosPrecioCard.plan6.cuotas[0])+'</div></div>'
+            +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: <b style="color:var(--nar);">'+fmt(precioVistaCard)+'</b></div>';
+        }
         var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
           var esSI=cd.sinInteres;
@@ -7131,6 +7360,13 @@ function tiendaEditarPrecio(id){
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">🏪 MAYORISTA</div>'
     +'<input id="edit-mayorista" list="lista-mayoristas-edit" value="'+(p.mayorista||'').replace(/"/g,'&quot;')+'" placeholder="Ej: Stagliano, Galiano, Cachi..." autocomplete="off" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:12px;">'
     +'<datalist id="lista-mayoristas-edit">'+_sugerenciasMayoristas()+'</datalist>'
+    +(!p.esCelu?'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">🧮 SISTEMA DE PRECIOS PARA ESTE PRODUCTO</div>'
+      +'<select id="edit-sistema-precio" style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;margin-bottom:5px;font-weight:800;color:var(--az);">'
+        +'<option value="general"'+(sistemaPrecioOverride(p.id)==='general'?' selected':'')+'>Usar configuración general</option>'
+        +'<option value="clasica"'+(sistemaPrecioOverride(p.id)==='clasica'?' selected':'')+'>Calculadora 1 — Clásica</option>'
+        +'<option value="protegida"'+(sistemaPrecioOverride(p.id)==='protegida'?' selected':'')+'>Calculadora 2 — Plan Protegido</option>'
+      +'</select>'
+      +'<div style="font-size:.62rem;color:var(--sub);margin-bottom:12px;line-height:1.4;">El Plan Protegido necesita un costo real mayor a $0.</div>':'')
     +'<div style="font-size:.7rem;font-weight:800;color:var(--sub);margin-bottom:4px;">CARACTERÍSTICAS (pegá acá)</div>'
     +'<textarea id="edit-carac" rows="6" placeholder="Pegá las características del producto..." style="width:100%;padding:11px;border:2px solid var(--bor);border-radius:10px;box-sizing:border-box;font-family:inherit;font-size:.82rem;margin-bottom:14px;">'+(p.caracteristicas||'').replace(/</g,'&lt;')+'</textarea>'
     +'<button id="btn-guardar-precios" class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaGuardarPrecios()">✅ Guardar</button>'
@@ -7184,6 +7420,12 @@ function tiendaGuardarPrecios(){
   }else{
     var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
     if(p){
+      var sistemaEl=document.getElementById('edit-sistema-precio');
+      var sistemaElegido=sistemaEl?sistemaEl.value:'general';
+      if(sistemaElegido==='protegida' && costo<=0){
+        alert('Para usar el Plan Protegido en este producto primero cargá su costo real.');
+        return;
+      }
       cambioCategoria=window._tiendaEditCategoriaOriginal!==cat;
       if(nombre)p.nombre=nombre;
       // sellar fecha SOLO si cambió el precio de venta o el costo
@@ -7207,6 +7449,9 @@ function tiendaGuardarPrecios(){
         if(res&&res.error)throw res.error;
       }).catch(function(err){
         alert('⚠️ El producto se guardó, pero Supabase no confirmó la categoría.\n\nVolvé a guardar con conexión.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
+      });
+      guardarSistemaPrecioProducto(p.id,sistemaElegido).catch(function(err){
+        alert('⚠️ El producto se guardó, pero la nube no confirmó su sistema de precios.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
       });
       if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
     }
@@ -7670,7 +7915,7 @@ function prepararCajonTools(){
       'tienda-btn-cargar','tienda-btn-celus','tienda-btn-carac',
       'tienda-btn-subir','tienda-btn-banner','tienda-btn-cupones','tienda-btn-stats',
       'tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
-      'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-subs','tienda-btn-pdf',
+      'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-sistema-precios','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
       'tienda-btn-diag-ocultos','tienda-btn-restaurar-manuales',
       'tienda-btn-auth-fotos','tienda-btn-auth-fotos-salir','btn-limpiar-dup','btn-reclasificar'
@@ -7783,9 +8028,10 @@ function tiendaPedirWA(id){
   if(!p)return;
   window._tiendaPedirId=id;
   var esVendedor = (revUnlocked || adminUnlocked) && !vistaPreviaCliente; // vendedores/admin desbloqueados
+  var precioPedir=tiendaPrecioContado(p);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📲 '+(esVendedor?'Pedir producto':'Consultá este producto')+'</h3>'
     +'<div style="font-size:.85rem;font-weight:700;color:var(--az);margin:6px 0 2px;">'+p.nombre+'</div>'
-    +'<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:12px;">'+fmt(p.venta)+'</div>'
+    +'<div style="font-size:1.1rem;font-weight:900;color:var(--nar);margin-bottom:12px;">'+fmt(precioPedir)+'</div>'
     +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">'+(esVendedor?'¿A quién le consultás?':'Consultá con nosotros')+'</div>';
   // Consultar a los administradores/encargada (visible para TODOS)
   TIENDA_VENDEDORES.forEach(function(v){
@@ -7841,6 +8087,11 @@ function tiendaAsesoramiento(){
 function tiendaConsultarVendedor(){
   var p=buscarProd(window._tiendaPedirId);
   if(!p)return;
+  if(sistemaPrecioProducto(p)==='protegida'){
+    var msgProtegido='Hola! 🐝 Soy cliente de AmarangoElectro. Me interesa este producto:\n\n'+armarMensajeProductoPorModo(p,'protegida','')+'\n\n¿Me pasás info?';
+    window.open('https://wa.me/?text='+encodeURIComponent(msgProtegido),'_blank');
+    document.getElementById('modal-cuotas').style.display='none';return;
+  }
   var msg='Hola! 🐝 Soy cliente de AmarangoElectro. Me interesa este producto:\n\n'
     +'📦 '+p.nombre+'\n💵 Contado: '+fmt(p.venta)+'\n';
   var planes=[];
@@ -7860,6 +8111,11 @@ function tiendaConsultarVendedor(){
 function tiendaEnviarWA(tel, nombreVend){
   var p=buscarProd(window._tiendaPedirId);
   if(!p)return;
+  if(sistemaPrecioProducto(p)==='protegida'){
+    var msgProtegido='Hola '+nombreVend+'! Me interesa este producto de AmarangoElectro 🐝\n\n'+armarMensajeProductoPorModo(p,'protegida','')+'\n\n¿Está disponible? ¿Me pasás más info?';
+    window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(msgProtegido),'_blank');
+    document.getElementById('modal-cuotas').style.display='none';return;
+  }
   var msg='Hola '+nombreVend+'! Me interesa este producto de AmarangoElectro 🐝\n\n'
     +'📦 '+p.nombre+'\n'
     +'💵 Contado: '+fmt(p.venta)+'\n';
@@ -7882,7 +8138,7 @@ function tiendaEnviarWA(tel, nombreVend){
 function tiendaEnviarConsulta(){
   var p=buscarProd(window._tiendaPedirId);
   if(!p)return;
-  var msg='Chicos!! 🐝 ¿Está disponible este producto?\n\n📦 '+p.nombre+'\n💵 '+fmt(p.venta);
+  var msg='Chicos!! 🐝 ¿Está disponible este producto?\n\n📦 '+p.nombre+'\n💵 '+fmt(tiendaPrecioContado(p));
   var url='https://wa.me/?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
   document.getElementById('modal-cuotas').style.display='none';
@@ -7892,8 +8148,7 @@ function tiendaEnviarConsulta(){
 function tiendaVender(){
   var p=buscarProd(window._tiendaPedirId);
   if(!p)return;
-  var cuotasLines=armarCuotasLines(p.venta, p);
-  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  var msg=armarMensajeProductoPorModo(p,sistemaPrecioProducto(p),'');
   var url='https://wa.me/?text='+encodeURIComponent(msg);
   window.open(url,'_blank');
   document.getElementById('modal-cuotas').style.display='none';
@@ -7948,7 +8203,20 @@ function tiendaVerDetalle(id){
   html+='<h3 style="color:var(--az);font-weight:900;font-size:1.02rem;line-height:1.2;margin:0;">'+p.nombre+'</h3>'
     +'<div style="display:flex;align-items:center;gap:5px;margin:4px 0 10px;font-size:.64rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>';
 
+  var datosPrecioDetalle=tiendaDatosPrecio(p);
+  var esVendedorDetalle=!tiendaEsAdmin&&!vistaPreviaCliente&&revUnlocked;
+  if(esVendedorDetalle && tiendaEsAutomatico(p)){
+    var stockDetalle=tiendaLeerStockProveedor(p);
+    var sinStockDetalle=(p.sinStock===true||p.estadoProveedor==='sin_stock'||(stockDetalle.informado&&stockDetalle.valor<=0));
+    html+='<div style="font-size:.7rem;font-weight:900;margin-bottom:9px;color:'+(sinStockDetalle?'#B91C1C':'#08783E')+';background:'+(sinStockDetalle?'#FEF2F2':'#F0FDF4')+';border:1px solid '+(sinStockDetalle?'#FECACA':'#BBF7D0')+';border-radius:9px;padding:7px 9px;">'+(sinStockDetalle?'⛔ Sin stock':(stockDetalle.informado?'📦 Stock: '+stockDetalle.valor:'✅ Stock disponible'))+'</div>';
+  }else if(esVendedorDetalle && !tiendaEsAutomatico(p)){
+    html+=etiquetaPrecioVendedor(p);
+  }
+
   // ═══ BLOQUE DE PRECIO PRO: la cuota manda, el contado va de referencia ═══
+  if(datosPrecioDetalle.modo==='protegida'){
+    html+=htmlPlanProtegidoResumen(datosPrecioDetalle,tiendaEsAdmin);
+  }else{
   var _mejor=mejorCuotaDatos(p.venta, p);
   if(_mejor){
     html+='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:14px;padding:11px 14px;margin-bottom:9px;box-shadow:0 5px 16px rgba(11,45,107,.22);">'
@@ -7975,11 +8243,13 @@ function tiendaVerDetalle(id){
   if(bloquePrecioAntes(p,'.8rem')){
     html+='<div style="margin:-4px 0 12px;text-align:center;">'+bloquePrecioAntes(p,'.8rem')+'</div>';
   }
+  }
   // características (si tiene)
   if(p.caracteristicas){
     html+='<div style="background:var(--bg);border-radius:11px;padding:10px 12px;margin-bottom:11px;font-size:.76rem;color:var(--az);white-space:pre-line;line-height:1.5;border:1px solid var(--bor);">'+p.caracteristicas.replace(/</g,'&lt;')+'</div>';
   }
   // ═══ PLANES DE CUOTAS ═══
+  if(datosPrecioDetalle.modo!=='protegida'){
   html+='<div style="font-size:.64rem;font-weight:800;color:var(--sub);letter-spacing:1px;margin-bottom:7px;">ELEGÍ TU PLAN</div>';
   // plan SIN INTERÉS destacado (si el producto lo tiene)
   if(p.sinInteres){
@@ -7999,6 +8269,7 @@ function tiendaVerDetalle(id){
         +'<span style="font-weight:800;color:var(--az);font-size:.78rem;">'+n+' cuotas'+(esLaMejor?' <span style="color:var(--nar);font-size:.58rem;font-weight:900;">★ RECOMENDADO</span>':'')+'</span>'
         +'<span style="font-weight:900;color:var(--nar);font-size:.9rem;">'+fmt(vc)+'</span></div>';
     }
+  }
   }
   var pid="'"+p.id+"'";
   var esVend = (revUnlocked || adminUnlocked) && !vistaPreviaCliente;
@@ -8027,11 +8298,12 @@ function tiendaVerDetalle(id){
       +'<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;">';
     relacionados.forEach(function(r){
       var rid="'"+r.id+"'";
-      var rcuota=mejorCuotaTexto(r.venta);
+      var rDatos=tiendaDatosPrecio(r);
+      var rcuota=rDatos.modo==='protegida'?'Inicial '+fmt(rDatos.inicial):mejorCuotaTexto(r.venta);
       html+='<div onclick="tiendaVerDetalle('+rid+')" style="flex:0 0 auto;width:120px;background:var(--wh);border:1px solid var(--bor);border-radius:10px;padding:8px;cursor:pointer;">'
         +(r.foto?'<div style="width:100%;height:70px;border-radius:6px;background:#f0f2f8 url(\''+r.foto+'\') center/cover no-repeat;margin-bottom:5px;"></div>':'<div style="font-size:1.6rem;text-align:center;margin-bottom:5px;">'+catProd(r).split(' ')[0]+'</div>')
         +'<div style="font-size:.66rem;font-weight:700;color:var(--az);line-height:1.15;height:28px;overflow:hidden;">'+r.nombre+'</div>'
-        +'<div style="font-size:.8rem;font-weight:900;color:var(--nar);">'+fmt(r.venta)+'</div>'
+        +'<div style="font-size:.8rem;font-weight:900;color:var(--nar);">'+fmt(rDatos.contado)+'</div>'
         +(rcuota?'<div style="font-size:.56rem;font-weight:700;color:#0a8a3f;">💳 '+rcuota+'</div>':'')
         +'</div>';
     });
@@ -8210,19 +8482,38 @@ function tiendaDescargarImagenProducto(id){
     });
 }
 
+function abrirOpcionesCompartirAdmin(id){
+  var p=buscarProd(id);if(!p)return;
+  var pid="'"+p.id+"'";
+  var tieneCosto=Number(p.costo)>0;
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📤 Compartir producto</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí qué propuesta querés enviar para <b>'+escapeHtml(p.nombre)+'</b>.</p>'
+    +'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:var(--az);" onclick="compartirProducto('+pid+',\'clasica\')">Calculadora 1 — Clásica</button>'
+    +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--nar)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'protegida\')">Calculadora 2 — Plan Protegido</button>'
+    +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--gr)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'ambas\')">Compartir ambas opciones</button>'
+    +(!tieneCosto?'<div style="font-size:.68rem;color:#9A4A00;background:#FFF7ED;border:1px solid #FED7AA;border-radius:9px;padding:8px 10px;margin-bottom:8px;">Falta el costo real para habilitar el Plan Protegido.</div>':'')
+    +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="tiendaVerDetalle('+pid+')">Cancelar</button>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+}
+
 // Compartir un producto directamente con el mensaje completo y la foto.
-function compartirProducto(id){
+function compartirProducto(id,modoForzado){
   if(!_tiendaSincronizacionInicialLista){
     mostrarToast('🔄 Esperá un momento: estamos actualizando las fotos');
     return;
   }
   var p=buscarProd(id);
   if(!p)return;
-  var cuotasLines=armarCuotasLines(p.venta, p);
+  if(tiendaEsAdmin && typeof modoForzado!=='string'){
+    abrirOpcionesCompartirAdmin(id);return;
+  }
   // link que abre la tienda mostrando ESTE producto
   var base=window.location.href.split('#')[0].split('?')[0];
   var linkProd=base+'?prod='+encodeURIComponent(id);
-  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines, null)+"\n\n🛒 Miralo acá: "+linkProd;
+  var modo=typeof modoForzado==='string'?modoForzado:sistemaPrecioProducto(p);
+  var msg=modo==='ambas'?armarMensajeProductoAmbos(p,linkProd):armarMensajeProductoPorModo(p,modo,linkProd);
+  if(!msg){alert('Para compartir el Plan Protegido primero cargá el costo real del producto.');return;}
+  document.getElementById('modal-cuotas').style.display='none';
 
   // Si tiene foto, intentar compartir la imagen + texto
   if(p.foto && navigator.share){
@@ -8275,11 +8566,13 @@ function compartirInstagram(id){
   if(!p)return;
   var base=window.location.href.split('#')[0].split('?')[0];
   var linkProd=base+'?prod='+encodeURIComponent(id);
+  var datosPrecioInstagram=tiendaDatosPrecio(p);
   var mejor=null;
-  try{ mejor=mejorCuotaDatos(p.venta,p); }catch(e){}
+  try{ mejor=datosPrecioInstagram.modo==='clasica'?mejorCuotaDatos(p.venta,p):null; }catch(e){}
   var texto='🐝 '+(p.nombre||'Producto')+'\n\n';
-  if(mejor) texto+='💳 '+mejor.n+' cuotas fijas de '+fmt(mejor.valor)+'\n';
-  texto+='💵 Contado: '+fmt(p.venta)
+  if(datosPrecioInstagram.modo==='protegida')texto+='🤝 Retiralo por '+fmt(datosPrecioInstagram.inicial)+'\n🚀 3 pagos · luego 2 de '+fmt(datosPrecioInstagram.plan3.cuotas[0])+'\n💥 6 pagos · luego 5 de '+fmt(datosPrecioInstagram.plan6.cuotas[0])+'\n';
+  else if(mejor) texto+='💳 '+mejor.n+' cuotas fijas de '+fmt(mejor.valor)+'\n';
+  texto+='💵 Contado: '+fmt(datosPrecioInstagram.contado)
     +'\n\n📲 Consultanos para reservarlo'
     +'\n🔗 '+linkProd
     +'\n\n📷 @amarangoelectro #AmarangoElectro';
@@ -8478,8 +8771,7 @@ function tiendaOcultarCategoria(cat, ocultar){
 // arma el texto combinado de todos los productos elegidos
 function tiendaTextoVarios(prods){
   var partes=prods.map(function(p){
-    var cuotasLines=armarCuotasLines(p.venta, p);
-    return armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+    return armarMensajeProductoPorModo(p,sistemaPrecioProducto(p),'');
   });
   return partes.join('\n\n━━━━━━━━━━━━━\n\n');
 }
@@ -8505,8 +8797,7 @@ function tiendaCompartirEnCadena(prods, i){
     return;
   }
   var p=prods[i];
-  var cuotasLines=armarCuotasLines(p.venta, p);
-  var msg=armarMensajeAmarango(p.nombre, p.venta, cuotasLines);
+  var msg=armarMensajeProductoPorModo(p,sistemaPrecioProducto(p),'');
   var restantes=prods.length-i-1;
 
   function siguiente(){
@@ -8675,12 +8966,15 @@ function tiendaCatalogoPDF(){
     html+='<div class="cat-titulo">'+cat+'</div>';
     html+='<div class="grid">';
     cats[cat].forEach(function(p){
-      var cd=mejorCuotaDatos(p.venta,p);
+      var datosPdf=tiendaDatosPrecio(p);
+      var cd=datosPdf.modo==='clasica'?mejorCuotaDatos(p.venta,p):null;
       var fotoHtml=p.foto
         ? '<img class="foto" src="'+p.foto+'" alt="">'
         : '<div class="noimg">📦</div>';
       var cuotaHtml='';
-      if(cd){
+      if(datosPdf.modo==='protegida'){
+        cuotaHtml='<div class="cuota">Retiralo por $'+fmt(datosPdf.inicial)+' · luego 2 o 5 cuotas más bajas</div>';
+      }else if(cd){
         cuotaHtml='<div class="cuota">'+cd.n+' cuotas de $'+fmt(cd.valor)+'</div>';
         if(cd.sinInteres)cuotaHtml+='<div class="sininteres">✨ SIN INTERÉS</div>';
       }
@@ -8689,7 +8983,7 @@ function tiendaCatalogoPDF(){
         +'<div class="cuerpo">'
         +'<div class="nom">'+escapeHtml(p.nombre||'')+'</div>'
         +'<div class="precio-box">'
-        +'<div class="contado">$'+fmt(p.venta)+'</div>'
+        +'<div class="contado">$'+fmt(datosPdf.contado)+'</div>'
         +cuotaHtml
         +sinStockHtml
         +'</div>'
@@ -8818,6 +9112,14 @@ function etiquetaFechaPrecio(p){
     +'<span style="font-size:.55rem;font-weight:700;color:var(--sub);white-space:nowrap;">'+fechaTxt+'</span>'
     +'</div>';
 }
+function etiquetaPrecioVendedor(p){
+  var d=diasPrecio(p),texto,color,bg,bor;
+  if(d===null){texto='🕒 Precio sin chequear';color='#9A4A00';bg='#FFF7ED';bor='#FED7AA';}
+  else if(d===0){texto='✅ Precio chequeado hoy';color='#08783E';bg='#F0FDF4';bor='#BBF7D0';}
+  else if(d===1){texto='✅ Precio chequeado hace 1 día';color='#08783E';bg='#F0FDF4';bor='#BBF7D0';}
+  else{texto='🕒 Precio chequeado hace '+d+' días';color=d>=30?'#B91C1C':'#9A4A00';bg=d>=30?'#FEF2F2':'#FFF7ED';bor=d>=30?'#FECACA':'#FED7AA';}
+  return '<div style="font-size:.62rem;font-weight:900;margin-top:5px;color:'+color+';background:'+bg+';border:1px solid '+bor+';border-radius:8px;padding:5px 7px;">'+texto+'</div>';
+}
 
 // ===== FAVORITOS =====
 function cargarFavoritos(){
@@ -8852,7 +9154,7 @@ function agregarAlCarrito(id){
   if(!p)return;
   var item=carrito.find(function(x){return x.id==id;});
   if(item){ item.cantidad++; }
-  else{ carrito.push({id:p.id, nombre:p.nombre, venta:p.venta, cantidad:1}); }
+  else{ carrito.push({id:p.id, nombre:p.nombre, venta:tiendaPrecioContado(p), costo:Number(p.costo)||0, modoPrecio:sistemaPrecioProducto(p), cantidad:1}); }
   actualizarCarritoUI();
   // feedback visual: rebote del carrito
   var b=document.getElementById('carrito-flotante');
@@ -9386,7 +9688,7 @@ function totalCarrito(){
 function totalPedido(){
   if(pedidoActual.prodId!=null){
     var p=buscarProd(pedidoActual.prodId);
-    var base=p?p.venta:0;
+    var base=p?tiendaPrecioContado(p):0;
     if(cuponAplicado){
       var desc = cuponAplicado.tipo==='pct' ? Math.round(base*cuponAplicado.valor/100) : Math.min(cuponAplicado.valor,base);
       base-=desc;
@@ -9399,14 +9701,30 @@ function totalPedido(){
 function itemsPedido(){
   if(pedidoActual.prodId!=null){
     var p=buscarProd(pedidoActual.prodId);
-    return p?[{nombre:p.nombre, cantidad:1, venta:p.venta}]:[];
+    return p?[{nombre:p.nombre, cantidad:1, venta:tiendaPrecioContado(p),costo:Number(p.costo)||0,modoPrecio:sistemaPrecioProducto(p)}]:[];
   }
-  return carrito.map(function(x){return {nombre:x.nombre, cantidad:x.cantidad, venta:x.venta};});
+  return carrito.map(function(x){return {nombre:x.nombre, cantidad:x.cantidad, venta:x.venta,costo:x.costo||0,modoPrecio:x.modoPrecio||'clasica'};});
+}
+function datosProtegidosPedido(){
+  if(pedidoActual.prodId!=null){
+    var p=buscarProd(pedidoActual.prodId);
+    return p&&sistemaPrecioProducto(p)==='protegida'?calcularPlanProtegido(p.costo):null;
+  }
+  if(!carrito.length||carrito.some(function(x){return x.modoPrecio!=='protegida'||!(Number(x.costo)>0);} ))return null;
+  var costo=0,contado=0;
+  carrito.forEach(function(x){costo+=(Number(x.costo)||0)*(x.cantidad||1);contado+=(Number(x.venta)||0)*(x.cantidad||1);});
+  return calcularPlanProtegidoDesdeTotales(costo,contado);
 }
 // opciones de planes activos
 function opcionesPlanesHTML(){
   var total=totalPedido();
   var op='<option value="1">💵 Contado — '+fmt(total)+'</option>';
+  var protegido=datosProtegidosPedido();
+  if(protegido){
+    op+='<option value="103">🚀 3 pagos — inicial '+fmt(protegido.inicial)+'</option>';
+    op+='<option value="106">💥 6 pagos — inicial '+fmt(protegido.inicial)+'</option>';
+    return op;
+  }
   for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
       var t=calcularTotalPlan(total,n);
@@ -9418,11 +9736,17 @@ function opcionesPlanesHTML(){
 }
 function opcionesPlanesTarjetasHTML(){
   var total=totalPedido(), planes=[{n:1,t:'Contado',d:fmt(total),ic:'💵'}];
+  var protegido=datosProtegidosPedido();
+  if(protegido){
+    planes.push({n:103,t:'Plan 3 · 3 pagos',d:'Inicial '+fmt(protegido.inicial)+' + 2 de '+fmt(protegido.plan3.cuotas[0]),ic:'🚀'});
+    planes.push({n:106,t:'Plan 6 · 6 pagos',d:'Inicial '+fmt(protegido.inicial)+' + 5 de '+fmt(protegido.plan6.cuotas[0]),ic:'💥'});
+  }else{
   for(var n=2;n<=12;n++){
     if(planesConfig[n]&&planesConfig[n].activo){
       var t=calcularTotalPlan(total,n), vc=Math.round(t/n/1000)*1000;
       planes.push({n:n,t:n+' cuotas',d:fmt(vc)+' cada una',ic:'💳'});
     }
+  }
   }
   return planes.map(function(p){
     var on=parseInt(pedidoActual.plan,10)===p.n;
@@ -9594,7 +9918,15 @@ function actualizarPreviewCuota(){
   if(!sel||!prev)return;
   var n=parseInt(sel.value,10)||1; pedidoActual.plan=n;
   var total=totalPedido();
-  if(n>1){
+  var protegido=datosProtegidosPedido();
+  if((n===103||n===106)&&protegido){
+    var planP=n===103?protegido.plan3:protegido.plan6;
+    var posteriores=n===103?2:5;
+    prev.innerHTML='<div style="background:linear-gradient(135deg,#e7f9ee,#d3f5e1);border:1.5px solid #9fe3ba;border-radius:12px;padding:12px 14px;">'
+      +'<div style="font-size:.7rem;font-weight:800;color:#0a8a3f;text-transform:uppercase;letter-spacing:.4px;">Plan Protegido · '+(n===103?'3':'6')+' pagos</div>'
+      +'<div style="font-size:1.05rem;font-weight:900;color:var(--az);margin:4px 0;">Inicial: '+fmt(protegido.inicial)+'</div>'
+      +'<div style="font-size:.68rem;color:var(--sub);line-height:1.5;">Luego '+posteriores+' cuotas de '+fmt(planP.cuotas[0])+(planP.cuotas[posteriores-1]!==planP.cuotas[0]?' · última '+fmt(planP.cuotas[posteriores-1]):'')+'.<br>📦 Te lo entregamos dentro de las 48 hs de abonada la inicial.</div></div>';
+  }else if(n>1){
     var t=calcularTotalPlan(total,n); var vc=Math.round(t/n/1000)*1000;
     prev.innerHTML='<div style="background:linear-gradient(135deg,#e7f9ee,#d3f5e1);border:1.5px solid #9fe3ba;border-radius:12px;padding:12px 14px;">'
       +'<div style="font-size:.7rem;font-weight:800;color:#0a8a3f;text-transform:uppercase;letter-spacing:.4px;">Para reservar tu producto</div>'
@@ -9612,7 +9944,13 @@ function actualizarPreviewCuota(){
 function pasoResumen(){
   var sel=document.getElementById('cli-plan'); if(sel)pedidoActual.plan=parseInt(sel.value,10)||1;
   var total=totalPedido(), n=pedidoActual.plan, primeraCuota, textoPlan;
-  if(n>1){ var t=calcularTotalPlan(total,n); var vc=Math.round(t/n/1000)*1000; primeraCuota=vc; textoPlan=n+' cuotas de '+fmt(vc); }
+  var protegido=datosProtegidosPedido();
+  if((n===103||n===106)&&protegido){
+    var planP=n===103?protegido.plan3:protegido.plan6;
+    primeraCuota=protegido.inicial;
+    textoPlan=(n===103?'3 pagos · inicial + 2 cuotas':'6 pagos · inicial + 5 cuotas')+' de '+fmt(planP.cuotas[0]);
+  }
+  else if(n>1){ var t=calcularTotalPlan(total,n); var vc=Math.round(t/n/1000)*1000; primeraCuota=vc; textoPlan=n+' cuotas de '+fmt(vc); }
   else{ primeraCuota=total; textoPlan='Contado '+fmt(total); }
   pedidoActual._primeraCuota=primeraCuota; pedidoActual._textoPlan=textoPlan;
   var items=itemsPedido();
@@ -9652,7 +9990,12 @@ function enviarPedido(tel, nombreVendedor){
   items.forEach(function(x){ var sub=x.venta*(x.cantidad||1); total+=sub; msg+='• '+(x.cantidad>1?x.cantidad+'x ':'')+x.nombre+' — '+fmt(sub)+'\n'; });
   var n=pedidoActual.plan||1;
   msg+='\n💳 *PLAN ELEGIDO:*\n';
-  if(n>1){
+  var protegido=datosProtegidosPedido();
+  if((n===103||n===106)&&protegido){
+    var planP=n===103?protegido.plan3:protegido.plan6;
+    var posteriores=n===103?2:5;
+    msg+='🛡️ Plan '+(n===103?'3':'6')+' · '+(n===103?'3':'6')+' pagos totales\n✅ Inicial a abonar: *'+fmt(protegido.inicial)+'*\n   Luego '+posteriores+' cuotas de '+fmt(planP.cuotas[0])+(planP.cuotas[posteriores-1]!==planP.cuotas[0]?' · última '+fmt(planP.cuotas[posteriores-1]):'')+'\n';
+  }else if(n>1){
     var t=calcularTotalPlan(total,n); var vc=Math.round(t/n/1000)*1000;
     msg+='📆 '+n+' cuotas de '+fmt(vc)+'\n✅ 1ª cuota a abonar: *'+fmt(vc)+'*\n   (quedan '+(n-1)+' cuota'+(n-1===1?'':'s')+' de '+fmt(vc)+')\n';
   }else{ msg+='💵 Contado: '+fmt(total)+'\n'; }
@@ -9881,10 +10224,14 @@ function bajarHistorialNube(){
 function tiendaVerCuotas(id){
   var p=buscarProd(id);
   if(!p)return;
+  var datos=tiendaDatosPrecio(p);
   var html=(p.foto?'<div style="width:100%;height:160px;border-radius:12px;background:#f0f2f8 url(\''+p.foto+'\') center/cover no-repeat;margin-bottom:10px;"></div>':'')
-    +'<h3 style="color:var(--az);font-weight:900;font-size:1rem;">'+p.nombre+'</h3>'
-    +'<div style="font-size:1.3rem;font-weight:900;color:var(--nar);margin:4px 0 12px;">Contado: '+fmt(p.venta)+'</div>'
-    +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Planes de cuotas</div>';
+    +'<h3 style="color:var(--az);font-weight:900;font-size:1rem;margin-bottom:10px;">'+p.nombre+'</h3>';
+  if(datos.modo==='protegida'){
+    html+=htmlPlanProtegidoResumen(datos,tiendaEsAdmin);
+  }else{
+    html+='<div style="font-size:1.3rem;font-weight:900;color:var(--nar);margin:4px 0 12px;">Contado: '+fmt(p.venta)+'</div>'
+      +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Planes de cuotas</div>';
   // plan SIN INTERÉS destacado (si el producto lo tiene)
   if(p.sinInteres){
     var nsi=parseInt(p.sinInteres,10);
@@ -9903,6 +10250,7 @@ function tiendaVerCuotas(id){
         +'<span style="font-weight:700;color:var(--az);">'+n+' cuotas</span>'
         +'<span style="font-weight:900;color:var(--nar);">'+n+' x '+fmt(valorCuota)+'</span></div>';
     }
+  }
   }
   html+='<button class="calc-btn" style="width:100%;margin-top:14px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   document.getElementById('modal-cuotas-body').innerHTML=html;
@@ -11671,9 +12019,27 @@ function setContadoModo(m){
   document.getElementById('inp-contado').placeholder=(m==='usd')?'Ej: 110':'Ej: 150000';
   calcContado();
 }
+function calcContadoProtegido(valor){
+  var costo=0;
+  if(contadoModo==='venta'){
+    document.getElementById('res-contado').innerHTML='<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:14px;color:#9A4A00;font-size:.8rem;line-height:1.5;"><b>Plan Protegido</b><br>Ingresá el costo real del producto. Esta modalidad no puede calcularse desde un precio de venta.</div>';
+    document.getElementById('res-contado').className='tab-results';return;
+  }
+  if(contadoModo==='usd'){
+    var cotiz=parseFloat(document.getElementById('contado-cotiz').value)||0;
+    if(!cotiz){document.getElementById('res-contado').innerHTML='<div class="empty-icon">💵</div><p>Poné el valor del dólar para convertir el costo real</p>';return;}
+    costo=Math.round(valor*cotiz);
+  }else costo=Math.round(valor);
+  var datos=calcularPlanProtegido(costo);
+  var html=htmlPlanProtegidoResumen(datos,true);
+  window._lastWAMsg=armarMensajePlanProtegido('Producto',datos,'');
+  html+='<div class="share-row"><button class="share-btn wa" onclick="compartirWA()">💬 Compartir por WhatsApp</button></div>';
+  var el=document.getElementById('res-contado');el.innerHTML=html;el.className='tab-results';
+}
 function calcContado(){
   var valor=parseFloat(document.getElementById('inp-contado').value)||0;
   if(!valor){document.getElementById('res-contado').innerHTML='<div class="empty-icon">💰</div><p>Ingresá el precio para ver el resultado y las cuotas</p>';document.getElementById('res-contado').className='empty-state';return;}
+  if(sistemaPreciosGlobal==='protegida'){calcContadoProtegido(valor);return;}
   var costo, precio, pct, esManual;
   var pctInput=document.getElementById('margen-contado').value;
   esManual=(pctInput!==''&&pctInput!==null);
@@ -12021,7 +12387,7 @@ function margaritaProductosPara(texto){
     return {p:p,puntos:puntos+(p.destacado?1:0)};
   }).filter(function(x){return !palabras.length||x.puntos>0;}).sort(function(a,b){return b.puntos-a.puntos;}).slice(0,30).map(function(x){
     var p=x.p,base=location.origin+location.pathname.replace(/\/[^\/]*$/,'/');
-    return {id:String(p.id),nombre:p.nombre,categoria:catProd(p),precio:Number(p.venta)||0,caracteristicas:String(p.caracteristicas||'').slice(0,240),url:base+'?prod='+encodeURIComponent(p.id)};
+    return {id:String(p.id),nombre:p.nombre,categoria:catProd(p),precio:tiendaPrecioContado(p),caracteristicas:String(p.caracteristicas||'').slice(0,240),url:base+'?prod='+encodeURIComponent(p.id)};
   });
 }
 function margaritaEnviar(){
