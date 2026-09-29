@@ -315,6 +315,15 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
 #tienda-grid .prod-card{background:#fff !important;border:2px solid rgba(255,255,255,.92) !important;box-shadow:0 5px 16px rgba(0,0,0,.22) !important;}
 #tienda-contador{color:rgba(255,255,255,.88) !important;}
 #tienda-vacia{background:rgba(255,255,255,.95);border-radius:14px;color:var(--az) !important;}
+/* Plan Protegido: cada dato ocupa su propia línea para que importes largos
+   sigan siendo legibles y nunca se superpongan, incluso en tarjetas angostas. */
+.plan-protegido-box{background:linear-gradient(145deg,#0B2D6B,#173f8c);color:#fff;border-radius:11px;padding:9px;margin-bottom:6px;box-shadow:0 4px 12px rgba(11,45,107,.2);}
+.plan-protegido-opcion{background:#fff;border-radius:8px;padding:8px;margin-bottom:6px;text-align:center;min-width:0;overflow:hidden;}
+.plan-protegido-opcion:last-of-type{margin-bottom:0;}
+.plan-protegido-titulo{font-size:.62rem;font-weight:900;color:var(--az);line-height:1.15;}
+.plan-protegido-detalle{font-size:.66rem;font-weight:900;color:var(--az);line-height:1.2;margin-top:3px;}
+.plan-protegido-cuota{display:block;width:100%;margin-top:5px;font-size:clamp(1.05rem,7.5vw,1.28rem);font-weight:900;color:var(--nar);line-height:1.05;letter-spacing:-.35px;white-space:nowrap;}
+@media(min-width:900px){.plan-protegido-cuota{font-size:1.28rem;}}
 
 /* ═══ VISTA AUTOMÁTICA PARA COMPUTADORA ═══
    En pantallas grandes se aprovecha el ancho y se muestran más productos.
@@ -6871,15 +6880,17 @@ function tiendaCardsHtml(sublista){
       +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.62rem;font-weight:900;color:'+cm.txt+';background:'+cm.bg+';border:1.5px solid '+cm.bor+';border-radius:7px;padding:3px 8px;margin-bottom:4px;display:inline-block;box-shadow:inset 0 -5px 0 rgba(255,255,255,.18);">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
         if(datosPrecioCard.modo==='protegida'){
-          return '<div style="background:linear-gradient(145deg,#0B2D6B,#173f8c);color:#fff;border-radius:11px;padding:9px;margin-bottom:6px;box-shadow:0 4px 12px rgba(11,45,107,.2);">'
+          return '<div class="plan-protegido-box">'
             +'<div style="font-size:.57rem;font-weight:900;color:#FFD7B0;letter-spacing:.8px;margin:0 1px 6px;">ELEGÍ TU PLAN</div>'
-            +'<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:#fff;border-radius:8px;padding:7px 8px;margin-bottom:6px;">'
-              +'<div style="min-width:0;color:var(--az);line-height:1.15;"><div style="font-size:.6rem;font-weight:900;">🚀 PLAN 3</div><div style="font-size:.65rem;font-weight:900;color:var(--az);margin-top:3px;">Inicial + 2 cuotas</div></div>'
-              +'<div style="font-size:1.18rem;font-weight:900;color:var(--nar);line-height:1;white-space:nowrap;flex-shrink:0;">'+fmt(datosPrecioCard.plan3.cuotas[0])+'</div>'
+            +'<div class="plan-protegido-opcion">'
+              +'<div class="plan-protegido-titulo">🚀 PLAN 3</div>'
+              +'<div class="plan-protegido-detalle">Inicial + 2 cuotas</div>'
+              +'<div class="plan-protegido-cuota">'+fmt(datosPrecioCard.plan3.cuotas[0])+'</div>'
             +'</div>'
-            +'<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:#fff;border-radius:8px;padding:7px 8px;">'
-              +'<div style="min-width:0;color:var(--az);line-height:1.15;"><div style="font-size:.6rem;font-weight:900;">💥 PLAN 6</div><div style="font-size:.65rem;font-weight:900;color:var(--az);margin-top:3px;">Inicial + 5 cuotas</div></div>'
-              +'<div style="font-size:1.18rem;font-weight:900;color:var(--nar);line-height:1;white-space:nowrap;flex-shrink:0;">'+fmt(datosPrecioCard.plan6.cuotas[0])+'</div>'
+            +'<div class="plan-protegido-opcion">'
+              +'<div class="plan-protegido-titulo">💥 PLAN 6</div>'
+              +'<div class="plan-protegido-detalle">Inicial + 5 cuotas</div>'
+              +'<div class="plan-protegido-cuota">'+fmt(datosPrecioCard.plan6.cuotas[0])+'</div>'
             +'</div>'
             +'<div style="font-size:.6rem;color:rgba(255,255,255,.82);text-align:center;margin-top:7px;">Contado: <b style="color:#fff;">'+fmt(precioVistaCard)+'</b></div>'
             +'<button onclick="event.stopPropagation();tiendaVerDetalle('+pid+')" style="width:100%;margin-top:8px;padding:6px 7px;background:var(--nar);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:.61rem;font-weight:900;cursor:pointer;">🤝 Ver con cuánto lo retirás</button>'
