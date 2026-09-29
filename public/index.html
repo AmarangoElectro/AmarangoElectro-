@@ -4868,6 +4868,13 @@ function palabraCoincide(palabra, textoPalabras){
   }
   return false;
 }
+// Costo real de un celular cargado en USD. Se deriva siempre de los dos datos
+// originales guardados (USD × cotización), nunca del precio de venta.
+function costoRealCelu(c){
+  var usd=Number(c&&c.usd)||0;
+  var cotizacion=Number(c&&c.cotizUsada)||0;
+  return usd>0&&cotizacion>0?Math.round(usd*cotizacion):0;
+}
 // busca un producto por id, incluyendo los celulares virtuales (celu_N)
 function buscarProd(id){
   var p=tiendaProductos.find(function(x){return x.id==id;});
@@ -4875,7 +4882,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0, categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c), categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
   }
   return null;
 }
@@ -6448,7 +6455,7 @@ function tiendaRender(){
       esCelu: true,
       nombre: c.nombre,
       venta: c.precio,
-      costo: 0,
+      costo: costoRealCelu(c),
       categoria: '📱 Celulares',
       colores: c.colores||[],
       visible: !c.ocultoTienda,
@@ -8172,7 +8179,7 @@ function tiendaRelacionados(p){
   // universo: productos visibles + celulares
   var uni=tiendaProductos.filter(function(x){return x.visible;}).slice();
   var celus=cargarListaCelus();
-  celus.forEach(function(c,i){ if(c&&c.precio)uni.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,categoria:'📱 Celulares',foto:c.foto||''}); });
+  celus.forEach(function(c,i){ if(c&&c.precio)uni.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,costo:costoRealCelu(c),categoria:'📱 Celulares',foto:c.foto||''}); });
   // misma categoría, distinto al actual
   var rel=uni.filter(function(x){ return (''+x.id)!==(''+p.id) && catProd(x)===cat; });
   // mezclar un poco y tomar 4
@@ -8904,7 +8911,7 @@ function tiendaTodosLosProductos(soloVisibles){
     if(!c||!c.precio)return;
     if(soloVisibles && c.ocultoTienda)return; // celu oculto no va al catálogo del cliente
     universo.push({
-      id:'celu_'+i, esCelu:true, nombre:c.nombre, venta:c.precio, costo:0,
+      id:'celu_'+i, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c),
       categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda,
       foto:c.foto||'', caracteristicas:c.caracteristicas||'',
       destacado:c.destacado||false, delDia:c.delDia||false,
