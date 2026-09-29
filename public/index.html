@@ -2057,7 +2057,14 @@ function planProtegidoPiso(costo){
   if(costo>=50000)return 89998.20;
   return 0;
 }
-function planProtegidoRedondear(valor){return Math.ceil((Number(valor)||0)/500)*500;}
+function planProtegidoRedondear(valor){
+  valor=Number(valor)||0;
+  if(valor<=0)return 0;
+  // Los cientos exactos se conservan. Los valores intermedios suben lo mínimo
+  // hasta la terminación comercial en 99: 100.175 → 100.199.
+  if(Number.isInteger(valor) && valor%100===0)return valor;
+  return Math.ceil(valor/100)*100-1;
+}
 function planProtegidoCuotas(total,inicial,cantidad){
   var saldo=Math.max(0,Math.round(total)-Math.round(inicial));
   var cuotaBase=Math.ceil(saldo/cantidad);
