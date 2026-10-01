@@ -2071,10 +2071,11 @@ function planProtegidoRedondear(valor){
 }
 function planProtegidoCuotas(total,inicial,cantidad){
   var saldo=Math.max(0,Math.round(total)-Math.round(inicial));
-  var cuotaBase=Math.ceil(saldo/cantidad);
+  // Todas las cuotas posteriores son iguales y terminan en 99. Si el cálculo
+  // cae justo en un centenar, también avanza al siguiente 99 comercial.
+  var cuotaBase=Math.ceil(((saldo/cantidad)+1)/100)*100-1;
   var cuotas=[];
-  for(var i=0;i<cantidad-1;i++)cuotas.push(cuotaBase);
-  cuotas.push(saldo-cuotaBase*(cantidad-1));
+  for(var i=0;i<cantidad;i++)cuotas.push(cuotaBase);
   return cuotas;
 }
 function calcularPlanProtegidoDesdeTotales(costo,contadoForzado){
@@ -2087,23 +2088,26 @@ function calcularPlanProtegidoDesdeTotales(costo,contadoForzado){
   // total interno ya armado deben pasar por el mismo redondeo comercial.
   var baseContado=Number(contadoForzado)>0?Number(contadoForzado):coherente;
   var contado=planProtegidoRedondear(baseContado);
-  var total3=Math.round(contado*1.35);
-  var total6=Math.round(contado*1.78);
+  var totalObjetivo3=Math.round(contado*1.35);
+  var totalObjetivo6=Math.round(contado*1.78);
   var techo=Math.floor(contado*0.55);
   var inicialBase=Math.min(costo*0.75,contado*0.55);
-  var inicial=Math.ceil(Math.max(inicialBase,total3/3,total6/6));
+  var inicial=Math.ceil(Math.max(inicialBase,totalObjetivo3/3,totalObjetivo6/6));
   if(inicial>techo)inicial=techo;
-  var cuotas3=planProtegidoCuotas(total3,inicial,2);
-  var cuotas6=planProtegidoCuotas(total6,inicial,5);
+  var cuotas3=planProtegidoCuotas(totalObjetivo3,inicial,2);
+  var cuotas6=planProtegidoCuotas(totalObjetivo6,inicial,5);
   while(inicial<techo && (cuotas3.some(function(x){return inicial<=x;}) || cuotas6.some(function(x){return inicial<=x;}))){
     inicial++;
-    cuotas3=planProtegidoCuotas(total3,inicial,2);
-    cuotas6=planProtegidoCuotas(total6,inicial,5);
+    cuotas3=planProtegidoCuotas(totalObjetivo3,inicial,2);
+    cuotas6=planProtegidoCuotas(totalObjetivo6,inicial,5);
   }
+  var total3=inicial+cuotas3.reduce(function(a,b){return a+b;},0);
+  var total6=inicial+cuotas6.reduce(function(a,b){return a+b;},0);
   return {
     modo:'protegida',costo:costo,margen:margen,precioBase:precioBase,
     precioCoherente:coherente,contado:contado,inicial:inicial,
-    plan3:{total:total3,cuotas:cuotas3},plan6:{total:total6,cuotas:cuotas6},
+    plan3:{total:total3,totalObjetivo:totalObjetivo3,cuotas:cuotas3},
+    plan6:{total:total6,totalObjetivo:totalObjetivo6,cuotas:cuotas6},
     techoInicial:techo
   };
 }
