@@ -1201,19 +1201,19 @@ function htmlPlanProtegidoResumen(datos,administrativo){
   if(!datos)return '<div style="padding:12px;color:#B91C1C;background:#FEF2F2;border-radius:10px;">Este producto no tiene costo real para calcular el Plan Protegido.</div>';
   var c3=datos.plan3.cuotas, c6=datos.plan6.cuotas;
   var html='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:14px;padding:14px;margin-bottom:10px;color:#fff;box-shadow:0 5px 16px rgba(11,45,107,.22);">'
-    +'<div style="font-size:.65rem;font-weight:900;color:#FFD7B0;letter-spacing:.6px;">🤝 RETIRALO POR SOLO</div>'
+    +'<div style="font-size:.65rem;font-weight:900;color:#FFD7B0;letter-spacing:.6px;">🤝 PRIMER PAGO</div>'
     +'<div style="font-size:2rem;font-weight:900;color:var(--nar);line-height:1.1;margin:4px 0 10px;">'+fmt(datos.inicial)+'</div>'
-    +'<div style="font-size:.73rem;font-weight:800;margin-bottom:5px;">🚀 3 pagos</div><div style="font-size:.7rem;opacity:.9;margin-bottom:9px;">Inicial + 2 cuotas de <b>'+fmt(c3[0])+'</b>'+(c3[1]!==c3[0]?' · última '+fmt(c3[1]):'')+'</div>'
-    +'<div style="font-size:.73rem;font-weight:800;margin-bottom:5px;">💥 6 pagos</div><div style="font-size:.7rem;opacity:.9;">Inicial + 5 cuotas de <b>'+fmt(c6[0])+'</b>'+(c6[4]!==c6[0]?' · última '+fmt(c6[4]):'')+'</div>'
+    +'<div style="font-size:.73rem;font-weight:800;margin-bottom:5px;">🚀 PLAN 3 — 3 pagos en total</div><div style="font-size:.7rem;opacity:.9;margin-bottom:9px;">Después, 2 cuotas de <b>'+fmt(c3[0])+'</b>'+(c3[1]!==c3[0]?' · última '+fmt(c3[1]):'')+'</div>'
+    +'<div style="font-size:.73rem;font-weight:800;margin-bottom:5px;">💥 PLAN 6 — 6 pagos en total</div><div style="font-size:.7rem;opacity:.9;">Después, 5 cuotas de <b>'+fmt(c6[0])+'</b>'+(c6[4]!==c6[0]?' · última '+fmt(c6[4]):'')+'</div>'
     +'<div style="height:1px;background:rgba(255,255,255,.16);margin:10px 0 8px;"></div><div style="font-size:.72rem;">Contado ➡️ <b>'+fmt(datos.contado)+'</b></div>'
     +'</div>'
-    +'<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:9px 11px;font-size:.67rem;color:#08783E;line-height:1.55;margin-bottom:10px;">✅ Cuotas fijas<br>✅ Una sola inicial<br>✅ Después cuotas más bajas</div>';
+    +'<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:9px 11px;font-size:.67rem;color:#08783E;line-height:1.55;margin-bottom:10px;">✅ Cuotas fijas<br>✅ Un solo primer pago<br>✅ Después, cuotas más bajas</div>';
   if(administrativo){
     html+='<div style="background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:10px 12px;font-size:.68rem;color:var(--az);line-height:1.65;margin-bottom:10px;">'
       +'<b>Detalle administrativo</b><br>Costo real: '+fmt(datos.costo)+' · Margen: '+datos.margen+'%<br>'
-      +'Contado: '+fmt(datos.contado)+'<br>Total Plan 3: '+fmt(datos.plan3.total)+' · Inicial: '+fmt(datos.inicial)+'<br>'
+      +'Contado: '+fmt(datos.contado)+'<br>Total Plan 3: '+fmt(datos.plan3.total)+' · Primer pago: '+fmt(datos.inicial)+'<br>'
       +'Cuotas Plan 3: '+c3.map(fmt).join(' + ')+'<br>'
-      +'Total Plan 6: '+fmt(datos.plan6.total)+' · Inicial: '+fmt(datos.inicial)+'<br>'
+      +'Total Plan 6: '+fmt(datos.plan6.total)+' · Primer pago: '+fmt(datos.inicial)+'<br>'
       +'Cuotas Plan 6: '+c6.map(fmt).join(' + ')+'</div>';
   }
   return html;
@@ -6579,7 +6579,7 @@ function tiendaRender(){
       +'<div style="flex:1;min-width:0;">'
         +'<div style="color:#fff;font-size:.85rem;font-weight:800;line-height:1.2;margin-top:8px;">'+pDia.nombre+'</div>'
         +(datosDia.modo==='protegida'
-          ? '<div style="display:flex;gap:6px;margin-top:6px;"><div style="flex:1;background:rgba(255,255,255,.1);border-radius:7px;padding:5px;"><div style="color:#7fe8a0;font-size:.57rem;font-weight:900;">PLAN 3</div><div style="color:#fff;font-size:.6rem;font-weight:900;margin:2px 0;">Inicial + 2 cuotas</div><div style="color:#f0c040;font-size:1rem;font-weight:900;line-height:1.05;">'+fmt(datosDia.plan3.cuotas[0])+'</div></div><div style="flex:1;background:rgba(255,255,255,.1);border-radius:7px;padding:5px;"><div style="color:#7fe8a0;font-size:.57rem;font-weight:900;">PLAN 6</div><div style="color:#fff;font-size:.6rem;font-weight:900;margin:2px 0;">Inicial + 5 cuotas</div><div style="color:#f0c040;font-size:1rem;font-weight:900;line-height:1.05;">'+fmt(datosDia.plan6.cuotas[0])+'</div></div></div><div style="color:rgba(255,255,255,.65);font-size:.56rem;margin-top:4px;">Contado '+fmt(datosDia.contado)+' · 🤝 Abrí para ver la inicial</div>'
+          ? '<div style="color:#FFD7B0;font-size:.56rem;font-weight:900;margin-top:5px;">🤝 RETIRALO HOY CON</div><div style="color:#f0c040;font-size:1.25rem;font-weight:900;line-height:1.05;">'+fmt(datosDia.inicial)+'</div><div style="display:flex;gap:6px;margin-top:6px;"><div style="flex:1;background:rgba(255,255,255,.1);border-radius:7px;padding:5px;color:#fff;font-size:.58rem;font-weight:800;">🚀 PLAN 3<br>Después, 2 cuotas</div><div style="flex:1;background:rgba(255,255,255,.1);border-radius:7px;padding:5px;color:#fff;font-size:.58rem;font-weight:800;">💥 PLAN 6<br>Después, 5 cuotas</div></div><div style="color:rgba(255,255,255,.72);font-size:.56rem;margin-top:4px;">Ver valor de las cuotas · Contado '+fmt(datosDia.contado)+'</div>'
           : cdDia
           ? '<div style="color:#f0c040;font-size:1.5rem;font-weight:900;line-height:1.05;margin-top:2px;">'+fmt(cdDia.valor)+'</div>'
             +'<div style="color:#7fe8a0;font-size:.66rem;font-weight:800;">en '+cdDia.n+(cdDia.sinInteres?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
@@ -6607,7 +6607,7 @@ function tiendaRender(){
         +(p.foto?'<img loading="lazy" decoding="async" src="'+fotoOpt(p.foto,180).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" style="width:100%;height:90px;border-radius:8px;object-fit:cover;background:#f0f2f8;margin:14px 0 6px;display:block;">':'<div style="font-size:2rem;text-align:center;margin:14px 0 6px;">'+catProd(p).split(' ')[0]+'</div>')
         +'<div style="font-size:.72rem;font-weight:800;color:var(--az);line-height:1.15;height:32px;overflow:hidden;">'+p.nombre+'</div>'
         +(function(){
-          if(datosDestacado.modo==='protegida')return '<div style="font-size:.56rem;font-weight:900;color:var(--az);margin-top:4px;">🚀 PLAN 3</div><div style="font-size:.61rem;font-weight:900;color:var(--az);">Inicial + 2 cuotas</div><div style="font-size:1.05rem;font-weight:900;color:var(--nar);line-height:1.05;">'+fmt(datosDestacado.plan3.cuotas[0])+'</div><div style="font-size:.56rem;font-weight:900;color:var(--az);margin-top:4px;">💥 PLAN 6</div><div style="font-size:.61rem;font-weight:900;color:var(--az);">Inicial + 5 cuotas</div><div style="font-size:.92rem;font-weight:900;color:var(--nar);line-height:1.05;">'+fmt(datosDestacado.plan6.cuotas[0])+'</div><div style="font-size:.52rem;color:var(--sub);margin-top:4px;">Contado '+fmt(datosDestacado.contado)+'</div><div style="font-size:.53rem;font-weight:800;color:var(--az);margin-top:2px;">🤝 Ver inicial</div>';
+          if(datosDestacado.modo==='protegida')return '<div style="font-size:.54rem;font-weight:900;color:var(--az);margin-top:4px;">🤝 RETIRALO HOY CON</div><div style="font-size:1.08rem;font-weight:900;color:var(--nar);line-height:1.05;">'+fmt(datosDestacado.inicial)+'</div><div style="font-size:.58rem;font-weight:800;color:var(--az);margin-top:5px;">🚀 PLAN 3 · Después, 2 cuotas</div><div style="font-size:.58rem;font-weight:800;color:var(--az);margin-top:3px;">💥 PLAN 6 · Después, 5 cuotas</div><div style="font-size:.53rem;font-weight:900;color:var(--nar);margin-top:5px;">Ver valor de las cuotas</div><div style="font-size:.5rem;color:var(--sub);margin-top:3px;">Contado '+fmt(datosDestacado.contado)+'</div>';
           var cd=mejorCuotaDatos(p.venta, p);
           if(cd)return '<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div><div style="font-size:.56rem;font-weight:700;color:'+(cd.sinInteres?'var(--nar)':'#0a8a3f')+';">en '+cd.n+(cd.sinInteres?' ✨ s/interés':' cuotas')+'</div><div style="font-size:.58rem;color:var(--sub);">Contado: '+fmt(p.venta)+'</div>';
           return '<div style="font-size:.95rem;font-weight:900;color:var(--nar);margin-top:2px;">'+fmt(p.venta)+'</div>';
@@ -6895,19 +6895,19 @@ function tiendaCardsHtml(sublista){
       +(function(){
         if(datosPrecioCard.modo==='protegida'){
           return '<div class="plan-protegido-box">'
-            +'<div style="font-size:.57rem;font-weight:900;color:#FFD7B0;letter-spacing:.8px;margin:0 1px 6px;">ELEGÍ TU PLAN</div>'
+            +'<div style="font-size:.57rem;font-weight:900;color:#FFD7B0;letter-spacing:.8px;margin:0 1px 2px;">🤝 RETIRALO HOY CON</div>'
+            +'<div class="plan-protegido-cuota" style="color:var(--nar);margin:2px 0 7px;">'+fmt(datosPrecioCard.inicial)+'</div>'
+            +'<div style="font-size:.58rem;font-weight:800;color:#fff;margin-bottom:6px;text-align:center;">Elegí cómo abonar el resto:</div>'
             +'<div class="plan-protegido-opcion">'
               +'<div class="plan-protegido-titulo">🚀 PLAN 3</div>'
-              +'<div class="plan-protegido-detalle">Inicial + 2 cuotas</div>'
-              +'<div class="plan-protegido-cuota">'+fmt(datosPrecioCard.plan3.cuotas[0])+'</div>'
+              +'<div class="plan-protegido-detalle">Después, 2 cuotas</div>'
             +'</div>'
             +'<div class="plan-protegido-opcion">'
               +'<div class="plan-protegido-titulo">💥 PLAN 6</div>'
-              +'<div class="plan-protegido-detalle">Inicial + 5 cuotas</div>'
-              +'<div class="plan-protegido-cuota">'+fmt(datosPrecioCard.plan6.cuotas[0])+'</div>'
+              +'<div class="plan-protegido-detalle">Después, 5 cuotas</div>'
             +'</div>'
             +'<div style="font-size:.6rem;color:rgba(255,255,255,.82);text-align:center;margin-top:7px;">Contado: <b style="color:#fff;">'+fmt(precioVistaCard)+'</b></div>'
-            +'<button onclick="event.stopPropagation();tiendaVerDetalle('+pid+')" style="width:100%;margin-top:8px;padding:6px 7px;background:var(--nar);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:.61rem;font-weight:900;cursor:pointer;">🤝 Ver con cuánto lo retirás</button>'
+            +'<button onclick="event.stopPropagation();tiendaVerDetalle('+pid+')" style="width:100%;margin-top:8px;padding:6px 7px;background:var(--nar);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:.61rem;font-weight:900;cursor:pointer;">Ver valor de las cuotas</button>'
             +'</div>';
         }
         var cd=mejorCuotaDatos(p.venta, p);
@@ -8342,7 +8342,7 @@ function tiendaVerDetalle(id){
         +(r.foto?'<div style="width:100%;height:70px;border-radius:6px;background:#f0f2f8 url(\''+r.foto+'\') center/cover no-repeat;margin-bottom:5px;"></div>':'<div style="font-size:1.6rem;text-align:center;margin-bottom:5px;">'+catProd(r).split(' ')[0]+'</div>')
         +'<div style="font-size:.66rem;font-weight:700;color:var(--az);line-height:1.15;height:28px;overflow:hidden;">'+r.nombre+'</div>'
         +(rDatos.modo==='protegida'
-          ?'<div style="font-size:.57rem;font-weight:900;color:var(--az);margin-top:3px;">🚀 Inicial + 2 cuotas</div><div style="font-size:.88rem;font-weight:900;color:var(--nar);line-height:1.05;">'+fmt(rDatos.plan3.cuotas[0])+'</div><div style="font-size:.57rem;font-weight:900;color:var(--az);margin-top:3px;">💥 Inicial + 5 cuotas</div><div style="font-size:.8rem;font-weight:900;color:var(--nar);line-height:1.05;">'+fmt(rDatos.plan6.cuotas[0])+'</div><div style="font-size:.5rem;color:var(--sub);margin-top:3px;">Contado '+fmt(rDatos.contado)+' · Ver inicial</div>'
+          ?'<div style="font-size:.53rem;font-weight:900;color:var(--az);margin-top:3px;">🤝 RETIRALO HOY CON</div><div style="font-size:.9rem;font-weight:900;color:var(--nar);line-height:1.05;">'+fmt(rDatos.inicial)+'</div><div style="font-size:.55rem;font-weight:800;color:var(--az);margin-top:4px;">🚀 Después, 2 cuotas</div><div style="font-size:.55rem;font-weight:800;color:var(--az);margin-top:2px;">💥 Después, 5 cuotas</div><div style="font-size:.5rem;font-weight:900;color:var(--nar);margin-top:3px;">Ver valor de las cuotas</div><div style="font-size:.48rem;color:var(--sub);margin-top:2px;">Contado '+fmt(rDatos.contado)+'</div>'
           :'<div style="font-size:.92rem;font-weight:900;color:var(--nar);">'+fmt(rDatos.contado)+'</div>'+(rcuota?'<div style="font-size:.56rem;font-weight:700;color:#0a8a3f;">💳 '+rcuota+'</div>':''))
         +'</div>';
     });
@@ -8532,7 +8532,12 @@ function abrirOpcionesCompartirAdmin(id){
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--gr)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'ambas\')">Compartir ambas opciones</button>'
     +(!tieneCosto?'<div style="font-size:.68rem;color:#9A4A00;background:#FFF7ED;border:1px solid #FED7AA;border-radius:9px;padding:8px 10px;margin-bottom:8px;">Falta el costo real para habilitar el Plan Protegido.</div>':'')
     +'<button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="tiendaVerDetalle('+pid+')">Cancelar</button>';
-  document.getElementById('modal-cuotas-body').innerHTML=html;
+  var cuerpo=document.getElementById('modal-cuotas-body');
+  var modal=document.getElementById('modal-cuotas');
+  if(cuerpo)cuerpo.innerHTML=html;
+  // El botón directo vive fuera del detalle: además de preparar las opciones,
+  // hay que abrir explícitamente el modal para que el administrador las vea.
+  if(modal){modal.style.display='block';modal.scrollTop=0;}
 }
 
 // Compartir un producto directamente con el mensaje completo y la foto.
