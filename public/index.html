@@ -2069,6 +2069,14 @@ function planProtegidoRedondear(valor){
   if(Number.isInteger(valor) && valor%100===0)return valor;
   return Math.ceil(valor/100)*100-1;
 }
+function planProtegidoRedondearInicial(valor){
+  valor=Math.floor(Number(valor)||0);
+  if(valor<=0)return 0;
+  var resto=valor%100;
+  // 99 y los cientos exactos ya son importes comerciales válidos.
+  if(resto===99||resto===0)return valor;
+  return Math.max(0,Math.floor(valor/100)*100-1);
+}
 function planProtegidoCuotas(total,inicial,cantidad){
   var saldo=Math.max(0,Math.round(total)-Math.round(inicial));
   // Todas las cuotas posteriores son iguales y terminan en 99. Si el cálculo
@@ -2092,12 +2100,19 @@ function calcularPlanProtegidoDesdeTotales(costo,contadoForzado){
   var totalObjetivo6=Math.round(contado*1.78);
   var techo=Math.floor(contado*0.55);
   var inicialBase=Math.min(costo*0.75,contado*0.55);
-  var inicial=Math.ceil(Math.max(inicialBase,totalObjetivo3/3,totalObjetivo6/6));
-  if(inicial>techo)inicial=techo;
+  var inicialCalculada=Math.ceil(Math.max(inicialBase,totalObjetivo3/3,totalObjetivo6/6));
+  if(inicialCalculada>techo)inicialCalculada=techo;
+  var inicial=planProtegidoRedondearInicial(inicialCalculada);
   var cuotas3=planProtegidoCuotas(totalObjetivo3,inicial,2);
   var cuotas6=planProtegidoCuotas(totalObjetivo6,inicial,5);
   while(inicial<techo && (cuotas3.some(function(x){return inicial<=x;}) || cuotas6.some(function(x){return inicial<=x;}))){
-    inicial++;
+    // Si bajar al 99 anterior deja la inicial igual o menor que una cuota,
+    // usamos únicamente el siguiente centenar exacto que restablece la regla.
+    var mayorCuota=Math.max.apply(Math,cuotas3.concat(cuotas6));
+    var siguiente=Math.ceil((mayorCuota+1)/100)*100;
+    if(siguiente<=inicial)siguiente=Math.ceil((inicial+1)/100)*100;
+    if(siguiente>techo)break;
+    inicial=siguiente;
     cuotas3=planProtegidoCuotas(totalObjetivo3,inicial,2);
     cuotas6=planProtegidoCuotas(totalObjetivo6,inicial,5);
   }
