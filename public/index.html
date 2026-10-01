@@ -1173,10 +1173,14 @@ function armarMensajePlanProtegido(nombre,datos,link){
   var cuota3=datos.plan3.cuotas[0]||0;
   var cuota6=datos.plan6.cuotas[0]||0;
   var msg='*'+String(nombre||'PRODUCTO').toUpperCase()+'*\n\n'
-    +'🤝 Retiralo por solo *'+fmt(datos.inicial)+'*\n\n'
-    +'🚀 *3 pagos*\n🔸 Inicial + 2 cuotas de *'+fmt(cuota3)+'*\n\n'
-    +'💥 *6 pagos*\n🔸 Inicial + 5 cuotas de *'+fmt(cuota6)+'*\n\n'
-    +'Contado ➡️ *'+fmt(datos.contado)+'*';
+    +'🤝 *ELEGÍ TU PLAN*\n\n'
+    +'🚀 *PLAN 3 — 3 pagos en total*\n'
+    +'🔸 Primer pago de *'+fmt(datos.inicial)+'*\n'
+    +'🔸 Después 2 cuotas de *'+fmt(cuota3)+'*\n\n'
+    +'💥 *PLAN 6 — 6 pagos en total*\n'
+    +'🔸 Primer pago de *'+fmt(datos.inicial)+'*\n'
+    +'🔸 Después 5 cuotas de *'+fmt(cuota6)+'*\n\n'
+    +'💸 Contado ➡️ *'+fmt(datos.contado)+'*';
   if(link)msg+='\n\n'+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
@@ -8533,10 +8537,6 @@ function abrirOpcionesCompartirAdmin(id){
 
 // Compartir un producto directamente con el mensaje completo y la foto.
 function compartirProducto(id,modoForzado){
-  if(!_tiendaSincronizacionInicialLista){
-    mostrarToast('🔄 Esperá un momento: estamos actualizando las fotos');
-    return;
-  }
   var p=buscarProd(id);
   if(!p)return;
   if(tiendaEsAdmin && typeof modoForzado!=='string'){

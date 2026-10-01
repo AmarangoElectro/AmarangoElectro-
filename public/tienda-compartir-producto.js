@@ -4,7 +4,7 @@
 */
 (function(){
   'use strict';
-  var VERSION='ae-share-product-2026-08-24-2';
+  var VERSION='ae-share-product-2026-10-01-1';
   if(window.__AE_SHARE_PRODUCT__===VERSION)return;
   window.__AE_SHARE_PRODUCT__=VERSION;
 
@@ -35,7 +35,15 @@
   }
   function toast(t){try{if(typeof window.mostrarToast==='function'){window.mostrarToast(t);return;}}catch(e){}var x=document.getElementById('ae-share-toast');if(!x){x=document.createElement('div');x.id='ae-share-toast';x.style.cssText='position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:16000;background:#071c46;color:#fff;border-left:4px solid #FF7A00;border-radius:12px;padding:10px 14px;font:800 .75rem/1.2 system-ui;box-shadow:0 8px 24px #0003;';document.body.appendChild(x);}x.textContent=t;clearTimeout(x._t);x._t=setTimeout(function(){x.remove();},1700);}
   function compartir(card){
-    var p=productoPorCard(card),url=enlaceProducto(p,card),texto=mensajeProducto(p,url),nombre=String(p&&p.nombre||'Producto AmarangoElectro');
+    var p=productoPorCard(card);
+    // Usa la función central de la tienda para que el botón rápido envíe la
+    // foto y el mensaje completo de la calculadora elegida (incluido el Plan
+    // Protegido), sin necesidad de abrir primero el detalle del producto.
+    if(p&&typeof window.compartirProducto==='function'){
+      window.compartirProducto(p.id);
+      return;
+    }
+    var url=enlaceProducto(p,card),texto=mensajeProducto(p,url),nombre=String(p&&p.nombre||'Producto AmarangoElectro');
     if(navigator.share){navigator.share({title:nombre,text:texto,url:url}).catch(function(e){if(e&&e.name==='AbortError')return;copiar(texto).then(function(){toast('🔗 Enlace copiado');});});return;}
     copiar(texto).then(function(){toast('🔗 Enlace copiado para compartir');}).catch(function(){toast('No se pudo compartir');});
   }
