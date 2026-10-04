@@ -36,7 +36,9 @@ export function productFacetValues(product: Product, scope: string, key: FacetKe
   }
   if (scope === "celulares" && key === "storage") {
     const found = new Set<string>();
-    for (const match of full.matchAll(/(?:^|\D)(64|128|256|512)\s*(?:gb|g|\/\s*\d{1,2}\b)|(?:^|\D)(1)\s*tb\b/gi)) {
+    // Supplier titles often use storage/RAM (for example 256/12gb).
+    // The RAM suffix can itself end in GB, so a boundary after its digits would miss it.
+    for (const match of full.matchAll(/(?:^|\D)(64|128|256|512)\s*(?:gb\b|g\b|\/\s*\d{1,2}(?:\s*(?:gb|g|ram))?\b)|(?:^|\D)(1)\s*tb\b/gi)) {
       const value = match[1] ? `${match[1]} GB` : "1 TB";
       if (storageSizes.includes(value)) found.add(value);
     }

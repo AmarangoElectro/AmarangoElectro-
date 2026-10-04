@@ -52,3 +52,22 @@ test("phone storage and mattress size require an explicit matching value", () =>
   const bed = { ...phone, name: "Sommier Queen" };
   assert.deepEqual(options([bed, { ...bed, id: "king", name: "Colchón King" }], "colchones-y-sommiers", "size"), ["Queen", "King"]);
 });
+
+test("real Samsung and POCO supplier names populate every documented storage drawer", () => {
+  const evidence = JSON.parse(readFileSync(new URL("../fixtures/v16-90-cellphones-materialized.json", import.meta.url)));
+  const phones = evidence.products.map((row) => ({
+    id: row.id, name: row.name, model: row.model ?? null, brand: row.brand,
+    category: "celulares", specifications: {},
+  }));
+  for (const brand of ["Samsung", "POCO"]) {
+    const rows = phones.filter((phone) => phone.brand.toLowerCase() === brand.toLowerCase());
+    assert.ok(rows.length > 2, brand);
+    const values = options(rows, "celulares", "storage");
+    assert.ok(values.includes("256 GB"), `${brand}: ${values}`);
+    assert.ok(values.includes("512 GB"), `${brand}: ${values}`);
+    assert.ok(rows.filter((phone) => matchesFacets(phone, "celulares", { storage: "256 GB" })).every((phone) => /256\s*(?:gb|g|\/)/i.test(phone.name)));
+  }
+  const samsung = phones.filter((phone) => phone.brand.toLowerCase() === "samsung");
+  assert.ok(options(samsung, "celulares", "storage").includes("1 TB"));
+  assert.ok(options(samsung, "celulares", "storage").includes("128 GB"));
+});

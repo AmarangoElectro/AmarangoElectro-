@@ -9078,7 +9078,6 @@ html[data-theme="dark"] .advisor-sale-draft__actions button:first-child {
   }
 }
 
-
 /* V16 product decision flow — mobile, safe-area and dark parity */
 html[data-theme="dark"] .purchase-intent-sheet,
 html[data-theme="dark"] .compare-panel {
@@ -9638,4 +9637,88 @@ html[data-theme="dark"] .product-card-features { border-color: #31445c; backgrou
   border-radius: 999px;
   scroll-snap-align: start;
   white-space: nowrap;
+}
+
+/* V16: editorial text in place of the oversized catalog and financing panels. */
+.catalog-brand-stage,
+.catalog-brand-stage.stage-apple,
+.catalog-brand-stage.stage-samsung,
+.catalog-brand-stage.stage-motorola,
+.catalog-brand-stage.stage-xiaomi,
+.catalog-brand-stage.stage-infinix,
+.catalog-finance-band {
+  min-height: 0;
+  display: block;
+  margin: 20px 0 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--foreground);
+  overflow: visible;
+}
+.catalog-brand-stage::before,
+.catalog-brand-stage::after,
+.catalog-finance-band::after,
+.catalog-stage-panel,
+.catalog-profile-tags { display: none; }
+.catalog-brand-stage-copy .eyebrow,
+.catalog-finance-band .eyebrow { color: var(--orange); }
+.catalog-brand-stage-copy h2,
+.catalog-finance-band h3 {
+  max-width: 22ch;
+  margin: 5px 0 9px;
+  color: #0b3570;
+  font-size: clamp(29px, 3.5vw, 43px);
+  line-height: 1.08;
+  letter-spacing: -.045em;
+}
+.catalog-brand-stage-copy > p,
+.catalog-finance-band p:last-child {
+  max-width: 64ch;
+  color: var(--foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.catalog-finance-band { margin-top: 40px; }
+.catalog-finance-band h3 { max-width: 24ch; }
+.catalog-finance-band .finance-benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 13px;
+}
+.catalog-finance-band .finance-benefits span {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #0b3570;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: none;
+}
+.catalog-finance-band .finance-benefits span::before { content: "• "; color: var(--orange); }
+html[data-theme="dark"] .catalog-brand-stage-copy h2,
+html[data-theme="dark"] .catalog-finance-band h3 { color: #fff; }
+html[data-theme="dark"] .catalog-brand-stage-copy > p,
+html[data-theme="dark"] .catalog-finance-band p:last-child,
+html[data-theme="dark"] .catalog-finance-band .finance-benefits span { color: #ff974d; }
+@media (max-width: 760px) {
+  .catalog-brand-stage { margin: 15px 0 11px; padding: 0; }
+  .catalog-brand-stage-copy h2,
+  .catalog-finance-band h3 { font-size: clamp(28px, 8vw, 36px); }
+  .catalog-finance-band { margin-top: 32px; padding: 0; }
+  .catalog-active-filters {
+    min-height: 48px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 7px 9px;
+  }
+  .catalog-active-tags { flex: 1 1 auto; }
+  .catalog-active-filters .catalog-clear { min-height: 36px; }
 }
