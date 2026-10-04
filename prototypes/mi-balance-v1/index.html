@@ -959,7 +959,7 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 <div id="appNotice" class="appNotice" role="status" aria-live="polite" aria-atomic="true"><span id="appNoticeText"></span></div>
 
 <div class="app">
-<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn qrTopBtn" type="button" onclick="openQr()" aria-label="Mostrar código QR de Mi Balance">QR</button><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
+<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn qrTopBtn" type="button" onclick="openQr()" aria-label="Mostrar código QR de Mi Balance">QR</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
 <div id="appUpdateBar" class="appUpdateBar hidden"><div><b>✨ Hay una actualización de Mi Balance</b><small>Actualizá para ver las últimas mejoras. Tus datos no se borran.</small></div><button onclick="applyAppUpdate()">↻ Actualizar</button></div>
 
 <section class="welcomeStrip">
@@ -2098,7 +2098,7 @@ function confirmEmptyTrash(){state.trash=[];persist();render();renderTrash();clo
 function requestDeleteCurrentData(){closeM("accountModal");openM("deleteCurrentDataModal")}
 async function confirmDeleteCurrentData(){
   const id=currentProfileId,emailToDelete=currentEmail;if(!id)return;
-  await clearActiveSession();localStorage.removeItem("mb_vault_v2_"+id);localStorage.removeItem("mb_tour_seen_v2_"+id);
+  await clearActiveSession();localStorage.removeItem("mb_vault_v2_"+id);localStorage.removeItem("mb_tour_seen_v2_"+id);localStorage.removeItem("mb_first_steps_v1_"+id);
   const remaining=profiles().filter(p=>p.id!==id);saveProfiles(remaining);
   const last=normEmail(localStorage.getItem("mb_last_email")||"");if(last===normEmail(emailToDelete)){if(remaining.length)rememberProfileEmail(remaining[remaining.length-1].email);else localStorage.removeItem("mb_last_email")}
   vaultKey=null;currentProfileId=null;currentEmail="";state=EMPTY_STATE();closeM("deleteCurrentDataModal");location.reload()
