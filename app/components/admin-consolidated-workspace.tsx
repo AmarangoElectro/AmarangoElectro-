@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { BarChart3, Coins, ImagePlus, LayoutGrid, ListFilter, MoreHorizontal, Network, PackageCheck, Save, ShieldCheck, Smartphone, Sparkles, Tag, Truck, UserCog, Users, Wallet } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BarChart3, ChevronDown, Coins, ImagePlus, LayoutGrid, ListFilter, Network, PackageCheck, Save, ShieldCheck, Smartphone, Sparkles, Tag, Truck, UserCog, Users, Wallet } from "lucide-react";
 import { AmarangoCalculatorPanel } from "@/components/internal/admin/amarango-calculator-panel";
 import { PlatesPanel } from "@/components/internal/admin/plates-panel";
 import { AdminProductGrid } from "@/components/internal/admin/admin-product-grid";
@@ -54,7 +54,26 @@ const adminTabIds = [
   "offers",
 ] as const;
 type AdminTab = (typeof adminTabIds)[number];
-const moreAdminTabs: readonly AdminTab[] = ["crm", "collections", "reports", "providers", "cash", "deliveries", "advisors", "growth", "offers"];
+const adminModules: { title: string; tabs: { id: AdminTab; label: string; icon: typeof LayoutGrid }[] }[] = [
+  { title: "Productos y tienda", tabs: [
+    { id: "catalog", label: "Catálogo", icon: LayoutGrid },
+    { id: "storefront", label: "Revisión de tienda", icon: ShieldCheck },
+    { id: "cellphones90", label: "90 celulares · revisión", icon: Smartphone },
+    { id: "calculator", label: "Calculadora", icon: ListFilter },
+    { id: "plates", label: "Placas", icon: Sparkles },
+    { id: "offers", label: "Ofertas · borrador", icon: Tag },
+  ] },
+  { title: "Operación", tabs: [
+    { id: "crm", label: "Clientes / CRM", icon: Users },
+    { id: "collections", label: "Cobranzas", icon: Wallet },
+    { id: "reports", label: "Reportes", icon: BarChart3 },
+    { id: "providers", label: "Proveedores", icon: Truck },
+    { id: "cash", label: "Caja", icon: Coins },
+    { id: "deliveries", label: "Entregas", icon: PackageCheck },
+    { id: "advisors", label: "Asesores", icon: UserCog },
+    { id: "growth", label: "Adquisición / Referidos", icon: Network },
+  ] },
+];
 const adminTabHash: Record<AdminTab, string> = {
   catalog: "catalogo",
   storefront: "tienda",
@@ -79,14 +98,18 @@ export function AdminConsolidatedWorkspace() {
   const [adminLab, setAdminLab] = useState<AdminLab>(initialAdminLab);
   const [offer, setOffer] = useState<LabOfferState>(defaultLabOffer);
   const [tab, setTab] = useState<AdminTab>("catalog");
+  const [modulesOpen, setModulesOpen] = useState(false);
+  const moduleContent = useRef<HTMLDivElement>(null);
   const [crmInitialClientId, setCrmInitialClientId] = useState<string | null>(null);
   const [crmInstanceKey, setCrmInstanceKey] = useState(0);
 
   function openAdminTab(next: AdminTab) {
     setTab(next);
+    setModulesOpen(false);
     if (typeof window === "undefined") return;
     const nextUrl = `${window.location.pathname}${window.location.search}#${adminTabHash[next]}`;
     window.history.replaceState(window.history.state, "", nextUrl);
+    window.requestAnimationFrame(() => moduleContent.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
   function openClient360FromCollections(clientId: string) {
@@ -133,27 +156,18 @@ export function AdminConsolidatedWorkspace() {
         <div className="admin-command-hero-copy"><p className="eyebrow orange">CENTRO DE ADMINISTRACIÓN</p><h1>Administración central.<br /><span>Operativa, ordenada y segura.</span></h1>{adminGuide && <SectorGuide guide={adminGuide} />}</div>
         <div className="admin-command-hero-status"><ShieldCheck /><strong>MODO SEGURO</strong><span>Los cambios productivos requieren autorización</span></div>
       </section>
-      <nav className="admin-workspace-tabs" aria-label="Módulos administrativos" data-guide-target="admin-workspace-tabs">
-        <button aria-pressed={tab === "catalog"} onClick={() => openAdminTab("catalog")}><LayoutGrid /><span><small>PRODUCTOS</small><strong>Catálogo</strong></span></button>
-        <button aria-pressed={tab === "storefront"} onClick={() => openAdminTab("storefront")}><ShieldCheck /><span><small>CONTROL VISUAL</small><strong>Revisión de tienda</strong></span></button>
-        <button aria-pressed={tab === "cellphones90"} onClick={() => openAdminTab("cellphones90")}><Smartphone /><span><small>COHORTE ACTUAL</small><strong>90 Celulares · revisión</strong></span></button>
-        <button aria-pressed={tab === "calculator"} onClick={() => openAdminTab("calculator")}><ListFilter /><span><small>PRECIOS</small><strong>Calculadora</strong></span></button>
-        <button aria-pressed={tab === "plates"} onClick={() => openAdminTab("plates")}><Sparkles /><span><small>CONTENIDO</small><strong>Placas</strong></span></button>
-        <details className="admin-workspace-more" data-active={moreAdminTabs.includes(tab) ? "true" : "false"}>
-          <summary><MoreHorizontal /><span><small>OPERACIÓN</small><strong>Más áreas</strong></span></summary>
-          <div>
-            <button aria-pressed={tab === "crm"} onClick={() => { setCrmInitialClientId(null); setCrmInstanceKey((key) => key + 1); openAdminTab("crm"); }}><Users /> Clientes / CRM</button>
-            <button aria-pressed={tab === "collections"} onClick={() => openAdminTab("collections")}><Wallet /> Cobranzas</button>
-            <button aria-pressed={tab === "reports"} onClick={() => openAdminTab("reports")}><BarChart3 /> Reportes</button>
-            <button aria-pressed={tab === "providers"} onClick={() => openAdminTab("providers")}><Truck /> Proveedores</button>
-            <button aria-pressed={tab === "cash"} onClick={() => openAdminTab("cash")}><Coins /> Caja</button>
-            <button aria-pressed={tab === "deliveries"} onClick={() => openAdminTab("deliveries")}><PackageCheck /> Entregas</button>
-            <button aria-pressed={tab === "advisors"} onClick={() => openAdminTab("advisors")}><UserCog /> Asesores</button>
-            <button aria-pressed={tab === "growth"} onClick={() => openAdminTab("growth")}><Network /> Adquisición / Referidos</button>
-            <button aria-pressed={tab === "offers"} onClick={() => openAdminTab("offers")}><Tag /> Ofertas · borrador</button>
-          </div>
-        </details>
+      <nav className="admin-module-picker" aria-label="Módulos administrativos" data-guide-target="admin-workspace-tabs">
+        <button type="button" className="admin-module-picker-trigger" aria-expanded={modulesOpen} aria-controls="admin-module-options" onClick={() => setModulesOpen((open) => !open)}>
+          <LayoutGrid size={20} aria-hidden="true" /><span><small>ADMINISTRACIÓN</small><strong>{adminModules.flatMap((group) => group.tabs).find((module) => module.id === tab)?.label}</strong></span><span className="admin-module-picker-hint">Cambiar área</span><ChevronDown className={modulesOpen ? "is-open" : ""} size={19} aria-hidden="true" />
+        </button>
+        {modulesOpen && <div id="admin-module-options" className="admin-module-picker-options">
+          {adminModules.map((group) => <section key={group.title} aria-label={group.title}>
+            <h2>{group.title}</h2><div>{group.tabs.map(({ id, label, icon: Icon }) => <button type="button" key={id} aria-current={tab === id ? "page" : undefined} onClick={() => { if (id === "crm") { setCrmInitialClientId(null); setCrmInstanceKey((key) => key + 1); } openAdminTab(id); }}><Icon size={18} aria-hidden="true" />{label}</button>)}</div>
+          </section>)}
+        </div>}
       </nav>
+
+      <div id="admin-module-content" ref={moduleContent} className="admin-module-content">
 
       {tab === "catalog" && <>
         <section className="flyer-lab" aria-labelledby="flyer-lab-title">
@@ -177,6 +191,7 @@ export function AdminConsolidatedWorkspace() {
       {tab === "calculator" && <AmarangoCalculatorPanel />}
       {tab === "plates" && <PlatesPanel />}
       {tab === "offers" && <section className="offer-admin-editor"><div><p className="eyebrow orange">OFERTAS & OUTLET</p><h2>Control local del sector comercial</h2><p>No usa la calculadora habitual ni altera el catálogo maestro.</p></div><div className="offer-admin-form"><label className="toggle-row"><span>Sector activo</span><input type="checkbox" checked={offer.enabled} onChange={(event) => updateOffer("enabled", event.target.checked)} /></label><label>Tipo<select value={offer.kind} onChange={(event) => updateOffer("kind", event.target.value as OfferKind)}>{["Oferta del día","Contado especial","2 cuotas sin interés","3 cuotas sin interés","Outlet"].map((kind) => <option key={kind}>{kind}</option>)}</select></label><label>Producto<input value={offer.productName} onChange={(event) => updateOffer("productName", event.target.value)} /></label><label>Imagen del producto<input value={offer.imageSrc} onChange={(event) => updateOffer("imageSrc", event.target.value)} placeholder="/assets/productos/imagen.webp" /></label><label>Precio anterior ARS<input type="number" value={offer.previousPriceArs} onChange={(event) => updateOffer("previousPriceArs", Number(event.target.value))} /></label><label>Precio promocional ARS<input type="number" value={offer.promotionalPriceArs} onChange={(event) => updateOffer("promotionalPriceArs", Number(event.target.value))} /></label><label>Stock de referencia<input type="number" min="0" value={offer.stock} onChange={(event) => updateOffer("stock", Number(event.target.value))} /></label><button type="button" onClick={() => saveLabOffer(offer)}><Save /> Guardar solo en este dispositivo</button></div></section>}
+      </div>
       <p className="internal-privacy-note">Admin Mode V4.18B y Quick Actions V4.18A viven sólo en memoria y se descartan al cerrar. Los laboratorios históricos conservan su almacenamiento local previo. No hay cliente de Supabase, servicio administrativo, RPC ni petición de escritura.</p>
     </main>
   );
