@@ -1,4 +1,4 @@
-const CACHE='mi-balance-v35-qr-first-steps';
+const CACHE='mi-balance-v36-qr-first-steps';
 const ASSETS=['./','./index.html','./manifest.json','./icon.svg','./icon-maskable.svg','./social-preview-v2.svg','./amarango-logo-320.webp','./amarango-electro-promo-bg.webp'];
 
 self.addEventListener('install',event=>{
