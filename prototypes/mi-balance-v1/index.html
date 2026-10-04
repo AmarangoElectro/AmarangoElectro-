@@ -892,6 +892,14 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 .expenseMore summary:after{content:" +";color:var(--orange)}
 .expenseMore[open] summary:after{content:" −"}
 .expenseSimpleSheet .cat.on{outline:2px solid var(--orange);outline-offset:1px}
+
+/* QR event sharing */
+.qrTopBtn{font-size:9px!important;font-weight:950;letter-spacing:.02em}
+.shareInstallBtn{width:100%;margin-top:9px}
+.qrSheet{text-align:center}.qrSheetHead{display:flex;align-items:flex-start;justify-content:space-between;text-align:left;gap:10px}.qrSheetHead small{color:var(--orange);font-size:8px;font-weight:950;letter-spacing:.12em}.qrSheetHead h3{margin:4px 0}.qrSheet>p{color:var(--muted);font-size:11px;line-height:1.45;margin:7px 5px 12px}.qrFrame{display:inline-grid;place-items:center;padding:13px;background:#fff;border-radius:22px;box-shadow:0 12px 34px rgba(0,0,0,.28)}.qrFrame img{display:block;width:min(68vw,280px);height:auto;image-rendering:pixelated}.qrUrl{margin:10px 0 13px;font-size:10px;font-weight:850;color:var(--muted);word-break:break-all}
+
+/* First-use explanation: only the essentials */
+.firstStepsSheet{text-align:center}.firstStepsIcon{font-size:38px}.firstStepsEy{display:block;margin-top:4px;color:var(--orange);font-size:8px;font-weight:950;letter-spacing:.12em}.firstStepsSheet h3{font-size:23px;margin:5px 0}.firstStepsLead{margin:0 auto 13px!important;color:var(--muted)!important;font-size:11px!important;line-height:1.45!important;max-width:330px}.firstStepsList{display:grid;gap:8px;text-align:left}.firstStepsList>div{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:15px;background:var(--soft)}.firstStepsList>div>span{width:31px;height:31px;flex:0 0 31px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#ff6818,#ff8a4a);color:#fff;font-size:14px;font-weight:950}.firstStepsList p{margin:0!important}.firstStepsList b{display:block;font-size:12px}.firstStepsList small{display:block;margin-top:2px;color:var(--muted);font-size:9px;line-height:1.35}.firstStepsRule{margin:11px 0;padding:10px 11px;border-radius:13px;background:rgba(255,104,24,.08);border:1px solid rgba(255,104,24,.20);font-size:10px;line-height:1.4}.firstStepsRule b{color:var(--orange)}
 </style>
 </head>
 <body>
@@ -951,7 +959,7 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 <div id="appNotice" class="appNotice" role="status" aria-live="polite" aria-atomic="true"><span id="appNoticeText"></span></div>
 
 <div class="app">
-<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
+<header class="top"><div class="brand"><div class="mark"><i></i><i></i><i></i></div><div>Mi Balance<span class="sub">Un regalo de AmarangoElectro</span></div></div><div class="topTools"><button class="iconBtn qrTopBtn" type="button" onclick="openQr()" aria-label="Mostrar código QR de Mi Balance">QR</button><button class="iconBtn" type="button" onclick="shareApp()" aria-label="Compartir Mi Balance">↗</button><button id="helpBtn" class="iconBtn" type="button" onclick="startGuide(true)" aria-label="Guía de uso">?</button><button id="themeBtn" class="iconBtn" type="button" onclick="toggleTheme()" aria-label="Cambiar tema">☀️</button><button class="iconBtn" type="button" onclick="openAccount()" aria-label="Cuenta">👤</button></div></header>
 <div id="appUpdateBar" class="appUpdateBar hidden"><div><b>✨ Hay una actualización de Mi Balance</b><small>Actualizá para ver las últimas mejoras. Tus datos no se borran.</small></div><button onclick="applyAppUpdate()">↻ Actualizar</button></div>
 
 <section class="welcomeStrip">
@@ -1059,7 +1067,7 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 <section id="shareCard" class="shareCard">
   <b>🤝 Ayudá a alguien a ordenar sus números</b>
   <p>Mi Balance es un regalo de AmarangoElectro. Compartilo con un amigo o familiar que quiera tener más claro en qué se le va la plata.</p>
-  <div class="inlineBtns"><button class="smallBtn primaryMini" onclick="shareApp()">Compartir Mi Balance</button><button class="smallBtn" onclick="installApp()">Instalar app</button></div>
+  <div class="inlineBtns"><button class="smallBtn primaryMini" onclick="shareApp()">Compartir Mi Balance</button><button class="smallBtn" onclick="openQr()">Mostrar QR</button></div><button class="smallBtn shareInstallBtn" onclick="installApp()">Instalar app</button>
 </section>
 
 <section id="storeCard" class="storeCard storePromoCard">
@@ -1224,6 +1232,30 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
 
 <div id="shareFallbackModal" class="modal" onclick="backdrop(event,'shareFallbackModal')"><div class="sheet"><h3>Compartir Mi Balance</h3><p style="color:#56677b;line-height:1.55">Mantené presionado el enlace para copiarlo y compartirlo.</p><input id="shareFallbackUrl" class="shareFallbackUrl" readonly value="https://mibalance-amarango.netlify.app/"><button class="secondary" onclick="selectShareFallback()">Seleccionar enlace</button><button class="secondary" onclick="closeM('shareFallbackModal')">Cerrar</button></div></div>
 
+<div id="qrModal" class="modal" onclick="backdrop(event,'qrModal')"><div class="sheet qrSheet">
+  <div class="qrSheetHead"><div><small>COMPARTIR MI BALANCE</small><h3>Mostrá este QR</h3></div><button class="dailyClose" onclick="closeM('qrModal')" aria-label="Cerrar código QR">×</button></div>
+  <p>Que lo escaneen con la cámara del celular. Abre Mi Balance directamente y después pueden instalarla.</p>
+  <div class="qrFrame"><img id="miBalanceQr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbwAAAG8CAIAAAAq0oeIAAAIR0lEQVR4nO3dS04sOxQF0VdPzH/Kdfs0kENYruNkrQFA1oeQOxu/3u/3fwCs+f/TDwBwE9EECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMguHJ7fmLa1pvfO7mpX3Hjht3fxe85aQIEogkQiCZAIJoAgWgCBKIJEIgmQCCaAIFoAgSiCRCIJkAgmgDB16cf4LtdW9QbN7a7TNsFT9uMP/Xe85XX9dTv/ElOmgCBaAIEogkQiCZAIJoAgWgCBKIJEIgmQCCaAIFoAgSiCRCM255P271Ou0d71774Rje+rhufmZ85aQIEogkQiCZAIJoAgWgCBKIJEIgmQCCaAIFoAgSiCRCIJkAwbnt+8l7mXT9nxbR7vafdDz7tbvQVJ9+faRv2k3+n0zhpAgSiCRCIJkAgmgCBaAIEogkQiCZAIJoAgWgCBKIJEIgmQDBue37jrnzFyb3ztE39U/fyu0z7vKb9rml/y06aAIFoAgSiCRCIJkAgmgCBaAIEogkQiCZAIJoAgWgCBKIJELym7Tpv3A7vcuMGedr3Z8XJ/f6N2/xpr30aJ02AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIxt17vuLGvequrffJzfjK77rxvvKT2+pdnvp/CW7cpztpAgSiCRCIJkAgmgCBaAIEogkQiCZAIJoAgWgCBKIJEIgmQHDl9nzFU3fBT92Mn/xdu177yc/ipBu3+Sc5aQIEogkQiCZAIJoAgWgCBKIJEIgmQCCaAIFoAgSiCRCIJkDw2O35U53cek8zbRN98s7ukzvup/7fhl2cNAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyCwPb/Mya3uyW31Lk+9a/vGDfuue+GnfcecNAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyB47PZ82l71pGl73l3Pc+Pd39Puqb/xc5/GSRMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAGCK7fnT73besXJHfe0XfDJffq0e8ZPvq4bvxsnOWkCBKIJEIgmQCCaAIFoAgSiCRCIJkAgmgCBaAIEogkQiCZA8PrLG1KAykkTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBAtEECEQTIBBNgEA0AQLRBAhEEyAQTYBANAEC0QQIRBMgEE2AQDQBgn8gByix6qKo9AAAAABJRU5ErkJggg==" alt="Código QR para abrir Mi Balance"></div>
+  <div class="qrUrl">mibalance-amarango.netlify.app</div>
+  <button class="primary" onclick="shareApp()">Compartir enlace</button>
+  <button class="secondary" onclick="closeM('qrModal')">Cerrar</button>
+</div></div>
+
+<div id="firstStepsModal" class="modal" onclick="backdrop(event,'firstStepsModal')"><div class="sheet firstStepsSheet">
+  <div class="firstStepsIcon">📊</div>
+  <small class="firstStepsEy">MI BALANCE · PRIMERA VEZ</small>
+  <h3>Empezá en 3 pasos</h3>
+  <p class="firstStepsLead">No necesitás saber de finanzas. Hacé esto y la app se encarga del resto.</p>
+  <div class="firstStepsList">
+    <div><span>1</span><p><b>Decí cuánto entra</b><small>Cargá tu ingreso mensual una sola vez.</small></p></div>
+    <div><span>2</span><p><b>Anotá lo que gastás</b><small>Elegí el gasto → poné el monto → OK.</small></p></div>
+    <div><span>3</span><p><b>Elegí una meta</b><small>Auto, vacaciones, casa o lo que quieras lograr.</small></p></div>
+  </div>
+  <div class="firstStepsRule">Después es simple: <b>gastaste → lo anotás</b>. Mi Balance te muestra cómo venís.</div>
+  <button class="primary" onclick="finishFirstSteps(false)">Listo, empezar</button>
+  <button class="secondary" onclick="finishFirstSteps(true)">Mostrame dónde tocar</button>
+</div></div>
+
 <div id="accountModal" class="modal" onclick="backdrop(event,'accountModal')"><div class="sheet">
   <div class="accountSheetHead"><div class="accountAvatar">👤</div><div><h3 style="margin:0">Tu espacio</h3><div id="accountEmail" class="accountEmail">—</div></div></div>
   <div class="emailNote">🔐 Tus movimientos y metas siguen cifrados y guardados en este dispositivo.</div>
@@ -1233,6 +1265,7 @@ body[data-theme="light"] .storePromoContext{color:#69717c!important}
     <button id="soundToggleBtn" class="accountAction" onclick="toggleSound()"><span>🔊 Sonidos</span><span id="soundToggleText">Activados</span></button>
     <button class="accountAction" onclick="openTrash()"><span>🗑 Papelera</span><span id="trashAccountCount">0</span></button>
     <button class="accountAction" onclick="shareApp()"><span>🤝 Compartir Mi Balance</span><span>›</span></button>
+    <button class="accountAction" onclick="openQr()"><span>▦ Mostrar código QR</span><span>›</span></button>
     <button class="accountAction" onclick="checkForAppUpdate(true)"><span>↻ Buscar actualizaciones</span><span id="accountUpdateStatus">›</span></button>
   </div>
   <div class="accountSettingsBlock">
@@ -2076,17 +2109,19 @@ function saveProfileName(){state.profileName=String(profileNameInput.value||"").
 function startGuideFromAccount(){closeM("accountModal");setTimeout(()=>startGuide(true),180)}
 
 const GUIDE_STEPS=[
-  {sel:"#moneyHomePanel",title:"¿Dónde está tu plata hoy?",text:"Las bolsitas de adentro representan lo que todavía conservás y las de afuera lo que ya gastaste. Los porcentajes te permiten entender el mes en segundos."},
-  {sel:"#goalFocus",title:"Tu meta principal siempre a la vista",text:"Esta es la meta que elegiste como más importante. La idea es verla seguido y recordar por qué estás cuidando tus gastos."},
-  {sel:"#quickExpenses",title:"Anotá un gasto al toque",text:"Esto queda bien arriba para que registrar café, kiosco, supermercado o cualquier gasto chico te lleve apenas unos segundos."},
-  {sel:"#goalCarouselCard",title:"Tus otros objetivos",text:"Deslizá de costado para ver todas tus metas. Podés tener varias y elegir cualquiera como principal."},
-  {sel:"#rhythmNavBtn",title:"Tu ritmo financiero está acá",text:"Tocá Ritmo para abrir el tablero tipo trading. Ahí ves picos de gasto, promedio de 3 días, ritmo recomendado, racha, desafío y cómo viene el mes. Lo sacamos de Inicio para que la pantalla sea más simple."},
-  {sel:"#incomeCard",title:"Cargá tu ingreso",text:"Poné cuánto entra por mes y cuánto querés reservar. Con eso Mi Balance puede dimensionar mejor cuánto estás usando."},
-  {sel:"#microInsight",title:"Mirá lo que se acumula",text:"Los gastos chicos también cuentan. Acá ves cuánto representan juntos durante el mes."}
+  {sel:"#incomeCard",title:"1. Cargá cuánto entra",text:"Poné tu ingreso mensual y cuánto querés reservar. Esto lo hacés una vez y después podés editarlo cuando quieras."},
+  {sel:"#quickExpenses",title:"2. Anotá lo que gastás",text:"Tocá un gasto, escribí el monto y apretá OK. Ese es el hábito principal de Mi Balance: gastaste → lo anotás."},
+  {sel:"#goalFocus",title:"3. Elegí una meta",text:"Poné algo que quieras lograr. La vas a ver seguido para recordar por qué estás cuidando tu plata."},
+  {sel:"#moneyHomePanel",title:"4. Mirá cómo venís",text:"Acá ves rápido cuánto entró, cuánto salió y cuánto te queda. No necesitás hacer cuentas: Mi Balance las hace por vos."}
 ]
 let guideIndex=0,guideForce=false,guideTimer=null;
 function tourSeenKey(){return currentProfileId?"mb_tour_seen_v2_"+currentProfileId:"mb_tour_seen_v2_guest"}
-function maybeStartGuide(){if(!localStorage.getItem(tourSeenKey()))startGuide(false)}
+function firstStepsSeenKey(){return currentProfileId?"mb_first_steps_v1_"+currentProfileId:"mb_first_steps_v1_guest"}
+function maybeStartGuide(){if(!localStorage.getItem(firstStepsSeenKey()))openM("firstStepsModal")}
+function finishFirstSteps(showGuide=false){
+  localStorage.setItem(firstStepsSeenKey(),"1");closeM("firstStepsModal");
+  if(showGuide)setTimeout(()=>startGuide(true),180)
+}
 function startGuide(force=false){
   if(lock.style.display!=="none"){notify("Entrá a tu espacio para iniciar la guía.","info");return}
   guideForce=force;guideIndex=0;
@@ -2114,8 +2149,9 @@ function finishGuide(mark=true){
 }
 addEventListener("resize",()=>{if($("guideLayer")&&$("guideLayer").classList.contains("show"))showGuideStep()});
 
-const APP_BUILD="mi-balance-v34-deudas-simple-expense-flow";
+const APP_BUILD="mi-balance-v35-qr-first-steps";
 const SHARE_URL="https://mibalance-amarango.netlify.app/";
+function openQr(){openM("qrModal")}
 async function shareApp(){
   const data={title:"Mi Balance — Un regalo de AmarangoElectro",text:"📊 Te comparto Mi Balance, una app gratis y privada para ordenar tus ingresos, gastos y metas. Un regalo de AmarangoElectro.",url:SHARE_URL};
   try{
