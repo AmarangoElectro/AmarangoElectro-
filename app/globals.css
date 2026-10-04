@@ -9591,3 +9591,51 @@ html[data-theme="dark"] .home-final-sectors .featured-sector-copy small { color:
 .product-card-features li + li { margin-top: 4px; }
 html[data-theme="dark"] .product-card-features { border-color: #31445c; background: #14233a; color: #f6f8fc; }
 @media (max-width: 680px) { .product-card-premium .product-card-features { margin-bottom: 8px; } .product-card-features summary { font-size: .68rem; padding: 7px; } .product-card-features ul { font-size: .67rem; padding: 0 7px 8px 20px; } }
+
+/* The photo action is a small control, never a full-image compositing layer. */
+.product-card-premium .card-photo-zoom {
+  inset: auto auto 9px 9px;
+  width: auto;
+  height: 34px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 999px;
+  background: #071a39;
+  color: #fff;
+  white-space: nowrap;
+  box-shadow: 0 5px 14px rgba(4,15,32,.3);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.product-card-premium .card-photo-zoom svg,
+.product-card-premium .card-photo-zoom span {
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  filter: none;
+}
+.product-card-premium .card-photo-zoom span { font-size: .65rem; line-height: 1; }
+.sector-showroom[data-sector="celulares"] .sector-showroom-brands {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 2px 2px 7px;
+}
+.sector-showroom[data-sector="celulares"] .sector-showroom-brands a {
+  flex: 0 0 auto;
+  min-width: 84px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  scroll-snap-align: start;
+  white-space: nowrap;
+}

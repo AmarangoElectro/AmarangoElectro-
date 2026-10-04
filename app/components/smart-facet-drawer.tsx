@@ -32,7 +32,7 @@ export function SmartFacetDrawer({ products, scope, selected, onSelect, onClear,
           {group.options.map((value) => {
             const count = products.filter((product) => (!availableOnly || product.stock.status === "in_stock") && matchesFacets(product, scope, selected, group.key) && productFacetMatch(product, scope, group.key, value)).length;
             const active = selected[group.key] === value;
-            return <button key={value} type="button" disabled={!count && !active} aria-pressed={active} onClick={() => onSelect(group.key, active ? undefined : value)}>{value}<small>{count}</small></button>;
+            return <button key={value} type="button" disabled={!count && !active} aria-pressed={active} onClick={() => { onSelect(group.key, active ? undefined : value); setOpen(false); }}>{value}<small>{count}</small></button>;
           })}
         </div>
       </details>)}

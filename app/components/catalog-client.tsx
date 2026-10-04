@@ -105,6 +105,7 @@ export function CatalogClient({
   const facetScope = getFacetScope(categorySlug, sectorSlug);
   const facetStorageKey = `amarango-facets:${categorySlug}:${sectorSlug ?? "all"}`;
   const [facetSelection, setFacetSelection] = useState<FacetSelection>({});
+  const [focusRequest, setFocusRequest] = useState<{ value: string | null; token: number }>({ value: null, token: 0 });
   const [facetReady, setFacetReady] = useState(false);
   const brands = useMemo(() => ["Todos", ...new Set(products.map((product) => product.brand))], [products]);
   const categoryOptions = useMemo(() => ["Todas", ...new Set(products.map((product) => product.category))], [products]);
@@ -317,7 +318,7 @@ export function CatalogClient({
             type="button"
             className={brand === item ? "active" : ""}
             aria-pressed={brand === item}
-            onClick={() => { playSonicCue("filter"); setBrand(item); }}
+            onClick={() => { playSonicCue("filter"); setBrand(item); setFocusRequest((current) => ({ value: item, token: current.token + 1 })); }}
           >
             <small>{item === "Todos" ? "VER TODO" : "MARCA"}</small>
             <strong>{item}</strong>
@@ -474,7 +475,7 @@ export function CatalogClient({
         {catalogUpdating && <small className="catalog-refresh-indicator">Actualizando…</small>}
       </div>
       {filtered.length ? (
-        categorySlug ? <ProductCategoryAccordion products={filtered} scope={facetScope} autoOpen={Boolean(search.trim())} filters={<SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => {
+        categorySlug ? <ProductCategoryAccordion products={filtered} taxonomyProducts={products} scope={facetScope} autoOpen={Boolean(search.trim() || brand !== "Todos")} focusRequest={focusRequest} filters={<SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); setFocusRequest((current) => ({ value: value ?? null, token: current.token + 1 })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => {
             const customerCard = (
               <ProductCard
                 key={product.id}

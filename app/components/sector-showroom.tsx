@@ -180,7 +180,7 @@ export function SectorShowroom({ category, activeSector, activeBrand, availableB
           {brandFilters.map((item) => (
             <Link
               key={item.label}
-              href={item.value ? `/categoria/${category.slug}?marca=${encodeURIComponent(item.value)}#catalogo` : `/categoria/${category.slug}#catalogo`}
+              href={item.value ? `/categoria/${category.slug}?marca=${encodeURIComponent(item.value)}#categorias-productos` : `/categoria/${category.slug}#catalogo`}
               className={(activeBrand ?? "") === item.value ? "active" : ""}
               aria-current={(activeBrand ?? "") === item.value ? "page" : undefined}
             >{item.label}</Link>

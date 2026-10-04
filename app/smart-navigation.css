@@ -38,6 +38,7 @@ html[data-theme="dark"] .floating-scroll-top { background: #e87520; color: #0614
 
 /* Compact product drawers: only the selected group mounts its image grid. */
 .product-category-drawer { margin: 12px 0 24px; border: 1px solid var(--line, #dce5ef); border-radius: 20px; background: var(--card, #fff); color: var(--foreground, #071a39); box-shadow: 0 10px 30px rgba(5,22,49,.06); overflow: hidden; }
+.product-category-drawer { scroll-margin-top: calc(152px + env(safe-area-inset-top)); }
 .product-category-trigger, .product-category-group > button { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .product-category-trigger { min-height: 58px; padding: 12px 17px; font-size: 1.05rem; font-weight: 800; }
 .product-category-trigger > span, .product-category-group > button > span { flex: 1; }
@@ -48,6 +49,7 @@ html[data-theme="dark"] .floating-scroll-top { background: #e87520; color: #0614
 .product-category-content .smart-facets { margin: 0 0 4px; box-shadow: none; }
 .product-category-group { border: 1px solid var(--line, #dce5ef); border-radius: 13px; background: var(--soft, #f7f9fc); overflow: hidden; }
 .product-category-group > button { min-height: 52px; padding: 10px 14px; font-weight: 760; }
+.product-category-group > button { scroll-margin-top: calc(168px + env(safe-area-inset-top)); }
 .product-category-grid { padding: 0 10px 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .product-category-grid .catalog-card { min-width: 0; }
 html[data-theme="dark"] .product-category-drawer, html[data-theme="dark"] .product-category-group { background: #0d182a; border-color: #293b52; color: #f6f8fc; }

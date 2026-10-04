@@ -17,6 +17,7 @@ import { ProductCategoryAccordion } from "./product-category-accordion";
 function BrandFilteredPanel({ products, brandSlug }: { products: Product[]; brandSlug: string }) {
   const storageKey = `amarango-facets:celulares:${brandSlug}`;
   const [selected, setSelected] = useState<FacetSelection>({});
+  const [focusRequest, setFocusRequest] = useState<{ value: string | null; token: number }>({ value: null, token: 0 });
   const [availableOnly, setAvailableOnly] = useState(false);
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -30,7 +31,7 @@ function BrandFilteredPanel({ products, brandSlug }: { products: Product[]; bran
   useEffect(() => { if (ready) sessionStorage.setItem(storageKey, JSON.stringify({ ...selected, availableOnly })); }, [availableOnly, ready, selected, storageKey]);
   const filtered = useMemo(() => products.filter((product) => matchesFacets(product, "celulares", selected) && (!availableOnly || product.stock.status === "in_stock")), [availableOnly, products, selected]);
   return <>
-    <ProductCategoryAccordion products={filtered} scope="celulares" filters={<SmartFacetDrawer products={products} scope="celulares" selected={selected} onSelect={(key, value) => setSelected((current) => ({ ...current, [key]: value }))} onClear={() => { setSelected({}); setAvailableOnly(false); }} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => <ProductCard key={product.id} product={product} visualContext="brand" eagerImage />} />
+    <ProductCategoryAccordion products={filtered} taxonomyProducts={products} scope="celulares" focusRequest={focusRequest} filters={<SmartFacetDrawer products={products} scope="celulares" selected={selected} onSelect={(key, value) => { setSelected((current) => ({ ...current, [key]: value })); setFocusRequest((current) => ({ value: value ?? null, token: current.token + 1 })); }} onClear={() => { setSelected({}); setAvailableOnly(false); }} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => <ProductCard key={product.id} product={product} visualContext="brand" eagerImage />} />
     {!filtered.length && <div className="brand-product-drawer-empty">No hay productos con esta combinación. Limpiá los filtros para ver todos.</div>}
   </>;
 }
