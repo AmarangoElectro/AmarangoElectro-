@@ -12,6 +12,7 @@ import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
 import { matchesFacets, type FacetSelection } from "@/lib/catalog/smart-facets";
 import { SmartFacetDrawer } from "./smart-facet-drawer";
+import { ProductCategoryAccordion } from "./product-category-accordion";
 
 function BrandFilteredPanel({ products, brandSlug }: { products: Product[]; brandSlug: string }) {
   const storageKey = `amarango-facets:celulares:${brandSlug}`;
@@ -29,10 +30,7 @@ function BrandFilteredPanel({ products, brandSlug }: { products: Product[]; bran
   useEffect(() => { if (ready) sessionStorage.setItem(storageKey, JSON.stringify({ ...selected, availableOnly })); }, [availableOnly, ready, selected, storageKey]);
   const filtered = useMemo(() => products.filter((product) => matchesFacets(product, "celulares", selected) && (!availableOnly || product.stock.status === "in_stock")), [availableOnly, products, selected]);
   return <>
-    <SmartFacetDrawer products={products} scope="celulares" selected={selected} onSelect={(key, value) => setSelected((current) => ({ ...current, [key]: value }))} onClear={() => { setSelected({}); setAvailableOnly(false); }} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />
-    <div className="brand-product-drawer-grid">
-      {filtered.map((product) => <ProductCard key={product.id} product={product} visualContext="brand" />)}
-    </div>
+    <ProductCategoryAccordion products={filtered} scope="celulares" filters={<SmartFacetDrawer products={products} scope="celulares" selected={selected} onSelect={(key, value) => setSelected((current) => ({ ...current, [key]: value }))} onClear={() => { setSelected({}); setAvailableOnly(false); }} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => <ProductCard key={product.id} product={product} visualContext="brand" eagerImage />} />
     {!filtered.length && <div className="brand-product-drawer-empty">No hay productos con esta combinación. Limpiá los filtros para ver todos.</div>}
   </>;
 }

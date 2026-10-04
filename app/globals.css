@@ -9578,3 +9578,16 @@ html[data-theme="dark"] .home-final-sectors .featured-sector-copy small { color:
 }
 .product-card-premium .card-photo-zoom svg { width: 13px; height: 13px; }
 .product-card-premium .card-photo-zoom:hover { box-shadow: none; transform: none; }
+
+/* Flyer data stays legible: the full photo is contained, details expand on demand. */
+.product-card-premium .product-visual { background: #f2f5f9; }
+.product-card-premium .product-image { filter: none; image-rendering: auto; }
+.product-card-features { min-width: 0; margin: 0 0 10px; border: 1px solid var(--line, #dce5ef); border-radius: 11px; background: var(--soft, #f7f9fc); color: var(--foreground, #071a39); }
+.product-card-features summary { padding: 8px 10px; list-style: none; font-size: .74rem; font-weight: 750; cursor: pointer; }
+.product-card-features summary::-webkit-details-marker { display: none; }
+.product-card-features summary span { float: right; }
+.product-card-features[open] summary span { transform: rotate(180deg); }
+.product-card-features ul { margin: 0; padding: 0 10px 10px 24px; font-size: .75rem; line-height: 1.4; overflow-wrap: anywhere; }
+.product-card-features li + li { margin-top: 4px; }
+html[data-theme="dark"] .product-card-features { border-color: #31445c; background: #14233a; color: #f6f8fc; }
+@media (max-width: 680px) { .product-card-premium .product-card-features { margin-bottom: 8px; } .product-card-features summary { font-size: .68rem; padding: 7px; } .product-card-features ul { font-size: .67rem; padding: 0 7px 8px 20px; } }

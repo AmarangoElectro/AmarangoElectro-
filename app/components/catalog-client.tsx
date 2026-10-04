@@ -28,6 +28,7 @@ import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
 import { getFacetScope, matchesFacets, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
 import { SmartFacetDrawer } from "./smart-facet-drawer";
+import { ProductCategoryAccordion } from "./product-category-accordion";
 
 const brandProfiles = {
   Todos: {
@@ -122,13 +123,6 @@ export function CatalogClient({
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const deferredSearch = useDeferredValue(search);
-  const deferredBrand = useDeferredValue(brand);
-  const deferredCategory = useDeferredValue(category);
-  const deferredSort = useDeferredValue(sort);
-  const deferredFavoritesOnly = useDeferredValue(favoritesOnly);
-  const deferredMaxPrice = useDeferredValue(maxPrice);
-  const deferredAvailableOnly = useDeferredValue(availableOnly);
-  const deferredFacets = useDeferredValue(facetSelection);
   const favoritesSnapshot = useSyncExternalStore(subscribeFavorites, getFavoritesSnapshot, getFavoritesServerSnapshot);
   const favoriteIds = useMemo(() => parseFavoritesSnapshot(favoritesSnapshot), [favoritesSnapshot]);
   const compareSnapshot = useSyncExternalStore(subscribeCompare, getCompareSnapshot, getCompareServerSnapshot);
@@ -143,22 +137,22 @@ export function CatalogClient({
 
   const filtered = useMemo(() => {
     const candidates = products.filter((product) => {
-      const brandMatches = deferredBrand === "Todos"
-        || (compactBrandMode ? brandsShareFamily(product.brand, deferredBrand) : product.brand === deferredBrand);
-      const categoryMatches = deferredCategory === "Todas" || product.category === deferredCategory;
-      const favoriteMatches = !deferredFavoritesOnly || favoriteIds.has(product.id);
-      const availableMatches = !deferredAvailableOnly || product.stock.status === "in_stock";
-      const parsedMaxPrice = Number(deferredMaxPrice);
-      const priceMatches = !deferredMaxPrice || (Number.isFinite(parsedMaxPrice) && product.price !== null && product.price.amount <= parsedMaxPrice);
-      return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches && matchesFacets(product, facetScope, deferredFacets);
+      const brandMatches = brand === "Todos"
+        || (compactBrandMode ? brandsShareFamily(product.brand, brand) : product.brand === brand);
+      const categoryMatches = category === "Todas" || product.category === category;
+      const favoriteMatches = !favoritesOnly || favoriteIds.has(product.id);
+      const availableMatches = !availableOnly || product.stock.status === "in_stock";
+      const parsedMaxPrice = Number(maxPrice);
+      const priceMatches = !maxPrice || (Number.isFinite(parsedMaxPrice) && product.price !== null && product.price.amount <= parsedMaxPrice);
+      return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches && matchesFacets(product, facetScope, facetSelection);
     });
     const result = rankProductsForSearch(candidates, deferredSearch.trim());
-    if (deferredSort === "brand") return [...result].sort((a, b) => a.brand.localeCompare(b.brand, "es"));
-    if (deferredSort === "name") return [...result].sort((a, b) => a.name.localeCompare(b.name, "es"));
-    if (deferredSort === "price-asc") return [...result].sort((a, b) => (a.price?.amount ?? Number.POSITIVE_INFINITY) - (b.price?.amount ?? Number.POSITIVE_INFINITY));
-    if (deferredSort === "price-desc") return [...result].sort((a, b) => (b.price?.amount ?? Number.NEGATIVE_INFINITY) - (a.price?.amount ?? Number.NEGATIVE_INFINITY));
+    if (sort === "brand") return [...result].sort((a, b) => a.brand.localeCompare(b.brand, "es"));
+    if (sort === "name") return [...result].sort((a, b) => a.name.localeCompare(b.name, "es"));
+    if (sort === "price-asc") return [...result].sort((a, b) => (a.price?.amount ?? Number.POSITIVE_INFINITY) - (b.price?.amount ?? Number.POSITIVE_INFINITY));
+    if (sort === "price-desc") return [...result].sort((a, b) => (b.price?.amount ?? Number.NEGATIVE_INFINITY) - (a.price?.amount ?? Number.NEGATIVE_INFINITY));
     return result;
-  }, [compactBrandMode, deferredAvailableOnly, deferredBrand, deferredCategory, deferredFavoritesOnly, deferredFacets, deferredMaxPrice, deferredSearch, deferredSort, facetScope, favoriteIds, products]);
+  }, [compactBrandMode, availableOnly, brand, category, favoritesOnly, facetSelection, maxPrice, deferredSearch, sort, facetScope, favoriteIds, products]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -187,21 +181,21 @@ export function CatalogClient({
     if (typeof window === "undefined") return;
     if (!facetReady) return;
     const params = new URLSearchParams(window.location.search);
-    if (deferredBrand !== "Todos") params.set("marca", deferredBrand); else params.delete("marca");
-    if (showCategoryFilter && deferredCategory !== "Todas") params.set("categoria", deferredCategory); else params.delete("categoria");
+    if (brand !== "Todos") params.set("marca", brand); else params.delete("marca");
+    if (showCategoryFilter && category !== "Todas") params.set("categoria", category); else params.delete("categoria");
     if (deferredSearch.trim()) params.set("q", deferredSearch.trim()); else params.delete("q");
-    if (deferredSort !== "recommended") params.set("orden", deferredSort); else params.delete("orden");
-    if (deferredFavoritesOnly) params.set("favoritos", "1"); else params.delete("favoritos");
-    if (deferredMaxPrice) params.set("precioMax", deferredMaxPrice); else params.delete("precioMax");
-    if (deferredAvailableOnly) params.set("disponible", "1"); else params.delete("disponible");
+    if (sort !== "recommended") params.set("orden", sort); else params.delete("orden");
+    if (favoritesOnly) params.set("favoritos", "1"); else params.delete("favoritos");
+    if (maxPrice) params.set("precioMax", maxPrice); else params.delete("precioMax");
+    if (availableOnly) params.set("disponible", "1"); else params.delete("disponible");
     for (const key of ["measure", "storage", "capacity", "kind", "liters", "burners", "size"] as FacetKey[]) {
-      if (deferredFacets[key]) params.set(`f_${key}`, deferredFacets[key]); else params.delete(`f_${key}`);
+      if (facetSelection[key]) params.set(`f_${key}`, facetSelection[key]); else params.delete(`f_${key}`);
     }
-    window.sessionStorage.setItem(facetStorageKey, JSON.stringify(deferredFacets));
+    window.sessionStorage.setItem(facetStorageKey, JSON.stringify(facetSelection));
     const query = params.toString();
     const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || "#catalogo"}`;
     window.history.replaceState({}, "", next);
-  }, [deferredAvailableOnly, deferredBrand, deferredCategory, deferredFacets, deferredFavoritesOnly, deferredMaxPrice, deferredSearch, deferredSort, facetReady, facetStorageKey, showCategoryFilter]);
+  }, [availableOnly, brand, category, facetSelection, favoritesOnly, maxPrice, deferredSearch, sort, facetReady, facetStorageKey, showCategoryFilter]);
 
   const profile = categoryTitle === "Celulares"
     ? brandProfiles[brand as keyof typeof brandProfiles] ?? brandProfiles.Todos
@@ -212,7 +206,7 @@ export function CatalogClient({
         badges: ["Información clara", "Catálogo curado", "Sin duplicados"],
       };
   const activeFilterCount = Number(brand !== "Todos") + Number(category !== "Todas") + Number(Boolean(search.trim())) + Number(sort !== "recommended") + Number(favoritesOnly) + Number(Boolean(maxPrice)) + Number(availableOnly) + Object.values(facetSelection).filter(Boolean).length;
-  const catalogUpdating = deferredSearch !== search || deferredBrand !== brand || deferredCategory !== category || deferredSort !== sort || deferredFavoritesOnly !== favoritesOnly || deferredMaxPrice !== maxPrice || deferredAvailableOnly !== availableOnly || deferredFacets !== facetSelection;
+  const catalogUpdating = deferredSearch !== search;
   const hasBrandCampaign = brand !== "Todos" && hasCompleteBrandCampaign(brand);
 
   function clearFilters() {
@@ -316,7 +310,7 @@ export function CatalogClient({
         </div>
       </div>}
 
-      {!compactBrandMode ? <div className="catalog-quick-brands" aria-label="Cambiar experiencia de marca">
+      {!compactBrandMode && !categorySlug ? <div className="catalog-quick-brands" aria-label="Cambiar experiencia de marca">
         {brands.map((item) => (
           <button
             key={item}
@@ -446,7 +440,6 @@ export function CatalogClient({
         </div>
       </div>
 
-      {categorySlug && <SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />}
 
       {activeFilterCount > 0 && <div className="catalog-active-filters" aria-live="polite">
         <div>
@@ -481,26 +474,48 @@ export function CatalogClient({
         {catalogUpdating && <small className="catalog-refresh-indicator">Actualizando…</small>}
       </div>
       {filtered.length ? (
-        <div className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
-          const customerCard = (
-            <ProductCard
-              key={product.id}
-              product={product}
-              isCompared={compareIds.includes(product.id)}
-              compareDisabled={!compareIds.includes(product.id) && comparedProducts.length >= compareLimit}
-              onCompareToggle={toggleComparedProduct}
-              visualContext={brand === "Todos" ? (showCategoryFilter ? "amarango" : "sector") : "brand"}
-            />
-          );
-          if (!adminOverlay?.enabled) return customerCard;
-          return (
-            <div key={product.id} className="v418b-storefront-card-shell" data-v418b-admin-control="true">
-              {customerCard}
-              <button type="button" className="v418b-storefront-quick-action" onClick={() => adminOverlay.onQuickActions(product)}>
-                <span aria-hidden="true">⚡</span><strong>Acciones rápidas</strong><small>Vista de revisión</small>
-              </button>
-            </div>
-          );
+        categorySlug ? <ProductCategoryAccordion products={filtered} scope={facetScope} autoOpen={Boolean(search.trim())} filters={<SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => {
+            const customerCard = (
+              <ProductCard
+                key={product.id}
+                product={product}
+                eagerImage
+                isCompared={compareIds.includes(product.id)}
+                compareDisabled={!compareIds.includes(product.id) && comparedProducts.length >= compareLimit}
+                onCompareToggle={toggleComparedProduct}
+                visualContext={brand === "Todos" ? (showCategoryFilter ? "amarango" : "sector") : "brand"}
+              />
+            );
+            if (!adminOverlay?.enabled) return customerCard;
+            return (
+              <div key={product.id} className="v418b-storefront-card-shell" data-v418b-admin-control="true">
+                {customerCard}
+                <button type="button" className="v418b-storefront-quick-action" onClick={() => adminOverlay.onQuickActions(product)}>
+                  <span aria-hidden="true">⚡</span><strong>Acciones rápidas</strong><small>Vista de revisión</small>
+                </button>
+              </div>
+            );
+        }} />
+        : <div className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
+            const customerCard = (
+              <ProductCard
+                key={product.id}
+                product={product}
+                isCompared={compareIds.includes(product.id)}
+                compareDisabled={!compareIds.includes(product.id) && comparedProducts.length >= compareLimit}
+                onCompareToggle={toggleComparedProduct}
+                visualContext={brand === "Todos" ? (showCategoryFilter ? "amarango" : "sector") : "brand"}
+              />
+            );
+            if (!adminOverlay?.enabled) return customerCard;
+            return (
+              <div key={product.id} className="v418b-storefront-card-shell" data-v418b-admin-control="true">
+                {customerCard}
+                <button type="button" className="v418b-storefront-quick-action" onClick={() => adminOverlay.onQuickActions(product)}>
+                  <span aria-hidden="true">⚡</span><strong>Acciones rápidas</strong><small>Vista de revisión</small>
+                </button>
+              </div>
+            );
         })}</div>
       ) : (
         <div className="catalog-empty" role="status" aria-live="polite">

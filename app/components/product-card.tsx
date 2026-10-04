@@ -25,6 +25,7 @@ interface ProductCardProps {
   compareDisabled?: boolean;
   onCompareToggle?: (product: Product) => void;
   visualContext?: ProductCardVisualContext;
+  eagerImage?: boolean;
 }
 
 type ProductCardStyle = CSSProperties & {
@@ -35,7 +36,12 @@ type ProductCardStyle = CSSProperties & {
   "--card-brand-deep": string;
 };
 
-export function ProductCard({ product, isCompared = false, compareDisabled = false, onCompareToggle, visualContext = "brand" }: ProductCardProps) {
+export function ProductCard({ product, isCompared = false, compareDisabled = false, onCompareToggle, visualContext = "brand", eagerImage = false }: ProductCardProps) {
+  const features = product.features.flatMap((feature) => feature
+    .replace(/^Características principales:\s*/i, "")
+    .split(/\s*[•●]\s*|\n+/)
+    .map((part) => part.trim().replace(/[.·\s]+$/, ""))
+    .filter(Boolean)).slice(0, 5);
   const favoritesSnapshot = useSyncExternalStore(subscribeFavorites, getFavoritesSnapshot, getFavoritesServerSnapshot);
   const favorite = parseFavoritesSnapshot(favoritesSnapshot).has(product.id);
   const href = `/producto/${product.slug}`;
@@ -99,7 +105,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
       <div className="product-visual">
         <span className="product-card-watermark" aria-hidden="true">{visualTheme.watermarkLabel}</span>
         {product.image ? (
-          <Image className="product-image" src={product.image.src} alt={product.image.alt} width={900} height={1200} sizes="(max-width: 680px) 50vw, (max-width: 1100px) 50vw, 33vw" loading="lazy" unoptimized />
+          <Image className="product-image" src={product.image.src} alt={product.image.alt} width={900} height={1200} sizes="(max-width: 680px) 50vw, (max-width: 1100px) 50vw, 33vw" loading={eagerImage ? "eager" : "lazy"} decoding="async" unoptimized />
         ) : (
           <>
             <div className="product-monogram" aria-hidden="true"><span>{initials}</span></div>
@@ -119,7 +125,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         <h3>{product.name}</h3>
         {product.description ? <p className="product-description">{product.description}</p> : null}
         {product.model ? <dl className="product-card-specs"><div><dt>Modelo</dt><dd>{product.model}</dd></div></dl> : null}
-        {product.features.length > 0 ? <div className="feature-chips" aria-label="Características del producto">{product.features.slice(0, 5).map((feature) => <span key={feature}>{feature}</span>)}</div> : null}
+        {features.length > 0 ? <details className="product-card-features"><summary>{features.length} características <span aria-hidden="true">⌄</span></summary><ul>{features.map((feature, index) => <li key={`${index}-${feature}`}>{feature}</li>)}</ul></details> : null}
         <div className={`product-card-commerce ${priceLabel ? "has-price" : "price-pending"}`}>
           {priceLabel ? <strong className="product-card-price">{priceLabel}</strong> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
           {sixInstallmentsLabel ? <span className="product-card-installments">{sixInstallmentsLabel}</span> : priceLabel ? <span className="product-card-installments">Consultá opciones de pago y disponibilidad</span> : null}
