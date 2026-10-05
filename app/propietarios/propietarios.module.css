@@ -105,6 +105,23 @@
   gap: 12px;
 }
 
+.owners {
+  max-width: 1180px;
+  margin: 18px auto 0;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.owners > span { color: #68788c; font-size: 0.72rem; font-weight: 900; letter-spacing: .13em; }
+.ownerList { display: flex; align-items: center; gap: 20px; }
+.owner { display: flex; align-items: center; gap: 9px; color: #10223f; font-size: .9rem; }
+.owner img {
+  width: 56px; height: 56px; object-fit: cover; object-position: 58% 26%;
+  border: 2px solid #fff; border-radius: 50%;
+  box-shadow: 0 5px 15px rgba(8,25,48,.15);
+}
+
 .guardrails > div {
   padding: 18px;
   border: 1px solid rgba(16, 34, 63, 0.08);
@@ -164,17 +181,25 @@
 }
 
 .moduleCard {
-  min-height: 190px;
-  padding: 22px;
+  min-height: 0;
+  padding: 0;
   border: 1px solid rgba(16, 34, 63, 0.08);
   border-radius: 24px;
   background: white;
   box-shadow: 0 14px 38px rgba(31, 55, 82, 0.07);
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: 1fr auto;
-  gap: 14px;
+  display: block;
 }
+
+.moduleCard summary {
+  min-height: 76px; padding: 12px 18px;
+  display: flex; align-items: center; gap: 14px;
+  list-style: none; cursor: pointer;
+}
+.moduleCard summary::-webkit-details-marker { display: none; }
+.moduleCard summary > strong { flex: 1; font-size: 1rem; }
+.moduleCard .chevron { flex: 0 0 auto; transition: transform .2s ease; }
+.moduleCard[open] .chevron { transform: rotate(180deg); }
+.moduleCard summary:focus-visible { outline: 3px solid #f07b0d; outline-offset: -4px; border-radius: 20px; }
 
 .iconWrap {
   width: 48px;
@@ -202,6 +227,9 @@
   font-size: 0.9rem;
   line-height: 1.55;
 }
+
+.moduleCopy { padding: 0 18px 18px; }
+.moduleCopy small { display: inline-block; margin-top: 12px; }
 
 .moduleCard small {
   grid-column: 1 / -1;
@@ -257,47 +285,53 @@
     font-size: clamp(2.15rem, 11vw, 3.5rem);
   }
 
+  .owners { gap: 10px; }
+  .ownerList { gap: 12px; }
+  .owner { gap: 6px; font-size: .82rem; }
+  .owner img { width: 46px; height: 46px; }
+
+  .grid { grid-template-columns: 1fr; gap: 8px; }
+
   .moduleCard {
     min-height: 0;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .workspace {
+:global(html[data-theme="dark"]) .workspace {
     background:
       radial-gradient(circle at top right, rgba(255, 126, 0, 0.08), transparent 32rem),
       #07111f;
     color: #f4f7fb;
-  }
+}
 
-  .guardrails > div,
-  .moduleCard,
-  .nextGate {
+:global(html[data-theme="dark"]) .guardrails > div,
+:global(html[data-theme="dark"]) .moduleCard,
+:global(html[data-theme="dark"]) .nextGate {
     background: #0d1b2d;
     border-color: rgba(255, 255, 255, 0.09);
     box-shadow: none;
-  }
+}
 
-  .sectionIntro h2,
-  .nextGate h2,
-  .moduleCopy h3,
-  .guardrails strong {
+:global(html[data-theme="dark"]) .sectionIntro h2,
+:global(html[data-theme="dark"]) .nextGate h2,
+:global(html[data-theme="dark"]) .guardrails strong,
+:global(html[data-theme="dark"]) .owner {
     color: #f5f7fb;
-  }
+}
 
-  .sectionIntro > span,
-  .moduleCopy p,
-  .guardrails span,
-  .nextGate > p {
+:global(html[data-theme="dark"]) .sectionIntro > span,
+:global(html[data-theme="dark"]) .moduleCopy p,
+:global(html[data-theme="dark"]) .guardrails span,
+:global(html[data-theme="dark"]) .nextGate > p,
+:global(html[data-theme="dark"]) .owners > span {
     color: #9eb0c7;
-  }
+}
 
-  .moduleCard small {
+:global(html[data-theme="dark"]) .moduleCard small {
     background: #13243a;
     color: #b7c5d8;
-  }
+}
 
-  .iconWrap {
+:global(html[data-theme="dark"]) .iconWrap {
     background: rgba(255, 138, 31, 0.13);
-  }
 }

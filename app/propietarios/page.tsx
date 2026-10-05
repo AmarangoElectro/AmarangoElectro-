@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { requireChatGPTUser } from "@/app/chatgpt-auth";
 import { InternalSpaceHeader } from "@/app/components/internal-space-header";
 import {
   BadgeCheck,
   Brush,
+  ChevronDown,
   Gift,
   ImagePlus,
   LockKeyhole,
@@ -97,6 +99,14 @@ export default async function PropietariosPage() {
           </div>
         </section>
 
+        <section className={styles.owners} aria-label="Propietarios de AmarangoElectro">
+          <span>PROPIETARIOS</span>
+          <div className={styles.ownerList}>
+            <div className={styles.owner}><Image src="/assets/owners/maxi.jpg" alt="Foto de Maxi" width={56} height={56} unoptimized /><strong>Maxi</strong></div>
+            <div className={styles.owner}><Image src="/assets/owners/angela.jpg" alt="Foto de Ángela" width={56} height={56} unoptimized /><strong>Ángela</strong></div>
+          </div>
+        </section>
+
         <section className={styles.guardrails} aria-label="Reglas de trabajo">
           <div>
             <Settings2 aria-hidden="true" />
@@ -126,16 +136,10 @@ export default async function PropietariosPage() {
 
           <div className={styles.grid}>
             {modules.map(({ icon: Icon, title, description, status }) => (
-              <article key={title} className={styles.moduleCard}>
-                <div className={styles.iconWrap}>
-                  <Icon aria-hidden="true" />
-                </div>
-                <div className={styles.moduleCopy}>
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </div>
-                <small>{status}</small>
-              </article>
+              <details key={title} className={styles.moduleCard}>
+                <summary><span className={styles.iconWrap}><Icon aria-hidden="true" /></span><strong>{title}</strong><ChevronDown className={styles.chevron} size={18} aria-hidden="true" /></summary>
+                <div className={styles.moduleCopy}><p>{description}</p><small>{status}</small></div>
+              </details>
             ))}
           </div>
         </section>
