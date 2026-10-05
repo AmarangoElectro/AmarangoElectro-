@@ -21,6 +21,9 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
   const panelRef = useRef<HTMLElement>(null);
   const rows = useMemo(() => buildComparisonRows(products), [products]);
   const visibleRows = differencesOnly ? rows.filter((row) => row.differs) : rows;
+  const knownPrices = products.map((product) => product.price?.amount).filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount));
+  const priceRange = knownPrices.length > 1 ? Math.max(...knownPrices) - Math.min(...knownPrices) : null;
+  const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 
   useEffect(() => {
     if (!open) return;
@@ -89,9 +92,9 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
           ))}
         </div>
         <div className="compare-dock-actions">
-          <button type="button" className="compare-clear" onClick={clearProducts}><Trash2 size={15} /> Limpiar</button>
-          <button type="button" className="compare-open" disabled={products.length < 2} onClick={openComparison}>
-            Comparar ahora <ArrowUpRight size={16} />
+          <button type="button" className="compare-clear" aria-label="Limpiar productos seleccionados" onClick={clearProducts}><Trash2 size={15} /> Limpiar</button>
+          <button type="button" className="compare-open" aria-label="Comparar precios y características" disabled={products.length < 2} onClick={openComparison}>
+            Comparar precios <ArrowUpRight size={16} />
           </button>
         </div>
       </aside>
@@ -102,11 +105,17 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
             <header className="compare-panel-header">
               <div>
                 <p className="eyebrow orange">COMPARACIÓN INTELIGENTE</p>
-                <h2 id="compare-title">Las diferencias importantes, juntas.</h2>
+                <h2 id="compare-title">Compará precios y características.</h2>
                 <p id="compare-description">Solo mostramos información que existe en el catálogo. Si un dato falta, queda marcado como “A confirmar”.</p>
               </div>
               <button type="button" ref={closeButtonRef} className="compare-close" aria-label="Cerrar comparación" onClick={() => setOpen(false)}><X size={20} /></button>
             </header>
+
+            <p className="compare-price-summary">
+              {priceRange !== null
+                ? <>Menor precio: <strong>{money.format(Math.min(...knownPrices))}</strong><span aria-hidden="true"> · </span>Diferencia: <strong>{money.format(priceRange)}</strong>{knownPrices.length < products.length ? <span> · {products.length - knownPrices.length} precio a confirmar</span> : null}</>
+                : <>Precio: <strong>{knownPrices.length ? money.format(knownPrices[0]) : "A confirmar"}</strong>{knownPrices.length < products.length ? <span> · {products.length - knownPrices.length} {products.length - knownPrices.length === 1 ? "precio a confirmar" : "precios a confirmar"}</span> : null}</>}
+            </p>
 
             <div className="compare-mode-row">
               <label className="compare-differences-toggle">
