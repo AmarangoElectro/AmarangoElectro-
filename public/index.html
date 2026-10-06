@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- AmarangoElectro: recuperación Plan Protegido 2026-10-05 v6 -->
 <!-- ARCHIVO PRINCIPAL AMARANGO: V-FOTO-WHATSAPP-MANUAL-3 + ESCRITORIO + INSTAGRAM + BUSQUEDA-EXACTA -->
 <html lang="es">
 <head>
@@ -903,7 +904,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <button id="tienda-btn-ruleta" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#e11d48,#ff7a00);"
       onclick="ruletaEditarAbrir()">🎰 Editar premios de la ruleta</button>
     <button id="tienda-btn-fmtcuota" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
-      onclick="tiendaToggleFormatoCuota()">💳 Formato de cuotas: Cajita</button>
+      onclick="tiendaToggleFormatoCuota()">💳 Vista de cuotas: Cajita</button>
     <button id="tienda-btn-sistema-precios" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#0B2D6B,#FF7A00);"
       onclick="abrirSistemaPrecios()">🧮 Sistema de precios: Clásica</button>
     <button id="tienda-btn-subs" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
@@ -4267,7 +4268,7 @@ function tiendaAplicarModo(){
   var btnAuthFotos=document.getElementById('tienda-btn-auth-fotos'); if(btnAuthFotos){ btnAuthFotos.style.display=tiendaEsAdmin?'block':'none'; tiendaAuthFotosActualizarBoton(); }
   var btnSalirFotos=document.getElementById('tienda-btn-auth-fotos-salir'); if(btnSalirFotos && !tiendaEsAdmin)btnSalirFotos.style.display='none';
   var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
-  var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Formato de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
+  var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Vista de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
   var btnSP=document.getElementById('tienda-btn-sistema-precios'); if(btnSP){ btnSP.style.display=tiendaEsAdmin?'block':'none'; tiendaActualizarBotonSistemaPrecios(); }
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
   var btnSub=document.getElementById('tienda-btn-subs'); if(btnSub)btnSub.style.display = tiendaEsAdmin?'block':'none';
@@ -8746,7 +8747,7 @@ function tiendaToggleFormatoCuota(){
   tiendaFormatoCuota=FORMATOS_CUOTA[(idx+1)%FORMATOS_CUOTA.length];
   try{ localStorage.setItem('ae_formato_cuota', tiendaFormatoCuota); }catch(e){}
   if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').upsert({id:'formatocuota',datos:tiendaFormatoCuota,actualizado:new Date().toISOString()}).then(function(){}).catch(function(){}); }
-  var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC)btnFC.textContent='💳 Formato de cuotas: '+(FORMATOS_NOMBRE[tiendaFormatoCuota]||tiendaFormatoCuota);
+  var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC)btnFC.textContent='💳 Vista de cuotas: '+(FORMATOS_NOMBRE[tiendaFormatoCuota]||tiendaFormatoCuota);
   mostrarToast('💳 Formato: '+(FORMATOS_NOMBRE[tiendaFormatoCuota]||tiendaFormatoCuota));
   tiendaRender();
 }
@@ -9456,7 +9457,7 @@ function ayudaAbrir(){
       {ic:'📱',t:'Cargar celulares',d:'En "Cargar celulares" pegá la lista completa. En USD, poné la cotización del dólar primero.'},
       {ic:'🖼️',t:'Fotos',d:'Cada producto tiene el botón "Foto". Al actualizar precios de celus, las fotos NO se borran.'},
       {ic:'⚙️',t:'Opciones por producto',d:'Abrí el cajón "Opciones" para destacar, poner del día, marcar SIN STOCK, o mostrar/ocultar de la tienda.'},
-      {ic:'💳',t:'Formato de cuotas',d:'Con "Formato de cuotas" elegís entre 5 estilos. Se aplica para todos los clientes.'},
+      {ic:'💳',t:'Vista de cuotas',d:'Con "Vista de cuotas" elegís entre 5 estilos para mostrar las cuotas directamente en las tarjetas, sin abrir el producto. Se aplica para todos los clientes.'},
       {ic:'📄',t:'Catálogo PDF',d:'Descargá el catálogo en PDF con fotos, 3 por fila, para compartir.'},
       {ic:'☁️',t:'Todo se guarda solo',d:'Los cambios se sincronizan en la nube. Angela y los demás ven lo mismo que vos.'}
     ];
