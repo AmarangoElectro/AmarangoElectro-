@@ -9801,3 +9801,35 @@ html[data-theme="dark"] .catalog-finance-band .finance-benefits span { color: #f
   .compare-dock-intro small { display: none; }
   .compare-dock-icon { width: 32px; height: 32px; }
 }
+
+/* Keep the supplier flyer unobstructed; actions live in a slim row below it. */
+.product-card-premium .product-media-actions {
+  position: relative; z-index: 5; min-height: 48px; padding: 3px 7px;
+  display: flex; align-items: center; justify-content: space-between; gap: 4px;
+  background: var(--card, #fff); border-top: 1px solid var(--line, #dce5ef);
+}
+.product-card-premium .product-media-actions .card-tools {
+  position: static; display: flex; gap: 3px;
+}
+.product-card-premium .product-media-actions .card-tools button {
+  width: 42px; height: 42px; min-width: 42px; min-height: 42px;
+  box-shadow: none;
+}
+.product-card-premium .product-media-actions .card-photo-zoom {
+  position: static; inset: auto; width: auto; height: 42px; min-height: 42px;
+  margin-left: auto; padding: 0 9px; flex: 0 0 auto; box-shadow: none;
+}
+.product-card-premium .product-media-actions .card-photo-zoom span { font-size: 11px; }
+[data-theme="dark"] .product-card-premium .product-media-actions {
+  background: #0c1422; border-color: #31445c;
+}
+@media (max-width: 400px) {
+  .product-card-premium .product-media-actions { padding-inline: 3px; gap: 2px; }
+  .product-card-premium .product-media-actions .card-tools { gap: 0; }
+  .product-card-premium .product-media-actions .card-photo-zoom { padding-inline: 5px; }
+  .product-card-premium .product-media-actions .card-photo-zoom span { font-size: 10px; }
+}
+@media (max-width: 380px) {
+  .product-card-premium .product-media-actions .card-photo-zoom { width: 42px; justify-content: center; }
+  .product-card-premium .product-media-actions .card-photo-zoom span { display: none; }
+}

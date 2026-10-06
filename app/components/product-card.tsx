@@ -112,13 +112,15 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
             <span className="image-status">FOTO EN ACTUALIZACIÓN</span>
           </>
         )}
-        <div className="card-tools">
-          <button type="button" aria-label={favorite ? "Quitar de favoritos" : "Guardar en favoritos"} onClick={toggleFavorite} className={favorite ? "active" : ""}>
-            <Heart size={18} fill={favorite ? "currentColor" : "none"} />
-          </button>
-          <button type="button" aria-label="Compartir producto" onClick={share}><Share2 size={18} /></button>
+        <div className="product-media-actions">
+          <div className="card-tools">
+            <button type="button" aria-label={favorite ? "Quitar de favoritos" : "Guardar en favoritos"} onClick={toggleFavorite} className={favorite ? "active" : ""}>
+              <Heart size={18} fill={favorite ? "currentColor" : "none"} />
+            </button>
+            <button type="button" aria-label="Compartir producto" onClick={share}><Share2 size={18} /></button>
+          </div>
+          {product.image ? <ProductMediaViewer image={product.image} productName={product.name} card /> : null}
         </div>
-        {product.image ? <ProductMediaViewer image={product.image} productName={product.name} card /> : null}
       </div>
       <div className="catalog-card-body">
         <p className="product-brand">{product.brand}</p>
