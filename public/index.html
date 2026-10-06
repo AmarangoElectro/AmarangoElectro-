@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AmarangoElectro: recuperación Plan Protegido 2026-10-05 v6 -->
+<!-- AmarangoElectro: Plan Protegido + cierre de sesiones admin 2026-10-06 v8 -->
 <!-- ARCHIVO PRINCIPAL AMARANGO: V-FOTO-WHATSAPP-MANUAL-3 + ESCRITORIO + INSTAGRAM + BUSQUEDA-EXACTA -->
 <html lang="es">
 <head>
@@ -1220,13 +1220,17 @@ function htmlPlanProtegidoResumen(datos,administrativo){
   return html;
 }
 var TC=1500;
-var ADMIN_PASS="Amara4";
-var adminUnlocked=(function(){try{return localStorage.getItem('ae_sesion_admin')==='1';}catch(e){return false;}})();
+var ADMIN_PASS="Cumbre.2026";
+var ADMIN_SESSION_VERSION="admin-cumbre-20261006-v1";
+function tiendaSesionAdminVigente(){
+  try{return localStorage.getItem('ae_sesion_admin')===ADMIN_SESSION_VERSION;}catch(e){return false;}
+}
+var adminUnlocked=tiendaSesionAdminVigente();
 var pendingTab=null;
 
 var REV_PASS='Moro6';       // clave de revendedores para las herramientas de cálculo
 var vistaPreviaCliente=false; // cuando true, se previsualiza como lo ve un cliente
-var revUnlocked=(function(){try{return localStorage.getItem('ae_sesion_rev')==='1'||localStorage.getItem('ae_sesion_admin')==='1';}catch(e){return false;}})();
+var revUnlocked=(function(){try{return localStorage.getItem('ae_sesion_rev')==='1'||tiendaSesionAdminVigente();}catch(e){return false;}})();
 
 // Acceso "Revendedores": pide Moro6 y abre las herramientas de precios
 function accesoRevendedores(){
@@ -1292,7 +1296,7 @@ function mostrarColaborador(){
   var okRev=false, okAdm=false;
   try{
     okRev = (typeof revUnlocked!=='undefined' && revUnlocked===true) || (localStorage.getItem('ae_sesion_rev')==='1');
-    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
+    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || tiendaSesionAdminVigente();
   }catch(e){}
   var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
   // Los invitados entran con ?colab=1 en el link que les mandamos por WhatsApp.
@@ -1549,7 +1553,7 @@ function abrirCapitalCompartido(){
   // y bloqueamos también si está activa la vista previa de cliente.
   var okMem = (typeof adminUnlocked!=='undefined' && adminUnlocked===true);
   var okLS  = false;
-  try{ okLS = (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okLS=false; }
+  try{ okLS = tiendaSesionAdminVigente(); }catch(e){ okLS=false; }
   var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
   if(!okMem || !okLS || enVistaCliente){
     alert('🔒 Herramienta exclusiva de administradores.\n\nEsta calculadora muestra costos y ganancias internas, por eso está protegida.');
@@ -1638,7 +1642,7 @@ function ccInputParam(k,label){
 function calcCapitalCompartido(){
   // 🔒 Segundo candado: aunque alguien llame esta función directo, sin admin no calcula.
   var okAdm=false;
-  try{ okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) && (localStorage.getItem('ae_sesion_admin')==='1'); }catch(e){ okAdm=false; }
+  try{ okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) && tiendaSesionAdminVigente(); }catch(e){ okAdm=false; }
   if(!okAdm){ var o=document.getElementById('cc-res'); if(o) o.innerHTML=''; return; }
 
   var val=parseFloat((document.getElementById('cc-costo').value||'').toString().replace(/\./g,'').replace(/,/g,'.'))||0;
@@ -1922,7 +1926,7 @@ function showAdminSub(s){
 function checkAdminPass(){
   var p=document.getElementById("admin-pass").value;
   if(p===ADMIN_PASS){
-    adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin","1");}catch(e){}
+    adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin",ADMIN_SESSION_VERSION);}catch(e){}
     revUnlocked=true;          // admin también puede usar herramientas de revendedor
     tiendaEsAdmin=true;        // admin también edita la tienda (sin pedir clave de nuevo)
     tiendaPublicarControlAdmin(true);
@@ -2219,7 +2223,7 @@ function guardarSistemaPrecioProducto(id,modo){
 /* =========================================================
    TIENDA REVENDEDORES — Etapa 1 (catálogo local + buscador + cuotas)
    ========================================================= */
-var TIENDA_PIN='Amara4';         // PIN de acceso a la tienda
+var TIENDA_PIN='Cumbre.2026';    // PIN de acceso a la tienda
 var tiendaProductos=[];          // catálogo en memoria
 var tiendaYaAnimo=false;         // la animación de entrada solo la 1ra vez (evita parpadeo)
 var tiendaCategoriaActiva='';    // filtro de chip activo
@@ -3995,7 +3999,7 @@ function tiendaForzarSubir(){
 }
 
 function tiendaLoginAdmin(){
-  // si ya se desbloqueó admin (Amara4), entrar directo sin pedir clave de nuevo
+  // si ya se desbloqueó admin en este equipo, entrar directo sin pedir clave de nuevo
   if(adminUnlocked){
     tiendaEsAdmin=true;
     tiendaModoPortada=true;
@@ -4021,7 +4025,7 @@ function tiendaConfirmarAdmin(){
   var v=(document.getElementById('tienda-admin-inp').value||'').trim();
   if(v===TIENDA_PIN){
     tiendaEsAdmin=true;
-    adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin","1");}catch(e){}   // clave correcta = acceso admin total
+    adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin",ADMIN_SESSION_VERSION);}catch(e){}   // clave correcta = acceso admin total
     revUnlocked=true;
     tiendaModoPortada=true;
     tiendaBandejaAdmin='';
@@ -5531,7 +5535,7 @@ function avisarUltimaVentaWhatsApp(){
 function esEquipo(){
   var okAdm=false, okRev=false;
   try{
-    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || (localStorage.getItem('ae_sesion_admin')==='1');
+    okAdm = (typeof adminUnlocked!=='undefined' && adminUnlocked===true) || tiendaSesionAdminVigente();
     okRev = (typeof revUnlocked!=='undefined' && revUnlocked===true) || (localStorage.getItem('ae_sesion_rev')==='1');
   }catch(e){}
   var enVistaCliente = (typeof vistaPreviaCliente!=='undefined' && vistaPreviaCliente===true);
