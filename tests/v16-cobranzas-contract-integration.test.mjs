@@ -41,17 +41,20 @@ test("Cobranzas adapter never reads public.ventas/public.clientes and has no mut
   assert.match(adapter, /"not_connected"/);
 });
 
-test("Cobranzas UI never implements payment registration, recargo, caja, receipts, WhatsApp, or a fabricated 'cobrado este mes' metric", async () => {
+test("Cobranzas registers payments only through the certified payment RPC adapter", async () => {
   const panel = await source("components/internal/admin/collections-panel.tsx");
-  // Strip block/line comments so doc comments explaining what's deliberately
-  // absent don't trip these checks on their own explanatory text.
   const codeOnly = panel.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-  assert.doesNotMatch(codeOnly, /Registrar pago|registrarPago|recargo|Recargo|<button[^>]*>\s*Recargo/i);
+
+  assert.match(panel, /createPaymentHistoryAdapter/);
+  assert.match(panel, /registerPayment/);
+  assert.match(panel, /Registrar pago/);
+  assert.match(panel, /Confirmar pago/);
+  assert.match(panel, /idempotencyKey/);
+  assert.doesNotMatch(codeOnly, /\.from\(|upsert\(|insert\(|update\(|delete\(/);
   assert.doesNotMatch(codeOnly, /whatsapp/i);
-  assert.doesNotMatch(codeOnly, /conciliaci[oó]n/i);
   assert.doesNotMatch(codeOnly, /[Cc]obrado este mes|COBRADO ESTE MES/);
   assert.doesNotMatch(codeOnly, /Cliente demo|cliente_demo/i);
-  assert.match(panel, /Datos no conectados en este entorno/);
+  assert.match(panel, /Conexión requerida/);
   assert.match(panel, /Ver Cliente 360/);
 });
 
