@@ -475,12 +475,12 @@ export function CatalogClient({
         {catalogUpdating && <small className="catalog-refresh-indicator">Actualizando…</small>}
       </div>
       {filtered.length ? (
-        categorySlug ? <ProductCategoryAccordion products={filtered} taxonomyProducts={products} scope={facetScope} autoOpen={Boolean(search.trim() || brand !== "Todos")} focusRequest={focusRequest} filters={<SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); setFocusRequest((current) => ({ value: value ?? null, token: current.token + 1 })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => {
+        categorySlug ? <ProductCategoryAccordion products={filtered} taxonomyProducts={products} scope={facetScope} autoOpen={Boolean(search.trim())} focusRequest={focusRequest} filters={<SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); setFocusRequest((current) => ({ value: value ?? null, token: current.token + 1 })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => {
             const customerCard = (
               <ProductCard
                 key={product.id}
                 product={product}
-                eagerImage
+                eagerImage={filtered[0]?.id === product.id || filtered[1]?.id === product.id}
                 isCompared={compareIds.includes(product.id)}
                 compareDisabled={!compareIds.includes(product.id) && comparedProducts.length >= compareLimit}
                 onCompareToggle={toggleComparedProduct}
