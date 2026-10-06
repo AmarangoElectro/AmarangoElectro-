@@ -2,30 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck } from "lucide-react";
+import { toast } from "sonner";
 import { createCollectionsReadOnlyAdapter, type CollectionsReadResult } from "@/lib/collections/collections-adapter";
 import type { V16CollectionsListRow, V16CollectionsSummaryRow, V16CollectionStatus } from "@/lib/collections/collections-contract";
+import { createPaymentHistoryAdapter } from "@/lib/payments/payment-history-adapter";
 import { PaymentHistoryPanel } from "./payment-history-panel";
-
-/**
- * V16 COBRANZAS — panel aditivo, read-only, dentro de /administracion.
- *
- * Usa exclusivamente `v16_collections_list` y `v16_collections_summary`
- * vía `CollectionsReadOnlyAdapter` — nunca lee `public.ventas` ni
- * `public.clientes` directamente. Sin sesión autenticada real en este
- * entorno, cae siempre en "Conexión requerida" — nunca
- * datos de ejemplo.
- *
- * Deliberadamente NO incluye (por instrucción explícita del gate y por
- * ausencia de fuente en el contrato congelado):
- * - registrar pago / marcar cuota como paga;
- * - aplicar recargo;
- * - movimiento de caja / conciliación (no hay RPC que devuelva eso);
- * - reglas comerciales de tolerancia/recargo (no son datos de la RPC,
- *   son configuración de negocio que no llegó congelada en este gate);
- * - "cobrado este mes" (no existe ese agregado en v16_collections_summary
- *   — la referencia visual lo muestra pero no está respaldado por
- *   evidencia; mostrarlo sería inventar un número).
- */
 
 const STATUS_FILTERS: { label: string; value: V16CollectionStatus | null }[] = [
   { label: "Todas", value: null },
@@ -46,6 +27,19 @@ const STATUS_BADGE_LABEL: Record<V16CollectionStatus, string> = {
 function money(value: number | null) {
   if (value === null || !Number.isFinite(value)) return "Monto no disponible";
   return value.toLocaleString("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+}
+
+function parseMoneyInput(value: string) {
+  const normalized = value.replace(/[^0-9,.-]/g, "").replace(/\./g, "").replace(",", ".");
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function requestId(prefix: string) {
+  const id = typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return `${prefix}-${id}`;
 }
 
 function StatusNotice({ result }: { result: CollectionsReadResult<unknown> }) {
@@ -72,23 +66,72 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
   const [summary, setSummary] = useState<CollectionsReadResult<V16CollectionsSummaryRow | null>>({ status: "not_connected" });
   const [list, setList] = useState<CollectionsReadResult<V16CollectionsListRow[]>>({ status: "not_connected" });
   const [expandedSaleId, setExpandedSaleId] = useState<string | null>(null);
+  const [paymentSaleId, setPaymentSaleId] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Mercado Pago / QR");
+  const [paymentSaving, setPaymentSaving] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     const adapter = createCollectionsReadOnlyAdapter();
     adapter.getSummary().then((result) => { if (!cancelled) setSummary(result); });
     return () => { cancelled = true; };
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     let cancelled = false;
     const adapter = createCollectionsReadOnlyAdapter();
     adapter.listCollections({ search_text: search.trim() || null, status_filter: statusFilter }).then((result) => { if (!cancelled) setList(result); });
     return () => { cancelled = true; };
-  }, [search, statusFilter]);
+  }, [search, statusFilter, refreshKey]);
 
   const summaryData = summary.status === "ok" ? summary.data : null;
   const rows = list.status === "ok" ? list.data : [];
+
+  function openPayment(row: V16CollectionsListRow) {
+    setPaymentSaleId(row.sale_id);
+    setPaymentAmount(row.installment_amount === null ? "" : String(Math.round(row.installment_amount)));
+  }
+
+  async function registerPayment(row: V16CollectionsListRow) {
+    const amount = parseMoneyInput(paymentAmount);
+    if (amount <= 0) {
+      toast.error("Ingresá un monto válido.");
+      return;
+    }
+
+    setPaymentSaving(true);
+    try {
+      const adapter = createPaymentHistoryAdapter();
+      const result = await adapter.registerPayment({
+        saleId: row.sale_id,
+        amountReceived: amount,
+        paidAt: null,
+        paymentMethod,
+        paymentReference: null,
+        idempotencyKey: requestId("collection-payment"),
+        adjustmentAmount: 0,
+        adjustmentReason: null,
+        note: null,
+      });
+
+      if (result.status !== "ok" || !result.data) {
+        if (result.status === "unauthorized") toast.error("No tenés permiso para registrar este pago.");
+        else if (result.status === "not_connected") toast.error("La conexión de Cobranzas todavía no está disponible.");
+        else toast.error("No pudimos registrar el pago.");
+        return;
+      }
+
+      toast.success(`Pago registrado · cuota ${result.data.installment_number}`);
+      setPaymentSaleId(null);
+      setPaymentAmount("");
+      setExpandedSaleId(row.sale_id);
+      setRefreshKey((current) => current + 1);
+    } finally {
+      setPaymentSaving(false);
+    }
+  }
 
   return (
     <section className="collections-panel" aria-labelledby="collections-panel-title">
@@ -96,13 +139,13 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
         <div>
           <p className="eyebrow orange">ADMINISTRACIÓN</p>
           <h2 id="collections-panel-title">Cobranzas</h2>
-          <span>Lo que vence, lo que está atrasado y lo que falta confirmar.</span>
+          <span>Lo que vence, lo que está atrasado y los pagos realmente registrados.</span>
         </div>
       </header>
 
       <div className="crm-status-banner" role="status">
         <ShieldCheck size={16} aria-hidden="true" />
-        Conexión segura · cobranzas reales · sin datos de prueba
+        Conexión segura · cobranzas reales · pagos con historial canónico
       </div>
 
       {summaryData && (
@@ -172,18 +215,46 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
               )}
               <div className="collections-actions">
                 <button type="button" className="crm-open" onClick={() => onOpenClient360(row.client_id)}>Ver Cliente 360 →</button>
+                {row.collection_status !== "COMPLETE" && (
+                  <button type="button" className="crm-open" onClick={() => paymentSaleId === row.sale_id ? setPaymentSaleId(null) : openPayment(row)}>
+                    {paymentSaleId === row.sale_id ? "Cancelar pago" : "Registrar pago"}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="crm-open"
-                  style={{ marginLeft: 8 }}
                   onClick={() => setExpandedSaleId(expandedSaleId === row.sale_id ? null : row.sale_id)}
                   data-guide-target="collections-payment-history-toggle"
                 >
-                  {expandedSaleId === row.sale_id ? "Ocultar historial de pagos" : "Historial de pagos"}
+                  {expandedSaleId === row.sale_id ? "Ocultar historial" : "Historial de pagos"}
                 </button>
               </div>
+
+              {paymentSaleId === row.sale_id && (
+                <div className="crm-notes" data-guide-target="collections-register-payment">
+                  <small>REGISTRAR PAGO</small>
+                  <div className="advisor-sale-fields">
+                    <label><span>Monto recibido *</span><input value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} inputMode="numeric" /></label>
+                    <label><span>Método</span>
+                      <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}>
+                        <option>Mercado Pago / QR</option>
+                        <option>Transferencia</option>
+                        <option>Efectivo</option>
+                        <option>Tarjeta</option>
+                        <option>Otro</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="collections-actions">
+                    <button type="button" className="crm-open" onClick={() => registerPayment(row)} disabled={paymentSaving}>
+                      {paymentSaving ? "Registrando…" : "Confirmar pago"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {expandedSaleId === row.sale_id && (
-                <PaymentHistoryPanel clientId={row.client_id} saleId={row.sale_id} />
+                <PaymentHistoryPanel key={`${row.sale_id}-${refreshKey}`} clientId={row.client_id} saleId={row.sale_id} />
               )}
             </article>
           ))}
