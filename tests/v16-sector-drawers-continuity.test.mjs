@@ -8,6 +8,7 @@ const sheet = fs.readFileSync(path.join(root, "app/components/all-sectors-sheet.
 const catalog = fs.readFileSync(path.join(root, "lib/catalog/retail-categories.ts"), "utf8");
 const css = fs.readFileSync(path.join(root, "app/globals.css"), "utf8");
 const assets = fs.readdirSync(path.join(root, "public/assets/v16-generated/sectors-v2"));
+const catalogClient = fs.readFileSync(path.join(root, "app/components/catalog-client.tsx"), "utf8");
 
 test("all 22 commercial sectors keep their approved artwork", () => {
   assert.equal(assets.filter((asset) => asset.endsWith(".webp")).length, 22);
@@ -24,6 +25,11 @@ test("each sector row opens its catalog directly without an intermediate drawer"
   assert.match(sheet, /sectors-sheet-row-category/);
   assert.match(sheet, /sectors-sheet-row-name/);
   assert.match(sheet, /sectors-sheet-row-toggle/);
+});
+
+test("direct sector links land on visible catalog content after hydration", () => {
+  assert.match(catalogClient, /window\.location\.hash !== "#catalogo"/);
+  assert.match(catalogClient, /document\.getElementById\("catalogo"\)\?\.scrollIntoView\(\{ block: "start" \}\)/);
 });
 
 test("sector rows keep artwork, category, name and arrow in a stable foreground stack", () => {
