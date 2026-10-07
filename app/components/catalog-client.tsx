@@ -194,6 +194,14 @@ export function CatalogClient({
   }, [compactBrandMode, availableOnly, brand, category, favoritesOnly, facetSelection, maxPrice, deferredSearch, sort, facetScope, favoriteIds, products, quickFilters, quickSelection]);
 
   useEffect(() => {
+    if (typeof window === "undefined" || window.location.hash !== "#catalogo") return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("catalogo")?.scrollIntoView({ block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     let saved: FacetSelection = {};
     if (!categorySlug) try { saved = JSON.parse(window.sessionStorage.getItem(facetStorageKey) || "{}"); } catch { saved = {}; }
