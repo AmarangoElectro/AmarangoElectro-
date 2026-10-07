@@ -19,7 +19,9 @@ import { GrowthAcquisitionPanel } from "@/components/internal/admin/growth-acqui
 import { SectorGuide } from "@/app/components/sector-guide";
 import { findSectorGuide } from "@/lib/onboarding/sector-guides";
 import { defaultLabOffer, parseLabOffer, saveLabOffer, type LabOfferState, type OfferKind } from "@/lib/os-lab/offers-store";
-import { v411PilotAdminProducts } from "@/components/internal/admin/v411-pilot-products";
+
+import type { Product } from "@/lib/catalog/types";
+import { Newsletter } from "./newsletter";
 
 const adminGuide = findSectorGuide("admin", "administracion");
 const crmGuide = findSectorGuide("admin", "clientes-crm");
@@ -94,7 +96,7 @@ const adminHashTab = Object.fromEntries(
   Object.entries(adminTabHash).map(([tabId, hash]) => [hash, tabId]),
 ) as Record<string, AdminTab>;
 
-export function AdminConsolidatedWorkspace() {
+export function AdminConsolidatedWorkspace({ catalogProducts = [], administrativeFacts = {} }: { catalogProducts?: Product[]; administrativeFacts?: Record<string,{supplier:string|null;costArs:number|null;priceUpdatedAt:number|null}> }) {
   const [adminLab, setAdminLab] = useState<AdminLab>(initialAdminLab);
   const [offer, setOffer] = useState<LabOfferState>(defaultLabOffer);
   const [tab, setTab] = useState<AdminTab>("catalog");
@@ -146,7 +148,15 @@ export function AdminConsolidatedWorkspace() {
     setOffer((current) => ({ ...current, [key]: value }));
   }
 
-  const demoProducts = useMemo(() => [...v411PilotAdminProducts, { id: "lab-electra", name: "Producto Electra · fixture proveedor", imageUrl: adminLab.imageMode === "economic" ? economicImage : supplierImage, supplierImageUrl: supplierImage, supplier: "Mayorista pendiente", category: "Pequeños electrodomésticos", costArs: null, salePrice: null, visible: adminLab.visible, stockState: adminLab.stockState, priceUpdatedAt: null, featured: adminLab.featured, features: ["Fixture local"] }], [adminLab]);
+  const editableProducts = useMemo(() => catalogProducts.map(product => {
+    const known = administrativeFacts[product.id];
+    return { id: product.id, name: product.name, imageUrl: product.image?.src ?? null,
+      supplierImageUrl: product.supplierImage?.src ?? product.image?.src ?? null,
+      supplier: known?.supplier ?? null, category: product.category, costArs: known?.costArs ?? null,
+      salePrice: product.price?.amount ?? null, visible: product.visible,
+      stockState: product.stock.status === "out_of_stock" ? "out_of_stock" as const : "in_stock" as const,
+      priceUpdatedAt: known?.priceUpdatedAt ?? null, features: product.features, specifications: product.specifications };
+  }), [catalogProducts,administrativeFacts]);
 
   return (
     <main className="internal-workspace admin-workspace">
@@ -170,12 +180,8 @@ export function AdminConsolidatedWorkspace() {
       <div id="admin-module-content" ref={moduleContent} className="admin-module-content">
 
       {tab === "catalog" && <>
-        <section className="flyer-lab" aria-labelledby="flyer-lab-title">
-          <div className="flyer-lab-copy"><p className="eyebrow orange">FLYER ECONÓMICO</p><h2 id="flyer-lab-title">Foto proveedor → Adaptar → Preview → Aprobar</h2><p>La aprobación persiste únicamente en este navegador. No reemplaza fotografías ni productos reales.</p><div className="flyer-lab-steps"><span className={adminLab.imageMode === "supplier" ? "active" : "done"}>1 · Proveedor</span><span className={adminLab.imageMode === "economic" ? "active" : ""}>2 · Amarango</span><span>3 · Premium preparado</span></div><div className="flyer-lab-actions"><button type="button" onClick={() => saveAdmin({ ...adminLab, imageMode: "supplier" })}><ImagePlus /> Usar foto proveedor</button><button type="button" className="primary" onClick={() => saveAdmin({ ...adminLab, imageMode: "economic" })}><Save /> Aprobar flyer económico</button></div></div>
-          <div className="flyer-lab-preview"><Image src={adminLab.imageMode === "economic" ? economicImage : supplierImage} alt={adminLab.imageMode === "economic" ? "Preview de flyer económico Amarango" : "Fotografía de proveedor"} fill sizes="(max-width: 760px) 100vw, 38vw" unoptimized /><span>{adminLab.imageMode === "economic" ? "FLYER ECONÓMICO APROBADO LOCALMENTE" : "FOTO PROVEEDOR"}</span></div>
-        </section>
-        <section className="admin-local-controls"><label><input type="checkbox" checked={adminLab.visible} onChange={(event) => saveAdmin({ ...adminLab, visible: event.target.checked })} /> Visible en preview</label><label><input type="checkbox" checked={adminLab.featured} onChange={(event) => saveAdmin({ ...adminLab, featured: event.target.checked })} /> Destacado</label><label>Stock<select value={adminLab.stockState} onChange={(event) => saveAdmin({ ...adminLab, stockState: event.target.value as AdminLab["stockState"] })}><option value="in_stock">Disponible</option><option value="low_stock">Últimas unidades</option><option value="out_of_stock">Sin stock</option></select></label></section>
-        <div data-guide-target="admin-catalog-grid"><AdminProductGrid products={demoProducts} /></div>
+        <section className="media-workflow-intro"><h2>Fotos y características, por producto</h2><p>En cada tarjeta: Cambiar foto. Para un lote: seleccioná las tarjetas y elegí Estilo Amarango. Revisá el texto leído del flyer antes de guardar.</p></section>
+        <div data-guide-target="admin-catalog-grid"><AdminProductGrid products={editableProducts} /></div>
         <section className="admin-parity-strip"><strong>Operativa preservada</strong><span>Tarjetas + planilla</span><span>Costos y contado</span><span>Cuotas</span><span>Proveedor</span><span>Fotos</span><span>Visibilidad</span><span>Stock</span><span>Destacados</span><span>Acciones masivas</span><span>Revisión de precios</span></section>
       </>}
       {tab === "storefront" && <section aria-label="Revisión de tienda"><V418BStorefrontAdminPreview /></section>}
@@ -192,7 +198,8 @@ export function AdminConsolidatedWorkspace() {
       {tab === "plates" && <PlatesPanel />}
       {tab === "offers" && <section className="offer-admin-editor"><div><p className="eyebrow orange">OFERTAS & OUTLET</p><h2>Control local del sector comercial</h2><p>No usa la calculadora habitual ni altera el catálogo maestro.</p></div><div className="offer-admin-form"><label className="toggle-row"><span>Sector activo</span><input type="checkbox" checked={offer.enabled} onChange={(event) => updateOffer("enabled", event.target.checked)} /></label><label>Tipo<select value={offer.kind} onChange={(event) => updateOffer("kind", event.target.value as OfferKind)}>{["Oferta del día","Contado especial","2 cuotas sin interés","3 cuotas sin interés","Outlet"].map((kind) => <option key={kind}>{kind}</option>)}</select></label><label>Producto<input value={offer.productName} onChange={(event) => updateOffer("productName", event.target.value)} /></label><label>Imagen del producto<input value={offer.imageSrc} onChange={(event) => updateOffer("imageSrc", event.target.value)} placeholder="/assets/productos/imagen.webp" /></label><label>Precio anterior ARS<input type="number" value={offer.previousPriceArs} onChange={(event) => updateOffer("previousPriceArs", Number(event.target.value))} /></label><label>Precio promocional ARS<input type="number" value={offer.promotionalPriceArs} onChange={(event) => updateOffer("promotionalPriceArs", Number(event.target.value))} /></label><label>Stock de referencia<input type="number" min="0" value={offer.stock} onChange={(event) => updateOffer("stock", Number(event.target.value))} /></label><button type="button" onClick={() => saveLabOffer(offer)}><Save /> Guardar solo en este dispositivo</button></div></section>}
       </div>
-      <p className="internal-privacy-note">Admin Mode V4.18B y Quick Actions V4.18A viven sólo en memoria y se descartan al cerrar. Los laboratorios históricos conservan su almacenamiento local previo. No hay cliente de Supabase, servicio administrativo, RPC ni petición de escritura.</p>
+      <Newsletter admin />
+      <p className="internal-privacy-note">Las fotos y sus características revisadas se guardan en la conexión segura de V16. Los laboratorios históricos siguen separados.</p>
     </main>
   );
 }

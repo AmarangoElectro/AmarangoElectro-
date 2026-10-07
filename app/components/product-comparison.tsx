@@ -5,6 +5,7 @@ import Link from "./store-link";
 import { ArrowUpRight, GitCompareArrows, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { Product } from "@/lib/catalog";
+import type { FinancingOption } from "@/lib/catalog/types";
 import { buildComparisonRows } from "@/lib/catalog/comparison";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
@@ -16,14 +17,21 @@ interface ProductComparisonProps {
 
 export function ProductComparison({ products, onRemove, onClear }: ProductComparisonProps) {
   const [open, setOpen] = useState(false);
-  const [differencesOnly, setDifferencesOnly] = useState(true);
+  const [differencesOnly, setDifferencesOnly] = useState(false);
+  const [financing,setFinancing] = useState<Record<string,FinancingOption[]>>({});
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const rows = useMemo(() => buildComparisonRows(products), [products]);
+  const rows = useMemo(() => buildComparisonRows(products.map(product=>({...product,financing:product.financing.length?product.financing:financing[product.id]??[]}))), [products,financing]);
   const visibleRows = differencesOnly ? rows.filter((row) => row.differs) : rows;
   const knownPrices = products.map((product) => product.price?.amount).filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount));
   const priceRange = knownPrices.length > 1 ? Math.max(...knownPrices) - Math.min(...knownPrices) : null;
   const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+  useEffect(()=>{
+    if(!open)return;
+    const controller=new AbortController();setFinancing({});
+    fetch("/api/v16/comparison-financing",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:products.map(product=>product.id)}),signal:controller.signal}).then(response=>response.json()).then(body=>{if(!controller.signal.aborted&&body.status==="ok")setFinancing(body.data)}).catch(()=>{});
+    return()=>controller.abort();
+  },[open,products]);
 
   useEffect(() => {
     if (!open) return;
@@ -94,7 +102,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
         <div className="compare-dock-actions">
           <button type="button" className="compare-clear" aria-label="Limpiar productos seleccionados" onClick={clearProducts}><Trash2 size={15} /> Limpiar</button>
           <button type="button" className="compare-open" aria-label="Comparar precios y características" disabled={products.length < 2} onClick={openComparison}>
-            Comparar precios <ArrowUpRight size={16} />
+            Comparar productos <ArrowUpRight size={16} />
           </button>
         </div>
       </aside>
@@ -105,8 +113,8 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
             <header className="compare-panel-header">
               <div>
                 <p className="eyebrow orange">COMPARACIÓN INTELIGENTE</p>
-                <h2 id="compare-title">Compará precios y características.</h2>
-                <p id="compare-description">Solo mostramos información que existe en el catálogo. Si un dato falta, queda marcado como “A confirmar”.</p>
+                <h2 id="compare-title">Compará cuotas y características.</h2>
+                <p id="compare-description">Características revisadas del flyer. Cuotas orientativas sobre el contado publicado; la cotización oficial confirma el importe. Si un dato falta, queda “A confirmar”.</p>
               </div>
               <button type="button" ref={closeButtonRef} className="compare-close" aria-label="Cerrar comparación" onClick={() => setOpen(false)}><X size={20} /></button>
             </header>
@@ -127,7 +135,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
             </div>
 
             <div className="compare-table-scroll" tabIndex={0} aria-label="Tabla comparativa; desplazamiento horizontal disponible en pantallas pequeñas">
-              <div className="compare-table" style={{ "--compare-count": products.length } as CSSProperties}>
+              <div className="compare-table" data-count={products.length} style={{ "--compare-count": products.length } as CSSProperties}>
                 <div className="compare-corner"><span>PRODUCTO</span></div>
                 {products.map((product) => (
                   <article className="compare-product-head" key={product.id}>

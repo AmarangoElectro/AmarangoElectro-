@@ -1,4 +1,5 @@
 import type { CatalogAdapter, CatalogQuery, Product } from "./types";
+import { applyProductMedia } from "./product-media";
 import { V411AuditedPilotCatalogAdapter } from "./audited-pilot-adapter";
 import { Cohort0FrozenCatalogAdapter } from "./cohort0-frozen-adapter";
 import { V16ElectroSnapshotCatalogAdapter } from "./v16-electro-snapshot-adapter";
@@ -203,7 +204,15 @@ class V16CompositeCatalogAdapter implements CatalogAdapter {
   }
 }
 
-export const catalog: CatalogAdapter = new V16CompositeCatalogAdapter();
+export const rawCatalog: CatalogAdapter = new V16CompositeCatalogAdapter();
+export const catalog: CatalogAdapter = {
+  source: rawCatalog.source,
+  async listProducts(query) { return applyProductMedia(await rawCatalog.listProducts(query)); },
+  async getProductBySlug(slug) {
+    const product = await rawCatalog.getProductBySlug(slug);
+    return product ? (await applyProductMedia([product]))[0] : null;
+  },
+};
 
 export { LegacyCatalogAdapter } from "./legacy/legacy-catalog-adapter";
 export type { LegacyCatalogSnapshot } from "./legacy/legacy-catalog-adapter";

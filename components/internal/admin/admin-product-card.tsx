@@ -9,11 +9,12 @@ interface Props {
   onSelect?: (id: string) => void;
   onAction?: (featureId: string, productId: string) => void;
   onQuickActions?: (productId: string) => void;
+  onChangePhoto?: (productId: string) => void;
 }
 
 const money = (value: number | null) => value === null ? "A confirmar" : `$${Math.round(value).toLocaleString("es-AR")}`;
 
-export function AdminProductCard({ product, selected = false, onSelect, onAction, onQuickActions }: Props) {
+export function AdminProductCard({ product, selected = false, onSelect, onAction, onQuickActions, onChangePhoto }: Props) {
   const editAction = product.primaryActions.find((action) => action.featureId === "catalog.product.edit");
   const shareAction = product.primaryActions.find((action) => action.featureId === "store.share");
   const overflowActions = [
@@ -51,6 +52,7 @@ export function AdminProductCard({ product, selected = false, onSelect, onAction
       </div>
 
       <div className="admin-product-card__actions">
+        {onChangePhoto && <button type="button" onClick={() => onChangePhoto(product.id)}>📷 Cambiar foto</button>}
         <button type="button" className="v418a-card-trigger" onClick={() => onQuickActions?.(product.id)}>⚡ Acciones rápidas</button>
         {editAction ? <button type="button" onClick={() => onAction?.(editAction.featureId, product.id)}>{editAction.icon} {editAction.label}</button> : null}
         {shareAction ? <button type="button" onClick={() => onAction?.(shareAction.featureId, product.id)}>{shareAction.icon} {shareAction.label}</button> : null}

@@ -20,6 +20,7 @@ export interface AdminCardProductInput {
   interestFreeInstallments?: number | null;
   previousPrice?: number | null;
   features?: readonly string[];
+  specifications?: Record<string,string>;
 }
 
 export interface AdminProductCardModel {

@@ -6,19 +6,20 @@ import type { AdminProductCardModel } from "@/lib/internal/admin/product-card-mo
 import { buildV418ADiff, createV418ADraft, inferAuthorizedTaxonomy, validateV418ADraft, V418A_AVAILABILITY, v418aActions, type V418AAction, type V418AProductSnapshot } from "@/lib/internal/admin/v418a-quick-actions";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
-interface Props { product: AdminProductCardModel | null; open: boolean; onOpenChange: (open: boolean) => void; }
+interface Props { product: AdminProductCardModel | null; open: boolean; onOpenChange: (open: boolean) => void; onChangePhoto?: (id:string)=>void; }
 const stockToAvailability = (stock: AdminProductCardModel["stockState"]): V418AProductSnapshot["availability"] => stock === "out_of_stock" ? "unavailable" : stock === "low_stock" ? "check_availability" : "available";
 const availabilityLabel: Record<(typeof V418A_AVAILABILITY)[number], string> = {
   available: "Disponible",
   check_availability: "Consultar disponibilidad",
   unavailable: "Sin stock",
+  paused: "En pausa",
 };
 
 function snapshotOf(product: AdminProductCardModel): V418AProductSnapshot {
   return { id: product.id, name: product.name, price: product.salePrice, availability: stockToAvailability(product.stockState), imageLabel: product.imageUrl?.split("/").at(-1) ?? "Sin foto", ...inferAuthorizedTaxonomy(product.category), visible: product.visible };
 }
 
-export function V418AQuickActionsSheet({ product, open, onOpenChange }: Props) {
+export function V418AQuickActionsSheet({ product, open, onOpenChange, onChangePhoto }: Props) {
   const snapshot = useMemo(() => product ? snapshotOf(product) : null, [product]);
   const [active, setActive] = useState<V418AAction>("price");
   const [draft, setDraft] = useState(() => snapshot ? createV418ADraft(snapshot) : null);
@@ -53,7 +54,7 @@ export function V418AQuickActionsSheet({ product, open, onOpenChange }: Props) {
         <section className="v418a-editor" aria-live="polite">
           {active === "price" && <label>Precio de venta ARS<input type="number" min="1" step="1" value={current.price ?? ""} onChange={(event) => patch({ price: event.target.value === "" ? null : Number(event.target.value) })} /></label>}
           {active === "availability" && <label>Disponibilidad<select value={current.availability} onChange={(event) => patch({ availability: event.target.value as typeof current.availability })}>{V418A_AVAILABILITY.map((value) => <option key={value} value={value}>{availabilityLabel[value]}</option>)}</select></label>}
-          {active === "photo" && <label>Foto para vista previa<input type="file" accept="image/*" onChange={(event) => patch({ imageFile: event.target.files?.[0] ?? null })} /><small>La foto queda sólo en esta vista y se descarta al cerrar.</small></label>}
+          {active === "photo" && onChangePhoto ? <button type="button" onClick={()=>{if(product){changeOpen(false);onChangePhoto(product.id)}}}>Abrir editor de foto y características</button> : active === "photo" && <label>Foto para vista previa<input type="file" accept="image/*" onChange={(event) => patch({ imageFile: event.target.files?.[0] ?? null })} /><small>La foto queda sólo en esta vista y se descarta al cerrar.</small></label>}
           {active === "taxonomy" && <div className="v418a-taxonomy"><label>Categoría<select value={current.categorySlug} onChange={(event) => patch({ categorySlug: event.target.value, subcategorySlug: "" })}>{categories.map((entry) => <option key={entry.slug} value={entry.slug}>{entry.title}</option>)}</select></label><label>Subcategoría<select value={current.subcategorySlug} onChange={(event) => patch({ subcategorySlug: event.target.value })}><option value="">Sin subcategoría</option>{subcategories.map((entry) => <option key={entry.slug} value={entry.slug}>{entry.title}</option>)}</select></label></div>}
           {active === "visibility" && <button type="button" className="v418a-visibility" aria-pressed={!current.visible} onClick={() => patch({ visible: !current.visible })}>{current.visible ? "Ocultar en borrador" : "Mostrar en borrador"}</button>}
           {active === "full-sheet" && <div className="v418a-placeholder"><strong>Salida controlada</strong><p>La ficha completa todavía no está disponible desde esta acción.</p></div>}

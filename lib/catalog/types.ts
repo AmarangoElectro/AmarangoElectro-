@@ -47,6 +47,7 @@ export interface Product {
   category: string;
   subcategory: string | null;
   image: ProductImage | null;
+  supplierImage?: ProductImage | null;
   price: Money | null;
   financing: FinancingOption[];
   availability: Availability;

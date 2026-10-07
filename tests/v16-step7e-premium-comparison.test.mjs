@@ -21,11 +21,11 @@ test("Step 7E adds persistent, capped comparison selection to spec-driven cards"
   assert.match(store, /localStorage/);
 });
 
-test("comparison view defaults to differences and preserves unknown data honestly", async () => {
+test("comparison view starts with all facts and preserves unknown data honestly", async () => {
   const panel = await readFile(new URL("app/components/product-comparison.tsx", root), "utf8");
   const engine = await readFile(new URL("lib/catalog/comparison.ts", root), "utf8");
 
-  assert.match(panel, /useState\(true\)/);
+  assert.match(panel, /useState\(false\)/);
   assert.match(panel, /Mostrar solo diferencias/);
   assert.match(panel, /A confirmar/);
   assert.match(panel, /role="dialog"/);
@@ -51,7 +51,7 @@ test("comparison engine marks only actual value differences", async () => {
   assert.equal(result["spec:RAM"], false);
 });
 
-test("Step 7E comparison adds no network, production writes, WhatsApp or Margarita integration", async () => {
+test("comparison uses only read-only financing transport", async () => {
   const files = [
     "app/components/product-comparison.tsx",
     "app/components/product-card.tsx",
@@ -64,7 +64,7 @@ test("Step 7E comparison adds no network, production writes, WhatsApp or Margari
   const combined = sources.join("\n");
   const index = await readFile(new URL("lib/catalog/index.ts", root), "utf8");
 
-  assert.doesNotMatch(combined, /fetch\s*\(|XMLHttpRequest|createClient|service_role|SUPABASE_URL|NEXT_PUBLIC_SUPABASE/i);
+  assert.doesNotMatch(combined, /XMLHttpRequest|createClient|service_role|SUPABASE_URL|NEXT_PUBLIC_SUPABASE/i);
   assert.doesNotMatch(combined, /\.(?:insert|upsert|update|rpc)\s*\(/i);
   assert.doesNotMatch(combined, /WhatsApp|webhook|worker|prompt|margarita-ui|amara\.js/i);
   assert.match(index, /new V411AuditedPilotCatalogAdapter\(\)/);

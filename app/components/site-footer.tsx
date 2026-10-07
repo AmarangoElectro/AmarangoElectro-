@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "./store-link";
+import { Newsletter } from "./newsletter";
+import { RoleAccessLinks } from "./role-access-links";
 
 export function SiteFooter() {
   return (
@@ -29,9 +31,10 @@ export function SiteFooter() {
           <h3>Empresa</h3>
           <Link href="/#experiencia">Nuestra atención</Link>
           <span>Contacto</span>
-          <Link href="/mi-amarango">Área asesores</Link>
+          <RoleAccessLinks />
         </div>
       </div>
+      <div id="novedades"><Newsletter /></div>
       <div className="footer-legal">
         <span>AmarangoElectro</span>
         <span>Tecnología para tu vida. Personas para acompañarte.</span>

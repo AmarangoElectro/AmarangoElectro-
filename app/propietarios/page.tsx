@@ -15,6 +15,8 @@ import {
   WalletCards,
 } from "lucide-react";
 import styles from "./propietarios.module.css";
+import { requireSpaceAccess } from "@/lib/internal/auth/server-access";
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Propietarios · AmarangoElectro",
@@ -68,6 +70,7 @@ const modules = [
 
 export default async function PropietariosPage() {
   await requireChatGPTUser("/propietarios");
+  await requireSpaceAccess("owner");
 
   return (
     <>
