@@ -9,13 +9,10 @@ import { RecentlyViewedRail } from "@/app/components/recently-viewed-rail";
 import { SubcategoryBannerCard } from "@/app/components/subcategory-banner-card";
 import { DescansoBrandGallery } from "@/app/components/descanso-brand-gallery";
 import { ProgressiveCategoryExplorer } from "@/app/components/progressive-category-explorer";
-import { SubcategoryContextNavigation } from "@/app/components/subcategory-context-navigation";
 import { SectorBottomNavigation, SectorShowroom } from "@/app/components/sector-showroom";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "@/app/components/brand-campaign-banner";
 import { AllSectorsSheet } from "@/app/components/all-sectors-sheet";
-import { BrandProductAccordion } from "@/app/components/brand-product-accordion";
 import { getBrandLocale, getBrandLocalesForSector } from "@/lib/theme/brand-locale";
-import { deriveSubcategoryContext } from "@/lib/navigation/subcategory-context";
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
 
 export function generateStaticParams() {
@@ -68,18 +65,6 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const initialAvailableOnly = disponible === "1";
   const activeSubcategories = getActiveSubcategories(category);
   const plannedSubcategories = getPlannedSubcategories(category);
-  const subcategoryContext = deriveSubcategoryContext(category, {
-    sector: requestedSector,
-    brand: requestedCampaignBrand,
-  });
-  const phoneAccordionMode = slug === "celulares"
-    && !requestedCampaignBrand
-    && !activeSector
-    && !initialSearch
-    && initialSort === "recommended"
-    && !initialFavoritesOnly
-    && initialMaxPrice === null
-    && !initialAvailableOnly;
 
   return (
     <>
@@ -89,16 +74,10 @@ export default async function CategoryPage({ params, searchParams }: { params: P
           category={category}
           activeSector={activeSector}
           activeBrand={requestedCampaignBrand}
-          availableBrands={[...availableBrands]}
           compactBrandView={Boolean(requestedCampaignBrand)}
         />
-        <div className="category-context-navigation"><SubcategoryContextNavigation categoryTitle={category.title} items={subcategoryContext} /></div>
-
         <div id="catalogo">
-          {activeSector && <section id="sector-activo" className="catalog-sector-context"><div><small>SECTOR ACTIVO</small><strong>{activeSector.title}</strong><span>{activeSector.description}</span></div><Link href={`/categoria/${slug}#catalogo`}>Ver todo {category.title} ×</Link></section>}
-          {phoneAccordionMode ? (
-            <BrandProductAccordion categorySlug={category.slug} products={categoryProducts} brands={activeSubcategories.filter((subcategory) => Boolean(subcategory.brand))} />
-          ) : products.length > 0 ? (
+          {products.length > 0 ? (
             <CatalogClient
               key={`${category.slug}:${activeSector?.slug ?? "all"}:${requestedCampaignBrand ?? "all"}`}
               products={products}
@@ -112,6 +91,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
               compactBrandMode={Boolean(requestedCampaignBrand)}
               categorySlug={category.slug}
               sectorSlug={activeSector?.slug}
+              quickSubcategories={activeSubcategories.map(({ slug, title }) => ({ slug, title }))}
             />
           ) : (
             <section className={`catalog-coming${requestedCampaignBrand ? " is-brand-empty" : ""}`}>
@@ -124,7 +104,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
           )}
         </div>
 
-        {!phoneAccordionMode ? <section className={`category-subcategories ${slug === "celulares" ? "phone-generic-subcategories" : ""}`} aria-labelledby="subcategories-title" data-category={category.title}>
+        <section className={`category-subcategories ${slug === "celulares" ? "phone-generic-subcategories" : ""}`} aria-labelledby="subcategories-title" data-category={category.title}>
           <div className="section-intro split">
             <div><p className="eyebrow orange">EXPLORÁ POR CATEGORÍA</p><h2 id="subcategories-title">Encontrá lo que buscás.</h2></div>
             <p>La navegación está separada del catálogo para que cada sector pueda crecer sin mezclar interfaz, datos y lógica comercial.</p>
@@ -153,7 +133,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
           )}
           {plannedSubcategories.length > 0 && <div className="category-planned-sectors"><div><small>PREPARADO PARA CRECER</small><strong>Próximos sectores</strong></div><div>{plannedSubcategories.map((subcategory) => <span key={subcategory.slug}>{subcategory.title}</span>)}</div></div>}
           {publishableBrandLocales.length > 0 && <div className="category-brands"><div><small>LOCALES DE MARCA</small><strong>Entrá al local.</strong></div><div>{publishableBrandLocales.map((locale) => <Link key={locale.key} href={`?marca=${encodeURIComponent(locale.brand)}#catalogo`}>{locale.tabLabel}<span aria-hidden="true">→</span></Link>)}</div></div>}
-        </section> : null}
+        </section>
 
         {slug === "descanso" ? <DescansoBrandGallery /> : null}
 

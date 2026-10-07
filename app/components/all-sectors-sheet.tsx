@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, ChevronDown, LayoutGrid, Sparkles, X } from "lucide-react";
+import { ArrowRight, LayoutGrid, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "./store-link";
@@ -10,15 +10,11 @@ import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
 export function AllSectorsSheet() {
   const [open, setOpen] = useState(false);
-  const [openSectorId, setOpenSectorId] = useState<string | null>(null);
 
   useEffect(() => {
     const sync = () => {
       const next = isSectorsSheetOpen();
       setOpen(next);
-      if (!next) {
-        setOpenSectorId(null);
-      }
     };
     sync();
     return subscribeSectorsSheet(sync);
@@ -51,19 +47,15 @@ export function AllSectorsSheet() {
         </div>
         <div className="sectors-sheet-list">
           {retailCategories.map((category) => {
-            const expanded = openSectorId === category.id;
-            const panelId = `sector-drawer-${category.id}`;
             return (
-              <article key={category.id} className={`sectors-sheet-item ${expanded ? "is-open" : ""}`}>
-                <button
-                  type="button"
+              <article key={category.id} className="sectors-sheet-item">
+                <Link
+                  href={category.href}
                   className="sectors-sheet-row"
                   tabIndex={open ? 0 : -1}
-                  aria-expanded={expanded}
-                  aria-controls={panelId}
                   onClick={() => {
                     playSonicCue("navigate");
-                    setOpenSectorId((current) => current === category.id ? null : category.id);
+                    closeSectorsSheet();
                   }}
                 >
                   <span className="sectors-sheet-row-art" aria-hidden="true">
@@ -74,20 +66,8 @@ export function AllSectorsSheet() {
                     <small className="sectors-sheet-row-category">{category.eyebrow}</small>
                     <strong className="sectors-sheet-row-name">{category.title}</strong>
                   </span>
-                  <span className="sectors-sheet-row-toggle" aria-hidden="true"><ChevronDown size={18} strokeWidth={2.4} /></span>
-                </button>
-                {expanded && (
-                  <div className="sectors-sheet-row-panel" id={panelId}>
-                    <p>{category.description}</p>
-                    <Link
-                      href={category.href}
-                      tabIndex={open ? 0 : -1}
-                      onClick={() => { playSonicCue("navigate"); closeSectorsSheet(); }}
-                    >
-                      Entrar al sector <ArrowRight size={15} aria-hidden="true" />
-                    </Link>
-                  </div>
-                )}
+                  <span className="sectors-sheet-row-toggle" aria-hidden="true"><ArrowRight size={18} strokeWidth={2.4} /></span>
+                </Link>
               </article>
             );
           })}

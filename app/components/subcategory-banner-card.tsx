@@ -49,7 +49,7 @@ export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory
   const showEditorialLogo = hasEditorialBanner && categorySlug !== "herramientas";
   const href = subcategory.brand
     ? `/categoria/${categorySlug}?marca=${encodeURIComponent(subcategory.brand)}#catalogo`
-    : `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#sector-activo`;
+    : `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#catalogo`;
 
   const toolsMeta = categorySlug === "herramientas" ? toolsBannerMeta[subcategory.slug] : undefined;
 

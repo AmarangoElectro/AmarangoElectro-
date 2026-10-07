@@ -9,22 +9,21 @@ const catalog = fs.readFileSync(path.join(root, "lib/catalog/retail-categories.t
 const css = fs.readFileSync(path.join(root, "app/globals.css"), "utf8");
 const assets = fs.readdirSync(path.join(root, "public/assets/v16-generated/sectors-v2"));
 
-test("all 22 commercial sectors use the new editable-background art system", () => {
+test("all 22 commercial sectors keep their approved artwork", () => {
   assert.equal(assets.filter((asset) => asset.endsWith(".webp")).length, 22);
   assert.match(catalog, /const sectorArt =/);
-  assert.equal((catalog.match(/image: sectorArt\(/g) ?? []).length, 22);
-  assert.equal((catalog.match(/mobileImage: sectorArt\(/g) ?? []).length, 22);
+  assert.equal((catalog.match(/image: sectorArt\(/g) ?? []).length, 21);
+  assert.equal((catalog.match(/mobileImage: sectorArt\(/g) ?? []).length, 21);
+  assert.match(catalog, /id: "celulares"[^\n]*image: "\/assets\/mobile\/celulares\.webp"/);
 });
 
-test("the all-sector selector behaves as an accessible tap-to-toggle drawer", () => {
-  assert.match(sheet, /openSectorId/);
-  assert.match(sheet, /aria-expanded=\{expanded\}/);
-  assert.match(sheet, /aria-controls=\{panelId\}/);
-  assert.match(sheet, /current === category\.id \? null : category\.id/);
+test("each sector row opens its catalog directly without an intermediate drawer", () => {
+  assert.match(sheet, /href=\{category\.href\}/);
+  assert.doesNotMatch(sheet, /openSectorId|aria-expanded=\{expanded\}|Entrar al sector/);
+  assert.match(catalog, /#catalogo`/);
   assert.match(sheet, /sectors-sheet-row-category/);
   assert.match(sheet, /sectors-sheet-row-name/);
   assert.match(sheet, /sectors-sheet-row-toggle/);
-  assert.match(sheet, /Entrar al sector/);
 });
 
 test("sector rows keep artwork, category, name and arrow in a stable foreground stack", () => {

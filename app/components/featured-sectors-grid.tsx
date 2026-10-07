@@ -37,7 +37,7 @@ export function FeaturedSectorsGrid() {
       return [{
         key: category.slug,
         title: "title" in sector ? sector.title : category.title,
-        href: `/categoria/${category.slug}`,
+        href: `/categoria/${category.slug}#catalogo`,
         subtitle,
         artwork: HOME_ARTWORK[slug] ?? retail?.image ?? category.image ?? category.bannerImage ?? null,
       }];

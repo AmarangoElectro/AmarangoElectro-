@@ -18,7 +18,7 @@ export interface RetailCategoryEntry {
 }
 
 const categoryHref = (category: string, sector?: string) =>
-  `/categoria/${category}${sector ? `?sector=${sector}#sector-activo` : ""}`;
+  `/categoria/${category}${sector ? `?sector=${sector}` : ""}#catalogo`;
 
 const sectorArt = (id: string) => `/assets/v16-generated/sectors-v2/${id}.webp`;
 

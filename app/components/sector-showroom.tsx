@@ -6,13 +6,6 @@ import { ThemeToggle } from "./theme-toggle";
 import { OpenSectorsSheetButton } from "./open-sectors-sheet-button";
 import type { CategoryDefinition, SubcategoryDefinition } from "@/lib/catalog/categories";
 
-const sectorTabs = [
-  { slug: "celulares", label: "Celulares", icon: "📱" },
-  { slug: "smart-tv", label: "Smart TV", icon: "📺" },
-  { slug: "audio", label: "Audio", icon: "🎧" },
-  { slug: "gaming", label: "Gaming", icon: "🎮" },
-] as const;
-
 type Editorial = {
   eyebrow: string;
   title: string;
@@ -99,11 +92,10 @@ interface SectorShowroomProps {
   category: CategoryDefinition;
   activeSector?: SubcategoryDefinition;
   activeBrand?: string;
-  availableBrands: string[];
   compactBrandView?: boolean;
 }
 
-export function SectorShowroom({ category, activeSector, activeBrand, availableBrands, compactBrandView = false }: SectorShowroomProps) {
+export function SectorShowroom({ category, activeSector, activeBrand, compactBrandView = false }: SectorShowroomProps) {
   const categoryEditorial = editorial[category.slug];
   const sectorEditorial = activeSector ? subcategoryEditorial[activeSector.slug] : undefined;
   const hero: Editorial = sectorEditorial
@@ -128,13 +120,6 @@ export function SectorShowroom({ category, activeSector, activeBrand, availableB
           image: null,
         };
   const visual = sectorVisuals[category.slug] ?? sectorVisuals.otros;
-  const knownCategoryBrands = category.subcategories.flatMap((item) => item.brand ? [item.brand] : []);
-  const brandFilters = category.slug === "celulares" || compactBrandView
-    ? [
-        { value: "", label: "Ver todo" },
-        ...[...new Set([...availableBrands, ...knownCategoryBrands])].map((brand) => ({ value: brand, label: brand === "Apple" ? "iPhone" : brand })),
-      ]
-    : [];
 
   return (
     <section
@@ -166,27 +151,6 @@ export function SectorShowroom({ category, activeSector, activeBrand, availableB
         {activeBrand ? <input type="hidden" name="marca" value={activeBrand} /> : null}
         {activeSector && !activeSector.brand ? <input type="hidden" name="sector" value={activeSector.slug} /> : null}
       </form>}
-
-      {!compactBrandView ? <nav className="sector-showroom-tabs" aria-label="Cambiar de sector">
-        {sectorTabs.map((item) => (
-          <Link key={item.slug} href={`/categoria/${item.slug}`} className={category.slug === item.slug ? "active" : ""} aria-current={category.slug === item.slug ? "page" : undefined}>
-            <span aria-hidden="true">{item.icon}</span><strong>{item.label}</strong>
-          </Link>
-        ))}
-      </nav> : null}
-
-      {brandFilters.length > 0 ? (
-        <nav className="sector-showroom-brands" aria-label={`Explorar marcas de ${category.title}`}>
-          {brandFilters.map((item) => (
-            <Link
-              key={item.label}
-              href={item.value ? `/categoria/${category.slug}?marca=${encodeURIComponent(item.value)}#categorias-productos` : `/categoria/${category.slug}#catalogo`}
-              className={(activeBrand ?? "") === item.value ? "active" : ""}
-              aria-current={(activeBrand ?? "") === item.value ? "page" : undefined}
-            >{item.label}</Link>
-          ))}
-        </nav>
-      ) : null}
 
       {!compactBrandView ? <div
         className={`sector-editorial sector-editorial-${category.slug}${hero.image ? " has-image" : ""}`}

@@ -26,9 +26,7 @@ import {
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-banner";
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
-import { getFacetScope, matchesFacets, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
-import { SmartFacetDrawer } from "./smart-facet-drawer";
-import { ProductCategoryAccordion } from "./product-category-accordion";
+import { deriveFacetGroups, getFacetScope, matchesFacets, productFacetValues, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
 
 const brandProfiles = {
   Todos: {
@@ -68,6 +66,17 @@ const brandProfiles = {
     badges: ["Infinix", "Performance"],
   },
 } as const;
+const emptyQuickSubcategories: { slug: string; title: string }[] = [];
+const quickNamePatterns: Record<string, Record<string, RegExp>> = {
+  herramientas: { taladros: /\btaladro|\batornillador|\bpercutor/, amoladoras: /\bamoladora/, sierras: /\bsierra|\bcaladora/ },
+  audio: { torres: /\btorre/, "barras-de-sonido": /\bbarra de sonido|\bsoundbar/, "parlantes-portatiles": /\bparlante|\bportatil/ },
+  electrodomesticos: { refrigeracion: /\bheladera|\bfreezer|\bfrigobar|\brefrigerador/, lavado: /\blavarropas|\blavasecarropas|\bsecarropas/, coccion: /\bcocina|\banafe|\bhorno|\bmicroondas|\bfreidora/, climatizacion: /\bventilador|\baire acondicionado|\bestufa|\bcalefactor|\bcaloventor/, "pequenos-electrodomesticos": /\bpava|\blicuadora|\bbatidora|\btostadora|\bcafetera/, limpieza: /\baspiradora|\bhidrolavadora|\bmopa/ },
+};
+
+function matchesQuickSubcategory(product: Product, category: string, slug: string) {
+  if (product.subcategory) return product.subcategory === slug;
+  return quickNamePatterns[category]?.[slug]?.test(normalizeCatalogText(product.name)) ?? false;
+}
 
 interface CatalogClientProps {
   adminOverlay?: { enabled: boolean; onQuickActions: (product: Product) => void };
@@ -84,6 +93,7 @@ interface CatalogClientProps {
   compactBrandMode?: boolean;
   categorySlug?: string;
   sectorSlug?: string;
+  quickSubcategories?: { slug: string; title: string }[];
 }
 
 export function CatalogClient({
@@ -101,11 +111,12 @@ export function CatalogClient({
   compactBrandMode = false,
   categorySlug = "",
   sectorSlug,
+  quickSubcategories = emptyQuickSubcategories,
 }: CatalogClientProps) {
   const facetScope = getFacetScope(categorySlug, sectorSlug);
   const facetStorageKey = `amarango-facets:${categorySlug}:${sectorSlug ?? "all"}`;
   const [facetSelection, setFacetSelection] = useState<FacetSelection>({});
-  const [focusRequest, setFocusRequest] = useState<{ value: string | null; token: number }>({ value: null, token: 0 });
+  const [quickSelection, setQuickSelection] = useState("all");
   const [facetReady, setFacetReady] = useState(false);
   const brands = useMemo(() => ["Todos", ...new Set(products.map((product) => product.brand))], [products]);
   const categoryOptions = useMemo(() => ["Todas", ...new Set(products.map((product) => product.category))], [products]);
@@ -135,6 +146,32 @@ export function CatalogClient({
   );
 
   const suggestions = useMemo(() => buildCatalogSuggestions(products, search), [products, search]);
+  const quickFilters = useMemo(() => {
+    if (!categorySlug) return [];
+    const options: { id: string; label: string; matches: (product: Product) => boolean }[] = [];
+    if (categorySlug === "celulares") {
+      const preferred = ["Apple", "Samsung", "Motorola", "Xiaomi", "Infinix", "Poco"];
+      for (const family of preferred) {
+        if (products.some((product) => brandsShareFamily(product.brand, family))) options.push({ id: `brand:${family}`, label: family === "Poco" ? "POCO" : family, matches: (product) => brandsShareFamily(product.brand, family) });
+      }
+      for (const family of [...new Set(products.map((product) => product.brand))]) {
+        if (!preferred.some((known) => brandsShareFamily(family, known))) options.push({ id: `brand:${family}`, label: family, matches: (product) => brandsShareFamily(product.brand, family) });
+      }
+    } else if (categorySlug === "smart-tv") {
+      const measures = deriveFacetGroups(products, "smart-tv").find((group) => group.key === "measure")?.options ?? [];
+      for (const measure of measures) options.push({ id: `measure:${measure}`, label: measure.replace("″", '"'), matches: (product) => productFacetValues(product, "smart-tv", "measure").includes(measure) });
+    } else {
+      for (const item of quickSubcategories) {
+        const matches = (product: Product) => matchesQuickSubcategory(product, categorySlug, item.slug);
+        if (products.some(matches)) options.push({ id: `sub:${item.slug}`, label: categorySlug === "audio" && item.slug === "parlantes-portatiles" ? "Parlantes" : item.title, matches });
+      }
+      if (!options.length) {
+        const group = deriveFacetGroups(products, facetScope).find((item) => item.key !== "brand");
+        for (const value of group?.options ?? []) options.push({ id: `${group!.key}:${value}`, label: value, matches: (product) => productFacetValues(product, facetScope, group!.key).includes(value) });
+      }
+    }
+    return options;
+  }, [categorySlug, facetScope, products, quickSubcategories]);
 
   const filtered = useMemo(() => {
     const candidates = products.filter((product) => {
@@ -145,7 +182,8 @@ export function CatalogClient({
       const availableMatches = !availableOnly || product.stock.status === "in_stock";
       const parsedMaxPrice = Number(maxPrice);
       const priceMatches = !maxPrice || (Number.isFinite(parsedMaxPrice) && product.price !== null && product.price.amount <= parsedMaxPrice);
-      return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches && matchesFacets(product, facetScope, facetSelection);
+      const quick = quickFilters.find((item) => item.id === quickSelection);
+      return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches && matchesFacets(product, facetScope, facetSelection) && (!quick || quick.matches(product));
     });
     const result = rankProductsForSearch(candidates, deferredSearch.trim());
     if (sort === "brand") return [...result].sort((a, b) => a.brand.localeCompare(b.brand, "es"));
@@ -153,12 +191,12 @@ export function CatalogClient({
     if (sort === "price-asc") return [...result].sort((a, b) => (a.price?.amount ?? Number.POSITIVE_INFINITY) - (b.price?.amount ?? Number.POSITIVE_INFINITY));
     if (sort === "price-desc") return [...result].sort((a, b) => (b.price?.amount ?? Number.NEGATIVE_INFINITY) - (a.price?.amount ?? Number.NEGATIVE_INFINITY));
     return result;
-  }, [compactBrandMode, availableOnly, brand, category, favoritesOnly, facetSelection, maxPrice, deferredSearch, sort, facetScope, favoriteIds, products]);
+  }, [compactBrandMode, availableOnly, brand, category, favoritesOnly, facetSelection, maxPrice, deferredSearch, sort, facetScope, favoriteIds, products, quickFilters, quickSelection]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     let saved: FacetSelection = {};
-    try { saved = JSON.parse(window.sessionStorage.getItem(facetStorageKey) || "{}"); } catch { saved = {}; }
+    if (!categorySlug) try { saved = JSON.parse(window.sessionStorage.getItem(facetStorageKey) || "{}"); } catch { saved = {}; }
     const next: FacetSelection = {};
     for (const key of ["measure", "storage", "capacity", "kind", "liters", "burners", "size"] as FacetKey[]) {
       const value = params.get(`f_${key}`) ?? saved[key];
@@ -166,7 +204,7 @@ export function CatalogClient({
     }
     setFacetSelection(next);
     setFacetReady(true);
-  }, [facetScope, facetStorageKey, products]);
+  }, [categorySlug, facetScope, facetStorageKey, products]);
 
   const correction = useMemo(
     () => (filtered.length === 0 && deferredSearch.trim() ? suggestCatalogCorrection(products, deferredSearch) : null),
@@ -208,9 +246,10 @@ export function CatalogClient({
       };
   const activeFilterCount = Number(brand !== "Todos") + Number(category !== "Todas") + Number(Boolean(search.trim())) + Number(sort !== "recommended") + Number(favoritesOnly) + Number(Boolean(maxPrice)) + Number(availableOnly) + Object.values(facetSelection).filter(Boolean).length;
   const catalogUpdating = deferredSearch !== search;
-  const hasBrandCampaign = brand !== "Todos" && hasCompleteBrandCampaign(brand);
+  const hasBrandCampaign = brand !== "Todos" && hasCompleteBrandCampaign(brand) && (!categorySlug || compactBrandMode);
 
   function clearFilters() {
+    setQuickSelection("all");
     setBrand("Todos");
     setCategory("Todas");
     setSearch("");
@@ -293,7 +332,7 @@ export function CatalogClient({
     <section className={`catalog-section${hasBrandCampaign ? " has-brand-campaign" : ""}${compactBrandMode ? " is-compact-brand" : ""}`} aria-label={`Catálogo ${brand === "Todos" ? "AmarangoElectro" : brand}`}>
       {hasBrandCampaign ? <BrandCampaignBanner brand={brand} /> : null}
 
-      {!hasBrandCampaign && <div className={`catalog-brand-stage ${brand === "Todos" ? "stage-all" : `stage-${normalizeCatalogText(brand)}`}`}>
+      {!categorySlug && !hasBrandCampaign && <div className={`catalog-brand-stage ${brand === "Todos" ? "stage-all" : `stage-${normalizeCatalogText(brand)}`}`}>
         <div className="catalog-brand-stage-copy">
           <p className="eyebrow orange">{profile.eyebrow}</p>
           <h2>{profile.title}</h2>
@@ -318,7 +357,7 @@ export function CatalogClient({
             type="button"
             className={brand === item ? "active" : ""}
             aria-pressed={brand === item}
-            onClick={() => { playSonicCue("filter"); setBrand(item); setFocusRequest((current) => ({ value: item, token: current.token + 1 })); }}
+            onClick={() => { playSonicCue("filter"); setBrand(item); }}
           >
             <small>{item === "Todos" ? "VER TODO" : "MARCA"}</small>
             <strong>{item}</strong>
@@ -397,7 +436,7 @@ export function CatalogClient({
               </div>
             )}
           </div>
-          <button
+          {!categorySlug && <button
             type="button"
             className="catalog-filter-toggle"
             aria-expanded={filtersOpen}
@@ -408,9 +447,9 @@ export function CatalogClient({
             <span>Filtros</span>
             {activeFilterCount > 0 ? <strong>{activeFilterCount}</strong> : null}
             <ChevronDown size={15} aria-hidden="true" />
-          </button>
+          </button>}
         </div>
-        <div id="catalog-advanced-filters" className="catalog-advanced-filters" hidden={!filtersOpen}>
+        {!categorySlug && <div id="catalog-advanced-filters" className="catalog-advanced-filters" hidden={!filtersOpen}>
           {showCategoryFilter && <div className="brand-filters catalog-category-filters" aria-label="Filtrar por categoría">
             {categoryOptions.map((item) => <button key={item} type="button" className={category === item ? "active" : ""} aria-pressed={category === item} onClick={() => { playSonicCue("filter"); setCategory(item); }}>{item === "Todas" ? "Todas las categorías" : item.replace(/-/g, " ")}</button>)}
           </div>}
@@ -438,11 +477,11 @@ export function CatalogClient({
               <option value="price-desc">Mayor precio</option>
             </select>
           </label>
-        </div>
+        </div>}
       </div>
 
 
-      {activeFilterCount > 0 && <div className="catalog-active-filters" aria-live="polite">
+      {!categorySlug && activeFilterCount > 0 && <div className="catalog-active-filters" aria-live="polite">
         <div>
           <SlidersHorizontal size={16} aria-hidden="true" />
           <strong>{activeFilterCount}</strong>
@@ -474,34 +513,16 @@ export function CatalogClient({
         <span>{filtered.length} {filtered.length === 1 ? "opción" : "opciones"} para explorar</span>
         {catalogUpdating && <small className="catalog-refresh-indicator">Actualizando…</small>}
       </div>
+      {categorySlug && quickFilters.length > 0 && <nav className="catalog-quick-filters" aria-label={`Filtrar ${categoryTitle}`}>
+        {[{ id: "all", label: "Todos" }, ...quickFilters].map((item) => <button key={item.id} type="button" className={quickSelection === item.id ? "active" : ""} aria-pressed={quickSelection === item.id} onClick={() => { setQuickSelection(item.id); playSonicCue("filter"); }}>{item.label}</button>)}
+      </nav>}
       {filtered.length ? (
-        categorySlug ? <ProductCategoryAccordion products={filtered} taxonomyProducts={products} scope={facetScope} autoOpen={Boolean(search.trim())} focusRequest={focusRequest} filters={<SmartFacetDrawer products={products} scope={facetScope} selected={{ ...facetSelection, brand: brand === "Todos" ? undefined : brand }} onSelect={(key, value) => { if (key === "brand") setBrand(value ?? "Todos"); else setFacetSelection((current) => ({ ...current, [key]: value })); setFocusRequest((current) => ({ value: value ?? null, token: current.token + 1 })); }} onClear={clearFilters} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => {
+        <div className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
             const customerCard = (
               <ProductCard
                 key={product.id}
                 product={product}
-                eagerImage={filtered[0]?.id === product.id || filtered[1]?.id === product.id}
-                isCompared={compareIds.includes(product.id)}
-                compareDisabled={!compareIds.includes(product.id) && comparedProducts.length >= compareLimit}
-                onCompareToggle={toggleComparedProduct}
-                visualContext={brand === "Todos" ? (showCategoryFilter ? "amarango" : "sector") : "brand"}
-              />
-            );
-            if (!adminOverlay?.enabled) return customerCard;
-            return (
-              <div key={product.id} className="v418b-storefront-card-shell" data-v418b-admin-control="true">
-                {customerCard}
-                <button type="button" className="v418b-storefront-quick-action" onClick={() => adminOverlay.onQuickActions(product)}>
-                  <span aria-hidden="true">⚡</span><strong>Acciones rápidas</strong><small>Vista de revisión</small>
-                </button>
-              </div>
-            );
-        }} />
-        : <div className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
-            const customerCard = (
-              <ProductCard
-                key={product.id}
-                product={product}
+                eagerImage={Boolean(categorySlug && (filtered[0]?.id === product.id || filtered[1]?.id === product.id))}
                 isCompared={compareIds.includes(product.id)}
                 compareDisabled={!compareIds.includes(product.id) && comparedProducts.length >= compareLimit}
                 onCompareToggle={toggleComparedProduct}

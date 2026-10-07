@@ -22,7 +22,7 @@ function subcategoryHref(categorySlug: string, subcategory: SubcategoryDefinitio
   if (subcategory.brand) {
     return `/categoria/${categorySlug}?marca=${encodeURIComponent(subcategory.brand)}#catalogo`;
   }
-  return `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#sector-activo`;
+  return `/categoria/${categorySlug}?sector=${encodeURIComponent(subcategory.slug)}#catalogo`;
 }
 
 /**
