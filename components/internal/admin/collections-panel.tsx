@@ -107,7 +107,7 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
       const result = await adapter.registerPayment({
         saleId: row.sale_id,
         amountReceived: amount,
-        paidAt: null,
+        paidAt: new Date().toISOString(),
         paymentMethod,
         paymentReference: null,
         idempotencyKey: requestId("collection-payment"),
