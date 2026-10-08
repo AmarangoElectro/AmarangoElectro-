@@ -11,6 +11,7 @@ import Link from "./store-link";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
 import { getBrandLocale } from "@/lib/theme/brand-locale";
+import { getBrandDrawerBackdrop } from "@/lib/visual/brand-drawer-art";
 
 type BrandProductAccordionProps = {
   categorySlug: string;
@@ -51,13 +52,14 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
           const family = normalizeBrandFamily(brand.brand);
           const isPhoneArtwork = ["apple", "iphone", "samsung", "motorola", "xiaomi", "infinix", "poco"].includes(family);
           const artwork = categorySlug !== "celulares" && isPhoneArtwork ? null : getBrandCampaignArtwork(brand.brand);
+          const backdrop = artwork ? null : getBrandDrawerBackdrop(categorySlug, sectorSlug, brand.brand);
           const locale = getBrandLocale(brand.brand, categorySlug);
           const brandProducts = productsByBrand.get(normalizeBrandFamily(brand.brand)) ?? [];
           const isOpen = openBrands.has(brand.slug);
           const panelId = `brand-products-${brand.slug}`;
 
           return (
-            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${artwork ? "" : " has-text-banner"}`} key={brand.slug}>
+            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${backdrop ? " has-contextual-art" : ""}`} key={brand.slug}>
               <button
                 type="button"
                 className="brand-product-drawer-trigger"
@@ -71,11 +73,20 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
                     <Image className="brand-product-drawer-art brand-product-drawer-art-light" src={artwork.light} alt="" fill sizes="(max-width: 760px) 100vw, 1400px" unoptimized />
                     <Image className="brand-product-drawer-art brand-product-drawer-art-dark" src={artwork.dark} alt="" fill sizes="(max-width: 760px) 100vw, 1400px" unoptimized />
                   </>
-                ) : (
-                  <span className="brand-product-drawer-fallback" aria-hidden="true">{brand.icon}</span>
-                )}
+                ) : backdrop ? (
+                  <>
+                    <Image className="brand-product-drawer-art brand-product-drawer-context-art" src={backdrop.image} alt="" fill sizes="(max-width: 760px) 100vw, 1400px" unoptimized />
+                    <span className="brand-product-drawer-context-shade" aria-hidden="true" />
+                    <span className="brand-product-drawer-context-copy">
+                      <small>{backdrop.title}</small>
+                      <strong className={brand.title.length > 13 ? "is-long-name" : undefined} style={locale ? { fontFamily: locale.fontFamily } : undefined}>{brand.title}</strong>
+                      <span>{backdrop.description}</span>
+                      <em>Explorar <b aria-hidden="true">→</b></em>
+                    </span>
+                  </>
+                ) : null}
                 <span className="brand-product-drawer-label">
-                  <small>{brandProducts.length ? `${brandProducts.length} PRODUCTOS` : "LOCAL PREPARADO"}</small>
+                  <small>{brandProducts.length ? `${brandProducts.length} ${brandProducts.length === 1 ? "PRODUCTO" : "PRODUCTOS"}` : "LOCAL PREPARADO"}</small>
                   <strong style={locale ? { fontFamily: locale.fontFamily } : undefined}>{brand.title}</strong>
                 </span>
                 <span className="brand-product-drawer-toggle" aria-hidden="true"><ChevronDown size={22} /></span>

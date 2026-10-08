@@ -7,10 +7,21 @@
 .catalog-section.is-embedded-brand .catalog-quick-filters { margin-bottom: 8px; }
 .catalog-section.is-embedded-brand .catalog-quick-filters button { min-height: 44px; }
 .catalog-section.is-embedded-brand .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.brand-product-drawer.has-text-banner .brand-product-drawer-label { inset: 0; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 12px; color: var(--foreground); }
-.brand-product-drawer.has-text-banner .brand-product-drawer-trigger { min-height: 116px; aspect-ratio: 5.8 / 1; background: var(--card); }
-.brand-product-drawer.has-text-banner .brand-product-drawer-label strong { display: block; font-size: clamp(24px, 4vw, 44px); line-height: 1.1; }
-.brand-product-drawer.has-text-banner .brand-product-drawer-fallback { display: none; }
+.brand-product-drawer.has-contextual-art .brand-product-drawer-label { top: auto; bottom: 14px; left: 18px; }
+.brand-product-drawer-context-shade { position: absolute; inset: 0; background: linear-gradient(90deg, #f8f6f1ee, #f8f6f1b0 34%, #f8f6f110 62%, transparent 76%); }
+.brand-product-drawer-context-copy { position: absolute; z-index: 2; inset: 0 auto 34px 0; width: 47%; padding: clamp(16px, 3vw, 40px); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 10px; text-align: left; color: #101e30; }
+.brand-product-drawer-context-copy > small { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: #5c6b78; }
+.brand-product-drawer-context-copy > strong { max-width: 100%; font-size: clamp(24px, 4.2vw, 56px); font-weight: 900; line-height: 1.03; letter-spacing: -1.5px; overflow-wrap: anywhere; }
+.brand-product-drawer-context-copy > strong.is-long-name { font-size: clamp(18px, 3vw, 38px); letter-spacing: -.8px; }
+.brand-product-drawer-context-copy > span { font-size: clamp(11px, 1.5vw, 17px); line-height: 1.25; color: #52606c; }
+.brand-product-drawer-context-copy > em { margin-top: 2px; padding: 8px 14px; border-radius: 999px; background: #155da5; color: #fff; font-style: normal; font-size: 11px; font-weight: 650; line-height: 1; }
+.brand-product-drawer-context-copy > em b { padding-left: 8px; color: #ffb37c; }
+html[data-theme="dark"] .brand-product-drawer-context-art { filter: brightness(.78) saturate(.92); }
+html[data-theme="dark"] .brand-product-drawer-context-shade { background: linear-gradient(90deg, #071426f5, #071426d8 34%, #07142642 62%, #07142610 90%); }
+html[data-theme="dark"] .brand-product-drawer-context-copy { color: #f7f9fd; }
+html[data-theme="dark"] .brand-product-drawer-context-copy > small { color: #ffac73; }
+html[data-theme="dark"] .brand-product-drawer-context-copy > span { color: #d2dbea; }
+html[data-theme="dark"] .brand-product-drawer-context-copy > em { background: #145fbb; }
 @media (max-width: 760px) {
  .brand-product-accordion-intro { gap: 6px; }
  .brand-product-accordion-intro h2 { font-size: 26px; letter-spacing: -1px; }
@@ -20,6 +31,18 @@
  .brand-product-drawer-panel header strong { font-size: 18px; }
  .brand-product-drawer-label { top: auto; bottom: 10px; left: 10px; }
  .brand-product-drawer-label small { font-size: 7px; }
- .brand-product-drawer.has-text-banner .brand-product-drawer-label { padding: 18px; }
+ .brand-product-drawer.has-contextual-art .brand-product-drawer-label { left: 10px; bottom: 10px; }
+ .brand-product-drawer-context-copy { inset: 0 auto 24px 0; padding: 14px 18px; gap: 6px; }
+ .brand-product-drawer-context-copy > small { font-size: 7px; letter-spacing: 1px; }
+ .brand-product-drawer-context-copy > em { padding: 6px 10px; font-size: 9px; }
  .catalog-section.is-embedded-brand .catalog-grid { gap: 9px; }
+}
+@media (max-width: 460px) {
+ .brand-product-drawer-context-copy { width: 49%; padding: 10px 12px; gap: 4px; }
+ .brand-product-drawer-context-copy > small { display: none; }
+ .brand-product-drawer-context-copy > strong { font-size: 23px; letter-spacing: -.8px; }
+ .brand-product-drawer-context-copy > strong.is-long-name { font-size: 17px; }
+ .brand-product-drawer-context-copy > strong.is-long-name + span { display: none; }
+ .brand-product-drawer-context-copy > span { font-size: 10px; }
+ .brand-product-drawer-context-copy > em { padding: 5px 8px; font-size: 8px; }
 }
