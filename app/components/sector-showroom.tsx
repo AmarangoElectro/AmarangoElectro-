@@ -1,3 +1,5 @@
+import {coordinatedSectorArt} from "@/lib/visual/sector-banner-art";
+import {AudioWave} from "./audio-wave";
 import Image from "next/image";
 import { ArrowLeft, Home, LayoutGrid, MessageCircle, Search, UserRound } from "lucide-react";
 import type { CSSProperties } from "react";
@@ -113,12 +115,17 @@ export function SectorShowroom({ category, activeSector, activeBrand, compactBra
           copy: activeSector.description,
           image: null,
         }
-      : categoryEditorial ?? {
+      : categoryEditorial ? {...categoryEditorial} : {
           eyebrow: category.eyebrow,
           title: category.title,
           copy: category.heroTagline ?? category.description,
           image: null,
         };
+  const coordinatedArt = activeSector
+    ? activeSector.slug === "climatizacion" ? coordinatedSectorArt.climatizacion
+      : activeSector.slug === "refrigeracion" ? coordinatedSectorArt.electrodomesticos : undefined
+    : coordinatedSectorArt[category.slug];
+  if(coordinatedArt){hero.image=coordinatedArt;hero.imagePosition="center";}
   const visual = sectorVisuals[category.slug] ?? sectorVisuals.otros;
 
   return (
@@ -153,7 +160,7 @@ export function SectorShowroom({ category, activeSector, activeBrand, compactBra
       </form>}
 
       {!compactBrandView ? <div
-        className={`sector-editorial sector-editorial-${category.slug}${hero.image ? " has-image" : ""}`}
+        className={`sector-editorial sector-editorial-${category.slug}${hero.image ? " has-image" : ""}${coordinatedArt ? " has-coordinated-art" : ""}`}
         style={hero.image ? { "--sector-editorial-image": `url(${hero.image})` } as CSSProperties : undefined}
       >
         {hero.image ? <Image src={hero.image} alt="" fill priority sizes="(max-width: 760px) 100vw, 1200px" unoptimized style={hero.imagePosition ? { objectPosition: hero.imagePosition } : undefined} /> : <span className="sector-editorial-mark" aria-hidden="true">{visual.mark}</span>}
@@ -162,8 +169,8 @@ export function SectorShowroom({ category, activeSector, activeBrand, compactBra
           <small>{hero.eyebrow}</small>
           <h2>{hero.title}</h2>
           <p>{hero.copy}</p>
-          {category.slug === "audio" && !activeSector ? <span className="sector-equalizer" aria-hidden="true"><i /><i /><i /><i /><i /></span> : null}
         </div>
+        {category.slug === "audio" && !activeSector ? <AudioWave className="sector-audio-wave"/> : null}
         <Link href="#catalogo" className="sector-editorial-cta">Ver productos <span aria-hidden="true">→</span></Link>
       </div> : null}
     </section>

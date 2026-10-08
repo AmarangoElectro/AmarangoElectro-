@@ -1,5 +1,7 @@
 "use client";
 
+import {coordinatedSectorArt} from "@/lib/visual/sector-banner-art";
+import {AudioWave} from "./audio-wave";
 import Link from "./store-link";
 import { getCategory } from "@/lib/catalog/categories";
 import { retailCategories } from "@/lib/catalog/retail-categories";
@@ -18,14 +20,8 @@ const FINAL_HOME_SECTORS = [
 ] as const;
 
 const HOME_ARTWORK: Readonly<Record<string, string>> = {
+  ...coordinatedSectorArt,
   celulares: "/assets/v16-generated/sectors-v2/celulares.webp",
-  "smart-tv": "/assets/v16-generated/sectors-v2/smart-tv.webp",
-  electrodomesticos: "/assets/banners/categories/electrodomesticos-premium.webp",
-  audio: "/assets/v16-generated/sectors-v2/audio.webp",
-  hogar: "/assets/v16-generated/sectors-v2/hogar-decoracion.webp",
-  herramientas: "/assets/banners/categories/herramientas-premium-clean.webp",
-  gaming: "/assets/v16-generated/sectors-v2/gaming.webp",
-  descanso: "/assets/v16-generated/sectors-v2/colchones-sommiers.webp",
 };
 
 export function FeaturedSectorsGrid() {
@@ -72,7 +68,7 @@ export function FeaturedSectorsGrid() {
           <Link
             key={key}
             href={href}
-            className="featured-sector-card"
+            className={`featured-sector-card${coordinatedSectorArt[key]?" has-coordinated-art":""}`}
             data-home-sector={key}
             aria-label={`Entrar a ${title}`}
           >
@@ -81,13 +77,14 @@ export function FeaturedSectorsGrid() {
             <span className="featured-sector-copy">
               <strong>{title}</strong>
               <small>{subtitle}</small>
+              {key === "audio" ? <AudioWave className="home-audio-wave"/> : null}
             </span>
             <span className="featured-sector-arrow" aria-hidden="true">→</span>
           </Link>
         ))}
         <button
           type="button"
-          className="featured-sector-card featured-sector-more"
+          className="featured-sector-card featured-sector-more has-coordinated-art"
           data-home-sector="more"
           aria-label="Ver más sectores"
           onClick={() => {
@@ -95,7 +92,7 @@ export function FeaturedSectorsGrid() {
             openSectorsSheet();
           }}
         >
-          <img src="/assets/v16-generated/sectors-v2/otros.webp" alt="" loading="lazy" decoding="async" />
+          <img src={coordinatedSectorArt.otros} alt="" loading="lazy" decoding="async" />
           <span className="featured-sector-shade" aria-hidden="true" />
           <span className="featured-sector-copy">
             <strong>Más sectores</strong>
