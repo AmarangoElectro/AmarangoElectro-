@@ -95,9 +95,10 @@ interface SectorShowroomProps {
   activeSector?: SubcategoryDefinition;
   activeBrand?: string;
   compactBrandView?: boolean;
+  hideEditorial?: boolean;
 }
 
-export function SectorShowroom({ category, activeSector, activeBrand, compactBrandView = false }: SectorShowroomProps) {
+export function SectorShowroom({ category, activeSector, activeBrand, compactBrandView = false, hideEditorial = false }: SectorShowroomProps) {
   const categoryEditorial = editorial[category.slug];
   const sectorEditorial = activeSector ? subcategoryEditorial[activeSector.slug] : undefined;
   const hero: Editorial = sectorEditorial
@@ -159,7 +160,7 @@ export function SectorShowroom({ category, activeSector, activeBrand, compactBra
         {activeSector && !activeSector.brand ? <input type="hidden" name="sector" value={activeSector.slug} /> : null}
       </form>}
 
-      {!compactBrandView ? <div
+      {!compactBrandView && !hideEditorial ? <div
         className={`sector-editorial sector-editorial-${category.slug}${hero.image ? " has-image" : ""}${coordinatedArt ? " has-coordinated-art" : ""}`}
         style={hero.image ? { "--sector-editorial-image": `url(${hero.image})` } as CSSProperties : undefined}
       >

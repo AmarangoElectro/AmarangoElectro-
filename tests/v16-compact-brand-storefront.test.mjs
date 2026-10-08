@@ -35,7 +35,7 @@ test("brand routes use the compact campaign-first experience", async () => {
   assert.match(category, /compactBrandView=\{Boolean\(requestedCampaignBrand\)\}/);
   assert.match(category, /compactBrandMode=\{Boolean\(requestedCampaignBrand\)\}/);
   assert.match(showroom, /Todos los sectores/);
-  assert.match(showroom, /!compactBrandView \? <div/);
+  assert.match(showroom, /!compactBrandView && !hideEditorial \? <div/);
   assert.ok(catalog.indexOf("<BrandCampaignBanner") < catalog.indexOf("catalog-quick-brands"));
 });
 

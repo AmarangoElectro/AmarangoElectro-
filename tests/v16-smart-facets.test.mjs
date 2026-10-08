@@ -71,3 +71,17 @@ test("real Samsung and POCO supplier names populate every documented storage dra
   assert.ok(options(samsung, "celulares", "storage").includes("1 TB"));
   assert.ok(options(samsung, "celulares", "storage").includes("128 GB"));
 });
+
+test("laundry chips distinguish small and large capacities without inventing buckets", () => {
+  const laundry = ["4", "5", "6.5", "11", "15"].map((kg, index) => ({ ...products[0], id: `wash-${index}`, name: `Lavarropas ${kg} kg`, category: "electrodomesticos", subcategory: "lavado" }));
+  assert.deepEqual(options(laundry, "lavado", "capacity"), ["4 kg", "5 kg", "6,5 kg", "11 kg", "15 kg"]);
+  assert.deepEqual(laundry.filter((product) => matchesFacets(product, "lavado", { capacity: "5 kg" })).map((product) => product.name), ["Lavarropas 5 kg"]);
+  assert.equal(laundry.filter((product) => matchesFacets(product, "lavado", { capacity: "6 kg" })).length, 0);
+});
+
+test("a brand with one known memory still exposes its actual chip", () => {
+  const phone = { ...products[0], category: "celulares", name: "Motorola 256/8", brand: "Motorola" };
+  assert.deepEqual(deriveFacetGroups([phone], "celulares", true).find((group) => group.key === "storage")?.options, ["256 GB"]);
+  assert.ok(matchesFacets(phone, "celulares", {}));
+  assert.ok(!matchesFacets(phone, "celulares", { storage: "128 GB" }));
+});

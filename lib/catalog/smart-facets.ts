@@ -48,7 +48,7 @@ export function productFacetValues(product: Product, scope: string, key: FacetKe
     if (key === "capacity") {
       const match = full.match(/\b(\d{1,2}(?:[.,]\d)?)\s*k(?:g|ilos?)\b/);
       const kg = match ? Number(match[1].replace(",", ".")) : 0;
-      return kg >= 11 && kg <= 25 ? ["11 kg+"] : kg >= 6 && kg <= 10 ? [`${match![1].replace(".", ",")} kg`] : [];
+      return kg >= 4 && kg <= 25 ? [`${String(kg).replace(".", ",")} kg`] : [];
     }
     if (key === "kind") {
       const options = [["Semiautomático", /\bsemi\s*automatic/], ["Automático", /\bautomatic/], ["Carga frontal", /\bcarga frontal\b|\bfrontal\b/], ["Carga superior", /\bcarga superior\b|\bsuperior\b/]] as const;
@@ -96,7 +96,7 @@ export function productFacetValues(product: Product, scope: string, key: FacetKe
   return [];
 }
 
-export function deriveFacetGroups(products: readonly Product[], scope: string): FacetGroup[] {
+export function deriveFacetGroups(products: readonly Product[], scope: string, includeSingleValues = false): FacetGroup[] {
   const config: Partial<Record<string, Array<[FacetKey, string]>>> = {
     "smart-tv": [["measure", "Pulgadas"]], celulares: [["storage", "Almacenamiento"]],
     lavado: [["capacity", "Capacidad"], ["kind", "Tipo"]],
@@ -110,7 +110,7 @@ export function deriveFacetGroups(products: readonly Product[], scope: string): 
     const present = new Set(products.flatMap((product) => productFacetValues(product, scope, key)));
     const order = scope === "smart-tv" && key === "measure" ? tvSizes.map((n) => `${n}″`) : key === "storage" ? storageSizes : key === "size" ? mattressSizes : [];
     return { key, label, options: [...present].sort((a, b) => key === "capacity" || key === "liters" || key === "burners" || key === "measure" && scope === "climatizacion" ? Number.parseFloat(a.replace(",", ".")) - Number.parseFloat(b.replace(",", ".")) : order.length ? order.indexOf(a) - order.indexOf(b) : a.localeCompare(b, "es")) };
-  }).filter((group) => group.options.length > 1 || group.options.length === 1 && products.some((product) => !productFacetValues(product, scope, group.key).includes(group.options[0])));
+  }).filter((group) => group.options.length > 1 || group.options.length === 1 && (includeSingleValues || products.some((product) => !productFacetValues(product, scope, group.key).includes(group.options[0]))));
 }
 
 export function matchesFacets(product: Product, scope: string, selected: FacetSelection, except?: FacetKey): boolean {

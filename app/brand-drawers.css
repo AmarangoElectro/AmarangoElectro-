@@ -1,0 +1,25 @@
+/* Category brand drawers: keep approved campaign artwork and immediate cards. */
+.brand-product-accordion { margin-top: 14px; }
+.brand-product-accordion .brand-product-drawer-trigger { aspect-ratio: 3 / 1; }
+.brand-product-drawer-panel > .catalog-section.is-embedded-brand { width: 100%; max-width: none; padding: 0; margin: 0; }
+.catalog-section.is-embedded-brand .catalog-toolbar-shell { position: static; margin-top: 0; }
+.catalog-section.is-embedded-brand .catalog-count { margin: 12px 0 8px; }
+.catalog-section.is-embedded-brand .catalog-quick-filters { margin-bottom: 8px; }
+.catalog-section.is-embedded-brand .catalog-quick-filters button { min-height: 44px; }
+.catalog-section.is-embedded-brand .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.brand-product-drawer.has-text-banner .brand-product-drawer-label { inset: 0; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 12px; color: var(--foreground); }
+.brand-product-drawer.has-text-banner .brand-product-drawer-trigger { min-height: 116px; aspect-ratio: 5.8 / 1; background: var(--card); }
+.brand-product-drawer.has-text-banner .brand-product-drawer-label strong { display: block; font-size: clamp(24px, 4vw, 44px); line-height: 1.1; }
+.brand-product-drawer.has-text-banner .brand-product-drawer-fallback { display: none; }
+@media (max-width: 760px) {
+ .brand-product-accordion-intro { gap: 6px; }
+ .brand-product-accordion-intro h2 { font-size: 26px; letter-spacing: -1px; }
+ .brand-product-accordion-intro > p { font-size: 12px; }
+ .brand-product-drawer-panel { padding: 12px 8px; }
+ .brand-product-drawer-panel > header { margin-bottom: 10px; }
+ .brand-product-drawer-panel header strong { font-size: 18px; }
+ .brand-product-drawer-label { top: auto; bottom: 10px; left: 10px; }
+ .brand-product-drawer-label small { font-size: 7px; }
+ .brand-product-drawer.has-text-banner .brand-product-drawer-label { padding: 18px; }
+ .catalog-section.is-embedded-brand .catalog-grid { gap: 9px; }
+}

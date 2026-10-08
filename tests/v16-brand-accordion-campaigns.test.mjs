@@ -14,7 +14,10 @@ test("Celulares keeps brand exploration inline with accessible drawers", async (
   assert.match(page, /<BrandProductAccordion/);
   assert.match(accordion, /aria-expanded=\{isOpen\}/);
   assert.match(accordion, /Ver tienda completa/);
-  assert.match(accordion, /brandProducts\.map\(\(product\) => <ProductCard/);
+  assert.match(accordion, /<CatalogClient products=\{brandProducts\}/);
+  assert.match(accordion, /compactBrandMode embeddedBrandMode/);
+  assert.doesNotMatch(accordion, /<ProductCategoryAccordion|<SmartFacetDrawer/);
+  assert.match(page, /hideEditorial=\{slug === "celulares"\}/);
 });
 
 test("new Administration and Gaming artwork stays logo-free and editable", async () => {

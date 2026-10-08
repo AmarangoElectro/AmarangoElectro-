@@ -2,47 +2,24 @@
 
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Product } from "@/lib/catalog";
-import type { SubcategoryDefinition } from "@/lib/catalog/categories";
+import type { BrandDrawerDefinition } from "@/lib/catalog/brand-drawers";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
-import { ProductCard } from "./product-card";
+import { CatalogClient } from "./catalog-client";
 import Link from "./store-link";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
-import { matchesFacets, type FacetSelection } from "@/lib/catalog/smart-facets";
-import { SmartFacetDrawer } from "./smart-facet-drawer";
-import { ProductCategoryAccordion } from "./product-category-accordion";
-
-function BrandFilteredPanel({ products, brandSlug }: { products: Product[]; brandSlug: string }) {
-  const storageKey = `amarango-facets:celulares:${brandSlug}`;
-  const [selected, setSelected] = useState<FacetSelection>({});
-  const [focusRequest, setFocusRequest] = useState<{ value: string | null; token: number }>({ value: null, token: 0 });
-  const [availableOnly, setAvailableOnly] = useState(false);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(sessionStorage.getItem(storageKey) || "{}");
-      if (typeof saved.storage === "string" && products.some((product) => matchesFacets(product, "celulares", { storage: saved.storage }))) setSelected({ storage: saved.storage });
-      setAvailableOnly(saved.availableOnly === true);
-    } catch { /* Ignore stale local preferences. */ }
-    setReady(true);
-  }, [products, storageKey]);
-  useEffect(() => { if (ready) sessionStorage.setItem(storageKey, JSON.stringify({ ...selected, availableOnly })); }, [availableOnly, ready, selected, storageKey]);
-  const filtered = useMemo(() => products.filter((product) => matchesFacets(product, "celulares", selected) && (!availableOnly || product.stock.status === "in_stock")), [availableOnly, products, selected]);
-  return <>
-    <ProductCategoryAccordion products={filtered} taxonomyProducts={products} scope="celulares" focusRequest={focusRequest} filters={<SmartFacetDrawer products={products} scope="celulares" selected={selected} onSelect={(key, value) => { setSelected((current) => ({ ...current, [key]: value })); setFocusRequest((current) => ({ value: value ?? null, token: current.token + 1 })); }} onClear={() => { setSelected({}); setAvailableOnly(false); }} availableOnly={availableOnly} onAvailabilityChange={setAvailableOnly} resultCount={filtered.length} />} renderProduct={(product) => <ProductCard key={product.id} product={product} visualContext="brand" eagerImage />} />
-    {!filtered.length && <div className="brand-product-drawer-empty">No hay productos con esta combinación. Limpiá los filtros para ver todos.</div>}
-  </>;
-}
+import { getBrandLocale } from "@/lib/theme/brand-locale";
 
 type BrandProductAccordionProps = {
   categorySlug: string;
+  sectorSlug?: string;
   products: Product[];
-  brands: SubcategoryDefinition[];
+  brands: BrandDrawerDefinition[];
 };
 
-export function BrandProductAccordion({ categorySlug, products, brands }: BrandProductAccordionProps) {
+export function BrandProductAccordion({ categorySlug, sectorSlug, products, brands }: BrandProductAccordionProps) {
   const [openBrands, setOpenBrands] = useState<Set<string>>(() => new Set());
   const productsByBrand = useMemo(() => {
     const grouped = new Map<string, Product[]>();
@@ -71,13 +48,16 @@ export function BrandProductAccordion({ categorySlug, products, brands }: BrandP
       <div className="brand-product-accordion-list">
         {brands.map((brand) => {
           if (!brand.brand) return null;
-          const artwork = getBrandCampaignArtwork(brand.brand);
+          const family = normalizeBrandFamily(brand.brand);
+          const isPhoneArtwork = ["apple", "iphone", "samsung", "motorola", "xiaomi", "infinix", "poco"].includes(family);
+          const artwork = categorySlug !== "celulares" && isPhoneArtwork ? null : getBrandCampaignArtwork(brand.brand);
+          const locale = getBrandLocale(brand.brand, categorySlug);
           const brandProducts = productsByBrand.get(normalizeBrandFamily(brand.brand)) ?? [];
           const isOpen = openBrands.has(brand.slug);
           const panelId = `brand-products-${brand.slug}`;
 
           return (
-            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}`} key={brand.slug}>
+            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${artwork ? "" : " has-text-banner"}`} key={brand.slug}>
               <button
                 type="button"
                 className="brand-product-drawer-trigger"
@@ -96,7 +76,7 @@ export function BrandProductAccordion({ categorySlug, products, brands }: BrandP
                 )}
                 <span className="brand-product-drawer-label">
                   <small>{brandProducts.length ? `${brandProducts.length} PRODUCTOS` : "LOCAL PREPARADO"}</small>
-                  <strong>{brand.title}</strong>
+                  <strong style={locale ? { fontFamily: locale.fontFamily } : undefined}>{brand.title}</strong>
                 </span>
                 <span className="brand-product-drawer-toggle" aria-hidden="true"><ChevronDown size={22} /></span>
               </button>
@@ -105,10 +85,10 @@ export function BrandProductAccordion({ categorySlug, products, brands }: BrandP
                 <div className="brand-product-drawer-panel" id={panelId}>
                   <header>
                     <div><small>CATÁLOGO</small><strong>{brandProducts.length ? `Productos de ${brand.title}` : `${brand.title} está preparado`}</strong></div>
-                    <Link href={`/categoria/${categorySlug}?marca=${encodeURIComponent(brand.brand)}#catalogo`}>Ver tienda completa <span aria-hidden="true">→</span></Link>
+                    <Link href={`/categoria/${categorySlug}?marca=${encodeURIComponent(brand.brand)}${sectorSlug ? `&sector=${encodeURIComponent(sectorSlug)}` : ""}#catalogo`}>Ver tienda completa <span aria-hidden="true">→</span></Link>
                   </header>
                   {brandProducts.length ? (
-                    <BrandFilteredPanel products={brandProducts} brandSlug={brand.slug} />
+                    <CatalogClient products={brandProducts} comparisonProducts={products} categorySlug={categorySlug} sectorSlug={sectorSlug} initialBrand={brand.brand} categoryTitle={brand.title} compactBrandMode embeddedBrandMode />
                   ) : (
                     <div className="brand-product-drawer-empty">
                       <strong>El espacio visual ya está listo.</strong>

@@ -81,6 +81,7 @@ function matchesQuickSubcategory(product: Product, category: string, slug: strin
 interface CatalogClientProps {
   adminOverlay?: { enabled: boolean; onQuickActions: (product: Product) => void };
   products: Product[];
+  comparisonProducts?: Product[];
   initialBrand?: string;
   initialSearch?: string;
   initialSort?: "recommended" | "brand" | "name" | "price-asc" | "price-desc";
@@ -91,6 +92,7 @@ interface CatalogClientProps {
   categoryTitle?: string;
   showCategoryFilter?: boolean;
   compactBrandMode?: boolean;
+  embeddedBrandMode?: boolean;
   categorySlug?: string;
   sectorSlug?: string;
   quickSubcategories?: { slug: string; title: string }[];
@@ -98,6 +100,7 @@ interface CatalogClientProps {
 
 export function CatalogClient({
   products,
+  comparisonProducts,
   adminOverlay,
   initialBrand = "Todos",
   initialSearch = "",
@@ -109,6 +112,7 @@ export function CatalogClient({
   categoryTitle = "Celulares",
   showCategoryFilter = false,
   compactBrandMode = false,
+  embeddedBrandMode = false,
   categorySlug = "",
   sectorSlug,
   quickSubcategories = emptyQuickSubcategories,
@@ -139,7 +143,7 @@ export function CatalogClient({
   const favoriteIds = useMemo(() => parseFavoritesSnapshot(favoritesSnapshot), [favoritesSnapshot]);
   const compareSnapshot = useSyncExternalStore(subscribeCompare, getCompareSnapshot, getCompareServerSnapshot);
   const compareIds = useMemo(() => parseCompareSnapshot(compareSnapshot), [compareSnapshot]);
-  const productById = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
+  const productById = useMemo(() => new Map((comparisonProducts ?? products).map((product) => [product.id, product])), [comparisonProducts, products]);
   const comparedProducts = useMemo(
     () => compareIds.map((id) => productById.get(id)).filter((product): product is Product => Boolean(product)),
     [compareIds, productById],
@@ -149,6 +153,10 @@ export function CatalogClient({
   const quickFilters = useMemo(() => {
     if (!categorySlug) return [];
     const options: { id: string; label: string; matches: (product: Product) => boolean }[] = [];
+    const primaryFacet = deriveFacetGroups(products, facetScope, true).find((group) => group.key !== "brand");
+    if (primaryFacet && (embeddedBrandMode || compactBrandMode || Boolean(sectorSlug))) {
+      return primaryFacet.options.map((value) => ({ id: `${primaryFacet.key}:${value}`, label: value, matches: (product: Product) => productFacetValues(product, facetScope, primaryFacet.key).includes(value) }));
+    }
     if (categorySlug === "celulares") {
       const preferred = ["Apple", "Samsung", "Motorola", "Xiaomi", "Infinix", "Poco"];
       for (const family of preferred) {
@@ -171,7 +179,7 @@ export function CatalogClient({
       }
     }
     return options;
-  }, [categorySlug, facetScope, products, quickSubcategories]);
+  }, [categorySlug, compactBrandMode, embeddedBrandMode, facetScope, products, quickSubcategories, sectorSlug]);
 
   const filtered = useMemo(() => {
     const candidates = products.filter((product) => {
@@ -194,14 +202,15 @@ export function CatalogClient({
   }, [compactBrandMode, availableOnly, brand, category, favoritesOnly, facetSelection, maxPrice, deferredSearch, sort, facetScope, favoriteIds, products, quickFilters, quickSelection]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || window.location.hash !== "#catalogo") return;
+    if (embeddedBrandMode || typeof window === "undefined" || window.location.hash !== "#catalogo") return;
     const frame = window.requestAnimationFrame(() => {
       document.getElementById("catalogo")?.scrollIntoView({ block: "start" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [embeddedBrandMode]);
 
   useEffect(() => {
+    if (embeddedBrandMode) { setFacetReady(true); return; }
     const params = new URLSearchParams(window.location.search);
     let saved: FacetSelection = {};
     if (!categorySlug) try { saved = JSON.parse(window.sessionStorage.getItem(facetStorageKey) || "{}"); } catch { saved = {}; }
@@ -212,7 +221,7 @@ export function CatalogClient({
     }
     setFacetSelection(next);
     setFacetReady(true);
-  }, [categorySlug, facetScope, facetStorageKey, products]);
+  }, [categorySlug, embeddedBrandMode, facetScope, facetStorageKey, products]);
 
   const correction = useMemo(
     () => (filtered.length === 0 && deferredSearch.trim() ? suggestCatalogCorrection(products, deferredSearch) : null),
@@ -222,10 +231,11 @@ export function CatalogClient({
   useEffect(() => {
     const validIds = compareIds.filter((id) => productById.has(id));
     if (validIds.length !== compareIds.length) setCompareIds(validIds);
-  }, [compareIds, productById]);
+  }, [compareIds, embeddedBrandMode, productById]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (embeddedBrandMode) return;
     if (!facetReady) return;
     const params = new URLSearchParams(window.location.search);
     if (brand !== "Todos") params.set("marca", brand); else params.delete("marca");
@@ -242,7 +252,7 @@ export function CatalogClient({
     const query = params.toString();
     const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || "#catalogo"}`;
     window.history.replaceState({}, "", next);
-  }, [availableOnly, brand, category, facetSelection, favoritesOnly, maxPrice, deferredSearch, sort, facetReady, facetStorageKey, showCategoryFilter]);
+  }, [availableOnly, brand, category, embeddedBrandMode, facetSelection, favoritesOnly, maxPrice, deferredSearch, sort, facetReady, facetStorageKey, showCategoryFilter]);
 
   const profile = categoryTitle === "Celulares"
     ? brandProfiles[brand as keyof typeof brandProfiles] ?? brandProfiles.Todos
@@ -254,11 +264,11 @@ export function CatalogClient({
       };
   const activeFilterCount = Number(brand !== "Todos") + Number(category !== "Todas") + Number(Boolean(search.trim())) + Number(sort !== "recommended") + Number(favoritesOnly) + Number(Boolean(maxPrice)) + Number(availableOnly) + Object.values(facetSelection).filter(Boolean).length;
   const catalogUpdating = deferredSearch !== search;
-  const hasBrandCampaign = brand !== "Todos" && hasCompleteBrandCampaign(brand) && (!categorySlug || compactBrandMode);
+  const hasBrandCampaign = !embeddedBrandMode && brand !== "Todos" && hasCompleteBrandCampaign(brand) && (!categorySlug || compactBrandMode);
 
   function clearFilters() {
     setQuickSelection("all");
-    setBrand("Todos");
+    setBrand(embeddedBrandMode ? initialBrand : "Todos");
     setCategory("Todas");
     setSearch("");
     setSort("recommended");
@@ -337,7 +347,7 @@ export function CatalogClient({
   }
 
   return (
-    <section className={`catalog-section${hasBrandCampaign ? " has-brand-campaign" : ""}${compactBrandMode ? " is-compact-brand" : ""}`} aria-label={`Catálogo ${brand === "Todos" ? "AmarangoElectro" : brand}`}>
+    <section className={`catalog-section${hasBrandCampaign ? " has-brand-campaign" : ""}${compactBrandMode ? " is-compact-brand" : ""}${embeddedBrandMode ? " is-embedded-brand" : ""}`} aria-label={`Catálogo ${brand === "Todos" ? "AmarangoElectro" : brand}`}>
       {hasBrandCampaign ? <BrandCampaignBanner brand={brand} /> : null}
 
       {!categorySlug && !hasBrandCampaign && <div className={`catalog-brand-stage ${brand === "Todos" ? "stage-all" : `stage-${normalizeCatalogText(brand)}`}`}>
@@ -513,10 +523,10 @@ export function CatalogClient({
         )}
       </div>}
 
-      <div className="catalog-heading">
+      {!embeddedBrandMode && <div className="catalog-heading">
         <div><p className="eyebrow orange">CATÁLOGO</p><h2 id="catalog-title">Explorá {categoryTitle.toLowerCase()}.</h2></div>
         <p>Los datos que todavía no confirmamos se muestran como pendientes — nunca los inventamos.</p>
-      </div>
+      </div>}
       <div className="catalog-count" aria-live="polite">
         <span>{filtered.length} {filtered.length === 1 ? "opción" : "opciones"} para explorar</span>
         {catalogUpdating && <small className="catalog-refresh-indicator">Actualizando…</small>}
@@ -569,10 +579,10 @@ export function CatalogClient({
         onRemove={removeComparedProduct}
         onClear={() => { clearCompareIds(); playSonicCue("tap"); }}
       />
-      <aside className="catalog-finance-band">
+      {!embeddedBrandMode && <aside className="catalog-finance-band">
         <div><p className="eyebrow orange">FINANCIACIÓN CON CLARIDAD</p><h3>Elegí el equipo.<br />Nosotros te explicamos las opciones.</h3><p>La financiación acompaña la experiencia sin dominarla. Las cuotas reales aparecerán únicamente cuando estén validadas.</p></div>
         <div className="finance-benefits"><span>Créditos con mínimos requisitos</span><span>Atención personalizada</span><span>Consulta sin presión</span></div>
-      </aside>
+      </aside>}
     </section>
   );
 }
