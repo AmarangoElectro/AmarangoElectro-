@@ -6,12 +6,19 @@ import { buildAdminProductCardModel, type AdminCardProductInput } from "../../..
 import { AdminProductCard } from "./admin-product-card";
 import { V418AQuickActionsSheet } from "./v418a-quick-actions-sheet";
 import { ProductPhotoEditor } from "./product-photo-editor";
+import {useProductShare} from "@/components/ui/use-product-share";
 
 interface Props {
   products: readonly (AdminCardProductInput & { stockState: "in_stock" | "low_stock" | "out_of_stock" })[];
 }
 
 export function AdminProductGrid({ products }: Props) {
+  const sharing=useProductShare();
+  function onAction(action:string,id:string){
+    const p=currentProducts.find(p=>p.id===id);
+    if(action!=="store.share"||!p?.slug)return;
+    void sharing.share({name:p.name,url:new URL(`/producto/${p.slug}`,window.location.origin).toString(),cashPriceArs:p.salePrice,imageUrl:p.imageUrl,productId:p.id,installments:p.financing?.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null}))});
+  }
   const [mediaOverrides,setMediaOverrides] = useState<Record<string,Partial<AdminCardProductInput>>>({});
   const [photoIds,setPhotoIds] = useState<string[]>([]);
   const [branded,setBranded] = useState(false);
@@ -36,11 +43,12 @@ export function AdminProductGrid({ products }: Props) {
       </div>
       {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button type="button" onClick={()=>{setBranded(true);setPhotoIds([...selected])}}>Estilo Amarango para seleccionados</button><button type="button" onClick={()=>setSelected(new Set())}>Quitar selección</button></div>}
       <div className="admin-product-grid">
-        {visible.map((product) => <AdminProductCard key={product.id} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} />)}
+        {visible.map((product) => <AdminProductCard key={product.id} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onAction={onAction} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} />)}
       </div>
       {visible.length < filtered.length && <button type="button" className="admin-load-more" onClick={() => setLoaded((n) => nextAdminCatalogWindow(n, filtered.length))}>Mostrar {Math.min(36, filtered.length-visible.length)} más</button>}
       <V418AQuickActionsSheet onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} product={quickProductId ? buildAdminProductCardModel(products.find((item) => item.id === quickProductId)!) : null} open={quickProductId !== null} onOpenChange={(next) => { if (!next) setQuickProductId(null); }} />
       {photoIds.length>0&&<ProductPhotoEditor products={photoIds.map(id=>currentProducts.find(product=>product.id===id)!).filter(Boolean)} branded={branded} onClose={()=>setPhotoIds([])} onSaved={(id,imageUrl,features,specifications,supplierImageUrl)=>setMediaOverrides(current=>({...current,[id]:{imageUrl,features,specifications,supplierImageUrl}}))}/>}
+      {sharing.dialog}
     </section>
   );
 }

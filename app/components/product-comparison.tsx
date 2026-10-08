@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "./store-link";
 import { ArrowUpRight, GitCompareArrows, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Product } from "@/lib/catalog";
 import type { FinancingOption } from "@/lib/catalog/types";
-import { buildComparisonRows } from "@/lib/catalog/comparison";
+import { buildComparisonRows,commonSpecificationKeys } from "@/lib/catalog/comparison";
+import {useProductFlyerFacts} from "@/lib/photo-intelligence/use-product-flyer-facts";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
 interface ProductComparisonProps {
@@ -21,7 +22,9 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
   const [financing,setFinancing] = useState<Record<string,FinancingOption[]>>({});
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const rows = useMemo(() => buildComparisonRows(products.map(product=>({...product,financing:product.financing.length?product.financing:financing[product.id]??[]}))), [products,financing]);
+  const {products:documentedProducts,reading}=useProductFlyerFacts(products,open);
+  const commonKeys=commonSpecificationKeys(documentedProducts);
+  const rows = buildComparisonRows(documentedProducts.map(product=>({...product,financing:product.financing.length?product.financing:financing[product.id]??[]})));
   const visibleRows = differencesOnly ? rows.filter((row) => row.differs) : rows;
   const knownPrices = products.map((product) => product.price?.amount).filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount));
   const priceRange = knownPrices.length > 1 ? Math.max(...knownPrices) - Math.min(...knownPrices) : null;
@@ -114,7 +117,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
               <div>
                 <p className="eyebrow orange">COMPARACIÓN INTELIGENTE</p>
                 <h2 id="compare-title">Compará cuotas y características.</h2>
-                <p id="compare-description">Características revisadas del flyer. Cuotas orientativas sobre el contado publicado; la cotización oficial confirma el importe. Si un dato falta, queda “A confirmar”.</p>
+                <p id="compare-description">{reading?"Leyendo las fotos para comparar…":commonKeys.length?`${commonKeys.length} características en común. Compará sus valores y las cuotas.`:"Sin especificaciones en común: mostramos las características legibles de cada producto."} Las cuotas son orientativas; la cotización oficial confirma el importe.</p>
               </div>
               <button type="button" ref={closeButtonRef} className="compare-close" aria-label="Cerrar comparación" onClick={() => setOpen(false)}><X size={20} /></button>
             </header>

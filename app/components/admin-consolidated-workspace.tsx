@@ -151,7 +151,7 @@ export function AdminConsolidatedWorkspace({ catalogProducts = [], administrativ
 
   const editableProducts = useMemo(() => catalogProducts.map(product => {
     const known = administrativeFacts[product.id];
-    return { id: product.id, name: product.name, imageUrl: product.image?.src ?? null,
+    return { id: product.id, name: product.name, slug:product.slug, financing:product.financing, imageUrl: product.image?.src ?? null,
       supplierImageUrl: product.supplierImage?.src ?? product.image?.src ?? null,
       supplier: known?.supplier ?? null, category: product.category, costArs: known?.costArs ?? null,
       salePrice: product.price?.amount ?? null, visible: product.visible,

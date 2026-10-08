@@ -6,7 +6,7 @@ import { GitCompareArrows, Heart, Share2 } from "lucide-react";
 import { useMemo, useSyncExternalStore, type CSSProperties } from "react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog";
-import { shareProductLink } from "@/lib/commerce/share-product";
+import {useProductShare} from "@/components/ui/use-product-share";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { getAuthorizedReferralShareCode } from "@/lib/growth/referral-attribution-client";
 import { getProductCardVisualTheme, type ProductCardVisualContext } from "@/lib/theme/product-card-theme";
@@ -77,16 +77,9 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
     }
   }
 
-  async function share() {
-    const url = new URL(href, window.location.origin).toString();
-    try {
-      playSonicCue("share");
-      const result = await shareProductLink({ name: product.name, url, cashPriceArs: product.price?.amount ?? null, installments: product.financing.map((plan) => ({ installments: plan.installments, amountArs: plan.installmentAmount?.amount ?? null })), imageUrl: product.image?.src ?? null, referralCode: getAuthorizedReferralShareCode(), productId: product.id });
-      if (result === "copied") toast.success("Enlace copiado para compartir");
-    } catch {
-      toast.error("No pudimos compartir este producto.");
-    }
-  }
+  const sharing=useProductShare();
+  const shareInput=()=>({name:product.name,url:new URL(href,window.location.origin).toString(),cashPriceArs:product.price?.amount??null,installments:product.financing.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,referralCode:getAuthorizedReferralShareCode(),productId:product.id});
+  async function share(){playSonicCue("share");await sharing.share(shareInput())}
 
   return (
     <article
@@ -117,7 +110,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
             <button type="button" aria-label={favorite ? "Quitar de favoritos" : "Guardar en favoritos"} onClick={toggleFavorite} className={favorite ? "active" : ""}>
               <Heart size={18} fill={favorite ? "currentColor" : "none"} />
             </button>
-            <button type="button" aria-label="Compartir producto" onClick={share}><Share2 size={18} /></button>
+            <button type="button" aria-label="Compartir producto" disabled={sharing.busy} onPointerDown={()=>sharing.prepare(shareInput())} onPointerEnter={()=>sharing.prepare(shareInput())} onFocus={()=>sharing.prepare(shareInput())} onClick={share}><Share2 size={18} /></button>
           </div>
           {product.image ? <ProductMediaViewer image={product.image} productName={product.name} card /> : null}
         </div>
@@ -150,6 +143,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
           </button>
         )}
       </div>
+      {sharing.dialog}
     </article>
   );
 }

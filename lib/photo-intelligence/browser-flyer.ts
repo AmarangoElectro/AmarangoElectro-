@@ -2,9 +2,29 @@ import { extractFlyerFacts } from "./flyer-text";
 
 export async function readFlyer(image:string,onProgress:(message:string)=>void) {
   const {createWorker,PSM}=await import("tesseract.js");
-  const worker=await createWorker("spa",1,{workerPath:"/vendor/ocr/worker.min.js",corePath:"/vendor/ocr/core",langPath:"/vendor/ocr/spa/4.0.0_best_int",logger:message=>{if(message.status==="recognizing text")onProgress(`Leyendo flyer… ${Math.round(message.progress*100)}%`)}});
-  try { await worker.setParameters({tessedit_pageseg_mode:PSM.SPARSE_TEXT}); const {data}=await worker.recognize(image); return {text:data.text,...extractFlyerFacts(data.text)}; }
-  finally { await worker.terminate(); }
+  let worker: Awaited<ReturnType<typeof createWorker>> | undefined;
+  let finished=false;
+  let timer:ReturnType<typeof setTimeout>;
+  const timeout=new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new Error("flyer_timeout")),40000)});
+  const work=(async()=>{
+    // Small supplier flyers need larger text for reliable character recognition.
+    onProgress("Preparando foto para lectura…");
+    const source=await loadImage(image);
+    if(finished)throw new Error("flyer_timeout");
+    const scale=Math.min(2,1800/Math.max(source.naturalWidth,source.naturalHeight));
+    const canvas=document.createElement("canvas");
+    canvas.width=Math.round(source.naturalWidth*scale);canvas.height=Math.round(source.naturalHeight*scale);
+    const context=canvas.getContext("2d");if(!context)throw new Error("flyer_canvas_unavailable");
+    context.drawImage(source,0,0,canvas.width,canvas.height);
+    worker=await createWorker("spa",1,{workerPath:"/vendor/ocr/worker.min.js",corePath:"/vendor/ocr/core",langPath:"/vendor/ocr/spa/4.0.0_best_int",logger:message=>{if(!finished&&message.status==="recognizing text")onProgress(`Leyendo flyer… ${Math.round(message.progress*100)}%`)}});
+    if(finished){await worker.terminate();throw new Error("flyer_timeout")}
+    await worker.setParameters({tessedit_pageseg_mode:PSM.SPARSE_TEXT});
+    const {data}=await worker.recognize(canvas,{}, {text:true,blocks:true});
+    const clearLines=data.blocks?.flatMap(block=>block.paragraphs.flatMap(paragraph=>paragraph.lines)).filter(line=>line.confidence>=55).map(line=>line.text);
+    return {text:data.text,...extractFlyerFacts(clearLines?.length?clearLines.join("\n"):data.confidence>=55?data.text:"")};
+  })();
+  try{return await Promise.race([work,timeout])}
+  finally{finished=true;clearTimeout(timer!);if(worker)await worker.terminate()}
 }
 
 async function loadImage(src:string){const image=new Image();image.crossOrigin="anonymous";image.src=src;await image.decode();return image}

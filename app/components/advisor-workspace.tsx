@@ -9,7 +9,7 @@ import { OffersShowcase } from "./offers-showcase";
 import { AdvisorSaleDraftPanel } from "./advisor-sale-draft-panel";
 import { SectorGuide } from "./sector-guide";
 import { findSectorGuide } from "@/lib/onboarding/sector-guides";
-import { toast } from "sonner";
+import {useProductShare} from "@/components/ui/use-product-share";
 import Image from "next/image";
 import { AdvisorGrowthSummary } from "./advisor-growth-summary";
 import { AdvisorMonthDashboard } from "./advisor-month-dashboard";
@@ -29,22 +29,8 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
     return products.filter((product) => normalizeCatalogText([product.name, product.model, product.brand, product.category].filter(Boolean).join(" ")).includes(term));
   }, [products, query]);
 
-  async function share(product: Product) {
-    const url = `${window.location.origin}/producto/${product.slug}`;
-    const price = product.price ? `Contado ${money(product.price.amount)}` : "Precio a confirmar";
-    const text = `${product.name}\n${price}\nAmarangoElectro\n${url}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: product.name, text, url });
-        toast.success(product.image ? "Publicación preparada con vista previa" : "Publicación preparada");
-        return;
-      }
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
-      toast.success("WhatsApp listo para publicar");
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("No pudimos preparar el producto.");
-    }
-  }
+  const sharing=useProductShare();
+  async function share(product:Product){await sharing.share({name:product.name,url:`${window.location.origin}/producto/${product.slug}`,cashPriceArs:product.price?.amount??null,installments:product.financing.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,productId:product.id})}
 
   return (
     <main className="internal-workspace advisor-workspace">
@@ -99,6 +85,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         </div>
         <p className="internal-privacy-note">Esta vista no muestra costos, markup, caja, proveedores internos ni información financiera privada.</p>
       </section>
+      {sharing.dialog}
     </main>
   );
 }

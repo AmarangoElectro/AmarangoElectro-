@@ -4,6 +4,8 @@ import { adminProductContextActions } from "./admin-workspace";
 export interface AdminCardProductInput {
   id: string;
   name: string;
+  slug?: string;
+  financing?: readonly {installments:number;installmentAmount:{amount:number}|null;totalAmount?:{amount:number}|null}[];
   imageUrl: string | null;
   supplierImageUrl?: string | null;
   supplier: string | null;

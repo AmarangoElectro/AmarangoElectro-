@@ -5,7 +5,7 @@ import Link from "./store-link";
 import { Share2, ShieldCheck } from "lucide-react";
 import { useMemo, useSyncExternalStore } from "react";
 import { getOfferServerSnapshot, getOfferSnapshot, parseLabOffer, subscribeOffer } from "@/lib/os-lab/offers-store";
-import { toast } from "sonner";
+import {useProductShare} from "@/components/ui/use-product-share";
 
 const ars = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 
@@ -13,18 +13,10 @@ export function OffersShowcase({ advisor = false }: { advisor?: boolean }) {
   const raw = useSyncExternalStore(subscribeOffer, getOfferSnapshot, getOfferServerSnapshot);
   const offer = useMemo(() => parseLabOffer(raw), [raw]);
 
+  const sharing=useProductShare();
   if (!offer.enabled) return null;
 
-  async function shareOffer() {
-    const text = `${offer.productName}\n${offer.kind}: ${ars.format(offer.promotionalPriceArs)}\nAmarangoElectro`;
-    try {
-      if (navigator.share) await navigator.share({ title: offer.productName, text, url: window.location.origin });
-      else await navigator.clipboard.writeText(`${text}\n${window.location.origin}`);
-      toast.success(navigator.share ? "Oferta lista para compartir" : "Oferta copiada");
-    } catch (error) {
-      if (!(error instanceof DOMException && error.name === "AbortError")) toast.error("No pudimos preparar el contenido para compartir.");
-    }
-  }
+  async function shareOffer(){await sharing.share({name:`${offer.productName} · ${offer.kind}`,url:window.location.origin,cashPriceArs:offer.promotionalPriceArs,imageUrl:offer.imageSrc})}
 
   return (
     <section id={advisor ? undefined : "ofertas"} className={`offers-showcase ${advisor ? "offers-advisor" : ""}`} aria-labelledby={advisor ? "advisor-offer-title" : "store-offer-title"}>
@@ -44,6 +36,7 @@ export function OffersShowcase({ advisor = false }: { advisor?: boolean }) {
         </div>
         <small className="offer-lab-note"><ShieldCheck size={14} /> Precio de referencia — confirmá el valor final al consultar.</small>
       </div>
+      {sharing.dialog}
     </section>
   );
 }

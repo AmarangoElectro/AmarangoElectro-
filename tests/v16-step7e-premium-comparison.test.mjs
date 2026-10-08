@@ -35,7 +35,9 @@ test("comparison view starts with all facts and preserves unknown data honestly"
 
 test("comparison engine marks only actual value differences", async () => {
   const script = `
-    import { buildComparisonRows } from './lib/catalog/comparison.ts';
+    import {build} from 'esbuild';
+    const bundled=await build({entryPoints:['./lib/catalog/comparison.ts'],bundle:true,write:false,format:'esm',platform:'node'});
+    const {buildComparisonRows}=await import('data:text/javascript;base64,'+Buffer.from(bundled.outputFiles[0].text).toString('base64'));
     const base = { category:'celulares', subcategory:null, image:null, financing:[], availability:'unknown', stock:{status:'unknown',quantity:null,label:null}, specifications:{RAM:'8 GB'}, description:null, warranty:null, visible:true, source:'mock' };
     const a = {...base,id:'a',slug:'a',name:'A',brand:'Samsung',model:'A16',price:{amount:100,currency:'ARS'},features:['Android','Batería']};
     const b = {...base,id:'b',slug:'b',name:'B',brand:'Samsung',model:'A17',price:{amount:100,currency:'ARS'},features:['Android','Batería']};

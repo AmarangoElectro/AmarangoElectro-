@@ -3,6 +3,7 @@ import { useEffect,useRef,useState } from "react";
 import type { AdminCardProductInput } from "@/lib/internal/admin/product-card-model";
 import { createPhoto,readFlyer } from "@/lib/photo-intelligence/browser-flyer";
 import { parseSpecificationLines } from "@/lib/photo-intelligence/flyer-text";
+import {factsForProduct} from "@/lib/photo-intelligence/product-facts";
 import { Sheet,SheetContent,SheetDescription,SheetHeader,SheetTitle } from "@/components/ui/sheet";
 
 type Draft={product:AdminCardProductInput;source:string;image:string;style:"original"|"amarango";features:string;specifications:string;sourceText:string;reviewed:boolean;saved:boolean};
@@ -21,7 +22,8 @@ export function ProductPhotoEditor({products,branded,onClose,onSaved}:{products:
       const image=style==="original"?original:await createPhoto(source,drafts[i].product.name,"amarango");
       patch(i,{source:original,image,style,features:"",specifications:"",sourceText:"",reviewed:false,saved:false});
       try {
-        const facts=await readFlyer(original,text=>{if(active.current)setMessage(text)});
+        const raw=await readFlyer(original,text=>{if(active.current)setMessage(text)});
+        const facts={...raw,...factsForProduct({name:drafts[i].product.name,features:[],specifications:{}},raw)};
         patch(i,{sourceText:facts.text,features:facts.features.join("\n"),specifications:Object.entries(facts.specifications).map(([key,value])=>`${key}: ${value}`).join("\n")});
         if(active.current)setMessage(facts.features.length?"Texto leído. Revisá las características y especificaciones.":"No encontramos características legibles. Podés escribirlas desde el flyer.");
       }catch{if(active.current)setError("No pudimos leer el texto automáticamente. Revisá la foto y completá los campos antes de guardar.")}
