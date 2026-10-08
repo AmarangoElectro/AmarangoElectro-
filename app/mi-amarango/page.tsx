@@ -13,7 +13,11 @@ export const dynamic = "force-dynamic";
 export default async function MiAmarangoPage() {
   await requireChatGPTUser("/mi-amarango");
   const access = await resolveSpaceAccess();
-  if(!access.advisor){const own=await storeAction("identity");if(own.status===200&&own.data.store)redirect("/mi-tienda")}
+  if (!access.advisor) {
+    const own = await storeAction("identity");
+    if (own.status === 200 && own.data.store) redirect("/mi-tienda");
+    redirect("/mi-espacio");
+  }
   const products = await catalog.listProducts({ visibleOnly: true });
   return (
     <>

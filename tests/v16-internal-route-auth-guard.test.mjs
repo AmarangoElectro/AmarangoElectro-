@@ -5,6 +5,7 @@ const advisor=fs.readFileSync("app/mi-amarango/page.tsx","utf8");
 const retry=fs.readFileSync("app/auth-retry/page.tsx","utf8");
 const internalHeader=fs.readFileSync("app/components/internal-space-header.tsx","utf8");
 const siteHeader=fs.readFileSync("app/components/site-header.tsx","utf8");
+const roleLinks=fs.readFileSync("app/components/role-access-links.tsx","utf8");
 const protectedLink=fs.readFileSync("app/components/protected-space-link.tsx","utf8");
 
 test("repo has server-side authenticated-user primitive",()=>{
@@ -41,9 +42,9 @@ test("Sites runtime owns the reserved OAuth callback route",()=>{
 
 test("expired login retry is explicit, keeps exact return paths, and cannot auto-loop",()=>{
   assert.match(retry,/await getChatGPTUser\(\)/);
-  assert.match(retry,/if \(user\) redirect\("\/mi-amarango"\)/);
-  assert.match(retry,/chatGPTSignInPath\("\/mi-amarango"\)/);
-  assert.match(retry,/chatGPTSignInPath\("\/administracion"\)/);
+  assert.match(retry,/if \(user\) redirect\("\/mi-espacio"\)/);
+  assert.match(retry,/chatGPTSignInPath\("\/mi-espacio"\)/);
+  assert.match(retry,/target="_top"/);
   assert.doesNotMatch(retry,/requireChatGPTUser|setTimeout|location\.|router\.|localStorage/);
 });
 
@@ -68,8 +69,9 @@ test("identity-aware pages are forced dynamic per request",()=>{
 test("protected space navigation stays inside the active Sites session",()=>{
   assert.match(protectedLink,/from "next\/link"/);
   assert.match(protectedLink,/prefetch=\{false\}/);
-  assert.match(siteHeader,/ProtectedSpaceLink href="\/mi-amarango"/);
-  assert.match(siteHeader,/ProtectedSpaceLink href="\/administracion"/);
+  assert.match(siteHeader,/RoleAccessLinks/);
+  assert.match(roleLinks,/ProtectedSpaceLink href="\/mi-espacio"/);
+  assert.match(roleLinks,/access\?\.admin && <ProtectedSpaceLink href="\/administracion"/);
   assert.match(internalHeader,/ProtectedSpaceLink href="\/"/);
   assert.doesNotMatch(internalHeader,/signout-with-chatgpt|chatGPTSignOutPath|Cerrar sesión/);
 });

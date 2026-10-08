@@ -1,9 +1,8 @@
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { redirect } from "next/navigation";
 import { backendFetch } from "@/lib/server/backend";
-
-export type SpaceAccess = { role: "owner" | "admin" | "asesor" | "cliente" | null; admin: boolean; owner: boolean; advisor: boolean };
-export const NO_SPACE_ACCESS: SpaceAccess = { role: null, admin: false, owner: false, advisor: false };
+import { NO_SPACE_ACCESS, parseSpaceAccess, type SpaceAccess } from "./space-entry";
+export { NO_SPACE_ACCESS, type SpaceAccess } from "./space-entry";
 
 export async function resolveSpaceAccess(): Promise<SpaceAccess> {
   const user = await getChatGPTUser();
@@ -11,7 +10,7 @@ export async function resolveSpaceAccess(): Promise<SpaceAccess> {
   try {
     const response = await backendFetch("/rest/v1/rpc/v16_chatgpt_space_access", { method: "POST", body: JSON.stringify({ p_email: user.email }) });
     if (!response.ok) return NO_SPACE_ACCESS;
-    return await response.json() as SpaceAccess;
+    return parseSpaceAccess(await response.json());
   } catch { return NO_SPACE_ACCESS; }
 }
 

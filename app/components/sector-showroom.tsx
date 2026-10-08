@@ -4,6 +4,7 @@ import Image from "next/image";
 import { ArrowLeft, Home, LayoutGrid, MessageCircle, Search, UserRound } from "lucide-react";
 import type { CSSProperties } from "react";
 import Link from "./store-link";
+import { ProtectedSpaceLink } from "./protected-space-link";
 import { ThemeToggle } from "./theme-toggle";
 import { OpenSectorsSheetButton } from "./open-sectors-sheet-button";
 import type { CategoryDefinition, SubcategoryDefinition } from "@/lib/catalog/categories";
@@ -183,7 +184,7 @@ export function SectorBottomNavigation() {
     <nav className="sector-bottom-navigation" aria-label="Navegación principal móvil">
       <Link href="/"><Home size={20} /><span>Inicio</span></Link>
       <OpenSectorsSheetButton className="active"><LayoutGrid size={20} /><span>Sectores</span></OpenSectorsSheetButton>
-      <Link href="/mi-amarango"><UserRound size={20} /><span>Mi Amarango</span></Link>
+      <ProtectedSpaceLink href="/mi-espacio"><UserRound size={20} /><span>Mi espacio</span></ProtectedSpaceLink>
       <span aria-disabled="true" title="El canal de WhatsApp se habilitará cuando exista un destino validado"><MessageCircle size={20} /><span>WhatsApp</span></span>
     </nav>
   );

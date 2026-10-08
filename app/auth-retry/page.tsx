@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ChatGPTAuthRetryPage() {
   const user = await getChatGPTUser();
-  if (user) redirect("/mi-amarango");
+  if (user) redirect("/mi-espacio");
 
   return (
     <main className="error-state">
@@ -14,8 +14,8 @@ export default async function ChatGPTAuthRetryPage() {
       <h1>El intento de ingreso venció.</h1>
       <p>Volvé a iniciar sesión y elegí tu cuenta de ChatGPT dentro de los próximos minutos.</p>
       <div className="error-state-actions">
-        <StoreLink href={chatGPTSignInPath("/mi-amarango")}>Reintentar Mi Amarango</StoreLink>
-        <StoreLink href={chatGPTSignInPath("/administracion")}>Reintentar Administración</StoreLink>
+        <StoreLink href={chatGPTSignInPath("/mi-espacio")} target="_top">Reintentar ingreso</StoreLink>
+        <StoreLink href="/">Volver a la tienda</StoreLink>
       </div>
     </main>
   );
