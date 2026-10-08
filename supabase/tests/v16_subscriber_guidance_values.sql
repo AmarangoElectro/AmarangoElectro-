@@ -1,0 +1,43 @@
+-- Synthetic fixtures only, all mutations are rolled back. Staging only.
+begin;
+set local request.jwt.claims='{"role":"service_role"}';
+set local role service_role;
+do $$
+declare a uuid; b uuid; r jsonb; p uuid:=gen_random_uuid(); c uuid:=gen_random_uuid(); d jsonb:='{"need":"financing","tools":["installments"],"monthly_sales":"starting","installments":"want","budget":null,"value":"simplicity"}';
+begin
+ assert (select count(*)=3 from public.v16_subscription_plans where id<>'tienda' and monthly_price is null and setup_price is null and tool_values='[]'::jsonb and previous_price is null and promo_price is null),'paid prices changed before real owner input';
+ assert not has_function_privilege('anon','public.v16_store_action(text,text,text,jsonb)','execute') and not has_function_privilege('authenticated','public.v16_store_action(text,text,text,jsonb)','execute'),'untrusted direct RPC access';
+ assert not has_table_privilege('authenticated','public.v16_subscriber_stores','select'),'direct store exposure';
+ r:=public.v16_store_action('guidance-a','a@example.invalid','create',jsonb_build_object('name','Guidance A','slug','guidance-test-a','requested_plan','premium','consent',true,'diagnosis',d));
+ a:=(r->'store'->>'id')::uuid;assert a is not null and r->'store'->>'plan'='tienda','diagnosis granted a paid plan';
+ r:=public.v16_store_action('guidance-b','b@example.invalid','create','{"name":"Guidance B","slug":"guidance-test-b","requested_plan":"tienda","consent":true}');b:=(r->'store'->>'id')::uuid;assert b is not null;
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_store',jsonb_build_object('store_id',a,'plan','tienda','status','active'))->>'ok'='true';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_store',jsonb_build_object('store_id',b,'plan','gestion','status','active'))->>'ok'='true';
+ assert public.v16_store_action('guidance-a','a@example.invalid','diagnosis',jsonb_build_object('diagnosis',d||'{"need":"support","value":"support"}'::jsonb))->>'ok'='true';
+ assert public.v16_store_action('guidance-a','a@example.invalid','growth_interest','{"need":"financing"}')->>'ok'='true';
+ assert public.v16_store_action('guidance-a','a@example.invalid','dismiss_suggestion','{"key":"financing"}')->>'ok'='true';
+ r:=public.v16_store_action('guidance-a','a@example.invalid','workspace');
+ assert r->'store'->'diagnosis'->>'need'='support' and r->'store'->'growth_interests' ? 'financing' and r->'store'->'growth_dismissed' ? 'financing','own guidance did not persist';
+ assert r->'store'->>'plan'='tienda' and r->'store'->>'requested_plan'='premium','guidance changed current or requested plan';
+ r:=public.v16_store_action('guidance-b','b@example.invalid','workspace');
+ assert r->'store'->'diagnosis'='null'::jsonb and r->'store'->'growth_interests'='[]'::jsonb and r->'store'->'growth_dismissed'='[]'::jsonb,'cross-tenant guidance leak';
+ assert public.v16_store_action('guidance-a','a@example.invalid','diagnosis','{"diagnosis":{"need":"bogus"}}')->>'error'='invalid','malformed diagnosis accepted';
+ assert public.v16_store_action('guidance-a','a@example.invalid','growth_interest','{"need":"premium"}')->>'error'='invalid','unknown interest accepted';
+ assert public.v16_store_action('guidance-a','a@example.invalid','owner_price','{"id":"gestion","monthly_price":100,"setup_price":null}')->>'error'='forbidden','subscriber can set global prices';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_price','{"id":"tienda","monthly_price":100,"setup_price":null}')->>'error'='invalid','free plan price changed';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_price','{"id":"gestion","monthly_price":100,"setup_price":null,"previous_price":120,"promo_price":80,"promo_text":"Synthetic promo","promo_expires_at":"2099-01-01T00:00:00Z","tool_values":[{"name":"Synthetic CRM","reference_price":100,"promo_price":70}]}')->>'ok'='true','owner pricing failed';
+ r:=public.v16_store_action('guidance-b','b@example.invalid','workspace');
+ assert (select x->>'promo_price'='80' and x->'tool_values'->0->>'reference_price'='100' from jsonb_array_elements(r->'plans') x where x->>'id'='gestion'),'configured prices did not persist';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_price','{"id":"cuotas","monthly_price":100,"setup_price":null,"promo_price":120}')->>'error'='invalid','artificial promotion accepted';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_price','{"id":"cuotas","monthly_price":100,"setup_price":null,"tool_values":[{"name":"Synthetic tool","reference_price":null,"promo_price":70}]}')->>'error'='invalid','promotion without reference accepted';
+ assert public.v16_store_action('guidance-a','a@example.invalid','brand','{"name":"Guidance A","primary_color":"#123456","accent_color":"#ff7920","whatsapp":"","published":true}')->>'ok'='true';
+ r:=public.v16_public_store('guidance-test-a');
+ assert not(r->'store' ? 'diagnosis') and not(r->'store' ? 'growth_interests') and not(r->'store' ? 'growth_dismissed') and not(r ? 'usage'),'private diagnosis exposed in catalogue';
+ assert public.v16_store_action('guidance-b','b@example.invalid','product',jsonb_build_object('id',p,'name','Synthetic product','cash_price',100,'visible',true,'features','[]'::jsonb,'specifications','{}'::jsonb))->>'ok'='true';
+ assert public.v16_store_action('guidance-b','b@example.invalid','customer',jsonb_build_object('id',c,'name','Synthetic customer','phone','','notes',''))->>'ok'='true';
+ assert public.v16_store_action('guidance-b','b@example.invalid','sale',jsonb_build_object('id',gen_random_uuid(),'customer_id',c,'product_id',p))->>'ok'='true';
+ r:=public.v16_store_action('guidance-b','b@example.invalid','workspace');assert r->'usage'->>'customers'='1' and r->'usage'->>'monthly_sales'='1','actual own usage missing';
+ r:=public.v16_store_action('guidance-a','a@example.invalid','workspace');assert r->'usage'->>'customers'='0' and r->'usage'->>'monthly_sales'='0','other tenant usage counted';
+end $$;
+rollback;
+select 'PASS: owners-only values, undefined paid prices, durable isolated guidance, real own usage, no auto upgrade, private projection' as result;

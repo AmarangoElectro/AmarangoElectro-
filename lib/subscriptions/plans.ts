@@ -14,10 +14,11 @@ export function installmentQuote(cash:number, installments:number, surcharge:num
   const last=Math.round((total-each*(installments-1))*100)/100;
   return {total,each,last};
 }
-export type Store = {id:string;owner_site_user_id?:string;owner_email?:string;slug:string;name:string;plan:PlanId;requested_plan:PlanId;status:"pending"|"active"|"paused";primary_color:string;accent_color:string;logo_asset_id:string|null;whatsapp:string;published:boolean;financing:Record<string,number>;created_at:string};
+export type Store = {id:string;owner_site_user_id?:string;owner_email?:string;slug:string;name:string;plan:PlanId;requested_plan:PlanId;status:"pending"|"active"|"paused";primary_color:string;accent_color:string;logo_asset_id:string|null;whatsapp:string;published:boolean;financing:Record<string,number>;created_at:string;diagnosis?:import("./guidance").Diagnosis|null;growth_interests?:string[];growth_dismissed?:string[]};
 export type StoreProduct = {id:string;store_id:string;name:string;cash_price:number;visible:boolean;asset_id:string|null;source_asset_id:string|null;features:string[];specifications:Record<string,string>};
 export type StoreCustomer = {id:string;name:string;phone:string;notes:string};
 export type StoreSale = {id:string;customer_id:string;product_id:string;snapshot:{customer:string;product:string};total:number;created_at:string};
-export type PlanPrice = {id:PlanId;monthly_price:number|null;setup_price:number|null};
-export type StoreData = {store:Store|null;products:StoreProduct[];customers:StoreCustomer[];sales:StoreSale[];plans:PlanPrice[]};
+export type ToolValue = {name:string;reference_price:number|null;promo_price:number|null};
+export type PlanPrice = {id:PlanId;monthly_price:number|null;setup_price:number|null;tool_values?:ToolValue[];previous_price?:number|null;promo_price?:number|null;promo_text?:string;promo_expires_at?:string|null};
+export type StoreData = {store:Store|null;products:StoreProduct[];customers:StoreCustomer[];sales:StoreSale[];plans:PlanPrice[];usage?:{customers:number;monthly_sales:number}};
 export const assetUrl=(storeId:string,assetId:string)=>`/api/v16/store-asset/${storeId}/${assetId}`;
