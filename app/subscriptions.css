@@ -3,7 +3,7 @@
 .subscription-intro small,.subscription-plans small{font-size:12px;letter-spacing:.08em;font-weight:800;color:#bd580b}
 .subscription-intro h1{font-size:clamp(25px,4vw,36px);line-height:1.15;margin:10px 0}
 .subscriber-workspace p,.subscriber-storefront p{line-height:1.55}.subscriber-workspace .muted,.subscriber-storefront .muted{color:var(--text-secondary,#607084);font-size:13px}
-.subscription-plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.subscription-plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}
 .subscription-plans article{background:var(--surface,#fff);border:1px solid var(--border,#dfe5ed);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:9px}
 .subscription-plans article.selected{border:2px solid #ff7920;padding:19px}
 .subscription-plans h3{font-size:24px;margin:0}.subscription-plans p{margin:0}.subscription-plans ul{padding-left:20px;line-height:1.6;font-size:14px;flex:1}
@@ -28,3 +28,5 @@
 @media(min-width:1000px){.subscriber-storefront .store-product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:700px){.subscription-plans{grid-template-columns:1fr}.subscription-plans article{padding:16px}.subscription-intro{padding:18px}.store-panel{padding:16px}.store-fields{gap:12px}.owner-plan-price{grid-template-columns:1fr 1fr}.owner-plan-price>strong{grid-column:1/-1}.owner-plan-price button{grid-column:1/-1}.subscriber-brand{padding:16px;gap:10px;flex-wrap:wrap}.subscriber-brand h1{font-size:20px}.subscriber-brand img{width:55px;height:55px}.store-product-card{padding:10px;gap:8px}.store-product-grid{gap:10px}.store-product-card>strong{font-size:18px}.store-tabs button{font-size:12px;padding:10px}.store-photo-modal{padding:16px}.platform-owners{gap:18px}.platform-owners img{width:60px;height:60px}}
 html[data-theme=dark] .subscriber-workspace,html[data-theme=dark] .subscriber-storefront,html[data-theme=dark] .store-photo-modal{--surface:#101e30;--surface-muted:#182a41;--background:#081426;--border:#2a3c53;--text-primary:#edf3fc;--text-secondary:#a7b5c8}
+
+.subscription-plans .premium-plan{border-color:#f2b17c}.subscription-plans .premium-plan>small{color:#a44908}

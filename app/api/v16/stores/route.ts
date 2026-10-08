@@ -1,7 +1,7 @@
 import {z} from "zod";
 import {storeAction} from "@/lib/subscriptions/server";
 import {privateJson,sameOrigin} from "@/lib/server/backend";
-const plan=z.enum(["tienda","cuotas","gestion"]);
+const plan=z.enum(["tienda","cuotas","gestion","premium"]);
 const color=z.string().regex(/^#[0-9a-fA-F]{6}$/);
 const specs=z.record(z.string().min(1).max(60),z.string().max(220)).refine(v=>Object.keys(v).length<=30);
 const schemas={
@@ -13,7 +13,7 @@ const schemas={
   sale:z.object({id:z.string().uuid(),customer_id:z.string().uuid(),product_id:z.string().uuid()}).strict(),
   request_plan:z.object({requested_plan:plan}).strict(),
   owner_store:z.object({store_id:z.string().uuid(),plan,status:z.enum(["pending","active","paused"])}).strict(),
-  owner_price:z.object({id:plan,monthly_price:z.number().nonnegative().max(10000000).nullable(),setup_price:z.number().nonnegative().max(10000000).nullable()}).strict(),
+  owner_price:z.object({id:z.enum(["cuotas","gestion","premium"]),monthly_price:z.number().nonnegative().max(10000000).nullable(),setup_price:z.number().nonnegative().max(10000000).nullable()}).strict(),
 };
 export async function GET(request:Request){
   const view=new URL(request.url).searchParams.get("view");
