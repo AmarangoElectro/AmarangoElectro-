@@ -130,9 +130,9 @@ Scene/backdrop and subjects: A realistic dusk outdoor campsite, navy dome campin
 
 ## Integración y validación
 
-- Carrusel principal: seis categorías originales, mismas rutas, controles, carga prioritaria inicial y pausas del carrusel. Fotografía coordinada y texto de la app, adaptable a modo claro/oscuro.
+- Carrusel principal: restaurado exactamente al modelo publicado anterior (Sites source c73add05cb0f8392a6343de4c47fd786696ba5e5), con las seis imágenes de campaña originales. Los banners grandes de inicio quedan preservados; la actualización visual se limita a los ovalados y sectores.
 - Nueve entradas ovaladas de inicio: misma estructura. Celulares intacto.
 - Encabezados de categorías: escena apropiada por categoría. Climatización usa su propia escena; Refrigeración usa la escena de electrodomésticos. No cambia el catálogo mostrado.
-- Audio: onda decorativa animada en carrusel, entrada de inicio y encabezado del sector. No reproduce audio; pausa fuera de pantalla o con pestaña oculta y respeta reducción de movimiento.
+- Audio: onda decorativa animada únicamente en la entrada ovalada de inicio y el encabezado del sector. No reproduce audio; pausa fuera de pantalla o con pestaña oculta y respeta reducción de movimiento.
 - Regresión existente: 14 de 17 comprobaciones pasan. Las otras 3 fallan de igual forma en el HEAD limpio previo: destino antiguo de favoritos, enlace fijo del pie reemplazado por navegación por rol y búsqueda antigua de `filtered.map` en Todos los sectores. No son fallas introducidas por estos banners.
 - Revisión visual en Android pendiente: no hubo dispositivo ni navegador de QA habilitado en esta sesión. No se declara PASS de Android.

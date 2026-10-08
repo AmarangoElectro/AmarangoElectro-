@@ -4,23 +4,15 @@ import Link from "./store-link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
-import { coordinatedSectorArt } from "@/lib/visual/sector-banner-art";
-import { AudioWave } from "./audio-wave";
 
 const slides = [
-  { slug: "smart-tv", label: "Smart TV", href: "/categoria/smart-tv#catalogo", background: "#06152d" },
-  { slug: "electrodomesticos", label: "Electrodomésticos", href: "/categoria/electrodomesticos#catalogo", background: "#21150f" },
-  { slug: "climatizacion", label: "Climatización", href: "/categoria/electrodomesticos?sector=climatizacion#catalogo", background: "#071830" },
-  { slug: "audio", label: "Audio", href: "/categoria/audio#catalogo", background: "#050a14" },
-  { slug: "hogar", label: "Hogar y estilo", href: "/categoria/hogar#catalogo", background: "#2b1d18" },
-  { slug: "descanso", label: "Descanso", href: "/categoria/descanso#catalogo", background: "#302018" },
+  { slug: "smart-tv", label: "Smart TV", href: "/categoria/smart-tv#catalogo", desktop: "/assets/v16-final/main/smart-tv.png", mobile: "/assets/v16-final/main/smart-tv.png", background: "#06152d" },
+  { slug: "electrodomesticos", label: "Electrodomésticos", href: "/categoria/electrodomesticos#catalogo", desktop: "/assets/v16-final/main/electrodomesticos.png", mobile: "/assets/v16-final/main/electrodomesticos.png", background: "#21150f" },
+  { slug: "climatizacion", label: "Climatización", href: "/categoria/electrodomesticos?sector=climatizacion#catalogo", desktop: "/assets/v16-final/main/climatizacion.png", mobile: "/assets/v16-final/main/climatizacion.png", background: "#071830" },
+  { slug: "audio", label: "Audio", href: "/categoria/audio#catalogo", desktop: "/assets/v16-final/main/audio.png", mobile: "/assets/v16-final/main/audio.png", background: "#050a14" },
+  { slug: "hogar", label: "Hogar y estilo", href: "/categoria/hogar#catalogo", desktop: "/assets/v16-final/main/hogar.png", mobile: "/assets/v16-final/main/hogar.png", background: "#2b1d18" },
+  { slug: "descanso", label: "Descanso", href: "/categoria/descanso#catalogo", desktop: "/assets/v16-final/main/descanso.png", mobile: "/assets/v16-final/main/descanso.png", background: "#302018" },
 ] as const;
-
-const coordinatedSlides = slides.map((slide) => ({
-  ...slide,
-  desktop: coordinatedSectorArt[slide.slug],
-  mobile: coordinatedSectorArt[slide.slug],
-}));
 
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
@@ -120,10 +112,10 @@ export function HeroSlider() {
         touchStart.current = null;
       }}
     >
-      {coordinatedSlides.map((slide, index) => (
+      {slides.map((slide, index) => (
         <article
           key={slide.label}
-          className={`hero-slide image-slide has-coordinated-art ${index === current ? "active" : ""}`}
+          className={`hero-slide image-slide ${index === current ? "active" : ""}`}
           aria-hidden={index !== current}
           data-slide-slug={slide.slug}
           data-artwork-framing="premium-advertising"
@@ -145,12 +137,6 @@ export function HeroSlider() {
                   decoding={index === 0 ? "sync" : "async"}
                 />
               </picture>
-              <span className="hero-coordinated-copy">
-                <small>AMARANGOELECTRO</small>
-                <strong>{slide.label}</strong>
-                <span>Explorá el catálogo de este sector.</span>
-                {slide.slug === "audio" && index === current ? <AudioWave className="hero-audio-wave" /> : null}
-              </span>
               <span className="hero-slide-action" aria-hidden="true">Ver sector <b>→</b></span>
             </Link>
           ) : null}
