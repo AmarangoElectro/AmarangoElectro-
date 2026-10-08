@@ -1,4 +1,5 @@
 "use client";
+import { AppSelect } from "@/components/ui/app-select";
 
 import { useEffect, useState } from "react";
 import { ArrowDownCircle, ArrowUpCircle, Plus, RotateCcw, Search, ShieldCheck } from "lucide-react";
@@ -161,9 +162,9 @@ function PostMovementForm({ onCreated, onCancel }: { onCreated: () => void; onCa
       <div className="reports-filters">
         <label>
           <small>TIPO DE MOVIMIENTO</small>
-          <select value={movementType} onChange={(event) => setMovementType(event.target.value as V16CashMovementType)}>
+          <AppSelect value={movementType} onChange={(event) => setMovementType(event.target.value as V16CashMovementType)}>
             {V16_CASH_MANUAL_POST_TYPES.map((type) => <option key={type} value={type}>{V16_CASH_MOVEMENT_TYPE_LABEL[type]}</option>)}
-          </select>
+          </AppSelect>
         </label>
         <label>
           <small>MONTO</small>
@@ -278,10 +279,10 @@ export function CashPanel() {
         </label>
         <label>
           <small>TIPO</small>
-          <select value={movementTypeFilter ?? ""} onChange={(event) => setMovementTypeFilter(event.target.value || null)}>
+          <AppSelect value={movementTypeFilter ?? ""} onChange={(event) => setMovementTypeFilter(event.target.value || null)}>
             <option value="">Todos los tipos</option>
             {Object.entries(V16_CASH_MOVEMENT_TYPE_LABEL).map(([type, label]) => <option key={type} value={type}>{label}</option>)}
-          </select>
+          </AppSelect>
         </label>
       </div>
 

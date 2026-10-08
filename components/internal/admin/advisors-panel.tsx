@@ -1,4 +1,5 @@
 "use client";
+import { useReasonDialog } from "@/components/ui/use-reason-dialog";
 
 import { useEffect, useState } from "react";
 import { Plus, Search, ShieldCheck } from "lucide-react";
@@ -91,6 +92,7 @@ function AssignClientForm({ advisorId, onDone, onCancel }: { advisorId: string; 
 }
 
 function AdvisorDetailView({ advisorId, advisorName, onBack }: { advisorId: string; advisorName: string; onBack: () => void }) {
+  const {requestReason, reasonDialog} = useReasonDialog();
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [portfolio, setPortfolio] = useState<AdvisorsReadResult<V16AdvisorPortfolioListRow[]>>({ status: "not_connected" });
   const [actionNotice, setActionNotice] = useState<AdvisorsReadResult<unknown> | null>(null);
@@ -109,7 +111,7 @@ function AdvisorDetailView({ advisorId, advisorName, onBack }: { advisorId: stri
   const rows = portfolio.status === "ok" ? portfolio.data : [];
 
   async function endAssignment(assignmentId: number) {
-    const reason = window.prompt("Motivo para finalizar la asignación (obligatorio):");
+    const reason = await requestReason({title:"Finalizar asignación",description:"Indicá el motivo para finalizar esta asignación. Se guardará en su historial.",confirmLabel:"Finalizar asignación",required:true});
     if (!reason || !reason.trim()) return;
     const adapter = createAdvisorsAdapter();
     const result = await adapter.endAssignment({ assignmentId, reason: reason.trim() });
@@ -119,6 +121,7 @@ function AdvisorDetailView({ advisorId, advisorName, onBack }: { advisorId: stri
 
   return (
     <section className="crm-360" aria-labelledby="advisor-detail-title" data-guide-target="advisors-detail">
+      {reasonDialog}
       <button type="button" className="crm-back" onClick={onBack}>← Volver a Asesores</button>
       <header className="crm-360-header">
         <div>

@@ -1,11 +1,12 @@
 import * as React from "react"
-import { ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { AppSelect } from "./app-select"
 
 function NativeSelect({
   className,
   size = "default",
+  children,
   ...props
 }: Omit<React.ComponentProps<"select">, "size"> & { size?: "sm" | "default" }) {
   return (
@@ -13,7 +14,7 @@ function NativeSelect({
       className="group/native-select relative w-fit has-[select:disabled]:opacity-50"
       data-slot="native-select-wrapper"
     >
-      <select
+      <AppSelect
         data-slot="native-select"
         data-size={size}
         className={cn(
@@ -23,14 +24,19 @@ function NativeSelect({
           className
         )}
         {...props}
-      />
-      <ChevronDownIcon
-        className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted-foreground opacity-50 select-none"
-        aria-hidden="true"
-        data-slot="native-select-icon"
-      />
+      >{nativeOptions(children)}</AppSelect>
     </div>
   )
+}
+
+function nativeOptions(children: React.ReactNode): React.ReactNode {
+  return React.Children.map(children, child => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return child
+    if (child.type === NativeSelectOption) return React.createElement("option", child.props)
+    if (child.type === NativeSelectOptGroup) return React.createElement("optgroup", child.props, nativeOptions(child.props.children))
+    if (child.type === React.Fragment) return <>{nativeOptions(child.props.children)}</>
+    return child
+  })
 }
 
 function NativeSelectOption({

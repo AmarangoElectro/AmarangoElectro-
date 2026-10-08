@@ -1,4 +1,5 @@
 "use client";
+import { AppSelect } from "@/components/ui/app-select";
 
 import { Filter, Gift, Network, ShieldAlert, TrendingUp, UsersRound, WalletCards } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -18,6 +19,9 @@ import type {
 
 const money=(value:number)=>value.toLocaleString("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0});
 const pct=(value:number|null)=>value===null?"—":`${(value*100).toFixed(1)}%`;
+const sourceLabels: Record<AcquisitionSource,string> = {DIRECT:"Acceso directo",WHATSAPP:"WhatsApp",INSTAGRAM:"Instagram",FACEBOOK:"Facebook",META_ADS:"Publicidad en Meta",CLIENT_REFERRAL:"Recomendación de cliente",ADVISOR:"Asesor",ORGANIC:"Búsqueda orgánica",CAMPAIGN:"Campaña",OTHER:"Otra fuente"};
+const rewardLabels: Record<RewardType,string> = {AMARANGO_BALANCE:"Saldo Amarango",NEXT_PURCHASE_DISCOUNT:"Descuento en la próxima compra",COUPON:"Cupón",GIFT:"Regalo",SPECIAL_BENEFIT:"Beneficio especial",SHIPPING_BENEFIT:"Beneficio de envío",OTHER:"Otro beneficio"};
+const releaseLabels: Record<RewardReleaseCondition,string> = {FIRST_VALID_PAYMENT:"Primer pago válido",MINIMUM_PAID_AMOUNT:"Monto mínimo cobrado",DELIVERY_AND_VALID_PAYMENT:"Entrega y pago válido",SALE_PAID_IN_FULL:"Venta pagada por completo",ADMIN_APPROVAL:"Aprobación de Administración"};
 
 function Status({results}:{results:readonly GrowthGatewayResult<unknown>[]}) {
   if(results.some(result=>result.status==="error")) return <div className="growth-admin-status error"><b>No pudimos cargar Adquisición.</b></div>;
@@ -118,10 +122,10 @@ export function GrowthAcquisitionPanel() {
 
       <div className="growth-admin-filters">
         <Filter size={16}/>
-        <select value={source} onChange={event=>setSource(event.target.value)} aria-label="Fuente">
-          <option value="ALL">Todas las fuentes</option><option>DIRECT</option><option>WHATSAPP</option><option>INSTAGRAM</option><option>FACEBOOK</option><option>META_ADS</option><option>CLIENT_REFERRAL</option><option>ADVISOR</option><option>ORGANIC</option><option>CAMPAIGN</option><option>OTHER</option>
-        </select>
-        <select value={period} onChange={event=>setPeriod(event.target.value as "7d"|"30d"|"90d")} aria-label="Período"><option value="7d">7 días</option><option value="30d">30 días</option><option value="90d">90 días</option></select>
+        <AppSelect value={source} onChange={event=>setSource(event.target.value)} aria-label="Fuente">
+          <option value="ALL">Todas las fuentes</option>{Object.entries(sourceLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
+        </AppSelect>
+        <AppSelect value={period} onChange={event=>setPeriod(event.target.value as "7d"|"30d"|"90d")} aria-label="Período"><option value="7d">7 días</option><option value="30d">30 días</option><option value="90d">90 días</option></AppSelect>
         <input value={campaignId} onChange={event=>setCampaignId(event.target.value)} placeholder="Campaña" aria-label="Campaña" />
         <input value={advisorId} onChange={event=>setAdvisorId(event.target.value)} placeholder="Asesor" aria-label="Asesor" />
         <input value={referrerCustomerId} onChange={event=>setReferrerCustomerId(event.target.value)} placeholder="Referidor" aria-label="Referidor" />
@@ -153,7 +157,7 @@ export function GrowthAcquisitionPanel() {
       <section className="growth-admin-block">
         <div className="growth-section-heading"><Gift/><div><small>BENEFICIOS</small><strong>Políticas configurables, nunca hardcodeadas.</strong></div></div>
         <p>Tipo · valor · porcentaje · tope · mínimo de compra · vencimiento · productos/categorías · condición de liberación.</p>
-        {policyRows.length===0?<div className="growth-empty">No hay políticas disponibles desde una fuente segura.</div>:<div className="growth-policy-list">{policyRows.map(policy=><article key={policy.policyId}><div><strong>{policy.name}</strong><small>{policy.rewardType} · {policy.releaseCondition}</small></div><span>{policy.active?"Activa":"Pausada"}</span></article>)}</div>}
+        {policyRows.length===0?<div className="growth-empty">No hay políticas disponibles desde una fuente segura.</div>:<div className="growth-policy-list">{policyRows.map(policy=><article key={policy.policyId}><div><strong>{policy.name}</strong><small>{rewardLabels[policy.rewardType]} · {releaseLabels[policy.releaseCondition]}</small></div><span>{policy.active?"Activa":"Pausada"}</span></article>)}</div>}
       </section>
 
       <section className="growth-admin-block">
@@ -178,13 +182,13 @@ export function GrowthAcquisitionPanel() {
         <div className="growth-config-grid">
           <label>Nombre<input value={policyDraft.name} onChange={e=>setPolicyDraft({...policyDraft,name:e.target.value})}/></label>
           <label className="growth-check"><input type="checkbox" checked={policyDraft.active} onChange={e=>setPolicyDraft({...policyDraft,active:e.target.checked})}/> Política activa</label>
-          <label>Tipo<select value={policyDraft.rewardType} onChange={e=>setPolicyDraft({...policyDraft,rewardType:e.target.value as RewardType})}>{["AMARANGO_BALANCE","NEXT_PURCHASE_DISCOUNT","COUPON","GIFT","SPECIAL_BENEFIT","SHIPPING_BENEFIT","OTHER"].map(x=><option key={x}>{x}</option>)}</select></label>
+          <label>Tipo<AppSelect value={policyDraft.rewardType} onChange={e=>setPolicyDraft({...policyDraft,rewardType:e.target.value as RewardType})}>{Object.entries(rewardLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</AppSelect></label>
           <label>Valor fijo<input type="number" value={policyDraft.fixedValueArs??""} onChange={e=>setPolicyDraft({...policyDraft,fixedValueArs:e.target.value?Number(e.target.value):null})}/></label>
           <label>Porcentaje<input type="number" value={policyDraft.percentValue??""} onChange={e=>setPolicyDraft({...policyDraft,percentValue:e.target.value?Number(e.target.value):null})}/></label>
           <label>Tope<input type="number" value={policyDraft.maxValueArs??""} onChange={e=>setPolicyDraft({...policyDraft,maxValueArs:e.target.value?Number(e.target.value):null})}/></label>
           <label>Mínimo compra<input type="number" value={policyDraft.minimumPurchaseArs??""} onChange={e=>setPolicyDraft({...policyDraft,minimumPurchaseArs:e.target.value?Number(e.target.value):null})}/></label>
           <label>Vence en días<input type="number" value={policyDraft.expiresAfterDays??""} onChange={e=>setPolicyDraft({...policyDraft,expiresAfterDays:e.target.value?Number(e.target.value):null})}/></label>
-          <label>Condición<select value={policyDraft.releaseCondition} onChange={e=>setPolicyDraft({...policyDraft,releaseCondition:e.target.value as RewardReleaseCondition})}>{["FIRST_VALID_PAYMENT","MINIMUM_PAID_AMOUNT","DELIVERY_AND_VALID_PAYMENT","SALE_PAID_IN_FULL","ADMIN_APPROVAL"].map(x=><option key={x}>{x}</option>)}</select></label>
+          <label>Condición<AppSelect value={policyDraft.releaseCondition} onChange={e=>setPolicyDraft({...policyDraft,releaseCondition:e.target.value as RewardReleaseCondition})}>{Object.entries(releaseLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</AppSelect></label>
           <label>Mínimo cobrado<input type="number" value={policyDraft.minimumPaidAmountArs??""} onChange={e=>setPolicyDraft({...policyDraft,minimumPaidAmountArs:e.target.value?Number(e.target.value):null})}/></label>
           <label>Productos habilitados<input value={(policyDraft.allowedProductIds??[]).join(", ")} onChange={e=>setPolicyDraft({...policyDraft,allowedProductIds:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)})} placeholder="IDs separados por coma"/></label>
           <label>Categorías habilitadas<input value={(policyDraft.allowedCategoryIds??[]).join(", ")} onChange={e=>setPolicyDraft({...policyDraft,allowedCategoryIds:e.target.value.split(",").map(x=>x.trim()).filter(Boolean)})} placeholder="IDs separados por coma"/></label>

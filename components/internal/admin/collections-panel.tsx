@@ -1,4 +1,5 @@
 "use client";
+import { AppSelect } from "@/components/ui/app-select";
 
 import { useEffect, useState } from "react";
 import { Search, ShieldCheck } from "lucide-react";
@@ -236,13 +237,13 @@ export function CollectionsPanel({ onOpenClient360 }: { onOpenClient360: (client
                   <div className="advisor-sale-fields">
                     <label><span>Monto recibido *</span><input value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} inputMode="numeric" /></label>
                     <label><span>Método</span>
-                      <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}>
+                      <AppSelect value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value)}>
                         <option>Mercado Pago / QR</option>
                         <option>Transferencia</option>
                         <option>Efectivo</option>
                         <option>Tarjeta</option>
                         <option>Otro</option>
-                      </select>
+                      </AppSelect>
                     </label>
                   </div>
                   <div className="collections-actions">

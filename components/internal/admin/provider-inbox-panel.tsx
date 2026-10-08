@@ -1,4 +1,6 @@
 "use client";
+import { useReasonDialog } from "@/components/ui/use-reason-dialog";
+import { AppSelect } from "@/components/ui/app-select";
 
 import { useEffect, useState } from "react";
 import { Plus, Search, ShieldCheck } from "lucide-react";
@@ -58,6 +60,7 @@ function StatusNotice({ result }: { result: ProviderInboxReadResult<unknown> }) 
 }
 
 function ThreadDetailView({ threadId, onBack }: { threadId: string; onBack: () => void }) {
+  const {requestReason, reasonDialog} = useReasonDialog();
   const [detail, setDetail] = useState<ProviderInboxReadResult<V16ProviderInboxThreadDetailRow | null>>({ status: "not_connected" });
   const [messages, setMessages] = useState<ProviderInboxReadResult<V16ProviderInboxMessageRow[]>>({ status: "not_connected" });
   const [noteBody, setNoteBody] = useState("");
@@ -108,6 +111,7 @@ function ThreadDetailView({ threadId, onBack }: { threadId: string; onBack: () =
 
   return (
     <section className="crm-360" aria-labelledby="thread-detail-title" data-guide-target="inbox-thread-detail">
+      {reasonDialog}
       <button type="button" className="crm-back" onClick={onBack}>← Volver a la Bandeja</button>
       <StatusNotice result={detail} />
       {thread && <>
@@ -147,9 +151,9 @@ function ThreadDetailView({ threadId, onBack }: { threadId: string; onBack: () =
           <div className="reports-filters" data-guide-target="inbox-composer">
             <label>
               <small>TIPO DE NOTA</small>
-              <select value={noteKind} onChange={(event) => setNoteKind(event.target.value as V16ProviderInboxMessageKind)}>
+              <AppSelect value={noteKind} onChange={(event) => setNoteKind(event.target.value as V16ProviderInboxMessageKind)}>
                 {MESSAGE_KIND_OPTIONS.map((kind) => <option key={kind} value={kind}>{V16_PROVIDER_INBOX_MESSAGE_KIND_LABEL[kind]}</option>)}
-              </select>
+              </AppSelect>
             </label>
           </div>
           <label className="crm-search">
@@ -172,9 +176,9 @@ function ThreadDetailView({ threadId, onBack }: { threadId: string; onBack: () =
                 type="button"
                 className="crm-open"
                 style={{ marginRight: 8, marginTop: 8 }}
-                onClick={() => {
+                onClick={async () => {
                   if (status === "CANCELLED") {
-                    const reason = window.prompt("Motivo de cancelación:");
+                    const reason = await requestReason({title:"Cancelar seguimiento",description:"Indicá el motivo de cancelación para conservarlo en el historial.",confirmLabel:"Cancelar seguimiento",required:true});
                     if (!reason) return;
                     transition(status, reason);
                     return;
@@ -225,15 +229,15 @@ function CreateThreadForm({ providers, onCreated, onCancel }: { providers: V16Pr
       <div className="reports-filters">
         <label>
           <small>PROVEEDOR</small>
-          <select value={providerId} onChange={(event) => setProviderId(event.target.value)}>
+          <AppSelect value={providerId} onChange={(event) => setProviderId(event.target.value)}>
             {providers.map((provider) => <option key={provider.provider_id} value={provider.provider_id}>{provider.canonical_name}</option>)}
-          </select>
+          </AppSelect>
         </label>
         <label>
           <small>PRIORIDAD</small>
-          <select value={priority} onChange={(event) => setPriority(event.target.value as V16ProviderInboxPriority)}>
+          <AppSelect value={priority} onChange={(event) => setPriority(event.target.value as V16ProviderInboxPriority)}>
             {PRIORITY_OPTIONS.map((option) => <option key={option} value={option}>{V16_PROVIDER_INBOX_PRIORITY_LABEL[option]}</option>)}
-          </select>
+          </AppSelect>
         </label>
       </div>
       <label className="crm-search">
@@ -324,17 +328,17 @@ export function ProviderInboxPanel() {
       <div className="reports-filters" data-guide-target="inbox-provider-filter">
         <label>
           <small>PROVEEDOR</small>
-          <select value={providerFilter ?? ""} onChange={(event) => setProviderFilter(event.target.value || null)}>
+          <AppSelect value={providerFilter ?? ""} onChange={(event) => setProviderFilter(event.target.value || null)}>
             <option value="">Todos los proveedores</option>
             {providerRowsForFilter.map((provider) => <option key={provider.provider_id} value={provider.provider_id}>{provider.canonical_name}</option>)}
-          </select>
+          </AppSelect>
         </label>
         <label>
           <small>PRIORIDAD</small>
-          <select value={priorityFilter ?? ""} onChange={(event) => setPriorityFilter((event.target.value || null) as V16ProviderInboxPriority | null)}>
+          <AppSelect value={priorityFilter ?? ""} onChange={(event) => setPriorityFilter((event.target.value || null) as V16ProviderInboxPriority | null)}>
             <option value="">Todas</option>
             {PRIORITY_OPTIONS.map((option) => <option key={option} value={option}>{V16_PROVIDER_INBOX_PRIORITY_LABEL[option]}</option>)}
-          </select>
+          </AppSelect>
         </label>
       </div>
 

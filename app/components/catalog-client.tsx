@@ -1,4 +1,5 @@
 "use client";
+import { AppSelect } from "@/components/ui/app-select";
 
 import { ArrowUpRight, ChevronDown, Heart, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
@@ -487,13 +488,13 @@ export function CatalogClient({
           </button>
           <label className="catalog-sort">
             <span className="sr-only">Ordenar productos</span>
-            <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)}>
+            <AppSelect value={sort} onChange={(event) => setSort(event.target.value as typeof sort)}>
               <option value="recommended">Recomendados</option>
               <option value="brand">Marca A–Z</option>
               <option value="name">Nombre A–Z</option>
               <option value="price-asc">Menor precio</option>
               <option value="price-desc">Mayor precio</option>
-            </select>
+            </AppSelect>
           </label>
         </div>}
       </div>

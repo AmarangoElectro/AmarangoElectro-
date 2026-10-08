@@ -1,4 +1,5 @@
 "use client";
+import { useReasonDialog } from "@/components/ui/use-reason-dialog";
 
 import { useEffect, useState } from "react";
 import { Plus, Search, ShieldCheck } from "lucide-react";
@@ -119,6 +120,7 @@ function CoordinateDialog({ delivery, onClose, onDone }: { delivery: V16Delivery
 }
 
 function DeliveryDetailView({ deliveryId, onBack }: { deliveryId: number; onBack: () => void }) {
+  const {requestReason, reasonDialog} = useReasonDialog();
   const [detail, setDetail] = useState<DeliveriesReadResult<V16DeliveryRow | null>>({ status: "not_connected" });
   const [actionNotice, setActionNotice] = useState<DeliveriesReadResult<unknown> | null>(null);
   const [coordinating, setCoordinating] = useState(false);
@@ -151,6 +153,7 @@ function DeliveryDetailView({ deliveryId, onBack }: { deliveryId: number; onBack
 
   return (
     <section className="crm-360" aria-labelledby="delivery-detail-title" data-guide-target="deliveries-detail">
+      {reasonDialog}
       <button type="button" className="crm-back" onClick={onBack}>← Volver a Entregas</button>
       <StatusNotice result={detail} />
       {delivery && <>
@@ -180,10 +183,11 @@ function DeliveryDetailView({ deliveryId, onBack }: { deliveryId: number; onBack
                 type="button"
                 className="crm-open"
                 style={{ marginRight: 8, marginTop: 8 }}
-                onClick={() => {
+                onClick={async () => {
                   if (next === "COORDINADA") { setCoordinating(true); return; }
                   if (next === "CANCELADA") {
-                    const note = window.prompt("Nota para la cancelación (opcional):");
+                    const note = await requestReason({title:"Cancelar entrega",description:"Confirmá la cancelación. Podés agregar una nota para el historial.",confirmLabel:"Cancelar entrega"});
+                    if (note === null) return;
                     transition(next, note || null);
                     return;
                   }
