@@ -1,0 +1,9 @@
+"use client";
+import {PLANS,money,type PlanId,type PlanPrice} from "@/lib/subscriptions/plans";
+export function PlanCards({prices=[],selected,onChoose,disabled=false}:{prices?:PlanPrice[];selected?:PlanId;onChoose?:(id:PlanId)=>void;disabled?:boolean}){
+ return <div className="subscription-plans">{PLANS.map(p=>{const price=prices.find(x=>x.id===p.id);return <article key={p.id} className={selected===p.id?"selected":""}><small>NIVEL {p.order}</small><h3>{p.name}</h3><p>{p.headline}</p><strong>{price?.monthly_price==null?"Valor mensual a definir":`${money(price.monthly_price)} / mes`}</strong>{price?.setup_price!=null&&<span>Alta: {money(price.setup_price)}</span>}<ul>{p.features.map(f=><li key={f}>{f}</li>)}</ul><p className="muted">Hasta {p.limit} productos.</p>{onChoose&&<button disabled={disabled} onClick={()=>onChoose(p.id)}>{selected===p.id?"Nivel seleccionado":`Elegir ${p.name}`}</button>}</article>})}</div>
+}
+export async function changeStore(action:string,payload:unknown){
+ const response=await fetch("/api/v16/stores",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,payload})});const data=await response.json();if(!response.ok)throw new Error(errorMessage(data.error));return data;
+}
+export function errorMessage(error:string){return ({forbidden:"Tu cuenta no tiene permiso para este cambio.",inactive:"La tienda necesita habilitación de Amarango.",locked:"Esta herramienta requiere otro nivel.",limit:"Llegaste al límite de productos del nivel.",slug_taken:"Ese enlace ya está usado. Elegí otro.",exists:"Tu cuenta ya tiene una tienda.",not_found:"No encontramos ese registro en tu tienda.",unauthenticated:"Ingresá con tu cuenta de ChatGPT para continuar.",invalid:"Revisá los campos antes de guardar."} as Record<string,string>)[error]??"No se pudo guardar. Tus datos siguen en el formulario."}

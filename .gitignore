@@ -43,4 +43,5 @@ next-env.d.ts
 /work/
 
 /public/vendor/ocr/
+/supabase/.temp/
 *.tsbuildinfo

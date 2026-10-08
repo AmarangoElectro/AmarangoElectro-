@@ -31,6 +31,8 @@ export function SiteFooter() {
           <h3>Empresa</h3>
           <Link href="/#experiencia">Nuestra atención</Link>
           <span>Contacto</span>
+          <Link href="/suscribirme">Crear mi tienda</Link>
+          <Link href="/mi-tienda">Mi tienda</Link>
           <RoleAccessLinks />
         </div>
       </div>

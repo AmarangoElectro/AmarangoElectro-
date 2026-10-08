@@ -8,7 +8,7 @@ export async function readFlyer(image:string,onProgress:(message:string)=>void) 
 }
 
 async function loadImage(src:string){const image=new Image();image.crossOrigin="anonymous";image.src=src;await image.decode();return image}
-export async function createPhoto(src:string,name:string,style:"original"|"amarango") {
+export async function createPhoto(src:string,name:string,style:"original"|"amarango",brand?:{name:string;primary:string;accent:string;logo?:string}) {
   const image=await loadImage(src);
   const scale=Math.min(1,1600/Math.max(image.width,image.height));
   const width=Math.round(image.width*scale),height=Math.round(image.height*scale);
@@ -20,17 +20,19 @@ export async function createPhoto(src:string,name:string,style:"original"|"amara
   ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(image,(canvas.width-width)/2,header,width,height);
   if(style==="amarango"){
-    ctx.fillStyle="#071a39";ctx.fillRect(0,0,canvas.width,header);ctx.fillRect(0,canvas.height-footer,canvas.width,footer);
-    const logo=await loadImage("/brand/amarango-logo-official.png");
-    const logoScale=Math.min(95/logo.width,95/logo.height);ctx.drawImage(logo,canvas.width-115,15,logo.width*logoScale,logo.height*logoScale);
-    ctx.fillStyle="#ff7920";ctx.fillRect(0,header-7,canvas.width,7);
-    ctx.font="bold 27px Arial";ctx.fillText("AMARANGOELECTRO",22,40);
-    ctx.fillStyle="#fff";ctx.font="bold 22px Arial";
+    ctx.fillStyle=brand?.primary??"#071a39";ctx.fillRect(0,0,canvas.width,header);ctx.fillRect(0,canvas.height-footer,canvas.width,footer);
+    const logoSrc=brand?brand.logo:"/brand/amarango-logo-official.png";
+    if(logoSrc){const logo=await loadImage(logoSrc);const logoScale=Math.min(95/logo.width,95/logo.height);ctx.drawImage(logo,canvas.width-115,15,logo.width*logoScale,logo.height*logoScale)}
+    ctx.fillStyle=brand?.accent??"#ff7920";ctx.fillRect(0,header-7,canvas.width,7);
+    ctx.font="bold 27px Arial";ctx.fillText(brand?.name??"AMARANGOELECTRO",22,40,canvas.width-150);
+    const rgb=(brand?.primary??"#071a39").slice(1).match(/.{2}/g)!.map(v=>{const n=parseInt(v,16)/255;return n<=.04045?n/12.92:((n+.055)/1.055)**2.4});
+    const textColor=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]>.179?"#081426":"#fff";
+    ctx.fillStyle=textColor;ctx.font="bold 22px Arial";
     const words=name.split(" ");let line="",y=76;
     for(const word of words){if(ctx.measureText(`${line} ${word}`).width>canvas.width-160&&line){ctx.fillText(line,22,y);line=word;y+=26;if(y>105)break}else line=`${line} ${word}`.trim()}
     if(y<=105)ctx.fillText(line,22,y);
     ctx.font="bold 24px Arial";ctx.fillText("Consultá opciones de pago",22,canvas.height-53);
-    ctx.font="20px Arial";ctx.fillText("Envío gratis según la zona",22,canvas.height-22);
+    ctx.font="20px Arial";ctx.fillText(brand?"Precio y disponibilidad sujetos a confirmación":"Envío gratis según la zona",22,canvas.height-22,canvas.width-44);
   }
   return canvas.toDataURL("image/jpeg",.88);
 }

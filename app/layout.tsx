@@ -4,6 +4,7 @@ import "./growth.css";
 import "./professional-app-ux.css";
 import "./smart-navigation.css";
 import "./internal-compact.css";
+import "./subscriptions.css";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";
 import { FloatingScrollTop } from "./components/floating-scroll-top";
