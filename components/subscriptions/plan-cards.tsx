@@ -1,8 +1,45 @@
 "use client";
-import {PLANS,money,type PlanId,type PlanPrice} from "@/lib/subscriptions/plans";
+import {Box,CreditCard,Paintbrush,Image as ImageIcon,ScanText,Users,BarChart3,Headphones,Settings2,TrendingUp,Layers,Gift,Tag,Crown,Star} from "lucide-react";
+import {PLANS,money,type PlanId,type PlanPrice,type ToolValue} from "@/lib/subscriptions/plans";
 import {planValue} from "@/lib/subscriptions/guidance";
+
+const summaries:Record<PlanId,{title:string;subtitle:string;tools:string[];inherits?:string}>={
+ tienda:{title:"Tienda gratis",subtitle:"Ideal para empezar sin costo.",tools:["Catálogo","Contado","Logo y colores","Fotos manuales"]},
+ cuotas:{title:"Cuotas",subtitle:"Herramientas comerciales para vender más.",inherits:"Incluye Tienda gratis",tools:["Calculadora de cuotas","Lectura de flyers","Fotos con tu marca","Financiación"]},
+ gestion:{title:"Gestión",subtitle:"Controlá tu negocio con más orden.",inherits:"Incluye Cuotas",tools:["CRM propio","Clientes","Historial de ventas","Resumen comercial"]},
+ premium:{title:"Premium 1 a 1",subtitle:"Acompañamiento personalizado para crecer.",inherits:"Incluye Gestión",tools:["Soporte 1 a 1","Configuración personalizada","Estrategia comercial","Seguimiento cercano"]},
+};
+function toolIcon(name:string){
+ if(/logo|color|marca/i.test(name))return Paintbrush;
+ if(/foto|imagen/i.test(name))return ImageIcon;
+ if(/flyer|lectura/i.test(name))return ScanText;
+ if(/cliente/i.test(name))return Users;
+ if(/historial|crm|resumen|seguimiento/i.test(name))return BarChart3;
+ if(/soporte|acompañamiento/i.test(name))return Headphones;
+ if(/estrategia/i.test(name))return TrendingUp;
+ if(/configura|administración/i.test(name))return Settings2;
+ if(/cuota|financia|contado/i.test(name))return CreditCard;
+ if(/catálogo|tienda/i.test(name))return Box;
+ return Layers;
+}
 export function PlanCards({prices=[],selected,onChoose,disabled=false}:{prices?:PlanPrice[];selected?:PlanId;onChoose?:(id:PlanId)=>void;disabled?:boolean}){
- return <div className="subscription-plans">{PLANS.map(p=>{const price=prices.find(x=>x.id===p.id),v=planValue(price);return <article key={p.id} className={`${selected===p.id?"selected ":""}${p.id==="premium"?"premium-plan":""}`}><small>{p.id==="tienda"?"EMPEZÁ GRATIS":p.id==="premium"?"ACOMPAÑAMIENTO DE MAYOR VALOR":`NIVEL ${p.order} · HERRAMIENTAS PAGAS`}</small><h3>{p.name}</h3><p>{p.headline}</p>{p.id==="tienda"?<><strong>Gratis</strong><span>Empezá sin inversión inicial.</span><span>Sin cuota mensual ni costo de alta.</span></>:<><strong>{v.current==null?"A definir":`${v.promotionActive&&price?.promo_price!=null?"Hoy: ":""}${money(v.current)} / mes`}</strong>{price?.setup_price!=null&&<span>{p.id==="premium"?"Implementación":"Alta"}: {money(price.setup_price)}</span>}</>}<ul>{p.features.map(f=><li key={f}>{f}</li>)}</ul>{p.id!=="tienda"&&<div className="plan-value-breakdown">{v.tools.length>0&&<><small>{p.id==="premium"?"VALOR ESTIMADO DEL SERVICIO":"VALOR INDIVIDUAL DE REFERENCIA"}</small>{v.tools.map((t,i)=>{const promo=v.promotionActive&&t.promo_price!=null&&t.reference_price!=null&&t.promo_price<t.reference_price;return <div className="plan-tool-value" key={i}><span>{t.name}</span><span>{promo?<><del>{money(t.reference_price!)}</del> → <b>{money(t.promo_price!)}</b></>:t.reference_price==null?"A definir":money(t.reference_price)}</span></div>})}</>}<p>{p.id==="premium"?"Valor estimado del servicio":"Valor de las herramientas"}: <b>{v.referenceTotal==null?"A definir":money(v.referenceTotal)}</b></p>{v.previous!=null&&<p>Antes: <del>{money(v.previous)} / mes</del></p>}<p>{v.promotionActive&&price?.promo_price!=null?"Hoy":"Nivel completo"}: <b>{v.current==null?"A definir":`${money(v.current)} / mes`}</b></p>{v.promotionActive&&price?.promo_text&&<p className="plan-promo">{price.promo_text}</p>}{v.promotionActive&&price?.promo_expires_at&&<small>Vigencia hasta {new Date(price.promo_expires_at).toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires"})} (hora argentina).</small>}</div>}{p.upcoming.length>0&&<p className="muted">Próximas etapas: {p.upcoming.join(" · ")}.</p>}{p.id==="premium"?<p className="muted">Servicio humano: alcance, dedicación y tiempos acordados con Amarango. Mayor personalización, mayor inversión.</p>:<p className="muted">Hasta {p.limit} productos.</p>}{onChoose&&<button disabled={disabled} onClick={()=>onChoose(p.id)}>{selected===p.id?"Nivel seleccionado":p.id==="tienda"?"Empezar gratis":p.id==="premium"?"Solicitar acompañamiento":`Solicitar ${p.name}`}</button>}</article>})}</div>
+ return <div className="subscription-plans">{PLANS.map(p=>{
+  const price=prices.find(x=>x.id===p.id),v=planValue(price),copy=summaries[p.id],free=p.id==="tienda";
+  const rows:ToolValue[]=!free&&v.tools.length?v.tools:copy.tools.map(name=>({name,reference_price:null,promo_price:null}));
+  const FooterIcon=free?Gift:p.id==="cuotas"?Tag:p.id==="gestion"?Crown:Star;
+  const promo=v.promotionActive&&price?.promo_price!=null;
+  return <article key={p.id} className={`${selected===p.id?"selected ":""}${p.id==="premium"?"premium-plan":""}`}>
+   <header className="plan-heading"><span className="plan-number" aria-label={`Nivel ${p.order}`}>{p.order}</span><div><h3>{copy.title}</h3><p>{copy.subtitle}</p></div>{selected===p.id&&<span className="plan-selected-label">Elegido</span>}</header>
+   {copy.inherits&&<p className="plan-inherits">{copy.inherits}</p>}
+   <div className="plan-tools-grid">{rows.map((t,i)=>{
+    const Icon=toolIcon(t.name),discount=v.promotionActive&&t.promo_price!=null&&t.reference_price!=null&&t.promo_price<t.reference_price;
+    return <div className={`plan-tool-value ${i%3===0?"orange-icon":""}`} key={i}><Icon aria-hidden="true" size={20}/><span className="plan-tool-name">{t.name}</span><span className={`plan-tool-price ${free||discount?"highlight-value":""}`}>{free?<b>Gratis</b>:discount?<><del>{money(t.reference_price!)}</del><b>{money(t.promo_price!)}</b></>:t.reference_price==null?<span>A definir</span>:<b>{money(t.reference_price)}</b>}</span></div>
+   })}</div>
+   <div className={`plan-level-value ${free?"free-level-value":""}`}><FooterIcon aria-hidden="true" size={26}/><div><strong>{free?"Empezá hoy sin inversión inicial.":v.promotionActive&&price?.promo_text?price.promo_text:p.id==="premium"?"Acompañamiento personalizado":promo?"Promoción del nivel":"Valor del nivel"}</strong>{!free&&<p>{promo?"Hoy":"Nivel completo"}: <b>{v.current==null?"A definir":`${money(v.current)}/mes`}</b></p>}</div>{!free&&v.previous!=null&&<del className="plan-previous-price">{money(v.previous)}/mes</del>}</div>
+   {!free&&<div className="plan-value-footnote"><span>{p.id==="premium"?"Valor estimado del servicio":"Valor de las herramientas"}: <b>{v.referenceTotal==null?"A definir":money(v.referenceTotal)}</b></span>{price?.setup_price!=null&&<span>{p.id==="premium"?"Implementación":"Alta"}: {money(price.setup_price)}</span>}{v.promotionActive&&price?.promo_expires_at&&<span>Vigencia hasta {new Date(price.promo_expires_at).toLocaleString("es-AR",{timeZone:"America/Argentina/Buenos_Aires"})} (hora argentina).</span>}</div>}
+   <div className="plan-bottom"><details className="plan-inclusions"><summary>Ver qué incluye</summary><ul>{p.features.map(f=><li key={f}>{f}</li>)}</ul>{free?<p>Sin cuota mensual ni costo de alta.</p>:null}{p.upcoming.length>0&&<p className="muted">Próximas etapas: {p.upcoming.join(" · ")}.</p>}{p.id==="premium"?<p className="muted">Servicio humano: alcance, dedicación y tiempos acordados con Amarango. Mayor personalización, mayor inversión.</p>:<p className="muted">Hasta {p.limit} productos.</p>}</details>{onChoose&&<button disabled={disabled||selected===p.id} onClick={()=>onChoose(p.id)}>{selected===p.id?"Nivel seleccionado":free?"Empezar gratis":p.id==="premium"?"Solicitar acompañamiento":`Solicitar ${p.name}`}</button>}</div>
+  </article>
+ })}</div>
 }
 export async function changeStore(action:string,payload:unknown){
  const response=await fetch("/api/v16/stores",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action,payload})});const data=await response.json();if(!response.ok)throw new Error(errorMessage(data.error));return data;
