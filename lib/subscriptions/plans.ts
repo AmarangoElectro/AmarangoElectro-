@@ -14,11 +14,15 @@ export function installmentQuote(cash:number, installments:number, surcharge:num
   const last=Math.round((total-each*(installments-1))*100)/100;
   return {total,each,last};
 }
-export type Store = {id:string;owner_site_user_id?:string;owner_email?:string;slug:string;name:string;plan:PlanId;requested_plan:PlanId;status:"pending"|"active"|"paused";primary_color:string;accent_color:string;logo_asset_id:string|null;whatsapp:string;published:boolean;financing:Record<string,number>;created_at:string;diagnosis?:import("./guidance").Diagnosis|null;growth_interests?:string[];growth_dismissed?:string[]};
+export type Store = {id:string;owner_site_user_id?:string;owner_email?:string;slug:string;name:string;plan:PlanId;requested_plan:PlanId;status:"pending"|"active"|"paused";primary_color:string;accent_color:string;logo_asset_id:string|null;whatsapp:string;published:boolean;financing:Record<string,number>;created_at:string;diagnosis?:import("./guidance").Diagnosis|null;growth_interests?:string[];growth_dismissed?:string[];commercial_request?:CommercialRequest|null};
 export type StoreProduct = {id:string;store_id:string;name:string;cash_price:number;visible:boolean;asset_id:string|null;source_asset_id:string|null;features:string[];specifications:Record<string,string>};
 export type StoreCustomer = {id:string;name:string;phone:string;notes:string};
 export type StoreSale = {id:string;customer_id:string;product_id:string;snapshot:{customer:string;product:string};total:number;created_at:string};
 export type ToolValue = {name:string;reference_price:number|null;promo_price:number|null};
-export type PlanPrice = {id:PlanId;monthly_price:number|null;setup_price:number|null;tool_values?:ToolValue[];previous_price?:number|null;promo_price?:number|null;promo_text?:string;promo_expires_at?:string|null};
+export type PlanPrice = {id:PlanId;price_currency?:"USD"|"ARS";usd_to_ars?:number|null;fx_updated_at?:string|null;updated_at?:string;monthly_price:number|null;setup_price:number|null;tool_values?:ToolValue[];previous_price?:number|null;promo_price?:number|null;promo_text?:string;promo_expires_at?:string|null};
 export type StoreData = {store:Store|null;products:StoreProduct[];customers:StoreCustomer[];sales:StoreSale[];plans:PlanPrice[];usage?:{customers:number;monthly_sales:number}};
 export const assetUrl=(storeId:string,assetId:string)=>`/api/v16/store-asset/${storeId}/${assetId}`;
+
+export type CommercialRequest={id:string;plan:PlanId;offer:PlanPrice;monthly:number|null;setup:number|null;monthly_ars:number|null;setup_ars:number|null;created_at:string;contact_phone:string;message:string;status:"pending_private";business:string};
+export function planARS(value:number|null,price?:PlanPrice){if(value==null)return null;if(price?.price_currency!=="USD")return value;return price.usd_to_ars!=null&&price.usd_to_ars>0?Math.round(value*price.usd_to_ars*100)/100:null}
+export function planMoney(value:number,price?:PlanPrice){return price?.price_currency==="USD"?`USD ${new Intl.NumberFormat("es-AR",{minimumFractionDigits:2,maximumFractionDigits:2}).format(value)}`:`ARS ${money(value)}`}

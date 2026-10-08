@@ -1,4 +1,4 @@
-import {PLANS,type PlanId,type PlanPrice,type StoreData} from "./plans";
+import {PLANS,planARS,type PlanId,type PlanPrice,type StoreData} from "./plans";
 
 export type Diagnosis = {
  need:"sales"|"order"|"financing"|"support";
@@ -27,8 +27,8 @@ export function recommend(d:Diagnosis,prices:PlanPrice[]=[]):Recommendation{
  }else if(d.need==="financing"||d.installments!=="no"||d.tools.includes("installments")||d.value==="automation"){
   plan="cuotas";reason="Te recomendamos Cuotas para sumar financiación, calculadora y lectura de flyers con material adaptado a tu marca.";
  }
- const price=planValue(prices.find(p=>p.id===plan)).current;
- const budgetNote=plan==="tienda"?"Podés cambiar tu elección cuando lo necesites.":price==null?"El precio está a definir. Amarango confirmará el valor y el alcance antes de habilitar el nivel.":d.budget!=null&&price>d.budget?"Este nivel supera el presupuesto que indicás. Podés empezar gratis o comparar otras opciones.":"La recomendación no genera un cobro ni cambia tu nivel.";
+ const offer=prices.find(p=>p.id===plan),value=planValue(offer).current,price=planARS(value,offer);
+ const budgetNote=plan==="tienda"?"Podés cambiar tu elección cuando lo necesites.":value==null?"El precio está a definir. Amarango confirmará el valor y el alcance antes de habilitar el nivel.":price==null?"El precio se expresa en dólares. El equivalente en pesos queda pendiente de la cotización de Propietarios.":d.budget!=null&&price>d.budget?"Este nivel supera el presupuesto que indicás. Podés empezar gratis o comparar otras opciones.":"La recomendación no genera un cobro ni cambia tu nivel.";
  return {plan,reason,budgetNote};
 }
 export type GrowthSuggestion={key:"financing"|"management"|"support"|"volume";plan:PlanId;message:string};

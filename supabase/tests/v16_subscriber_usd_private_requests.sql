@@ -1,0 +1,41 @@
+-- Synthetic fixtures, staging only. Entire test rolls back; no charge or live subscriber change.
+begin;
+set local request.jwt.claims='{"role":"service_role"}';
+set local role service_role;
+do $$
+declare a uuid; b uuid; r jsonb; saved jsonb; offer jsonb;
+begin
+ assert not has_function_privilege('anon','public.v16_plan_request_snapshot(text,text,text,text)','execute');
+ assert not has_function_privilege('authenticated','public.v16_plan_request_snapshot(text,text,text,text)','execute');
+ assert (select count(*)=3 from public.v16_subscription_plans where id<>'tienda' and monthly_price is null and setup_price is null),'invented real prices';
+ assert public.v16_store_action('usd-a','a@example.invalid','owner_fx','{"usd_to_ars":1000}')->>'error'='forbidden','subscriber edited FX';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_fx','{"usd_to_ars":0}')->>'error'='invalid','zero FX accepted';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_fx','{"usd_to_ars":1234.5}')->>'ok'='true';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_price','{"id":"cuotas","price_currency":"USD","monthly_price":19.99,"setup_price":30}')->>'ok'='true';
+ r:=public.v16_store_action('usd-a','a@example.invalid','create','{"name":"Synthetic USD A","slug":"synthetic-usd-a","consent":true,"requested_plan":"cuotas","contact_phone":"+54 11 1234-5678","message":"Synthetic private scope"}');
+ a:=(r->'store'->>'id')::uuid;assert a is not null,'signup failed';
+ saved:=r->'store'->'commercial_request';
+ assert saved->>'monthly'='19.99' and saved->>'monthly_ars'='24677.66','USD/ARS snapshot conversion incorrect';
+ assert (saved->>'setup_ars')::numeric=37035,'setup conversion incorrect';
+ assert saved->>'contact_phone'='+54 11 1234-5678' and saved->>'status'='pending_private';
+ assert r->'store'->>'plan'='tienda' and r->'store'->>'status'='pending','request self-activated';
+ r:=public.v16_store_action('usd-b','b@example.invalid','create','{"name":"Synthetic USD B","slug":"synthetic-usd-b","consent":true,"requested_plan":"tienda"}');b:=(r->'store'->>'id')::uuid;
+ assert r->'store'->'commercial_request'->>'monthly'='0','free lost zero';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_fx','{"usd_to_ars":1500}')->>'ok'='true';
+ r:=public.v16_store_action('usd-a','a@example.invalid','workspace');assert r->'store'->'commercial_request'=saved,'old request silently repriced';
+ offer:=(select to_jsonb(p)from public.v16_subscription_plans p where id='cuotas');
+ assert public.v16_store_action('usd-a','a@example.invalid','request_plan',jsonb_build_object('requested_plan','cuotas','offer_updated_at',offer->>'updated_at','fx_updated_at','2000-01-01T00:00:00Z'))->>'error'='price_changed','stale FX request accepted';
+ assert public.v16_store_action('usd-a','a@example.invalid','request_plan',jsonb_build_object('requested_plan','cuotas','offer_updated_at',offer->>'updated_at','fx_updated_at',offer->>'fx_updated_at','monthly',1))->>'ok'='true';
+ r:=public.v16_store_action('usd-a','a@example.invalid','workspace');
+ assert r->'store'->'commercial_request'->>'monthly'='19.99' and (r->'store'->'commercial_request'->>'monthly_ars')::numeric=29985,'client overrode snapshot price';
+ assert r->'store'->>'plan'='tienda','request activated tools';
+ r:=public.v16_store_action('usd-b','b@example.invalid','workspace');assert r->'store'->>'id'=b::text and r->'store'->'commercial_request'->>'business'='Synthetic USD B','other subscriber overwritten';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_store',jsonb_build_object('store_id',a,'plan','tienda','status','active'))->>'ok'='true';
+ assert public.v16_store_action('usd-a','a@example.invalid','brand','{"name":"Synthetic USD A","primary_color":"#123456","accent_color":"#ff6818","whatsapp":"","published":true}')->>'ok'='true';
+ r:=public.v16_public_store('synthetic-usd-a');assert not(r->'store' ? 'commercial_request'),'private commercial request leaked publicly';
+ assert public.v16_store_action('test-owner','Max.huracan73@gmail.com','owner_fx','{"usd_to_ars":null}')->>'ok'='true';
+ assert public.v16_store_action('usd-a','a@example.invalid','request_plan','{"requested_plan":"cuotas"}')->>'ok'='true';
+ r:=public.v16_store_action('usd-a','a@example.invalid','workspace');assert r->'store'->'commercial_request'->'monthly_ars'='null'::jsonb,'invented exchange rate';
+end $$;
+rollback;
+select 'PASS: USD/ARS cents, undefined FX, owners-only prices, immutable request snapshot, private closure, no activation, isolated workspaces' as result;
