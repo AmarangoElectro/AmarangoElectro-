@@ -11,7 +11,7 @@ import Link from "./store-link";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
 import { getBrandLocale } from "@/lib/theme/brand-locale";
-import { getBrandDrawerBackdrop } from "@/lib/visual/brand-drawer-art";
+import { getBrandDrawerBackdrop, hasDistinctBrandDrawerArtwork } from "@/lib/visual/brand-drawer-art";
 
 type BrandProductAccordionProps = {
   categorySlug: string;
@@ -51,7 +51,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
           if (!brand.brand) return null;
           const family = normalizeBrandFamily(brand.brand);
           const isPhoneArtwork = ["apple", "iphone", "samsung", "motorola", "xiaomi", "infinix", "poco"].includes(family);
-          const artwork = categorySlug !== "celulares" && isPhoneArtwork ? null : getBrandCampaignArtwork(brand.brand);
+          const artwork = hasDistinctBrandDrawerArtwork(categorySlug, brand.brand) || (categorySlug !== "celulares" && isPhoneArtwork) ? null : getBrandCampaignArtwork(brand.brand);
           const backdrop = artwork ? null : getBrandDrawerBackdrop(categorySlug, sectorSlug, brand.brand);
           const locale = getBrandLocale(brand.brand, categorySlug);
           const brandProducts = productsByBrand.get(normalizeBrandFamily(brand.brand)) ?? [];

@@ -24,6 +24,25 @@ const audioBrands: Readonly<Record<string, string>> = {
   telefunken: generated("telefunken-audio"),
 };
 
+// Smart TV drawers have their own scenes; a generic room must not repeat per brand.
+const televisionBrands: Readonly<Record<string, { image: string; description: string }>> = {
+  samsung: { image: "samsung", description: "Tus historias, en grande." },
+  xiaomi: { image: "xiaomi", description: "Una pantalla para cada momento." },
+  noblex: { image: "noblex", description: "Compartí tus mejores momentos." },
+  kanji: { image: "kanji", description: "Más entretenimiento para tu hogar." },
+  bgh: { image: "bgh", description: "Tu contenido, en una nueva pantalla." },
+  rca: { image: "rca", description: "Disfrutá cada película." },
+  enova: { image: "enova", description: "Un nuevo espacio para disfrutar." },
+  marson: { image: "marson", description: "Descubrí tu próxima pantalla." },
+  netmak: { image: "netmak", description: "Conectá con lo que te gusta." },
+  performance: { image: "performance", description: "Viví el entretenimiento en grande." },
+  philips: { image: "philips", description: "Una experiencia para disfrutar." },
+};
+
+export function hasDistinctBrandDrawerArtwork(categorySlug: string, brand: string) {
+  return categorySlug === "smart-tv" && Boolean(televisionBrands[normalizeBrandFamily(brand)]);
+}
+
 const retailAliases: Readonly<Record<string, string>> = {
   "colchones-y-sommiers": "colchones-sommiers",
   "hogar-y-deco": "hogar-decoracion",
@@ -55,7 +74,9 @@ export function getBrandDrawerBackdrop(categorySlug: string, sectorSlug?: string
   const sector = category?.subcategories.find((item) => item.slug === sectorSlug);
   const scope = sectorSlug ?? categorySlug;
   const retail = retailCategories.find((item) => item.id === (retailAliases[scope] ?? scope));
-  const image = (categorySlug === "audio" ? audioBrands[normalizeBrandFamily(brand)] : undefined)
+  const television = categorySlug === "smart-tv" ? televisionBrands[normalizeBrandFamily(brand)] : undefined;
+  const image = (television ? `/assets/v16-generated/smart-tv-brands-v2/${television.image}.webp` : undefined)
+    ?? (categorySlug === "audio" ? audioBrands[normalizeBrandFamily(brand)] : undefined)
     ?? generatedScopes[scope]
     ?? generatedScopes[categorySlug]
     ?? retail?.image
@@ -65,6 +86,6 @@ export function getBrandDrawerBackdrop(categorySlug: string, sectorSlug?: string
   return {
     image,
     title: sector?.title ?? category?.title ?? "Catálogo",
-    description: descriptions[scope] ?? descriptions[categorySlug] ?? "Encontrá lo que buscás.",
+    description: television?.description ?? descriptions[scope] ?? descriptions[categorySlug] ?? "Encontrá lo que buscás.",
   };
 }
