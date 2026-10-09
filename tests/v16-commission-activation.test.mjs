@@ -36,7 +36,7 @@ const plugin={name:'quote-policy-boundary',setup(b){
  b.onLoad({filter:/.*/,namespace:'act-mock'},a=>({contents:a.path.endsWith('chatgpt-auth')?'export const getChatGPTUser=async()=>globalThis.__act.user':`export const backendFetch=async(path,init)=>{const body=JSON.parse(init.body);globalThis.__act.policyCalls.push(body);return Response.json(globalThis.__act.policy)};`,loader:'js'}));
 }};
 // Isolated test transport: no credentials or actual network requests.
-process.env.SUPABASE_URL='https://example.invalid';
+process.env.SUPABASE_URL='https://ugujgbamqmrvxbvzxxou.supabase.co';
 process.env.SUPABASE_SECRET_KEY='test-only-no-secret';
 process.env.V16_COMMISSION_ACTIVATED='true';
 const route=await load('app/api/v16/sale-quote/route.ts',[plugin]);
@@ -67,4 +67,13 @@ test('disabled rollout preserves existing quote issuer and never reads active ca
   const original=buildV16AuthorizedQuoteDraft({productId:'electro:qa',productName:'Producto QA',productModel:null,currentSalePriceArs:500000,costArs:null},'CLASSIC',{paymentMode:'FINANCED',installments:6});
   assert.equal(issued.p_commercial_snapshot.commission,original.commission);assert.deepEqual(issued.p_payment_amounts,original.paymentAmounts);
  }finally{process.env.V16_COMMISSION_ACTIVATED='true';globalThis.fetch=originalFetch}
+});
+
+test('activation flag cannot activate commissions on a production or unknown backend',async()=>{
+ const {commissionPolicyEnabled}=await load('lib/advisor-compensation/server-policy.ts');
+ const prior=process.env.SUPABASE_URL;
+ try{
+  for(const url of ['https://main-example.supabase.co','https://ugujgbamqmrvxbvzxxou.supabase.co.evil.test','http://ugujgbamqmrvxbvzxxou.supabase.co','invalid','']){process.env.SUPABASE_URL=url;assert.equal(commissionPolicyEnabled(),false)}
+  process.env.SUPABASE_URL=prior;assert.equal(commissionPolicyEnabled(),true);
+ }finally{process.env.SUPABASE_URL=prior}
 });

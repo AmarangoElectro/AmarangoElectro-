@@ -64,6 +64,7 @@ const plugin={name:'mock-trusted-boundary',setup(b){
  b.onLoad({filter:/.*/,namespace:'trusted-mock'},a=>({contents:a.path.endsWith('chatgpt-auth')?'export const getChatGPTUser=async()=>globalThis.__commTest.user':a.path.endsWith('server-access')?'export const resolveSpaceAccess=async()=>globalThis.__commTest.access':`export const sameOrigin=r=>!r.headers.get('origin')||r.headers.get('origin')===new URL(r.url).origin;export const privateJson=(x,s=200)=>Response.json(x,{status:s,headers:{'Cache-Control':'no-store'}});export const backendFetch=async(path,init)=>{globalThis.__commTest.calls.push({path,body:JSON.parse(init.body)});return Response.json(globalThis.__commTest.payload)};`,loader:'js'}));
 }};
 process.env.V16_COMMISSION_ACTIVATED='true';
+process.env.SUPABASE_URL='https://ugujgbamqmrvxbvzxxou.supabase.co';
 const route=await load('app/api/v16/commissions/route.ts',[plugin]);
 const ctx=(access={role:'asesor',advisor:true,admin:false,owner:false})=>(globalThis.__commTest={user:{email:'verified@example.test'},access,payload:workspace([op({costArs:111111,marginArs:222222,secret:'never'})]),calls:[]});
 const request=(method='GET',headers={})=>new Request('https://app.test/api/v16/commissions?advisorId=foreign',{method,headers});

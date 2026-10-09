@@ -1,44 +1,50 @@
-# V16 — activación de comisiones preparada, no ejecutada
+# V16 — comisiones: migración aplicada en staging
 
-## Estado publicado
+## Autorización y límite
 
-La vista privada mantiene “Ganás…” como estimación de la nueva escala y Tu mes como lectura de las comisiones registradas. No se activó la liquidación nueva ni el guardado del tope.
+El 9 de octubre de 2026, el usuario autorizó explícitamente activar la escala, los 2/3 pagos de comisión y el tope de Propietarios, sólo en la base de prueba y para ventas nuevas. Agregó: “No autoriza cambios en producción, ventas históricas, pagos ya registrados ni comisiones anteriores”.
 
-El cambio de activación está implementado detrás de una bandera **exclusivamente del servidor**, `V16_COMMISSION_ACTIVATED`, actualmente **sin configurar**. Así, la aplicación sigue usando la emisión de cotizaciones anterior y la RPC de lectura existente. Los intentos de guardar el tope devuelven `activation_required` sin escribir en la base.
+Se aplicó exclusivamente en **ugujgbamqmrvxbvzxxou**, rama `v16-core-operational-staging-20260927`. No se ejecutó DDL ni DML en la base principal `zctaukyrhsmpjkcddcqq`. No se modificó la configuración del sitio publicado ni se desplegó una nueva versión a producción.
 
-## Cambio concreto listo para revisar
+La migración registrada es `20261009061334_v16_prospective_commission_activation.sql`. Los archivos `v16-commission-activation-REVIEWED-PENDING.sql` y `v16-commission-activation-NOT-APPLIED.sql` quedan como borradores históricos, no como migraciones por ejecutar.
 
-El borrador revisado es `v16-commission-activation-REVIEWED-PENDING.sql`, fuera de migrations. Reemplaza para revisión el borrador anterior `v16-commission-activation-NOT-APPLIED.sql`. Ninguno se ejecutó.
+## Aplicado en la base de prueba
 
-Sólo se propone aplicarlo en **ugujgbamqmrvxbvzxxou**, la rama de prueba vinculada al sitio privado. No en la base principal.
+- Nueva escala contado: debajo de $200.000 → 10%; desde $200.000 → 7%.
+- Financiado: debajo de $50.000 → $7.500; debajo de $100.000 → $12.000; debajo de $200.000 → $20.000; debajo de $300.000 → $28.000; desde $300.000 → 10% con tope opcional.
+- Tope compartido, editable sólo por Propietarios a través del servidor; revisión para impedir sobrescribir una edición concurrente. Valor inicial **sin tope**, revisión 1: no se inventó un valor comercial.
+- Nuevas comisiones financiadas: 3 cuotas del cliente → 2 pagos de comisión; 6 → 3. Contado conserva 1 pago. Los planes existentes de 2/4 cuotas conservan 2 pagos de comisión.
+- La nueva rama de comisión actúa sólo cuando se emite una cotización con la nueva versión de política. Las cotizaciones ya emitidas conservan su importe, al igual que las ventas y comisiones anteriores.
+- El trigger actúa exclusivamente en INSERT con la política nueva y comprueba el snapshot de venta. No actualiza filas históricas ni pagos registrados.
+- Precios comerciales, financiación y cronogramas del cliente conservados.
 
-La propuesta contiene:
+## Verificaciones realizadas
 
-1. Tabla privada de configuración del tope, con revisión para evitar sobrescribir otra edición. RLS y ningún acceso directo de clientes ni asesores.
-2. RPC sólo para el servidor. Identidad comprobada en `v16_user_access`; sólo Propietarios puede guardar el tope. Administración y Asesores sólo leen; cada asesor conserva su ámbito.
-3. Cálculo independiente de la comisión. Contado: 10% por debajo de $200.000, 7% desde ese importe. Financiado: $7.500 / $12.000 / $20.000 / $28.000 en los rangos pedidos; desde $300.000, 10% con tope opcional de Propietarios. Sin tope inicial fijado.
-4. Emisión de nuevas cotizaciones: se modifica únicamente la rama de comisión, después de ejecutar el motor de precios y financiación vigente. Se conserva íntegramente la validación y el cronograma del cliente. Un guard comprueba que la función original coincide con la definición revisada; no se usa reemplazo dinámico de código SQL.
-5. Registro de comisiones: se permite un cronograma de tres pagos. Un trigger sólo actúa en INSERT de la política nueva y valida contra el snapshot de venta. Tres cuotas del cliente → dos pagos de comisión; seis → tres. Contado conserva un pago. Los planes de dos/cuatro cuotas existentes conservan dos pagos.
+- **50 pruebas de aplicación aprobadas**, sin fallos en el gate específico. Incluyen aislamiento, redacción de costo/margen, cálculo por rango, premios, guardado exclusivo de Propietarios, revisión concurrente, y preservación exacta de precios y cronogramas Classic/Protected.
+- **14/14 casos SQL** aprobados para rangos, porcentajes y tope.
+- **5/5 casos SQL** aprobados para cantidad de pagos y conservación exacta del total de comisión, con redondeo al centavo.
+- RPC nueva: ejecución denegada a anon/authenticated y permitida sólo al servidor. Tabla privada con RLS, sin acceso directo de anon/authenticated/service_role. El propietario de la función comprueba identidad y permisos antes de guardar.
+- Supabase Advisor sólo informó “RLS enabled no policy” para la tabla privada: es el cierre por defecto intencional, con acceso directo revocado. No se abrieron políticas para usuarios.
+- Comparación anterior/posterior: **sin cambios** en cotizaciones, snapshots, ledger de comisiones, pagos, caja, ventas y catálogo.
 
-El registro histórico no se recalcula ni se actualiza. Las cotizaciones ya emitidas, incluso antes de cambiar un tope, mantienen su importe hasta su vencimiento. La revisión del tope queda fijada en cada nueva cotización. Si cambia durante la emisión, se devuelve conflicto y se requiere preparar una cotización nueva.
+Checksums conservados:
 
-## Riesgo y autorización pendiente
+| Registro | Antes y después |
+|---|---|
+| Cotizaciones | e8d75c049e43e38f63a8eff04e66c7f4 |
+| Snapshots | 0ab7febc6808902f23f239aeca01062a |
+| Comisiones | d41d8cd98f00b204e9800998ecf8427e |
+| Pagos | 02a864974684c33f9aaf5370cd291bf5 |
+| Caja | 864f400aa72e97ece2f783f9ac061eba |
+| Ventas | 5c967762c05807275468e65e667a75a6 |
+| Catálogo | fb99c10141308757bb7b4dfb76698938 |
 
-La revisión automática rechazó la migración el 9 de octubre: consideró que “Sigamos” no era una autorización explícita para modificar la emisión de cotizaciones y el registro financiero. No se reintentó ni se ejecutó por otra vía.
+## Estado de la aplicación y límite de QA
 
-Riesgo concreto: modifica el importe y el cronograma de comisión de futuras cotizaciones y ventas, y agrega una configuración compartida del tope. Un error en esa integración podría impedir emitir o registrar una venta. No propone cambios en precios comerciales, cuotas del cliente, catálogo, roles ni registros históricos.
+La integración local está lista para staging y ahora exige dos condiciones: bandera del servidor `V16_COMMISSION_ACTIVATED=true` **y** backend exacto `https://ugujgbamqmrvxbvzxxou.supabase.co`. La bandera no puede activar esta política sobre producción u otro backend.
 
-Se necesita autorización explícita para **aplicar esta migración en la base de prueba**, validar sus funciones/cronogramas y después habilitar la bandera del servidor. La publicación de preparación no habilita esos pasos.
+En el sitio publicado la bandera sigue sin configurar. Por eso conserva el funcionamiento anterior, la comisión nueva en vista previa y el guardado del tope deshabilitado. No se habilitó su configuración porque el usuario excluyó cambios en producción. Se guarda el código/migración como versión sin desplegar.
 
-## Verificación completada
+La validación SQL comprobó las funciones reales de cálculo y reparto. Las pruebas de autorización y emisión de cotizaciones usan transporte simulado; no se fabricaron identidades ni sesiones. El ledger de staging no tiene comisiones históricas registradas. No se afirma haber completado un recorrido Android ni una venta real con comisión nueva. El QA de la interfaz requiere un entorno de aplicación de prueba habilitado con sesiones reales.
 
-- **49 pruebas aprobadas, cero fallos** en el gate específico.
-- Pruebas de preservación exacta de precio contado, anticipo, cuotas, totales y cronogramas de todos los planes actuales Classic/Protected al cambiar sólo metadatos de comisión.
-- Pruebas de política/revisión/tope: rechazo de datos inválidos, precios/costos/políticas enviados por el navegador ignorados, conflicto durante emisión, fallo sin política vigente.
-- Pruebas de límites de comisión, tope, distribución exacta de pagos, premios y conservación de las comisiones históricas.
-- Pruebas de aislamiento de asesor, redacción de costo/margen, propietario único autorizado a guardar, revisión/origen y ausencia de escrituras cuando la activación está deshabilitada.
-- Compilación oficial aprobada. Typecheck global conserva errores previos fuera de los archivos modificados.
-- Verificación nativa posterior al rechazo: tabla de configuración inexistente; función emisora original conserva hash `ae1142498b0afbf81858ea4dc01723df`; las dos cotizaciones conservan checksum `e8d75c049e43e38f63a8eff04e66c7f4`; catálogo conserva checksum `fb99c10141308757bb7b4dfb76698938`; ledger sigue vacío. No hubo cambios persistentes.
-- Configuración publicada verificada: bandera de activación sin configurar; backend sigue siendo staging; audiencia privada conservada.
-
-Las pruebas de la integración preparada usan transporte simulado sin credenciales ni red real. No equivalen a haber ejecutado la migración. La validación SQL de los nuevos cálculos y el recorrido Android con sesiones reales quedan pendientes de autorización/activación.
+Referencia del aviso informativo de RLS: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
