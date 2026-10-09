@@ -1,5 +1,6 @@
 "use client";
 
+import { useCompactCatalog } from "@/app/components/compact-catalog-controls";
 import { useMemo, useState } from "react";
 import { filterAdminCatalog, getAdminCatalogWindow, nextAdminCatalogWindow, type AdminCatalogFilterState } from "../../../lib/internal/admin/catalog-scale";
 import { buildAdminProductCardModel, type AdminCardProductInput } from "../../../lib/internal/admin/product-card-model";
@@ -30,6 +31,8 @@ export function AdminProductGrid({ products }: Props) {
   const [photoIds,setPhotoIds] = useState<string[]>([]);
   const [branded,setBranded] = useState(false);
   const currentProducts = useMemo(()=>products.map(product=>({...product,...mediaOverrides[product.id]})),[products,mediaOverrides]);
+  const compactItems = useMemo(() => currentProducts.map(product => ({id:product.id, name:product.name, brand:product.brand ?? "", model:product.model ?? null, category:product.category ?? "", subcategory:product.subcategory ?? null, specifications:product.specifications ?? {}, amount:product.salePrice})), [currentProducts]);
+  const compact = useCompactCatalog(compactItems);
   const calculatorProduct=currentProducts.find(product=>product.id===calculatorId);
   const [filters, setFilters] = useState<AdminCatalogFilterState>({});
   const [loaded, setLoaded] = useState(36);
@@ -40,7 +43,7 @@ export function AdminProductGrid({ products }: Props) {
     ...p,
     priceAge: buildAdminProductCardModel(p).priceAge.status === "fresh" ? "green" as const : buildAdminProductCardModel(p).priceAge.status === "warning" ? "yellow" as const : buildAdminProductCardModel(p).priceAge.status === "review" ? "red" as const : "unknown" as const,
   })), [currentProducts]);
-  const filtered = useMemo(() => filterAdminCatalog(scalable, filters), [scalable, filters]);
+  const filtered = useMemo(() => filterAdminCatalog(scalable, filters).filter(product => compact.idSet.has(product.id)).sort((a,b) => (compact.rank.get(a.id) ?? 0) - (compact.rank.get(b.id) ?? 0)), [scalable, filters, compact.ids]);
   const visible = useMemo(() => getAdminCatalogWindow(filtered, loaded), [filtered, loaded]);
 
   return (
@@ -49,6 +52,7 @@ export function AdminProductGrid({ products }: Props) {
         <input aria-label="Buscar productos" placeholder="Buscar producto, mayorista o categoría…" value={filters.query ?? ""} onChange={(e) => { setFilters((f) => ({ ...f, query:e.target.value })); setLoaded(36); }} />
         <span>{filtered.length.toLocaleString("es-AR")} productos</span>
       </div>
+      {compact.controls}
       {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button type="button" onClick={()=>{setBranded(true);setPhotoIds([...selected])}}>Estilo Amarango para seleccionados</button><button type="button" onClick={()=>setSelected(new Set())}>Quitar selección</button></div>}
       <div className="admin-product-grid">
         {visible.map((product) => <AdminProductCard key={product.id} commission={<CommissionProductGain name={product.name} price={product.salePrice} cap={commissions.status==='ok'?commissions.data?.cap:undefined} active={commissions.status==='ok'&&commissions.data?.policyActive===true}/>} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onAction={onAction} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} />)}

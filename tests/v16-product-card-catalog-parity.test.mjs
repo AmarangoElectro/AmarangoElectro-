@@ -18,7 +18,9 @@ test("canonical ProductCard always routes to the real PDP",()=>{
   assert.match(card,/href=\{href\}/);
 });
 test("sector page feeds its real products into CatalogClient",()=>{
-  assert.match(category,/<CatalogClient/);
+  assert.match(category,/<BrandProductAccordion/);
+  const drawer=fs.readFileSync("app/components/brand-product-accordion.tsx","utf8");
+  assert.match(drawer,/<CatalogClient[\s\S]{0,120}products=\{products\}/);
   assert.match(category,/products=\{products\}/);
 });
 test("card uses product source for image, brand, price, installments and stock",()=>{

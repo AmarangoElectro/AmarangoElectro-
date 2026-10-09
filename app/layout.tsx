@@ -11,6 +11,7 @@ import "./app-dialogs.css";
 import "./interaction-motion.css";
 import "./storefront-quotes.css";
 import "./dark-surfaces.css";
+import "./catalog-simplification.css";
 import { AmarangoMotion } from "./components/amarango-motion";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";

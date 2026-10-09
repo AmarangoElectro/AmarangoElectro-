@@ -153,7 +153,7 @@ export function AdminConsolidatedWorkspace({ catalogProducts = [], administrativ
     const known = administrativeFacts[product.id];
     return { id: product.id, name: product.name, slug:product.slug, financing:product.financing, imageUrl: product.image?.src ?? null,
       supplierImageUrl: product.supplierImage?.src ?? product.image?.src ?? null,
-      supplier: known?.supplier ?? null, category: product.category, costArs: known?.costArs ?? null,
+      brand: product.brand, model: product.model, subcategory: product.subcategory, supplier: known?.supplier ?? null, category: product.category, costArs: known?.costArs ?? null,
       salePrice: product.price?.amount ?? null, visible: product.visible,
       stockState: product.stock.status === "out_of_stock" ? "out_of_stock" as const : "in_stock" as const,
       priceUpdatedAt: known?.priceUpdatedAt ?? null, features: product.features, specifications: product.specifications };

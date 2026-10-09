@@ -1,4 +1,5 @@
 "use client";
+import {displayProductName} from "@/lib/catalog/display-name";
 
 import Image from "next/image";
 import type {ReactNode} from 'react';
@@ -45,7 +46,7 @@ export function AdminProductCard({ product, selected = false, onSelect, onAction
 
       <div className="admin-product-card__body">
         <div className="admin-product-card__eyebrow">{product.category} · {product.supplier}</div>
-        <h3>{product.name}</h3>
+        <h3>{displayProductName(product.name)}</h3>
         {commission}
         <div className="admin-product-card__prices">
           <div><small>Costo</small><strong>{money(product.costArs)}</strong></div>

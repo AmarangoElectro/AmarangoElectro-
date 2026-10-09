@@ -2,13 +2,12 @@
 
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { revealIfNeeded } from "@/lib/ux/interaction-motion";
 import type { Product } from "@/lib/catalog";
-import type { BrandDrawerDefinition } from "@/lib/catalog/brand-drawers";
+import { isPremiumCatalogBrand, type BrandDrawerDefinition } from "@/lib/catalog/brand-drawers";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
 import { CatalogClient } from "./catalog-client";
-import Link from "./store-link";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
 import { getBrandLocale } from "@/lib/theme/brand-locale";
@@ -19,9 +18,15 @@ type BrandProductAccordionProps = {
   sectorSlug?: string;
   products: Product[];
   brands: BrandDrawerDefinition[];
+  categoryTitle: string;
+  quickSubcategories?: {slug: string; title: string}[];
+  initialFilters?: Pick<ComponentProps<typeof CatalogClient>, "initialBrand" | "initialSearch" | "initialSort" | "initialFavoritesOnly" | "initialMaxPrice" | "initialAvailableOnly">;
 };
 
-export function BrandProductAccordion({ categorySlug, sectorSlug, products, brands }: BrandProductAccordionProps) {
+export function BrandProductAccordion({ categorySlug, sectorSlug, products, brands, categoryTitle, quickSubcategories, initialFilters }: BrandProductAccordionProps) {
+  const [allFilters, setAllFilters] = useState(initialFilters);
+  const [allRevision, setAllRevision] = useState(0);
+  const [view, setView] = useState<"all" | "brands">("all");
   const [openBrands, setOpenBrands] = useState<Set<string>>(() => new Set());
   const rootRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -48,12 +53,17 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
 
   return (
     <section ref={rootRef} className="brand-product-accordion" aria-labelledby="brand-accordion-title">
+      <nav className="catalog-view-tabs" aria-label={`Explorar ${categoryTitle}`}>
+        <button type="button" aria-pressed={view === "all"} onClick={() => { setView("all"); setOpenBrands(new Set()); setAllFilters({}); setAllRevision(value => value + 1); }}>Todos <small>{products.length}</small></button>
+        <button type="button" aria-pressed={view === "brands"} onClick={() => setView("brands")}>Por marca <small>{brands.filter(brand => productsByBrand.has(normalizeBrandFamily(brand.brand))).length}</small></button>
+      </nav>
+      {view === "all" ? <CatalogClient key={allRevision} resetInitialFacets={allRevision > 0} products={products} categorySlug={categorySlug} sectorSlug={sectorSlug} categoryTitle={categoryTitle} compactBrandMode quickSubcategories={quickSubcategories} {...allFilters} /> : <>
       <div className="brand-product-accordion-intro">
         <div>
           <p className="eyebrow orange">LOCALES DE MARCA</p>
-          <h2 id="brand-accordion-title">Elegí una marca y abrí su catálogo.</h2>
+          <h2 id="brand-accordion-title">Elegí una marca.</h2>
         </div>
-        <p>Todo queda en esta misma pantalla. Tocá nuevamente el banner para cerrar el cajón.</p>
+        <p>Todo queda en esta misma pantalla. Tocá una marca para abrir o cerrar sus productos.</p>
       </div>
 
       <div className="brand-product-accordion-list">
@@ -61,15 +71,19 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
           if (!brand.brand) return null;
           const family = normalizeBrandFamily(brand.brand);
           const isPhoneArtwork = ["apple", "iphone", "samsung", "motorola", "xiaomi", "infinix", "poco"].includes(family);
-          const artwork = hasDistinctBrandDrawerArtwork(categorySlug, brand.brand) || (categorySlug !== "celulares" && isPhoneArtwork) ? null : getBrandCampaignArtwork(brand.brand);
-          const backdrop = artwork ? null : getBrandDrawerBackdrop(categorySlug, sectorSlug, brand.brand);
+          const premium = isPremiumCatalogBrand(categorySlug, brand.brand);
+          const campaignAllowed = categorySlug === "celulares" || categorySlug === "smart-tv" || categorySlug === "gaming" || categorySlug === "audio" && ["jbl", "sony", "aiwa"].includes(family) || categorySlug === "electrodomesticos" && family === "lg";
+          const artwork = !premium || !campaignAllowed || hasDistinctBrandDrawerArtwork(categorySlug, brand.brand) || (categorySlug !== "celulares" && isPhoneArtwork) ? null : getBrandCampaignArtwork(brand.brand);
+          const backdrop = premium && !artwork && hasDistinctBrandDrawerArtwork(categorySlug, brand.brand) ? getBrandDrawerBackdrop(categorySlug, sectorSlug, brand.brand) : null;
           const locale = getBrandLocale(brand.brand, categorySlug);
           const brandProducts = productsByBrand.get(normalizeBrandFamily(brand.brand)) ?? [];
+          if (!brandProducts.length) return null;
+          const compact = !artwork && !backdrop;
           const isOpen = openBrands.has(brand.slug);
           const panelId = `brand-products-${brand.slug}`;
 
           return (
-            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${backdrop ? " has-contextual-art" : ""}`} key={brand.slug}>
+            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${backdrop ? " has-contextual-art" : ""}${compact ? " is-compact-drawer" : ""}`} key={brand.slug}>
               <button
                 type="button"
                 className="brand-product-drawer-trigger"
@@ -96,7 +110,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
                   </>
                 ) : null}
                 <span className="brand-product-drawer-label">
-                  <small>{brandProducts.length ? `${brandProducts.length} ${brandProducts.length === 1 ? "PRODUCTO" : "PRODUCTOS"}` : "LOCAL PREPARADO"}</small>
+                  <small>{brandProducts.length ? `${brandProducts.length} ${brandProducts.length === 1 ? "producto" : "productos"}` : "LOCAL PREPARADO"}</small>
                   <strong style={locale ? { fontFamily: locale.fontFamily } : undefined}>{brand.title}</strong>
                 </span>
                 <span className="brand-product-drawer-toggle" aria-hidden="true"><ChevronDown size={22} /></span>
@@ -106,10 +120,10 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
                 <div className="brand-product-drawer-panel" id={panelId} data-amarango-enter>
                   <header>
                     <div><small>CATÁLOGO</small><strong>{brandProducts.length ? `Productos de ${brand.title}` : `${brand.title} está preparado`}</strong></div>
-                    <Link href={`/categoria/${categorySlug}?marca=${encodeURIComponent(brand.brand)}${sectorSlug ? `&sector=${encodeURIComponent(sectorSlug)}` : ""}#catalogo`}>Ver tienda completa <span aria-hidden="true">→</span></Link>
+
                   </header>
                   {brandProducts.length ? (
-                    <CatalogClient products={brandProducts} comparisonProducts={products} categorySlug={categorySlug} sectorSlug={sectorSlug} initialBrand={brand.brand} categoryTitle={brand.title} compactBrandMode embeddedBrandMode />
+                    <CatalogClient products={brandProducts} comparisonProducts={products} categorySlug={categorySlug} sectorSlug={sectorSlug} initialBrand={brand.brand} quickSubcategories={quickSubcategories} categoryTitle={brand.title} compactBrandMode embeddedBrandMode />
                   ) : (
                     <div className="brand-product-drawer-empty">
                       <strong>El espacio visual ya está listo.</strong>
@@ -122,6 +136,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
           );
         })}
       </div>
+      </>}
     </section>
   );
 }

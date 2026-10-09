@@ -5,6 +5,7 @@ import Image from "next/image";
 import { GitCompareArrows, Heart, Share2 } from "lucide-react";
 import { useMemo, useSyncExternalStore, type CSSProperties } from "react";
 import { toast } from "sonner";
+import { displayProductName } from "@/lib/catalog/display-name";
 import type { Product } from "@/lib/catalog";
 import {useProductShare} from "@/components/ui/use-product-share";
 import {useStorefrontFinancing} from "@/lib/commerce/use-storefront-financing";
@@ -119,7 +120,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
       </div>
       <div className="catalog-card-body">
         <p className="product-brand">{product.brand}</p>
-        <h3>{product.name}</h3>
+        <h3>{displayProductName(product.name)}</h3>
         {product.description ? <p className="product-description">{product.description}</p> : null}
         {product.model ? <dl className="product-card-specs"><div><dt>Modelo</dt><dd>{product.model}</dd></div></dl> : null}
         {features.length > 0 ? <details className="product-card-features"><summary>{features.length} características <span aria-hidden="true">⌄</span></summary><ul>{features.map((feature, index) => <li key={`${index}-${feature}`}>{feature}</li>)}</ul></details> : null}

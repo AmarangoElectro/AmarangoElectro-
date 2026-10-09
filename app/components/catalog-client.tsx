@@ -28,7 +28,7 @@ import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { motionAllowed } from "@/lib/ux/interaction-motion";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-banner";
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
-import { deriveFacetGroups, getFacetScope, matchesFacets, productFacetValues, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
+import { deriveQuickFacetGroups, dominantFacetNumber, getFacetScope, matchesFacets, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
 
 const brandProfiles = {
   Todos: {
@@ -86,7 +86,7 @@ interface CatalogClientProps {
   comparisonProducts?: Product[];
   initialBrand?: string;
   initialSearch?: string;
-  initialSort?: "recommended" | "brand" | "name" | "price-asc" | "price-desc";
+  initialSort?: "recommended" | "brand" | "name" | "price-asc" | "price-desc" | "capacity";
   initialFavoritesOnly?: boolean;
   initialCategory?: string;
   initialMaxPrice?: number | null;
@@ -95,6 +95,7 @@ interface CatalogClientProps {
   showCategoryFilter?: boolean;
   compactBrandMode?: boolean;
   embeddedBrandMode?: boolean;
+  resetInitialFacets?: boolean;
   categorySlug?: string;
   sectorSlug?: string;
   quickSubcategories?: { slug: string; title: string }[];
@@ -115,14 +116,15 @@ export function CatalogClient({
   showCategoryFilter = false,
   compactBrandMode = false,
   embeddedBrandMode = false,
+  resetInitialFacets = false,
   categorySlug = "",
   sectorSlug,
   quickSubcategories = emptyQuickSubcategories,
 }: CatalogClientProps) {
-  const facetScope = getFacetScope(categorySlug, sectorSlug);
   const facetStorageKey = `amarango-facets:${categorySlug}:${sectorSlug ?? "all"}`;
   const [facetSelection, setFacetSelection] = useState<FacetSelection>({});
   const [quickSelection, setQuickSelection] = useState("all");
+  const facetScope = getFacetScope(categorySlug, quickSelection.startsWith("sub:") ? quickSelection.slice(4) : sectorSlug);
   const [facetReady, setFacetReady] = useState(false);
   const brands = useMemo(() => ["Todos", ...new Set(products.map((product) => product.brand))], [products]);
   const categoryOptions = useMemo(() => ["Todas", ...new Set(products.map((product) => product.category))], [products]);
@@ -165,38 +167,21 @@ export function CatalogClient({
   const quickFilters = useMemo(() => {
     if (!categorySlug) return [];
     const options: { id: string; label: string; matches: (product: Product) => boolean }[] = [];
-    const primaryFacet = deriveFacetGroups(products, facetScope, true).find((group) => group.key !== "brand");
-    if (primaryFacet && (embeddedBrandMode || compactBrandMode || Boolean(sectorSlug))) {
-      return primaryFacet.options.map((value) => ({ id: `${primaryFacet.key}:${value}`, label: value, matches: (product: Product) => productFacetValues(product, facetScope, primaryFacet.key).includes(value) }));
-    }
-    if (categorySlug === "celulares") {
-      const preferred = ["Apple", "Samsung", "Motorola", "Xiaomi", "Infinix", "Poco"];
-      for (const family of preferred) {
-        if (products.some((product) => brandsShareFamily(product.brand, family))) options.push({ id: `brand:${family}`, label: family === "Poco" ? "POCO" : family, matches: (product) => brandsShareFamily(product.brand, family) });
-      }
-      for (const family of [...new Set(products.map((product) => product.brand))]) {
-        if (!preferred.some((known) => brandsShareFamily(family, known))) options.push({ id: `brand:${family}`, label: family, matches: (product) => brandsShareFamily(product.brand, family) });
-      }
-    } else if (categorySlug === "smart-tv") {
-      const measures = deriveFacetGroups(products, "smart-tv").find((group) => group.key === "measure")?.options ?? [];
-      for (const measure of measures) options.push({ id: `measure:${measure}`, label: measure.replace("″", '"'), matches: (product) => productFacetValues(product, "smart-tv", "measure").includes(measure) });
-    } else {
-      for (const item of quickSubcategories) {
-        const matches = (product: Product) => matchesQuickSubcategory(product, categorySlug, item.slug);
-        if (products.some(matches)) options.push({ id: `sub:${item.slug}`, label: categorySlug === "audio" && item.slug === "parlantes-portatiles" ? "Parlantes" : item.title, matches });
-      }
-      if (!options.length) {
-        const group = deriveFacetGroups(products, facetScope).find((item) => item.key !== "brand");
-        for (const value of group?.options ?? []) options.push({ id: `${group!.key}:${value}`, label: value, matches: (product) => productFacetValues(product, facetScope, group!.key).includes(value) });
-      }
+    for (const item of quickSubcategories) {
+      if (item.slug === sectorSlug || ["celulares", "smart-tv"].includes(categorySlug)) continue;
+      const matches = (product: Product) => matchesQuickSubcategory(product, categorySlug, item.slug);
+      if (products.some(matches)) options.push({ id: `sub:${item.slug}`, label: item.title, matches });
     }
     return options;
   }, [categorySlug, compactBrandMode, embeddedBrandMode, facetScope, products, quickSubcategories, sectorSlug]);
 
+  const facetProducts = useMemo(() => products.filter(product => (brand === "Todos" || brandsShareFamily(product.brand, brand)) && (!quickFilters.find(item => item.id === quickSelection) || quickFilters.find(item => item.id === quickSelection)!.matches(product))), [products, brand, quickFilters, quickSelection]);
+  const featureGroups = useMemo(() => deriveQuickFacetGroups(facetProducts, facetScope), [facetProducts, facetScope]);
+  const capacitySortLabel = facetScope === "celulares" ? "Memoria" : facetScope === "smart-tv" ? "Pulgadas" : "Capacidad";
+
   const filtered = useMemo(() => {
     const candidates = products.filter((product) => {
-      const brandMatches = brand === "Todos"
-        || (compactBrandMode ? brandsShareFamily(product.brand, brand) : product.brand === brand);
+      const brandMatches = brand === "Todos" || brandsShareFamily(product.brand, brand);
       const categoryMatches = category === "Todas" || product.category === category;
       const favoriteMatches = !favoritesOnly || favoriteIds.has(product.id);
       const availableMatches = !availableOnly || product.stock.status === "in_stock";
@@ -206,6 +191,7 @@ export function CatalogClient({
       return brandMatches && categoryMatches && favoriteMatches && availableMatches && priceMatches && matchesFacets(product, facetScope, facetSelection) && (!quick || quick.matches(product));
     });
     const result = rankProductsForSearch(candidates, deferredSearch.trim());
+    if (sort === "capacity") return [...result].sort((a, b) => dominantFacetNumber(a, facetScope) - dominantFacetNumber(b, facetScope) || a.name.localeCompare(b.name, "es"));
     if (sort === "brand") return [...result].sort((a, b) => a.brand.localeCompare(b.brand, "es"));
     if (sort === "name") return [...result].sort((a, b) => a.name.localeCompare(b.name, "es"));
     if (sort === "price-asc") return [...result].sort((a, b) => (a.price?.amount ?? Number.POSITIVE_INFINITY) - (b.price?.amount ?? Number.POSITIVE_INFINITY));
@@ -222,7 +208,8 @@ export function CatalogClient({
   }, [embeddedBrandMode]);
 
   useEffect(() => {
-    if (embeddedBrandMode) { setFacetReady(true); return; }
+    if (embeddedBrandMode || resetInitialFacets) { setFacetReady(true); return; }
+    if (facetReady) return;
     const params = new URLSearchParams(window.location.search);
     let saved: FacetSelection = {};
     if (!categorySlug) try { saved = JSON.parse(window.sessionStorage.getItem(facetStorageKey) || "{}"); } catch { saved = {}; }
@@ -233,7 +220,7 @@ export function CatalogClient({
     }
     setFacetSelection(next);
     setFacetReady(true);
-  }, [categorySlug, embeddedBrandMode, facetScope, facetStorageKey, products]);
+  }, [categorySlug, embeddedBrandMode, resetInitialFacets, facetReady, facetScope, facetStorageKey, products]);
 
   const correction = useMemo(
     () => (filtered.length === 0 && deferredSearch.trim() ? suggestCatalogCorrection(products, deferredSearch) : null),
@@ -251,6 +238,8 @@ export function CatalogClient({
     if (!facetReady) return;
     const params = new URLSearchParams(window.location.search);
     if (brand !== "Todos") params.set("marca", brand); else params.delete("marca");
+    if (categorySlug && quickSelection.startsWith("sub:")) params.set("sector", quickSelection.slice(4));
+    else if (categorySlug && !sectorSlug) params.delete("sector");
     if (showCategoryFilter && category !== "Todas") params.set("categoria", category); else params.delete("categoria");
     if (deferredSearch.trim()) params.set("q", deferredSearch.trim()); else params.delete("q");
     if (sort !== "recommended") params.set("orden", sort); else params.delete("orden");
@@ -264,7 +253,7 @@ export function CatalogClient({
     const query = params.toString();
     const next = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || "#catalogo"}`;
     window.history.replaceState({}, "", next);
-  }, [availableOnly, brand, category, embeddedBrandMode, facetSelection, favoritesOnly, maxPrice, deferredSearch, sort, facetReady, facetStorageKey, showCategoryFilter]);
+  }, [availableOnly, brand, category, embeddedBrandMode, facetSelection, favoritesOnly, maxPrice, deferredSearch, sort, facetReady, facetStorageKey, showCategoryFilter, categorySlug, quickSelection, sectorSlug]);
 
   const profile = categoryTitle === "Celulares"
     ? brandProfiles[brand as keyof typeof brandProfiles] ?? brandProfiles.Todos
@@ -276,7 +265,7 @@ export function CatalogClient({
       };
   const activeFilterCount = Number(brand !== "Todos") + Number(category !== "Todas") + Number(Boolean(search.trim())) + Number(sort !== "recommended") + Number(favoritesOnly) + Number(Boolean(maxPrice)) + Number(availableOnly) + Object.values(facetSelection).filter(Boolean).length;
   const catalogUpdating = deferredSearch !== search;
-  const hasBrandCampaign = !embeddedBrandMode && brand !== "Todos" && hasCompleteBrandCampaign(brand) && (!categorySlug || compactBrandMode);
+  const hasBrandCampaign = !categorySlug && !embeddedBrandMode && brand !== "Todos" && hasCompleteBrandCampaign(brand) && (!categorySlug || compactBrandMode);
 
   function clearFilters() {
     setQuickSelection("all");
@@ -521,7 +510,7 @@ export function CatalogClient({
           {brand !== "Todos" && <span>Marca: {brand}</span>}
           {category !== "Todas" && <span>Categoría: {category.replace(/-/g, " ")}</span>}
           {search.trim() && <span>Búsqueda: {search.trim()}</span>}
-          {sort !== "recommended" && <span>Orden: {sort === "brand" ? "Marca A–Z" : sort === "name" ? "Nombre A–Z" : sort === "price-asc" ? "Menor precio" : "Mayor precio"}</span>}
+          {sort !== "recommended" && <span>Orden: {sort === "brand" ? "Marca A–Z" : sort === "name" ? "Nombre A–Z" : sort === "price-asc" ? "Menor precio" : sort === "capacity" ? capacitySortLabel : "Mayor precio"}</span>}
           {favoritesOnly && <span>Solo favoritos</span>}
           {maxPrice && <span>Hasta ${Number(maxPrice).toLocaleString("es-AR")}</span>}
           {availableOnly && <span>Stock confirmado</span>}
@@ -535,6 +524,12 @@ export function CatalogClient({
         )}
       </div>}
 
+      {categorySlug && <div className="catalog-inline-controls">
+        {!embeddedBrandMode && <nav className="catalog-quick-filters catalog-brand-filters" aria-label="Filtrar por marca">
+          {brands.filter((item, index) => item === "Todos" || !brands.slice(1, index).some(previous => brandsShareFamily(previous, item))).map(item => <button key={item} type="button" aria-pressed={brand === item || item !== "Todos" && brandsShareFamily(brand, item)} className={brand === item || item !== "Todos" && brandsShareFamily(brand, item) ? "active" : ""} onClick={() => { setBrand(item); setQuickSelection("all"); setFacetSelection({}); playSonicCue("filter"); }}>{item}</button>)}
+        </nav>}
+        <label className="catalog-inline-sort">Ordenar<AppSelect value={sort} onChange={event => setSort(event.target.value as typeof sort)}><option value="recommended">Recomendados</option><option value="price-asc">Menor precio</option><option value="price-desc">Mayor precio</option><option value="brand">Marca</option>{featureGroups.some(group => ["storage", "measure", "capacity", "liters"].includes(group.key)) && <option value="capacity">{capacitySortLabel}</option>}</AppSelect></label>
+      </div>}
       {!embeddedBrandMode && <div className="catalog-heading">
         <div><p className="eyebrow orange">CATÁLOGO</p><h2 id="catalog-title">Explorá {categoryTitle.toLowerCase()}.</h2></div>
         <p>Los datos que todavía no confirmamos se muestran como pendientes — nunca los inventamos.</p>
@@ -544,8 +539,12 @@ export function CatalogClient({
         {catalogUpdating && <small className="catalog-refresh-indicator">Actualizando…</small>}
       </div>
       {categorySlug && quickFilters.length > 0 && <nav className="catalog-quick-filters" aria-label={`Filtrar ${categoryTitle}`}>
-        {[{ id: "all", label: "Todos" }, ...quickFilters].map((item) => <button key={item.id} type="button" className={quickSelection === item.id ? "active" : ""} aria-pressed={quickSelection === item.id} onClick={() => { setQuickSelection(item.id); playSonicCue("filter"); }}>{item.label}</button>)}
+        {[{ id: "all", label: "Todos" }, ...quickFilters].map((item) => <button key={item.id} type="button" className={quickSelection === item.id ? "active" : ""} aria-pressed={quickSelection === item.id} onClick={() => { setQuickSelection(item.id); setFacetSelection({}); playSonicCue("filter"); }}>{item.label}</button>)}
       </nav>}
+      {categorySlug && featureGroups.map(group => <nav key={group.key} className="catalog-quick-filters catalog-feature-filters" aria-label={group.label}>
+        <span className="catalog-filter-label">{group.label}</span>
+        {["", ...group.options].map(value => <button key={value} type="button" className={(facetSelection[group.key] ?? "") === value ? "active" : ""} aria-pressed={(facetSelection[group.key] ?? "") === value} onClick={() => { setFacetSelection(current => ({ ...current, [group.key]: value })); playSonicCue("filter"); }}>{value || "Todos"}</button>)}
+      </nav>)}
       {filtered.length ? (
         <div ref={resultsRef} className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
             const customerCard = (

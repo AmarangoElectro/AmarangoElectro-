@@ -1,3 +1,4 @@
+import {displayProductName} from "@/lib/catalog/display-name";
 import Link from "../../components/store-link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -82,7 +83,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
           <div className="product-detail-copy">
             <p className="eyebrow orange">{product.brand} · AMARANGOELECTRO</p>
-            <h1>{product.name}</h1>
+            <h1>{displayProductName(product.name)}</h1>
             <p className="product-lead">{product.description ?? "Consultá características y disponibilidad."}</p>
             <div className="feature-chips large">{product.features.map((feature) => <span key={feature}>{feature}</span>)}</div>
             <div className="product-data-grid">

@@ -1,24 +1,26 @@
 import type { Product } from "./types";
 
+type FacetProduct = Pick<Product, "name" | "brand" | "model" | "specifications">;
+
 export type FacetKey = "measure" | "storage" | "capacity" | "kind" | "liters" | "burners" | "size" | "brand";
 export type FacetSelection = Partial<Record<FacetKey, string>>;
 export type FacetGroup = { key: FacetKey; label: string; options: string[] };
 
 const tvSizes = [32, 40, 43, 50, 55, 58, 60, 65, 70, 75, 85];
-const storageSizes = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB"];
+const storageSizes = ["64 GB", "128 GB", "256 GB", "512 GB", "1 TB", "2 TB"];
 const washingSizes = ["6 kg", "7 kg", "8 kg", "9 kg", "10 kg", "11 kg+"];
 const mattressSizes = ["1 plaza", "1 plaza y media", "2 plazas", "Queen", "King"];
 
 const normalize = (text: string) => text.toLocaleLowerCase("es-AR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-const identity = (product: Product) => normalize([product.name, product.model ?? ""].join(" "));
-const details = (product: Product) => normalize([product.name, product.model ?? "", ...Object.values(product.specifications)].join(" "));
+const identity = (product: FacetProduct) => normalize([product.name, product.model ?? ""].join(" "));
+const details = (product: FacetProduct) => normalize([product.name, product.model ?? "", ...Object.values(product.specifications)].join(" "));
 
 export function getFacetScope(category: string, sector?: string | null): string {
   if (sector === "lavado" || sector === "refrigeracion" || sector === "climatizacion" || sector === "coccion" || sector === "colchones-y-sommiers") return sector;
   return category;
 }
 
-export function productFacetValues(product: Product, scope: string, key: FacetKey): string[] {
+export function productFacetValues(product: FacetProduct, scope: string, key: FacetKey): string[] {
   if (key === "brand") return product.brand ? [product.brand] : [];
   const name = identity(product);
   const full = details(product);
@@ -38,8 +40,8 @@ export function productFacetValues(product: Product, scope: string, key: FacetKe
     const found = new Set<string>();
     // Supplier titles often use storage/RAM (for example 256/12gb).
     // The RAM suffix can itself end in GB, so a boundary after its digits would miss it.
-    for (const match of full.matchAll(/(?:^|\D)(64|128|256|512)\s*(?:gb\b|g\b|\/\s*\d{1,2}(?:\s*(?:gb|g|ram))?\b)|(?:^|\D)(1)\s*tb\b/gi)) {
-      const value = match[1] ? `${match[1]} GB` : "1 TB";
+    for (const match of full.matchAll(/(?:^|\D)(64|128|256|512)\s*(?:gb\b|g\b|\/\s*\d{1,2}(?:\s*(?:gb|g|ram))?\b)|(?:^|\D)(1|2)\s*tb\b/gi)) {
+      const value = match[1] ? `${match[1]} GB` : `${match[2]} TB`;
       if (storageSizes.includes(value)) found.add(value);
     }
     return [...found];
@@ -96,7 +98,7 @@ export function productFacetValues(product: Product, scope: string, key: FacetKe
   return [];
 }
 
-export function deriveFacetGroups(products: readonly Product[], scope: string, includeSingleValues = false): FacetGroup[] {
+export function deriveFacetGroups(products: readonly FacetProduct[], scope: string, includeSingleValues = false): FacetGroup[] {
   const config: Partial<Record<string, Array<[FacetKey, string]>>> = {
     "smart-tv": [["measure", "Pulgadas"]], celulares: [["storage", "Almacenamiento"]],
     lavado: [["capacity", "Capacidad"], ["kind", "Tipo"]],
@@ -113,6 +115,37 @@ export function deriveFacetGroups(products: readonly Product[], scope: string, i
   }).filter((group) => group.options.length > 1 || group.options.length === 1 && (includeSingleValues || products.some((product) => !productFacetValues(product, scope, group.key).includes(group.options[0]))));
 }
 
-export function matchesFacets(product: Product, scope: string, selected: FacetSelection, except?: FacetKey): boolean {
-  return Object.entries(selected).every(([key, value]) => !value || key === except || productFacetValues(product, scope, key as FacetKey).includes(value));
+export function matchesFacets(product: FacetProduct, scope: string, selected: FacetSelection, except?: FacetKey): boolean {
+  return Object.entries(selected).every(([key, value]) => !value || key === except || matchesFacetValue(product, scope, key as FacetKey, value));
+}
+
+const laundryRanges = [
+  { label: "Menos de 6 kg", min: 0, max: 6 },
+  { label: "6–7 kg", min: 6, max: 8 },
+  { label: "8–9 kg", min: 8, max: 10 },
+  { label: "10–11 kg", min: 10, max: 12 },
+  { label: "12 kg+", min: 12, max: Infinity },
+];
+
+export function matchesFacetValue(product: FacetProduct, scope: string, key: FacetKey, value: string): boolean {
+  const values = productFacetValues(product, scope, key);
+  const range = scope === "lavado" && key === "capacity" ? laundryRanges.find(item => item.label === value) : undefined;
+  return range ? values.some(item => {
+    const kg = Number.parseFloat(item.replace(",", "."));
+    return kg >= range.min && kg < range.max;
+  }) : values.includes(value);
+}
+
+/** Only offer groups with real products; decimal capacity remains intact in the data. */
+export function deriveQuickFacetGroups(products: readonly FacetProduct[], scope: string): FacetGroup[] {
+  return deriveFacetGroups(products, scope, true).filter(group => group.key !== "brand").map(group => {
+    if (scope !== "lavado" || group.key !== "capacity") return group;
+    return { ...group, options: laundryRanges.filter(range => products.some(product => matchesFacetValue(product, scope, "capacity", range.label))).map(range => range.label) };
+  });
+}
+
+export function dominantFacetNumber(product: FacetProduct, scope: string): number {
+  const key: FacetKey = scope === "celulares" ? "storage" : scope === "smart-tv" ? "measure" : scope === "lavado" ? "capacity" : "liters";
+  const values = productFacetValues(product, scope, key).map(value => Number.parseFloat(value.replace(",", ".")) * (/TB/.test(value) ? 1024 : 1));
+  return values.length ? Math.min(...values) : Infinity;
 }

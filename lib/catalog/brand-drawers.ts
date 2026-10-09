@@ -17,3 +17,15 @@ export function buildBrandDrawers(products: readonly Product[], configured: read
   }
   return [...brands.values()];
 }
+
+/** Large brand scenes are reserved for established brands in a matching sector. */
+export function isPremiumCatalogBrand(category: string, brand: string): boolean {
+  const primary: Record<string, string[]> = {
+    celulares: ["apple", "iphone", "samsung", "motorola", "xiaomi"],
+    "smart-tv": ["samsung", "lg", "tcl", "philips", "sony"],
+    audio: ["jbl", "sony", "aiwa", "lg"],
+    gaming: ["playstation", "sony"],
+    electrodomesticos: ["samsung", "lg"],
+  };
+  return primary[category]?.includes(normalizeBrandFamily(brand)) ?? false;
+}
