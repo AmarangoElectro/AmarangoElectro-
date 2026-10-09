@@ -3,6 +3,7 @@ import Link from "./store-link";
 import type { SubcategoryDefinition } from "@/lib/catalog/categories";
 import { retailCategories } from "@/lib/catalog/retail-categories";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
+import {audioSectorScenes} from "@/lib/visual/audio-scenes";
 
 interface Props {
   categorySlug: string;
@@ -44,7 +45,7 @@ export function SubcategoryBannerCard({ categorySlug, categoryTitle, subcategory
     "home-audio": "audio",
   };
   const retailArtwork = retailCategories.find((item) => item.id === (retailArtworkAliases[subcategory.slug] ?? subcategory.slug))?.image;
-  const artwork = retailArtwork ?? subcategory.image;
+  const artwork = (categorySlug==="audio"?audioSectorScenes[subcategory.slug]:undefined) ?? retailArtwork ?? subcategory.image;
   const hasEditorialBanner = !retailArtwork && Boolean(subcategory.image?.startsWith("/assets/banners/subcategories/"));
   const showEditorialLogo = hasEditorialBanner && categorySlug !== "herramientas";
   const href = subcategory.brand

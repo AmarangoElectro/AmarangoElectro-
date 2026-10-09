@@ -1,0 +1,9 @@
+/* Strong installment price, quiet cash price, without a promotional box. */
+.product-card-premium .product-card-installment-hero { display: flex; flex-direction: column; gap: 4px; padding: 0; background: transparent; border: 0; box-shadow: none; }
+.product-card-premium .product-card-installment-hero > span { color: var(--ink); font-size: .72rem; font-weight: 750; }
+.product-card-premium .product-card-installment-hero > strong { color: #123f75; font-size: clamp(21px, 5.4vw, 32px); font-weight: 900; line-height: 1.12; letter-spacing: -.6px; overflow-wrap: anywhere; }
+.product-card-premium .product-card-installment-hero > small { color: var(--muted); font-size: .62rem; font-weight: 600; }
+.product-card-premium .product-card-cash { display: block; margin-top: 8px; color: #617084; font-size: .72rem; font-weight: 550; line-height: 1.4; }
+[data-theme="dark"] .product-card-premium .product-card-installment-hero > strong { color: #fff; }
+[data-theme="dark"] .product-card-premium .product-card-installment-hero > span { color: #dfebfc; }
+[data-theme="dark"] .product-card-premium .product-card-cash { color: #aabbd3; }

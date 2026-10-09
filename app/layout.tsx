@@ -9,6 +9,7 @@ import "./sector-banners.css";
 import "./brand-drawers.css";
 import "./app-dialogs.css";
 import "./interaction-motion.css";
+import "./storefront-quotes.css";
 import { AmarangoMotion } from "./components/amarango-motion";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";

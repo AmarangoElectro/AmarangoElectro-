@@ -7,6 +7,8 @@ import { useMemo, useSyncExternalStore, type CSSProperties } from "react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/catalog";
 import {useProductShare} from "@/components/ui/use-product-share";
+import {useStorefrontFinancing} from "@/lib/commerce/use-storefront-financing";
+import {numericPlans} from "@/lib/commerce/storefront-financing";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { getAuthorizedReferralShareCode } from "@/lib/growth/referral-attribution-client";
 import { getProductCardVisualTheme, type ProductCardVisualContext } from "@/lib/theme/product-card-theme";
@@ -61,11 +63,10 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         maximumFractionDigits: 0,
       }).format(product.price.amount)
     : null;
-  const financingLabel = product.financing[0]?.label;
-  const sixInstallments = product.financing.find((plan) => plan.installments === 6 && plan.installmentAmount);
-  const sixInstallmentsLabel = sixInstallments?.installmentAmount
-    ? `6 cuotas fijas de ${new Intl.NumberFormat("es-AR", { style: "currency", currency: sixInstallments.installmentAmount.currency, maximumFractionDigits: 0 }).format(sixInstallments.installmentAmount.amount)}`
-    : financingLabel;
+  const financing=useStorefrontFinancing([product]);
+  const plans=numericPlans(financing.data[product.id]?.length?financing.data[product.id]:product.financing);
+  const featuredPlan=plans.find(plan=>plan.installments===6)??plans.at(-1);
+  const installmentPrice=featuredPlan?.installmentAmount?new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(featuredPlan.installmentAmount.amount):null;
 
   function toggleFavorite() {
     try {
@@ -78,7 +79,7 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
   }
 
   const sharing=useProductShare();
-  const shareInput=()=>({name:product.name,url:new URL(href,window.location.origin).toString(),cashPriceArs:product.price?.amount??null,installments:product.financing.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,referralCode:getAuthorizedReferralShareCode(),productId:product.id});
+  const shareInput=()=>({name:product.name,url:new URL(href,window.location.origin).toString(),cashPriceArs:product.price?.amount??null,installments:plans.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,referralCode:getAuthorizedReferralShareCode(),productId:product.id});
   async function share(){playSonicCue("share");await sharing.share(shareInput())}
 
   return (
@@ -122,9 +123,8 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         {product.model ? <dl className="product-card-specs"><div><dt>Modelo</dt><dd>{product.model}</dd></div></dl> : null}
         {features.length > 0 ? <details className="product-card-features"><summary>{features.length} características <span aria-hidden="true">⌄</span></summary><ul>{features.map((feature, index) => <li key={`${index}-${feature}`}>{feature}</li>)}</ul></details> : null}
         <div className={`product-card-commerce ${priceLabel ? "has-price" : "price-pending"}`}>
-          {priceLabel ? <strong className="product-card-price">{priceLabel}</strong> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
-          {sixInstallmentsLabel ? <span className="product-card-installments">{sixInstallmentsLabel}</span> : priceLabel ? <span className="product-card-installments">Consultá opciones de pago y disponibilidad</span> : null}
-          {priceLabel && sixInstallmentsLabel ? <small className="product-card-cash">Contado: {priceLabel}</small> : null}
+          {installmentPrice && featuredPlan ? <div className="product-card-installment-hero"><span>{featuredPlan.installments} cuotas de</span><strong>{installmentPrice}</strong><small>Cuotas orientativas</small></div> : priceLabel ? <span className="product-card-installments">{financing.loading?"Consultando cuotas…":"Consultá las opciones de cuotas"}</span> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
+          {priceLabel ? <small className="product-card-cash">Contado: {priceLabel}</small> : null}
           <span className={`product-card-availability ${product.stock.status === "in_stock" ? "is-positive" : ""}`}><span className="sr-only">Disponibilidad</span>{product.stock.label ?? "Consultar disponibilidad"}</span>
         </div>
         <Link className="catalog-card-link" href={href} onClick={() => playSonicCue("navigate")}>Ver producto <span aria-hidden="true">→</span></Link>

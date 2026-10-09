@@ -2,6 +2,7 @@ import { normalizeBrandFamily } from "@/lib/catalog/brand-family";
 import { categories } from "@/lib/catalog/categories";
 import { retailCategories } from "@/lib/catalog/retail-categories";
 import { coordinatedSectorArt } from "./sector-banner-art";
+import {audioBrandScenes} from "./audio-scenes";
 
 const generated = (key: string) => `/assets/v16-generated/brand-drawers-v1/${key}.webp`;
 
@@ -40,7 +41,8 @@ const televisionBrands: Readonly<Record<string, { image: string; description: st
 };
 
 export function hasDistinctBrandDrawerArtwork(categorySlug: string, brand: string) {
-  return categorySlug === "smart-tv" && Boolean(televisionBrands[normalizeBrandFamily(brand)]);
+  return categorySlug === "smart-tv" && Boolean(televisionBrands[normalizeBrandFamily(brand)])
+    || categorySlug === "audio" && Boolean(audioBrandScenes[normalizeBrandFamily(brand)]);
 }
 
 const retailAliases: Readonly<Record<string, string>> = {
@@ -75,7 +77,9 @@ export function getBrandDrawerBackdrop(categorySlug: string, sectorSlug?: string
   const scope = sectorSlug ?? categorySlug;
   const retail = retailCategories.find((item) => item.id === (retailAliases[scope] ?? scope));
   const television = categorySlug === "smart-tv" ? televisionBrands[normalizeBrandFamily(brand)] : undefined;
+  const audio = categorySlug === "audio" ? audioBrandScenes[normalizeBrandFamily(brand)] : undefined;
   const image = (television ? `/assets/v16-generated/smart-tv-brands-v2/${television.image}.webp` : undefined)
+    ?? audio?.image
     ?? (categorySlug === "audio" ? audioBrands[normalizeBrandFamily(brand)] : undefined)
     ?? generatedScopes[scope]
     ?? generatedScopes[categorySlug]
@@ -86,6 +90,6 @@ export function getBrandDrawerBackdrop(categorySlug: string, sectorSlug?: string
   return {
     image,
     title: sector?.title ?? category?.title ?? "Catálogo",
-    description: television?.description ?? descriptions[scope] ?? descriptions[categorySlug] ?? "Encontrá lo que buscás.",
+    description: television?.description ?? audio?.description ?? descriptions[scope] ?? descriptions[categorySlug] ?? "Encontrá lo que buscás.",
   };
 }

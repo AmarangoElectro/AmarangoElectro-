@@ -5,7 +5,7 @@ import Link from "./store-link";
 import { ArrowUpRight, GitCompareArrows, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Product } from "@/lib/catalog";
-import type { FinancingOption } from "@/lib/catalog/types";
+import {useStorefrontFinancing} from "@/lib/commerce/use-storefront-financing";
 import { buildComparisonRows } from "@/lib/catalog/comparison";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
@@ -18,21 +18,14 @@ interface ProductComparisonProps {
 export function ProductComparison({ products, onRemove, onClear }: ProductComparisonProps) {
   const [open, setOpen] = useState(false);
   const [differencesOnly, setDifferencesOnly] = useState(false);
-  const [financing,setFinancing] = useState<Record<string,FinancingOption[]>>({});
-  const [loadingFinancing,setLoadingFinancing] = useState(false);
+  const {data:financing,loading:loadingFinancing}=useStorefrontFinancing(products,open);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const rows = buildComparisonRows(products.map(product=>({...product,financing:product.financing.length?product.financing:financing[product.id]??[]})));
+  const rows = buildComparisonRows(products.map(product=>({...product,financing:financing[product.id]?.length?financing[product.id]:product.financing})));
   const visibleRows = differencesOnly ? rows.filter((row) => row.differs) : rows;
   const knownPrices = products.map((product) => product.price?.amount).filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount) && amount>0);
   const priceRange = knownPrices.length > 1 ? Math.max(...knownPrices) - Math.min(...knownPrices) : null;
   const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
-  useEffect(()=>{
-    if(!open)return;
-    const controller=new AbortController();setFinancing({});setLoadingFinancing(true);
-    fetch("/api/v16/comparison-financing",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:products.map(product=>product.id)}),signal:controller.signal}).then(response=>response.json()).then(body=>{if(!controller.signal.aborted&&body.status==="ok")setFinancing(body.data)}).catch(()=>{}).finally(()=>{if(!controller.signal.aborted)setLoadingFinancing(false)});
-    return()=>controller.abort();
-  },[open,products]);
 
   useEffect(() => {
     if (!open) return;
