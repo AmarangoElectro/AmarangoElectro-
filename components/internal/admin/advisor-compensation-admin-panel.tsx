@@ -30,7 +30,7 @@ export function AdvisorCompensationAdminPanel({
               <div><small>PREMIO</small><strong>{money(month.bonusArs)}</strong><span>{month.mainGoalReached ? `Adicional post-20: ${money(month.additionalBonusArs)}` : `Próximo objetivo: ${quantity(month.nextGoalEquivalentSales ?? 0)}`}</span></div>
             </article>
           ))}
-          {result.data.length === 0 && <div className="crm-empty-state"><b>No hay cierres mensuales disponibles.</b></div>}
+          {result.data.length === 0 && <div className="crm-empty-state"><b>No hay operaciones de comisión en este período.</b></div>}
         </div>
       )}
     </section>

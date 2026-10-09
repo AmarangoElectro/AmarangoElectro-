@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Plus, Search, ShieldCheck } from "lucide-react";
 import { createAdvisorsAdapter, type AdvisorsReadResult } from "@/lib/advisors/advisors-adapter";
 import type { V16AdvisorPortfolioListRow, V16AdvisorPortfolioSummaryRow } from "@/lib/advisors/advisors-contract";
-import { AdvisorCompensationAdminPanel } from "@/components/internal/admin/advisor-compensation-admin-panel";
+import { LiveCommissionControl } from "@/components/internal/admin/live-commission-control";
 
 /**
  * V16 ASESORES — panel aditivo dentro de /administracion.
@@ -267,7 +267,7 @@ export function AdvisorsPanel() {
         Conexión segura · cada asesor ve y gestiona únicamente su cartera asignada
       </div>
 
-      <AdvisorCompensationAdminPanel />
+      <LiveCommissionControl />
 
       <div className="collections-actions">
         <button type="button" className="crm-open" onClick={() => setView({ mode: "create" })}><Plus size={14} aria-hidden="true" style={{ display: "inline", verticalAlign: "middle" }} /> Nuevo asesor</button>

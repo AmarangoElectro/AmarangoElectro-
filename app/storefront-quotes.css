@@ -18,3 +18,14 @@
 .product-calculator-result strong { color: var(--ink); font-size: 20px; line-height: 1.45; }
 .product-installment-calculator .product-calculator-cash { font-size: 12px; }
 .admin-product-calculator-dialog { width: min(1000px, calc(100vw - 28px)); }
+.commission-gain { display: block; margin: 10px 0; padding: 10px 0; border: 0; background: transparent; color: #167051; font: inherit; font-size: 18px; font-weight: 850; text-align: left; cursor: pointer; }
+.commission-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.commission-filters button { padding: 10px 14px; min-height: 44px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.commission-filters button[aria-pressed="true"] { border-color: #1b6cce; color: #1b6cce; font-weight: 800; }
+.commission-detail { margin: 16px 0; font-size: 14px; }
+.commission-detail > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.commission-detail dd { margin: 0; font-weight: 750; overflow-wrap: anywhere; }
+.commission-admin-operations article { margin: 12px 0; padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+[data-theme="dark"] .commission-gain { color: #6bd8b0; }
+.commission-gain small{display:block;font-size:11px;font-weight:500;line-height:1.4;color:var(--muted-foreground,#637083);margin-top:4px}
+.commission-admin-operations dd{overflow-wrap:anywhere}

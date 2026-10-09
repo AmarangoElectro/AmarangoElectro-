@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import type {ReactNode} from 'react';
 import type { AdminProductCardModel } from "../../../lib/internal/admin/product-card-model";
 
 interface Props {
+  commission?:ReactNode;
   product: AdminProductCardModel;
   selected?: boolean;
   onSelect?: (id: string) => void;
@@ -14,7 +16,7 @@ interface Props {
 
 const money = (value: number | null) => value === null ? "A confirmar" : `$${Math.round(value).toLocaleString("es-AR")}`;
 
-export function AdminProductCard({ product, selected = false, onSelect, onAction, onQuickActions, onChangePhoto }: Props) {
+export function AdminProductCard({ product, selected = false, onSelect, onAction, onQuickActions, onChangePhoto,commission }: Props) {
   const editAction = product.primaryActions.find((action) => action.featureId === "catalog.product.edit");
   const shareAction = product.primaryActions.find((action) => action.featureId === "store.share");
   const overflowActions = [
@@ -44,6 +46,7 @@ export function AdminProductCard({ product, selected = false, onSelect, onAction
       <div className="admin-product-card__body">
         <div className="admin-product-card__eyebrow">{product.category} · {product.supplier}</div>
         <h3>{product.name}</h3>
+        {commission}
         <div className="admin-product-card__prices">
           <div><small>Costo</small><strong>{money(product.costArs)}</strong></div>
           <div><small>Contado</small><strong>{money(product.salePrice)}</strong></div>

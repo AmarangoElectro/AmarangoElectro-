@@ -9,6 +9,8 @@ import { ProductPhotoEditor } from "./product-photo-editor";
 import {useProductShare} from "@/components/ui/use-product-share";
 import {Dialog} from "radix-ui";
 import {AmarangoCalculatorPanel} from "./amarango-calculator-panel";
+import {useLiveCommissions} from '@/lib/advisor-compensation/use-live-commissions';
+import {CommissionProductGain} from '@/app/components/commission-product-gain';
 
 interface Props {
   products: readonly (AdminCardProductInput & { stockState: "in_stock" | "low_stock" | "out_of_stock" })[];
@@ -16,6 +18,7 @@ interface Props {
 
 export function AdminProductGrid({ products }: Props) {
   const sharing=useProductShare();
+  const commissions=useLiveCommissions();
   const [calculatorId,setCalculatorId]=useState<string|null>(null);
   function onAction(action:string,id:string){
     const p=currentProducts.find(p=>p.id===id);
@@ -48,7 +51,7 @@ export function AdminProductGrid({ products }: Props) {
       </div>
       {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button type="button" onClick={()=>{setBranded(true);setPhotoIds([...selected])}}>Estilo Amarango para seleccionados</button><button type="button" onClick={()=>setSelected(new Set())}>Quitar selección</button></div>}
       <div className="admin-product-grid">
-        {visible.map((product) => <AdminProductCard key={product.id} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onAction={onAction} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} />)}
+        {visible.map((product) => <AdminProductCard key={product.id} commission={<CommissionProductGain name={product.name} price={product.salePrice} cap={commissions.status==='ok'?commissions.data?.cap:undefined}/>} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onAction={onAction} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} />)}
       </div>
       {visible.length < filtered.length && <button type="button" className="admin-load-more" onClick={() => setLoaded((n) => nextAdminCatalogWindow(n, filtered.length))}>Mostrar {Math.min(36, filtered.length-visible.length)} más</button>}
       <V418AQuickActionsSheet onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} product={quickProductId ? buildAdminProductCardModel(products.find((item) => item.id === quickProductId)!) : null} open={quickProductId !== null} onOpenChange={(next) => { if (!next) setQuickProductId(null); }} />

@@ -58,6 +58,8 @@ function AdvisorMonthContent({ month }: { month: AdvisorMonthReadModel }) {
         <article><CircleDollarSign aria-hidden="true" /><small>COMISIONES DEL MES</small><strong>{money(month.commissionGeneratedArs)}</strong><p>Cobradas {money(month.commissionCollectedArs)} · Pendientes {money(month.commissionPendingArs)}</p></article>
       </div>
       <div className="advisor-month-validation">
+        <span>Próximo premio: <b>{money(month.nextGoalBonusArs??month.bonusArs+7500)}</b></span>
+        <span>Ventas faltantes: <b>{quantity(month.mainGoalReached?Math.max(0,Math.floor(month.equivalentSales)+1-month.equivalentSales):month.remainingEquivalentSales)}</b> equiv.</span>
         <span><b>{month.validSales}</b> ventas válidas</span>
         <span><b>{month.pendingOperations}</b> pendientes de validación</span>
         <span><b>{month.excludedOperations}</b> excluidas</span>
@@ -73,7 +75,7 @@ function AdvisorMonthContent({ month }: { month: AdvisorMonthReadModel }) {
         ))}
         {month.operations.length === 0 && <p className="advisor-operation-empty">No hay operaciones registradas en este período.</p>}
       </div>
-      <p className="advisor-month-footnote">Período {month.period} · Política {month.policyVersion}{month.closedAt ? ` · Cierre auditado ${month.closedAt}` : " · Cierre pendiente"}</p>
+      <p className="advisor-month-footnote">Período {month.period} · Comisiones registradas con política {month.policyVersion}{month.closedAt ? ` · Cierre auditado ${month.closedAt}` : " · Premio provisional hasta el cierre"}. Cobrado: pagos de comisión identificados con tu asesor y venta, sin reversa. Se actualiza cada 30 segundos y al volver a la app.</p>
     </>
   );
 }

@@ -13,6 +13,12 @@ import {useProductShare} from "@/components/ui/use-product-share";
 import Image from "next/image";
 import { AdvisorGrowthSummary } from "./advisor-growth-summary";
 import { AdvisorMonthDashboard } from "./advisor-month-dashboard";
+import {useLiveCommissions} from '@/lib/advisor-compensation/use-live-commissions';
+import {liveAdvisorMonth} from '@/lib/advisor-compensation/live-model';
+import {sortCommissionProducts,type CommissionSort,type CommissionModality} from '@/lib/advisor-compensation/commercial-policy';
+import {CommissionProductGain} from './commission-product-gain';
+import {useStorefrontFinancing} from '@/lib/commerce/use-storefront-financing';
+import {numericPlans} from '@/lib/commerce/storefront-financing';
 
 const advisorGuide = findSectorGuide("asesor", "mi-amarango");
 const liveStockSuppliers = new Set(["mega electro", "electro impacto"]);
@@ -22,15 +28,20 @@ function money(value: number | null | undefined) {
 }
 
 export function AdvisorWorkspace({ products }: { products: readonly Product[] }) {
+  const live=useLiveCommissions();
+  const [sort,setSort]=useState<CommissionSort>('commission'),[modality,setModality]=useState<CommissionModality>('cash');
+  const financing=useStorefrontFinancing(products);
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
     const term = normalizeCatalogText(query);
-    if (!term) return products;
-    return products.filter((product) => normalizeCatalogText([product.name, product.model, product.brand, product.category].filter(Boolean).join(" ")).includes(term));
-  }, [products, query]);
+    const found=products.filter((product) => !term||normalizeCatalogText([product.name, product.model, product.brand, product.category].filter(Boolean).join(" ")).includes(term));
+    const ordered=sortCommissionProducts(found,sort,modality,live.data?.cap??null,live.data?.salesCounts??{});
+    const installment=(p:Product)=>Math.min(...numericPlans(financing.data[p.id]?.length?financing.data[p.id]:p.financing).map(plan=>plan.installmentAmount!.amount));
+    return sort==='installments'?ordered.filter(p=>Number.isFinite(installment(p))).sort((a,b)=>installment(a)-installment(b)||a.id.localeCompare(b.id)):ordered;
+  }, [products, query,sort,modality,live.data,financing.data]);
 
   const sharing=useProductShare();
-  async function share(product:Product){await sharing.share({name:product.name,url:`${window.location.origin}/producto/${product.slug}`,cashPriceArs:product.price?.amount??null,installments:product.financing.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,productId:product.id})}
+  async function share(product:Product){const plans=numericPlans(financing.data[product.id]?.length?financing.data[product.id]:product.financing);await sharing.share({name:product.name,url:`${window.location.origin}/producto/${product.slug}`,cashPriceArs:product.price?.amount??null,installments:plans.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,productId:product.id})}
 
   return (
     <main className="internal-workspace advisor-workspace">
@@ -51,15 +62,16 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
         <article><WalletCards /><span><small>CUOTAS</small><strong>Conexión segura pendiente</strong></span></article>
         <a className="advisor-quick-card advisor-quick-card--sale" href="#advisor-sale-draft"><ClipboardList /><span><small>NUEVA VENTA</small><strong>Preparar operación</strong></span></a>
       </section>
-      <AdvisorMonthDashboard />
+      <AdvisorMonthDashboard result={live.data&&live.status==='ok'?{status:'ok',data:liveAdvisorMonth(live.data)}:live.status==='unauthorized'?{status:'unauthorized'}:{status:'not_connected'}} />
+      <button type="button" className="product-calculator-trigger" onClick={()=>void live.refresh()}>Actualizar Tu mes</button>
       <AdvisorGrowthSummary />
       <AdvisorSaleDraftPanel products={products} />
       <div id="advisor-offers" className="advisor-offers-anchor"><OffersShowcase advisor /></div>
       <section id="advisor-catalog" className="advisor-catalog" aria-labelledby="advisor-catalog-title">
         <div className="advisor-catalog-heading" data-guide-target="advisor-catalog-search"><div><p className="eyebrow orange">CATÁLOGO MAESTRO</p><h2 id="advisor-catalog-title">Productos oficiales</h2></div><label><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nombre, modelo, marca…" /></label></div>
-        <div className="advisor-product-grid">
+        <div className="commission-filters" role="group" aria-label="Ordenar productos">{([["commission","Más comisión"],["sales","Más vendidos"],["price","Mejor precio"],["installments","Cuotas"]] as const).map(([key,label])=><button key={key} type="button" aria-pressed={sort===key} onClick={()=>setSort(key)}>{label}</button>)}<button type="button" aria-pressed={modality==="cash"} onClick={()=>setModality("cash")}>Contado</button><button type="button" aria-pressed={modality==="financed"} onClick={()=>setModality("financed")}>Financiado</button></div>{sort==="sales"&&<p className="internal-privacy-note">Ventas registradas {live.data?.role==="asesor"?"por vos":"en Amarango"}.</p>}<div className="advisor-product-grid">
           {filtered.map((product) => {
-            const sixPlan = product.financing.find((plan) => plan.installments === 6 && plan.installmentAmount);
+            const sixPlan = numericPlans(financing.data[product.id]?.length?financing.data[product.id]:product.financing).find((plan) => plan.installments === 6 && plan.installmentAmount);
             const supplier = product.specifications.Proveedor?.trim().toLocaleLowerCase("es-AR") ?? "";
             const hasLiveStock = liveStockSuppliers.has(supplier);
             const stockText = hasLiveStock
@@ -74,7 +86,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
               {product.image ? <div className="advisor-product-placeholder advisor-product-image"><Image src={product.image.src} alt={product.image.alt} fill sizes="(max-width: 760px) 100vw, 33vw" loading="lazy" unoptimized /></div> : <div className="advisor-product-placeholder">{product.brand.slice(0, 1)}</div>}
               <div className="advisor-product-card__copy">
                 <small>{product.brand} · {product.category}</small><h3>{product.name}</h3>
-                <strong className="advisor-product-price">{money(product.price?.amount)}</strong>
+                <CommissionProductGain name={product.name} price={product.price?.amount??null} cap={live.status==="ok"?live.data?.cap:undefined} modality={modality}/><strong className="advisor-product-price">{money(product.price?.amount)}</strong>
                 <p>{sixPlan?.installmentAmount ? `6 cuotas de ${money(sixPlan.installmentAmount.amount)}` : product.price ? "Consultá opciones de pago" : "Consultá precio y opciones de pago"}</p>
                 <span className={`advisor-availability ${hasLiveStock ? "is-live" : "needs-check"}`}>{stockText}</span>
               </div>
