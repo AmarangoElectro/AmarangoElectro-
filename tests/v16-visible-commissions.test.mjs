@@ -63,13 +63,14 @@ const plugin={name:'mock-trusted-boundary',setup(b){
  b.onResolve({filter:/^@\/(app\/chatgpt-auth|lib\/internal\/auth\/server-access|lib\/server\/backend)$/},a=>({path:a.path,namespace:'trusted-mock'}));
  b.onLoad({filter:/.*/,namespace:'trusted-mock'},a=>({contents:a.path.endsWith('chatgpt-auth')?'export const getChatGPTUser=async()=>globalThis.__commTest.user':a.path.endsWith('server-access')?'export const resolveSpaceAccess=async()=>globalThis.__commTest.access':`export const sameOrigin=r=>!r.headers.get('origin')||r.headers.get('origin')===new URL(r.url).origin;export const privateJson=(x,s=200)=>Response.json(x,{status:s,headers:{'Cache-Control':'no-store'}});export const backendFetch=async(path,init)=>{globalThis.__commTest.calls.push({path,body:JSON.parse(init.body)});return Response.json(globalThis.__commTest.payload)};`,loader:'js'}));
 }};
+process.env.V16_COMMISSION_ACTIVATED='true';
 const route=await load('app/api/v16/commissions/route.ts',[plugin]);
 const ctx=(access={role:'asesor',advisor:true,admin:false,owner:false})=>(globalThis.__commTest={user:{email:'verified@example.test'},access,payload:workspace([op({costArs:111111,marginArs:222222,secret:'never'})]),calls:[]});
 const request=(method='GET',headers={})=>new Request('https://app.test/api/v16/commissions?advisorId=foreign',{method,headers});
 test('GET scopes by authenticated identity; advisor DTO redacts cost and margin even from malformed backend',async()=>{
  const c=ctx();const response=await route.GET(request());assert.equal(response.status,200);const json=await response.json();assert.equal(json.data.operations[0].commissionTotalArs,12345);
  for(const key of ['costArs','marginArs','secret'])assert.equal(key in json.data.operations[0],false);
- assert.deepEqual(c.calls[0].body,{p_email:'verified@example.test',p_period:null});assert.equal(response.headers.get('cache-control'),'no-store');
+ assert.deepEqual(c.calls[0].body,{p_email:'verified@example.test',p_period:null,p_action:'read'});assert.equal(response.headers.get('cache-control'),'no-store');
 });
 test('internal admin DTO contains cost and margin; foreign advisor response fails closed',async()=>{
  ctx({role:'admin',admin:true,owner:false,advisor:false});assert.equal((await (await route.GET(request())).json()).data.operations[0].costArs,111111);
@@ -81,9 +82,18 @@ test('anonymous, customer, cross-origin and invalid periods never read commissio
  c=ctx();assert.equal((await route.GET(request('GET',{origin:'https://evil.test'}))).status,403);assert.equal(c.calls.length,0);
  assert.equal((await route.GET(new Request('https://app.test/api/v16/commissions?period=2026-13'))).status,400);
 });
-test('cap activation remains blocked; advisor cannot submit; owner performs no database write',async()=>{
+test('only owners can save a cap; server validates value, revision, identity and origin',async()=>{
  let c=ctx();assert.equal((await route.POST(request('POST'))).status,403);assert.equal(c.calls.length,0);
- c=ctx({role:'owner',owner:true,admin:true,advisor:false});const response=await route.POST(request('POST'));assert.equal(response.status,409);assert.equal((await response.json()).status,'activation_required');assert.equal(c.calls.length,0);
+ c=ctx({role:'admin',owner:false,admin:true,advisor:false});assert.equal((await route.POST(request('POST'))).status,403);assert.equal(c.calls.length,0);
+ const write=(body,headers={})=>new Request('https://app.test/api/v16/commissions',{method:'POST',headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(body)});
+ c=ctx({role:'owner',owner:true,admin:true,advisor:false});
+ for(const body of [{cap:-1,revision:1},{cap:100000001,revision:1},{cap:'20000',revision:1},{cap:null,revision:0},{cap:20000}])assert.equal((await route.POST(write(body))).status,400);
+ assert.equal(c.calls.length,0);
+ assert.equal((await route.POST(write({cap:20000,revision:1},{origin:'https://evil.test'}))).status,403);
+ c.payload={cap:20000,revision:2,version:'2026-10-09|2',policyActive:true};
+ const response=await route.POST(write({cap:20000,revision:1,email:'foreign@example.test',advisorId:'foreign'}));
+ assert.equal(response.status,200);assert.equal((await response.json()).data.cap,20000);
+ assert.deepEqual(c.calls[0].body,{p_email:'verified@example.test',p_action:'set_cap',p_cap:20000,p_revision:1});
 });
 test('applied report migration is read-only, server-only and exact advisor-scoped; financial SQL remains a proposal',async()=>{
  const sql=await readFile('supabase/migrations/20261009051736_v16_commission_visibility_readonly.sql','utf8');
@@ -91,4 +101,12 @@ test('applied report migration is read-only, server-only and exact advisor-scope
  assert.match(sql,/l.advisor_id=a.advisor_id/);assert.match(sql,/metadata->>'advisor_id'=l.advisor_id::text/);assert.match(sql,/reverses_movement_id=c.movement_id/);
  assert.match(sql,/case when internal then jsonb_build_object\('costArs'/);
  assert.match(sql,/revoke all.*from public,anon,authenticated/);assert.match(sql,/grant execute.*to service_role/);
+});
+test('disabled rollout keeps existing read RPC and blocks owner cap writes without any backend mutation',async()=>{
+ process.env.V16_COMMISSION_ACTIVATED='false';
+ try{
+  let c=ctx();const response=await route.GET(request());assert.equal(response.status,200);
+  assert.equal(c.calls[0].path,'/rest/v1/rpc/v16_commission_visibility_read');assert.deepEqual(c.calls[0].body,{p_email:'verified@example.test',p_period:null});
+  c=ctx({role:'owner',owner:true,admin:true,advisor:false});assert.equal((await route.POST(request('POST'))).status,409);assert.equal(c.calls.length,0);
+ }finally{process.env.V16_COMMISSION_ACTIVATED='true'}
 });

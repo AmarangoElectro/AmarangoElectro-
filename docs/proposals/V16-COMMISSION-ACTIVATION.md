@@ -1,40 +1,44 @@
-# V16 — comisiones visibles y activación pendiente
+# V16 — activación de comisiones preparada, no ejecutada
 
-## Implementado
+## Estado publicado
 
-- Tarjetas privadas de Asesores, Administración y Propietarios: “Ganás…”, modalidad y detalle de comisión. La escala solicitada se muestra explícitamente como estimación pendiente de habilitación.
-- Filtros por comisión estimada, ventas registradas del asesor, precio contado y menor importe de cuota disponible.
-- Tu mes lee el ledger existente, la validación de entrega/cobranza y los cierres mensuales. Conserva comisiones y cronogramas históricos; no recalcula ventas antiguas con la escala nueva.
-- Ventas equivalentes, premios 5/10/15/20 y adicionales post-20 conservan la política existente. Premio provisional hasta el cierre.
-- Cobrado sólo suma pagos de comisión identificados mediante venta y advisor_id, sin reversa. No se reconstruye desde cuotas del cliente, nombres, ni movimientos ambiguos.
-- Reporte administrativo con costo y margen, asesor, venta, comisión, estado y premio. El DTO del asesor omite costo y margen.
-- Lectura cada 30 segundos en pantalla visible, al volver y con botón Actualizar. Sin persistencia local ni escrituras de pagos.
+La vista privada mantiene “Ganás…” como estimación de la nueva escala y Tu mes como lectura de las comisiones registradas. No se activó la liquidación nueva ni el guardado del tope.
 
-Migración de lectura aplicada exclusivamente en la rama de prueba **ugujgbamqmrvxbvzxxou**, vinculada al sitio privado. Función SECURITY DEFINER con search_path vacío; ejecución sólo service_role; ámbito de asesor determinado por identidad verificada del servidor. La tienda principal, catálogo, precios comerciales, financiación, roles y workspaces no se modificaron.
+El cambio de activación está implementado detrás de una bandera **exclusivamente del servidor**, `V16_COMMISSION_ACTIVATED`, actualmente **sin configurar**. Así, la aplicación sigue usando la emisión de cotizaciones anterior y la RPC de lectura existente. Los intentos de guardar el tope devuelven `activation_required` sin escribir en la base.
 
-## Pendiente de aprobación
+## Cambio concreto listo para revisar
 
-La revisión automática rechazó la propuesta de activación financiera por el alcance de sus cambios persistentes: configuración privilegiada, sustitución de una función de cotización y cambio de restricción/trigger del ledger. No se volvió a ejecutar esa propuesta.
+El borrador revisado es `v16-commission-activation-REVIEWED-PENDING.sql`, fuera de migrations. Reemplaza para revisión el borrador anterior `v16-commission-activation-NOT-APPLIED.sql`. Ninguno se ejecutó.
 
-El archivo `v16-commission-activation-NOT-APPLIED.sql` contiene el borrador rechazado, **fuera de migrations**, exclusivamente para revisión. No se debe ejecutar automáticamente ni tratarlo como migración validada.
+Sólo se propone aplicarlo en **ugujgbamqmrvxbvzxxou**, la rama de prueba vinculada al sitio privado. No en la base principal.
 
-Se solicita autorización para preparar y validar la activación **sólo en staging y sólo para ventas nuevas**:
+La propuesta contiene:
 
-1. Nueva comisión contado: menos de $200.000 → 10%; desde $200.000 → 7%.
-2. Financiado: menos de $50.000 → $7.500; menos de $100.000 → $12.000; menos de $200.000 → $20.000; menos de $300.000 → $28.000; desde $300.000 → 10% con tope configurable por Propietarios.
-3. Tres cuotas del cliente → dos pagos de comisión; seis cuotas → tres. Las otras modalidades existentes conservan su cronograma hasta que se defina una regla explícita.
-4. Guardado compartido del tope, exclusivo de Propietarios, con revisión para evitar cambios concurrentes y snapshot de política en cada nueva cotización.
-5. Conectar la nueva política a la emisión server-authoritative de nuevas cotizaciones y sus nuevos registros. No modificar el motor de precios ni financiación; no recalcular registros históricos.
+1. Tabla privada de configuración del tope, con revisión para evitar sobrescribir otra edición. RLS y ningún acceso directo de clientes ni asesores.
+2. RPC sólo para el servidor. Identidad comprobada en `v16_user_access`; sólo Propietarios puede guardar el tope. Administración y Asesores sólo leen; cada asesor conserva su ámbito.
+3. Cálculo independiente de la comisión. Contado: 10% por debajo de $200.000, 7% desde ese importe. Financiado: $7.500 / $12.000 / $20.000 / $28.000 en los rangos pedidos; desde $300.000, 10% con tope opcional de Propietarios. Sin tope inicial fijado.
+4. Emisión de nuevas cotizaciones: se modifica únicamente la rama de comisión, después de ejecutar el motor de precios y financiación vigente. Se conserva íntegramente la validación y el cronograma del cliente. Un guard comprueba que la función original coincide con la definición revisada; no se usa reemplazo dinámico de código SQL.
+5. Registro de comisiones: se permite un cronograma de tres pagos. Un trigger sólo actúa en INSERT de la política nueva y valida contra el snapshot de venta. Tres cuotas del cliente → dos pagos de comisión; seis → tres. Contado conserva un pago. Los planes de dos/cuatro cuotas existentes conservan dos pagos.
 
-Riesgo concreto: afecta el importe de comisión y su cronograma en futuras cotizaciones/ventas; las cotizaciones pendientes pueden necesitar reemisión al cambiar la revisión del tope. Antes de aplicar, revisar el borrador, estrechar la migración, verificar contratos actuales y probar cada umbral, concurrencia y registro nuevo aislado. La publicación actual no activa esos cambios.
+El registro histórico no se recalcula ni se actualiza. Las cotizaciones ya emitidas, incluso antes de cambiar un tope, mantienen su importe hasta su vencimiento. La revisión del tope queda fijada en cada nueva cotización. Si cambia durante la emisión, se devuelve conflicto y se requiere preparar una cotización nueva.
 
-## Validación y límites
+## Riesgo y autorización pendiente
 
-- Pruebas nuevas de umbrales, tope, división exacta de pagos, premios y conservación del ledger histórico.
-- Pruebas de API: identidad de sesión, aislamiento de asesor, redacción de costo/margen, rechazo de cliente/anónimo/origen externo y ausencia de escritura de tope.
-- Consultas de reporte y permisos verificadas en staging. No hay filas en el ledger de comisiones de esa rama al validar; no se inventaron datos reales ni se fabricó una sesión de asesor.
-- QA Android con sesiones reales de asesor y propietario pendiente. No se afirma PASS end-to-end.
-- Typecheck global mantiene errores previos fuera de los archivos modificados.
-- Cinco checks heredados no están actualizados para el sitio actual: uno espera la venta deshabilitada anterior, otro exige una lectura local de cuotas reemplazada por la cotización del servidor, dos buscan textos viejos de Asesores y uno espera HTTP 200 sin sesión en Administración, hoy protegida por redirect. No se debilitó la autorización para hacerlos pasar.
+La revisión automática rechazó la migración el 9 de octubre: consideró que “Sigamos” no era una autorización explícita para modificar la emisión de cotizaciones y el registro financiero. No se reintentó ni se ejecutó por otra vía.
 
-Resultado del gate específico: **42 pruebas aprobadas, 0 fallos**. Una ejecución más amplia dio 58 aprobadas y los 5 fallos heredados descritos arriba; no se modificaron ni debilitaron esos checks para ocultarlos. Compilación oficial aprobada. No hubo errores TypeScript en los archivos modificados.
+Riesgo concreto: modifica el importe y el cronograma de comisión de futuras cotizaciones y ventas, y agrega una configuración compartida del tope. Un error en esa integración podría impedir emitir o registrar una venta. No propone cambios en precios comerciales, cuotas del cliente, catálogo, roles ni registros históricos.
+
+Se necesita autorización explícita para **aplicar esta migración en la base de prueba**, validar sus funciones/cronogramas y después habilitar la bandera del servidor. La publicación de preparación no habilita esos pasos.
+
+## Verificación completada
+
+- **49 pruebas aprobadas, cero fallos** en el gate específico.
+- Pruebas de preservación exacta de precio contado, anticipo, cuotas, totales y cronogramas de todos los planes actuales Classic/Protected al cambiar sólo metadatos de comisión.
+- Pruebas de política/revisión/tope: rechazo de datos inválidos, precios/costos/políticas enviados por el navegador ignorados, conflicto durante emisión, fallo sin política vigente.
+- Pruebas de límites de comisión, tope, distribución exacta de pagos, premios y conservación de las comisiones históricas.
+- Pruebas de aislamiento de asesor, redacción de costo/margen, propietario único autorizado a guardar, revisión/origen y ausencia de escrituras cuando la activación está deshabilitada.
+- Compilación oficial aprobada. Typecheck global conserva errores previos fuera de los archivos modificados.
+- Verificación nativa posterior al rechazo: tabla de configuración inexistente; función emisora original conserva hash `ae1142498b0afbf81858ea4dc01723df`; las dos cotizaciones conservan checksum `e8d75c049e43e38f63a8eff04e66c7f4`; catálogo conserva checksum `fb99c10141308757bb7b4dfb76698938`; ledger sigue vacío. No hubo cambios persistentes.
+- Configuración publicada verificada: bandera de activación sin configurar; backend sigue siendo staging; audiencia privada conservada.
+
+Las pruebas de la integración preparada usan transporte simulado sin credenciales ni red real. No equivalen a haber ejecutado la migración. La validación SQL de los nuevos cálculos y el recorrido Android con sesiones reales quedan pendientes de autorización/activación.

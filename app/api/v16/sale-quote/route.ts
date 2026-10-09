@@ -1,5 +1,6 @@
 import { getChatGPTUser } from "@/app/chatgpt-auth";
 import { buildV16AuthorizedQuoteDraft } from "@/lib/operations/authorized-sale-quote-engine";
+import {readActiveCommissionPolicy,applyCommissionPolicy,commissionPolicyEnabled} from '@/lib/advisor-compensation/server-policy';
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? "https://zctaukyrhsmpjkcddcqq.supabase.co";
 const QUOTE_TTL_MS = 15 * 60 * 1000;
@@ -153,6 +154,11 @@ export async function POST(request: Request) {
     return json(400, { status: "error", message: "Selected financing option is not available" });
   }
 
+  // Server-owned commission revision; client prices, caps and policy versions are ignored.
+  if(commissionPolicyEnabled()){
+    try { quote=applyCommissionPolicy(quote,await readActiveCommissionPolicy(user.email)); }
+    catch { return json(503,{status:'not_connected',reason:'commission_policy_unavailable'}); }
+  }
   const expiresAt = new Date(Date.now() + QUOTE_TTL_MS).toISOString();
   const commercialSnapshot = {
     financingMode: quote.financingMode,
@@ -193,6 +199,7 @@ export async function POST(request: Request) {
 
   if (!issueResponse.ok) {
     const message = await readFailure(issueResponse);
+    if (message.includes('commission_policy_conflict')) return json(409,{status:'conflict',reason:'commission_policy_changed'});
     if (message.includes("identity_not_mapped")) return json(401, { status: "unauthenticated" });
     return json(issueResponse.status >= 500 ? 502 : 400, { status: "error", message: "Authorized quote could not be issued" });
   }

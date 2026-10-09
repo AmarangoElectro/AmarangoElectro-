@@ -86,7 +86,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
               {product.image ? <div className="advisor-product-placeholder advisor-product-image"><Image src={product.image.src} alt={product.image.alt} fill sizes="(max-width: 760px) 100vw, 33vw" loading="lazy" unoptimized /></div> : <div className="advisor-product-placeholder">{product.brand.slice(0, 1)}</div>}
               <div className="advisor-product-card__copy">
                 <small>{product.brand} · {product.category}</small><h3>{product.name}</h3>
-                <CommissionProductGain name={product.name} price={product.price?.amount??null} cap={live.status==="ok"?live.data?.cap:undefined} modality={modality}/><strong className="advisor-product-price">{money(product.price?.amount)}</strong>
+                <CommissionProductGain name={product.name} price={product.price?.amount??null} cap={live.status==="ok"?live.data?.cap:undefined} modality={modality} active={live.data?.policyActive===true&&live.status==="ok"}/><strong className="advisor-product-price">{money(product.price?.amount)}</strong>
                 <p>{sixPlan?.installmentAmount ? `6 cuotas de ${money(sixPlan.installmentAmount.amount)}` : product.price ? "Consultá opciones de pago" : "Consultá precio y opciones de pago"}</p>
                 <span className={`advisor-availability ${hasLiveStock ? "is-live" : "needs-check"}`}>{stockText}</span>
               </div>
