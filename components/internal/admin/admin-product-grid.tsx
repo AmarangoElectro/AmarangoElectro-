@@ -7,6 +7,8 @@ import { AdminProductCard } from "./admin-product-card";
 import { V418AQuickActionsSheet } from "./v418a-quick-actions-sheet";
 import { ProductPhotoEditor } from "./product-photo-editor";
 import {useProductShare} from "@/components/ui/use-product-share";
+import {Dialog} from "radix-ui";
+import {AmarangoCalculatorPanel} from "./amarango-calculator-panel";
 
 interface Props {
   products: readonly (AdminCardProductInput & { stockState: "in_stock" | "low_stock" | "out_of_stock" })[];
@@ -14,8 +16,10 @@ interface Props {
 
 export function AdminProductGrid({ products }: Props) {
   const sharing=useProductShare();
+  const [calculatorId,setCalculatorId]=useState<string|null>(null);
   function onAction(action:string,id:string){
     const p=currentProducts.find(p=>p.id===id);
+    if(action==="finance.calculator"&&p){setCalculatorId(id);return;}
     if(action!=="store.share"||!p?.slug)return;
     void sharing.share({name:p.name,url:new URL(`/producto/${p.slug}`,window.location.origin).toString(),cashPriceArs:p.salePrice,imageUrl:p.imageUrl,productId:p.id,installments:p.financing?.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null}))});
   }
@@ -23,6 +27,7 @@ export function AdminProductGrid({ products }: Props) {
   const [photoIds,setPhotoIds] = useState<string[]>([]);
   const [branded,setBranded] = useState(false);
   const currentProducts = useMemo(()=>products.map(product=>({...product,...mediaOverrides[product.id]})),[products,mediaOverrides]);
+  const calculatorProduct=currentProducts.find(product=>product.id===calculatorId);
   const [filters, setFilters] = useState<AdminCatalogFilterState>({});
   const [loaded, setLoaded] = useState(36);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -49,6 +54,7 @@ export function AdminProductGrid({ products }: Props) {
       <V418AQuickActionsSheet onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} product={quickProductId ? buildAdminProductCardModel(products.find((item) => item.id === quickProductId)!) : null} open={quickProductId !== null} onOpenChange={(next) => { if (!next) setQuickProductId(null); }} />
       {photoIds.length>0&&<ProductPhotoEditor products={photoIds.map(id=>currentProducts.find(product=>product.id===id)!).filter(Boolean)} branded={branded} onClose={()=>setPhotoIds([])} onSaved={(id,imageUrl,features,specifications,supplierImageUrl)=>setMediaOverrides(current=>({...current,[id]:{imageUrl,features,specifications,supplierImageUrl}}))}/>}
       {sharing.dialog}
+      <Dialog.Root open={!!calculatorProduct} onOpenChange={open=>{if(!open)setCalculatorId(null)}}><Dialog.Portal><Dialog.Overlay className="amarango-dialog-overlay"/><Dialog.Content className="amarango-reason-dialog admin-product-calculator-dialog"><Dialog.Title>Calculadora del producto</Dialog.Title><Dialog.Description>Costo y resultados privados para Administración y Propietarios.</Dialog.Description>{calculatorProduct&&<AmarangoCalculatorPanel key={calculatorProduct.id} initialProduct={calculatorProduct}/>}<div className="amarango-reason-actions"><Dialog.Close>Cerrar calculadora</Dialog.Close></div></Dialog.Content></Dialog.Portal></Dialog.Root>
     </section>
   );
 }

@@ -31,13 +31,15 @@ function commissionSummary(commission: ProtectedCommissionSchedule) {
   return `${commission.paymentCount - 1} × ${money(first)} + último ${money(payments[payments.length - 1])}`;
 }
 
-export function AmarangoCalculatorPanel() {
+export interface CalculatorProduct { name: string; costArs: number | null; costUsd?: number | null; fxRate?: number | null }
+export function AmarangoCalculatorPanel({initialProduct}:{initialProduct?:CalculatorProduct}={}) {
   const [formula, setFormula] = useState<"current" | "protected">("current");
 
   // Calculadora clásica: la financiación permanece intacta, pero la base sale siempre de costo real.
-  const [mode, setMode] = useState<"cost_ars" | "cost_usd">("cost_ars");
-  const [amount, setAmount] = useState(150000);
-  const [fxRate, setFxRate] = useState(1500);
+  const initialUsd=!!initialProduct && !(initialProduct.costArs && initialProduct.costArs>0) && !!initialProduct.costUsd && initialProduct.costUsd>0;
+  const [mode, setMode] = useState<"cost_ars" | "cost_usd">(initialUsd?"cost_usd":"cost_ars");
+  const [amount, setAmount] = useState(initialProduct?(initialUsd?initialProduct.costUsd??0:initialProduct.costArs??0):150000);
+  const [fxRate, setFxRate] = useState(initialProduct?initialProduct.fxRate??0:1500);
   const quote = useMemo(() => {
     try { return quoteAmarangoCalculator({ mode, amount, fxRate, installmentPlans:[2,4,6] }); } catch { return null; }
   }, [mode, amount, fxRate]);
@@ -47,8 +49,8 @@ export function AmarangoCalculatorPanel() {
   );
 
   // Plan Protegido: comparte exactamente el mismo precio contado definitivo.
-  const [protectedCost, setProtectedCost] = useState(150000);
-  const [productName, setProductName] = useState("");
+  const [protectedCost, setProtectedCost] = useState(initialProduct?.costArs??(initialProduct?0:150000));
+  const [productName, setProductName] = useState(initialProduct?.name??"");
   const [copied, setCopied] = useState(false);
   const protectedState = useMemo(() => {
     try { return { quote: quotePlanProtegido(protectedCost), error: null as string | null }; }
@@ -70,9 +72,10 @@ export function AmarangoCalculatorPanel() {
   return (
     <section className="admin-calculator-panel admin-finance-tool">
       <header className="admin-finance-tool-header">
-        <div className="admin-finance-tool-title"><span><Calculator /></span><div><small>HERRAMIENTA PRIVADA · SOLO ADMIN</small><h2>Calculadora AmarangoElectro</h2><p>Clásica y Plan Protegido comparten costo real, piso de coherencia y precio contado definitivo.</p></div></div>
+        <div className="admin-finance-tool-title"><span><Calculator /></span><div><small>PRIVADO · ADMINISTRACIÓN Y PROPIETARIOS</small><h2>Calculadora AmarangoElectro</h2><p>{initialProduct?initialProduct.name:"Clásica y Plan Protegido comparten costo real, piso de coherencia y precio contado definitivo."}</p></div></div>
         <span className="admin-policy-badge"><ShieldCheck /> {formula === "current" ? `Política ${AMARANGO_POLICY_VERSION}` : `Protegido ${PLAN_PROTEGIDO_VERSION}`}</span>
       </header>
+      {initialProduct&&<p className="admin-finance-helper">Simulación de este producto. No modifica el precio publicado ni guarda cambios automáticamente.{!amount&&" Cargá el costo real para calcular; no se estima desde el contado."}</p>}
 
       <div className="admin-calculator-formula-tabs" role="group" aria-label="Fórmula de financiación">
         <button type="button" onClick={() => setFormula("current")} aria-pressed={formula === "current"}>Calculadora clásica</button>

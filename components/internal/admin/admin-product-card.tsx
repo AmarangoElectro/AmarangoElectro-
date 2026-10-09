@@ -52,6 +52,7 @@ export function AdminProductCard({ product, selected = false, onSelect, onAction
       </div>
 
       <div className="admin-product-card__actions">
+        <button type="button" onClick={() => onAction?.("finance.calculator",product.id)}>🧮 Calculadora Amarango</button>
         {onChangePhoto && <button type="button" onClick={() => onChangePhoto(product.id)}>📷 Cambiar foto</button>}
         <button type="button" className="v418a-card-trigger" onClick={() => onQuickActions?.(product.id)}>⚡ Acciones rápidas</button>
         {editAction ? <button type="button" onClick={() => onAction?.(editAction.featureId, product.id)}>{editAction.icon} {editAction.label}</button> : null}

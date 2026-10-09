@@ -13,6 +13,7 @@ import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { getAuthorizedReferralShareCode } from "@/lib/growth/referral-attribution-client";
 import { getProductCardVisualTheme, type ProductCardVisualContext } from "@/lib/theme/product-card-theme";
 import { ProductMediaViewer } from "./product-media-viewer";
+import {ProductInstallmentCalculator} from "./product-installment-calculator";
 import {
   getFavoritesServerSnapshot,
   getFavoritesSnapshot,
@@ -123,8 +124,9 @@ export function ProductCard({ product, isCompared = false, compareDisabled = fal
         {product.model ? <dl className="product-card-specs"><div><dt>Modelo</dt><dd>{product.model}</dd></div></dl> : null}
         {features.length > 0 ? <details className="product-card-features"><summary>{features.length} características <span aria-hidden="true">⌄</span></summary><ul>{features.map((feature, index) => <li key={`${index}-${feature}`}>{feature}</li>)}</ul></details> : null}
         <div className={`product-card-commerce ${priceLabel ? "has-price" : "price-pending"}`}>
-          {installmentPrice && featuredPlan ? <div className="product-card-installment-hero"><span>{featuredPlan.installments} cuotas de</span><strong>{installmentPrice}</strong><small>Cuotas orientativas</small></div> : priceLabel ? <span className="product-card-installments">{financing.loading?"Consultando cuotas…":"Consultá las opciones de cuotas"}</span> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
+          {installmentPrice && featuredPlan ? <ProductInstallmentCalculator product={product} trigger={<button type="button" className="product-card-installment-hero" aria-label={`Abrir calculadora AmarangoElectro para ${product.name}`}><span>{featuredPlan.installments} cuotas de</span><strong>{installmentPrice}</strong><small>Cuotas orientativas · Ver opciones</small></button>} /> : priceLabel ? <span className="product-card-installments">{financing.loading?"Consultando cuotas…":"Consultá las opciones de cuotas"}</span> : <strong className="product-card-price-pending">Consultá precio y opciones de pago</strong>}
           {priceLabel ? <small className="product-card-cash">Contado: {priceLabel}</small> : null}
+          {!featuredPlan&&<ProductInstallmentCalculator product={product}/>} 
           <span className={`product-card-availability ${product.stock.status === "in_stock" ? "is-positive" : ""}`}><span className="sr-only">Disponibilidad</span>{product.stock.label ?? "Consultar disponibilidad"}</span>
         </div>
         <Link className="catalog-card-link" href={href} onClick={() => playSonicCue("navigate")}>Ver producto <span aria-hidden="true">→</span></Link>
