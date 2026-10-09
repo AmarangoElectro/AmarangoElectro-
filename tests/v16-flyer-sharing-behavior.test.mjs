@@ -108,3 +108,27 @@ test("main sharing uses only returned policy values; subscriber sharing never fe
  await share.shareProductLink({...shareInput,brandName:"Own shop",installments:[],imageUrl:null},{clipboard:{writeText:async()=>{}}});assert.equal(requests,1);
  }finally{globalThis.fetch=old}
 });
+
+test("sharing retains every valid server plan and reuses the card quote batch",async()=>{
+ const share=await load("lib/commerce/share-product.ts"),old=fetch;let requests=0,copied;
+ globalThis.fetch=async(_url,options)=>{requests++;assert.deepEqual(JSON.parse(options.body),{ids:["a"]});return Response.json({status:"ok",data:{a:[{installments:3,installmentAmount:{amount:100},totalAmount:{amount:301}},{installments:6,installmentAmount:{amount:-10}}]}})};
+ try{await Promise.all([share.prepareProductShare({...shareInput,installments:[],imageUrl:null}),share.copyProductShareText({...shareInput,installments:[],imageUrl:null},{clipboard:{writeText:async t=>{copied=t}}})]);
+ assert.equal(requests,1);assert.match(copied,/3 cuotas: 2 cuotas de \$100 \+ última de \$101/);assert.doesNotMatch(copied,/6 cuotas|Costo|Comisión/);assert.match(copied,/https:\/\/shop.test\/producto\/a/);
+ }finally{globalThis.fetch=old}
+});
+test("failed share quotes recover and successful quotes expire instead of being cached forever",async()=>{
+ const share=await load("lib/commerce/share-product.ts"),old=fetch,oldNow=Date.now;let requests=0,now=100000,copied;
+ Date.now=()=>now;
+ globalThis.fetch=async()=>{requests++;return requests===1?Response.json({status:"unavailable",data:{}}):Response.json({status:"ok",data:{a:[{installments:4,installmentAmount:{amount:requests===2?100:200}}]}})};
+ const p={...shareInput,installments:[],imageUrl:null},cap={clipboard:{writeText:async t=>{copied=t}}};
+ try{await share.copyProductShareText(p,cap);assert.match(copied,/consultá las opciones/);
+ now+=5001;await share.copyProductShareText(p,cap);assert.match(copied,/4 cuotas de \$100/);
+ await share.copyProductShareText(p,cap);assert.equal(requests,2);
+ now+=60001;await share.copyProductShareText(p,cap);assert.equal(requests,3);assert.match(copied,/4 cuotas de \$200/);
+ }finally{globalThis.fetch=old;Date.now=oldNow}
+});
+test("file capability exceptions preserve the text and link sharing path",async()=>{
+ const share=await load("lib/commerce/share-product.ts"),old=fetch;let sent;
+ globalThis.fetch=async()=>new Response("photo",{headers:{"content-type":"image/jpeg"}});
+ try{assert.equal(await share.shareProductLink(shareInput,{canShare:()=>{throw new TypeError("Unsupported file")},share:async d=>{sent=d}}),"shared-text");assert.equal(sent.files,undefined);assert.equal(sent.url,shareInput.url);assert.match(sent.text,/225\.000/)}finally{globalThis.fetch=old}
+});

@@ -1,4 +1,5 @@
 import { addReferralToUrl } from "@/lib/growth/referral-growth-engine";
+import { loadStorefrontFinancingById } from "./storefront-financing";
 export interface ShareProductInput {
  name:string;url:string;cashPriceArs?:number|null;
  installments?:readonly {installments:number;amountArs:number|null;totalArs?:number|null;lastAmountArs?:number|null}[];
@@ -26,7 +27,6 @@ export function buildShareProductText(product:ShareProductInput){
  lines.push(product.brandName??"AmarangoElectro");return lines.join("\n");
 }
 const photos=new Map<string,Promise<File|null>>(),readyPhotos=new Map<string,File>();
-const financing=new Map<string,Promise<ShareProductInput["installments"]>>();
 export function prepareSharePhoto(product:ShareProductInput):Promise<File|null>{
  const src=product.imageUrl;if(!src)return Promise.resolve(null);
  const cached=photos.get(src);if(cached)return cached;
@@ -44,24 +44,25 @@ export function prepareSharePhoto(product:ShareProductInput):Promise<File|null>{
 }
 async function prepareFinancing(product:ShareProductInput){
  if(product.installments?.some(p=>validAmount(p.amountArs))||!product.productId||product.brandName)return product.installments;
- const key=`${product.productId}:${product.cashPriceArs??""}`;
- if(!financing.has(key))financing.set(key,(async()=>{
-  try{
-   const response=await fetch("/api/v16/comparison-financing",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:[product.productId]}),signal:AbortSignal.timeout(12000)});
-   if(!response.ok)return [];
-   const body=await response.json();return body.status==="ok"&&Array.isArray(body.data?.[product.productId!])?body.data[product.productId!].filter((p:{installments:number;installmentAmount?:{amount:number}})=>[2,4,6].includes(p.installments)&&validAmount(p.installmentAmount?.amount)).map((p:{installments:number;installmentAmount:{amount:number}})=>({installments:p.installments,amountArs:p.installmentAmount.amount,totalArs:(p as {totalAmount?:{amount:number}}).totalAmount?.amount})):[];
-  }catch{return []}
- })());
- return financing.get(key)!;
+ const plans=await loadStorefrontFinancingById(product.productId,product.cashPriceArs??null);
+ return plans.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount!.amount,totalArs:plan.totalAmount?.amount??null}));
 }
 export async function prepareProductShare(product:ShareProductInput){await Promise.all([prepareSharePhoto(product),prepareFinancing(product)])}
 export function shareProductUrl(product:ShareProductInput){return product.referralCode?addReferralToUrl(product.url,product.referralCode,product.productId):product.url}
+async function publicationText(product:ShareProductInput){
+ const plans=await prepareFinancing(product);
+ return buildShareProductText({...product,installments:plans})+(plans?.some(p=>validAmount(p.amountArs))?"\nCuotas orientativas; confirmá la cotización.":"");
+}
+export async function copyProductShareText(product:ShareProductInput,capabilities:ShareCapabilities=navigator){
+ if(!capabilities.clipboard?.writeText)throw new Error("Clipboard unavailable");
+ await capabilities.clipboard.writeText(`${await publicationText(product)}\n${shareProductUrl(product)}`);
+}
 export async function shareProductLink(product:ShareProductInput,capabilities:ShareCapabilities=navigator):Promise<ShareProductResult>{
  // Requests made here are read-only; financing is supplied by the current server policy.
- const plans=await prepareFinancing(product);
- const text=buildShareProductText({...product,installments:plans})+(plans?.some(p=>validAmount(p.amountArs))?"\nCuotas orientativas; confirmá la cotización.":"");const url=shareProductUrl(product);
+ const text=await publicationText(product),url=shareProductUrl(product);
  const file=product.imageUrl?readyPhotos.get(product.imageUrl)??await prepareSharePhoto(product):null;
- const canAttach=!!file&&!!capabilities.canShare?.({files:[file]});
+ let canAttach=false;
+ try{canAttach=!!file&&!!capabilities.canShare?.({files:[file]})}catch{ /* Some browsers reject file capability checks. Keep the text/link path usable. */ }
  const data:ShareData=canAttach?{title:product.name,text:`${text}\n${url}`,files:[file!]}:{title:product.name,text,url};
  if(capabilities.share){
   if(inactive(capabilities))return "ready";

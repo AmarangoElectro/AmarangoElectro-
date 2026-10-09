@@ -42,10 +42,16 @@ async function flush() {
 
 export function loadStorefrontFinancing(product: PricingProduct): Promise<FinancingOption[]> {
   if(!product.price || !Number.isFinite(product.price.amount) || product.price.amount<=0) return Promise.resolve([]);
-  const key=`${product.id}:${product.price.amount}`;
+  return loadStorefrontFinancingById(product.id,product.price.amount);
+}
+
+/** Sharing and cards use the same bounded cache and server-authorized values. */
+export function loadStorefrontFinancingById(id:string, cashPriceArs:number|null=null): Promise<FinancingOption[]> {
+  if(!id.trim() || id.length>160) return Promise.resolve([]);
+  const key=`${id}:${typeof cashPriceArs==="number"&&Number.isFinite(cashPriceArs)&&cashPriceArs>0?cashPriceArs:""}`;
   const hit=cached.get(key);if(hit && hit.expires>Date.now()) return Promise.resolve(hit.plans);
   const inFlight=pending.get(key);if(inFlight) return inFlight;
-  const request=new Promise<FinancingOption[]>(resolve=>queue.set(key,{id:product.id,resolve}));pending.set(key,request);
+  const request=new Promise<FinancingOption[]>(resolve=>queue.set(key,{id,resolve}));pending.set(key,request);
   if(!scheduled) {scheduled=true;queueMicrotask(()=>void flush());}
   return request;
 }
