@@ -24,8 +24,10 @@ export function resolveEffectiveTheme(mode: ThemeMode): EffectiveTheme {
 
 export function applyThemeToDocument(mode: ThemeMode) {
   if (typeof document === "undefined") return;
-  document.documentElement.setAttribute("data-theme", resolveEffectiveTheme(mode));
+  const effective = resolveEffectiveTheme(mode);
+  document.documentElement.setAttribute("data-theme", effective);
   document.documentElement.setAttribute("data-theme-mode", mode);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", effective === "dark" ? "#09090a" : "#ffffff");
 }
 
 export function setThemeMode(mode: ThemeMode) {
@@ -52,4 +54,4 @@ export function subscribeThemePreference(listener: () => void) {
   };
 }
 
-export const themeInitScript = `(function(){try{var m=localStorage.getItem("${STORAGE_KEY}");if(m!=="light"&&m!=="dark"&&m!=="auto")m="auto";var e=m==="auto"?(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.setAttribute("data-theme",e);document.documentElement.setAttribute("data-theme-mode",m);}catch(err){}})();`;
+export const themeInitScript = `(function(){try{var m=localStorage.getItem("${STORAGE_KEY}");if(m!=="light"&&m!=="dark"&&m!=="auto")m="auto";var e=m==="auto"?(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):m;document.documentElement.setAttribute("data-theme",e);document.documentElement.setAttribute("data-theme-mode",m);var p=function(){var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute("content",document.documentElement.getAttribute("data-theme")==="dark"?"#09090a":"#ffffff")};p();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",p,{once:true});}catch(err){}})();`;

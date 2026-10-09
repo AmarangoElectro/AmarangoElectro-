@@ -1,0 +1,65 @@
+/* Neutral dark surfaces. Brand accents and photographic artwork keep their colors. */
+:root[data-theme="dark"] {
+  --background: #09090a;
+  --foreground: #f5f5f6;
+  --ink: #f5f5f6;
+  --card: #151516;
+  --card-foreground: #f5f5f6;
+  --popover: #1b1b1d;
+  --popover-foreground: #f5f5f6;
+  --soft: #202022;
+  --secondary: #202022;
+  --secondary-foreground: #f5f5f6;
+  --accent: #29292c;
+  --accent-foreground: #f5f5f6;
+  --primary-foreground: #09090a;
+  --line: #343437;
+  --border: #343437;
+  --input: #343437;
+  --muted: #a8a8ae;
+  --muted-foreground: #a8a8ae;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] .category-page { background: var(--background); }
+:root[data-theme="dark"] .brand-locale-hero { background: var(--card); }
+
+html[data-theme="dark"] :is(.site-header, .internal-space-header, .catalog-toolbar-shell, .catalog-toolbar, .phone-department-nav, .sector-bottom-navigation),
+html[data-theme="dark"][data-scroll-activity="active"] :is(.site-header, .catalog-toolbar-shell, .catalog-toolbar, .phone-department-nav, .product-actions-block) {
+  background: #111112 !important;
+  border-color: var(--line);
+}
+html[data-theme="dark"] .catalog-search,
+html[data-theme="dark"][data-scroll-activity="active"] .catalog-search { background: var(--card) !important; }
+
+html[data-theme="dark"] :is(.product-card-premium, .brand-campaign-banner, .brand-locale-hero, .compare-product-head, .admin-finance-tool, .commercial-request-card, .private-offer-summary) {
+  background: var(--card);
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(.product-card-premium .product-visual, .product-card-premium .product-media-actions, .product-card-premium .card-tools button, .product-card-premium .feature-chips span, .product-card-features, .catalog-advanced-filters, .catalog-filter-toggle, .catalog-quick-brands button:not(.active), .catalog-active-tags span, .catalog-active-filters, .compare-product-visual, .admin-result-primary, .admin-plate-preview, .admin-product-card__media, .advisor-product-placeholder, .advisor-product-card__tools button, .skeleton-surface, .skeleton-line, .route-skeleton-home-hero) {
+  background: var(--soft);
+  border-color: var(--line);
+}
+html[data-theme="dark"] :is(.customer-referral-share, .growth-primary-kpi) { background: var(--card); }
+html[data-theme="dark"] .toaster [data-sonner-toast],
+html[data-theme="dark"] [data-slot="dialog-content"],
+html[data-theme="dark"] [data-slot="alert-dialog-content"] {
+  background: var(--popover) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme="dark"] :is(.subscriber-workspace, .subscriber-storefront, .store-photo-modal) {
+  --surface: #151516;
+  --surface-muted: #202022;
+  --background: #09090a;
+  --border: #343437;
+  --text-primary: #f5f5f6;
+  --text-secondary: #a8a8ae;
+  --plans-ink: #f5f5f6;
+  --plans-muted: #a8a8ae;
+  --plans-surface: #151516;
+  --plans-chip: #202022;
+  --plans-border: #343437;
+}
+html[data-theme="dark"] .subscription-commercial-intro { background: linear-gradient(120deg, #151516, #202022); }
+html[data-theme="dark"] .subscription-commercial-panel > .subscription-commercial-intro { background: transparent; }
+html[data-theme="dark"] .growth-art-panel { background: linear-gradient(140deg, #29292c, #151516); }

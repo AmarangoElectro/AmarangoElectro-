@@ -10,6 +10,7 @@ import "./brand-drawers.css";
 import "./app-dialogs.css";
 import "./interaction-motion.css";
 import "./storefront-quotes.css";
+import "./dark-surfaces.css";
 import { AmarangoMotion } from "./components/amarango-motion";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";
@@ -22,7 +23,7 @@ import { themeInitScript } from "@/lib/ux/theme-preference";
 
 export const viewport: Viewport = {
   viewportFit: "cover",
-  themeColor: "#071426",
+  themeColor: "#09090a",
 };
 
 export const metadata: Metadata = {
