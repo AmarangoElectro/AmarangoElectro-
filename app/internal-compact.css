@@ -197,3 +197,8 @@ html[data-theme="dark"] .advisor-workspace .advisor-validation.is-excluded { col
   .admin-workspace .admin-product-card__more summary { min-height: 44px; padding: 8px; font-size: 12px; line-height: 1.35; }
   .admin-workspace .admin-product-card__more > div { grid-template-columns: 1fr; padding: 0 8px 8px; }
 }
+
+/* Compact, separate facts; no raw OCR paragraphs in the comparison. */
+.compare-fact-list { margin: 0; padding-left: 16px; display: grid; gap: 7px; font-weight: 600; }
+.compare-no-facts { color: var(--muted); }
+.compare-panel-header h2 { letter-spacing: -.8px; line-height: 1.15; }

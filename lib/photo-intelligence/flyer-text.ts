@@ -1,5 +1,5 @@
 const normalize = (text:string) => text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-const technicalWords = /pantalla|ram|memoria|almacenamiento|procesador|c[aá]mara|bater[ií]a|potencia|capacidad|temperatura|rpm|litros|\d\s*(?:kg|w|mah|mp|gb|tb|hz|bar|psi|pulgadas|°c)\b|bluetooth|wi.?fi|usb|hdmi|inverter|timer|temporizador|grill|convecci[oó]n|medidas|dimensiones|\d+\s*(?:x|×)\s*\d+.*\bcm\b|voltaje|presi[oó]n|velocidad|funciones|carga|seguridad|amoled|oled|fhd|hd\+|full hd|uhd|4k|\d+(?:[.,]\d+)?\s*["″”]|snapdragon|helio|dimensity|exynos|octa.?core|resoluci[oó]n|sistema operativo|android|dolby|bajo consumo/i;
+const technicalWords = /chip|pantalla|ram|memoria|almacenamiento|procesador|c[aá]mara|bater[ií]a|potencia|capacidad|temperatura|rpm|litros|\d\s*(?:kg|w|mah|mp|gb|tb|hz|bar|psi|pulgadas|°c)\b|bluetooth|wi.?fi|usb|hdmi|inverter|timer|temporizador|grill|convecci[oó]n|medidas|dimensiones|\d+\s*(?:x|×)\s*\d+.*\bcm\b|voltaje|presi[oó]n|velocidad|funciones|carga|seguridad|amoled|oled|fhd|hd\+|full hd|uhd|4k|\d+(?:[.,]\d+)?\s*["″”]|snapdragon|helio|dimensity|exynos|octa.?core|resoluci[oó]n|sistema operativo|android|dolby|bajo consumo/i;
 const marketingWords = /amarango|env[ií]o|cuotas|contado|precio|costo|mayorista|proveedor|markup|margen|comisi[oó]n|\$|whatsapp|instagram|facebook|garant[ií]a|stock|disponible|consult[aá]|https|www\.|@/i;
 const aliases: [string,RegExp][] = [
   ["RAM",/^(?:memoria\s+)?ram$/], ["Almacenamiento",/^(?:almacenamiento|memoria interna|memoria de almacenamiento)$/],
@@ -57,14 +57,61 @@ export function extractFlyerFacts(text: string) {
       const key=field==="Potencia"&&/carga/i.test(line)?"Carga":field==="Cámara"&&/frontal/i.test(line)?"Cámara frontal":field;
       const match=line.match(pattern);if(match&&!specifications[key])specifications[key]=match[1];
     }
-    if(!specifications.Procesador){const match=line.match(/\b((?:Snapdragon|Helio|Dimensity|Exynos)\s+[\w+ -]{1,35}|Octa[- ]Core)/i);if(match)specifications.Procesador=match[1].trim()}
+    if(!specifications.Procesador){const match=line.match(/\b((?:Snapdragon|Helio|Dimensity|Exynos)\s+[\w+ -]{1,35}|Octa[- ]Core|A\d{1,2}(?:\s+(?:Pro|Bionic))?)/i);if(match)specifications.Procesador=match[1].trim()}
+    if(/\b(?:AMOLED|OLED|Super Retina XDR|Retina)\b/i.test(line))specifications["Tecnología de pantalla"]=line.match(/\b(?:Super AMOLED|AMOLED|OLED|Super Retina XDR|Retina)\b/i)![0];
+    if(/\b(?:grill|convecci[oó]n|inverter|bajo consumo)\b/i.test(line)&&!specifications.Funciones)specifications.Funciones=(line.match(/\b(?:grill|convecci[oó]n|inverter|bajo consumo)\b/gi)??[]).join(" · ");
     if(!specifications.Resolución){const match=line.match(/\b(?:Full HD|FHD\+?|HD\+?|UHD|4K|8K)(?=\s|$|[·,;])/i);if(match)specifications.Resolución=match[0]}
     {const found=line.match(/\b(?:Bluetooth(?:\s+\d+(?:\.\d+)?)?|Wi-?Fi|USB(?:-C)?|HDMI)\b/gi);if(found)specifications.Conectividad=[...new Set([...(specifications.Conectividad?.split(" · ")??[]),...found])].join(" · ")}
   }
-  return {features,specifications};
+  const clean=cleanFlyerSpecifications(specifications);
+  return {features:Object.entries(clean).map(([key,value])=>`${key}: ${value}`),specifications:clean};
 }
 export function parseSpecificationLines(text:string) {
   const result:Record<string,string>={};
   for(const line of text.split("\n")){const index=line.indexOf(":");if(index>0&&line.slice(index+1).trim())result[canonicalSpecificationKey(line.slice(0,index))]=line.slice(index+1).trim()}
   return result;
+}
+
+/** Only complete, recognizable values are suitable for customer-facing facts. */
+export function cleanFlyerSpecifications(input:Record<string,string>) {
+  const output:Record<string,string>={};
+  for(const [rawKey,rawValue] of Object.entries(input)){
+    const key=canonicalSpecificationKey(rawKey),value=rawValue.trim().replace(/\s+/g," ");
+    if(!value||value.length>110||marketingWords.test(value)||/[A-Z]{2,}MP\b/i.test(value))continue;
+    const unit=fields.find(([field])=>(!["RAM","Almacenamiento"].includes(key)&&field===key)||(key==="Cámara frontal"&&field==="Cámara")||(key==="Carga"&&field==="Potencia"));
+    if(unit){
+      const match=value.match(unit[1]);
+      if(!match)continue;
+      // Do not attach a whole OCR paragraph to a short numerical value.
+      if(key==="Pantalla"){
+        const technology=value.match(/\b(?:Super AMOLED|AMOLED|OLED|Super Retina XDR|Retina|Full HD|FHD\+?|HD\+?|UHD|4K|8K|ProMotion)\b/gi)??[];
+        output[key]=[match[1],...new Set(technology)].join(" · ");
+      }else output[key]=match[1];
+      continue;
+    }
+    if(key==="RAM"||key==="Almacenamiento"||key==="Memoria"){
+      const match=value.match(/^\d+\s*(?:GB|TB)$/i);if(match)output[key==="Memoria"?"Almacenamiento":key]=match[0];continue;
+    }
+    if(key==="Procesador"){
+      const match=value.match(/^(?:Octa[- ]Core|A\d{1,2}(?:\s+(?:Pro|Bionic))?|(?:Snapdragon\s+(?:\d{3}[A-Za-z+]*|\d(?:\s*[+s])?\s+Gen\s+\d|X\s+(?:Elite|Plus))|Helio\s+[A-Za-z]?\d+[A-Za-z]*|Dimensity\s+\d+[A-Za-z]*(?:\s+(?:Ultra|Plus))?|Exynos\s+\d+))$/i);
+      if(match)output[key]=match[0];continue;
+    }
+    if(key==="Resolución"){
+      const match=value.match(/^(?:Full HD|FHD\+?|HD\+?|UHD|4K|8K|\d+\s*[x×]\s*\d+)$/i);if(match)output[key]=match[0];continue;
+    }
+    if(key==="Tecnología de pantalla"){
+      const match=value.match(/^(?:Super AMOLED|AMOLED|OLED|Super Retina XDR|Retina)$/i);if(match)output[key]=match[0];continue;
+    }
+    if(key==="Conectividad"){
+      const matches=value.match(/\b(?:Bluetooth(?:\s+\d+(?:\.\d+)?)?|Wi-?Fi|USB(?:-C)?|HDMI)\b/gi);
+      if(matches)output[key]=[...new Set(matches)].join(" · ");continue;
+    }
+    if(key==="Funciones"){
+      const matches=value.match(/\b(?:grill|convecci[oó]n|inverter|bajo consumo)\b/gi);
+      if(matches)output[key]=[...new Set(matches)].join(" · ");continue;
+    }
+    if(key==="Sistema operativo"&&/^(?:Android|Google TV|Android TV|WebOS|Tizen|iOS)(?:\s+\d+(?:\.\d+)*)?$/i.test(value))output[key]=value;
+    if(key==="Colores"&&/^[\p{L} ,/-]{2,65}$/u.test(value)&&!technicalWords.test(value))output[key]=value;
+  }
+  return output;
 }

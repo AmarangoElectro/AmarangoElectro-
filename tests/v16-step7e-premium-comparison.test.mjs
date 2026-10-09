@@ -49,7 +49,7 @@ test("comparison engine marks only actual value differences", async () => {
   const result = JSON.parse(stdout);
   assert.equal(result.model, true);
   assert.equal(result.price, false);
-  assert.equal(result.features, false);
+  assert.equal(result.features, undefined); // Empty technical lists do not create a row.
   assert.equal(result["spec:RAM"], false);
 });
 

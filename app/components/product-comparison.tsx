@@ -117,7 +117,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
               <div>
                 <p className="eyebrow orange">COMPARACIÓN INTELIGENTE</p>
                 <h2 id="compare-title">Compará cuotas y características.</h2>
-                <p id="compare-description">{reading?"Leyendo las fotos para comparar…":commonKeys.length?`${commonKeys.length} características en común. Compará sus valores y las cuotas.`:"Sin especificaciones en común: mostramos las características legibles de cada producto."} Las cuotas son orientativas; la cotización oficial confirma el importe.</p>
+                <p id="compare-description">{reading?"Leyendo las fotos para comparar…":commonKeys.length?`${commonKeys.length} ${commonKeys.length===1?"característica en común":"características en común"}. Compará los datos disponibles.`:"Mostramos únicamente los datos legibles y disponibles de cada producto."} Las cuotas son orientativas; la cotización oficial confirma el importe.</p>
               </div>
               <button type="button" ref={closeButtonRef} className="compare-close" aria-label="Cerrar comparación" onClick={() => setOpen(false)}><X size={20} /></button>
             </header>
@@ -158,7 +158,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
                 {visibleRows.length ? visibleRows.map((row) => (
                   <div className={`compare-row ${row.differs ? "is-different" : ""}`} key={row.id}>
                     <div className="compare-row-label"><span>{row.label}</span>{row.differs && <small>DIFERENCIA</small>}</div>
-                    {row.values.map((value, index) => <div className="compare-cell" key={`${row.id}:${products[index]?.id}`}>{value}</div>)}
+                    {row.values.map((value, index) => <div className="compare-cell" key={`${row.id}:${products[index]?.id}`}>{row.items ? (row.items[index]?.length ? <ul className="compare-fact-list">{row.items[index].map(item=><li key={item}>{item}</li>)}</ul> : <span className="compare-no-facts">—</span>) : value}</div>)}
                   </div>
                 )) : (
                   <div className="compare-no-differences">No hay diferencias documentadas entre estos productos con los datos disponibles.</div>

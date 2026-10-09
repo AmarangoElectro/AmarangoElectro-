@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import type {Product} from "@/lib/catalog/types";
-import {factsForProduct,type FlyerFacts} from "./product-facts";
+import {factsForProduct,presentableProductFacts,type FlyerFacts} from "./product-facts";
 import {technicalSpecifications} from "./flyer-text";
 
 // One OCR job at a time. Cache only in this page's memory, scoped to the image URL.
@@ -33,6 +33,6 @@ export function useProductFlyerFacts(products:readonly Product[],enabled=true){
   },[signature]);
   return {reading,products:products.map(p=>{
     const saved=facts[p.id],src=p.supplierImage?.src??p.image?.src;
-    return saved&&saved.src===src?{...p,...factsForProduct(p,saved.facts)}:p;
+    return {...p,...(saved&&saved.src===src?factsForProduct(p,saved.facts):presentableProductFacts(p))};
   })};
 }

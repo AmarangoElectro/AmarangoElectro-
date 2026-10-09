@@ -14,7 +14,7 @@ async function load(path){
 const facts=await load("lib/photo-intelligence/flyer-text.ts");
 const guard=await load("lib/photo-intelligence/product-facts.ts");
 const comparison=await load("lib/catalog/comparison.ts");
-const base={id:"a",name:"Phone 256 GB",slug:"phone",brand:"Brand",model:null,price:null,financing:[],features:[],specifications:{},image:null,supplierImage:null,stock:{label:null},warranty:null};
+const base={id:"a",name:"Phone",slug:"phone",brand:"Brand",model:null,price:null,financing:[],features:[],specifications:{},image:null,supplierImage:null,stock:{label:null},warranty:null};
 
 test("multiline phone evidence preserves values and distinguishes camera and charging",()=>{
  const got=facts.extractFlyerFacts('RAM: 8 GB\nAlmacenamiento: 256 GB\nPantalla\n6.7” FHD+\nSuper AMOLED\nCámara principal: 50 MP\nCámara frontal: 13 MP\nBatería\n5.000 mAh\nCarga rápida 25W\nProcesador: Octa-Core\nWi-Fi · Bluetooth 5.3');

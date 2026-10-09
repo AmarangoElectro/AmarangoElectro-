@@ -1,4 +1,4 @@
-const CACHE = "amarango-v16-shell-v1";
+const CACHE = "amarango-v16-shell-v2";
 const OFFLINE = "/offline.html";
 const SHELL = [OFFLINE, "/manifest.webmanifest", "/favicon.svg", "/logo-320.webp", "/icons/app-192.png", "/icons/app-512.png", "/icons/app-maskable-192.png", "/icons/app-maskable-512.png"];
 
@@ -14,11 +14,13 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  // Sites must receive OAuth navigation directly, not a worker subrequest.
+  if (url.origin === self.location.origin && ["/callback", "/signin-with-chatgpt", "/signout-with-chatgpt"].includes(url.pathname.replace(/\/$/, ""))) return;
   if (event.request.mode === "navigate") {
     event.respondWith(fetch(event.request).catch(() => caches.match(OFFLINE)));
     return;
   }
-  const url = new URL(event.request.url);
   if (url.origin === self.location.origin && SHELL.includes(url.pathname)) {
     event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
   }

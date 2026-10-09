@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "cdn.catalog-store.link", pathname: "/**" },
       {
         protocol: "https",
         hostname: "zctaukyrhsmpjkcddcqq.supabase.co",
