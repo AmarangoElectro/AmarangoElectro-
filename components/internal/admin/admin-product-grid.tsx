@@ -52,12 +52,13 @@ export function AdminProductGrid({ products }: Props) {
         <input aria-label="Buscar productos" placeholder="Buscar producto, mayorista o categoría…" value={filters.query ?? ""} onChange={(e) => { setFilters((f) => ({ ...f, query:e.target.value })); setLoaded(36); }} />
         <span>{filtered.length.toLocaleString("es-AR")} productos</span>
       </div>
-      {compact.controls}
+      {compact.renderCatalog(<>
       {selected.size > 0 && <div className="admin-bulk-tray"><strong>{selected.size} seleccionados</strong><button type="button" onClick={()=>{setBranded(true);setPhotoIds([...selected])}}>Estilo Amarango para seleccionados</button><button type="button" onClick={()=>setSelected(new Set())}>Quitar selección</button></div>}
       <div className="admin-product-grid">
         {visible.map((product) => <AdminProductCard key={product.id} commission={<CommissionProductGain name={product.name} price={product.salePrice} cap={commissions.status==='ok'?commissions.data?.cap:undefined} active={commissions.status==='ok'&&commissions.data?.policyActive===true}/>} product={buildAdminProductCardModel(product)} selected={selected.has(product.id)} onAction={onAction} onSelect={(id) => setSelected((current) => current.has(id) ? new Set([...current].filter((item) => item !== id)) : new Set(current).add(id))} onQuickActions={setQuickProductId} onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} />)}
       </div>
       {visible.length < filtered.length && <button type="button" className="admin-load-more" onClick={() => setLoaded((n) => nextAdminCatalogWindow(n, filtered.length))}>Mostrar {Math.min(36, filtered.length-visible.length)} más</button>}
+      </>)}
       <V418AQuickActionsSheet onChangePhoto={id=>{setBranded(false);setPhotoIds([id])}} product={quickProductId ? buildAdminProductCardModel(products.find((item) => item.id === quickProductId)!) : null} open={quickProductId !== null} onOpenChange={(next) => { if (!next) setQuickProductId(null); }} />
       {photoIds.length>0&&<ProductPhotoEditor products={photoIds.map(id=>currentProducts.find(product=>product.id===id)!).filter(Boolean)} branded={branded} onClose={()=>setPhotoIds([])} onSaved={(id,imageUrl,features,specifications,supplierImageUrl)=>setMediaOverrides(current=>({...current,[id]:{imageUrl,features,specifications,supplierImageUrl}}))}/>}
       {sharing.dialog}

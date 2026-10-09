@@ -74,7 +74,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
       <div id="advisor-offers" className="advisor-offers-anchor"><OffersShowcase advisor /></div>
       <section id="advisor-catalog" className="advisor-catalog" aria-labelledby="advisor-catalog-title">
         <div className="advisor-catalog-heading" data-guide-target="advisor-catalog-search"><div><p className="eyebrow orange">CATÁLOGO MAESTRO</p><h2 id="advisor-catalog-title">Productos oficiales</h2></div><label><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar nombre, modelo, marca…" /></label></div>
-        {compact.controls}
+        {compact.renderCatalog(<>
         <div className="commission-filters" role="group" aria-label="Ordenar productos">{([["commission","Más comisión"],["sales","Más vendidos"],["price","Mejor precio"],["installments","Cuotas"]] as const).map(([key,label])=><button key={key} type="button" aria-pressed={sort===key} onClick={()=>{compact.resetSort();setSort(key)}}>{label}</button>)}<button type="button" aria-pressed={modality==="cash"} onClick={()=>setModality("cash")}>Contado</button><button type="button" aria-pressed={modality==="financed"} onClick={()=>setModality("financed")}>Financiado</button></div>{sort==="sales"&&<p className="internal-privacy-note">Ventas registradas {live.data?.role==="asesor"?"por vos":"en Amarango"}.</p>}<div className="advisor-product-grid">
           {filtered.map((product) => {
             const sixPlan = numericPlans(financing.data[product.id]?.length?financing.data[product.id]:product.financing).find((plan) => plan.installments === 6 && plan.installmentAmount);
@@ -101,6 +101,7 @@ export function AdvisorWorkspace({ products }: { products: readonly Product[] })
           })}
           {filtered.length === 0 && <div className="internal-empty">No encontramos coincidencias. Probá con otra marca o modelo.</div>}
         </div>
+        </>)}
         <p className="internal-privacy-note">Esta vista no muestra costos, markup, caja, proveedores internos ni información financiera privada.</p>
       </section>
       {sharing.dialog}

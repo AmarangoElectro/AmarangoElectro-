@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 import { AppSelect } from "@/components/ui/app-select";
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
 import { deriveQuickFacetGroups, dominantFacetNumber, getFacetScope, matchesFacets, type FacetSelection } from "@/lib/catalog/smart-facets";
@@ -32,14 +33,19 @@ export function useCompactCatalog(items: readonly Item[]) {
   const ids = useMemo(() => ordered.map(item => item.id), [ordered]);
   const idSet = useMemo(() => new Set(ids), [ids]);
   const rank = useMemo(() => new Map(ids.map((id, index) => [id, index])), [ids]);
-  const controls = <details className="internal-catalog-filters" open>
-    <summary>Sectores y filtros</summary>
+  const controls = <div className="internal-catalog-filters">
     {categories.length > 1 && <nav className="catalog-quick-filters" aria-label="Filtrar por sector">
       {["", ...categories, ...(items.some(item => item.subcategory === "lavado") ? ["lavado"] : [])].map(value => <button key={value} type="button" className={category === value ? "active" : ""} aria-pressed={category === value} onClick={() => { setCategory(value); setBrand(""); setSelected({}); }}>{value ? value === "lavado" ? "Lavarropas" : (getCategory(value)?.title ?? value.replace(/-/g, " ")) : "Todos"}</button>)}
     </nav>}
     {brands.length > 0 && <nav className="catalog-quick-filters" aria-label="Filtrar por marca">{["", ...brands].map(value => <button key={value} type="button" className={brand === value ? "active" : ""} aria-pressed={brand === value} onClick={() => { setBrand(value); setSelected({}); }}>{value || "Todos"}</button>)}</nav>}
     {groups.map(group => <nav key={group.key} className="catalog-quick-filters" aria-label={group.label}><span className="catalog-filter-label">{group.label}</span>{["", ...group.options].map(value => <button key={value} type="button" className={(selected[group.key] ?? "") === value ? "active" : ""} aria-pressed={(selected[group.key] ?? "") === value} onClick={() => setSelected(current => ({...current, [group.key]:value}))}>{value || "Todos"}</button>)}</nav>)}
     <label className="catalog-inline-sort">Ordenar<AppSelect value={sort} onChange={e => setSort(e.target.value)}><option value="recommended">Recomendados</option><option value="price-asc">Menor precio</option><option value="price-desc">Mayor precio</option>{brands.length > 0 && <option value="brand">Marca</option>}{groups.some(group => ["storage", "measure", "capacity", "liters"].includes(group.key)) && <option value="capacity">{scope === "celulares" ? "Memoria" : scope === "smart-tv" ? "Pulgadas" : "Capacidad"}</option>}</AppSelect></label>
-  </details>;
-  return { ids, idSet, rank, controls, sort, resetSort: () => setSort("recommended") };
+  </div>;
+  function renderCatalog(children: ReactNode) {
+    return <details className="internal-catalog-drawer" open>
+      <summary><strong>Ver todos</strong><small>{items.length} {items.length === 1 ? "producto" : "productos"}</small><ChevronDown size={20} aria-hidden="true" /></summary>
+      <div className="internal-catalog-drawer-content">{controls}{children}</div>
+    </details>;
+  }
+  return { ids, idSet, rank, controls, renderCatalog, sort, resetSort: () => setSort("recommended") };
 }

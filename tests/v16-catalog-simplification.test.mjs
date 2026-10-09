@@ -53,7 +53,12 @@ test('catalog controls only project supplied data and category entry keeps all b
  assert.match(category,/const products = categoryProducts/);
  assert.doesNotMatch(category,/<SubcategoryBannerCard|<DescansoBrandGallery|href=\{`\?marca/);
  const drawer=readFileSync(new URL('../app/components/brand-product-accordion.tsx',import.meta.url),'utf8');
- assert.match(drawer,/useState<"all" \| "brands">\("all"\)/);
+ assert.match(drawer,/<strong>Ver todos<\/strong>/);
+ assert.doesNotMatch(drawer,/Por marca|catalog-view-tabs|revealIfNeeded|scrollIntoView/);
+ assert.match(drawer,/aria-expanded=\{allOpen\}/);
+ assert.match(drawer,/hidden=\{!isOpen\}/);
+ assert.match(controls,/internal-catalog-drawer/);
+ assert.match(controls,/\{controls\}\{children\}/);
  assert.match(drawer,/premium && !artwork && hasDistinctBrandDrawerArtwork/);
  assert.match(drawer,/is-compact-drawer/);
 });

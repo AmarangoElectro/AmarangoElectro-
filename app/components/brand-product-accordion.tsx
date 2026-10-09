@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
-import { revealIfNeeded } from "@/lib/ux/interaction-motion";
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import type { Product } from "@/lib/catalog";
 import { isPremiumCatalogBrand, type BrandDrawerDefinition } from "@/lib/catalog/brand-drawers";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
@@ -24,19 +23,18 @@ type BrandProductAccordionProps = {
 };
 
 export function BrandProductAccordion({ categorySlug, sectorSlug, products, brands, categoryTitle, quickSubcategories, initialFilters }: BrandProductAccordionProps) {
-  const [allFilters, setAllFilters] = useState(initialFilters);
-  const [allRevision, setAllRevision] = useState(0);
-  const [view, setView] = useState<"all" | "brands">("all");
-  const [openBrands, setOpenBrands] = useState<Set<string>>(() => new Set());
-  const rootRef = useRef<HTMLElement>(null);
+  const hasInitialFilters = Boolean(initialFilters?.initialSearch || initialFilters?.initialFavoritesOnly || initialFilters?.initialMaxPrice || initialFilters?.initialAvailableOnly || initialFilters?.initialSort && initialFilters.initialSort !== "recommended");
+  const [allOpen, setAllOpen] = useState(hasInitialFilters);
+  const [allMounted, setAllMounted] = useState(hasInitialFilters);
+  const [openBrands, setOpenBrands] = useState<Set<string>>(() => new Set(hasInitialFilters ? [] : brands.filter(brand => initialFilters?.initialBrand && normalizeBrandFamily(brand.brand) === normalizeBrandFamily(initialFilters.initialBrand)).map(brand => brand.slug)));
+  const [mountedBrands, setMountedBrands] = useState(openBrands);
   useEffect(() => {
-    if (!openBrands.size) return;
-    const frame = requestAnimationFrame(() => {
-      const panel = rootRef.current?.querySelector<HTMLElement>(".brand-product-drawer-panel");
-      if (panel) revealIfNeeded(panel);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [openBrands]);
+    // A saved facet link must show its results, even without a text search.
+    if (["storage", "measure", "capacity", "liters", "kind", "burners", "size"].some(key => new URLSearchParams(window.location.search).has(`f_${key}`))) {
+      setAllMounted(true);
+      setAllOpen(true);
+    }
+  }, []);
   const productsByBrand = useMemo(() => {
     const grouped = new Map<string, Product[]>();
     for (const product of products) {
@@ -46,28 +44,31 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
     return grouped;
   }, [products]);
 
+  const orderedBrands = useMemo(() => [...brands].sort((a, b) => Number(isPremiumCatalogBrand(categorySlug, b.brand)) - Number(isPremiumCatalogBrand(categorySlug, a.brand))), [brands, categorySlug]);
+
   function toggleBrand(slug: string) {
-    setOpenBrands((current) => current.has(slug) ? new Set() : new Set([slug]));
+    setOpenBrands((current) => {
+      const next = new Set(current);
+      if (next.has(slug)) next.delete(slug); else next.add(slug);
+      return next;
+    });
+    setMountedBrands(current => new Set(current).add(slug));
     playSonicCue("navigate");
   }
 
   return (
-    <section ref={rootRef} className="brand-product-accordion" aria-labelledby="brand-accordion-title">
-      <nav className="catalog-view-tabs" aria-label={`Explorar ${categoryTitle}`}>
-        <button type="button" aria-pressed={view === "all"} onClick={() => { setView("all"); setOpenBrands(new Set()); setAllFilters({}); setAllRevision(value => value + 1); }}>Todos <small>{products.length}</small></button>
-        <button type="button" aria-pressed={view === "brands"} onClick={() => setView("brands")}>Por marca <small>{brands.filter(brand => productsByBrand.has(normalizeBrandFamily(brand.brand))).length}</small></button>
-      </nav>
-      {view === "all" ? <CatalogClient key={allRevision} resetInitialFacets={allRevision > 0} products={products} categorySlug={categorySlug} sectorSlug={sectorSlug} categoryTitle={categoryTitle} compactBrandMode quickSubcategories={quickSubcategories} {...allFilters} /> : <>
-      <div className="brand-product-accordion-intro">
-        <div>
-          <p className="eyebrow orange">LOCALES DE MARCA</p>
-          <h2 id="brand-accordion-title">Elegí una marca.</h2>
-        </div>
-        <p>Todo queda en esta misma pantalla. Tocá una marca para abrir o cerrar sus productos.</p>
-      </div>
-
+    <section className="brand-product-accordion" aria-label={`Explorar ${categoryTitle}`}>
       <div className="brand-product-accordion-list">
-        {brands.map((brand) => {
+        <article className={`brand-product-drawer is-compact-drawer catalog-all-drawer${allOpen ? " is-open" : ""}`}>
+          <button type="button" className="brand-product-drawer-trigger" aria-expanded={allOpen} aria-controls="catalog-all-products" onClick={() => { setAllMounted(true); setAllOpen(current => !current); playSonicCue("navigate"); }}>
+            <span className="brand-product-drawer-label"><strong>Ver todos</strong><small>{products.length} {products.length === 1 ? "producto" : "productos"}</small></span>
+            <span className="brand-product-drawer-toggle" aria-hidden="true"><ChevronDown size={22} /></span>
+          </button>
+          <div id="catalog-all-products" className="brand-product-drawer-panel" hidden={!allOpen}>
+            {allMounted && <CatalogClient products={products} categorySlug={categorySlug} sectorSlug={sectorSlug} categoryTitle={categoryTitle} suppressInitialScroll compactBrandMode quickSubcategories={quickSubcategories} {...initialFilters} initialBrand={hasInitialFilters ? initialFilters?.initialBrand : undefined} />}
+          </div>
+        </article>
+        {orderedBrands.map((brand) => {
           if (!brand.brand) return null;
           const family = normalizeBrandFamily(brand.brand);
           const isPhoneArtwork = ["apple", "iphone", "samsung", "motorola", "xiaomi", "infinix", "poco"].includes(family);
@@ -116,27 +117,16 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
                 <span className="brand-product-drawer-toggle" aria-hidden="true"><ChevronDown size={22} /></span>
               </button>
 
-              {isOpen ? (
-                <div className="brand-product-drawer-panel" id={panelId} data-amarango-enter>
-                  <header>
-                    <div><small>CATÁLOGO</small><strong>{brandProducts.length ? `Productos de ${brand.title}` : `${brand.title} está preparado`}</strong></div>
-
-                  </header>
-                  {brandProducts.length ? (
-                    <CatalogClient products={brandProducts} comparisonProducts={products} categorySlug={categorySlug} sectorSlug={sectorSlug} initialBrand={brand.brand} quickSubcategories={quickSubcategories} categoryTitle={brand.title} compactBrandMode embeddedBrandMode />
-                  ) : (
-                    <div className="brand-product-drawer-empty">
-                      <strong>El espacio visual ya está listo.</strong>
-                      <span>Las tarjetas aparecerán acá cuando ingresen productos validados de {brand.title}.</span>
-                    </div>
-                  )}
-                </div>
-              ) : null}
+              <div className="brand-product-drawer-panel" id={panelId} hidden={!isOpen}>
+                {mountedBrands.has(brand.slug) && <>
+                  <header><div><small>CATÁLOGO</small><strong>Productos de {brand.title}</strong></div></header>
+                  <CatalogClient products={brandProducts} comparisonProducts={products} categorySlug={categorySlug} sectorSlug={sectorSlug} initialBrand={brand.brand} quickSubcategories={quickSubcategories} categoryTitle={brand.title} compactBrandMode embeddedBrandMode />
+                </>}
+              </div>
             </article>
           );
         })}
       </div>
-      </>}
     </section>
   );
 }

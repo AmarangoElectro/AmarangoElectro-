@@ -96,6 +96,7 @@ interface CatalogClientProps {
   compactBrandMode?: boolean;
   embeddedBrandMode?: boolean;
   resetInitialFacets?: boolean;
+  suppressInitialScroll?: boolean;
   categorySlug?: string;
   sectorSlug?: string;
   quickSubcategories?: { slug: string; title: string }[];
@@ -117,6 +118,7 @@ export function CatalogClient({
   compactBrandMode = false,
   embeddedBrandMode = false,
   resetInitialFacets = false,
+  suppressInitialScroll = false,
   categorySlug = "",
   sectorSlug,
   quickSubcategories = emptyQuickSubcategories,
@@ -200,12 +202,12 @@ export function CatalogClient({
   }, [compactBrandMode, availableOnly, brand, category, favoritesOnly, facetSelection, maxPrice, deferredSearch, sort, facetScope, favoriteIds, products, quickFilters, quickSelection]);
 
   useEffect(() => {
-    if (embeddedBrandMode || typeof window === "undefined" || window.location.hash !== "#catalogo") return;
+    if (suppressInitialScroll || embeddedBrandMode || typeof window === "undefined" || window.location.hash !== "#catalogo") return;
     const frame = window.requestAnimationFrame(() => {
       document.getElementById("catalogo")?.scrollIntoView({ block: "start" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [embeddedBrandMode]);
+  }, [embeddedBrandMode, suppressInitialScroll]);
 
   useEffect(() => {
     if (embeddedBrandMode || resetInitialFacets) { setFacetReady(true); return; }
