@@ -2,11 +2,15 @@
 import type { Product } from "@/lib/catalog";
 import {useProductFlyerFacts} from "@/lib/photo-intelligence/use-product-flyer-facts";
 import {technicalSpecifications} from "@/lib/photo-intelligence/flyer-text";
+import {useStorefrontFinancing} from "@/lib/commerce/use-storefront-financing";
+import {numericPlans,formatStorefrontPlan} from "@/lib/commerce/storefront-financing";
 
 export function ProductDecisionDetails({ product: original }: { product: Product }) {
   const {products,reading}=useProductFlyerFacts([original]);
   const product=products[0];
   const specifications = Object.entries(technicalSpecifications(product.specifications));
+  const financing=useStorefrontFinancing([original]);
+  const plans=numericPlans(financing.data[original.id]?.length?financing.data[original.id]:original.financing);
 
   return (
     <section className="product-decision-section" aria-labelledby="product-decision-title">
@@ -36,7 +40,7 @@ export function ProductDecisionDetails({ product: original }: { product: Product
           <div className="product-decision-content product-decision-commerce">
             <div><small>DISPONIBILIDAD</small><strong>{product.stock.label ?? "A confirmar"}</strong></div>
             <div><small>GARANTÍA</small><strong>{product.warranty ?? "A confirmar"}</strong></div>
-            <div><small>FINANCIACIÓN</small><strong>{product.financing[0]?.label ?? "A confirmar"}</strong></div>
+            <div><small>FINANCIACIÓN</small>{plans.length?<><ul className="product-decision-financing-options">{plans.map(plan=><li key={plan.installments}>{formatStorefrontPlan(plan)}</li>)}</ul><small>Cuotas orientativas; confirmá la cotización.</small></>:<strong>{financing.loading?"Consultando cuotas…":"Consultá las opciones de cuotas"}</strong>}</div>
           </div>
         </details>
       </div>

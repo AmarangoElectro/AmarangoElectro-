@@ -4,6 +4,16 @@ export function numericPlans(plans: readonly FinancingOption[] = []): FinancingO
   return plans.filter(plan => plan && Number.isInteger(plan.installments) && plan.installments > 0 && Number.isFinite(plan.installmentAmount?.amount) && plan.installmentAmount!.amount > 0);
 }
 
+/** Customer-facing detail, including the real final installment when rounding differs. */
+export function formatStorefrontPlan(plan: FinancingOption): string {
+  if(!numericPlans([plan]).length)return "Consultá las opciones de cuotas";
+  const money=(value:number)=>new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:2}).format(value);
+  const amount=plan.installmentAmount!.amount,total=plan.totalAmount?.amount;
+  const hasTotal=typeof total==="number"&&Number.isFinite(total)&&total>0;
+  const last=hasTotal?Math.round((total-amount*(plan.installments-1))*100)/100:null;
+  return `${plan.installments} cuotas de ${money(amount)}${last!==null&&last>0&&Math.abs(last-amount)>=.01?` · Última ${money(last)}`:""}${hasTotal?` · Total ${money(total)}`:""}`;
+}
+
 type PricingProduct = Pick<Product, "id" | "price" | "financing">;
 const cached = new Map<string, { plans: FinancingOption[]; expires: number }>();
 const pending = new Map<string, Promise<FinancingOption[]>>();

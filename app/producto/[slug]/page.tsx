@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { catalog } from "@/lib/catalog";
 import { ProductActions } from "@/app/components/product-actions";
+import { ProductFinancingSummary } from "@/app/components/product-financing-summary";
 import { ProductCard } from "@/app/components/product-card";
 import { ProductDecisionDetails } from "@/app/components/product-decision-details";
 import { ProductMediaViewer } from "@/app/components/product-media-viewer";
@@ -96,7 +97,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </section>
 
         <section className="product-information">
-          <article><span>▣</span><div><h2>Financiación clara</h2><p>{product.financing.length ? "Opciones disponibles en el catálogo." : "Consultá las opciones de pago disponibles para este producto."}</p></div></article>
+          <ProductFinancingSummary product={product} />
           <article><span>⌂</span><div><h2>Entrega y disponibilidad</h2><p>Consultá disponibilidad y condiciones de entrega para tu zona.</p></div></article>
           <article><span>✓</span><div><h2>Garantía y respaldo</h2><p>Consultá la garantía correspondiente a este producto.</p></div></article>
         </section>

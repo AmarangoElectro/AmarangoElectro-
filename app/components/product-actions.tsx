@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import type { Product } from "@/lib/catalog";
 import { announcePurchaseIntent, buildPurchaseIntentProduct } from "@/lib/commerce/purchase-intent";
 import {useProductShare} from "@/components/ui/use-product-share";
+import {useStorefrontFinancing} from "@/lib/commerce/use-storefront-financing";
+import {numericPlans,formatStorefrontPlan} from "@/lib/commerce/storefront-financing";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 import { getAuthorizedReferralShareCode, getPendingAttribution } from "@/lib/growth/referral-attribution-client";
 import {
@@ -20,6 +22,8 @@ export function ProductActions({ product }: { product: Product }) {
   const favoritesSnapshot = useSyncExternalStore(subscribeFavorites, getFavoritesSnapshot, getFavoritesServerSnapshot);
   const favorite = parseFavoritesSnapshot(favoritesSnapshot).has(product.id);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const financing=useStorefrontFinancing([product]);
+  const plans=numericPlans(financing.data[product.id]?.length?financing.data[product.id]:product.financing);
 
   useEffect(() => { setReferralCode(getAuthorizedReferralShareCode()); }, []);
 
@@ -34,11 +38,13 @@ export function ProductActions({ product }: { product: Product }) {
   }
 
   const sharing=useProductShare();
-  const shareInput=()=>({name:product.name,url:window.location.href,cashPriceArs:product.price?.amount??null,installments:product.financing.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,referralCode,productId:product.id});
+  const shareInput=()=>({name:product.name,url:window.location.href,cashPriceArs:product.price?.amount??null,installments:plans.map(plan=>({installments:plan.installments,amountArs:plan.installmentAmount?.amount??null,totalArs:plan.totalAmount?.amount??null})),imageUrl:product.image?.src??null,referralCode,productId:product.id});
   async function share(){playSonicCue("share");await sharing.share(shareInput())}
 
   function consult() {
     const payload = buildPurchaseIntentProduct(product, window.location.href, getPendingAttribution());
+    const featured=plans.find(plan=>plan.installments===6)??plans.at(-1);
+    if(featured)payload.financingLabel=`${formatStorefrontPlan(featured)} · Orientativa; confirmá la cotización`;
     announcePurchaseIntent(payload);
     playSonicCue("intent");
   }

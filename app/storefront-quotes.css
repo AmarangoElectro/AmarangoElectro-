@@ -7,3 +7,5 @@
 [data-theme="dark"] .product-card-premium .product-card-installment-hero > strong { color: #fff; }
 [data-theme="dark"] .product-card-premium .product-card-installment-hero > span { color: #dfebfc; }
 [data-theme="dark"] .product-card-premium .product-card-cash { color: #aabbd3; }
+.product-decision-financing-options { margin: 0 0 10px; padding-left: 16px; color: var(--ink); font-size: 12px; line-height: 1.65; }
+.product-decision-financing-options li + li { margin-top: 8px; }
