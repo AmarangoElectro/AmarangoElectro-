@@ -5,14 +5,16 @@ import {runInNewContext} from "node:vm";
 import {build} from "esbuild";
 
 async function load(file){const result=await build({entryPoints:[file],bundle:true,write:false,format:"esm",platform:"node"});return import("data:text/javascript;base64,"+Buffer.from(result.outputFiles[0].text).toString("base64"));}
-const parser=await load("lib/photo-intelligence/flyer-text.ts"),comparison=await load("lib/catalog/comparison.ts");
+const parser=await load("lib/photo-intelligence/flyer-text.ts"),comparison=await load("lib/catalog/comparison.ts"),facts=await load("lib/photo-intelligence/product-facts.ts");
 const base={id:"a",name:'IPHONE 16 Pro 512GB',brand:"Apple",model:"iPhone 16 PRO",features:[],specifications:{Colores:"Natural"},stock:{label:"A confirmar"},warranty:null,price:{amount:2490000},financing:[]};
 
 test("Android screenshot fragments become separate facts without duplicate camera text",()=>{
   const other={...base,id:"b",name:'IPHONE 16 E 128GB',features:["16e 128GB y\nCÁMARA 48 MP"],specifications:{Colores:"black"}};
   const rows=comparison.buildComparisonRows([base,other]);
-  assert.deepEqual(rows.find(row=>row.id==="spec:Almacenamiento").values,["512GB","128GB"]);
-  assert.deepEqual(rows.find(row=>row.id==="features").items,[[],["Cámara: 48 MP"]]);
+  assert.equal(facts.presentableProductFacts(base).specifications.Almacenamiento,"512GB");
+  assert.equal(facts.presentableProductFacts(other).specifications.Almacenamiento,"128GB");
+  assert.equal(facts.presentableProductFacts(other).specifications.Cámara,"48 MP");
+  assert.deepEqual(rows.map(row=>row.id),["price"]);
   assert.doesNotMatch(JSON.stringify(rows),/16e 128GB y|CÁMARA 48 MP/);
   assert.equal(rows.some(row=>row.id.startsWith("financing:")),false);
   assert.equal(rows.some(row=>row.id==="warranty"||row.id==="availability"),false);

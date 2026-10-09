@@ -6,8 +6,7 @@ import { ArrowUpRight, GitCompareArrows, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Product } from "@/lib/catalog";
 import type { FinancingOption } from "@/lib/catalog/types";
-import { buildComparisonRows,commonSpecificationKeys } from "@/lib/catalog/comparison";
-import {useProductFlyerFacts} from "@/lib/photo-intelligence/use-product-flyer-facts";
+import { buildComparisonRows } from "@/lib/catalog/comparison";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
 
 interface ProductComparisonProps {
@@ -20,25 +19,25 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
   const [open, setOpen] = useState(false);
   const [differencesOnly, setDifferencesOnly] = useState(false);
   const [financing,setFinancing] = useState<Record<string,FinancingOption[]>>({});
+  const [loadingFinancing,setLoadingFinancing] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const {products:documentedProducts,reading}=useProductFlyerFacts(products,open);
-  const commonKeys=commonSpecificationKeys(documentedProducts);
-  const rows = buildComparisonRows(documentedProducts.map(product=>({...product,financing:product.financing.length?product.financing:financing[product.id]??[]})));
+  const rows = buildComparisonRows(products.map(product=>({...product,financing:product.financing.length?product.financing:financing[product.id]??[]})));
   const visibleRows = differencesOnly ? rows.filter((row) => row.differs) : rows;
-  const knownPrices = products.map((product) => product.price?.amount).filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount));
+  const knownPrices = products.map((product) => product.price?.amount).filter((amount): amount is number => typeof amount === "number" && Number.isFinite(amount) && amount>0);
   const priceRange = knownPrices.length > 1 ? Math.max(...knownPrices) - Math.min(...knownPrices) : null;
   const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
   useEffect(()=>{
     if(!open)return;
-    const controller=new AbortController();setFinancing({});
-    fetch("/api/v16/comparison-financing",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:products.map(product=>product.id)}),signal:controller.signal}).then(response=>response.json()).then(body=>{if(!controller.signal.aborted&&body.status==="ok")setFinancing(body.data)}).catch(()=>{});
+    const controller=new AbortController();setFinancing({});setLoadingFinancing(true);
+    fetch("/api/v16/comparison-financing",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ids:products.map(product=>product.id)}),signal:controller.signal}).then(response=>response.json()).then(body=>{if(!controller.signal.aborted&&body.status==="ok")setFinancing(body.data)}).catch(()=>{}).finally(()=>{if(!controller.signal.aborted)setLoadingFinancing(false)});
     return()=>controller.abort();
   },[open,products]);
 
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
     document.body.style.overflow = "hidden";
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -65,6 +64,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
+      if(previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus({preventScroll:true});
     };
   }, [open]);
 
@@ -104,8 +104,8 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
         </div>
         <div className="compare-dock-actions">
           <button type="button" className="compare-clear" aria-label="Limpiar productos seleccionados" onClick={clearProducts}><Trash2 size={15} /> Limpiar</button>
-          <button type="button" className="compare-open" aria-label="Comparar precios y características" disabled={products.length < 2} onClick={openComparison}>
-            Comparar productos <ArrowUpRight size={16} />
+          <button type="button" className="compare-open" aria-label="Comparar precios y cuotas" disabled={products.length < 2} onClick={openComparison}>
+            Comparar precios y cuotas <ArrowUpRight size={16} />
           </button>
         </div>
       </aside>
@@ -115,9 +115,9 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
           <section ref={panelRef} className="compare-panel" role="dialog" aria-modal="true" aria-labelledby="compare-title" aria-describedby="compare-description">
             <header className="compare-panel-header">
               <div>
-                <p className="eyebrow orange">COMPARACIÓN INTELIGENTE</p>
-                <h2 id="compare-title">Compará cuotas y características.</h2>
-                <p id="compare-description">{reading?"Leyendo las fotos para comparar…":commonKeys.length?`${commonKeys.length} ${commonKeys.length===1?"característica en común":"características en común"}. Compará los datos disponibles.`:"Mostramos únicamente los datos legibles y disponibles de cada producto."} Las cuotas son orientativas; la cotización oficial confirma el importe.</p>
+                <p className="eyebrow orange">COMPARACIÓN</p>
+                <h2 id="compare-title">Compará precios y cuotas.</h2>
+                <p id="compare-description">Contado y opciones de cuotas, en un solo lugar. Las cuotas son orientativas; la cotización oficial confirma el importe.</p>
               </div>
               <button type="button" ref={closeButtonRef} className="compare-close" aria-label="Cerrar comparación" onClick={() => setOpen(false)}><X size={20} /></button>
             </header>
@@ -137,7 +137,7 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
               <small>{visibleRows.length} {visibleRows.length === 1 ? "dato comparable" : "datos comparables"}</small>
             </div>
 
-            <div className="compare-table-scroll" tabIndex={0} aria-label="Tabla comparativa; desplazamiento horizontal disponible en pantallas pequeñas">
+            <div className="compare-table-scroll" tabIndex={0} aria-label="Tabla de precios y cuotas; desplazamiento horizontal disponible en pantallas pequeñas">
               <div className="compare-table" data-count={products.length} style={{ "--compare-count": products.length } as CSSProperties}>
                 <div className="compare-corner"><span>PRODUCTO</span></div>
                 {products.map((product) => (
@@ -158,16 +158,16 @@ export function ProductComparison({ products, onRemove, onClear }: ProductCompar
                 {visibleRows.length ? visibleRows.map((row) => (
                   <div className={`compare-row ${row.differs ? "is-different" : ""}`} key={row.id}>
                     <div className="compare-row-label"><span>{row.label}</span>{row.differs && <small>DIFERENCIA</small>}</div>
-                    {row.values.map((value, index) => <div className="compare-cell" key={`${row.id}:${products[index]?.id}`}>{row.items ? (row.items[index]?.length ? <ul className="compare-fact-list">{row.items[index].map(item=><li key={item}>{item}</li>)}</ul> : <span className="compare-no-facts">—</span>) : value}</div>)}
+                    {row.values.map((value, index) => <div className={`compare-cell${row.id==="price"&&knownPrices.length>1&&products[index]?.price?.amount===Math.min(...knownPrices)?" is-best-price":""}`} key={`${row.id}:${products[index]?.id}`}>{value}</div>)}
                   </div>
                 )) : (
-                  <div className="compare-no-differences">No hay diferencias documentadas entre estos productos con los datos disponibles.</div>
+                  <div className="compare-no-differences">{rows.length?"Los precios y cuotas disponibles coinciden.":"Consultá los precios y las opciones de cuotas de estos productos."}</div>
                 )}
               </div>
             </div>
 
             <footer className="compare-panel-footer">
-              <p>La comparación ayuda a decidir; la ficha individual conserva el detalle completo de cada producto.</p>
+              <p aria-live="polite">{loadingFinancing?"Consultando cuotas…":rows.some(row=>row.id.startsWith("financing:"))?"Cuotas orientativas. Confirmá el importe final con tu asesor.":"Consultá con tu asesor las opciones de cuotas disponibles."}</p>
               <button type="button" onClick={() => setOpen(false)}>Seguir explorando</button>
             </footer>
           </section>

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { revealIfNeeded } from "@/lib/ux/interaction-motion";
 import type { Product } from "@/lib/catalog";
 import type { BrandDrawerDefinition } from "@/lib/catalog/brand-drawers";
 import { getBrandCampaignArtwork } from "./brand-campaign-banner";
@@ -22,6 +23,15 @@ type BrandProductAccordionProps = {
 
 export function BrandProductAccordion({ categorySlug, sectorSlug, products, brands }: BrandProductAccordionProps) {
   const [openBrands, setOpenBrands] = useState<Set<string>>(() => new Set());
+  const rootRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!openBrands.size) return;
+    const frame = requestAnimationFrame(() => {
+      const panel = rootRef.current?.querySelector<HTMLElement>(".brand-product-drawer-panel");
+      if (panel) revealIfNeeded(panel);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [openBrands]);
   const productsByBrand = useMemo(() => {
     const grouped = new Map<string, Product[]>();
     for (const product of products) {
@@ -37,7 +47,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
   }
 
   return (
-    <section className="brand-product-accordion" aria-labelledby="brand-accordion-title">
+    <section ref={rootRef} className="brand-product-accordion" aria-labelledby="brand-accordion-title">
       <div className="brand-product-accordion-intro">
         <div>
           <p className="eyebrow orange">LOCALES DE MARCA</p>
@@ -93,7 +103,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
               </button>
 
               {isOpen ? (
-                <div className="brand-product-drawer-panel" id={panelId}>
+                <div className="brand-product-drawer-panel" id={panelId} data-amarango-enter>
                   <header>
                     <div><small>CATÁLOGO</small><strong>{brandProducts.length ? `Productos de ${brand.title}` : `${brand.title} está preparado`}</strong></div>
                     <Link href={`/categoria/${categorySlug}?marca=${encodeURIComponent(brand.brand)}${sectorSlug ? `&sector=${encodeURIComponent(sectorSlug)}` : ""}#catalogo`}>Ver tienda completa <span aria-hidden="true">→</span></Link>

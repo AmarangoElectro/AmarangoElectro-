@@ -1,0 +1,40 @@
+/* Motion adds feedback without changing page structure or banner artwork. */
+.amarango-touch-wave {
+  position: fixed;
+  z-index: 2147483000;
+  width: 36px;
+  height: 36px;
+  margin: -18px;
+  border: 1.5px solid #ff7920;
+  border-radius: 50%;
+  box-shadow: 0 0 0 5px #1976e826, 0 0 18px #ff79204a;
+  pointer-events: none;
+  animation: amarango-touch .38s ease-out both;
+}
+.compare-cell.is-best-price { color: #146842; background: #dff7ed; font-weight: 800; }
+:root[data-theme="dark"] .compare-cell.is-best-price { color: #7cf1ba; background: #113829; }
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root) { animation: amarango-page-out .14s ease-out both; }
+  ::view-transition-new(root) { animation: amarango-page-in .18s ease-out both; }
+  :root:not([data-performance-profile="lean"]) [data-amarango-enter] { animation: amarango-reveal .24s cubic-bezier(.2,.8,.2,1) both; }
+  :root:not([data-performance-profile="lean"]) :is(.catalog-section, .compare-dock, .compare-panel, .subscriber-storefront, .internal-main, .subscription-page) button:not(.brand-product-drawer-trigger) {
+    transition: box-shadow .18s ease-out, background-color .18s ease-out, color .18s ease-out, border-color .18s ease-out;
+  }
+  :root:not([data-performance-profile="lean"]) :is(.catalog-section, .compare-dock, .compare-panel, .subscriber-storefront) button:not(:disabled):not(.brand-product-drawer-trigger):active {
+    box-shadow: 0 0 0 3px #1976e826, 0 0 14px #ff79202b;
+  }
+  .brand-product-drawer-toggle { transition: transform .22s cubic-bezier(.2,.8,.2,1), background-color .18s ease-out; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .amarango-touch-wave { display: none; }
+  .compare-overlay, .compare-panel, [data-amarango-enter] { animation: none !important; }
+  .brand-product-drawer-toggle { transition: none !important; }
+}
+:root[data-performance-profile="lean"] .amarango-touch-wave { display: none; }
+:root[data-performance-profile="lean"]::view-transition-old(root), :root[data-performance-profile="lean"]::view-transition-new(root) { animation: none; }
+@keyframes amarango-touch { from { opacity: .8; transform: scale(.5); } to { opacity: 0; transform: scale(1.8); } }
+@keyframes amarango-reveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes amarango-page-out { to { opacity: 0; } }
+@keyframes amarango-page-in { from { opacity: 0; } to { opacity: 1; } }

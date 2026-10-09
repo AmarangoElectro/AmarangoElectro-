@@ -25,6 +25,7 @@ import {
   subscribeCompare,
 } from "@/lib/commerce/compare-store";
 import { playSonicCue } from "@/lib/ux/sonic-feedback";
+import { motionAllowed } from "@/lib/ux/interaction-motion";
 import { BrandCampaignBanner, hasCompleteBrandCampaign } from "./brand-campaign-banner";
 import { brandsShareFamily } from "@/lib/catalog/brand-family";
 import { deriveFacetGroups, getFacetScope, matchesFacets, productFacetValues, type FacetKey, type FacetSelection } from "@/lib/catalog/smart-facets";
@@ -139,6 +140,16 @@ export function CatalogClient({
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const previousQuick = useRef(quickSelection);
+  useEffect(() => {
+    if (previousQuick.current === quickSelection) return;
+    previousQuick.current = quickSelection;
+    const results = resultsRef.current;
+    if (!results || !motionAllowed(window, document) || !results.animate) return;
+    const animation = results.animate([{ opacity: .55, transform: "translateY(5px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: 180, easing: "ease-out" });
+    return () => animation.cancel();
+  }, [quickSelection]);
   const deferredSearch = useDeferredValue(search);
   const favoritesSnapshot = useSyncExternalStore(subscribeFavorites, getFavoritesSnapshot, getFavoritesServerSnapshot);
   const favoriteIds = useMemo(() => parseFavoritesSnapshot(favoritesSnapshot), [favoritesSnapshot]);
@@ -536,7 +547,7 @@ export function CatalogClient({
         {[{ id: "all", label: "Todos" }, ...quickFilters].map((item) => <button key={item.id} type="button" className={quickSelection === item.id ? "active" : ""} aria-pressed={quickSelection === item.id} onClick={() => { setQuickSelection(item.id); playSonicCue("filter"); }}>{item.label}</button>)}
       </nav>}
       {filtered.length ? (
-        <div className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
+        <div ref={resultsRef} className={`catalog-grid ${catalogUpdating ? "is-updating" : ""} ${filtered.length <= 2 ? "sparse-results" : ""}`} aria-busy={catalogUpdating}>{filtered.map((product) => {
             const customerCard = (
               <ProductCard
                 key={product.id}

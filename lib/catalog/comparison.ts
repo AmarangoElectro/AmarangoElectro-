@@ -10,8 +10,6 @@ export interface ComparisonRow {
 }
 const money=new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0});
 const unknown="A confirmar";
-const known=(value:string|null|undefined)=>Boolean(value?.trim()&&!/^(?:a confirmar|desconocido|unknown|no disponible)$/i.test(value.trim()));
-function text(value:string|null|undefined){return known(value)?value!.trim():unknown;}
 function facts(product:Pick<Product,"specifications">&Partial<Pick<Product,"name"|"features">>){
   return presentableProductFacts({name:product.name??"",features:product.features??[],specifications:product.specifications});
 }
@@ -29,23 +27,17 @@ function createRow(id:string,label:string,values:string[]):ComparisonRow{
 }
 export function buildComparisonRows(products:readonly Product[]):ComparisonRow[]{
   if(products.length<2)return [];
-  const documented=products.map(product=>({...product,...facts(product)}));
   const baseRows=[
-    createRow("brand","Marca",products.map(product=>text(product.brand))),
-    createRow("model","Modelo",products.map(product=>text(product.model))),
     createRow("price","Contado",products.map(product=>product.price&&Number.isFinite(product.price.amount)&&product.price.amount>0?money.format(product.price.amount):unknown)),
-    createRow("availability","Disponibilidad",products.map(product=>text(product.stock.label))),
-    createRow("warranty","Garantía",products.map(product=>text(product.warranty))),
-    createRow("colors","Colores",documented.map(product=>text(product.specifications.Colores))),
   ].filter(row=>row.values.some(value=>value!==unknown));
-  const keys=commonSpecificationKeys(documented);
-  const specificationRows=keys.map(key=>createRow(`spec:${key}`,key,documented.map(product=>product.specifications[key])));
-  const items=documented.map(product=>Object.entries(product.specifications).filter(([key])=>key!=="Colores"&&!keys.includes(key)).slice(0,5).map(([key,value])=>`${key}: ${value}`));
-  const ownRows:ComparisonRow[]=items.some(list=>list.length)?[{...createRow("features","Características de cada producto",items.map(list=>list.join("\n"))),items}]:[];
-  const counts=[...new Set(products.flatMap(product=>product.financing.filter(plan=>Number.isFinite(plan.installmentAmount?.amount)&&plan.installmentAmount!.amount>0).map(plan=>plan.installments)))].sort((a,b)=>a-b);
+  const counts=[...new Set(products.flatMap(product=>product.financing.filter(plan=>Number.isInteger(plan.installments)&&plan.installments>0&&Number.isFinite(plan.installmentAmount?.amount)&&plan.installmentAmount!.amount>0).map(plan=>plan.installments)))].sort((a,b)=>a-b);
   const financingRows=counts.map(count=>createRow(`financing:${count}`,`${count} cuotas`,products.map(product=>{
     const plan=product.financing.find(option=>option.installments===count&&Number.isFinite(option.installmentAmount?.amount)&&option.installmentAmount!.amount>0);
-    return plan?.installmentAmount?`${count} × ${money.format(plan.installmentAmount.amount)}`:unknown;
+    if(!plan?.installmentAmount)return unknown;
+    const total=plan.totalAmount?.amount;
+    const hasTotal=typeof total==="number"&&Number.isFinite(total)&&total>0;
+    const last=hasTotal?Math.round((total-plan.installmentAmount.amount*(count-1))*100)/100:null;
+    return `${count} × ${money.format(plan.installmentAmount.amount)}${last!==null&&last>0&&last!==plan.installmentAmount.amount?` · Última ${money.format(last)}`:""}${hasTotal?` · Total ${money.format(total)}`:""}`;
   })));
-  return [...baseRows,...financingRows,...specificationRows,...ownRows];
+  return [...baseRows,...financingRows];
 }

@@ -40,17 +40,19 @@ test("a reused flyer cannot attach the other storage variant",()=>{
  assert.equal(got.specifications.Almacenamiento,"256 GB");assert.equal(got.specifications.RAM,"4 GB");
  assert.doesNotMatch(got.features.join("\n"),/128\s*GB/);assert.match(got.features.join("\n"),/256/);
 });
-test("comparison normalizes aliases, caps common keys at five and flags real differences",()=>{
+test("technical helper normalizes aliases while financial comparison excludes specifications",()=>{
  const a={...base,specifications:{"Memoria RAM":"8 GB",Almacenamiento:"256 GB",Pantalla:'6.7"',Procesador:"Octa-Core",Batería:"5000 mAh",Conectividad:"Wi-Fi",Potencia:"20 W",Proveedor:"private"}};
  const b={...a,id:"b",specifications:{...a.specifications,"Memoria RAM":"12 GB"}};
  assert.equal(comparison.commonSpecificationKeys([a,b]).length,5);
- const rows=comparison.buildComparisonRows([a,b]);assert.equal(rows.find(r=>r.id==="spec:RAM").differs,true);
- assert.equal(rows.some(r=>r.id==="spec:Proveedor"),false);
+ const rows=comparison.buildComparisonRows([a,b]);assert.deepEqual(rows,[]);
+ assert.equal(guard.presentableProductFacts(a).specifications.RAM,"8 GB");
+ assert.equal(guard.presentableProductFacts(b).specifications.RAM,"12 GB");
 });
-test("no common keys falls back to each product's own literal characteristics",()=>{
+test("product facts remain available in fichas but never enter financial comparison",()=>{
  const a={...base,features:["Bluetooth 5.3"],specifications:{Batería:"5000 mAh"}},b={...base,id:"b",features:["Grill"],specifications:{Capacidad:"70 L"}};
  const rows=comparison.buildComparisonRows([a,b]);assert.equal(rows.some(r=>r.id.startsWith("spec:")),false);
- const own=rows.find(r=>r.id==="features");assert.match(own.values[0],/Bluetooth/);assert.match(own.values[1],/70 L/);
+ assert.equal(rows.some(r=>r.id==="features"),false);
+ assert.match(guard.presentableProductFacts(a).features.join(" "),/Bluetooth/);assert.match(guard.presentableProductFacts(b).features.join(" "),/70 L/);
 });
 test("PDP hides empty technical sections and renders populated evidence",async()=>{
  const {ProductDecisionDetails}=await load("app/components/product-decision-details.tsx");

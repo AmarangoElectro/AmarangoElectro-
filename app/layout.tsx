@@ -8,6 +8,8 @@ import "./subscriptions.css";
 import "./sector-banners.css";
 import "./brand-drawers.css";
 import "./app-dialogs.css";
+import "./interaction-motion.css";
+import { AmarangoMotion } from "./components/amarango-motion";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteScrollReset } from "./components/route-scroll-reset";
 import { FloatingScrollTop } from "./components/floating-scroll-top";
@@ -41,6 +43,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="antialiased">
         <PerformanceBudget />
         <ScrollQualityManager />
+        <AmarangoMotion />
         <PwaManager />
         <RouteScrollReset />
         <FloatingScrollTop />

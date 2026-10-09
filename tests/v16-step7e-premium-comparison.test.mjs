@@ -47,10 +47,10 @@ test("comparison engine marks only actual value differences", async () => {
   `;
   const { stdout } = await execFileAsync(process.execPath, ["--experimental-strip-types", "--input-type=module", "-e", script], { cwd: new URL("../", import.meta.url) });
   const result = JSON.parse(stdout);
-  assert.equal(result.model, true);
+  assert.equal(result.model, undefined);
   assert.equal(result.price, false);
   assert.equal(result.features, undefined); // Empty technical lists do not create a row.
-  assert.equal(result["spec:RAM"], false);
+  assert.equal(result["spec:RAM"], undefined);
 });
 
 test("comparison uses only read-only financing transport", async () => {
