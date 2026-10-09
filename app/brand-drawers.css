@@ -1,8 +1,13 @@
 /* Category brand drawers: keep approved campaign artwork and immediate cards. */
 .brand-product-accordion { margin-top: 14px; }
+.brand-product-accordion-list { grid-template-columns: minmax(0, 1fr); }
+.brand-product-drawer,
+.brand-product-drawer-trigger,
+.brand-product-drawer-panel { min-width: 0; max-width: 100%; }
 .brand-product-accordion .brand-product-drawer-trigger { aspect-ratio: 3 / 1; }
 .brand-product-drawer-panel > .catalog-section.is-embedded-brand { width: 100%; max-width: none; padding: 0; margin: 0; }
-.catalog-section.is-embedded-brand .catalog-toolbar-shell { position: static; margin-top: 0; }
+.catalog-section.is-embedded-brand .catalog-toolbar-shell { position: static; margin: 0 0 15px; padding-inline: 0; }
+.catalog-section.is-embedded-brand :is(.catalog-search-wrap, .catalog-quick-filters, .catalog-grid) { min-width: 0; max-width: 100%; }
 .catalog-section.is-embedded-brand .catalog-count { margin: 12px 0 8px; }
 .catalog-section.is-embedded-brand .catalog-quick-filters { margin-bottom: 8px; }
 .catalog-section.is-embedded-brand .catalog-quick-filters button { min-height: 44px; }
