@@ -91,3 +91,48 @@ html[data-theme="dark"] .brand-product-drawer-context-shade { background: linear
   .brand-product-drawer-panel:not([hidden]), .internal-catalog-drawer[open] > .internal-catalog-drawer-content { animation: none; }
   .internal-catalog-drawer > summary svg { transition: none; }
 }
+
+/* Secondary brands follow the supplied compact row reference. */
+.brand-product-accordion .is-secondary-brand {
+  border-color: color-mix(in srgb, var(--line) 45%, transparent);
+  border-radius: 10px;
+  background: var(--soft);
+  box-shadow: none;
+}
+.brand-product-accordion .is-secondary-brand + .is-secondary-brand { margin-top: -6px; }
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-trigger {
+  min-height: 52px;
+  padding: 10px 14px;
+  gap: 10px;
+  background: var(--soft);
+}
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-label { gap: 8px; }
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-label strong {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -.15px;
+}
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-label small { font-size: 11px; }
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-toggle {
+  flex-basis: 22px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  color: var(--orange);
+}
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-trigger:is(:active, :focus-visible, [aria-expanded="true"]) {
+  outline: 1px solid var(--blue);
+  outline-offset: -1px;
+  box-shadow: none;
+}
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-trigger::after { display: none; }
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-panel { border-radius: 0 0 10px 10px; }
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-panel > header { margin-bottom: 10px; }
+.brand-product-accordion .is-secondary-brand .brand-product-drawer-panel header strong { font-size: 18px; letter-spacing: -.3px; }
+@media (max-width: 760px) {
+  .brand-product-accordion .is-secondary-brand + .is-secondary-brand { margin-top: -2px; }
+}

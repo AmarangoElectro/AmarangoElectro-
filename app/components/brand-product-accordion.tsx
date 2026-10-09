@@ -84,7 +84,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
           const panelId = `brand-products-${brand.slug}`;
 
           return (
-            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${backdrop ? " has-contextual-art" : ""}${compact ? " is-compact-drawer" : ""}`} key={brand.slug}>
+            <article className={`brand-product-drawer${isOpen ? " is-open" : ""}${backdrop ? " has-contextual-art" : ""}${compact ? " is-compact-drawer" : ""}${!premium ? " is-secondary-brand" : ""}`} key={brand.slug}>
               <button
                 type="button"
                 className="brand-product-drawer-trigger"
@@ -112,7 +112,7 @@ export function BrandProductAccordion({ categorySlug, sectorSlug, products, bran
                 ) : null}
                 <span className="brand-product-drawer-label">
                   <small>{brandProducts.length ? `${brandProducts.length} ${brandProducts.length === 1 ? "producto" : "productos"}` : "LOCAL PREPARADO"}</small>
-                  <strong style={locale ? { fontFamily: locale.fontFamily } : undefined}>{brand.title}</strong>
+                  <strong style={premium && locale ? { fontFamily: locale.fontFamily } : undefined}>{brand.title}</strong>
                 </span>
                 <span className="brand-product-drawer-toggle" aria-hidden="true"><ChevronDown size={22} /></span>
               </button>
