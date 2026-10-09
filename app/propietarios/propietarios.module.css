@@ -298,17 +298,15 @@
 }
 
 :global(html[data-theme="dark"]) .workspace {
-    background:
-      radial-gradient(circle at top right, rgba(255, 126, 0, 0.08), transparent 32rem),
-      #07111f;
-    color: #f4f7fb;
+    background: var(--background);
+    color: var(--foreground);
 }
 
 :global(html[data-theme="dark"]) .guardrails > div,
 :global(html[data-theme="dark"]) .moduleCard,
 :global(html[data-theme="dark"]) .nextGate {
-    background: #0d1b2d;
-    border-color: rgba(255, 255, 255, 0.09);
+    background: var(--card);
+    border-color: var(--line);
     box-shadow: none;
 }
 
@@ -316,7 +314,7 @@
 :global(html[data-theme="dark"]) .nextGate h2,
 :global(html[data-theme="dark"]) .guardrails strong,
 :global(html[data-theme="dark"]) .owner {
-    color: #f5f7fb;
+    color: var(--foreground);
 }
 
 :global(html[data-theme="dark"]) .sectionIntro > span,
@@ -324,14 +322,19 @@
 :global(html[data-theme="dark"]) .guardrails span,
 :global(html[data-theme="dark"]) .nextGate > p,
 :global(html[data-theme="dark"]) .owners > span {
-    color: #9eb0c7;
+    color: var(--muted-foreground);
 }
 
 :global(html[data-theme="dark"]) .moduleCard small {
-    background: #13243a;
-    color: #b7c5d8;
+    background: var(--soft);
+    color: var(--muted-foreground);
 }
 
 :global(html[data-theme="dark"]) .iconWrap {
     background: rgba(255, 138, 31, 0.13);
+}
+
+:global(html[data-theme="dark"]) .hero {
+  background: linear-gradient(135deg, var(--card), var(--soft));
+  border-color: var(--line);
 }

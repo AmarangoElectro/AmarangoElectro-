@@ -1,4 +1,4 @@
-const CACHE = "amarango-v16-shell-v2";
+const CACHE = "amarango-v16-shell-v3";
 const OFFLINE = "/offline.html";
 const SHELL = [OFFLINE, "/manifest.webmanifest", "/favicon.svg", "/logo-320.webp", "/icons/app-192.png", "/icons/app-512.png", "/icons/app-maskable-192.png", "/icons/app-maskable-512.png"];
 
