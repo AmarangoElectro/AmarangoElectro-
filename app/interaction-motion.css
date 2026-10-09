@@ -14,7 +14,35 @@
 .compare-cell.is-best-price { color: #146842; background: #dff7ed; font-weight: 800; }
 :root[data-theme="dark"] .compare-cell.is-best-price { color: #7cf1ba; background: #113829; }
 
+/* Blue light follows the pressed banner, never the product panel below it. */
+.brand-product-drawer { overflow: visible; }
+.brand-product-drawer-trigger { border-radius: inherit; }
+.brand-product-drawer-panel { border-radius: 0 0 27px 27px; }
+:is(.brand-product-drawer-trigger, .subcategory-banner, .subcategory-brand-campaign, .featured-sector-card):is(:active, :focus-visible),
+.brand-product-drawer-trigger[aria-expanded="true"] {
+  outline: 2px solid #298bff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px #2387ff24, 0 0 18px #2387ff5c, 0 0 34px #2387ff26;
+}
+.brand-product-drawer-trigger::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px #64b5ff, inset 0 0 16px #2387ff42;
+  opacity: 0;
+  pointer-events: none;
+}
+.brand-product-drawer-trigger:is(:active, :focus-visible)::after,
+.brand-product-drawer-trigger[aria-expanded="true"]::after { opacity: 1; }
+@media (max-width: 760px) {
+  .brand-product-drawer-panel { border-radius: 0 0 18px 18px; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .brand-product-drawer-trigger { transition: box-shadow .18s ease-out, outline-color .18s ease-out; }
+  .brand-product-drawer-trigger::after { transition: opacity .18s ease-out; }
   @view-transition { navigation: auto; }
   ::view-transition-old(root) { animation: amarango-page-out .14s ease-out both; }
   ::view-transition-new(root) { animation: amarango-page-in .18s ease-out both; }
