@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AmarangoElectro: Plan Protegido + cierre de sesiones admin 2026-10-06 v8 -->
+<!-- AmarangoElectro: Promo Día de la Madre 2026 + base completa v9 -->
 <!-- ARCHIVO PRINCIPAL AMARANGO: V-FOTO-WHATSAPP-MANUAL-3 + ESCRITORIO + INSTAGRAM + BUSQUEDA-EXACTA -->
 <html lang="es">
 <head>
@@ -907,6 +907,8 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
       onclick="tiendaToggleFormatoCuota()">💳 Vista de cuotas: Cajita</button>
     <button id="tienda-btn-sistema-precios" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#0B2D6B,#FF7A00);"
       onclick="abrirSistemaPrecios()">🧮 Sistema de precios: Clásica</button>
+    <button id="tienda-btn-promo-madre" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#ec4899,#FF7A00);"
+      onclick="abrirPromoMadre()">💐 Promo Día de la Madre: ACTIVA</button>
     <button id="tienda-btn-subs" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="verSuscriptores()">📧 Ver correos suscritos</button>
     <button id="tienda-btn-pdf" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#c0392b;"
@@ -1133,6 +1135,8 @@ function bloquePrecioAntes(p, tam){
 // Devuelve {n: cantidad de cuotas, valor: valor de cada cuota} de la mejor cuota
 // Si el producto tiene sinInteres (número de cuotas), calcula SIN recargo: contado ÷ N
 function mejorCuotaDatos(precio, prod){
+  var promo=promoMadreDatos(prod);
+  if(promo)return {n:3,valor:promo.cuota,sinInteres:true,promoMadre:true,total:promo.total,ahorro:promo.ahorro};
   if(prod && prod.sinInteres){
     var ns=parseInt(prod.sinInteres,10);
     if(ns>0){ var vcs=Math.round(precio/ns/1000)*1000; return { n:ns, valor:vcs, sinInteres:true }; }
@@ -1154,6 +1158,8 @@ function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
 // Arma las líneas de cuotas según los planes activos, SIEMPRE en orden fijo 2→4→6
 // Si el producto tiene sinInteres, muestra esa cuota especial sin recargo
 function armarCuotasLines(precio, prod){
+  var promo=promoMadreDatos(prod);
+  if(promo)return ["💐 3 cuotas SIN INTERÉS de "+fmt(promo.cuota),"💸 Ahorrás "+fmt(promo.ahorro)+" pagando al contado"];
   if(prod && prod.sinInteres){
     var ns=parseInt(prod.sinInteres,10);
     if(ns>0){
@@ -1168,6 +1174,17 @@ function armarCuotasLines(precio, prod){
     lines.push("💳 "+n+" cuotas fijas de "+fmt(valorCuota));
   });
   return lines;
+}
+function armarMensajePromoMadre(p,link){
+  var promo=promoMadreDatos(p);if(!promo)return '';
+  var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
+    +'💐 *ESPECIAL DÍA DE LA MADRE*\n\n'
+    +'✨ *3 CUOTAS SIN INTERÉS*\n'
+    +'de *'+fmt(promo.cuota)+'*\n\n'
+    +'💸 Contado: *'+fmt(promo.contado)+'*\n'
+    +'🎁 Ahorrás *'+fmt(promo.ahorro)+'* pagando al contado';
+  if(link)msg+='\n\n🛒 Miralo acá: '+link;
+  return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
 function armarMensajePlanProtegido(nombre,datos,link){
   if(!datos||datos.modo!=='protegida')return '';
@@ -1186,6 +1203,7 @@ function armarMensajePlanProtegido(nombre,datos,link){
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
 function armarMensajeProductoPorModo(p,modo,link){
+  if(modo==='promo')return armarMensajePromoMadre(p,link);
   var datos=tiendaDatosPrecio(p,modo);
   if(modo==='protegida'&&datos.modo!=='protegida')return '';
   if(datos.modo==='protegida')return armarMensajePlanProtegido(p.nombre,datos,link);
@@ -2050,6 +2068,74 @@ var sistemaPreciosProductos=(function(){
   try{return JSON.parse(localStorage.getItem(SISTEMA_PRECIOS_PRODUCTOS_KEY)||'{}')||{};}catch(e){return {};}
 })();
 
+// ═══ PROMO DÍA DE LA MADRE 2026 ═══
+// Es una capa temporal: no reescribe precios, catálogo, stock ni proveedores.
+// Hasta el 18/10 inclusive, los productos con costo real menor a $100.000
+// muestran en 3 pagos el mismo total comercial que el plan clásico de 2 cuotas.
+var PROMO_MADRE_ID='promo_madre_2026';
+var PROMO_MADRE_KEY='ae_promo_madre_2026';
+var PROMO_MADRE_FIN_UTC=Date.UTC(2026,9,19,3,0,0); // 19/10 00:00, Argentina
+var promoMadreActiva=(function(){
+  try{
+    var guardado=localStorage.getItem(PROMO_MADRE_KEY);
+    return guardado===null?Date.now()<PROMO_MADRE_FIN_UTC:guardado==='1';
+  }catch(e){return Date.now()<PROMO_MADRE_FIN_UTC;}
+})();
+function promoMadreVigente(){return promoMadreActiva===true && Date.now()<PROMO_MADRE_FIN_UTC;}
+function promoMadreDatos(p){
+  if(!promoMadreVigente()||!p)return null;
+  var costo=Number(p.costo)||0;
+  var contado=Math.round(Number(p.venta)||0);
+  if(!(costo>0&&costo<100000&&contado>0))return null;
+  var totalPlan2=Math.round(calcularTotalPlan(contado,2));
+  // Cuota limpia a centenas y tres pagos exactamente iguales.
+  var cuota=Math.max(100,Math.ceil((totalPlan2/3)/100)*100);
+  var publicado=cuota*3;
+  return {modo:'promo_madre',costo:costo,contado:contado,cuota:cuota,total:publicado,ahorro:Math.max(0,publicado-contado)};
+}
+function tiendaGuardarPromoMadreLocal(){
+  try{localStorage.setItem(PROMO_MADRE_KEY,promoMadreActiva?'1':'0');}catch(e){}
+}
+function tiendaActualizarBotonPromoMadre(){
+  var b=document.getElementById('tienda-btn-promo-madre');if(!b)return;
+  var vigente=promoMadreVigente();
+  b.textContent='💐 Promo Día de la Madre: '+(vigente?'ACTIVA':'DESACTIVADA');
+  b.style.background=vigente?'linear-gradient(135deg,#ec4899,#FF7A00)':'#64748b';
+}
+function bajarPromoMadreNube(){
+  if(!NUBE_OK||!sbCalc)return Promise.resolve(false);
+  return sbCalc.from('tienda_catalogo').select('datos').eq('id',PROMO_MADRE_ID).maybeSingle().then(function(r){
+    if(r&&r.error)throw r.error;
+    var d=r&&r.data&&r.data.datos;
+    if(d&&typeof d.activa==='boolean')promoMadreActiva=d.activa;
+    tiendaGuardarPromoMadreLocal();tiendaActualizarBotonPromoMadre();
+    if(typeof tiendaRender==='function')tiendaRender();
+    return true;
+  }).catch(function(err){console.warn('No se pudo bajar la promo del Día de la Madre.',err);return false;});
+}
+function guardarPromoMadreNube(){
+  tiendaGuardarPromoMadreLocal();
+  if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión con Supabase'));
+  return sbCalc.from('tienda_catalogo').upsert({id:PROMO_MADRE_ID,datos:{activa:promoMadreActiva,fin:'2026-10-18T23:59:59-03:00',costoMaximo:100000},actualizado:new Date().toISOString()}).select('datos').then(function(r){if(r&&r.error)throw r.error;return true;});
+}
+function abrirPromoMadre(){
+  if(!tiendaEsAdmin)return;
+  var vigente=promoMadreVigente();
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">💐 Promo Día de la Madre</h3>'
+    +'<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px;margin:10px 0;font-size:.72rem;color:#9f1239;line-height:1.55;"><b>Productos incluidos:</b> costo real menor a $100.000.<br><b>Beneficio:</b> 3 cuotas sin interés usando el total del Plan 2.<br><b>Vigencia:</b> hasta el domingo 18 de octubre inclusive.</div>'
+    +'<button class="calc-btn" style="width:100%;background:'+(vigente?'#64748b':'linear-gradient(135deg,#ec4899,#FF7A00)')+';" onclick="cambiarPromoMadre('+(!vigente)+')">'+(vigente?'Desactivar promoción':'Activar promoción')+'</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:9px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
+  tiendaModalAbrir(html);
+}
+function cambiarPromoMadre(activa){
+  if(!tiendaEsAdmin)return;
+  if(activa && Date.now()>=PROMO_MADRE_FIN_UTC){alert('La fecha automática de esta promoción ya terminó.');return;}
+  if(!confirm('¿'+(activa?'Activar':'Desactivar')+' la Promo Día de la Madre para clientes y vendedores?'))return;
+  promoMadreActiva=!!activa;tiendaGuardarPromoMadreLocal();tiendaActualizarBotonPromoMadre();tiendaRender();
+  guardarPromoMadreNube().then(function(){mostrarToast('✅ Promo '+(promoMadreActiva?'activada':'desactivada')+' para todos');abrirPromoMadre();})
+    .catch(function(err){alert('⚠️ El cambio quedó en este dispositivo, pero la nube no lo confirmó.\n\n'+(err.message||err));});
+}
+
 function planProtegidoMargen(costo){
   costo=Number(costo)||0;
   if(costo<50000)return 80;
@@ -2146,6 +2232,8 @@ function sistemaPrecioProducto(p){
 }
 function tiendaDatosPrecio(p,modoForzado){
   if(!p)return {modo:'clasica',contado:0};
+  var promo=promoMadreDatos(p);
+  if(promo && (modoForzado==='promo'||!/^(clasica|protegida)$/.test(modoForzado||'')))return promo;
   var modo=/^(clasica|protegida)$/.test(modoForzado||'')?modoForzado:sistemaPrecioProducto(p);
   if(modo==='protegida'){
     var protegido=calcularPlanProtegido(p.costo);
@@ -2518,6 +2606,7 @@ function tiendaInit(){
     function(){ try{ bajarPremiosRuletaNube(); }catch(e){} },
     function(){ try{ bajarCuponesNube(); }catch(e){} },
     function(){ try{ bajarSistemaPreciosNube(); }catch(e){} },
+    function(){ try{ bajarPromoMadreNube(); }catch(e){} },
     function(){ try{ bajarClientesNube(); }catch(e){} },
     function(){ try{ bajarHistorialNube(); }catch(e){} },
     function(){ try{ if(NUBE_OK && sbCalc){ sbCalc.from('tienda_catalogo').select('datos').eq('id','formatocuota').maybeSingle().then(function(r){ if(r&&r.data&&r.data.datos){ try{ localStorage.setItem('ae_formato_cuota', r.data.datos); }catch(e){} tiendaRender(); } }).catch(function(){}); } }catch(e){} }
@@ -4274,6 +4363,7 @@ function tiendaAplicarModo(){
   var btnRul=document.getElementById('tienda-btn-ruleta'); if(btnRul)btnRul.style.display = tiendaEsAdmin?'block':'none';
   var btnFC=document.getElementById('tienda-btn-fmtcuota'); if(btnFC){ btnFC.style.display = tiendaEsAdmin?'block':'none'; btnFC.textContent='💳 Vista de cuotas: '+(tiendaFormatoCuota==='caja'?'Cajita':'Simple'); }
   var btnSP=document.getElementById('tienda-btn-sistema-precios'); if(btnSP){ btnSP.style.display=tiendaEsAdmin?'block':'none'; tiendaActualizarBotonSistemaPrecios(); }
+  var btnPM=document.getElementById('tienda-btn-promo-madre'); if(btnPM){ btnPM.style.display=tiendaEsAdmin?'block':'none'; tiendaActualizarBotonPromoMadre(); }
   var btnLj=document.getElementById('tienda-btn-lujo'); if(false && btnLj){ btnLj.style.display = tiendaEsAdmin?'block':'none'; btnLj.textContent='✨ Modo Lujo: '+(document.body.classList.contains('lujo')?'On':'Off'); }
   var btnSub=document.getElementById('tienda-btn-subs'); if(btnSub)btnSub.style.display = tiendaEsAdmin?'block':'none';
   var btnRe=document.getElementById('tienda-btn-restore'); if(btnRe)btnRe.style.display = tiendaEsAdmin?'block':'none';
@@ -6595,7 +6685,7 @@ function tiendaRender(){
   if(pDia && verSoloOfertas && !tiendaCategoriaActiva && !qDia){
     var pidDia="'"+pDia.id+"'";
     var datosDia=tiendaDatosPrecio(pDia);
-    var cdDia=datosDia.modo==='clasica'?mejorCuotaDatos(pDia.venta, pDia):null;
+    var cdDia=datosDia.modo!=='protegida'?mejorCuotaDatos(pDia.venta, pDia):null;
     diaDiv.innerHTML='<div onclick="tiendaVerDetalle('+pidDia+')" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.12);border:2px solid #f0c040;position:relative;overflow:hidden;">'
       +'<div style="position:absolute;top:0;right:0;background:#f0c040;color:#1a1a2e;font-size:.6rem;font-weight:900;padding:3px 12px;border-radius:0 14px 0 12px;">🌟 PRODUCTO DEL DÍA</div>'
       +(tiendaEsAdmin?'<button onclick="event.stopPropagation();quitarDelDia('+pidDia+')" title="Quitar de producto del día" style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,.9);border:none;width:26px;height:26px;border-radius:50%;font-size:.85rem;font-weight:900;color:#DC2626;cursor:pointer;line-height:1;padding:0;z-index:5;">✕</button>':'')
@@ -6917,6 +7007,17 @@ function tiendaCardsHtml(sublista){
       +'</div>'
       +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.62rem;font-weight:900;color:'+cm.txt+';background:'+cm.bg+';border:1.5px solid '+cm.bor+';border-radius:7px;padding:3px 8px;margin-bottom:4px;display:inline-block;box-shadow:inset 0 -5px 0 rgba(255,255,255,.18);">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
+        if(datosPrecioCard.modo==='promo_madre'){
+          return '<div style="background:linear-gradient(145deg,#9f1239,#ec4899 52%,#FF7A00);border-radius:13px;padding:10px 8px;margin:5px 0 7px;color:#fff;text-align:center;box-shadow:0 5px 16px rgba(190,24,93,.24);">'
+            +'<div style="font-size:.56rem;font-weight:900;letter-spacing:.8px;color:#fff1f2;">💐 ESPECIAL DÍA DE LA MADRE</div>'
+            +'<div style="font-size:.72rem;font-weight:900;margin-top:5px;">3 CUOTAS SIN INTERÉS</div>'
+            +'<div style="font-size:.58rem;font-weight:800;margin-top:2px;">DE</div>'
+            +'<div style="font-size:1.42rem;font-weight:900;line-height:1.05;color:#fff;overflow-wrap:anywhere;">'+fmt(datosPrecioCard.cuota)+'</div>'
+            +'<div style="height:1px;background:rgba(255,255,255,.28);margin:8px 2px 6px;"></div>'
+            +'<div style="font-size:.6rem;">Contado: <b>'+fmt(datosPrecioCard.contado)+'</b></div>'
+            +'<div style="font-size:.61rem;font-weight:900;color:#fff7cc;margin-top:3px;">🎁 Ahorrás '+fmt(datosPrecioCard.ahorro)+'</div>'
+            +'</div>';
+        }
         if(datosPrecioCard.modo==='protegida'){
           return '<div class="plan-protegido-box">'
             +'<div style="font-size:.57rem;font-weight:900;color:#FFD7B0;letter-spacing:.8px;margin:0 1px 2px;">🤝 RETIRALO HOY CON</div>'
@@ -7977,7 +8078,7 @@ function prepararCajonTools(){
       'tienda-btn-cargar','tienda-btn-celus','tienda-btn-carac',
       'tienda-btn-subir','tienda-btn-banner','tienda-btn-cupones','tienda-btn-stats',
       'tienda-btn-clientes','tienda-btn-papelera','tienda-btn-backup',
-      'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-sistema-precios','tienda-btn-subs','tienda-btn-pdf',
+      'tienda-btn-ruleta','tienda-btn-fmtcuota','tienda-btn-sistema-precios','tienda-btn-promo-madre','tienda-btn-subs','tienda-btn-pdf',
       'tienda-btn-backup-download','tienda-btn-restore','tienda-btn-diag',
       'tienda-btn-diag-ocultos','tienda-btn-restaurar-manuales',
       'tienda-btn-auth-fotos','tienda-btn-auth-fotos-salir','btn-limpiar-dup','btn-reclasificar'
@@ -8279,10 +8380,11 @@ function tiendaVerDetalle(id){
   if(datosPrecioDetalle.modo==='protegida'){
     html+=htmlPlanProtegidoResumen(datosPrecioDetalle,tiendaEsAdmin);
   }else{
+  var _promoDetalle=promoMadreDatos(p);
   var _mejor=mejorCuotaDatos(p.venta, p);
   if(_mejor){
     html+='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:14px;padding:11px 14px;margin-bottom:9px;box-shadow:0 5px 16px rgba(11,45,107,.22);">'
-      +'<div style="color:rgba(255,255,255,.62);font-size:.55rem;font-weight:800;letter-spacing:1.1px;">PAGÁ EN CUOTAS FIJAS</div>'
+      +'<div style="color:'+(_promoDetalle?'#FFD7E5':'rgba(255,255,255,.62)')+';font-size:.55rem;font-weight:800;letter-spacing:1.1px;">'+(_promoDetalle?'💐 ESPECIAL DÍA DE LA MADRE':'PAGÁ EN CUOTAS FIJAS')+'</div>'
       +'<div style="display:flex;align-items:baseline;gap:6px;margin-top:3px;">'
         +'<span style="color:#fff;font-size:.85rem;font-weight:800;">'+_mejor.n+' x</span>'
         +'<span style="color:var(--nar);font-size:1.7rem;font-weight:900;letter-spacing:-1px;line-height:1;">'+fmt(_mejor.valor)+'</span>'
@@ -8295,6 +8397,7 @@ function tiendaVerDetalle(id){
         +'<span style="color:rgba(255,255,255,.6);font-size:.65rem;font-weight:700;">Precio de contado</span>'
         +'<span style="color:#fff;font-size:.95rem;font-weight:900;">'+fmt(p.venta)+'</span>'
       +'</div>'
+      +(_promoDetalle?'<div style="color:#fff7cc;font-size:.66rem;font-weight:900;text-align:right;margin-top:4px;">🎁 Ahorrás '+fmt(_promoDetalle.ahorro)+'</div>':'')
       +'</div>';
   } else {
     html+='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 6px 20px rgba(11,45,107,.22);">'
@@ -8313,8 +8416,15 @@ function tiendaVerDetalle(id){
   // ═══ PLANES DE CUOTAS ═══
   if(datosPrecioDetalle.modo!=='protegida'){
   html+='<div style="font-size:.64rem;font-weight:800;color:var(--sub);letter-spacing:1px;margin-bottom:7px;">ELEGÍ TU PLAN</div>';
+  if(_promoDetalle){
+    html+='<div style="background:linear-gradient(135deg,#ec4899,#FF7A00);color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 3px 10px rgba(236,72,153,.3);">'
+      +'<div style="font-size:.62rem;font-weight:900;opacity:.95;letter-spacing:.5px;">💐 PROMO HASTA EL 18/10</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;gap:8px;">'
+      +'<span style="font-weight:800;font-size:.85rem;">3 cuotas SIN INTERÉS</span>'
+      +'<span style="font-weight:900;font-size:1.1rem;white-space:nowrap;">'+fmt(_promoDetalle.cuota)+'</span></div></div>';
+  }
   // plan SIN INTERÉS destacado (si el producto lo tiene)
-  if(p.sinInteres){
+  if(p.sinInteres && !_promoDetalle){
     var nsiD=parseInt(p.sinInteres,10);
     var vsiD=Math.round(p.venta/nsiD/1000)*1000;
     html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 3px 10px rgba(255,122,0,.3);">'
@@ -8323,7 +8433,7 @@ function tiendaVerDetalle(id){
       +'<span style="font-weight:800;font-size:.85rem;">'+nsiD+' cuotas SIN INTERÉS</span>'
       +'<span style="font-weight:900;font-size:1.1rem;">'+fmt(vsiD)+'</span></div></div>';
   }
-  for(var n=2;n<=12;n++){
+  if(!_promoDetalle)for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
       var vc=Math.round(calcularTotalPlan(p.venta,n)/n/1000)*1000;
       var esLaMejor=(_mejor && _mejor.n===n && !_mejor.sinInteres);
@@ -8549,8 +8659,10 @@ function abrirOpcionesCompartirAdmin(id){
   var p=buscarProd(id);if(!p)return;
   var pid="'"+p.id+"'";
   var tieneCosto=Number(p.costo)>0;
+  var promo=promoMadreDatos(p);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📤 Compartir producto</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí qué propuesta querés enviar para <b>'+escapeHtml(p.nombre)+'</b>.</p>'
+    +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">💐 Promo Día de la Madre</button>':'')
     +'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:var(--az);" onclick="compartirProducto('+pid+',\'clasica\')">Calculadora 1 — Clásica</button>'
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--nar)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'protegida\')">Calculadora 2 — Plan Protegido</button>'
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--gr)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'ambas\')">Compartir ambas opciones</button>'
@@ -8575,7 +8687,8 @@ function compartirProducto(id,modoForzado){
   var base=window.location.href.split('#')[0].split('?')[0];
   var linkProd=base+'?prod='+encodeURIComponent(id);
   var modo=typeof modoForzado==='string'?modoForzado:sistemaPrecioProducto(p);
-  var msg=modo==='ambas'?armarMensajeProductoAmbos(p,linkProd):armarMensajeProductoPorModo(p,modo,linkProd);
+  var promoDirecta=promoMadreDatos(p) && (modoForzado==='promo'||typeof modoForzado!=='string');
+  var msg=promoDirecta?armarMensajePromoMadre(p,linkProd):(modo==='ambas'?armarMensajeProductoAmbos(p,linkProd):armarMensajeProductoPorModo(p,modo,linkProd));
   if(!msg){alert('Para compartir el Plan Protegido primero cargá el costo real del producto.');return;}
   document.getElementById('modal-cuotas').style.display='none';
 
@@ -8632,10 +8745,10 @@ function compartirInstagram(id){
   var linkProd=base+'?prod='+encodeURIComponent(id);
   var datosPrecioInstagram=tiendaDatosPrecio(p);
   var mejor=null;
-  try{ mejor=datosPrecioInstagram.modo==='clasica'?mejorCuotaDatos(p.venta,p):null; }catch(e){}
+  try{ mejor=datosPrecioInstagram.modo!=='protegida'?mejorCuotaDatos(p.venta,p):null; }catch(e){}
   var texto='🐝 '+(p.nombre||'Producto')+'\n\n';
   if(datosPrecioInstagram.modo==='protegida')texto+='🤝 Retiralo por '+fmt(datosPrecioInstagram.inicial)+'\n🚀 3 pagos · luego 2 de '+fmt(datosPrecioInstagram.plan3.cuotas[0])+'\n💥 6 pagos · luego 5 de '+fmt(datosPrecioInstagram.plan6.cuotas[0])+'\n';
-  else if(mejor) texto+='💳 '+mejor.n+' cuotas fijas de '+fmt(mejor.valor)+'\n';
+  else if(mejor) texto+=(mejor.promoMadre?'💐 ESPECIAL DÍA DE LA MADRE\n✨ ':'💳 ')+mejor.n+' cuotas '+(mejor.sinInteres?'SIN INTERÉS':'fijas')+' de '+fmt(mejor.valor)+'\n'+(mejor.promoMadre?'🎁 Ahorrás '+fmt(mejor.ahorro)+' al contado\n':'');
   texto+='💵 Contado: '+fmt(datosPrecioInstagram.contado)
     +'\n\n📲 Consultanos para reservarlo'
     +'\n🔗 '+linkProd
@@ -9031,7 +9144,7 @@ function tiendaCatalogoPDF(){
     html+='<div class="grid">';
     cats[cat].forEach(function(p){
       var datosPdf=tiendaDatosPrecio(p);
-      var cd=datosPdf.modo==='clasica'?mejorCuotaDatos(p.venta,p):null;
+      var cd=datosPdf.modo!=='protegida'?mejorCuotaDatos(p.venta,p):null;
       var fotoHtml=p.foto
         ? '<img class="foto" src="'+p.foto+'" alt="">'
         : '<div class="noimg">📦</div>';
@@ -10296,8 +10409,17 @@ function tiendaVerCuotas(id){
   }else{
     html+='<div style="font-size:1.3rem;font-weight:900;color:var(--nar);margin:4px 0 12px;">Contado: '+fmt(p.venta)+'</div>'
       +'<div style="font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;margin-bottom:8px;">Planes de cuotas</div>';
+  var promoCuotas=promoMadreDatos(p);
+  if(promoCuotas){
+    html+='<div style="background:linear-gradient(135deg,#ec4899,#FF7A00);color:#fff;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(236,72,153,.3);">'
+      +'<div style="font-size:.7rem;font-weight:900;opacity:.95;">💐 ESPECIAL DÍA DE LA MADRE</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;gap:8px;">'
+      +'<span style="font-weight:800;">3 cuotas SIN INTERÉS</span>'
+      +'<span style="font-weight:900;font-size:1.1rem;white-space:nowrap;">3 x '+fmt(promoCuotas.cuota)+'</span></div>'
+      +'<div style="font-size:.68rem;font-weight:900;margin-top:6px;color:#fff7cc;">🎁 Ahorrás '+fmt(promoCuotas.ahorro)+' pagando al contado</div></div>';
+  }
   // plan SIN INTERÉS destacado (si el producto lo tiene)
-  if(p.sinInteres){
+  if(p.sinInteres && !promoCuotas){
     var nsi=parseInt(p.sinInteres,10);
     var vsi=Math.round(p.venta/nsi/1000)*1000;
     html+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(255,122,0,.3);">'
@@ -10306,7 +10428,7 @@ function tiendaVerCuotas(id){
       +'<span style="font-weight:800;">'+nsi+' cuotas SIN INTERÉS</span>'
       +'<span style="font-weight:900;font-size:1.1rem;">'+nsi+' x '+fmt(vsi)+'</span></div></div>';
   }
-  for(var n=2;n<=12;n++){
+  if(!promoCuotas)for(var n=2;n<=12;n++){
     if(planesConfig[n] && planesConfig[n].activo){
       var total=calcularTotalPlan(p.venta,n);
       var valorCuota=Math.round(total/n/1000)*1000;
