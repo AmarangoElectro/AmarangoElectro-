@@ -1186,6 +1186,19 @@ function armarMensajePromoMadre(p,link){
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
+function armarMensajePromoMadreCliente(p,link){
+  var beneficio=promoMadreCliente6Datos(p);if(!beneficio)return '';
+  var promo=beneficio.promo3;
+  var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
+    +'💐 *ESPECIAL DÍA DE LA MADRE*\n\n'
+    +'✨ *3 CUOTAS SIN INTERÉS*\n'
+    +'de *'+fmt(promo.cuota)+'*\n\n'
+    +'⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*\n'
+    +'*6 cuotas de '+fmt(beneficio.cuota)+'*\n\n'
+    +'💸 Ahorrás *'+fmt(promo.ahorro)+'* pagando al contado';
+  if(link)msg+='\n\n🛒 Miralo acá: '+link;
+  return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
+}
 function armarMensajePlanProtegido(nombre,datos,link){
   if(!datos||datos.modo!=='protegida')return '';
   var cuota3=datos.plan3.cuotas[0]||0;
@@ -1204,6 +1217,7 @@ function armarMensajePlanProtegido(nombre,datos,link){
 }
 function armarMensajeProductoPorModo(p,modo,link){
   if(modo==='promo')return armarMensajePromoMadre(p,link);
+  if(modo==='promo_cliente_6')return armarMensajePromoMadreCliente(p,link);
   var datos=tiendaDatosPrecio(p,modo);
   if(modo==='protegida'&&datos.modo!=='protegida')return '';
   if(datos.modo==='protegida')return armarMensajePlanProtegido(p.nombre,datos,link);
@@ -2086,12 +2100,24 @@ function promoMadreDatos(p){
   if(!promoMadreVigente()||!p)return null;
   var costo=Number(p.costo)||0;
   var contado=Math.round(Number(p.venta)||0);
-  if(!(costo>0&&costo<100000&&contado>0))return null;
+  var esCelular=!!p.esCelu||/celular|smartphone|iphone|motorola|samsung|xiaomi|redmi|moto\s/i.test(String(p.categoria||'')+' '+String(p.nombre||''));
+  // Electro y hogar: costo menor a $100.000. Celulares seleccionados:
+  // costo de hasta $350.000, tal como se definió para esta campaña.
+  var incluido=(costo>0&&costo<100000)||(esCelular&&costo>0&&costo<=350000);
+  if(!(incluido&&contado>0))return null;
   var totalPlan2=Math.round(calcularTotalPlan(contado,2));
   // Cuota limpia a centenas y tres pagos exactamente iguales.
   var cuota=Math.max(100,Math.ceil((totalPlan2/3)/100)*100);
   var publicado=cuota*3;
-  return {modo:'promo_madre',costo:costo,contado:contado,cuota:cuota,total:publicado,ahorro:Math.max(0,publicado-contado)};
+  return {modo:'promo_madre',costo:costo,contado:contado,cuota:cuota,total:publicado,ahorro:Math.max(0,publicado-contado),esCelular:esCelular};
+}
+function promoMadreCliente6Datos(p){
+  var promo=promoMadreDatos(p);
+  if(!promo||!promo.esCelular||promo.costo>350000)return null;
+  // Beneficio reservado: total del Plan 4 (+55 %) distribuido en 6 pagos.
+  var totalPlan4=Math.round(calcularTotalPlan(promo.contado,4));
+  var cuota6=Math.max(100,Math.ceil((totalPlan4/6)/100)*100);
+  return {cuota:cuota6,total:cuota6*6,contado:promo.contado,promo3:promo};
 }
 function tiendaGuardarPromoMadreLocal(){
   try{localStorage.setItem(PROMO_MADRE_KEY,promoMadreActiva?'1':'0');}catch(e){}
@@ -8660,9 +8686,11 @@ function abrirOpcionesCompartirAdmin(id){
   var pid="'"+p.id+"'";
   var tieneCosto=Number(p.costo)>0;
   var promo=promoMadreDatos(p);
+  var promoCliente6=promoMadreCliente6Datos(p);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📤 Compartir producto</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí qué propuesta querés enviar para <b>'+escapeHtml(p.nombre)+'</b>.</p>'
     +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">💐 Promo Día de la Madre</button>':'')
+    +(promoCliente6?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#0B2D6B,#2563EB);" onclick="compartirProducto('+pid+',\'promo_cliente_6\')">⭐ Cliente Amarango — compartir 3 + 6 cuotas</button>':'')
     +'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:var(--az);" onclick="compartirProducto('+pid+',\'clasica\')">Calculadora 1 — Clásica</button>'
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--nar)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'protegida\')">Calculadora 2 — Plan Protegido</button>'
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--gr)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'ambas\')">Compartir ambas opciones</button>'
@@ -8688,7 +8716,7 @@ function compartirProducto(id,modoForzado){
   var linkProd=base+'?prod='+encodeURIComponent(id);
   var modo=typeof modoForzado==='string'?modoForzado:sistemaPrecioProducto(p);
   var promoDirecta=promoMadreDatos(p) && (modoForzado==='promo'||typeof modoForzado!=='string');
-  var msg=promoDirecta?armarMensajePromoMadre(p,linkProd):(modo==='ambas'?armarMensajeProductoAmbos(p,linkProd):armarMensajeProductoPorModo(p,modo,linkProd));
+  var msg=modoForzado==='promo_cliente_6'?armarMensajePromoMadreCliente(p,linkProd):(promoDirecta?armarMensajePromoMadre(p,linkProd):(modo==='ambas'?armarMensajeProductoAmbos(p,linkProd):armarMensajeProductoPorModo(p,modo,linkProd)));
   if(!msg){alert('Para compartir el Plan Protegido primero cargá el costo real del producto.');return;}
   document.getElementById('modal-cuotas').style.display='none';
 
