@@ -1181,8 +1181,7 @@ function armarMensajePromoMadre(p,link){
     +'💐 *ESPECIAL DÍA DE LA MADRE*\n\n'
     +'✨ *3 CUOTAS SIN INTERÉS*\n'
     +'de *'+fmt(promo.cuota)+'*\n\n'
-    +'💸 Contado: *'+fmt(promo.contado)+'*\n'
-    +'🎁 Ahorrás *'+fmt(promo.ahorro)+'* pagando al contado';
+    +'🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
@@ -1195,7 +1194,7 @@ function armarMensajePromoMadreCliente(p,link){
     +'de *'+fmt(promo.cuota)+'*\n\n'
     +'⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*\n'
     +'*6 cuotas de '+fmt(beneficio.cuota)+'*\n\n'
-    +'💸 Ahorrás *'+fmt(promo.ahorro)+'* pagando al contado';
+    +'🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
