@@ -602,6 +602,8 @@ body.oscuro #tienda-grid .plan-protegido-opcion{background:#fff !important;borde
   .ae-card-paybtn{font-size:.61rem;padding:8px 5px;}
   .ae-card-actions{gap:5px;}
   .ae-card-actions .calc-btn,.ae-card-actions button{font-size:.61rem !important;padding:7px 3px !important;}
+  /* En celular la acción para ampliar siempre queda visible y legible. */
+  #tienda-grid .prod-ampliar-btn{display:flex !important;visibility:visible !important;opacity:1 !important;align-items:center;justify-content:center;width:100% !important;min-height:38px !important;background:#f7f9fc !important;color:#10244a !important;border:1px solid #dce4ef !important;}
 }
 
 @media(max-width:350px){
@@ -610,15 +612,94 @@ body.oscuro #tienda-grid .plan-protegido-opcion{background:#fff !important;borde
 }
 
 @media(min-width:900px){
-  .ae-hero-slider{max-width:1672px !important;aspect-ratio:1672/941 !important;height:auto !important;min-height:0 !important;}
+  html,body{width:100% !important;max-width:none !important;margin:0 !important;}
+  body{box-shadow:none !important;}
+  .header,#nav-inferior,#tienda-selec-bar{max-width:none !important;}
+  .tab-content{width:100% !important;max-width:none !important;padding-left:clamp(24px,3vw,58px) !important;padding-right:clamp(24px,3vw,58px) !important;}
+  .ae-hero-slider{width:100% !important;max-width:none !important;aspect-ratio:1672/941 !important;height:auto !important;min-height:0 !important;}
   .ae-hero-slide{background-size:contain !important;background-position:center !important;}
   .ae-hero-slide-1{background-image:url('hero-descanso-horizontal.png') !important;}
   .ae-hero-slide-2{background-image:url('hero-hogar-horizontal.png') !important;}
   .ae-hero-slide-3{background-image:url('hero-audio-horizontal.png') !important;}
   .ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.png') !important;}
   .ae-home-links{max-width:720px;}
-  #tienda-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important;}
+  #tienda-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr)) !important;}
   #tienda-grid .prod-foto{height:245px !important;}
+}
+
+@media(max-width:899px){
+  #tab-tienda,#tienda-cont,#tienda-grid{background:transparent !important;}
+  .ae-hero-menu{color:#fff !important;background:rgba(5,24,55,.88) !important;border-color:rgba(255,255,255,.75) !important;}
+}
+
+/* ═══ PORTADAS HORIZONTALES EN TODOS LOS DISPOSITIVOS ═══ */
+.ae-hero-slider{width:100% !important;max-width:none !important;aspect-ratio:1672/941 !important;height:auto !important;min-height:0 !important;background:#07172d !important;}
+.ae-hero-slide{background-size:contain !important;background-position:center !important;}
+.ae-hero-slide-1{background-image:url('hero-descanso-horizontal.png') !important;}
+.ae-hero-slide-2{background-image:url('hero-hogar-horizontal.png') !important;}
+.ae-hero-slide-3{background-image:url('hero-audio-horizontal.png') !important;}
+.ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.png') !important;}
+
+/* ═══ DOS TEMAS REALES PARA LAS TARJETAS ═══
+   Claro: blanco luminoso. Oscuro: azul profundo con brillo Amarango. */
+body:not(.oscuro) #tienda-grid .prod-card{
+  background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%) !important;
+  border:1px solid #d9e4f2 !important;
+  color:#10244a !important;
+  box-shadow:0 7px 20px rgba(16,61,125,.12),0 0 0 1px rgba(255,255,255,.9) inset !important;
+}
+body:not(.oscuro) #tienda-grid .prod-card:nth-child(even){
+  box-shadow:0 7px 20px rgba(229,97,0,.11),0 0 0 1px rgba(255,255,255,.9) inset !important;
+}
+body.oscuro,body.oscuro.rol-admin,body.oscuro.rol-revendedor{
+  background:radial-gradient(circle at top,#163467 0%,#08172f 42%,#050d1c 100%) fixed !important;
+  color:#eef5ff !important;
+}
+body.oscuro #tienda-grid .prod-card{
+  background:linear-gradient(165deg,#142d55 0%,#0b1d3a 100%) !important;
+  border:1px solid rgba(87,157,255,.58) !important;
+  color:#eef5ff !important;
+  box-shadow:0 9px 25px rgba(0,0,0,.34),0 0 18px rgba(35,117,255,.2),inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+body.oscuro #tienda-grid .prod-card:nth-child(even){
+  border-color:rgba(255,139,48,.58) !important;
+  box-shadow:0 9px 25px rgba(0,0,0,.34),0 0 18px rgba(255,122,0,.18),inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+body.oscuro #tienda-grid .prod-nombre,
+body.oscuro #tienda-grid .ae-card-price,
+body.oscuro #tienda-grid .ae-card-price b{color:#fff !important;}
+body.oscuro #tienda-grid .prod-marca{color:#ff9a47 !important;}
+body.oscuro #tienda-grid .ae-card-paycopy{color:#b9c8dc !important;}
+body.oscuro #tienda-grid .prod-ampliar-btn,
+body.oscuro #tienda-grid .ae-card-paybtn,
+body.oscuro #tienda-grid .ae-card-actions .calc-btn,
+body.oscuro #tienda-grid .prod-card details summary{
+  background:rgba(255,255,255,.08) !important;
+  color:#f5f8ff !important;
+  border-color:rgba(255,255,255,.18) !important;
+}
+body.oscuro #tienda-grid .ae-finance,
+body.oscuro #tienda-grid .plan-protegido-box{
+  background:rgba(5,18,40,.58) !important;
+  color:#fff !important;
+  border-color:rgba(255,255,255,.16) !important;
+}
+body.oscuro #tienda-grid .ae-finance-promo-main,
+body.oscuro #tienda-grid .ae-finance-classic-main,
+body.oscuro #tienda-grid .ae-finance-contado,
+body.oscuro #tienda-grid .ae-finance-ahorro,
+body.oscuro #tienda-grid .plan-protegido-opcion{background:rgba(255,255,255,.07) !important;}
+body.oscuro #tienda-grid .ae-finance-promo-main>span,
+body.oscuro #tienda-grid .ae-finance-classic-main>span,
+body.oscuro #tienda-grid .ae-finance-contado b,
+body.oscuro #tienda-grid .plan-protegido-titulo{color:#fff !important;}
+body.oscuro #tienda-grid .ae-finance-contado,
+body.oscuro #tienda-grid .ae-finance-ahorro,
+body.oscuro #tienda-grid .plan-protegido-detalle{color:#c2d0e3 !important;}
+
+@media(max-width:899px){
+  .ae-hero-slider{border-radius:12px !important;margin-bottom:12px !important;}
+  .ae-hero-menu{width:38px;height:38px;top:9px;right:9px;}
 }
 
 </style>
