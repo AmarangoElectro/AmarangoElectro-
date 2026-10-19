@@ -390,10 +390,10 @@ body.rol-admin{background:#f5f7fb !important;color:#10244a;}
 .ae-hero-slider{position:relative;display:block !important;width:100%;aspect-ratio: .67;min-height:0 !important;padding:0 !important;overflow:hidden;background:#061a3f !important;isolation:isolate;}
 .ae-hero-slider::before,.ae-hero-slider::after{display:none !important;}
 .ae-hero-slide{position:absolute;inset:0;opacity:0;background-repeat:no-repeat;background-size:100% auto;background-position:center 48%;animation:aeHeroRotacion 24s infinite ease-in-out;transform:scale(1.002);}
-.ae-hero-slide-1{background-image:url('hero-descanso.jpeg');animation-delay:0s;}
-.ae-hero-slide-2{background-image:url('hero-hogar.jpeg');animation-delay:6s;}
-.ae-hero-slide-3{background-image:url('hero-audio.jpeg');animation-delay:12s;}
-.ae-hero-slide-4{background-image:url('hero-climatizacion.jpeg');animation-delay:18s;}
+.ae-hero-slide-1{background-image:url('hero-descanso-limpio.png');animation-delay:0s;}
+.ae-hero-slide-2{background-image:url('hero-hogar-limpio.png');animation-delay:6s;}
+.ae-hero-slide-3{background-image:url('hero-audio-limpio.png');animation-delay:12s;}
+.ae-hero-slide-4{background-image:url('hero-climatizacion-limpio.png');animation-delay:18s;}
 @keyframes aeHeroRotacion{0%{opacity:0}3%,22%{opacity:1}25%,100%{opacity:0}}
 .ae-hero-menu{position:absolute;top:12px;right:12px;z-index:5;width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(5,24,55,.75);color:#fff;font-size:21px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);backdrop-filter:blur(6px);}
 .ae-hero-dots{position:absolute;left:18px;bottom:14px;z-index:5;display:flex;gap:7px;align-items:center;}
@@ -463,6 +463,140 @@ body.oscuro .portada-cat-cab h3{color:#fff !important;}
   .ae-hero-slide{background-size:cover;background-position:center 48%;}
   #tienda-grid{gap:15px !important;}
   #tienda-grid .prod-card{padding:11px !important;}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NUEVA TIENDA AMARANGO — diseño integral aprobado
+   Esta capa reemplaza visualmente la interfaz anterior sin mezclar estilos.
+   ═══════════════════════════════════════════════════════════════ */
+:root{--ae-ink:#071d49;--ae-blue:#0B2D6B;--ae-link:#0967d9;--ae-orange:#FF6F0A;--ae-line:#dfe6ef;--ae-soft:#f5f7fb;}
+html{background:#edf2f8 !important;}
+body,body.rol-admin,body.rol-revendedor{background:var(--ae-soft) !important;color:var(--ae-ink);}
+.tab-content{padding-top:12px !important;}
+
+.header{background:#fff !important;border:0 !important;border-bottom:1px solid var(--ae-line) !important;box-shadow:0 4px 16px rgba(7,29,73,.07) !important;}
+.header-info h1{font-size:1.12rem !important;font-weight:900 !important;color:var(--ae-blue) !important;}
+.header-info p{color:#667085 !important;}
+.hdr-menu-btn{border-radius:12px !important;}
+.hdr-buscar input{height:48px;border:2px solid #2b68ad !important;border-radius:26px !important;background:#fff !important;font-size:.88rem !important;}
+
+/* Portadas limpias 2:3: cada archivo contiene únicamente el banner. */
+.ae-hero-slider{width:100%;max-width:720px;margin:0 auto 14px !important;aspect-ratio:2/3 !important;height:auto !important;min-height:0 !important;border-radius:16px !important;background:#07172d !important;box-shadow:0 7px 22px rgba(7,29,73,.15) !important;}
+.ae-hero-slide{background-size:contain !important;background-position:center !important;transform:none !important;background-color:#07172d;}
+.ae-hero-menu{display:none !important;}
+.ae-hero-dots{left:18px !important;bottom:14px !important;}
+
+.ae-home-links{max-width:720px;margin:0 auto 15px;display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.ae-home-links button{min-width:0;min-height:58px;display:grid;grid-template-columns:34px 1fr 16px;align-items:center;gap:5px;background:#fff;border:1px solid var(--ae-line);border-left:4px solid #0967d9;border-radius:13px;padding:10px 12px;color:var(--ae-ink);font-family:inherit;cursor:pointer;box-shadow:0 2px 9px rgba(7,29,73,.04);text-align:left;}
+.ae-home-links button:nth-child(even){border-left-color:var(--ae-orange);}
+.ae-home-links span{color:var(--ae-orange);font-size:1.45rem;font-weight:500;line-height:1;}
+.ae-home-links b{font-size:.78rem;font-weight:850;white-space:normal;line-height:1.08;}
+.ae-home-links i{font-size:1.35rem;font-style:normal;color:#23395e;text-align:right;}
+
+#tienda-buscar-wrap{max-width:100% !important;margin:0 !important;}
+#tienda-chips.cat-grid{padding:1px 0 9px !important;}
+#tienda-chips .cat-tile{min-height:55px !important;border:1px solid var(--ae-line) !important;border-radius:12px !important;box-shadow:none !important;}
+#tienda-grid{margin-top:12px !important;gap:12px !important;align-items:stretch !important;}
+#tienda-grid .prod-card{height:100%;padding:11px !important;border:1px solid var(--ae-line) !important;border-radius:15px !important;box-shadow:0 4px 14px rgba(7,29,73,.06) !important;background:#fff !important;}
+#tienda-grid .prod-card>div:first-child{margin:-2px -2px 0 !important;border:1px solid #c9d6e6;border-radius:11px !important;background:#fff !important;}
+#tienda-grid .prod-card>div:first-child>button{display:none !important;}
+#tienda-grid .prod-foto{height:220px !important;object-fit:contain !important;border-radius:10px !important;background:#fff !important;}
+.prod-ampliar-btn{margin:9px 0 10px !important;min-height:40px;background:#f6f7f9 !important;border:1px solid #e1e5eb !important;border-radius:22px !important;color:#0d244e !important;font-size:.7rem !important;}
+.prod-marca{margin:0 1px 4px !important;color:#e36d00 !important;font-size:.56rem !important;}
+#tienda-grid .prod-nombre{font-size:.82rem !important;line-height:1.27 !important;min-height:42px !important;color:#091d43 !important;font-weight:850 !important;}
+.ae-card-badge{background:var(--ae-orange);color:#fff;font-size:.59rem;font-weight:900;padding:5px 9px;border-radius:7px;box-shadow:none;letter-spacing:.25px;}
+
+.ae-finance{margin:6px 0 8px;border-radius:12px;overflow:hidden;}
+.ae-finance-promo{background:#fff;border:1px solid #edf0f4;}
+.ae-finance-promo-main{display:grid;grid-template-columns:1fr 1.18fr;align-items:center;gap:8px;padding:10px 8px;background:#fff4ec;color:#e65300;}
+.ae-finance-promo-main>b{font-size:.72rem;line-height:1.03;border-right:1px solid #ffb985;padding-right:7px;}
+.ae-finance-promo-main>span{font-size:1.12rem;line-height:1;font-weight:900;color:#0a214e;white-space:nowrap;}
+.ae-finance-promo-main small{display:block;font-size:.5rem;font-weight:700;margin-top:3px;}
+.ae-finance-consulta{padding:8px;background:#edf6ff;color:#0960c7;font-size:.58rem;font-weight:850;text-align:center;}
+.ae-finance-ahorro{padding:7px 6px;color:#283852;font-size:.55rem;line-height:1.25;}
+.ae-finance-classic{border:1px solid #dfe8f4;background:#f3f7fc;}
+.ae-finance-classic-main{display:grid;grid-template-columns:1fr 1.12fr;align-items:center;gap:7px;padding:10px 8px;color:#e45f00;}
+.ae-finance-classic-main>b{font-size:.68rem;line-height:1.06;border-right:1px solid #c9d8ea;padding-right:6px;}
+.ae-finance-classic-main>span{font-size:1.08rem;line-height:1;font-weight:900;color:#0a214e;white-space:nowrap;}
+.ae-finance-classic-main small{display:block;font-size:.49rem;font-weight:700;margin-top:3px;color:#52637b;}
+.ae-finance-contado{padding:7px 8px;border-top:1px solid #dfe8f4;background:#fff;color:#52637b;font-size:.58rem;}
+.ae-finance-contado b{color:#0a214e;}
+
+/* Tarjetas profesionales: una sola jerarquía visual para todos los planes. */
+.ae-finance,.plan-protegido-box{box-shadow:none !important;}
+.ae-finance-promo,.ae-finance-classic,.plan-protegido-box{background:#f7f9fc !important;border:1px solid #dce4ef !important;color:#0a214e !important;}
+.ae-finance-promo-main,.ae-finance-classic-main{background:#f7f9fc !important;color:#0a214e !important;grid-template-columns:1fr !important;gap:5px !important;text-align:left !important;padding:11px 12px !important;}
+.ae-finance-promo-main>b,.ae-finance-classic-main>b{border:0 !important;border-bottom:1px solid #dce4ef !important;padding:0 0 7px !important;color:#e46100 !important;font-size:.68rem !important;letter-spacing:.35px;}
+.ae-finance-promo-main>span,.ae-finance-classic-main>span{font-size:clamp(1.05rem,2vw,1.35rem) !important;color:#0a214e !important;white-space:normal !important;overflow-wrap:anywhere;line-height:1.08 !important;}
+.ae-finance-promo-main small,.ae-finance-classic-main small{font-size:.57rem !important;color:#667085 !important;}
+.ae-finance-consulta{background:#eef4fb !important;color:#0b57a4 !important;border-top:1px solid #dce4ef;font-size:.61rem !important;line-height:1.3;}
+.ae-finance-ahorro,.ae-finance-contado{background:#fff !important;color:#5b6678 !important;font-size:.61rem !important;line-height:1.35;}
+.ae-card-price{margin:6px 0 2px;color:#101828;font-size:.9rem;font-weight:900;line-height:1.2;overflow-wrap:anywhere;}
+.ae-card-price b{color:#101828;font-size:1.04rem;}
+.ae-card-paycopy{margin:4px 0 8px;color:#667085;font-size:.65rem;line-height:1.3;}
+.ae-card-paybtn{width:100%;min-height:43px;padding:9px 8px;background:#f5f7fa;color:#0755ad;border:1px solid #d9e0e9;border-radius:10px;font-family:inherit;font-size:.67rem;font-weight:900;cursor:pointer;line-height:1.2;}
+.ae-card-paybtn:hover{background:#edf4fc;}
+.ae-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:auto;padding-top:8px;}
+.ae-card-actions .calc-btn,.ae-card-actions button{width:100%;min-width:0;min-height:42px;margin:0 !important;padding:8px 5px !important;border-radius:10px !important;font-size:.68rem !important;box-shadow:none !important;}
+.ae-card-actions .calc-btn{background:#f7f9fc !important;color:#0755ad !important;border:1px solid #dce4ef !important;}
+.ae-card-actions .calc-btn:only-child{grid-column:1/-1;}
+.ae-card-actions .ae-publish-btn{background:#0967d9 !important;color:#fff !important;border:1px solid #0967d9 !important;}
+
+.plan-protegido-box{background:#f3f7fc !important;color:#0a214e !important;border:1px solid #dce6f1;border-radius:12px !important;padding:9px !important;}
+.plan-protegido-box>div:first-child{color:#e46100 !important;}
+.plan-protegido-box>div:nth-child(2){font-size:1.22rem !important;}
+.plan-protegido-box>div:nth-child(3){color:#3d4f68 !important;}
+.plan-protegido-opcion{border:1px solid #dbe5f1 !important;background:#fff !important;}
+.plan-protegido-box>div[style*="rgba"]{color:#52637b !important;}
+.plan-protegido-box>div:first-child{font-size:.63rem !important;letter-spacing:.45px !important;}
+.plan-protegido-box .plan-protegido-cuota{font-size:clamp(1.18rem,2vw,1.42rem) !important;overflow-wrap:anywhere;}
+.plan-protegido-opcion{padding:8px !important;border-radius:9px !important;}
+.plan-protegido-titulo{color:#0a214e !important;font-size:.68rem !important;}
+.plan-protegido-detalle{color:#536176 !important;font-size:.62rem !important;line-height:1.25;}
+.plan-protegido-box>button{background:#0967d9 !important;min-height:39px;font-size:.65rem !important;}
+
+#tienda-grid .prod-card>.calc-btn{min-height:45px !important;margin-top:auto !important;background:linear-gradient(135deg,#0B2D6B,#07539b) !important;border:0 !important;border-radius:10px !important;font-size:.78rem !important;font-weight:900 !important;}
+#tienda-grid .prod-card button[onclick*="compartirProducto"]{min-height:42px !important;background:#fff !important;color:#0B2D6B !important;border:1.5px solid #0B2D6B !important;border-radius:10px !important;font-size:.72rem !important;box-shadow:none !important;}
+#tienda-grid .prod-card button[onclick*="compartirInstagram"]{border-radius:10px !important;}
+
+#nav-inferior{background:#fff !important;}
+
+@media(max-width:430px){
+  .tab-content{padding:10px 8px 94px !important;}
+  .ae-home-links{gap:7px;}
+  .ae-home-links button{min-height:54px;padding:8px;grid-template-columns:29px 1fr 12px;}
+  .ae-home-links b{font-size:.7rem;}
+  #tienda-grid{gap:8px !important;}
+  #tienda-grid .prod-card{padding:8px !important;}
+  #tienda-grid .prod-foto{height:176px !important;}
+  .ae-finance-promo-main{grid-template-columns:1fr;gap:4px;text-align:center;}
+  .ae-finance-promo-main>b{border-right:0;border-bottom:1px solid #ffb985;padding:0 0 5px;}
+  .ae-finance-promo-main>span{font-size:1rem;}
+  .ae-finance-classic-main{grid-template-columns:1fr;gap:4px;text-align:center;}
+  .ae-finance-classic-main>b{border-right:0;border-bottom:1px solid #c9d8ea;padding:0 0 5px;}
+  .ae-finance-classic-main>span{font-size:1rem;}
+  .ae-card-price{font-size:.78rem;}
+  .ae-card-price b{font-size:.88rem;}
+  .ae-card-paybtn{font-size:.61rem;padding:8px 5px;}
+  .ae-card-actions{gap:5px;}
+  .ae-card-actions .calc-btn,.ae-card-actions button{font-size:.61rem !important;padding:7px 3px !important;}
+}
+
+@media(max-width:350px){
+  #tienda-grid{grid-template-columns:1fr !important;}
+  #tienda-grid .prod-foto{height:240px !important;}
+}
+
+@media(min-width:900px){
+  .ae-hero-slider{max-width:1672px !important;aspect-ratio:1672/941 !important;height:auto !important;min-height:0 !important;}
+  .ae-hero-slide{background-size:contain !important;background-position:center !important;}
+  .ae-hero-slide-1{background-image:url('hero-descanso-horizontal.png') !important;}
+  .ae-hero-slide-2{background-image:url('hero-hogar-horizontal.png') !important;}
+  .ae-hero-slide-3{background-image:url('hero-audio-horizontal.png') !important;}
+  .ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.png') !important;}
+  .ae-home-links{max-width:720px;}
+  #tienda-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important;}
+  #tienda-grid .prod-foto{height:245px !important;}
 }
 
 </style>
@@ -821,6 +955,13 @@ body.oscuro .portada-cat-cab h3{color:#fff !important;}
       <button class="ae-hero-menu" onclick="abrirCajon()" aria-label="Abrir menú">☰</button>
       <div class="ae-hero-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </section>
+
+    <nav class="ae-home-links" aria-label="Accesos principales">
+      <button onclick="abrirCajonCats()"><span>▣</span><b>Sectores</b><i>›</i></button>
+      <button onclick="tiendaFiltrarCat('');setTimeout(function(){document.getElementById('tienda-grid').scrollIntoView({behavior:'smooth'});},80)"><span>▦</span><b>Catálogo</b><i>›</i></button>
+      <button onclick="abrirCajonCats()"><span>☆</span><b>Nuestras marcas</b><i>›</i></button>
+      <button onclick="toggleVerFavoritos()"><span>♡</span><b>Favoritos</b><i>›</i></button>
+    </nav>
 
     <!-- Buscador debajo de la portada -->
     <div class="ae-buscar-fila"><div class="hdr-buscar ae-buscar-banner">
@@ -7053,6 +7194,9 @@ function tiendaCardsHtml(sublista){
     // ═══ ESTILO MERCADO LIBRE: la foto va PRIMERO y grande; las etiquetas se
     // superponen sobre ella para no empujarla hacia abajo. ═══
     var etiquetas='';
+    if(promoMadreDatos(p)){
+      etiquetas+='<div class="ae-card-badge">PROMO OCTUBRE</div>';
+    }
     if(p.sinStock){
       etiquetas+='<div style="background:#dc2626;color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.4px;box-shadow:0 2px 6px rgba(0,0,0,.2);">SIN STOCK</div>';
     }
@@ -7155,14 +7299,11 @@ function tiendaCardsHtml(sublista){
       +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.62rem;font-weight:900;color:'+cm.txt+';background:'+cm.bg+';border:1.5px solid '+cm.bor+';border-radius:7px;padding:3px 8px;margin-bottom:4px;display:inline-block;box-shadow:inset 0 -5px 0 rgba(255,255,255,.18);">🏪 '+p.mayorista+'</div>';})():'')
       +(function(){
         if(datosPrecioCard.modo==='promo_madre'){
-          return '<div style="background:linear-gradient(145deg,#9f1239,#ec4899 52%,#FF7A00);border-radius:13px;padding:10px 8px;margin:5px 0 7px;color:#fff;text-align:center;box-shadow:0 5px 16px rgba(190,24,93,.24);">'
-            +'<div style="font-size:.56rem;font-weight:900;letter-spacing:.8px;color:#fff1f2;">✨ PROMO OCTUBRE</div>'
-            +'<div style="font-size:.72rem;font-weight:900;margin-top:5px;">3 CUOTAS SIN INTERÉS</div>'
-            +'<div style="font-size:.58rem;font-weight:800;margin-top:2px;">DE</div>'
-            +'<div style="font-size:1.42rem;font-weight:900;line-height:1.05;color:#fff;overflow-wrap:anywhere;">'+fmt(datosPrecioCard.cuota)+'</div>'
-            +'<div style="height:1px;background:rgba(255,255,255,.28);margin:8px 2px 6px;"></div>'
-            +'<div style="font-size:.6rem;">Contado: <b>'+fmt(datosPrecioCard.contado)+'</b></div>'
-            +'<div style="font-size:.61rem;font-weight:900;color:#fff7cc;margin-top:3px;">🎁 Ahorrás '+fmt(datosPrecioCard.ahorro)+'</div>'
+          var tieneBeneficio6=!!promoMadreCliente6Datos(p);
+          return '<div class="ae-finance ae-finance-promo">'
+            +'<div class="ae-finance-promo-main"><b>3 CUOTAS<br>SIN INTERÉS</b><span>'+fmt(datosPrecioCard.cuota)+'<small>por cuota</small></span></div>'
+            +(tieneBeneficio6?'<div class="ae-finance-consulta">▣ Consultá si ingresás en 6 cuotas</div>':'')
+            +'<div class="ae-finance-ahorro">◇ Ahorrás pagando al contado: <b>'+fmt(datosPrecioCard.ahorro)+'</b></div>'
             +'</div>';
         }
         if(datosPrecioCard.modo==='protegida'){
@@ -7225,13 +7366,11 @@ function tiendaCardsHtml(sublista){
               +'<div style="font-size:1.35rem;font-weight:900;color:var(--nar);line-height:1;">'+fmt(p.venta)+'</div>'
               +'<div style="font-size:.66rem;font-weight:800;color:'+(esSI?'#0a8a3f':'var(--az)')+';margin-bottom:5px;">ó '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' SIN INTERÉS':'')+'</div>';
           }
-          // formato CAJA (Frávega): verde = sin interés, azul = cuotas fijas
-          var bgCaja=esSI?'linear-gradient(135deg,#16a34a,#22c55e)':'linear-gradient(135deg,#0B2D6B,#1a4a9e)';
-          return '<div style="background:'+bgCaja+';color:#fff;border-radius:9px;padding:7px 9px;margin-bottom:4px;">'
-              +'<div style="font-size:1.05rem;font-weight:900;line-height:1;">'+cd.n+' x '+fmt(cd.valor)+'</div>'
-              +'<div style="font-size:.6rem;font-weight:800;opacity:.95;margin-top:1px;">'+(esSI?'cuotas SIN INTERÉS ✨':'cuotas fijas')+'</div>'
-            +'</div>'
-            +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: <b style="color:var(--nar);">'+fmt(p.venta)+'</b> '+bloquePrecioAntes(p)+'</div>';
+          // formato CAJA profesional: misma identidad limpia de la nueva tienda
+          return '<div class="ae-card-price">Contado: <b>'+fmt(p.venta)+'</b></div>'
+            +'<div class="ae-card-paycopy">Consultá opciones de pago</div>'
+            +'<button class="ae-card-paybtn" onclick="event.stopPropagation();tiendaVerDetalle('+pid+')">Ver opciones de cuotas</button>'
+            +(p.precioAntes?'<div style="margin-top:5px;">'+bloquePrecioAntes(p)+'</div>':'');
         }else{
           return '<div style="font-size:1.2rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
             +'<div style="margin-bottom:6px;">'+bloquePrecioAntes(p)+'</div>';
@@ -7283,13 +7422,16 @@ function tiendaCardsHtml(sublista){
         ?'<button style="width:100%;font-size:.66rem;padding:8px 4px;margin-bottom:5px;background:#eef4ff;color:var(--az);border:1.5px solid #cddffb;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaUsarFotoProveedor('+pid+')">↩️ Usar foto del proveedor</button>'
         :'');
     }else{
-      // Un solo botón: la foto y el precio son los protagonistas.
-      // "Ver cuotas" y "Consultar" quedan adentro del detalle del producto.
-      card+='<button class="calc-btn" style="font-size:.8rem;padding:11px;background:var(--nar);margin-top:2px;font-weight:900;box-shadow:0 2px 8px rgba(255,122,0,.32);" onclick="tiendaVerDetalle('+pid+')">Ver producto</button>';
+      // Acciones limpias al pie, como en la referencia aprobada.
+      card+='<div class="ae-card-actions">'
+        +'<button class="calc-btn" onclick="tiendaVerDetalle('+pid+')">Ver producto</button>';
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
-        card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')">📤 Compartir</button>';
-        card+='<button style="width:100%;font-size:.7rem;padding:7px 4px;margin-top:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')">📸 Instagram</button>';
+        card+='<button class="ae-publish-btn" onclick="event.stopPropagation();compartirProducto('+pid+')">↗ Publicar</button>';
+      }
+      card+='</div>';
+      if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
+        card+='<button style="width:100%;font-size:.65rem;padding:7px 4px;margin-top:6px;background:#fff;color:#596579;border:1px solid #dce4ef;border-radius:9px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:none;" onclick="event.stopPropagation();compartirInstagram('+pid+')">Instagram</button>';
       }
     }
     card+='</div>';
