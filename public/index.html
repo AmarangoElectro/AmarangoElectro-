@@ -37,11 +37,11 @@
 <meta name="apple-mobile-web-app-title" content="Tienda Amarango">
 <meta name="application-name" content="Tienda Amarango">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 :root{--az:#0B2D6B;--nar:#FF7A00;--bg:#FFFFFF;--bor:#EBD9B4;--txt:#1A1A2E;--sub:#6B7280;--wh:#fff;--gr:#10B981;--red:#EF4444}
 body.oscuro{--az:#7fa8e0;--nar:#FF9838;--bg:#0a1830;--bor:#1e3a5f;--txt:#e8eef7;--sub:#9bb3d4;--wh:#122442;--gr:#34d399;--red:#f87171}
 body.oscuro{background:#0a1830;color:#e8eef7;}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 html{overflow-x:hidden;width:100%;overscroll-behavior-x:none;}
 body{color:var(--txt);min-height:100vh;width:100%;max-width:480px;margin:0 auto;overflow-x:hidden;overscroll-behavior-x:none;position:relative;letter-spacing:-.01em;line-height:1.5;}
 /* Seguridad: ningún medio/contenedor puede ser más ancho que la pantalla (evita el arrastre lateral) */
@@ -264,8 +264,8 @@ body.oscuro .prod-card{background:#122442 !important;border-color:#1e3a5f;border
 #btn-atras{display:none;position:fixed;bottom:82px;left:12px;z-index:1385;background:rgba(11,45,107,.92);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:20px;padding:7px 14px 7px 11px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 14px rgba(0,0,0,.32);align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;}
 #btn-atras:active{transform:scale(.96);}
 /* ═══ MODO LUJO ✨ ═══ */
-body.lujo h1,body.lujo .tienda-saludo,body.lujo #tienda-saludo-hora{font-family:'Playfair Display',serif !important;letter-spacing:.5px;}
-body.lujo .prod-nombre{font-family:'Playfair Display',serif !important;font-weight:700 !important;letter-spacing:.3px;}
+body.lujo h1,body.lujo .tienda-saludo,body.lujo #tienda-saludo-hora{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;letter-spacing:.5px;}
+body.lujo .prod-nombre{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif !important;font-weight:700 !important;letter-spacing:.3px;}
 body.lujo .prod-card{border:1px solid rgba(212,175,55,.45) !important;box-shadow:0 4px 20px rgba(212,175,55,.12),0 2px 8px rgba(0,0,0,.06) !important;background:rgba(255,255,255,.90) !important;}
 body.lujo.oscuro .prod-card{background:rgba(18,36,66,.90) !important;border-color:rgba(212,175,55,.5) !important;}
 body.lujo #tienda-buscar{border-color:#d4af37 !important;box-shadow:0 2px 12px rgba(212,175,55,.2) !important;}
@@ -348,6 +348,101 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
   .ae-hero-kicker{font-size:.68rem;padding:6px 14px;}
   .ae-hero-logo{width:225px;height:225px;margin-right:32px;}
   #tienda-chips .cat-tile{width:74px;min-height:58px;}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   IDENTIDAD VISUAL 2026 — inspirada en la nueva tienda Amarango
+   Solo presentación: no altera datos, precios, planes ni funciones.
+   ═══════════════════════════════════════════════════════════════ */
+html{background:#eef3f9 !important;}
+body,
+body.rol-revendedor,
+body.rol-admin{background:#f5f7fb !important;color:#10244a;}
+
+/* Encabezado más limpio, claro y liviano. */
+.header{background:rgba(255,255,255,.97) !important;border-bottom:1px solid #dfe6ef !important;box-shadow:0 5px 18px rgba(15,45,91,.09) !important;}
+.header::before,.header::after{display:none !important;}
+.header-logo{box-shadow:0 2px 8px rgba(11,45,107,.13),0 0 0 1px #e3e9f1 !important;}
+.header-info h1{color:#0B2D6B !important;text-shadow:none !important;letter-spacing:-.3px !important;}
+.header-info h1 .pwr::before{border-color:#0B2D6B !important;border-top-color:transparent !important;box-shadow:none !important;}
+.header-info h1 .pwr::after{background:#0B2D6B !important;box-shadow:none !important;}
+.header-info p{color:#667085 !important;font-style:normal !important;font-weight:600 !important;}
+.header-badge{background:#f4f7fb !important;border-color:#d8e0eb !important;color:#0B2D6B !important;}
+.hdr-menu-btn{background:#0B2D6B !important;border-color:#0B2D6B !important;color:#fff !important;box-shadow:0 3px 9px rgba(11,45,107,.2) !important;}
+
+/* Área principal y buscador, respetando los mismos controles. */
+.tab-content{padding:16px 12px 96px;}
+.ae-buscar-fila{margin-bottom:12px;}
+.hdr-buscar input{border:1.5px solid #1556a0 !important;border-radius:24px !important;box-shadow:0 3px 10px rgba(11,45,107,.08) !important;color:#10244a !important;font-weight:500 !important;}
+.hdr-buscar input::placeholder{color:#7b8798;}
+.btn-subir-header{border:1px solid #d8e0eb !important;border-radius:12px !important;box-shadow:0 2px 8px rgba(11,45,107,.08) !important;}
+
+/* Portada: mantiene el contenido actual con una terminación más profesional. */
+.ae-hero{border:0 !important;border-radius:15px !important;background:linear-gradient(118deg,#061a3f 0%,#0B2D6B 60%,#164d96 100%) !important;box-shadow:0 8px 22px rgba(11,45,107,.18) !important;}
+.ae-hero::before{opacity:.28 !important;}
+.ae-hero::after{opacity:.72 !important;height:60px !important;bottom:-42px !important;}
+.ae-hero-kicker{background:rgba(255,255,255,.12) !important;border:1px solid rgba(255,255,255,.18);box-shadow:none !important;}
+.ae-hero h2{letter-spacing:-.8px !important;text-shadow:none !important;}
+.ae-hero p{font-weight:500 !important;color:rgba(255,255,255,.83) !important;}
+.ae-hero-logo{filter:drop-shadow(0 6px 9px rgba(0,0,0,.2)) !important;}
+
+/* Categorías y navegación con tarjetas blancas y acentos Amarango. */
+#tienda-buscar-wrap{background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;}
+#tienda-chips.cat-grid{background:transparent !important;padding:2px 1px 10px !important;gap:8px !important;}
+#tienda-chips .cat-tile{background:#fff !important;border:1px solid #dfe6ef !important;border-left:3px solid #1556a0 !important;border-radius:12px !important;box-shadow:0 3px 10px rgba(11,45,107,.06) !important;}
+#tienda-chips .cat-tile:nth-child(even){border-left-color:#FF7A00 !important;}
+#tienda-chips .cat-tile.on{background:#fff !important;border-color:#FF7A00 !important;border-left-color:#FF7A00 !important;box-shadow:0 5px 14px rgba(255,122,0,.14) !important;transform:translateY(-1px);}
+#tienda-chips .cat-tile.on .cat-tile-txt{color:#0B2D6B !important;}
+#tienda-chips .cat-tile-txt{font-weight:700 !important;color:#18345f !important;}
+
+/* Catálogo: conserva exactamente las tarjetas y acciones existentes. */
+#tab-tienda,#tienda-cont,#tienda-grid{background:transparent !important;}
+#tienda-grid{gap:10px !important;}
+#tienda-grid .prod-card{background:#fff !important;border:1px solid #e1e7ef !important;border-radius:14px !important;box-shadow:0 4px 14px rgba(11,45,107,.08) !important;padding:10px !important;}
+#tienda-grid .prod-card:active{transform:scale(.99);box-shadow:0 3px 10px rgba(11,45,107,.12) !important;}
+#tienda-grid .prod-card>div:first-child{border-radius:11px 11px 0 0;overflow:hidden;}
+#tienda-grid .prod-foto{border-radius:11px 11px 0 0 !important;}
+#tienda-grid .prod-nombre{color:#10244a !important;font-weight:750 !important;letter-spacing:-.18px !important;}
+.plan-protegido-box{background:#0B2D6B !important;border-radius:11px !important;box-shadow:none !important;}
+.plan-protegido-opcion{border:1px solid #e4e9f1;border-radius:8px !important;}
+.calc-btn{border-radius:10px !important;box-shadow:none !important;}
+
+/* Barra inferior con la misma estructura y acciones de siempre. */
+#nav-inferior{background:rgba(255,255,255,.97) !important;border-top:1px solid #e1e7ef !important;box-shadow:0 -5px 18px rgba(11,45,107,.08) !important;backdrop-filter:blur(10px);}
+#nav-inferior .nav-item{color:#58677e !important;}
+
+/* Estados de lectura sobre el nuevo fondo claro. */
+#tienda-contador{color:#5f6f83 !important;}
+.portada-cat-cab h3{color:#0B2D6B !important;}
+.portada-cat-ver{border:1px solid #dfe6ef !important;box-shadow:0 2px 8px rgba(11,45,107,.07) !important;}
+
+/* El modo oscuro sigue funcionando y conserva contraste. */
+body.oscuro,
+body.oscuro.rol-revendedor,
+body.oscuro.rol-admin{background:#0a1830 !important;color:#e8eef7;}
+body.oscuro .header{background:rgba(18,36,66,.98) !important;border-bottom-color:#274568 !important;}
+body.oscuro .header-info h1{color:#fff !important;}
+body.oscuro .header-info p{color:#a9bdd8 !important;}
+body.oscuro #tienda-chips .cat-tile{background:#122442 !important;border-color:#28466d !important;}
+body.oscuro #tienda-chips .cat-tile-txt{color:#e8eef7 !important;}
+body.oscuro #tienda-grid .prod-card{background:#122442 !important;border-color:#28466d !important;}
+body.oscuro #tienda-grid .prod-nombre{color:#f1f5fb !important;}
+body.oscuro .portada-cat-cab h3{color:#fff !important;}
+
+@media(max-width:430px){
+  .tab-content{padding-left:10px;padding-right:10px;}
+  .ae-hero{min-height:170px;padding:20px 13px 20px 18px !important;}
+  .ae-hero-logo{width:118px;height:118px;}
+  .ae-hero h2{font-size:1.32rem;}
+  #tienda-grid{gap:8px !important;}
+  #tienda-grid .prod-card{padding:8px !important;}
+}
+
+@media(min-width:900px){
+  body{background:#f5f7fb !important;box-shadow:0 0 30px rgba(11,45,107,.10);}
+  .tab-content{padding:24px 30px 42px;}
+  #tienda-grid{gap:15px !important;}
+  #tienda-grid .prod-card{padding:11px !important;}
 }
 
 </style>
@@ -9134,7 +9229,8 @@ function tiendaCatalogoPDF(){
 
   var hoy=new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});
   var css='<style>'
-    +'*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif;}'
+    +'@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");'
+    +'*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}'
     +'body{color:#1a1a1a;padding:0;}'
     +'.pdf-header{background:linear-gradient(135deg,#0B2D6B,#1a4a9e);color:#fff;padding:24px 28px;text-align:center;}'
     +'.pdf-header h1{font-size:26px;font-weight:900;letter-spacing:1px;}'
