@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AmarangoElectro: Promo Día de la Madre 2026 + base completa v9 -->
+<!-- AmarangoElectro: Promo Octubre 3 cuotas 2026 + base completa v12 -->
 <!-- ARCHIVO PRINCIPAL AMARANGO: V-FOTO-WHATSAPP-MANUAL-3 + ESCRITORIO + INSTAGRAM + BUSQUEDA-EXACTA -->
 <html lang="es">
 <head>
@@ -908,7 +908,7 @@ body.oscuro{background:#0a1830;background-attachment:scroll;}
     <button id="tienda-btn-sistema-precios" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#0B2D6B,#FF7A00);"
       onclick="abrirSistemaPrecios()">🧮 Sistema de precios: Clásica</button>
     <button id="tienda-btn-promo-madre" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:linear-gradient(135deg,#ec4899,#FF7A00);"
-      onclick="abrirPromoMadre()">💐 Promo Día de la Madre: ACTIVA</button>
+      onclick="abrirPromoMadre()">✨ Promo Octubre — 3 cuotas: ACTIVA</button>
     <button id="tienda-btn-subs" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:var(--az);"
       onclick="verSuscriptores()">📧 Ver correos suscritos</button>
     <button id="tienda-btn-pdf" class="calc-btn" style="display:none;width:100%;margin-top:10px;background:#c0392b;"
@@ -1177,11 +1177,13 @@ function armarCuotasLines(precio, prod){
 }
 function armarMensajePromoMadre(p,link){
   var promo=promoMadreDatos(p);if(!promo)return '';
+  var beneficio6=promoMadreCliente6Datos(p);
   var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
-    +'💐 *ESPECIAL DÍA DE LA MADRE*\n\n'
+    +'✨ *PROMO OCTUBRE — 3 CUOTAS*\n\n'
     +'✨ *3 CUOTAS SIN INTERÉS*\n'
-    +'de *'+fmt(promo.cuota)+'*\n\n'
-    +'🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
+    +'de *'+fmt(promo.cuota)+'*'
+    +(beneficio6?'\n\n⭐ *¿Ya sos cliente Amarango?*\nConsultá si ingresás en la promo de *6 cuotas de '+fmt(beneficio6.cuota)+'*.':'')
+    +'\n\n🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
 }
@@ -1189,7 +1191,7 @@ function armarMensajePromoMadreCliente(p,link){
   var beneficio=promoMadreCliente6Datos(p);if(!beneficio)return '';
   var promo=beneficio.promo3;
   var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
-    +'💐 *ESPECIAL DÍA DE LA MADRE*\n\n'
+    +'✨ *PROMO OCTUBRE — 3 CUOTAS*\n\n'
     +'✨ *3 CUOTAS SIN INTERÉS*\n'
     +'de *'+fmt(promo.cuota)+'*\n\n'
     +'⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*\n'
@@ -2081,13 +2083,13 @@ var sistemaPreciosProductos=(function(){
   try{return JSON.parse(localStorage.getItem(SISTEMA_PRECIOS_PRODUCTOS_KEY)||'{}')||{};}catch(e){return {};}
 })();
 
-// ═══ PROMO DÍA DE LA MADRE 2026 ═══
+// ═══ PROMO OCTUBRE — 3 CUOTAS 2026 ═══
 // Es una capa temporal: no reescribe precios, catálogo, stock ni proveedores.
-// Hasta el 18/10 inclusive, los productos con costo real menor a $100.000
+// Hasta el 31/10 inclusive, los productos incluidos
 // muestran en 3 pagos el mismo total comercial que el plan clásico de 2 cuotas.
 var PROMO_MADRE_ID='promo_madre_2026';
 var PROMO_MADRE_KEY='ae_promo_madre_2026';
-var PROMO_MADRE_FIN_UTC=Date.UTC(2026,9,19,3,0,0); // 19/10 00:00, Argentina
+var PROMO_MADRE_FIN_UTC=Date.UTC(2026,10,1,3,0,0); // 01/11 00:00, Argentina
 var promoMadreActiva=(function(){
   try{
     var guardado=localStorage.getItem(PROMO_MADRE_KEY);
@@ -2124,7 +2126,7 @@ function tiendaGuardarPromoMadreLocal(){
 function tiendaActualizarBotonPromoMadre(){
   var b=document.getElementById('tienda-btn-promo-madre');if(!b)return;
   var vigente=promoMadreVigente();
-  b.textContent='💐 Promo Día de la Madre: '+(vigente?'ACTIVA':'DESACTIVADA');
+  b.textContent='✨ Promo Octubre — 3 cuotas: '+(vigente?'ACTIVA':'DESACTIVADA');
   b.style.background=vigente?'linear-gradient(135deg,#ec4899,#FF7A00)':'#64748b';
 }
 function bajarPromoMadreNube(){
@@ -2136,18 +2138,18 @@ function bajarPromoMadreNube(){
     tiendaGuardarPromoMadreLocal();tiendaActualizarBotonPromoMadre();
     if(typeof tiendaRender==='function')tiendaRender();
     return true;
-  }).catch(function(err){console.warn('No se pudo bajar la promo del Día de la Madre.',err);return false;});
+  }).catch(function(err){console.warn('No se pudo bajar la Promo Octubre.',err);return false;});
 }
 function guardarPromoMadreNube(){
   tiendaGuardarPromoMadreLocal();
   if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión con Supabase'));
-  return sbCalc.from('tienda_catalogo').upsert({id:PROMO_MADRE_ID,datos:{activa:promoMadreActiva,fin:'2026-10-18T23:59:59-03:00',costoMaximo:100000},actualizado:new Date().toISOString()}).select('datos').then(function(r){if(r&&r.error)throw r.error;return true;});
+  return sbCalc.from('tienda_catalogo').upsert({id:PROMO_MADRE_ID,datos:{activa:promoMadreActiva,fin:'2026-10-31T23:59:59-03:00',costoMaximo:100000,costoMaximoCelulares:350000,nombre:'Promo Octubre — 3 cuotas'},actualizado:new Date().toISOString()}).select('datos').then(function(r){if(r&&r.error)throw r.error;return true;});
 }
 function abrirPromoMadre(){
   if(!tiendaEsAdmin)return;
   var vigente=promoMadreVigente();
-  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">💐 Promo Día de la Madre</h3>'
-    +'<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px;margin:10px 0;font-size:.72rem;color:#9f1239;line-height:1.55;"><b>Productos incluidos:</b> costo real menor a $100.000.<br><b>Beneficio:</b> 3 cuotas sin interés usando el total del Plan 2.<br><b>Vigencia:</b> hasta el domingo 18 de octubre inclusive.</div>'
+  var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">✨ Promo Octubre — 3 cuotas</h3>'
+    +'<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px;margin:10px 0;font-size:.72rem;color:#9f1239;line-height:1.55;"><b>Productos incluidos:</b> electro y hogar con costo menor a $100.000, y celulares seleccionados con costo de hasta $350.000.<br><b>Beneficio:</b> 3 cuotas sin interés usando el total del Plan 2.<br><b>Vigencia:</b> hasta el 31 de octubre inclusive.</div>'
     +'<button class="calc-btn" style="width:100%;background:'+(vigente?'#64748b':'linear-gradient(135deg,#ec4899,#FF7A00)')+';" onclick="cambiarPromoMadre('+(!vigente)+')">'+(vigente?'Desactivar promoción':'Activar promoción')+'</button>'
     +'<button class="calc-btn" style="width:100%;margin-top:9px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   tiendaModalAbrir(html);
@@ -2155,7 +2157,7 @@ function abrirPromoMadre(){
 function cambiarPromoMadre(activa){
   if(!tiendaEsAdmin)return;
   if(activa && Date.now()>=PROMO_MADRE_FIN_UTC){alert('La fecha automática de esta promoción ya terminó.');return;}
-  if(!confirm('¿'+(activa?'Activar':'Desactivar')+' la Promo Día de la Madre para clientes y vendedores?'))return;
+  if(!confirm('¿'+(activa?'Activar':'Desactivar')+' la Promo Octubre — 3 cuotas para clientes y vendedores?'))return;
   promoMadreActiva=!!activa;tiendaGuardarPromoMadreLocal();tiendaActualizarBotonPromoMadre();tiendaRender();
   guardarPromoMadreNube().then(function(){mostrarToast('✅ Promo '+(promoMadreActiva?'activada':'desactivada')+' para todos');abrirPromoMadre();})
     .catch(function(err){alert('⚠️ El cambio quedó en este dispositivo, pero la nube no lo confirmó.\n\n'+(err.message||err));});
@@ -7034,7 +7036,7 @@ function tiendaCardsHtml(sublista){
       +(function(){
         if(datosPrecioCard.modo==='promo_madre'){
           return '<div style="background:linear-gradient(145deg,#9f1239,#ec4899 52%,#FF7A00);border-radius:13px;padding:10px 8px;margin:5px 0 7px;color:#fff;text-align:center;box-shadow:0 5px 16px rgba(190,24,93,.24);">'
-            +'<div style="font-size:.56rem;font-weight:900;letter-spacing:.8px;color:#fff1f2;">💐 ESPECIAL DÍA DE LA MADRE</div>'
+            +'<div style="font-size:.56rem;font-weight:900;letter-spacing:.8px;color:#fff1f2;">✨ PROMO OCTUBRE</div>'
             +'<div style="font-size:.72rem;font-weight:900;margin-top:5px;">3 CUOTAS SIN INTERÉS</div>'
             +'<div style="font-size:.58rem;font-weight:800;margin-top:2px;">DE</div>'
             +'<div style="font-size:1.42rem;font-weight:900;line-height:1.05;color:#fff;overflow-wrap:anywhere;">'+fmt(datosPrecioCard.cuota)+'</div>'
@@ -8409,7 +8411,7 @@ function tiendaVerDetalle(id){
   var _mejor=mejorCuotaDatos(p.venta, p);
   if(_mejor){
     html+='<div style="background:linear-gradient(150deg,#0a1f4d,var(--az));border-radius:14px;padding:11px 14px;margin-bottom:9px;box-shadow:0 5px 16px rgba(11,45,107,.22);">'
-      +'<div style="color:'+(_promoDetalle?'#FFD7E5':'rgba(255,255,255,.62)')+';font-size:.55rem;font-weight:800;letter-spacing:1.1px;">'+(_promoDetalle?'💐 ESPECIAL DÍA DE LA MADRE':'PAGÁ EN CUOTAS FIJAS')+'</div>'
+      +'<div style="color:'+(_promoDetalle?'#FFD7E5':'rgba(255,255,255,.62)')+';font-size:.55rem;font-weight:800;letter-spacing:1.1px;">'+(_promoDetalle?'✨ PROMO OCTUBRE — 3 CUOTAS':'PAGÁ EN CUOTAS FIJAS')+'</div>'
       +'<div style="display:flex;align-items:baseline;gap:6px;margin-top:3px;">'
         +'<span style="color:#fff;font-size:.85rem;font-weight:800;">'+_mejor.n+' x</span>'
         +'<span style="color:var(--nar);font-size:1.7rem;font-weight:900;letter-spacing:-1px;line-height:1;">'+fmt(_mejor.valor)+'</span>'
@@ -8443,7 +8445,7 @@ function tiendaVerDetalle(id){
   html+='<div style="font-size:.64rem;font-weight:800;color:var(--sub);letter-spacing:1px;margin-bottom:7px;">ELEGÍ TU PLAN</div>';
   if(_promoDetalle){
     html+='<div style="background:linear-gradient(135deg,#ec4899,#FF7A00);color:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 3px 10px rgba(236,72,153,.3);">'
-      +'<div style="font-size:.62rem;font-weight:900;opacity:.95;letter-spacing:.5px;">💐 PROMO HASTA EL 18/10</div>'
+      +'<div style="font-size:.62rem;font-weight:900;opacity:.95;letter-spacing:.5px;">✨ PROMO HASTA EL 31/10</div>'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;gap:8px;">'
       +'<span style="font-weight:800;font-size:.85rem;">3 cuotas SIN INTERÉS</span>'
       +'<span style="font-weight:900;font-size:1.1rem;white-space:nowrap;">'+fmt(_promoDetalle.cuota)+'</span></div></div>';
@@ -8688,7 +8690,7 @@ function abrirOpcionesCompartirAdmin(id){
   var promoCliente6=promoMadreCliente6Datos(p);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📤 Compartir producto</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí qué propuesta querés enviar para <b>'+escapeHtml(p.nombre)+'</b>.</p>'
-    +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">💐 Promo Día de la Madre</button>':'')
+    +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">✨ Promo Octubre — 3 cuotas</button>':'')
     +(promoCliente6?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#0B2D6B,#2563EB);" onclick="compartirProducto('+pid+',\'promo_cliente_6\')">⭐ Cliente Amarango — compartir 3 + 6 cuotas</button>':'')
     +'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:var(--az);" onclick="compartirProducto('+pid+',\'clasica\')">Calculadora 1 — Clásica</button>'
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--nar)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'protegida\')">Calculadora 2 — Plan Protegido</button>'
@@ -8775,7 +8777,7 @@ function compartirInstagram(id){
   try{ mejor=datosPrecioInstagram.modo!=='protegida'?mejorCuotaDatos(p.venta,p):null; }catch(e){}
   var texto='🐝 '+(p.nombre||'Producto')+'\n\n';
   if(datosPrecioInstagram.modo==='protegida')texto+='🤝 Retiralo por '+fmt(datosPrecioInstagram.inicial)+'\n🚀 3 pagos · luego 2 de '+fmt(datosPrecioInstagram.plan3.cuotas[0])+'\n💥 6 pagos · luego 5 de '+fmt(datosPrecioInstagram.plan6.cuotas[0])+'\n';
-  else if(mejor) texto+=(mejor.promoMadre?'💐 ESPECIAL DÍA DE LA MADRE\n✨ ':'💳 ')+mejor.n+' cuotas '+(mejor.sinInteres?'SIN INTERÉS':'fijas')+' de '+fmt(mejor.valor)+'\n'+(mejor.promoMadre?'🎁 Ahorrás '+fmt(mejor.ahorro)+' al contado\n':'');
+  else if(mejor) texto+=(mejor.promoMadre?'✨ PROMO OCTUBRE — 3 CUOTAS\n✨ ':'💳 ')+mejor.n+' cuotas '+(mejor.sinInteres?'SIN INTERÉS':'fijas')+' de '+fmt(mejor.valor)+'\n'+(mejor.promoMadre?'🎁 Ahorrás '+fmt(mejor.ahorro)+' al contado\n':'');
   texto+='💵 Contado: '+fmt(datosPrecioInstagram.contado)
     +'\n\n📲 Consultanos para reservarlo'
     +'\n🔗 '+linkProd
@@ -10439,7 +10441,7 @@ function tiendaVerCuotas(id){
   var promoCuotas=promoMadreDatos(p);
   if(promoCuotas){
     html+='<div style="background:linear-gradient(135deg,#ec4899,#FF7A00);color:#fff;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 2px 8px rgba(236,72,153,.3);">'
-      +'<div style="font-size:.7rem;font-weight:900;opacity:.95;">💐 ESPECIAL DÍA DE LA MADRE</div>'
+      +'<div style="font-size:.7rem;font-weight:900;opacity:.95;">✨ PROMO OCTUBRE — 3 CUOTAS</div>'
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px;gap:8px;">'
       +'<span style="font-weight:800;">3 cuotas SIN INTERÉS</span>'
       +'<span style="font-weight:900;font-size:1.1rem;white-space:nowrap;">3 x '+fmt(promoCuotas.cuota)+'</span></div>'
