@@ -493,6 +493,10 @@ body,body.rol-admin,body.rol-revendedor{background:var(--ae-soft) !important;col
 .ae-home-links b{font-size:.78rem;font-weight:850;white-space:normal;line-height:1.08;}
 .ae-home-links i{font-size:1.35rem;font-style:normal;color:#23395e;text-align:right;}
 
+/* Los accesos bajo la portada se retiran. El menú completo vuelve al botón ☰. */
+.ae-home-links{display:none !important;}
+.ae-hero-menu{display:flex !important;align-items:center;justify-content:center;}
+
 #tienda-buscar-wrap{max-width:100% !important;margin:0 !important;}
 #tienda-chips.cat-grid{padding:1px 0 9px !important;}
 #tienda-chips .cat-tile{min-height:55px !important;border:1px solid var(--ae-line) !important;border-radius:12px !important;box-shadow:none !important;}
@@ -558,6 +562,24 @@ body,body.rol-admin,body.rol-revendedor{background:var(--ae-soft) !important;col
 #tienda-grid .prod-card>.calc-btn{min-height:45px !important;margin-top:auto !important;background:linear-gradient(135deg,#0B2D6B,#07539b) !important;border:0 !important;border-radius:10px !important;font-size:.78rem !important;font-weight:900 !important;}
 #tienda-grid .prod-card button[onclick*="compartirProducto"]{min-height:42px !important;background:#fff !important;color:#0B2D6B !important;border:1.5px solid #0B2D6B !important;border-radius:10px !important;font-size:.72rem !important;box-shadow:none !important;}
 #tienda-grid .prod-card button[onclick*="compartirInstagram"]{border-radius:10px !important;}
+
+/* Incluso con el modo oscuro guardado, el catálogo conserva las tarjetas claras
+   aprobadas. El modo oscuro queda disponible para paneles y herramientas. */
+body.oscuro #tienda-grid .prod-card{background:#fff !important;border-color:#dce4ef !important;color:#10244a !important;}
+body.oscuro #tienda-grid .prod-nombre{color:#10244a !important;}
+body.oscuro #tienda-grid .prod-ampliar-btn{background:#f7f9fc !important;color:#15284d !important;border-color:#dce4ef !important;}
+body.oscuro #tienda-grid .ae-finance,
+body.oscuro #tienda-grid .plan-protegido-box{background:#f7f9fc !important;color:#0a214e !important;border-color:#dce4ef !important;}
+body.oscuro #tienda-grid .plan-protegido-opcion{background:#fff !important;border-color:#dce4ef !important;}
+
+/* Controles administrativos discretos: azul, blanco y gris; los colores de
+   alerta se reservan únicamente para problemas reales de stock o precio. */
+#tienda-grid .prod-card details summary{background:#f7f9fc !important;color:#0a214e !important;border-color:#dce4ef !important;box-shadow:none !important;}
+#tienda-grid .prod-card button[onclick*="tiendaConfirmarPrecioManual"]{background:#f7f9fc !important;color:#0755ad !important;border-color:#dce4ef !important;}
+#tienda-grid .prod-card button[onclick*="compartirInstagram"]{background:#fff !important;color:#46566e !important;border:1px solid #dce4ef !important;}
+#tienda-grid .prod-card button[onclick*="tiendaEditarPrecio"],
+#tienda-grid .prod-card button[onclick*="tiendaEditarFoto"],
+#tienda-grid .prod-card button[onclick*="tiendaUsarFotoProveedor"]{background:#f7f9fc !important;color:#0a214e !important;border-color:#dce4ef !important;}
 
 #nav-inferior{background:#fff !important;}
 
