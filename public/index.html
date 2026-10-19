@@ -386,6 +386,21 @@ body.rol-admin{background:#f5f7fb !important;color:#10244a;}
 .ae-hero p{font-weight:500 !important;color:rgba(255,255,255,.83) !important;}
 .ae-hero-logo{filter:drop-shadow(0 6px 9px rgba(0,0,0,.2)) !important;}
 
+/* Portada fotográfica rotativa aprobada. Las cuatro imágenes cambian solas. */
+.ae-hero-slider{position:relative;display:block !important;width:100%;aspect-ratio: .67;min-height:0 !important;padding:0 !important;overflow:hidden;background:#061a3f !important;isolation:isolate;}
+.ae-hero-slider::before,.ae-hero-slider::after{display:none !important;}
+.ae-hero-slide{position:absolute;inset:0;opacity:0;background-repeat:no-repeat;background-size:100% auto;background-position:center 48%;animation:aeHeroRotacion 24s infinite ease-in-out;transform:scale(1.002);}
+.ae-hero-slide-1{background-image:url('hero-descanso.jpeg');animation-delay:0s;}
+.ae-hero-slide-2{background-image:url('hero-hogar.jpeg');animation-delay:6s;}
+.ae-hero-slide-3{background-image:url('hero-audio.jpeg');animation-delay:12s;}
+.ae-hero-slide-4{background-image:url('hero-climatizacion.jpeg');animation-delay:18s;}
+@keyframes aeHeroRotacion{0%{opacity:0}3%,22%{opacity:1}25%,100%{opacity:0}}
+.ae-hero-menu{position:absolute;top:12px;right:12px;z-index:5;width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.5);background:rgba(5,24,55,.75);color:#fff;font-size:21px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2);backdrop-filter:blur(6px);}
+.ae-hero-dots{position:absolute;left:18px;bottom:14px;z-index:5;display:flex;gap:7px;align-items:center;}
+.ae-hero-dots i{display:block;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.ae-hero-dots i:first-child{width:28px;border-radius:8px;background:#fff;animation:aeHeroDot1 24s infinite;}
+@keyframes aeHeroDot1{0%,22%{opacity:1}25%,100%{opacity:.55}}
+
 /* Categorías y navegación con tarjetas blancas y acentos Amarango. */
 #tienda-buscar-wrap{background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;}
 #tienda-chips.cat-grid{background:transparent !important;padding:2px 1px 10px !important;gap:8px !important;}
@@ -403,6 +418,11 @@ body.rol-admin{background:#f5f7fb !important;color:#10244a;}
 #tienda-grid .prod-card>div:first-child{border-radius:11px 11px 0 0;overflow:hidden;}
 #tienda-grid .prod-foto{border-radius:11px 11px 0 0 !important;}
 #tienda-grid .prod-nombre{color:#10244a !important;font-weight:750 !important;letter-spacing:-.18px !important;}
+.prod-ampliar-btn{width:100%;margin:8px 0 7px;padding:8px;border:1px solid #e0e5ec;border-radius:20px;background:#f7f8fa;color:#15284d;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;}
+.prod-marca{font-size:.56rem;color:#D76B00;font-weight:900;letter-spacing:.45px;text-transform:uppercase;margin:2px 0 3px;}
+#tienda-grid .prod-card>.calc-btn{background:#0B2D6B !important;border:1px solid #0B2D6B !important;color:#fff !important;border-radius:9px !important;box-shadow:none !important;}
+#tienda-grid .prod-card button[onclick*="compartirProducto"]{background:#0967d9 !important;color:#fff !important;border:1px solid #0967d9 !important;box-shadow:none !important;}
+#tienda-grid .prod-card button[onclick*="compartirInstagram"]{border-radius:9px !important;box-shadow:none !important;}
 .plan-protegido-box{background:#0B2D6B !important;border-radius:11px !important;box-shadow:none !important;}
 .plan-protegido-opcion{border:1px solid #e4e9f1;border-radius:8px !important;}
 .calc-btn{border-radius:10px !important;box-shadow:none !important;}
@@ -431,9 +451,7 @@ body.oscuro .portada-cat-cab h3{color:#fff !important;}
 
 @media(max-width:430px){
   .tab-content{padding-left:10px;padding-right:10px;}
-  .ae-hero{min-height:170px;padding:20px 13px 20px 18px !important;}
-  .ae-hero-logo{width:118px;height:118px;}
-  .ae-hero h2{font-size:1.32rem;}
+  .ae-hero-slider{aspect-ratio:.67 !important;padding:0 !important;}
   #tienda-grid{gap:8px !important;}
   #tienda-grid .prod-card{padding:8px !important;}
 }
@@ -441,6 +459,8 @@ body.oscuro .portada-cat-cab h3{color:#fff !important;}
 @media(min-width:900px){
   body{background:#f5f7fb !important;box-shadow:0 0 30px rgba(11,45,107,.10);}
   .tab-content{padding:24px 30px 42px;}
+  .ae-hero-slider{height:min(560px,62vh);min-height:440px !important;aspect-ratio:auto;background:#061a3f !important;}
+  .ae-hero-slide{background-size:cover;background-position:center 48%;}
   #tienda-grid{gap:15px !important;}
   #tienda-grid .prod-card{padding:11px !important;}
 }
@@ -793,14 +813,13 @@ body.oscuro .portada-cat-cab h3{color:#fff !important;}
     <!-- Barra superior movida al cajón lateral (☰). El buscador está en el header azul. -->
 
     <!-- Portada principal de la tienda -->
-    <section class="ae-hero" aria-label="Amarango Electro">
-      <button onclick="abrirCajon()" aria-label="Abrir menú" style="position:absolute;top:16px;right:16px;z-index:4;width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.18);">☰</button>
-      <div class="ae-hero-copy">
-        <div class="ae-hero-kicker">🐝 Amarango Electro</div>
-        <h2>Todo para tu hogar, <span>más fácil</span></h2>
-        <p>Electrodomésticos, tecnología y mucho más. Comprá al contado o en cuotas fijas.</p>
-      </div>
-      <img class="ae-hero-logo" src="amara-logo.png" alt="Logo Amarango Electro" onerror="this.onerror=null;this.src='icon.png';">
+    <section class="ae-hero ae-hero-slider" aria-label="Promociones Amarango Electro">
+      <div class="ae-hero-slide ae-hero-slide-1" aria-label="Descanso y confort"></div>
+      <div class="ae-hero-slide ae-hero-slide-2" aria-label="Hogar y estilo"></div>
+      <div class="ae-hero-slide ae-hero-slide-3" aria-label="Sonido y entretenimiento"></div>
+      <div class="ae-hero-slide ae-hero-slide-4" aria-label="Climatización"></div>
+      <button class="ae-hero-menu" onclick="abrirCajon()" aria-label="Abrir menú">☰</button>
+      <div class="ae-hero-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </section>
 
     <!-- Buscador debajo de la portada -->
@@ -7021,6 +7040,7 @@ function tiendaCardsHtml(sublista){
     var selMarcado=tiendaSelecSet[p.id];
     var fadeClass = tiendaYaAnimo ? '' : ' card-fade';
     var delay=tiendaYaAnimo ? 0 : Math.min(_idx*40, 400); // fade escalonado (tope 0.4s)
+    var marcaVisual=String(p.marca||p.brand||String(p.nombre||'').split(/\s+/)[0]||'Amarango').trim();
     var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
     // modo compartir varios: casilla de selección (para todos)
@@ -7063,6 +7083,10 @@ function tiendaCardsHtml(sublista){
       +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
       +'</div>';
+
+    if(p.foto){
+      card+='<button class="prod-ampliar-btn" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')">↗ Ampliar</button>';
+    }
 
     // controles de admin (debajo de la foto, no la empujan)
     if(tiendaEsAdmin && !p.esCelu){
@@ -7123,6 +7147,7 @@ function tiendaCardsHtml(sublista){
 
     card+=''
       +badgePrecioFecha(p)
+      +'<div class="prod-marca">'+escapeHtml(marcaVisual)+'</div>'
       +'<div style="display:flex;align-items:flex-start;gap:6px;margin:6px 0 2px;">'
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="flex:1;font-size:.78rem;font-weight:800;color:var(--az);line-height:1.2;min-height:32px;cursor:pointer;">'+p.nombre+(p.foto?' 🔍':'')+'</div>'
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="flex:0 0 auto;background:none;border:none;font-size:1.05rem;cursor:pointer;line-height:1;padding:0;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
