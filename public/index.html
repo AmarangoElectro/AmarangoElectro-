@@ -6479,11 +6479,30 @@ function tiendaRenderMantenerPosicion(estado){
   try{tiendaRender();}finally{window._tiendaSuspenderConservacionAutomatica=false;}
   tiendaRestaurarPosicionLista(estado);
 }
+// Una restauración de posición pendiente nunca debe competir con el dedo.
+// Antes se ejecutaba tres veces (al renderizar, +100 ms y +240 ms), por eso en
+// Android el catálogo podía retroceder dos o tres veces al empezar a deslizar.
+var _tiendaRestauracionScrollToken=0;
+var _tiendaUltimoGestoScroll=0;
+(function instalarCancelacionRestauracionTactil(){
+  function cancelar(){
+    _tiendaUltimoGestoScroll=Date.now();
+    _tiendaRestauracionScrollToken++;
+  }
+  document.addEventListener('touchstart',cancelar,{passive:true,capture:true});
+  document.addEventListener('touchmove',cancelar,{passive:true,capture:true});
+  document.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='touch')cancelar();
+  },{passive:true,capture:true});
+})();
 function tiendaRestaurarPosicionLista(estado){
   estado=estado||{};
+  var token=++_tiendaRestauracionScrollToken;
   var cantidad=Math.max(0,Number(estado.mostrados)||0);
   while(_tiendaMostrados<cantidad && _tiendaMostrados<_tiendaListaFull.length)tiendaVerMas();
   function restaurar(){
+    if(token!==_tiendaRestauracionScrollToken)return;
+    if(Date.now()-_tiendaUltimoGestoScroll<180)return;
     var ancla=estado.anclaId?document.getElementById(estado.anclaId):null;
     if(ancla){
       var diferencia=ancla.getBoundingClientRect().top-Number(estado.anclaTop||0);
@@ -6493,9 +6512,9 @@ function tiendaRestaurarPosicionLista(estado){
       window.scrollTo({top:Math.min(Math.max(0,Number(estado.scrollY)||0),maxY),behavior:'auto'});
     }
   }
+  // Una sola restauración antes del siguiente dibujo. No se programan
+  // correcciones tardías que puedan pelear con un gesto ya iniciado.
   requestAnimationFrame(function(){requestAnimationFrame(restaurar);});
-  setTimeout(restaurar,100);
-  setTimeout(restaurar,240);
 }
 
 // Mientras Angie/Max sigan dentro de una bandeja administrativa, cualquier
