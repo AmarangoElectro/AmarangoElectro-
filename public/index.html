@@ -697,6 +697,84 @@ body.oscuro #tienda-grid .ae-finance-contado,
 body.oscuro #tienda-grid .ae-finance-ahorro,
 body.oscuro #tienda-grid .plan-protegido-detalle{color:#c2d0e3 !important;}
 
+/* Botón de imagen: contraste fijo y comprobable en ambos temas. Ningún tema,
+   rol o regla dinámica puede volverlo azul sobre azul. */
+body #tienda-grid .prod-card button.prod-ampliar-btn,
+body.oscuro #tienda-grid .prod-card button.prod-ampliar-btn,
+body:not(.oscuro) #tienda-grid .prod-card button.prod-ampliar-btn{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+  width:100% !important;
+  min-height:42px !important;
+  padding:9px 10px !important;
+  background:#ffffff !important;
+  background-image:none !important;
+  color:#08224f !important;
+  -webkit-text-fill-color:#08224f !important;
+  border:2px solid #9db4d3 !important;
+  border-radius:22px !important;
+  box-shadow:0 3px 10px rgba(4,31,76,.14) !important;
+  text-shadow:none !important;
+  font-size:.72rem !important;
+  font-weight:900 !important;
+  line-height:1.15 !important;
+  appearance:none !important;
+  -webkit-appearance:none !important;
+}
+body #tienda-grid .prod-card button.prod-ampliar-btn span,
+body #tienda-grid .prod-card button.prod-ampliar-btn strong{
+  display:inline !important;
+  color:#08224f !important;
+  -webkit-text-fill-color:#08224f !important;
+  font:inherit !important;
+}
+body.oscuro #tienda-grid .prod-card button.prod-ampliar-btn{
+  border-color:#70a9ff !important;
+  box-shadow:0 0 14px rgba(74,145,255,.28),0 3px 10px rgba(0,0,0,.28) !important;
+}
+
+/* Contraste general del contenido interactivo de cada tarjeta. */
+body:not(.oscuro) #tienda-grid .prod-card button{font-weight:850;}
+body.oscuro #tienda-grid .prod-card button{font-weight:850;}
+body.oscuro #tienda-grid .prod-card button[onclick*="compartirProducto"]{background:#1475df !important;color:#fff !important;border-color:#5ba6ff !important;}
+body.oscuro #tienda-grid .prod-card button[onclick*="compartirInstagram"]{background:#fff !important;color:#08224f !important;border-color:#9db4d3 !important;}
+
+/* Todas las vistas de cuotas deben cerrar dentro de la tarjeta. */
+.ae-cuota-simple,.ae-cuota-destacada,.ae-cuota-comparativa,.ae-cuota-ahorro{width:100%;min-width:0;max-width:100%;overflow:hidden;}
+.ae-cuota-monto{max-width:100%;font-size:clamp(.9rem,1.5vw,1.35rem);font-weight:900;line-height:1.08;overflow-wrap:anywhere;word-break:normal;}
+.ae-cuota-simple .ae-cuota-monto,.ae-cuota-ahorro .ae-cuota-monto{color:var(--nar);}
+.ae-cuota-subtexto{font-size:.62rem;font-weight:750;line-height:1.3;overflow-wrap:anywhere;}
+.ae-cuota-contado{font-size:.62rem;color:var(--sub);line-height:1.3;margin:3px 0 6px;overflow-wrap:anywhere;}
+.ae-cuota-destacada{padding:9px 7px;margin-bottom:5px;border-radius:10px;text-align:center;color:#fff;background:linear-gradient(135deg,#e86300,#ff8b2b);}
+.ae-cuota-destacada .ae-cuota-monto{font-size:clamp(1rem,2vw,1.45rem);color:#fff;}
+.ae-cuota-comparativa{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;margin-bottom:5px;}
+.ae-cuota-comparativa-item{min-width:0;padding:7px 5px;border:1px solid #dce4ef;border-radius:9px;background:#f7f9fc;text-align:center;}
+.ae-cuota-comparativa-item .ae-cuota-monto{font-size:clamp(.72rem,1.25vw,1rem);}
+.ae-cuota-comparativa-item:first-child .ae-cuota-monto{color:#0a214e;}
+.ae-cuota-comparativa-item:last-child .ae-cuota-monto{color:#e46100;}
+.ae-cuota-comparativa-etiqueta{font-size:.54rem;color:#667085;font-weight:800;line-height:1.2;margin-bottom:3px;overflow-wrap:anywhere;}
+.ae-cuota-comparativa-pie{font-size:.6rem;text-align:center;color:var(--sub);font-weight:750;line-height:1.3;margin-bottom:6px;overflow-wrap:anywhere;}
+body.oscuro #tienda-grid .ae-cuota-contado,
+body.oscuro #tienda-grid .ae-cuota-subtexto,
+body.oscuro #tienda-grid .ae-cuota-comparativa-pie{color:#c2d0e3 !important;}
+body.oscuro #tienda-grid .ae-cuota-comparativa-item{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);}
+body.oscuro #tienda-grid .ae-cuota-comparativa-etiqueta{color:#b9c8dc;}
+body.oscuro #tienda-grid .ae-cuota-comparativa-item:first-child .ae-cuota-monto{color:#fff;}
+body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{color:#ff9a47;}
+
+@container (max-width:220px){
+  .ae-cuota-comparativa{grid-template-columns:1fr;}
+}
+#tienda-grid .prod-card{container-type:inline-size;}
+@media(max-width:430px){
+  .ae-cuota-comparativa{grid-template-columns:1fr;}
+  .ae-cuota-comparativa-item .ae-cuota-monto{font-size:.9rem;}
+}
+
 @media(max-width:899px){
   .ae-hero-slider{border-radius:12px !important;margin-bottom:12px !important;}
   .ae-hero-menu{width:38px;height:38px;top:9px;right:9px;}
@@ -7332,7 +7410,7 @@ function tiendaCardsHtml(sublista){
       +'</div>';
 
     if(p.foto){
-      card+='<button class="prod-ampliar-btn" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')">↗ Ampliar</button>';
+      card+='<button class="prod-ampliar-btn" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')"><span aria-hidden="true">↗</span><strong>Ampliar imagen</strong></button>';
     }
 
     // controles de admin (debajo de la foto, no la empujan)
@@ -7431,30 +7509,32 @@ function tiendaCardsHtml(sublista){
           var esSI=cd.sinInteres;
           if(tiendaFormatoCuota==='simple'){
             // formato SIMPLE: cuota grande naranja + texto
-            return '<div style="font-size:1.15rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
-              +'<div style="font-size:.62rem;font-weight:700;color:'+(esSI?'var(--nar)':'#0a8a3f')+';margin-bottom:1px;">en '+cd.n+(esSI?' cuotas ✨ SIN INTERÉS':' cuotas fijas')+'</div>'
-              +'<div style="font-size:.66rem;color:var(--sub);margin-bottom:6px;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
+            return '<div class="ae-cuota-simple">'
+              +'<div class="ae-cuota-monto">'+fmt(cd.valor)+'</div>'
+              +'<div class="ae-cuota-subtexto">en '+cd.n+(esSI?' cuotas · SIN INTERÉS':' cuotas fijas')+'</div>'
+              +'<div class="ae-cuota-contado">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>'
+              +'</div>';
           }
           if(tiendaFormatoCuota==='destacado'){
-            return '<div style="background:linear-gradient(135deg,#FF7A00,#ff9a3d);border-radius:10px;padding:9px;margin-bottom:5px;text-align:center;color:#fff;">'
+            return '<div class="ae-cuota-destacada">'
               +'<div style="font-size:.62rem;font-weight:800;opacity:.95;letter-spacing:.5px;">'+cd.n+' CUOTAS DE</div>'
-              +'<div style="font-size:1.7rem;font-weight:900;line-height:1;">'+fmt(cd.valor)+'</div>'
+              +'<div class="ae-cuota-monto">'+fmt(cd.valor)+'</div>'
               +'<div style="font-size:.62rem;font-weight:800;margin-top:2px;background:rgba(255,255,255,.25);border-radius:20px;padding:1px 8px;display:inline-block;">'+(esSI?'\u2728 SIN INTERÉS':'CUOTAS FIJAS')+'</div>'
               +'</div>'
-              +'<div style="font-size:.62rem;color:var(--sub);margin-bottom:6px;text-align:center;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
+              +'<div class="ae-cuota-contado" style="text-align:center;">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>';
           }
           if(tiendaFormatoCuota==='comparativo'){
-            return '<div style="display:flex;gap:6px;margin-bottom:5px;">'
-              +'<div style="flex:1;background:#f0f4ff;border-radius:9px;padding:6px;text-align:center;">'
-                +'<div style="font-size:.55rem;color:var(--sub);font-weight:700;">CONTADO</div>'
-                +'<div style="font-size:1rem;font-weight:900;color:var(--az);line-height:1.1;">'+fmt(p.venta)+'</div>'
+            return '<div class="ae-cuota-comparativa">'
+              +'<div class="ae-cuota-comparativa-item">'
+                +'<div class="ae-cuota-comparativa-etiqueta">CONTADO</div>'
+                +'<div class="ae-cuota-monto">'+fmt(p.venta)+'</div>'
               +'</div>'
-              +'<div style="flex:1;background:'+(esSI?'#e6f8ee':'#fff4e8')+';border-radius:9px;padding:6px;text-align:center;">'
-                +'<div style="font-size:.55rem;color:var(--sub);font-weight:700;">'+cd.n+' CUOTAS</div>'
-                +'<div style="font-size:1rem;font-weight:900;color:var(--nar);line-height:1.1;">'+fmt(cd.valor)+'</div>'
+              +'<div class="ae-cuota-comparativa-item">'
+                +'<div class="ae-cuota-comparativa-etiqueta">'+cd.n+' CUOTAS</div>'
+                +'<div class="ae-cuota-monto">'+fmt(cd.valor)+'</div>'
               +'</div>'
               +'</div>'
-              +'<div style="font-size:.6rem;text-align:center;color:'+(esSI?'#0a8a3f':'var(--sub)')+';font-weight:700;margin-bottom:6px;">'+(esSI?'\u2728 Sin interés':'Cuotas fijas')+' '+bloquePrecioAntes(p)+'</div>';
+              +'<div class="ae-cuota-comparativa-pie">'+(esSI?'Sin interés':'Cuotas fijas')+' '+bloquePrecioAntes(p)+'</div>';
           }
           if(tiendaFormatoCuota==='ahorro'){
             var tieneOferta=p.precioAntes&&parseFloat(p.precioAntes)>p.venta;
@@ -7465,9 +7545,10 @@ function tiendaCardsHtml(sublista){
                   +'<span style="background:#dc2626;color:#fff;font-size:.6rem;font-weight:900;padding:1px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0;display:inline-block;">-'+pctOff+'%</span>'
                 +'</div>'
               : '';
-            return cab
-              +'<div style="font-size:1.35rem;font-weight:900;color:var(--nar);line-height:1;">'+fmt(p.venta)+'</div>'
-              +'<div style="font-size:.66rem;font-weight:800;color:'+(esSI?'#0a8a3f':'var(--az)')+';margin-bottom:5px;">ó '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' SIN INTERÉS':'')+'</div>';
+            return '<div class="ae-cuota-ahorro">'+cab
+              +'<div class="ae-cuota-monto">'+fmt(p.venta)+'</div>'
+              +'<div class="ae-cuota-subtexto">o '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' · SIN INTERÉS':'')+'</div>'
+              +'</div>';
           }
           // formato CAJA profesional: misma identidad limpia de la nueva tienda
           return '<div class="ae-card-price">Contado: <b>'+fmt(p.venta)+'</b></div>'
