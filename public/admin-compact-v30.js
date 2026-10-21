@@ -12,7 +12,8 @@
     return typeof window.buscarProd==="function" ? window.buscarProd(id) : null;
   }
   function esAdmin(){
-    return typeof window.tiendaEsAdmin!=="undefined" && window.tiendaEsAdmin===true
+    return window.vistaPreviaCliente!==true
+      && typeof window.tiendaEsAdmin!=="undefined" && window.tiendaEsAdmin===true
       && typeof window.tiendaExigirAdmin==="function";
   }
   function fmtCosto(n){
