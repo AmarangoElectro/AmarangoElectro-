@@ -8472,7 +8472,9 @@ function tiendaEditarMayoristaCelu(id){
   tiendaProductos.forEach(function(x){if(x&&x.mayorista)usados[String(x.mayorista).trim()]=true;});
   cargarListaCelus().forEach(function(x){if(x&&x.mayorista)usados[String(x.mayorista).trim()]=true;});
   var opciones=Object.keys(usados).filter(Boolean).sort().map(function(m){return '<option value="'+escapeHtml(m)+'">';}).join('');
-  var html='<h3 style="color:var(--az);font-size:1rem;">🏪 Mayorista del celular</h3>'
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+    +'<h3 style="color:var(--az);font-size:1rem;margin:0;">🏪 Mayorista del celular</h3>'
+    +'<button type="button" aria-label="Cerrar mayorista" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'" style="flex:0 0 34px;width:34px;height:34px;border:1px solid var(--bor);border-radius:50%;background:var(--wh);color:var(--sub);font-size:22px;line-height:1;cursor:pointer;">×</button></div>'
     +'<p style="font-size:.75rem;color:var(--sub);">'+escapeHtml(p.nombre)+'</p>'
     +'<label for="ae-celu-mayorista-input" style="display:block;font-size:.75rem;font-weight:800;margin:12px 0 6px;">Elegí o escribí el mayorista</label>'
     +'<input id="ae-celu-mayorista-input" list="ae-celu-mayoristas" value="'+escapeHtml(p.mayorista||'')+'" placeholder="Nombre del mayorista" style="width:100%;padding:12px;box-sizing:border-box;border:1px solid var(--bor);border-radius:9px;background:var(--wh);color:var(--txt);font-size:1rem;">'
