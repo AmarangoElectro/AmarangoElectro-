@@ -126,8 +126,8 @@ function aplicarUiAdminProfesional(response) {
   const tipo = String(response.headers.get("content-type") || "").toLowerCase();
   if (!tipo.includes("text/html")) return response;
   return new HTMLRewriter()
-    .on("head", { element(el){ el.append(ADMIN_UI_STYLE+'<link rel="stylesheet" href="/admin-compact-v30.css?v=1">\n',{html:true}); } })
-    .on("body", { element(el){ el.append(ADMIN_UI_SCRIPT+'<script defer src="/admin-compact-v30.js?v=1"></script>\n',{html:true}); } })
+    .on("head", { element(el){ el.append(ADMIN_UI_STYLE,{html:true}); } })
+    .on("body", { element(el){ el.append(ADMIN_UI_SCRIPT,{html:true}); } })
     .transform(response);
 }
 
