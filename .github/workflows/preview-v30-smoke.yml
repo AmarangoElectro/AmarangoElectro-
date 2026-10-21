@@ -66,4 +66,22 @@ jobs:
               -w 'HTTP=%{http_code} IP=%{remote_ip} TLS=%{ssl_verify_result} redirect=%{redirect_url} total=%{time_total}\n' "$url"
             head -15 /tmp/orig-headers 2>/dev/null | grep -Ei '^(HTTP|server:|cf-ray:|location:|content-type:|x-)'
           done
+          echo "=== RESPUESTA JSON ERROR CACHE (sólo si HTTP != 200) ==="
+          code=$(curl --max-time 18 -sS -o /tmp/cache-error -w '%{http_code}' "https://amarangoelectro.com.ar/api/catalogo-cache")
+          echo "cache_status=$code"
+          if [ "$code" != "200" ]; then head -c 280 /tmp/cache-error; echo; fi
+          echo "=== API REST SUPABASE: ESTADO LECTURA ANON (SIN EXHIBIR CLAVE) ==="
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const p=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8'));
+          const url=new URL(p.vars.SUPABASE_URL+'/rest/v1/tienda_catalogo');
+          url.search='?id=eq.catalogo&select=id&limit=1';
+          const headers={apikey:p.vars.SUPABASE_ANON_KEY,Authorization:'Bearer '+p.vars.SUPABASE_ANON_KEY};
+          fetch(url,{headers,signal:AbortSignal.timeout(12000)})
+          .then(async r=>{
+             console.log('supabase_rest_status='+r.status);
+             if(!r.ok)console.log('supabase_rest_error='+String(await r.text()).slice(0,240));
+             else console.log('supabase_rest_ok=true');
+          }).catch(e=>console.log('supabase_rest_fetch_error='+e.name+':'+e.message));
+          NODE
           echo "=== FIN (no se modificó producción) ==="
