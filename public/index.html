@@ -5620,7 +5620,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c), categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c), categoria:'📱 Celulares', mayorista:c.mayorista||'', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
   }
   return null;
 }
@@ -8347,6 +8347,7 @@ function tiendaGuardarPrecios(){
       if(nombre)celus[i].nombre=nombre;
       celus[i].precio=Math.round(venta);
       celus[i].caracteristicas=carac;
+      celus[i].mayorista=mayorista;
       try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
       subirCelusNube(celus);
     }
@@ -9863,7 +9864,7 @@ function tiendaTodosLosProductos(soloVisibles){
     if(soloVisibles && c.ocultoTienda)return; // celu oculto no va al catálogo del cliente
     universo.push({
       id:'celu_'+i, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c),
-      categoria:'📱 Celulares', colores:c.colores||[], visible:!c.ocultoTienda,
+      categoria:'📱 Celulares', mayorista:c.mayorista||'', colores:c.colores||[], visible:!c.ocultoTienda,
       foto:c.foto||'', caracteristicas:c.caracteristicas||'',
       destacado:c.destacado||false, delDia:c.delDia||false,
       pocoStock:c.pocoStock||false, sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0
