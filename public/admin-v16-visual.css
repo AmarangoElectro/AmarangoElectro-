@@ -737,3 +737,16 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is
 @media (prefers-reduced-motion:reduce){
   #tienda-grid *{scroll-behavior:auto !important;}
 }
+
+
+#ae-category-loading[hidden]{display:none !important;}
+#ae-category-loading{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  margin:8px 0;padding:10px 12px;border:1px solid #dce7f6;
+  border-radius:11px;background:#f5f9ff;color:#0a4fbf;
+  font:750 .75rem system-ui,sans-serif;
+}
+.ae-loading-spinner{width:15px;height:15px;border:2px solid #b5cbed;border-top-color:#ff7a00;border-radius:50%;animation:ae-category-spin .75s linear infinite;}
+@keyframes ae-category-spin{to{transform:rotate(360deg)}}
+body.oscuro #ae-category-loading{background:#14243c;border-color:#365478;color:#fff;}
+@media(prefers-reduced-motion:reduce){.ae-loading-spinner{animation:none;border-top-color:#0a4fbf;}}
