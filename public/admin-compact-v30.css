@@ -68,7 +68,7 @@
   cursor:pointer!important;text-decoration:none!important;
 }
 #tienda-grid.ae-v30-admin .prod-card .ae-v30-tools>details{
-  display:contents!important;
+  display:block!important;flex:0 0 36px!important;min-width:36px!important;
 }
 #tienda-grid.ae-v30-admin .prod-card .ae-v30-tools>details[open]{
   display:block!important;flex:0 0 100%!important;order:6!important;
