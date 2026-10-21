@@ -680,3 +680,39 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is
     width:100% !important;min-width:0 !important;height:40px !important;
   }
 }
+
+
+/* Nombre completo conservado en datos; tarjeta compacta y legible en Android. */
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre{
+  display:-webkit-box !important;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3;
+  line-clamp:3;
+  overflow:hidden !important;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  min-width:0;
+  max-width:100%;
+  min-height:0 !important;
+  max-height:4.05em;
+  line-height:1.35 !important;
+  font-size:.76rem !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary{
+  font-size:.68rem !important;
+  line-height:1.2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:4px !important;
+  white-space:normal;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open]{
+  height:auto !important;
+  min-height:39px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open]>div{
+  position:relative;
+  z-index:3;
+}
