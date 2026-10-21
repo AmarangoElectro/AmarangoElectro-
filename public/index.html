@@ -1078,6 +1078,11 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 #modal-cuotas.ae-modern-product-detail #modal-cuotas-body button{font-family:Inter,system-ui,-apple-system,sans-serif!important;letter-spacing:-.015em;border-radius:11px!important;box-shadow:none!important}
 #modal-cuotas.ae-modern-product-detail #modal-cuotas-body .calc-btn{font-weight:800!important}
 #modal-cuotas.ae-modern-product-detail #modal-cuotas-body{padding-bottom:10px}
+</style><style id="ae-explora-colores-2026">
+.ae-explora-titulo{grid-column:1/-1;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:clamp(1.15rem,4.5vw,1.45rem);font-weight:900;letter-spacing:-.035em;margin:4px 2px 9px;line-height:1.2;color:#0A4FBF}
+.ae-explora-titulo span:nth-child(2){color:#111827}
+body.oscuro .ae-explora-titulo{color:#fff}
+body.oscuro .ae-explora-titulo span:nth-child(2){color:#FF7A00}
 </style></head>
 <body class="en-tienda">
 
@@ -7319,7 +7324,7 @@ function tiendaRenderPortadaCategorias(universo,cont){
   if(!html){
     html='<div style="grid-column:1/-1;background:#fff;border-radius:14px;padding:22px;text-align:center;color:var(--az);font-weight:800;">Estamos preparando la vidriera. Tocá una categoría arriba para ver sus productos.</div>';
   }else{
-    html='<div style="grid-column:1/-1;color:#fff;font-size:1.15rem;font-weight:900;margin:2px 2px 6px;">Explorá nuestros productos</div>'+html;
+    html='<div class="ae-explora-titulo"><span>Explorá</span> <span>nuestros</span> <span>productos</span></div>'+html;
     html+='<div style="grid-column:1/-1;text-align:center;margin:0 0 28px;"><button onclick="tiendaModoPortada=false;tiendaMostrarTodos=true;tiendaRender();" style="background:var(--nar);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(255,122,0,.28);">Ver todos los productos</button></div>';
   }
   _tiendaListaFull=[];
@@ -8472,7 +8477,9 @@ function tiendaEditarMayoristaCelu(id){
   tiendaProductos.forEach(function(x){if(x&&x.mayorista)usados[String(x.mayorista).trim()]=true;});
   cargarListaCelus().forEach(function(x){if(x&&x.mayorista)usados[String(x.mayorista).trim()]=true;});
   var opciones=Object.keys(usados).filter(Boolean).sort().map(function(m){return '<option value="'+escapeHtml(m)+'">';}).join('');
-  var html='<h3 style="color:var(--az);font-size:1rem;">🏪 Mayorista del celular</h3>'
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">'
+    +'<h3 style="color:var(--az);font-size:1rem;margin:0;">🏪 Mayorista del celular</h3>'
+    +'<button type="button" aria-label="Cerrar" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'" style="flex:none;width:36px;height:36px;border:1px solid var(--bor);border-radius:10px;background:var(--wh);color:var(--txt);font-size:1.25rem;cursor:pointer;">×</button></div>'
     +'<p style="font-size:.75rem;color:var(--sub);">'+escapeHtml(p.nombre)+'</p>'
     +'<label for="ae-celu-mayorista-input" style="display:block;font-size:.75rem;font-weight:800;margin:12px 0 6px;">Elegí o escribí el mayorista</label>'
     +'<input id="ae-celu-mayorista-input" list="ae-celu-mayoristas" value="'+escapeHtml(p.mayorista||'')+'" placeholder="Nombre del mayorista" style="width:100%;padding:12px;box-sizing:border-box;border:1px solid var(--bor);border-radius:9px;background:var(--wh);color:var(--txt);font-size:1rem;">'
