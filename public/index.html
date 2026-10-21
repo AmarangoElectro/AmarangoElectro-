@@ -7557,7 +7557,7 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && !vistaPreviaCliente){
       card+='<div class="ae-admin-cost-inline"><span>Costo: <b>'
         +(Number(p.costo)>0?fmt(Number(p.costo)):'A confirmar')
-        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+');requestAnimationFrame(function(){var campo=document.getElementById('edit-costo');if(campo){campo.focus();campo.select();}})">✎</button></div>';
+        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+');requestAnimationFrame(function(){var campo=document.getElementById(&quot;edit-costo&quot;);if(campo){campo.focus();campo.select();}})">✎</button></div>';
     }
 
     if(tiendaEsAdmin){
