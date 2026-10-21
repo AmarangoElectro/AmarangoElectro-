@@ -17,7 +17,7 @@ jobs:
       - name: Obtener rama de prueba
         uses: actions/checkout@v4
       - name: Ejecutar pruebas de preservación y gesto horizontal
-        run: node --test tests/admin-v16-visual-click.test.mjs
+        run: node --test tests/admin-v16-visual-click.test.mjs tests/v16-typography-preservation.test.mjs
       - name: Confirmar que no se agregaron dependencias ni se tocó Supabase
         run: |
           test -f public/admin-v16-visual.css
@@ -41,9 +41,12 @@ jobs:
           for i in $(seq 1 20); do
             status=$(curl --max-time 15 -sSL -o /tmp/store-preview.html -w '%{http_code}' "$url/" || true)
             css=$(curl --max-time 15 -sSL -o /tmp/store-preview.css -w '%{http_code}' "$url/admin-v16-visual.css" || true)
-            if [ "$status" = "200" ] && [ "$css" = "200" ] &&
+            typo=$(curl --max-time 15 -sSL -o /tmp/store-typography.css -w '%{http_code}' "$url/v16-typography.css" || true)
+            if [ "$status" = "200" ] && [ "$css" = "200" ] && [ "$typo" = "200" ] &&
                grep -q 'admin-v16-visual.css' /tmp/store-preview.html &&
-               grep -q 'ae-admin-v16-visual' /tmp/store-preview.css; then
+               grep -q 'v16-typography.css' /tmp/store-preview.html &&
+               grep -q 'ae-admin-v16-visual' /tmp/store-preview.css &&
+               grep -q 'font-family: Inter' /tmp/store-typography.css; then
               ok=1; break
             fi
             echo "preview aún no listo: intento $i (HTML=$status CSS=$css)"
