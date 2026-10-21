@@ -785,6 +785,21 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="/admin-v16-visual.css?v=1">
 <link rel="stylesheet" href="/v16-typography.css?v=1">
+<style id="ae-admin-card-polish-20261021">
+/* Controles administrativos compactos, manteniendo las funciones existentes. */
+.ae-admin-visibility{width:calc(100% - 47px)!important;display:inline-flex!important;vertical-align:middle!important;min-height:42px!important;margin-right:6px!important}
+.ae-admin-share-top{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:40px;height:42px;border:1px solid #bde8cd;border-radius:12px;background:#e9f9ef;color:#087b45;font-size:1.35rem;font-weight:900;cursor:pointer}
+.ae-admin-share-top:active{transform:scale(.96)}
+.ae-admin-quickbar{border:1px solid var(--bor);background:var(--wh);border-radius:13px;padding:7px;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.ae-admin-quickbar>button{width:100%!important;margin:0!important;min-height:37px!important;border-radius:10px!important;box-shadow:none!important;font-size:.68rem!important}
+.ae-admin-quickbar>details{grid-column:1/-1;margin:0!important;min-width:0}
+.ae-admin-quickbar>details>summary{border-radius:10px!important;min-height:32px}
+.ae-admin-edit-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px!important}
+.ae-admin-edit-actions>button{min-width:0!important;min-height:40px;border-radius:10px!important}
+.ae-admin-edit-actions>button:nth-child(n+3){min-width:0!important}
+#ae-admin-atajos button{border-radius:12px!important}
+#ae-admin-atajos button:last-of-type{background:#ff7a00!important;color:#fff!important;border-color:#ff7a00!important}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -7429,7 +7444,8 @@ function tiendaCardsHtml(sublista){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
       card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
         +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
-        +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
+        +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>'
+        +'<button type="button" class="ae-admin-share-top" title="Compartir producto por WhatsApp" aria-label="Compartir producto por WhatsApp" onclick="event.preventDefault();event.stopPropagation();compartirProducto('+pid+')">↗</button>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -7614,8 +7630,6 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaVerDesdeMenu('+pid+')">↗ Ver producto</button>';
       card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
-      // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
       card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
       card+='</div>'; // cierre de barra compacta de accesos existentes
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
