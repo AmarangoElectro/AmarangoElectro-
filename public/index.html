@@ -7398,16 +7398,19 @@ function tiendaCardsHtml(sublista){
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
       +'</div>';
 
+    var botonAmpliarAdmin='';
     if(p.foto){
-      card+='<button class="prod-ampliar-btn" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')"><span aria-hidden="true">↗</span><strong>Ampliar imagen</strong></button>';
+      var botonAmpliar='<button class="prod-ampliar-btn" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')"><span aria-hidden="true">↗</span><strong>Ampliar imagen</strong></button>';
+      if(tiendaEsAdmin && !vistaPreviaCliente) botonAmpliarAdmin=botonAmpliar;
+      else card+=botonAmpliar;
     }
 
     // controles de admin (debajo de la foto, no la empujan)
     if(tiendaEsAdmin && !p.esCelu){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
-      card+='<label style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
+      card+='<label class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
         +'<input type="checkbox" '+(p.visible?'checked':'')+' onchange="event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+');"> '
-        +(p.visible?'👁️ Visible':'🙈 Oculto')+'</label>';
+        +(p.visible?'Visible':'Oculto')+'</label>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -7554,7 +7557,7 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && !vistaPreviaCliente){
       card+='<div class="ae-admin-cost-inline"><span>Costo: <b>'
         +(Number(p.costo)>0?fmt(Number(p.costo)):'A confirmar')
-        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+')">✎</button></div>';
+        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+');requestAnimationFrame(function(){var campo=document.getElementById('edit-costo');if(campo){campo.focus();campo.select();}})">✎</button></div>';
     }
 
     if(tiendaEsAdmin){
@@ -7575,7 +7578,7 @@ function tiendaCardsHtml(sublista){
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
-      card+='<div class="ae-admin-quickbar"><details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true">⋯</span></summary><div style="padding-top:6px;">';
+      card+='<div class="ae-admin-quickbar">'+botonAmpliarAdmin+'<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true">⋯</span></summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
