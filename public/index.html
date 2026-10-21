@@ -7976,9 +7976,8 @@ function _sugerenciasMayoristas(){
 function tiendaAmpliarDesdeMenu(id){
   if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
   var p=buscarProd(id);if(!p)return;
-  var card=Array.from(document.querySelectorAll('#tienda-grid .prod-card')).find(function(el){
-    return el.querySelector('#opts-'+CSS.escape(String(id)));
-  });
+  var menu=document.getElementById('opts-'+id);
+  var card=menu&&menu.closest('.prod-card');
   var boton=card&&card.querySelector('.prod-ampliar-btn');
   if(boton){boton.click();return;}
   mostrarToast('⚠️ No se encontró la acción de ampliar imagen');
@@ -7991,11 +7990,9 @@ function tiendaConfirmarPrecioDesdeMenu(id){
 }
 function tiendaVerDesdeMenu(id){
   var p=buscarProd(id);if(!p)return;
-  var card=document.getElementById('opts-'+id);
-  var cont=card&&card.closest('.prod-card');
-  var link=cont&&cont.querySelector('a[href*="prod="]');
-  if(link){link.click();return;}
-  mostrarToast('Usá la opción Ver producto del catálogo');
+  var destino=new URL(window.location.href);
+  destino.searchParams.set('prod',String(id));
+  window.open(destino.toString(),'_blank','noopener');
 }
 function tiendaAbrirCostoInline(id, boton){
   if(!tiendaExigirAdmin() || vistaPreviaCliente)return;
