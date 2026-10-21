@@ -889,6 +889,36 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
   }
 }
 </style>
+<style id="fix-bordes-marcas-admin">
+/* Acentos de marca discretos, solo celulares en Administración */
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca] {
+  border-width:1px !important;
+  border-style:solid !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="motorola"],
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca="moto"] {
+  border-color:#d9cafa !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="infinix"] {
+  border-color:#bfe6d0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="iphone"],
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="apple"] {
+  border-color:#f8cfaa !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="samsung"] {
+  border-color:#c1d9fa !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="poco"] {
+  border-color:#f1e6a4 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="redmi"] {
+  border-color:#f3c5c5 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-marca*="xiaomi"] {
+  border-color:#f0c9c5 !important;
+}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -7473,7 +7503,7 @@ function tiendaCardsHtml(sublista){
     var fadeClass = ''; // Sin animación por tarjeta: evita desapariciones y saltos al deslizar.
     var delay=0; // Sin animaciones escalonadas al cargar categorías. // fade escalonado (tope 0.4s)
     var marcaVisual=String(p.marca||p.brand||String(p.nombre||'').split(/\s+/)[0]||'Amarango').trim();
-    var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+    var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" '+(tiendaEsAdmin&&!vistaPreviaCliente&&p.esCelu?'data-ae-marca="'+escapeHtml(marcaVisual.toLowerCase()).replace(/"/g,'&quot;')+'"':'')+' style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
     // modo compartir varios: casilla de selección (para todos)
     if(tiendaModoSelec){
