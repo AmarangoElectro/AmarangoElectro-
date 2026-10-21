@@ -1,0 +1,46 @@
+name: Smoke producción post tipografía V16 (solo lectura)
+
+on:
+  push:
+    branches:
+      - "qa/verificar-post-publicacion-visual-20261021"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probar web y catálogo publicados sin escribir datos
+        shell: bash
+        run: |
+          set -euo pipefail
+          origin="https://amarangoelectro.com.ar"
+          found=0
+          for i in $(seq 1 18); do
+            code=$(curl --max-time 15 -fsSL -o /tmp/amarango-home.html -w '%{http_code}' "$origin/" || true)
+            catalog=$(curl --max-time 15 -sSL -o /tmp/amarango-catalog.json -w '%{http_code}' "$origin/api/catalogo-cache" || true)
+            typography=$(curl --max-time 15 -sSL -o /tmp/amarango-v16.css -w '%{http_code}' "$origin/v16-typography.css" || true)
+            admin=$(curl --max-time 15 -sSL -o /tmp/amarango-admin.css -w '%{http_code}' "$origin/admin-v16-visual.css" || true)
+            hasLink=0
+            hasStyle=0
+            [ "$code" = 200 ] && grep -q 'v16-typography.css' /tmp/amarango-home.html && hasLink=1
+            [ "$typography" = 200 ] && grep -q 'AMARANGOELECTRO.*TIPOGRAFÍA V16' /tmp/amarango-v16.css && hasStyle=1
+            echo "intent=$i home=$code catalog=$catalog typography=$typography admin=$admin link=$hasLink style=$hasStyle"
+            if [ "$code" = 200 ] && [ "$catalog" = 200 ] &&
+               [ "$typography" = 200 ] && [ "$admin" = 200 ] &&
+               [ "$hasLink" = 1 ] && [ "$hasStyle" = 1 ] &&
+               grep -q 'ae-admin-v16-visual' /tmp/amarango-admin.css; then
+              found=1
+              echo "PASS: Sitio principal, API de catálogo y dos hojas visuales sirven la versión fusionada"
+              break
+            fi
+            sleep 8
+          done
+          if [ "$found" != 1 ]; then
+            echo "::error::No se pudo verificar la publicación de V16 visual y el catálogo. No cambiar datos ni publicar automáticamente."
+            exit 1
+          fi
