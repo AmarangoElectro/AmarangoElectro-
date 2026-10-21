@@ -780,6 +780,20 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
   .ae-hero-menu{width:38px;height:38px;top:9px;right:9px;}
 }
 
+
+/* Pulido visual administrativo: sin cambios funcionales */
+#tienda-grid.ae-admin-v16-visual .prod-card{border-radius:17px!important;border:1px solid #e1e7ef!important;box-shadow:0 5px 18px rgba(18,43,76,.07)!important;padding:10px!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-foto{border-radius:12px!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar{gap:6px!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details>summary{display:flex!important;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:7px 8px!important;background:#f6f9fd!important;border:1px solid #d8e3f0!important;border-radius:10px!important;color:#173f78!important;box-shadow:none!important;font-size:.66rem!important;list-style:none!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details>summary::-webkit-details-marker{display:none}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details>summary::marker{content:''}
+#tienda-grid.ae-admin-v16-visual .ae-drawer-icon{font-size:1.1rem;line-height:1}
+#tienda-grid.ae-admin-v16-visual .ae-drawer-chevron{font-size:1rem;transition:transform .18s}
+#tienda-grid.ae-admin-v16-visual details[open] .ae-drawer-chevron{transform:rotate(180deg)}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{min-width:0;border-radius:10px!important;box-shadow:none!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-menu-action{border-radius:9px!important}
+@media(max-width:480px){#tienda-grid.ae-admin-v16-visual{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -7595,7 +7609,7 @@ function tiendaCardsHtml(sublista){
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
-      card+='<div class="ae-admin-quickbar">'+botonAmpliarAdmin+'<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true">Abrir opciones</span></summary><div style="padding-top:6px;">';
+      card+='<div class="ae-admin-quickbar">'+botonAmpliarAdmin+'<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true" class="ae-drawer-icon">▤</span><span class="ae-drawer-label">Opciones</span><span aria-hidden="true" class="ae-drawer-chevron">⌄</span></summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
