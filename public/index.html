@@ -11523,6 +11523,10 @@ async function tiendaProcesarCarga(){
   document.getElementById('modal-carga').style.display='none';
   document.getElementById('carga-texto').value='';
   tiendaRender();
+  // Ubicar y resaltar el primer producto nuevo despues del guardado exitoso.
+  if(primerProductoCarga && primerProductoCarga.id!=null){
+    tiendaEnfocarProducto(primerProductoCarga.id,false);
+  }
   var msg;
   if(window._cargaResumen){
     var r=window._cargaResumen;
