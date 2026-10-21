@@ -1067,6 +1067,8 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-celu-fecha{font-size:10px;font-weight:650;color:var(--sub);margin:4px 0 6px;line-height:1.3}
 </style><style id="ae-celu-mayorista-action">
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-celu-mayorista-action{display:block;width:100%;min-height:30px;margin:4px 0 3px;padding:5px 7px;border:1px dashed var(--bor);border-radius:8px;background:var(--wh);color:var(--sub);font:700 11px Inter,system-ui,sans-serif;text-align:center;cursor:pointer}
+</style><style id="ae-asesor-antiguedad">
+#tienda-grid .prod-card .ae-asesor-antiguedad{font-size:10px;font-weight:750;color:var(--sub);padding:5px 7px;margin-bottom:5px;border:1px solid var(--bor);border-radius:7px;line-height:1.3}
 </style></head>
 <body class="en-tienda">
 
@@ -7775,7 +7777,7 @@ function tiendaCardsHtml(sublista){
     }
 
     card+=''
-      +badgePrecioFecha(p)
+      +(esVendedorCard?badgeAntiguedadAsesor(p):badgePrecioFecha(p))
       +'<div class="prod-marca">'+escapeHtml(marcaVisual)+'</div>'
       +'<div style="display:flex;align-items:flex-start;gap:6px;margin:6px 0 2px;">'
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="flex:1;min-width:0;font-size:.78rem;font-weight:800;color:var(--az);line-height:1.3;cursor:pointer;" title="'+escapeHtml(String(p.nombre||'')).replace(/"/g,'&quot;')+'">'+escapeHtml(String(p.nombre||''))+'</div>'
@@ -8456,16 +8458,49 @@ function tiendaEditarMayoristaCelu(id){
   if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
   var p=buscarProd(id);
   if(!p||!p.esCelu)return;
-  tiendaEditarPrecio(id);
-  requestAnimationFrame(function(){
-    var campo=document.getElementById('edit-mayorista');
-    if(campo){
-      campo.scrollIntoView({block:'center',behavior:'smooth'});
-      campo.focus();
-    }else{
-      mostrarToast('⚠️ No se encontró el campo Mayorista');
-    }
-  });
+  var usados={};
+  tiendaProductos.forEach(function(x){if(x&&x.mayorista)usados[String(x.mayorista).trim()]=true;});
+  cargarListaCelus().forEach(function(x){if(x&&x.mayorista)usados[String(x.mayorista).trim()]=true;});
+  var opciones=Object.keys(usados).filter(Boolean).sort().map(function(m){return '<option value="'+escapeHtml(m)+'">';}).join('');
+  var html='<h3 style="color:var(--az);font-size:1rem;">🏪 Mayorista del celular</h3>'
+    +'<p style="font-size:.75rem;color:var(--sub);">'+escapeHtml(p.nombre)+'</p>'
+    +'<label for="ae-celu-mayorista-input" style="display:block;font-size:.75rem;font-weight:800;margin:12px 0 6px;">Elegí o escribí el mayorista</label>'
+    +'<input id="ae-celu-mayorista-input" list="ae-celu-mayoristas" value="'+escapeHtml(p.mayorista||'')+'" placeholder="Nombre del mayorista" style="width:100%;padding:12px;box-sizing:border-box;border:1px solid var(--bor);border-radius:9px;background:var(--wh);color:var(--txt);font-size:1rem;">'
+    +'<datalist id="ae-celu-mayoristas">'+opciones+'</datalist>'
+    +'<button id="ae-celu-mayorista-save" class="calc-btn" style="width:100%;margin-top:14px;background:var(--gr);" onclick="tiendaGuardarMayoristaCelu(\''+id+'\')">Guardar mayorista</button>'
+    +'<div id="ae-celu-mayorista-msg" role="status" style="font-size:.7rem;margin-top:8px;color:var(--sub);"></div>';
+  document.getElementById('modal-cuotas-body').innerHTML=html;
+  document.getElementById('modal-cuotas').style.display='block';
+}
+function tiendaGuardarMayoristaCelu(id){
+  if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
+  var i=parseInt(String(id).replace('celu_',''),10);
+  var lista=cargarListaCelus(), c=lista[i];
+  var campo=document.getElementById('ae-celu-mayorista-input');
+  var boton=document.getElementById('ae-celu-mayorista-save');
+  var aviso=document.getElementById('ae-celu-mayorista-msg');
+  if(!c||!campo||!boton)return;
+  var nombre=campo.value.trim();
+  if(!nombre){aviso.textContent='Escribí o seleccioná un mayorista.';return;}
+  if(!NUBE_OK||!sbCalc){aviso.textContent='Sin conexión a la nube. No se guardó el cambio.';return;}
+  lista[i].mayorista=nombre;
+  boton.disabled=true;boton.textContent='Guardando…';aviso.textContent='';
+  Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:lista,actualizado:new Date().toISOString()}))
+    .then(function(r){if(r&&r.error)throw r.error;return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();})
+    .then(function(r){
+      if(r&&r.error)throw r.error;
+      var remoto=r&&r.data&&r.data.datos;
+      if(!Array.isArray(remoto)||!remoto[i]||String(remoto[i].mayorista||'').trim()!==nombre)throw new Error('Mayorista no confirmado');
+      localStorage.setItem('amarango_celulares',JSON.stringify(remoto));
+      boton.disabled=false;boton.textContent='✓ Guardado';
+      aviso.textContent='Mayorista guardado correctamente.';
+      tiendaRenderMantenerPosicion(tiendaCapturarPosicionLista(null));
+      mostrarToast('✅ Mayorista: '+nombre);
+    }).catch(function(err){
+      boton.disabled=false;boton.textContent='Reintentar guardar';
+      aviso.textContent='No se pudo guardar. Reintentá.';
+      console.warn('No se guardó el mayorista del celular',err);
+    });
 }
 
 function tiendaEditarPrecio(id){
@@ -10302,6 +10337,17 @@ function etiquetaFechaPrecio(p){
     +'<span style="font-size:.6rem;font-weight:800;color:'+color+';line-height:1.15;">'+txt+'</span>'
     +'<span style="font-size:.55rem;font-weight:700;color:var(--sub);white-space:nowrap;">'+fechaTxt+'</span>'
     +'</div>';
+}
+function badgeAntiguedadAsesor(p){
+  // Misma escala del semáforo de administración, sin mostrar costos ni mayoristas.
+  var ts=p.esCelu?(p.fechaCarga||p.fechaSubida||0):(p.creado||p.fechaCarga||p.precioActualizado||0);
+  if(!ts)return '<div class="ae-asesor-antiguedad">⚪ Fecha de carga no registrada · Consultar stock</div>';
+  var fecha=new Date(ts), tiempo=fecha.getTime();
+  if(!isFinite(tiempo)||tiempo>Date.now())return '<div class="ae-asesor-antiguedad">⚪ Fecha no disponible · Consultar stock</div>';
+  var dias=Math.floor((Date.now()-tiempo)/86400000);
+  var luz=dias>=28?'🔴':dias>=14?'🟡':'🟢';
+  var texto=dias===0?'Subido hoy':dias===1?'Subido ayer':'Subido hace '+dias+' días';
+  return '<div class="ae-asesor-antiguedad">'+luz+' '+texto+' · '+(dias>=28?'Consultar stock':dias>=14?'Confirmar disponibilidad':'Stock sujeto a confirmación')+'</div>';
 }
 function etiquetaPrecioVendedor(p){
   var d=diasPrecio(p),texto,color,bg,bor;
