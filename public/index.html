@@ -808,6 +808,87 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="/admin-v16-visual.css?v=1">
 <link rel="stylesheet" href="/v16-typography.css?v=1">
+<style id="fix-tarjetas-2">
+/* Solo vista administrativa: tres acciones y opciones en fila completa */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:7px !important;
+  align-items:stretch !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details[open] {
+  grid-column:1 / -1 !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:auto !important;
+  max-width:100% !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details > summary,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details[open] > summary {
+  box-sizing:border-box !important;
+  display:flex !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:38px !important;
+  min-height:38px !important;
+  justify-content:center !important;
+  align-items:center !important;
+  gap:6px !important;
+  padding:4px 6px !important;
+  margin:0 !important;
+  overflow:hidden !important;
+  white-space:nowrap !important;
+  word-break:normal !important;
+  overflow-wrap:normal !important;
+  font-size:12px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-drawer-label {
+  display:inline !important;
+  font-size:12px !important;
+  font-weight:700 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-drawer-icon {
+  font-size:14px !important;
+  flex-shrink:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-drawer-chevron {
+  display:inline !important;
+  font-size:12px !important;
+  flex-shrink:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions {
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:6px !important;
+  width:100%;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions > button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions > button:nth-child(n+3) {
+  box-sizing:border-box !important;
+  flex:none !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:auto !important;
+  min-height:38px !important;
+  font-size:11px !important;
+  padding:4px 2px !important;
+  letter-spacing:-.01em;
+  white-space:nowrap !important;
+  word-break:normal !important;
+}
+@media(max-width:400px) {
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions > button {
+    font-size:10px !important;
+  }
+}
+</style>
 </head>
 <body class="en-tienda">
 
