@@ -45,3 +45,25 @@ jobs:
             exit 1
           fi
           echo "PASS: /, CSS y JS de Admin V30 sirven contenido real"
+
+  diagnostico-tienda-original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Comprobar DNS y HTTP solo lectura del dominio original
+        shell: bash
+        run: |
+          set +e
+          echo "=== FECHA ==="
+          date -u
+          echo "=== DNS ==="
+          getent ahosts amarangoelectro.com.ar | head -8
+          getent ahosts www.amarangoelectro.com.ar | head -8
+          echo "=== CURL tienda original ==="
+          for url in "https://amarangoelectro.com.ar/" "https://www.amarangoelectro.com.ar/" "https://amarangoelectro.com.ar/api/catalogo-cache"; do
+            echo "URL $url"
+            curl --max-time 18 -sS -L -o /dev/null -D /tmp/orig-headers \
+              -w 'HTTP=%{http_code} IP=%{remote_ip} TLS=%{ssl_verify_result} redirect=%{redirect_url} total=%{time_total}\n' "$url"
+            head -15 /tmp/orig-headers 2>/dev/null | grep -Ei '^(HTTP|server:|cf-ray:|location:|content-type:|x-)'
+          done
+          echo "=== FIN (no se modificó producción) ==="
