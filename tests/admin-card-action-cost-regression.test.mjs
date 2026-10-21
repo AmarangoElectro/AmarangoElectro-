@@ -11,13 +11,13 @@ const costCode=html.slice(html.indexOf('function tiendaAbrirCostoInline('),html.
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
 test('un gesto en Visibilidad no se conecta con Compartir',()=>{
-  assert.match(card,/ae-admin-reference-visibility/);
-  assert.match(card,/onclick="event\.preventDefault\(\);event\.stopPropagation\(\);tiendaSetVisibilidadTarjeta/);
+  assert.match(card,/class="ae-admin-visibility/);
+  assert.match(card,/onclick="event\.preventDefault\(\);event\.stopPropagation\(\);tiendaToggleVisibilidadDirecta/);
   assert.doesNotMatch(card,/onchange="event\.stopPropagation\(\);tiendaToggleVisibilidadDirecta/);
   assert.match(card,/onclick="event\.stopPropagation\(\);compartirProducto/);
-  assert.match(card,/event\.stopPropagation\(\);compartirInstagram/);
-  assert.match(card,/tiendaSetVisibilidadTarjeta/);
-  assert.match(css,/\.ae-admin-reference-visibility button\.is-selected/);
+  assert.match(card,/onclick="event\.stopPropagation\(\);compartirInstagram/);
+  assert.match(card,/onclick="event\.preventDefault\(\);event\.stopPropagation\(\);tiendaToggleVisibleProd/);
+  assert.match(css,/\.ae-admin-visibility > \* \{\s*pointer-events:none/);
   assert.match(css,/touch-action:manipulation/);
 });
 
@@ -134,7 +134,7 @@ test('sin rol administrativo, vista cliente y sincronizados no admiten edición 
   assert.match(costCode,/!tiendaExigirAdmin\(\) \|\| vistaPreviaCliente/);
   assert.match(costCode,/p\.esCelu \|\| tiendaEsAutomatico\(p\)/);
   assert.match(card,/if\(tiendaEsAdmin && !vistaPreviaCliente\)/);
-  assert.match(card,/if\(tiendaEsAdmin && !vistaPreviaCliente\)/);
+  assert.match(card,/if\(tiendaEsAdmin && !p\.esCelu && !vistaPreviaCliente\)/);
 });
 
 test('Javascript del documento es válido, sin cambios de funciones de categorías',()=>{
