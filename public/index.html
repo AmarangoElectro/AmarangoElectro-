@@ -783,6 +783,7 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="/admin-v16-visual.css?v=1">
 </head>
 <body class="en-tienda">
 
@@ -2778,9 +2779,7 @@ var TIENDA_PIN='Cumbre.2026';    // PIN de acceso a la tienda
 var tiendaProductos=[];          // catálogo en memoria
 var tiendaYaAnimo=false;         // la animación de entrada solo la 1ra vez (evita parpadeo)
 var tiendaCategoriaActiva='';    // filtro de chip activo
-var _catScrollTimer=null;
-var _catScrollRestaurar=null;
-var _catIgnorarScroll=false;
+var _catScrollRestaurar=null; // guardar únicamente posición horizontal, no seleccionar al deslizar
 var tiendaMarcaActiva='';        // filtro de marca activo (dentro de Celulares)
 var tiendaSubfiltroActivo='';    // tipo/pulgadas dentro de categorías mixtas
 var tiendaMostrarTodos=false;    // botón final de la vidriera
@@ -7119,45 +7118,16 @@ function tiendaRender(){
   chipsBox.innerHTML=chipsHtml;
   chipsBox.style.display='flex';
   chipsBox.style.padding='8px';
-  // Al desplazar, la categoría que queda en el centro cambia automáticamente
-  // los productos. Un pequeño retraso evita cambios mientras el dedo se mueve.
-  chipsBox.onscroll=function(){
-    if(_catIgnorarScroll)return;
-    if(_catScrollTimer)clearTimeout(_catScrollTimer);
-    _catScrollTimer=setTimeout(function(){
-      var centro=chipsBox.scrollLeft+(chipsBox.clientWidth/2);
-      var tiles=Array.prototype.slice.call(chipsBox.querySelectorAll('.cat-tile'));
-      var elegido=null,distancia=Infinity;
-      tiles.forEach(function(tile){
-        var medio=tile.offsetLeft+(tile.offsetWidth/2);
-        var d=Math.abs(medio-centro);
-        if(d<distancia){distancia=d;elegido=tile;}
-      });
-      if(!elegido)return;
-      var nueva=elegido.getAttribute('data-categoria')||'';
-      if(nueva!==tiendaCategoriaActiva){
-        _catScrollRestaurar=chipsBox.scrollLeft;
-        tiendaFiltrarCat(nueva,true);
-      }
-    },180);
-  };
-  // Conservar la posición horizontal cuando el cambio nació del desplazamiento.
+  // La fila de categorías sólo se desplaza. El filtro cambia al tocar un chip.
+  // Guardar posición horizontal sin seleccionar automáticamente el ítem central.
+  chipsBox.onscroll=function(){ _catScrollRestaurar=chipsBox.scrollLeft; };
   if(_catScrollRestaurar!==null){
-    _catIgnorarScroll=true;
-    chipsBox.scrollLeft=_catScrollRestaurar;
-    _catScrollRestaurar=null;
-    setTimeout(function(){_catIgnorarScroll=false;},260);
+    chipsBox.scrollLeft=Math.max(0,Math.min(_catScrollRestaurar,Math.max(0,chipsBox.scrollWidth-chipsBox.clientWidth)));
   }else if(tiendaCategoriaActiva){
-    _catIgnorarScroll=true;
-    setTimeout(function(){
-      var activo=chipsBox.querySelector('.cat-tile.on');
-      if(activo){ chipsBox.scrollLeft=Math.max(0,activo.offsetLeft-(chipsBox.clientWidth-activo.offsetWidth)/2); }
-      setTimeout(function(){_catIgnorarScroll=false;},220);
-    },0);
+    var activo=chipsBox.querySelector('.cat-tile.on');
+    if(activo)chipsBox.scrollLeft=Math.max(0,activo.offsetLeft-(chipsBox.clientWidth-activo.offsetWidth)/2);
   }else{
-    _catIgnorarScroll=true;
     chipsBox.scrollLeft=0;
-    setTimeout(function(){_catIgnorarScroll=false;},220);
   }
 
   // PRODUCTO DEL DÍA (solo en vista principal sin filtros)
@@ -7580,6 +7550,13 @@ function tiendaCardsHtml(sublista){
         }
       })();
 
+    // Costo de catálogo sólo en Administración; reutiliza el editor existente.
+    if(tiendaEsAdmin && !vistaPreviaCliente){
+      card+='<div class="ae-admin-cost-inline"><span>Costo: <b>'
+        +(Number(p.costo)>0?fmt(Number(p.costo)):'A confirmar')
+        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+')">✎</button></div>';
+    }
+
     if(tiendaEsAdmin){
       if(tiendaEsPendienteImagenAdmin(p)){
         card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🖼️ Imagen del proveedor pendiente</div>'
@@ -7598,7 +7575,7 @@ function tiendaCardsHtml(sublista){
       }
       // botón destacar (estrella) arriba de los otros
       // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
-      card+='<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;">⚙️ Opciones del producto ▾</summary><div style="padding-top:6px;">';
+      card+='<div class="ae-admin-quickbar"><details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;"><span aria-hidden="true">⋯</span></summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
@@ -7610,10 +7587,11 @@ function tiendaCardsHtml(sublista){
       card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.sinStock?'#fee2e2':'var(--bg)')+';color:'+(p.sinStock?'#dc2626':'var(--sub)')+';border:1.5px solid '+(p.sinStock?'#fca5a5':'var(--bor)')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'✅ Marcar con stock':'⛔ Marcar SIN STOCK')+'</button>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')">📤 Compartir</button>';
-      card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="compartirInstagram('+pid+')">📸 Instagram</button>';
+      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
+      card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
+      card+='</div>'; // cierre de barra compacta de accesos existentes
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
-      card+='<div style="display:flex;gap:5px;margin-bottom:5px;">'
+      card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
         // 🔄 REEMPLAZAR: sube la foto nueva ENCIMA de la actual (mismo botón para
         // poner o cambiar). Nunca deja el producto sin foto ni te saca de acá.
@@ -7646,6 +7624,7 @@ function tiendaCardsHtml(sublista){
 function tiendaAplicarVistaYAvisos(){
   var cont=document.getElementById('tienda-grid');
   if(cont){
+    cont.classList.toggle('ae-admin-v16-visual',!!tiendaEsAdmin&&!vistaPreviaCliente);
     cont.classList.remove('vista-lista','vista-chica');
     if(tiendaVista===1) cont.classList.add('vista-lista');
     else if(tiendaVista===2) cont.classList.add('vista-chica');
