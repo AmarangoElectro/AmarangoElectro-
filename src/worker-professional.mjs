@@ -4,15 +4,13 @@ const PRO_UX_HEAD = `
 <link rel="stylesheet" href="/professional-ux.css?v=20260823-2">
 <link rel="stylesheet" href="/professional-dialogs.css?v=20260823-1">
 <link rel="stylesheet" href="/professional-touch.css?v=20260823-2">
+<style id="ae-retirar-margarita">#margarita-fab,#margarita-overlay,#margarita-teaser,#margarita-panel{display:none!important;pointer-events:none!important}</style>
 `;
 
 const PRO_UX_BODY = `
 <script src="/professional-ux.js?v=20260823-1" defer></script>
 <script src="/professional-dialogs.js?v=20260823-1" defer></script>
 <script src="/tienda-productividad.js?v=20260824-1" defer></script>
-<script src="/margarita-teaser.js?v=20260823-1" defer></script>
-<script src="/margarita-product-cards.js?v=20260823-1" defer></script>
-<script src="/margarita-visual-tune.js?v=20260823-3" defer></script>
 `;
 
 const MARGARITA_RESCUE_PROMPT = `
