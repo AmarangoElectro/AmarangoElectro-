@@ -526,3 +526,157 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>detai
     min-height:33px !important;
   }
 }
+
+
+/* Interacciones Android: controles aislados con destino táctil identificable. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility {
+  position:relative;
+  isolation:isolate;
+  z-index:1;
+  order:-1;
+  width:100% !important;
+  min-height:39px !important;
+  margin:0 0 6px !important;
+  padding:6px 8px !important;
+  justify-content:flex-start !important;
+  text-align:left;
+  font-family:inherit;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility > * {
+  pointer-events:none;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility .ae-admin-visibility-dot {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 21px;
+  width:21px;
+  height:21px;
+  border-radius:5px;
+  border:1px solid currentColor;
+  font-size:.9rem;
+  font-weight:800;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing {
+  display:flex !important;
+  flex-direction:column;
+  align-items:stretch;
+  min-height:0 !important;
+  padding:7px;
+  gap:7px;
+  border:1px solid #d5e3f3;
+  border-radius:9px;
+  background:#f8fbff;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing label{
+  display:block;
+  width:100%;
+  font-size:.7rem;
+  font-weight:700;
+  color:#244b78;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing input.ae-admin-cost-input {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:39px;
+  margin-top:5px;
+  padding:7px 8px;
+  border:1px solid #88a9cb;
+  border-radius:8px;
+  background:#fff;
+  color:#173758;
+  font:700 16px Inter,system-ui,sans-serif;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing .ae-admin-cost-actions {
+  display:flex;
+  width:100%;
+  gap:5px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing .ae-admin-cost-actions button {
+  flex:1 1 0 !important;
+  width:auto !important;
+  min-width:0 !important;
+  height:39px !important;
+  min-height:39px !important;
+  padding:5px 6px !important;
+  border-radius:8px !important;
+  font-size:.67rem !important;
+  font-weight:750;
+  touch-action:manipulation;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing .ae-admin-cost-save{
+  background:#0a4fbf !important;
+  border-color:#0a4fbf !important;
+  color:#fff !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing .ae-admin-cost-cancel{
+  background:#fff !important;
+  border-color:#bdcbdf !important;
+  color:#334b6c !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing button:disabled {
+  opacity:.6 !important;
+  cursor:progress;
+}
+/* Cuatro herramientas en fila cuando caben; dos por fila en Android angosto. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:5px !important;
+  width:100%;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+  box-sizing:border-box !important;
+  width:100% !important;
+  min-width:0 !important;
+  height:39px !important;
+  min-height:39px !important;
+  margin:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open] {
+  grid-column:1/-1;
+  width:100% !important;
+  max-width:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button::before {
+  width:22px !important;
+  height:22px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn span {
+  font-size:1.25rem !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+  font-size:1.5rem !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions>button:nth-child(n+3) {
+  min-width:33px !important;
+  flex-basis:33px !important;
+  width:33px !important;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing {
+  background:#1a2d47;
+  border-color:#456184;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is-editing label {
+  color:#e3efff;
+}
+@media(max-width:400px){
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details,
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+    height:40px !important;min-height:40px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn{
+    width:100% !important;min-width:0 !important;height:40px !important;
+  }
+}
