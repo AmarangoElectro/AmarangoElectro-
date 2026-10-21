@@ -1060,7 +1060,10 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 #tienda-grid.ae-admin-v16-visual .prod-card[data-ae-supplier="1"]{border-color:var(--ae-supplier-border)!important;box-shadow:0 3px 14px rgba(20,44,76,.045),inset 0 0 0 .5px var(--ae-supplier-border)!important}
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label{box-sizing:border-box;width:100%;min-width:0;margin:6px 0 4px;padding:7px 8px;border:1px solid;border-radius:9px;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:clamp(10px,2.9vw,12px);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
 </style>
-</head>
+<style id="ae-supplier-soft-borders">
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-supplier="1"]{border-color:color-mix(in srgb,var(--ae-supplier-border) 24%,var(--bor))!important;box-shadow:0 2px 9px rgba(20,44,76,.035)!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label{border-color:color-mix(in srgb,currentColor 19%,transparent)!important;background:color-mix(in srgb,var(--wh) 78%,transparent)!important}
+</style></head>
 <body class="en-tienda">
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
@@ -8526,8 +8529,30 @@ function tiendaGuardarPrecios(){
       celus[i].precio=Math.round(venta);
       celus[i].caracteristicas=carac;
       celus[i].mayorista=mayorista;
+      // Refrescar la tarjeta desde el mismo dato que se acaba de editar.
+      // El guardado en nube continúa por el circuito de celulares existente.
       try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
-      subirCelusNube(celus);
+      if(NUBE_OK && sbCalc){
+        var indiceGuardado=i, mayoristaGuardado=mayorista;
+        var botonMay=document.getElementById('btn-guardar-precios');
+        if(botonMay){botonMay.disabled=true;botonMay.textContent='Guardando…';}
+        Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:celus,actualizado:new Date().toISOString()}))
+          .then(function(res){if(res&&res.error)throw res.error;return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();})
+          .then(function(res){
+            if(res&&res.error)throw res.error;
+            var listaConfirmada=res&&res.data&&res.data.datos;
+            if(!Array.isArray(listaConfirmada)||!listaConfirmada[indiceGuardado]||String(listaConfirmada[indiceGuardado].mayorista||'').trim()!==mayoristaGuardado)throw new Error('Mayorista no confirmado');
+            if(botonMay){botonMay.disabled=false;botonMay.textContent='✅ Guardado';}
+            mostrarToast('✅ Mayorista del celular guardado');
+            tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
+          }).catch(function(err){
+            if(botonMay){botonMay.disabled=false;botonMay.textContent='Reintentar guardar';}
+            mostrarToast('⚠️ No se pudo confirmar el mayorista en la nube');
+            console.warn('Error guardando mayorista celular',err);
+          });
+      }else{
+        mostrarToast('⚠️ Sin conexión a la nube: cambio solo en este dispositivo');
+      }
     }
   }else{
     var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
@@ -12757,6 +12782,9 @@ function guardarListaCelus(){
         if(typeof prev.visible!=='undefined') cc.visible=prev.visible;
         if(prev.caracteristicas && !cc.caracteristicas) cc.caracteristicas=prev.caracteristicas;
         if(prev.categoria && !cc.categoria) cc.categoria=prev.categoria;
+        // El mayorista es un dato administrativo: conservarlo al actualizar listas de precios.
+        if(prev.mayorista && !cc.mayorista) cc.mayorista=prev.mayorista;
+        if(prev.costoManual>0 && !cc.costoManual) cc.costoManual=prev.costoManual;
       }
       mapa[k]=cc;
     });
