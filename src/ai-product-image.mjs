@@ -22,7 +22,7 @@ async function tokenIgual(a,b) {
 export async function imagenProducto(request,env){
   const enabled=String(env.AI_IMAGES_ENABLED||"")==="true"
     && Boolean(env.OPENAI_API_KEY && env.AI_ADMIN_TOKEN);
-  if(request.method==="GET") return json({ok:true,enabled:false,configured:enabled,
+  if(request.method==="GET") return json({ok:true,enabled:enabled && Boolean(env.AI_IMAGE_LIMITER),configured:enabled,
     message:"La generación se habilita únicamente con autorización administrativa y control de consumo."});
   if(request.method!=="POST") return json({ok:false,error:"Método no permitido"},405);
   if(!enabled) return json({ok:false,error:"Generador desactivado. No se generaron imágenes ni cargos."},503);
@@ -57,7 +57,7 @@ export async function imagenProducto(request,env){
   payload.append("model",String(env.AI_IMAGE_MODEL||"gpt-image-1"));
   payload.append("quality","medium");
   payload.append("size","1024x1536");
-  payload.append("image",image,"producto-original.jpg");
+  payload.append("image",image, String(image.name||"producto-original.png").slice(-120));
   payload.append("prompt",
     "Crear una pieza publicitaria vertical y premium de AmarangoElectro basada en la foto provista. "+
     "Conservar producto, marca, modelo, forma, color y detalles físicos sin inventar características. "+
