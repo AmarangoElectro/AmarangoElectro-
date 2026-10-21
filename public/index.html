@@ -7350,8 +7350,8 @@ function tiendaCardsHtml(sublista){
     var esVendedorCard=!tiendaEsAdmin&&!vistaPreviaCliente&&revUnlocked;
     var pid="'"+p.id+"'"; // id entre comillas (sirve para número y para celu_N)
     var selMarcado=tiendaSelecSet[p.id];
-    var fadeClass = tiendaYaAnimo ? '' : ' card-fade';
-    var delay=tiendaYaAnimo ? 0 : Math.min(_idx*40, 400); // fade escalonado (tope 0.4s)
+    var fadeClass = ''; // Sin animación por tarjeta: evita desapariciones y saltos al deslizar.
+    var delay=0; // Sin animaciones escalonadas al cargar categorías. // fade escalonado (tope 0.4s)
     var marcaVisual=String(p.marca||p.brand||String(p.nombre||'').split(/\s+/)[0]||'Amarango').trim();
     var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
