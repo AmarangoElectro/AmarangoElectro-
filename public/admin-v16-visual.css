@@ -750,3 +750,48 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is
 @keyframes ae-category-spin{to{transform:rotate(360deg)}}
 body.oscuro #ae-category-loading{background:#14243c;border-color:#365478;color:#fff;}
 @media(prefers-reduced-motion:reduce){.ae-loading-spinner{animation:none;border-top-color:#0a4fbf;}}
+
+/* Amarango admin: cabecera compacta y botonera ordenada, sin cambiar acciones. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-status-row {
+  order:-1;display:flex;align-items:stretch;gap:6px;width:100%;margin:0 0 5px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-status-row .ae-admin-visibility {
+  order:0;flex:1;min-width:0;width:auto;margin:0!important;border-radius:10px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-share-top {
+  display:flex;align-items:center;justify-content:center;flex:0 0 36px;
+  width:36px;min-height:34px;padding:5px;border-radius:10px;
+  color:#fff;background:#168c55;border:1px solid #127448;
+  box-shadow:0 2px 7px rgba(18,116,72,.12);cursor:pointer;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;padding:7px;background:#f6f8fc;border:1px solid #e4e9f1;
+  border-radius:12px;align-items:stretch;justify-content:stretch;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+  width:100%!important;min-width:0!important;max-width:none!important;
+  flex:1 1 auto!important;height:39px!important;min-height:39px!important;
+  border-radius:10px!important;background:#fff!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details {
+  min-width:0;position:relative;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions {
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 32px 32px;
+  gap:5px!important;margin:7px 0!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions>button {
+  width:100%!important;min-width:0!important;flex:none!important;
+  min-height:38px!important;border-radius:10px!important;
+  background:#fff!important;border:1px solid #dce4ef!important;
+  color:#173c68!important;font-size:.61rem!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions>button:nth-child(n+3) {
+  width:100%!important;min-width:0!important;flex:none!important;
+}
+@media(max-width:390px){
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar{gap:4px;padding:5px}
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 27px 27px;gap:3px!important}
+}
