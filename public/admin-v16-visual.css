@@ -750,3 +750,42 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is
 @keyframes ae-category-spin{to{transform:rotate(360deg)}}
 body.oscuro #ae-category-loading{background:#14243c;border-color:#365478;color:#fff;}
 @media(prefers-reduced-motion:reduce){.ae-loading-spinner{animation:none;border-top-color:#0a4fbf;}}
+
+/* Hotfix Android: acciones administrativas legibles, sin letras verticales */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:5px!important;align-items:stretch!important;justify-content:stretch!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details{
+  width:100%!important;min-width:0!important;max-width:100%!important;
+  flex:none!important;margin:0!important;box-sizing:border-box!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary{
+  width:100%!important;min-width:0!important;max-width:100%!important;
+  height:36px!important;min-height:36px!important;box-sizing:border-box!important;
+  padding:3px!important;gap:0!important;overflow:hidden!important;
+  white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-drawer-label,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-drawer-chevron{display:none!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-drawer-icon{font-size:1.2rem!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open]{
+  grid-column:1/-1!important;min-width:0!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open]>summary{
+  width:36px!important;margin-left:auto!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline{
+  display:grid!important;grid-template-columns:minmax(0,1fr) 32px!important;
+  align-items:center!important;min-width:0!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline>span{
+  min-width:0!important;overflow-wrap:normal!important;word-break:normal!important;
+  font-size:clamp(.55rem,2.4vw,.7rem)!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline>button{
+  width:32px!important;min-width:32px!important;flex:none!important;
+  font-size:1rem!important;line-height:1!important;overflow:hidden!important;
+  overflow-wrap:normal!important;word-break:normal!important;
+}
