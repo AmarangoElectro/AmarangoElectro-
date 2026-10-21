@@ -1,0 +1,37 @@
+name: Emergency catalog 401 read-only verification
+
+on:
+  push:
+    branches:
+      - emergency/catalogo-401-key-20261021
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify active public Supabase API key can read only catalog ID
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const cfg=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8')).vars;
+          const html=fs.readFileSync('public/index.html','utf8');
+          if(!html.includes(cfg.SUPABASE_ANON_KEY))throw Error("Key differs from existing live storefront");
+          const url=cfg.SUPABASE_URL+'/rest/v1/tienda_catalogo?id=eq.catalogo&select=id&limit=1';
+          const headers={apikey:cfg.SUPABASE_ANON_KEY,authorization:'Bearer '+cfg.SUPABASE_ANON_KEY};
+          fetch(url,{headers,signal:AbortSignal.timeout(16000)}).then(async r=>{
+            console.log("Supabase REST catalog read-only status: "+r.status);
+            if(!r.ok){
+              console.log("Response error type: "+String(await r.text()).slice(0,160));
+              process.exitCode=1;return;
+            }
+            const rows=await r.json();
+            console.log("Catalog metadata rows available: "+(Array.isArray(rows)?rows.length:"invalid"));
+            if(!Array.isArray(rows)||!rows.length)process.exitCode=1;
+          }).catch(e=>{console.log("Network error: "+e.message);process.exitCode=1;});
+          NODE
