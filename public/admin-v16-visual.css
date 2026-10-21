@@ -680,3 +680,58 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is
     width:100% !important;min-width:0 !important;height:40px !important;
   }
 }
+
+
+/* Referencia Infinix: barra superior, controles secundarios plegables y selector. */
+#tienda-grid.ae-admin-v16-visual .prod-card{display:flex;flex-direction:column;}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-toolbar{
+  order:-10;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:6px!important;margin:0 0 8px!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-toolbar>button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-toolbar>details>summary{
+  display:flex!important;align-items:center;justify-content:center;
+  height:43px!important;min-height:43px!important;width:100%!important;
+  border-radius:12px!important;border:1px solid #dce4ef!important;
+  background:#f6f8fb!important;color:#173f78!important;
+  font-size:1.35rem!important;font-weight:800!important;
+  cursor:pointer;touch-action:manipulation;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-toolbar>details{
+  position:relative;grid-column:auto!important;width:100%!important;height:auto!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-toolbar>details[open]{
+  grid-column:1/-1!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-toolbar>details[open]>summary{
+  max-width:33%;margin-left:auto!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-options-content{
+  display:grid;grid-template-columns:1fr;gap:5px;padding:6px 0;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-options-content>button{
+  width:100%!important;min-height:39px!important;margin:0!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-visibility{
+  display:grid;grid-template-columns:1fr 1fr;gap:3px;
+  padding:4px;margin:7px 0 2px;background:#f1f2f5;border:1px solid #e0e4ea;
+  border-radius:13px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-visibility button{
+  min-width:0;min-height:43px;border:0;border-radius:11px;
+  background:transparent;color:#263243;font-size:.75rem;font-weight:800;
+  font-family:inherit;cursor:pointer;touch-action:manipulation;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-visibility button.is-selected{
+  background:#ff7900;color:#fff;box-shadow:0 2px 6px #ff790033;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-status{
+  font-size:.65rem;text-align:center;color:var(--sub);margin-bottom:7px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-confirm-cost{
+  width:100%;min-height:40px;margin:5px 0 8px;border-radius:11px;
+  border:1px solid #dce4ef;background:#f7f9fc;color:#0a4fbf;
+  font:750 .7rem Inter,system-ui,sans-serif;cursor:pointer;touch-action:manipulation;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-visibility{background:#1d2939;border-color:#344357;}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-reference-visibility button:not(.is-selected){color:#f0f4fa;}
