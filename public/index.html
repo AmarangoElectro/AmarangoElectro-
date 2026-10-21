@@ -9623,7 +9623,8 @@ function tiendaCatalogoPDF(){
     +'@media print{.cat-titulo{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.pdf-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}'
     +'</style>';
 
-  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Catálogo AmarangoElectro</title>'+css+'</head><body>';
+  var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Catálogo AmarangoElectro</title>'+css+'<link rel="stylesheet" href="/admin-compact-v30.css?v=1">
+</head><body>';
   html+='<div class="pdf-header"><h1>AMARANGO ELECTRO</h1><div class="sub">EQUIPO AMARANGOELECTRO</div><div class="ig">📷 @amarangoelectro</div></div>';
   html+='<div class="pdf-fecha">Catálogo actualizado al '+hoy+' — Precios en pesos, sujetos a cambios</div>';
 
@@ -13080,5 +13081,6 @@ function margaritaEnviar(){
   .catch(function(){margaritaEscribiendo(false);margaritaPintar('margarita','No pude conectarme 🐝 Probá de nuevo o consultanos por WhatsApp.');_margaritaCargando=false;});
 }
 </script>
+<script src="/admin-compact-v30.js?v=1" defer></script>
 </body>
 </html>
