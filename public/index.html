@@ -5660,6 +5660,8 @@ function palabraCoincide(palabra, textoPalabras){
 // Costo real de un celular cargado en USD. Se deriva siempre de los dos datos
 // originales guardados (USD × cotización), nunca del precio de venta.
 function costoRealCelu(c){
+  var manual=Number(c&&c.costoManual)||0;
+  if(manual>0)return Math.round(manual);
   var usd=Number(c&&c.usd)||0;
   var cotizacion=Number(c&&c.cotizUsada)||0;
   return usd>0&&cotizacion>0?Math.round(usd*cotizacion):0;
@@ -8199,8 +8201,8 @@ function tiendaAbrirCostoInline(id, boton){
   if(!tiendaExigirAdmin() || vistaPreviaCliente)return;
   var p=buscarProd(id);
   if(!p)return;
-  if(p.esCelu || tiendaEsAutomatico(p)){
-    // La edición completa existente gestiona estos productos; no simular guardado local.
+  if(tiendaEsAutomatico(p) && !p.esCelu){
+    // Los productos sincronizados conservan su circuito autorizado de proveedor.
     tiendaEditarPrecio(id);
     requestAnimationFrame(function(){var campo=document.getElementById('edit-costo');if(campo){campo.focus();campo.select();}});
     return;
@@ -8256,8 +8258,8 @@ function tiendaCancelarCostoInline(caja){
 function tiendaGuardarCostoInline(id,campo,guardar,cancelar,caja){
   if(!tiendaExigirAdmin() || vistaPreviaCliente || guardar.disabled)return;
   var p=buscarProd(id);
-  if(!p || p.esCelu || tiendaEsAutomatico(p)){
-    mostrarToast('⚠️ Este costo no tiene un guardado autorizado.');
+  if(!p || (tiendaEsAutomatico(p) && !p.esCelu)){
+    mostrarToast('⚠️ Este costo requiere el editor del proveedor.');
     return;
   }
   var entrada=String(campo.value||'').trim().replace(/^\$\s*/,'');
@@ -8273,6 +8275,36 @@ function tiendaGuardarCostoInline(id,campo,guardar,cancelar,caja){
   if(Number(p.costo)===nuevo){tiendaCancelarCostoInline(caja);return;}
   if(!NUBE_OK || !sbCalc){
     mostrarToast('⚠️ Sin conexión. El costo no se modificó.');
+    return;
+  }
+  // Celulares: persistir el costo manual en la misma lista sincronizada,
+  // sin alterar precio de venta, cotización ni costo USD del proveedor.
+  if(p.esCelu){
+    var idx=parseInt(String(id).replace('celu_',''),10);
+    var lista=cargarListaCelus();
+    if(!lista[idx]){mostrarToast('⚠️ No se encontró el celular.');return;}
+    if(!NUBE_OK || !sbCalc){mostrarToast('⚠️ Sin conexión. El costo no se modificó.');return;}
+    var anteriorLista=lista[idx].costoManual;
+    lista[idx].costoManual=nuevo;
+    guardar.disabled=true;cancelar.disabled=true;guardar.textContent='Guardando…';
+    Promise.resolve(sbCalc.from('celulares_lista').upsert({
+      id:'lista',datos:lista,actualizado:new Date().toISOString()
+    })).then(function(res){
+      if(res&&res.error)throw res.error;
+      return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();
+    }).then(function(res){
+      if(res&&res.error)throw res.error;
+      var remotos=res&&res.data&&res.data.datos;
+      if(!Array.isArray(remotos)||!remotos[idx]||Number(remotos[idx].costoManual)!==nuevo)
+        throw new Error('La nube no confirmó el costo del celular');
+      localStorage.setItem('amarango_celulares',JSON.stringify(lista));
+      tiendaRenderMantenerPosicion(tiendaCapturarPosicionLista(null));
+      mostrarToast('✅ Costo guardado: '+fmt(nuevo));
+    }).catch(function(err){
+      guardar.disabled=false;cancelar.disabled=false;guardar.textContent='Guardar';
+      mostrarToast('⚠️ No se confirmó el costo. Reintentá.');
+      console.warn('Error guardando costo celular',err);
+    });
     return;
   }
   var anterior=p.costo;
