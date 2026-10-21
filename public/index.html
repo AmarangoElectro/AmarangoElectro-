@@ -7589,12 +7589,17 @@ function tiendaCardsHtml(sublista){
       card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.visible?'#fff0f0':'#e6f8ee')+';color:'+(p.visible?'var(--red)':'var(--gr)')+';border:1.5px solid '+(p.visible?'#ffd0d0':'#b8e6c8')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibleProd('+pid+')">'+(p.visible?'🙈 Ocultar de la tienda':'👁️ Mostrar en la tienda')+'</button>';
       // botón SIN STOCK (dentro del cajón)
       card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.sinStock?'#fee2e2':'var(--bg)')+';color:'+(p.sinStock?'#dc2626':'var(--sub)')+';border:1.5px solid '+(p.sinStock?'#fca5a5':'var(--bor)')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'✅ Marcar con stock':'⛔ Marcar SIN STOCK')+'</button>';
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaAmpliarDesdeMenu('+pid+')">↗ Ampliar imagen</button>';
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+')">✎ Editar producto</button>';
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaEditarFoto('+pid+')">▣ Reemplazar foto</button>';
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaConfirmarPrecioDesdeMenu('+pid+')">✓ Confirmar precio</button>';
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaVerDesdeMenu('+pid+')">↗ Ver producto</button>';
+      card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
       card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
       card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
       card+='</div>'; // cierre de barra compacta de accesos existentes
-      // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
         // 🔄 REEMPLAZAR: sube la foto nueva ENCIMA de la actual (mismo botón para
@@ -7968,6 +7973,30 @@ function _sugerenciasMayoristas(){
 // Editar el costo sin abandonar la tarjeta. No recalcula el precio al público.
 // Los productos de proveedor y celulares tienen un origen diferente: impedir
 // persistencia simulada o reescritura de un precio que la sincronización pisaría.
+function tiendaAmpliarDesdeMenu(id){
+  if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
+  var p=buscarProd(id);if(!p)return;
+  var card=Array.from(document.querySelectorAll('#tienda-grid .prod-card')).find(function(el){
+    return el.querySelector('#opts-'+CSS.escape(String(id)));
+  });
+  var boton=card&&card.querySelector('.prod-ampliar-btn');
+  if(boton){boton.click();return;}
+  mostrarToast('⚠️ No se encontró la acción de ampliar imagen');
+}
+function tiendaConfirmarPrecioDesdeMenu(id){
+  if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
+  var p=buscarProd(id);if(!p)return;
+  if(p.esCelu||tiendaEsAutomatico(p)){mostrarToast('✓ Precio sincronizado con proveedor');return;}
+  tiendaConfirmarPrecioManual(id);
+}
+function tiendaVerDesdeMenu(id){
+  var p=buscarProd(id);if(!p)return;
+  var card=document.getElementById('opts-'+id);
+  var cont=card&&card.closest('.prod-card');
+  var link=cont&&cont.querySelector('a[href*="prod="]');
+  if(link){link.click();return;}
+  mostrarToast('Usá la opción Ver producto del catálogo');
+}
 function tiendaAbrirCostoInline(id, boton){
   if(!tiendaExigirAdmin() || vistaPreviaCliente)return;
   var p=buscarProd(id);
