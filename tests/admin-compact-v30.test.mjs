@@ -30,7 +30,8 @@ test('los scripts nuevos no sustituyen las acciones comerciales existentes',asyn
   const worker=await readFile(new URL('../src/worker.mjs',import.meta.url),'utf8');
   const legacy=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
   const ux=await readFile(new URL('../public/admin-compact-v30.js',import.meta.url),'utf8');
-  assert.match(worker,/admin-compact-v30\.js/);
+  assert.match(legacy,/admin-compact-v30\.js/);
+  assert.match(legacy,/admin-compact-v30\.css/);
   assert.match(worker,/api\/crear-imagen-producto/);
   for(const fn of ['tiendaEditarPrecio','compartirProducto','compartirInstagram','tiendaToggleVisibleProd']){
     assert.match(legacy,new RegExp('function\\s+'+fn+'\\s*\\('));
