@@ -785,6 +785,15 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="/admin-v16-visual.css?v=1">
 <link rel="stylesheet" href="/v16-typography.css?v=1">
+<style id="ae-admin-polish-20261021">
+#btn-arriba{background:#FF7A00!important;color:#fff!important;border:1px solid #f06a00!important;box-shadow:0 6px 20px rgba(255,122,0,.34)!important}
+#btn-arriba svg{display:block;margin:auto}
+.ae-admin-visibility{display:inline-flex!important;vertical-align:middle;width:calc(100% - 53px)!important;max-width:calc(100% - 53px)}
+.ae-admin-share-top{display:inline-flex;vertical-align:middle;align-items:center;justify-content:center;width:43px;height:43px;margin-left:7px;background:#eaf8ef;color:#148647;border:1px solid #bce5cc;border-radius:12px;cursor:pointer;font-size:1.4rem;font-weight:800}
+.ae-admin-quickbar button,.ae-admin-quickbar summary,.ae-admin-edit-actions button{border-radius:11px!important;min-height:38px;line-height:1.2}
+.ae-admin-edit-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px!important}
+.ae-admin-edit-actions button{min-width:0;padding:8px 3px!important;overflow-wrap:anywhere}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -1262,7 +1271,7 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
-    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:215px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
+    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:215px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12 6-6 6 6M12 6v13"/></svg></button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none !important;position:fixed;bottom:78px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
 
     <!-- 🎰 Ruleta de descuentos -->
@@ -7430,6 +7439,7 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
         +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
         +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
+      card+='<button type="button" class="ae-admin-share-top" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp">↗</button>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -7615,7 +7625,6 @@ function tiendaCardsHtml(sublista){
       card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
       card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
       card+='</div>'; // cierre de barra compacta de accesos existentes
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
