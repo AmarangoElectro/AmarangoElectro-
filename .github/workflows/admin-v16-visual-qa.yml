@@ -1,0 +1,56 @@
+name: QA visual admin y categorías click
+
+on:
+  push:
+    branches:
+      - "work/admin-v16-visual-click-categorias-20261021"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Obtener rama de prueba
+        uses: actions/checkout@v4
+      - name: Ejecutar pruebas de preservación y gesto horizontal
+        run: node --test tests/admin-v16-visual-click.test.mjs
+      - name: Confirmar que no se agregaron dependencias ni se tocó Supabase
+        run: |
+          test -f public/admin-v16-visual.css
+          test -f netlify.toml
+          test "$(grep -c 'var _catScrollRestaurar=null;' public/index.html)" -eq 1
+          if grep -q 'tiendaFiltrarCat(nueva,true)' public/index.html; then
+            echo "Error: quedó la selección por desplazamiento"
+            exit 1
+          fi
+
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Smoke de preview Netlify en lectura
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://deploy-preview-23--amarangoelectro.netlify.app"
+          ok=0
+          for i in $(seq 1 20); do
+            status=$(curl --max-time 15 -sSL -o /tmp/store-preview.html -w '%{http_code}' "$url/" || true)
+            css=$(curl --max-time 15 -sSL -o /tmp/store-preview.css -w '%{http_code}' "$url/admin-v16-visual.css" || true)
+            if [ "$status" = "200" ] && [ "$css" = "200" ] &&
+               grep -q 'admin-v16-visual.css' /tmp/store-preview.html &&
+               grep -q 'ae-admin-v16-visual' /tmp/store-preview.css; then
+              ok=1; break
+            fi
+            echo "preview aún no listo: intento $i (HTML=$status CSS=$css)"
+            sleep 10
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::La vista previa no sirve HTML/CSS correctamente"
+            exit 1
+          fi
+          echo "PASS: la vista previa carga HTML y la estética nueva"
