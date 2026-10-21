@@ -7406,7 +7406,27 @@ function tiendaCardsHtml(sublista){
       else card+=botonAmpliar;
     }
 
-    // La visibilidad se controla desde el selector inferior.
+    // controles de admin (debajo de la foto, no la empujan)
+    if(tiendaEsAdmin && !p.esCelu && !vistaPreviaCliente){
+      var checked2=tiendaMarcadosSet[p.id]?'checked':'';
+      card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
+        +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
+        +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
+      // Motivo del ocultamiento visible para el admin: sin esto no había forma
+      // de saber, a simple vista, por qué un producto con stock quedaba oculto.
+      if(!p.visible || tiendaEstaOcultoAdmin(p)){
+        var _motivo=tiendaMotivoOcultoActual(p);
+        var _motivoTexto={manual:'🔒 Ocultado a mano',duplicado:'🧩 Posible duplicado',
+          sin_stock:'📦 Sin stock',revision_precio:'🕓 Revisando precio',
+          sin_motivo:'⚠️ Sin motivo — revisar'}[_motivo]||'';
+        if(_motivoTexto){
+          card+='<div style="font-size:.6rem;font-weight:800;margin-top:2px;color:'+(_motivo==='sin_motivo'?'#B91C1C':'#6b7280')+';">'+_motivoTexto+'</div>';
+        }
+      }
+    }
+    if(tiendaEsAdmin && p.esCelu){
+      card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
+    }
     var nombreProveedorDetectado=String(p.proveedor||p.mayorista||'');
     var esProveedorSincronizado=/mega|elektro|electro.?impacto/i.test(nombreProveedorDetectado);
     var esProdAutomatico=!!(p.automaticoProveedor || p.proveedorClave || p.proveedorId || esProveedorSincronizado);
@@ -7541,9 +7561,6 @@ function tiendaCardsHtml(sublista){
         +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.preventDefault();event.stopPropagation();tiendaAbrirCostoInline('+pid+',this)">✎</button></div>';
     }
 
-    if(tiendaEsAdmin && !vistaPreviaCliente && !p.esCelu && !tiendaEsAutomatico(p)){
-      card+='<button type="button" class="ae-admin-confirm-cost" onclick="event.stopPropagation();tiendaConfirmarCostoTarjeta('+pid+')">✓ Confirmar costo</button>';
-    }
     if(tiendaEsAdmin && !vistaPreviaCliente){
       if(tiendaEsPendienteImagenAdmin(p)){
         card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🖼️ Imagen del proveedor pendiente</div>'
@@ -7560,23 +7577,23 @@ function tiendaCardsHtml(sublista){
         var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
         card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
       }
-      card+='<div class="ae-admin-quickbar ae-admin-reference-toolbar">'
-        +'<button type="button" aria-label="Compartir" onclick="event.stopPropagation();compartirProducto('+pid+')">↗</button>'
-        +'<button type="button" aria-label="Copiar datos" onclick="event.stopPropagation();tiendaCopiarDatosTarjeta('+pid+')">▢</button>'
-        +'<details class="ae-admin-options"><summary aria-label="Más opciones">•••</summary><div class="ae-admin-options-content">';
+      // botón destacar (estrella) arriba de los otros
+      // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
+      card+='<div class="ae-admin-quickbar">'+botonAmpliarAdmin+'<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true">⋯</span></summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.sinInteres?'#fff4e6':'var(--bg)')+';color:'+(p.sinInteres?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.sinInteres?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetSinInteres('+pid+')">'+(p.sinInteres?'✨ '+parseInt(p.sinInteres,10)+' cuotas s/interés':'☆ Cuotas sin interés')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.precioAntes?'#ffe4e9':'var(--bg)')+';color:'+(p.precioAntes?'#e11d48':'var(--sub)')+';border:1.5px solid '+(p.precioAntes?'#e11d48':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetOferta('+pid+')">'+(p.precioAntes?'🔥 Oferta ('+fmt(p.precioAntes)+' antes)':'☆ Poner en oferta')+'</button>';
+      // botón MOSTRAR/OCULTAR en la tienda (dentro del cajón)
+      card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.visible?'#fff0f0':'#e6f8ee')+';color:'+(p.visible?'var(--red)':'var(--gr)')+';border:1.5px solid '+(p.visible?'#ffd0d0':'#b8e6c8')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibleProd('+pid+')">'+(p.visible?'🙈 Ocultar de la tienda':'👁️ Mostrar en la tienda')+'</button>';
       // botón SIN STOCK (dentro del cajón)
       card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.sinStock?'#fee2e2':'var(--bg)')+';color:'+(p.sinStock?'#dc2626':'var(--sub)')+';border:1.5px solid '+(p.sinStock?'#fca5a5':'var(--bor)')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'✅ Marcar con stock':'⛔ Marcar SIN STOCK')+'</button>';
-      card+='<button type="button" onclick="event.stopPropagation();compartirInstagram('+pid+')">📸 Instagram</button>';
-      card+='</div></details></div>';
-      card+='<div class="ae-admin-reference-visibility" role="group" aria-label="Visibilidad">'
-        +'<button type="button" class="'+(p.visible?'is-selected':'')+'" onclick="event.preventDefault();event.stopPropagation();tiendaSetVisibilidadTarjeta('+pid+',true)">Mostrar</button>'
-        +'<button type="button" class="'+(!p.visible?'is-selected':'')+'" onclick="event.preventDefault();event.stopPropagation();tiendaSetVisibilidadTarjeta('+pid+',false)">Ocultar</button>'
-        +'</div><div class="ae-admin-reference-status">'+(p.visible?'Visible en la tienda':'Oculto en la tienda')+'</div>';
+      card+='</div></details>';
+      // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
+      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
+      card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
+      card+='</div>'; // cierre de barra compacta de accesos existentes
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
@@ -7951,23 +7968,6 @@ function _sugerenciasMayoristas(){
 // Editar el costo sin abandonar la tarjeta. No recalcula el precio al público.
 // Los productos de proveedor y celulares tienen un origen diferente: impedir
 // persistencia simulada o reescritura de un precio que la sincronización pisaría.
-function tiendaCopiarDatosTarjeta(id){
-  var p=buscarProd(id);if(!p)return;
-  var texto=String(p.nombre||'')+'\nContado: '+fmt(p.venta);
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(texto).then(function(){mostrarToast('✅ Copiado');}).catch(function(){mostrarToast('⚠️ No se pudo copiar');});
-  else mostrarToast('⚠️ Copiar no disponible');
-}
-function tiendaSetVisibilidadTarjeta(id,visible){
-  if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
-  var p=buscarProd(id);if(!p||!!p.visible===!!visible)return;
-  tiendaToggleVisibilidadDirecta(id);
-}
-function tiendaConfirmarCostoTarjeta(id){
-  if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
-  var p=buscarProd(id);if(!p||p.esCelu||tiendaEsAutomatico(p))return;
-  if(!(Number(p.costo)>0)){mostrarToast('⚠️ Ingresá primero el costo');return;}
-  mostrarToast('✓ Costo registrado: '+fmt(p.costo));
-}
 function tiendaAbrirCostoInline(id, boton){
   if(!tiendaExigirAdmin() || vistaPreviaCliente)return;
   var p=buscarProd(id);
