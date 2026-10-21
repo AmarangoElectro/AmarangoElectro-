@@ -8534,7 +8534,7 @@ function tiendaGuardarPrecios(){
       celus[i].precio=Math.round(venta);
       celus[i].caracteristicas=carac;
       celus[i].mayorista=mayorista;
-      if(!celus[i].fechaCarga)celus[i].fechaCarga=new Date().toISOString();
+      // No inventar fecha histórica al editar un celular existente.
       // Refrescar la tarjeta desde el mismo dato que se acaba de editar.
       // El guardado en nube continúa por el circuito de celulares existente.
       try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
