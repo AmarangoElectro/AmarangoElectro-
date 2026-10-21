@@ -7407,11 +7407,11 @@ function tiendaCardsHtml(sublista){
     }
 
     // controles de admin (debajo de la foto, no la empujan)
-    if(tiendaEsAdmin && !p.esCelu){
+    if(tiendaEsAdmin && !p.esCelu && !vistaPreviaCliente){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
-      card+='<label class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" style="display:flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;margin-top:7px;color:'+(p.visible?'var(--gr)':'var(--sub)')+';">'
-        +'<input type="checkbox" '+(p.visible?'checked':'')+' onchange="event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+');"> '
-        +(p.visible?'Visible':'Oculto')+'</label>';
+      card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
+        +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
+        +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -7558,10 +7558,10 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && !vistaPreviaCliente){
       card+='<div class="ae-admin-cost-inline"><span>Costo: <b>'
         +(Number(p.costo)>0?fmt(Number(p.costo)):'A confirmar')
-        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+');requestAnimationFrame(function(){var campo=document.getElementById(&quot;edit-costo&quot;);if(campo){campo.focus();campo.select();}})">✎</button></div>';
+        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.preventDefault();event.stopPropagation();tiendaAbrirCostoInline('+pid+',this)">✎</button></div>';
     }
 
-    if(tiendaEsAdmin){
+    if(tiendaEsAdmin && !vistaPreviaCliente){
       if(tiendaEsPendienteImagenAdmin(p)){
         card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🖼️ Imagen del proveedor pendiente</div>'
           +'<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:#EAF8EF;color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaAprobarImagenActual('+pid+')">✅ Aprobar imagen actual</button>';
@@ -7586,13 +7586,13 @@ function tiendaCardsHtml(sublista){
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.sinInteres?'#fff4e6':'var(--bg)')+';color:'+(p.sinInteres?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.sinInteres?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetSinInteres('+pid+')">'+(p.sinInteres?'✨ '+parseInt(p.sinInteres,10)+' cuotas s/interés':'☆ Cuotas sin interés')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.precioAntes?'#ffe4e9':'var(--bg)')+';color:'+(p.precioAntes?'#e11d48':'var(--sub)')+';border:1.5px solid '+(p.precioAntes?'#e11d48':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetOferta('+pid+')">'+(p.precioAntes?'🔥 Oferta ('+fmt(p.precioAntes)+' antes)':'☆ Poner en oferta')+'</button>';
       // botón MOSTRAR/OCULTAR en la tienda (dentro del cajón)
-      card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.visible?'#fff0f0':'#e6f8ee')+';color:'+(p.visible?'var(--red)':'var(--gr)')+';border:1.5px solid '+(p.visible?'#ffd0d0':'#b8e6c8')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="tiendaToggleVisibleProd('+pid+')">'+(p.visible?'🙈 Ocultar de la tienda':'👁️ Mostrar en la tienda')+'</button>';
+      card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.visible?'#fff0f0':'#e6f8ee')+';color:'+(p.visible?'var(--red)':'var(--gr)')+';border:1.5px solid '+(p.visible?'#ffd0d0':'#b8e6c8')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibleProd('+pid+')">'+(p.visible?'🙈 Ocultar de la tienda':'👁️ Mostrar en la tienda')+'</button>';
       // botón SIN STOCK (dentro del cajón)
       card+='<button style="width:100%;font-size:.68rem;padding:8px 4px;margin-bottom:6px;background:'+(p.sinStock?'#fee2e2':'var(--bg)')+';color:'+(p.sinStock?'#dc2626':'var(--sub)')+';border:1.5px solid '+(p.sinStock?'#fca5a5':'var(--bor)')+';border-radius:8px;font-weight:800;cursor:pointer;" onclick="tiendaToggleSinStock('+pid+')">'+(p.sinStock?'✅ Marcar con stock':'⛔ Marcar SIN STOCK')+'</button>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
-      card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
+      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
+      card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
       card+='</div>'; // cierre de barra compacta de accesos existentes
       // botones de admin (productos propios Y celulares): editar + foto (+ quitar solo propios)
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
@@ -8230,9 +8230,18 @@ function tiendaToggleMarcado(id){
 // hasta que un "Ocultar marcados" posterior los ocultaba a todos de golpe,
 // sin relación entre sí. Ahora el switch cambia la visibilidad al instante,
 // como visualmente promete, y lo publica enseguida.
+var _tiendaVisibilidadEnCurso={};
 function tiendaToggleVisibilidadDirecta(id){
+  if(!tiendaExigirAdmin() || vistaPreviaCliente)return;
+  var clave=String(id);
+  if(_tiendaVisibilidadEnCurso[clave])return;
+  if(!NUBE_OK || !sbCalc){
+    mostrarToast('⚠️ Sin conexión de guardado. No se modificó la visibilidad.');
+    return;
+  }
+  _tiendaVisibilidadEnCurso[clave]=true;
   var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
-  if(!p)return;
+  if(!p){delete _tiendaVisibilidadEnCurso[clave];return;}
   var posicionPrevia=tiendaCapturarPosicionLista(id);
   var haciendoVisible=!p.visible;
   var ahora=Date.now();
@@ -8256,7 +8265,7 @@ function tiendaToggleVisibilidadDirecta(id){
     mostrarToast(haciendoVisible?'👁️ Visible guardado para todos':'🙈 Oculto guardado para todos');
   }).catch(function(err){
     alert('⚠️ El cambio quedó en este dispositivo, pero Supabase no lo confirmó.\n\nVolvé a intentarlo con conexión.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
-  });
+  }).finally(function(){delete _tiendaVisibilidadEnCurso[clave];});
 }
 
 // En productos automáticos, además de cambiar la vista guardamos la decisión
