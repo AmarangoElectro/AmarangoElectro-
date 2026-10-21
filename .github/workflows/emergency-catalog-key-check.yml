@@ -35,3 +35,29 @@ jobs:
             if(!Array.isArray(rows)||!rows.length)process.exitCode=1;
           }).catch(e=>{console.log("Network error: "+e.message);process.exitCode=1;});
           NODE
+
+  live-store-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check main store and catalog after production configuration update
+        shell: bash
+        run: |
+          set +e
+          date -u
+          for i in $(seq 1 12); do
+            home=$(curl --max-time 15 -sS -L -o /dev/null -w '%{http_code}' 'https://amarangoelectro.com.ar/')
+            cache=$(curl --max-time 15 -sS -L -o /tmp/amarango_catalog_response -w '%{http_code}' 'https://amarangoelectro.com.ar/api/catalogo-cache')
+            echo "attempt=$i homepage=$home catalog=$cache"
+            if [ "$cache" = "200" ]; then
+              echo "RECOVERED: cached catalog API is responding with HTTP 200"
+              exit 0
+            fi
+            if [ "$cache" != "200" ]; then
+              head -c 180 /tmp/amarango_catalog_response
+              echo
+            fi
+            sleep 10
+          done
+          echo "::error::LIVE-CATALOG-NOT-RECOVERED: manual Cloudflare deployment likely needed"
+          exit 1
