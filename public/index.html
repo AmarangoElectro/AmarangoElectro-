@@ -7400,7 +7400,7 @@ function tiendaCardsHtml(sublista){
 
     var botonAmpliarAdmin='';
     if(p.foto){
-      var botonAmpliar='<button class="prod-ampliar-btn" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')"><span aria-hidden="true">↗</span><strong>Ampliar imagen</strong></button>';
+      var botonAmpliar='<button class="prod-ampliar-btn" title="Ampliar imagen" aria-label="Ampliar imagen" onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')"><span aria-hidden="true">↗</span><strong>Ampliar imagen</strong></button>';
       if(tiendaEsAdmin && !vistaPreviaCliente) botonAmpliarAdmin=botonAmpliar;
       else card+=botonAmpliar;
     }
