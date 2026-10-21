@@ -1149,7 +1149,7 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
     <!-- Buscador debajo de la portada -->
     <div class="ae-buscar-fila"><div class="hdr-buscar ae-buscar-banner">
       <span class="hb-lupa">🔍</span>
-      <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+      <input id="hdr-buscar-input" placeholder="Buscar producto, marca o modelo…" autocomplete="off"
         oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
         onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
         onblur="setTimeout(hdrCerrarSugerencias,180)">
@@ -1157,6 +1157,12 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
       <div id="hdr-sugerencias" style="display:none;position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:99999;max-height:60vh;overflow-y:auto;-webkit-overflow-scrolling:touch;border:1px solid #e0e0e0;"></div>
     </div><button id="tienda-subir-header" class="btn-subir-header" onclick="tiendaAbrirCarga()">🐝 Subir<br>productos</button></div>
 
+    <!-- Atajos de navegación para administración, sin duplicar buscadores -->
+    <div id="ae-admin-atajos" style="display:none;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0 10px;">
+      <button type="button" onclick="var x=document.getElementById('hdr-buscar-input');if(x){x.focus();x.scrollIntoView({behavior:'auto',block:'center'});}" style="border:1px solid var(--bor);background:var(--wh);color:var(--az);padding:9px 12px;border-radius:12px;font-weight:800;">🔎 Buscar</button>
+      <button type="button" onclick="window.scrollTo({top:0,behavior:'auto'});" style="border:1px solid var(--bor);background:var(--wh);color:var(--az);padding:9px 12px;border-radius:12px;font-weight:800;">↑ Arriba</button>
+      <span style="font-size:.72rem;color:var(--sub);">24 productos por lote · tocá Ver más para continuar</span>
+    </div>
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
       👑 Modo administrador — ves todos los productos y podés elegir cuáles mostrar.
@@ -6953,7 +6959,7 @@ function tiendaLiberarRevisionManual(p, publicar){
     var sent=document.getElementById('tienda-sentinela');
     if(!sent){ setTimeout(arranca,500); return; }
     var io=new IntersectionObserver(function(entradas){
-      if(entradas[0] && entradas[0].isIntersecting){ tiendaVerMas(); }
+      if(entradas[0] && entradas[0].isIntersecting && !tiendaEsAdmin){ tiendaVerMas(); }
     }, {rootMargin:'600px'});
     io.observe(sent);
   };
@@ -7032,6 +7038,8 @@ function tiendaRenderPortadaCategorias(universo,cont){
 }
 
 function tiendaRender(){
+  var atajosAdmin=document.getElementById('ae-admin-atajos');
+  if(atajosAdmin)atajosAdmin.style.display=(tiendaEsAdmin&&!vistaPreviaCliente)?'flex':'none';
   var conservarAutomaticamente=window._tiendaMantenerPosicionHastaSalir && tiendaEsAdmin && tiendaBandejaAdmin && !window._tiendaSuspenderConservacionAutomatica;
   if(conservarAutomaticamente && !window._tiendaPosicionAutomaticaPendiente){
     window._tiendaPosicionAutomaticaPendiente=tiendaCapturarPosicionLista(null);
@@ -13153,83 +13161,5 @@ try{ tiendaInit(); }catch(e){}
 })();
 </script>
 
-<!-- ═══ MARGARITA · ASISTENTE DE VENTAS ═══ -->
-<button id="margarita-fab" onclick="margaritaAbrir()" aria-label="Hablar con Margarita"
-  style="position:fixed;right:18px;bottom:76px;z-index:1420;width:60px;height:60px;padding:0;overflow:hidden;border-radius:50%;background:#fff;border:3px solid #0B2D6B;cursor:pointer;box-shadow:0 0 0 3px #FF7A00,0 5px 18px rgba(11,45,107,.4);display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;"><img id="margarita-fab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;"></button>
-<div id="margarita-overlay" onclick="if(event.target===this)margaritaCerrar()"
-  style="display:none;position:fixed;inset:0;background:rgba(2,12,46,.5);z-index:3100;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);">
-  <div style="width:100%;max-width:480px;height:min(78vh,680px);background:#ECE5DD;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -6px 30px rgba(0,0,0,.35);">
-    <div style="background:linear-gradient(135deg,#0B2D6B,#1e5bc8);color:#fff;padding:12px 15px;display:flex;align-items:center;gap:10px;border-bottom:3px solid #FF7A00;">
-      <div style="width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;"><img id="margarita-cab-img" alt="Margarita" style="width:100%;height:100%;object-fit:cover;"></div>
-      <div style="flex:1;min-width:0;"><div style="font-weight:900;font-size:1rem;">Margarita</div><div style="font-size:.67rem;opacity:.86;">Asistente de AmarangoElectro · en línea</div></div>
-      <button onclick="margaritaCerrar()" aria-label="Cerrar" style="background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;padding:4px;">×</button>
-    </div>
-    <div id="margarita-msgs" style="flex:1;overflow-y:auto;padding:13px 11px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;"></div>
-    <div style="background:#F0F0F0;padding:9px 10px calc(9px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;border-top:1px solid #ddd;">
-      <input id="margarita-input" type="text" placeholder="¿Qué producto estás buscando?" autocomplete="off" onkeydown="if(event.key==='Enter')margaritaEnviar()" style="flex:1;border:none;border-radius:22px;padding:12px 15px;font-size:.88rem;font-family:inherit;outline:none;background:#fff;">
-      <button onclick="margaritaEnviar()" id="margarita-send" aria-label="Enviar" style="width:44px;height:44px;border-radius:50%;background:#FF7A00;border:none;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">➤</button>
-    </div>
-  </div>
-</div>
-<style>
-.margarita-burb{max-width:82%;padding:9px 13px;border-radius:14px;font-size:.86rem;line-height:1.42;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.margarita-cli{align-self:flex-end;background:#DCF8C6;color:#111;border-bottom-right-radius:4px}.margarita-bot{align-self:flex-start;background:#fff;color:#111;border-bottom-left-radius:4px}.margarita-bot a{color:#0B2D6B;font-weight:800}.margarita-escribe{align-self:flex-start;background:#fff;color:#777;font-size:.78rem;padding:9px 13px;border-radius:14px}
-@media(min-width:800px){#margarita-fab{bottom:20px!important;right:20px!important}}
-</style>
-<script type="module">
-// Conservamos margarita-ui.js y todos sus módulos internos, pero el avatar
-// visible usa siempre la foto oficial elegida por Angie.
-import './margarita-ui.js';
-const MARGARITA_AVATAR='./margarita-avatar-oficial.jpeg?v=20260823';
-var mf=document.getElementById('margarita-fab-img');if(mf)mf.src=MARGARITA_AVATAR;
-var mc=document.getElementById('margarita-cab-img');if(mc)mc.src=MARGARITA_AVATAR;
-// Si un módulo visual anterior intenta reponer un avatar viejo después de
-// cargar, conservamos la foto oficial en ambos círculos.
-[mf,mc].forEach(function(img){
-  if(!img)return;
-  new MutationObserver(function(){
-    if(img.getAttribute('src')!==MARGARITA_AVATAR)img.setAttribute('src',MARGARITA_AVATAR);
-  }).observe(img,{attributes:true,attributeFilter:['src']});
-});
-</script>
-<script>
-var _margaritaHist=[],_margaritaCargando=false;
-function margaritaAbrir(){
-  document.getElementById('margarita-overlay').style.display='flex';
-  if(!_margaritaHist.length)margaritaPintar('margarita','¡Hola! Soy Margarita 🐝 ¿Qué estás buscando? Te hago unas preguntas cortitas y te ayudo a elegir la mejor opción.');
-  setTimeout(function(){var i=document.getElementById('margarita-input');if(i)i.focus();},250);
-}
-function margaritaCerrar(){document.getElementById('margarita-overlay').style.display='none';}
-function margaritaPintar(quien,texto){
-  var cont=document.getElementById('margarita-msgs'),d=document.createElement('div');
-  d.className='margarita-burb '+(quien==='cliente'?'margarita-cli':'margarita-bot');
-  var seguro=String(texto||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  d.innerHTML=seguro.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">Ver producto</a>');
-  cont.appendChild(d);cont.scrollTop=cont.scrollHeight;
-}
-function margaritaEscribiendo(on){
-  var cont=document.getElementById('margarita-msgs'),d=document.getElementById('margarita-escribiendo');
-  if(on&&!d){d=document.createElement('div');d.id='margarita-escribiendo';d.className='margarita-escribe';d.textContent='Margarita está escribiendo…';cont.appendChild(d);cont.scrollTop=cont.scrollHeight;}else if(!on&&d)d.remove();
-}
-function margaritaProductosPara(texto){
-  var palabras=normTxt(texto).split(/\s+/).filter(function(w){return w.length>2;});
-  return (tiendaProductos||[]).filter(tiendaEstaVisibleYConStock).map(function(p){
-    var n=normTxt((p.nombre||'')+' '+catProd(p)+' '+(p.caracteristicas||'')),puntos=0;
-    palabras.forEach(function(w){if(n.indexOf(w)>=0)puntos+=3;});
-    return {p:p,puntos:puntos+(p.destacado?1:0)};
-  }).filter(function(x){return !palabras.length||x.puntos>0;}).sort(function(a,b){return b.puntos-a.puntos;}).slice(0,30).map(function(x){
-    var p=x.p,base=location.origin+location.pathname.replace(/\/[^\/]*$/,'/');
-    return {id:String(p.id),nombre:p.nombre,categoria:catProd(p),precio:tiendaPrecioContado(p),caracteristicas:String(p.caracteristicas||'').slice(0,240),url:base+'?prod='+encodeURIComponent(p.id)};
-  });
-}
-function margaritaEnviar(){
-  if(_margaritaCargando)return;
-  var inp=document.getElementById('margarita-input'),texto=(inp.value||'').trim();if(!texto)return;
-  margaritaPintar('cliente',texto);_margaritaHist.push({rol:'usuario',texto:texto});inp.value='';_margaritaCargando=true;margaritaEscribiendo(true);
-  fetch('/api/margarita',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mensajes:_margaritaHist.slice(-10),productos:margaritaProductosPara(texto)})})
-  .then(function(r){return r.json();}).then(function(data){margaritaEscribiendo(false);var resp=data.respuesta||'No pude responderte ahora 🐝 Probá nuevamente en un ratito.';margaritaPintar('margarita',resp);_margaritaHist.push({rol:'margarita',texto:resp});_margaritaCargando=false;})
-  .catch(function(){margaritaEscribiendo(false);margaritaPintar('margarita','No pude conectarme 🐝 Probá de nuevo o consultanos por WhatsApp.');_margaritaCargando=false;});
-}
-</script>
 </body>
 </html>
