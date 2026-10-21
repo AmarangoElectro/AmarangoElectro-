@@ -7319,7 +7319,7 @@ function tiendaRenderPortadaCategorias(universo,cont){
   if(!html){
     html='<div style="grid-column:1/-1;background:#fff;border-radius:14px;padding:22px;text-align:center;color:var(--az);font-weight:800;">Estamos preparando la vidriera. Tocá una categoría arriba para ver sus productos.</div>';
   }else{
-    html='<div style="grid-column:1/-1;color:#fff;font-size:1.15rem;font-weight:900;margin:2px 2px 6px;">Explorá nuestros productos</div>'+html;
+    html='<div style="grid-column:1/-1;color:var(--az);font-size:1.15rem;font-weight:900;margin:2px 2px 6px;letter-spacing:-.02em;text-shadow:none;">Explorá nuestros productos</div>'+html;
     html+='<div style="grid-column:1/-1;text-align:center;margin:0 0 28px;"><button onclick="tiendaModoPortada=false;tiendaMostrarTodos=true;tiendaRender();" style="background:var(--nar);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(255,122,0,.28);">Ver todos los productos</button></div>';
   }
   _tiendaListaFull=[];
