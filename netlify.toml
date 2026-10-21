@@ -1,0 +1,8 @@
+# Configuración acotada para la vista previa de Netlify.
+# El HTML principal de AmarangoElectro está en public/index.html.
+# No afecta Cloudflare (wrangler.jsonc) ni cambia la tienda productiva.
+[build]
+  publish = "public"
+
+# Nunca convertir /api/* en un fallback de index.html: sus endpoints
+# requieren los servicios específicos del backend y no deben simularse.
