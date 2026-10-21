@@ -7965,6 +7965,123 @@ function _sugerenciasMayoristas(){
   tiendaProductos.forEach(function(p){ if(p&&p.mayorista) usados[p.mayorista]=true; });
   return Object.keys(usados).sort().map(function(m){ return '<option value="'+m.replace(/"/g,'&quot;')+'">'; }).join('');
 }
+// Editar el costo sin abandonar la tarjeta. No recalcula el precio al público.
+// Los productos de proveedor y celulares tienen un origen diferente: impedir
+// persistencia simulada o reescritura de un precio que la sincronización pisaría.
+function tiendaAbrirCostoInline(id, boton){
+  if(!tiendaExigirAdmin() || vistaPreviaCliente)return;
+  var p=buscarProd(id);
+  if(!p)return;
+  if(p.esCelu || tiendaEsAutomatico(p)){
+    mostrarToast('⚠️ Costo sincronizado: no admite edición individual segura.');
+    return;
+  }
+  var caja=boton&&boton.closest('.ae-admin-cost-inline');
+  if(!caja || caja.classList.contains('is-editing'))return;
+  caja._costoHtmlAnterior=caja.innerHTML;
+  caja.classList.add('is-editing');
+  caja.textContent='';
+  var label=document.createElement('label');
+  label.textContent='Costo ($)';
+  var campo=document.createElement('input');
+  campo.type='text';
+  campo.inputMode='numeric';
+  campo.autocomplete='off';
+  campo.className='ae-admin-cost-input';
+  campo.setAttribute('aria-label','Nuevo costo en pesos');
+  campo.value=Number(p.costo)>0?String(Math.round(Number(p.costo))):'';
+  label.appendChild(campo);
+  var acciones=document.createElement('div');
+  acciones.className='ae-admin-cost-actions';
+  var guardar=document.createElement('button');
+  guardar.type='button';guardar.textContent='Guardar';
+  guardar.className='ae-admin-cost-save';
+  var cancelar=document.createElement('button');
+  cancelar.type='button';cancelar.textContent='Cancelar';
+  cancelar.className='ae-admin-cost-cancel';
+  guardar.addEventListener('click',function(e){
+    e.preventDefault();e.stopPropagation();
+    tiendaGuardarCostoInline(id,campo,guardar,cancelar,caja);
+  });
+  cancelar.addEventListener('click',function(e){
+    e.preventDefault();e.stopPropagation();
+    if(guardar.disabled)return;
+    tiendaCancelarCostoInline(caja);
+  });
+  campo.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();guardar.click();}
+    if(e.key==='Escape'){e.preventDefault();cancelar.click();}
+  });
+  acciones.appendChild(guardar);
+  acciones.appendChild(cancelar);
+  caja.appendChild(label);
+  caja.appendChild(acciones);
+  campo.focus();campo.select();
+}
+function tiendaCancelarCostoInline(caja){
+  if(!caja || typeof caja._costoHtmlAnterior!=='string')return;
+  caja.innerHTML=caja._costoHtmlAnterior;
+  caja.classList.remove('is-editing');
+  delete caja._costoHtmlAnterior;
+}
+function tiendaGuardarCostoInline(id,campo,guardar,cancelar,caja){
+  if(!tiendaExigirAdmin() || vistaPreviaCliente || guardar.disabled)return;
+  var p=buscarProd(id);
+  if(!p || p.esCelu || tiendaEsAutomatico(p)){
+    mostrarToast('⚠️ Este costo no tiene un guardado autorizado.');
+    return;
+  }
+  var entrada=String(campo.value||'').trim().replace(/^\$\s*/,'');
+  if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(entrada)){
+    mostrarToast('⚠️ Ingresá un costo válido, sin centavos.');
+    campo.focus();return;
+  }
+  var nuevo=Number(entrada.replace(/\./g,''));
+  if(!Number.isSafeInteger(nuevo)||nuevo<=0){
+    mostrarToast('⚠️ El costo debe ser mayor a cero.');
+    campo.focus();return;
+  }
+  if(Number(p.costo)===nuevo){tiendaCancelarCostoInline(caja);return;}
+  if(!NUBE_OK || !sbCalc){
+    mostrarToast('⚠️ Sin conexión. El costo no se modificó.');
+    return;
+  }
+  var anterior=p.costo;
+  var marcaAnterior=p.estadoManualActualizado;
+  var posicion=tiendaCapturarPosicionLista(null);
+  var marca=Date.now();
+  guardar.disabled=true;cancelar.disabled=true;guardar.textContent='Guardando…';
+  p.costo=nuevo;
+  p.estadoManualActualizado=marca;
+  Promise.resolve().then(function(){
+    return tiendaGuardarLocal();
+  }).then(function(res){
+    if(res&&res.error)throw res.error;
+    return Promise.resolve(sbCalc.from('tienda_catalogo').select('datos')
+      .eq('id',TIENDA_MANUALES_ID).maybeSingle());
+  }).then(function(res){
+    if(res&&res.error)throw res.error;
+    var remotos=res&&res.data&&res.data.datos;
+    var remoto=Array.isArray(remotos)&&remotos.find(function(x){return x&&String(x.id)===String(id);});
+    if(!remoto || Number(remoto.costo)!==nuevo){
+      throw new Error('La nube no confirmó el costo del producto');
+    }
+    tiendaRenderMantenerPosicion(posicion);
+    mostrarToast('✅ Costo guardado: '+fmt(nuevo));
+  }).catch(function(err){
+    if(p.costo===nuevo && p.estadoManualActualizado===marca){
+      p.costo=anterior;
+      if(marcaAnterior===undefined)delete p.estadoManualActualizado;
+      else p.estadoManualActualizado=marcaAnterior;
+      try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+      try{tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});}catch(e){}
+    }
+    guardar.disabled=false;cancelar.disabled=false;guardar.textContent='Guardar';
+    mostrarToast('⚠️ No se confirmó el costo. Revisá la conexión y reintentá.');
+    console.warn('Error al guardar costo de tarjeta',err);
+  });
+}
+
 function tiendaEditarPrecio(id){
   if(!tiendaExigirAdmin())return;
   var p=buscarProd(id);
