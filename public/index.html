@@ -1056,6 +1056,10 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
   }
 }
 </style>
+<style id="ae-admin-supplier-unified">
+#tienda-grid.ae-admin-v16-visual .prod-card[data-ae-supplier="1"]{border-color:var(--ae-supplier-border)!important;box-shadow:0 3px 14px rgba(20,44,76,.045),inset 0 0 0 .5px var(--ae-supplier-border)!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label{box-sizing:border-box;width:100%;min-width:0;margin:6px 0 4px;padding:7px 8px;border:1px solid;border-radius:9px;font-family:Inter,system-ui,-apple-system,sans-serif;font-size:clamp(10px,2.9vw,12px);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -7642,7 +7646,9 @@ function tiendaCardsHtml(sublista){
     var fadeClass = ''; // Sin animación por tarjeta: evita desapariciones y saltos al deslizar.
     var delay=0; // Sin animaciones escalonadas al cargar categorías. // fade escalonado (tope 0.4s)
     var marcaVisual=String(p.marca||p.brand||String(p.nombre||'').split(/\s+/)[0]||'Amarango').trim();
-    var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" '+(tiendaEsAdmin&&!vistaPreviaCliente&&p.esCelu?'data-ae-marca="'+escapeHtml(marcaVisual.toLowerCase()).replace(/"/g,'&quot;')+'"':'')+' style="'+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
+    var mayoristaUnico=String(p.proveedor||p.mayorista||'').trim();
+    var colorMayoristaCard=mayoristaUnico?colorMayorista(mayoristaUnico):null;
+    var card='<div id="card-'+p.id+'" class="prod-card'+fadeClass+'" '+(tiendaEsAdmin&&!vistaPreviaCliente&&p.esCelu?'data-ae-marca="'+escapeHtml(marcaVisual.toLowerCase()).replace(/"/g,'&quot;')+'"':'')+(tiendaEsAdmin&&!vistaPreviaCliente&&colorMayoristaCard?' data-ae-supplier="1"':'')+' style="'+(colorMayoristaCard&&tiendaEsAdmin&&!vistaPreviaCliente?'--ae-supplier-border:'+colorMayoristaCard.bor+';':'')+(delay?'animation-delay:'+delay+'ms;':'')+'background:var(--wh);border:'+(tiendaModoSelec&&selMarcado?'2px solid var(--nar)':'1px solid var(--bor)')+';border-radius:14px;padding:12px;display:flex;flex-direction:column;min-width:0;overflow:hidden;'+(tiendaEsAdmin&&!p.esCelu&&!p.visible?'opacity:.55;':'')+'">';
 
     // modo compartir varios: casilla de selección (para todos)
     if(tiendaModoSelec){
@@ -7713,6 +7719,9 @@ function tiendaCardsHtml(sublista){
         }
       }
     }
+    if(tiendaEsAdmin && !vistaPreviaCliente && mayoristaUnico){
+      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">🏪 '+escapeHtml(mayoristaUnico)+'</div>';
+    }
     if(tiendaEsAdmin && p.esCelu){
       card+='<div style="font-size:.58rem;font-weight:700;margin-top:5px;color:var(--sub);">📱 Celulares</div>';
     }
@@ -7728,7 +7737,7 @@ function tiendaCardsHtml(sublista){
       var colorProveedor=colorMayorista(nombreProveedor);
       var textoStock=sinStockProveedor?'⛔ SIN STOCK':(stockInfo.informado?'📦 Stock: '+stockProveedor:'✅ Disponible');
       card+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.62rem;font-weight:900;margin-top:5px;color:'+colorProveedor.txt+';background:'+colorProveedor.bg+';border:1.5px solid '+colorProveedor.bor+';border-radius:8px;padding:5px 7px;">'
-        +'<span>🔄 '+nombreProveedor+'</span>'
+        +'<span>📦 Stock</span>'
         +'<span style="color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'rgba(255,255,255,.72)':'#fff')+';border-radius:20px;padding:2px 6px;white-space:nowrap;">'+textoStock+'</span>'
         +'</div>';
     }
@@ -7759,7 +7768,7 @@ function tiendaCardsHtml(sublista){
       +'<div class="prod-nombre" onclick="tiendaVerDetalle('+pid+')" style="flex:1;min-width:0;font-size:.78rem;font-weight:800;color:var(--az);line-height:1.3;cursor:pointer;" title="'+escapeHtml(String(p.nombre||'')).replace(/"/g,'&quot;')+'">'+escapeHtml(String(p.nombre||''))+'</div>'
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="flex:0 0 auto;background:none;border:none;font-size:1.05rem;cursor:pointer;line-height:1;padding:0;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>'
-      +((tiendaEsAdmin && p.mayorista)?(function(){var cm=colorMayorista(p.mayorista);return '<div style="font-size:.62rem;font-weight:900;color:'+cm.txt+';background:'+cm.bg+';border:1.5px solid '+cm.bor+';border-radius:7px;padding:3px 8px;margin-bottom:4px;display:inline-block;box-shadow:inset 0 -5px 0 rgba(255,255,255,.18);">🏪 '+p.mayorista+'</div>';})():'')
+
       +(function(){
         if(datosPrecioCard.modo==='promo_madre'){
           var tieneBeneficio6=!!promoMadreCliente6Datos(p);
