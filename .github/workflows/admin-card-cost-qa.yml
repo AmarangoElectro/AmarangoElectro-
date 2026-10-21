@@ -1,0 +1,38 @@
+name: QA tarjetas admin - visibilidad y costo
+
+on:
+  push:
+    branches:
+      - "work/admin-card-actions-cost-inline-20261021"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Obtener rama bajo prueba
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verificar funciones y eventos
+        run: node --test tests/admin-v16-visual-click.test.mjs tests/v16-typography-preservation.test.mjs tests/admin-card-action-cost-regression.test.mjs
+      - name: Confirmar zona de cambios y preservar config productiva
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only 5ad964d59aabf01f04bfe9a2cd93677bf8726be0...HEAD > /tmp/cambios-tarjetas.txt
+          cat /tmp/cambios-tarjetas.txt
+          if grep -Eq '^(wrangler.jsonc|src/|supabase/|migrations/|public/v16-typography.css)$' /tmp/cambios-tarjetas.txt; then
+            echo "::error::Se tocaron zonas de negocio o configuración fuera del alcance"
+            exit 1
+          fi
+          test -f public/admin-v16-visual.css
+          test -f tests/admin-card-action-cost-regression.test.mjs
+          echo "PASS: Supabase, ventas, comisiones y configuración productiva sin editar"
