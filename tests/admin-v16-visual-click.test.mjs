@@ -75,12 +75,12 @@ test('acciones principales visibles, imagen más pequeña y costo directo sin nu
   const region=html.slice(html.indexOf('function tiendaCardsHtml('),html.indexOf('// aplica clases de vista y avisos'));
   assert.match(region,/var botonAmpliarAdmin=''/);
   assert.match(region,/botonAmpliarAdmin=botonAmpliar/);
-  assert.match(region,/\+botonAmpliarAdmin\+'<details/);
+  assert.match(region,/ae-admin-reference-toolbar/);
   assert.match(region,/aria-label="Ampliar imagen"/);
   assert.match(region,/aria-label="Editar costo"/);
   assert.match(region,/tiendaAbrirCostoInline\(/);
-  assert.match(region,/class="ae-admin-visibility/);
-  assert.match(region,/tiendaToggleVisibilidadDirecta/);
+  assert.match(region,/ae-admin-reference-visibility/);
+  assert.match(region,/tiendaSetVisibilidadTarjeta/);
   assert.match(region,/class="ae-admin-edit-actions"/);
   assert.match(region,/tiendaEditarPrecio\('\+pid\+'\)/);
   assert.match(region,/tiendaEditarFoto\('\+pid\+'\)/);
@@ -88,6 +88,6 @@ test('acciones principales visibles, imagen más pequeña y costo directo sin nu
   assert.match(region,/event\.stopPropagation\(\);compartirInstagram\(/);
   assert.match(css,/#tienda-grid\.ae-admin-v16-visual \.prod-card \.prod-foto\s*\{\s*height:clamp\(134px,41vw,160px\)/);
   assert.match(css,/object-fit:contain !important/);
-  assert.match(css,/\.ae-admin-visibility \{\s*order:-1/);
+  assert.match(css,/\.ae-admin-reference-toolbar\{/);
   assert.doesNotMatch(region,/Crear imagen con IA/);
 });
