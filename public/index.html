@@ -7999,7 +7999,9 @@ function tiendaAbrirCostoInline(id, boton){
   var p=buscarProd(id);
   if(!p)return;
   if(p.esCelu || tiendaEsAutomatico(p)){
-    mostrarToast('⚠️ Costo sincronizado: no admite edición individual segura.');
+    // La edición completa existente gestiona estos productos; no simular guardado local.
+    tiendaEditarPrecio(id);
+    requestAnimationFrame(function(){var campo=document.getElementById('edit-costo');if(campo){campo.focus();campo.select();}});
     return;
   }
   var caja=boton&&boton.closest('.ae-admin-cost-inline');
