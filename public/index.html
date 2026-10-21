@@ -970,6 +970,92 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
   }
 }
 </style>
+<style id="ae-admin-options-polish">
+/* Cajón de opciones: lenguaje visual coherente con el detalle renovado.
+   Solo tarjetas de Administración; no afecta al cliente. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details {
+  min-width:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details[open] > div {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  max-height:52vh !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  padding:8px !important;
+  margin-top:5px;
+  border:1px solid var(--bor);
+  border-radius:12px;
+  background:var(--wh);
+  scrollbar-width:thin;
+  overscroll-behavior:contain;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details[open] > div > button {
+  box-sizing:border-box;
+  display:flex !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:39px !important;
+  height:auto !important;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  margin:0 0 7px !important;
+  padding:8px 5px !important;
+  border-radius:9px !important;
+  font-family:Inter,system-ui,-apple-system,sans-serif !important;
+  font-size:clamp(10px,2.6vw,12px) !important;
+  font-weight:750 !important;
+  line-height:1.25 !important;
+  letter-spacing:-.018em;
+  text-align:center;
+  white-space:normal;
+  overflow-wrap:break-word;
+  word-break:normal;
+  box-shadow:none !important;
+  text-shadow:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-admin-menu-action {
+  display:flex !important;
+  width:100% !important;
+  border:1px solid var(--bor) !important;
+  background:var(--bg) !important;
+  color:var(--az) !important;
+  font-weight:750 !important;
+  box-shadow:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar .ae-admin-menu-more-title {
+  font-family:Inter,system-ui,-apple-system,sans-serif !important;
+  font-size:11px !important;
+  font-weight:650 !important;
+  line-height:1.3;
+  letter-spacing:0;
+  color:var(--sub);
+  padding:4px 2px 2px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details > summary {
+  font-family:Inter,system-ui,-apple-system,sans-serif !important;
+  font-weight:750 !important;
+  letter-spacing:-.02em;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions > button {
+  font-family:Inter,system-ui,-apple-system,sans-serif !important;
+  font-weight:750 !important;
+  letter-spacing:-.02em;
+  border-radius:10px !important;
+  box-shadow:none !important;
+}
+@media(max-width:400px) {
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details[open] > div {
+    padding:6px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > details[open] > div > button {
+    font-size:10px !important;
+    padding:8px 3px !important;
+  }
+}
+</style>
 </head>
 <body class="en-tienda">
 
