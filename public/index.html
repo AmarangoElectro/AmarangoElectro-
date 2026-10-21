@@ -6976,11 +6976,21 @@ function tiendaVerCategoriaPortada(cat){
   tiendaSubfiltroActivo='';
   verSoloFavoritos=false;
   verSoloOfertas=false;
-  tiendaRender();
-  setTimeout(function(){
+  tiendaMostrarCargaCategoria();
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    try{tiendaRender();}finally{tiendaOcultarCargaCategoria();}
     var destino=document.getElementById('tienda-submarcas')||document.getElementById('tienda-grid');
-    if(destino&&destino.scrollIntoView)destino.scrollIntoView({behavior:'smooth',block:'start'});
-  },60);
+    if(destino&&destino.scrollIntoView)destino.scrollIntoView({behavior:'auto',block:'start'});
+  });});
+}
+function tiendaMostrarCargaCategoria(){
+  var grid=document.getElementById('tienda-grid');if(!grid)return;
+  var aviso=document.getElementById('ae-category-loading');
+  if(!aviso){aviso=document.createElement('div');aviso.id='ae-category-loading';aviso.setAttribute('role','status');aviso.setAttribute('aria-live','polite');aviso.innerHTML='<span class="ae-loading-spinner" aria-hidden="true"></span><span>Cargando productos…</span>';grid.parentNode.insertBefore(aviso,grid);}
+  aviso.hidden=false;
+}
+function tiendaOcultarCargaCategoria(){
+  var aviso=document.getElementById('ae-category-loading');if(aviso)aviso.hidden=true;
 }
 function tiendaRenderPortadaCategorias(universo,cont){
   var secciones=[
