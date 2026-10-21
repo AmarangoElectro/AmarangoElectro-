@@ -78,14 +78,14 @@ test('acciones principales visibles, imagen más pequeña y costo directo sin nu
   assert.match(region,/\+botonAmpliarAdmin\+'<details/);
   assert.match(region,/aria-label="Ampliar imagen"/);
   assert.match(region,/aria-label="Editar costo"/);
-  assert.match(region,/document\.getElementById\(&quot;edit-costo&quot;\)/);
+  assert.match(region,/tiendaAbrirCostoInline\(/);
   assert.match(region,/class="ae-admin-visibility/);
   assert.match(region,/tiendaToggleVisibilidadDirecta/);
   assert.match(region,/class="ae-admin-edit-actions"/);
   assert.match(region,/tiendaEditarPrecio\('\+pid\+'\)/);
   assert.match(region,/tiendaEditarFoto\('\+pid\+'\)/);
-  assert.match(region,/onclick="compartirProducto\('\+pid\+'\)/);
-  assert.match(region,/onclick="compartirInstagram\('\+pid\+'\)/);
+  assert.match(region,/event\.stopPropagation\(\);compartirProducto\(/);
+  assert.match(region,/event\.stopPropagation\(\);compartirInstagram\(/);
   assert.match(css,/#tienda-grid\.ae-admin-v16-visual \.prod-card \.prod-foto\s*\{\s*height:clamp\(134px,41vw,160px\)/);
   assert.match(css,/object-fit:contain !important/);
   assert.match(css,/\.ae-admin-visibility \{\s*order:-1/);
