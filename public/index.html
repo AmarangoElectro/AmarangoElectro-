@@ -9823,21 +9823,7 @@ function tiendaCatalogoPDF(){
 
   html+='<div class="pdf-foot">AmarangoElectro — Financiación en cuotas fijas · Consultá por WhatsApp<br>Generado el '+hoy+'</div>';
   html+='
-<style id="ae-admin-compact-20261021">
-#tienda-grid.ae-admin-v16-visual .ae-admin-status-row{display:flex;align-items:center;gap:6px;margin:5px 0 6px;min-width:0}
-#tienda-grid.ae-admin-v16-visual .ae-admin-status-row .ae-admin-visibility{flex:1;min-width:0;margin:0!important}
-#tienda-grid.ae-admin-v16-visual .ae-admin-share-top{display:grid;place-items:center;flex:0 0 35px;width:35px;height:35px;border:1px solid #cbdcf4;border-radius:10px;background:#eef5ff;color:#0a4fbf;cursor:pointer;padding:8px;box-shadow:none}
-#tienda-grid.ae-admin-v16-visual .ae-admin-share-top svg{width:19px;height:19px}
-#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;align-items:start}
-#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>*{min-width:0;margin:0!important}
-#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>details{grid-column:1/-1}
-#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>button{min-height:34px!important;padding:6px 4px!important;font-size:.64rem!important;border-radius:9px!important}
-#ae-admin-orange-top{position:fixed;right:16px;bottom:calc(85px + env(safe-area-inset-bottom,0px));width:45px;height:45px;z-index:12000;border:0;border-radius:15px;background:#ff7a00;color:white;box-shadow:0 5px 18px #a64c004d;display:grid;place-items:center;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .18s,transform .18s;cursor:pointer}
-#ae-admin-orange-top.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
-#ae-admin-orange-top svg{width:23px;height:23px}
-@media(max-width:480px){#tienda-grid.ae-admin-v16-visual{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-</style>
-<script id="ae-admin-orange-top-script">(function(){if(window.__aeOrangeTopInstalled)return;window.__aeOrangeTopInstalled=true;var b=document.createElement('button');b.id='ae-admin-orange-top';b.type='button';b.title='Volver arriba';b.setAttribute('aria-label','Volver arriba');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/><path d="M12 8v12"/></svg>';document.body.appendChild(b);b.addEventListener('click',function(){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});var ticking=false;function refresh(){ticking=false;var grid=document.getElementById('tienda-grid');b.classList.toggle('is-visible',!!(grid&&grid.classList.contains('ae-admin-v16-visual')&&window.scrollY>350));}window.addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(refresh)}},{passive:true});new MutationObserver(function(){if(!ticking){ticking=true;requestAnimationFrame(refresh)}}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});refresh()})();</script>
+
 </body></html>';
 
   // abrir en ventana nueva y disparar impresión (guardar como PDF)
@@ -13178,5 +13164,20 @@ try{ tiendaInit(); }catch(e){}
 })();
 </script>
 
+<style id="ae-admin-compact-20261021">
+#tienda-grid.ae-admin-v16-visual .ae-admin-status-row{display:flex;align-items:center;gap:6px;margin:5px 0 6px;min-width:0}
+#tienda-grid.ae-admin-v16-visual .ae-admin-status-row .ae-admin-visibility{flex:1;min-width:0;margin:0!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-share-top{display:grid;place-items:center;flex:0 0 35px;width:35px;height:35px;border:1px solid #cbdcf4;border-radius:10px;background:#eef5ff;color:#0a4fbf;cursor:pointer;padding:8px;box-shadow:none}
+#tienda-grid.ae-admin-v16-visual .ae-admin-share-top svg{width:19px;height:19px}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;align-items:start}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>*{min-width:0;margin:0!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>details{grid-column:1/-1}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>button{min-height:34px!important;padding:6px 4px!important;font-size:.64rem!important;border-radius:9px!important}
+#ae-admin-orange-top{position:fixed;right:16px;bottom:calc(85px + env(safe-area-inset-bottom,0px));width:45px;height:45px;z-index:12000;border:0;border-radius:15px;background:#ff7a00;color:white;box-shadow:0 5px 18px #a64c004d;display:grid;place-items:center;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .18s,transform .18s;cursor:pointer}
+#ae-admin-orange-top.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
+#ae-admin-orange-top svg{width:23px;height:23px}
+@media(max-width:480px){#tienda-grid.ae-admin-v16-visual{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+</style>
+<script id="ae-admin-orange-top-script">(function(){if(window.__aeOrangeTopInstalled)return;window.__aeOrangeTopInstalled=true;var b=document.createElement('button');b.id='ae-admin-orange-top';b.type='button';b.title='Volver arriba';b.setAttribute('aria-label','Volver arriba');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/><path d="M12 8v12"/></svg>';document.body.appendChild(b);b.addEventListener('click',function(){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});var ticking=false;function refresh(){ticking=false;var grid=document.getElementById('tienda-grid');b.classList.toggle('is-visible',!!(grid&&grid.classList.contains('ae-admin-v16-visual')&&window.scrollY>350));}window.addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(refresh)}},{passive:true});new MutationObserver(function(){if(!ticking){ticking=true;requestAnimationFrame(refresh)}}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});refresh()})();</script>
 </body>
 </html>
