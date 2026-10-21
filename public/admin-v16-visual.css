@@ -1,0 +1,528 @@
+#tienda-grid.ae-admin-v16-visual {
+--ae-wa-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2011.5a8%208%200%200%201-11.7%207.1L4%2020l1.4-4.2A8%208%200%201%201%2020%2011.5Z%22%2F%3E%3Cpath%20d%3D%22M8%208.5c.2%202.9%203.4%206%206.3%206.5l1.2-1.6-2.4-1.1-1%201c-1-.5-1.6-1.2-2.1-2.2l.8-1.1-1.2-2.3Z%22%2F%3E%3C%2Fsvg%3E");
+--ae-ig-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2218%22%20height%3D%2218%22%20rx%3D%225%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%224%22%2F%3E%3Ccircle%20cx%3D%2217.5%22%20cy%3D%226.5%22%20r%3D%22.8%22%20fill%3D%22black%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");
+}
+/* AMARANGOELECTRO — Pulido visual V16 de tarjetas administrativas.
+   Sin funciones nuevas; conservar funciones, permisos, cálculo y datos.
+   Aplicar SOLO cuando tiendaEsAdmin && !vistaPreviaCliente. */
+#tienda-grid.ae-admin-v16-visual {
+  gap:9px !important;
+  align-items:start !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card {
+  min-width:0 !important;
+  padding:8px !important;
+  height:auto !important;
+  border-radius:13px !important;
+  border-color:#dce4ed !important;
+  background:#fff !important;
+  box-shadow:0 3px 12px rgba(12,35,70,.055) !important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important;
+  letter-spacing:-.008em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-foto {
+  width:100% !important;
+  height:176px !important;
+  max-height:176px !important;
+  object-fit:contain !important;
+  background:#fff !important;
+  border-radius:10px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-ampliar-btn {
+  display:flex !important;
+  width:100% !important;
+  justify-content:center !important;
+  align-items:center !important;
+  min-height:34px !important;
+  margin:5px 0 4px !important;
+  padding:5px 6px !important;
+  border-radius:8px !important;
+  border:1px solid #dbe3ec !important;
+  box-shadow:none !important;
+  background:#f8fafc !important;
+  color:#1c3a60 !important;
+  -webkit-text-fill-color:#1c3a60 !important;
+  font-size:.67rem !important;
+  font-weight:700 !important;
+  letter-spacing:-.01em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-ampliar-btn * {
+  color:inherit !important;
+  -webkit-text-fill-color:inherit !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-marca {
+  margin:4px 0 2px !important;
+  font-size:.58rem !important;
+  font-weight:750 !important;
+  letter-spacing:.035em !important;
+  color:#ca6507 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre {
+  color:#172e4d !important;
+  font-size:.75rem !important;
+  line-height:1.23 !important;
+  min-height:0 !important;
+  font-weight:750 !important;
+  letter-spacing:-.015em !important;
+  overflow-wrap:break-word !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa {
+  padding:0 !important;
+  margin:5px 0 2px !important;
+  gap:4px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa-item {
+  padding:6px 3px !important;
+  min-width:0 !important;
+  border:1px solid #e3e8ef !important;
+  border-radius:8px !important;
+  box-shadow:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa-etiqueta {
+  font-size:.54rem !important;
+  font-weight:650 !important;
+  letter-spacing:.01em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-monto {
+  font-size:clamp(.77rem,3.6vw,1.05rem) !important;
+  font-weight:800 !important;
+  line-height:1.13 !important;
+  overflow-wrap:anywhere !important;
+  letter-spacing:-.035em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa-pie,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-card-paycopy {
+  margin:2px 0 4px !important;
+  font-size:.62rem !important;
+  font-weight:550 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-card-price {
+  margin:4px 0 !important;
+  padding:4px 0 !important;
+  font-size:.74rem !important;
+  font-weight:650 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-card-price b {
+  font-size:.86rem !important;
+  font-weight:800 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-card-paybtn {
+  padding:6px 7px !important;
+  min-height:33px !important;
+  border-radius:8px !important;
+  font-size:.65rem !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-simple,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-destacada,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-ahorro {
+  margin:4px 0 !important;
+  padding:8px 6px !important;
+  border-radius:9px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:5px;
+  margin:5px 0 4px;
+  color:#5d6d80;
+  font-size:.63rem;
+  font-weight:500;
+  line-height:1.25;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline b {
+  color:#294460;
+  font-weight:700;
+  font-size:.68rem;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline button {
+  flex:0 0 32px !important;
+  width:32px !important;
+  height:32px !important;
+  min-height:32px !important;
+  min-width:32px !important;
+  padding:3px !important;
+  margin:0 !important;
+  border-radius:8px !important;
+  border:1px solid #d8e1eb !important;
+  background:#f6f9fc !important;
+  color:#215798 !important;
+  font-size:1rem !important;
+  box-shadow:none !important;
+  cursor:pointer;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card button[onclick*="tiendaConfirmarPrecioManual"] {
+  padding:6px 4px !important;
+  min-height:31px !important;
+  margin:3px 0 5px !important;
+  border:1px solid #cde4d4 !important;
+  border-radius:8px !important;
+  background:#f0faf4 !important;
+  color:#226448 !important;
+  box-shadow:none !important;
+  font-size:.62rem !important;
+  font-weight:700 !important;
+  line-height:1.2 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+  display:flex !important;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:6px 0 5px;
+  padding:0;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex:0 0 36px !important;
+  width:36px !important;
+  min-width:36px !important;
+  height:36px !important;
+  min-height:36px !important;
+  padding:4px !important;
+  margin:0 !important;
+  border:1px solid #d8e1ea !important;
+  border-radius:9px !important;
+  background:#f8fafc !important;
+  background-image:none !important;
+  color:#193c65 !important;
+  box-shadow:none !important;
+  font-weight:700 !important;
+  cursor:pointer !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button {
+  font-size:0 !important;
+  line-height:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button::before{
+  content:"";
+  display:block;
+  height:19px;
+  width:19px;
+  background-color:currentColor;
+  mask-repeat:no-repeat;
+  mask-size:contain;
+  mask-position:center;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-size:contain;
+  -webkit-mask-position:center;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[onclick*="compartirProducto"] {
+  order:1;
+  color:#19885b !important;
+  border-color:#cce8da !important;
+  background:#f7fcf9 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[onclick*="compartirProducto"]::before{
+  mask-image:var(--ae-wa-icon);
+  -webkit-mask-image:var(--ae-wa-icon);
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[onclick*="compartirInstagram"] {
+  order:2;
+  color:#b1377e !important;
+  border-color:#eddbe7 !important;
+  background:#fffafd !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[onclick*="compartirInstagram"]::before{
+  mask-image:var(--ae-ig-icon);
+  -webkit-mask-image:var(--ae-ig-icon);
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details {
+  order:3;
+  display:block !important;
+  margin:0 !important;
+  flex:0 0 36px;
+  min-width:36px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary{
+  list-style:none !important;
+  font-size:1.35rem !important;
+  font-weight:750 !important;
+  line-height:1 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary::-webkit-details-marker{display:none}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open] {
+  order:4;
+  flex-basis:100% !important;
+  min-width:0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open]>summary {
+  margin-left:auto !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>div {
+  padding:7px !important;
+  margin:6px 0 0 !important;
+  max-height:54vh;
+  overflow-y:auto;
+  background:#f7f9fc;
+  border:1px solid #d9e2ed;
+  border-radius:9px;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>div>button {
+  min-height:32px !important;
+  padding:6px 5px !important;
+  margin:3px 0 !important;
+  border-radius:7px !important;
+  font-size:.64rem !important;
+  font-weight:700 !important;
+  box-shadow:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions {
+  margin:4px 0 2px !important;
+  gap:4px !important;
+  align-items:stretch !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions > button {
+  min-width:0 !important;
+  min-height:32px !important;
+  padding:6px 3px !important;
+  border-radius:8px !important;
+  border-width:1px !important;
+  box-shadow:none !important;
+  font-size:.59rem !important;
+  font-weight:700 !important;
+  line-height:1.15 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions > button:nth-child(n+3) {
+  flex:0 0 26px !important;
+  width:26px !important;
+  padding:3px 0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-marca,
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline{
+  max-width:100%;
+}
+@media(max-width:390px) {
+  #tienda-grid.ae-admin-v16-visual .prod-card .prod-foto{
+    height:155px !important;max-height:155px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar{
+    gap:4px;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary{
+    width:34px !important;height:34px !important;
+    min-width:34px !important;min-height:34px !important;flex-basis:34px !important;
+  }
+}
+/* Desplazar categorías no selecciona ni cambia productos; sólo el toque activa.
+   El deslizamiento tampoco debe fijar forzosamente el ítem central. */
+#tienda-chips.cat-grid{
+  scroll-snap-type:none !important;
+  scroll-padding-inline:0 !important;
+}
+#tienda-chips .cat-tile{
+  scroll-snap-align:none !important;
+}
+/* Modo oscuro: conservar contraste de acciones sin afectar la vista cliente */
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card{
+  background:#13243b !important;
+  border-color:#32455f !important;
+  color:#f5f8fc !important;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre,
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline b {
+  color:#f5f8fc !important;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline{
+  color:#c0cee1 !important;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>div {
+  background:#1a2d47 !important;border-color:#39516d !important;
+}
+
+
+/* AE ADMIN VISUAL V16 / ETAPA ACCESOS — solamente presentación.
+   Mantener foto, visibilidad, costo, ampliar, WA, IG, editar y reemplazar a la vista. */
+#tienda-grid.ae-admin-v16-visual .prod-card {
+  gap:0 !important;
+  padding:7px !important;
+  border-radius:12px !important;
+  letter-spacing:-.012em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card>div:has(>img.prod-foto){
+  margin:-2px -2px 0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-foto {
+  height:clamp(134px,41vw,160px) !important;
+  max-height:160px !important;
+  min-height:0 !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  border-radius:9px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility {
+  order:-1;
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  width:100%;
+  min-height:27px;
+  margin:0 0 4px !important;
+  padding:3px 5px;
+  background:#f4faf6 !important;
+  border:1px solid #dcebe1;
+  border-radius:7px;
+  font-size:.64rem !important;
+  font-weight:650 !important;
+  color:#246d4a !important;
+  box-sizing:border-box;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility.is-hidden {
+  color:#8d4b26 !important;
+  background:#fff8f3 !important;
+  border-color:#ecd9c7 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility input {
+  flex:0 0 15px;
+  width:15px;
+  height:15px;
+  margin:0;
+  accent-color:#146b4a;
+  cursor:pointer;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-marca {
+  margin:4px 0 1px !important;
+  font-size:.55rem !important;
+  font-weight:700 !important;
+  letter-spacing:.025em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre {
+  font-size:.75rem !important;
+  font-weight:730 !important;
+  line-height:1.19 !important;
+  min-height:0 !important;
+  letter-spacing:-.01em !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline {
+  margin:4px 0 3px !important;
+  min-height:29px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline button {
+  min-width:30px !important;
+  flex-basis:30px !important;
+  width:30px !important;
+  height:30px !important;
+  min-height:30px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa {
+  gap:4px !important;
+  margin:4px 0 1px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-cuota-comparativa-item{
+  border-radius:7px !important;
+  padding:5px 2px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar {
+  justify-content:space-between !important;
+  gap:4px !important;
+  flex-wrap:wrap !important;
+  margin:4px 0 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+  flex:0 0 32px !important;
+  width:32px !important;
+  min-width:32px !important;
+  height:34px !important;
+  min-height:34px !important;
+  padding:4px !important;
+  border-radius:8px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details {
+  flex:0 0 32px !important;
+  min-width:32px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details[open] {
+  flex:0 0 100% !important;
+  max-width:100% !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn {
+  order:0 !important;
+  display:flex !important;
+  position:static !important;
+  width:32px !important;
+  min-width:32px !important;
+  height:34px !important;
+  min-height:34px !important;
+  margin:0 !important;
+  padding:2px !important;
+  border:1px solid #d8e1ea !important;
+  border-radius:8px !important;
+  background:#f8fafc !important;
+  color:#183c67 !important;
+  -webkit-text-fill-color:#183c67 !important;
+  box-shadow:none !important;
+  font-size:1.15rem !important;
+  line-height:1 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn::before {
+  display:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn span {
+  display:inline !important;
+  font-size:1.08rem !important;
+  font-weight:650 !important;
+  color:inherit !important;
+  -webkit-text-fill-color:inherit !important;
+  line-height:1 !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn strong {
+  display:none !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions {
+  margin:3px 0 !important;
+  gap:4px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions>button {
+  min-height:35px !important;
+  padding:5px 3px !important;
+  font-size:.61rem !important;
+  font-weight:750 !important;
+  border-radius:8px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions>button:nth-child(n+3) {
+  flex-basis:26px !important;
+  min-width:26px !important;
+  width:26px !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card button[onclick*="tiendaConfirmarPrecioManual"] {
+  min-height:30px !important;
+  font-weight:650 !important;
+  font-size:.62rem !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+  font-weight:700 !important;
+  font-size:1.28rem !important;
+}
+@media(max-width:390px) {
+  #tienda-grid.ae-admin-v16-visual .prod-card .prod-foto{
+    height:clamp(124px,40vw,148px) !important;
+    max-height:148px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button,
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary {
+    flex-basis:31px !important;
+    min-width:31px !important;
+    width:31px !important;
+    height:33px !important;
+    min-height:33px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details{
+    flex-basis:31px !important;
+    min-width:31px !important;
+  }
+  #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button.prod-ampliar-btn {
+    flex-basis:31px !important;
+    min-width:31px !important;
+    width:31px !important;
+    height:33px !important;
+    min-height:33px !important;
+  }
+}

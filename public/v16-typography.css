@@ -1,0 +1,144 @@
+/*
+ * AMARANGOELECTRO — TIPOGRAFÍA V16 PARA TODOS LOS ROLES (SÓLO VISUAL)
+ * Referencia verificada: app/globals.css de V16, Inter, ui-sans-serif...
+ * Aplica a Cliente, Administración y Mi Amarango/Asesores por igual.
+ * No agrega, esconde, mueve ni sustituye controles o herramientas.
+ * No cambia datos, precios, cuotas, permisos, banners, logos o fotografías.
+ * La fuente Inter ya se importa en el index original: no descargar ni copiar fuentes.
+ */
+
+/* Familia tipográfica idéntica a la base de V16. */
+body,
+body button,
+body input,
+body select,
+body textarea,
+body summary,
+body label {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ajuste de jerarquía: sobria y consistente, sin alterar tamaños o geometría. */
+body :is(h1,h2,h3,h4,h5,h6) {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -.022em !important;
+}
+body :is(p,small,li,dt,dd,figcaption) {
+  letter-spacing: -.006em;
+}
+body :is(button,summary,[role="button"],input,select,textarea) {
+  letter-spacing: -.014em !important;
+}
+body :is(button,summary,[role="button"]) {
+  font-weight: 750 !important;
+}
+body :is(input,select,textarea) {
+  font-weight: 500 !important;
+  letter-spacing: -.01em !important;
+}
+
+/* Encabezado, navegación, portada y sectores: mismos componentes, nueva letra. */
+body .header-info h1 {
+  font-weight: 800 !important;
+  letter-spacing: -.025em !important;
+}
+body .header-info :is(span,small,p),
+body .hdr-marca :is(span,small,p) {
+  font-weight: 600 !important;
+  letter-spacing: -.008em !important;
+}
+body :is(.cajon-item,.tab,.nav-item,.portada-cat-ver,.cat-tile-txt) {
+  font-weight: 720 !important;
+  letter-spacing: -.016em !important;
+}
+body .cat-tile.on .cat-tile-txt,
+body .tab.on {
+  font-weight: 800 !important;
+}
+body .portada-cat-cab h3,
+body .portada-cat-seccion h3 {
+  font-weight: 800 !important;
+  letter-spacing: -.024em !important;
+}
+body :is(.ae-home-links b,.ae-home-links strong) {
+  font-weight: 760 !important;
+  letter-spacing: -.018em !important;
+}
+
+/* Catálogo: misma foto, mismos precios, mismo orden y botones.
+   Sólo cambia la proporción visual de letras y números. */
+body #tienda-grid .prod-card,
+body .portada-cat-grid .prod-card {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+body #tienda-grid .prod-marca,
+body .portada-cat-grid .prod-marca {
+  font-weight: 750 !important;
+  letter-spacing: .022em !important;
+}
+body #tienda-grid .prod-nombre,
+body .portada-cat-grid .prod-nombre {
+  font-weight: 780 !important;
+  letter-spacing: -.022em !important;
+}
+body #tienda-grid .ae-cuota-monto,
+body .portada-cat-grid .ae-cuota-monto,
+body #tienda-grid .ae-card-price b,
+body #tienda-grid .ae-cuota-contado b,
+body .portada-cat-grid .ae-card-price b {
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.034em !important;
+}
+body #tienda-grid .ae-cuota-comparativa-etiqueta,
+body #tienda-grid .ae-cuota-subtexto,
+body #tienda-grid .ae-card-paycopy,
+body #tienda-grid .ae-cuota-comparativa-pie {
+  font-weight: 600 !important;
+  letter-spacing: -.007em !important;
+}
+body #tienda-grid .prod-card :is(.calc-btn,.ae-card-paybtn,.ae-publish-btn,.prod-ampliar-btn),
+body .portada-cat-grid .prod-card :is(.calc-btn,.ae-card-paybtn,.ae-publish-btn,.prod-ampliar-btn) {
+  font-weight: 760 !important;
+  letter-spacing: -.012em !important;
+}
+
+/* Administración: costo y acciones actuales siguen visibles y con su handler.
+   En Mi Amarango y Cliente no se incorpora información de costos. */
+body #tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre {
+  font-weight: 780 !important;
+  letter-spacing: -.02em !important;
+}
+body #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline,
+body #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility {
+  font-weight: 600 !important;
+  letter-spacing: -.008em !important;
+}
+body #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline b {
+  font-weight: 750 !important;
+  font-variant-numeric: tabular-nums;
+}
+body #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-edit-actions>button,
+body #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>div>button {
+  font-weight: 720 !important;
+  letter-spacing: -.012em !important;
+}
+
+/* Formularios y modales existentes, incluidos costo, pedidos y atención al cliente. */
+body :is(.precio-label,.modal-titulo,.modal-title,.precio-input-wrap label) {
+  font-weight: 750 !important;
+  letter-spacing: -.012em !important;
+}
+body :is(.tab-content,.cajon-content,#modal-cuotas-body) :is(h2,h3,h4) {
+  font-weight: 800 !important;
+  letter-spacing: -.025em !important;
+}
+body :is(.tab-content,.cajon-content,#modal-cuotas-body) :is(label,small) {
+  letter-spacing: -.008em !important;
+}
+
+/* No se estilizan los píxeles de imágenes, banners o el logo oficial:
+   se conservan sus artes y tipografías originales. */
