@@ -716,3 +716,24 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline.is
   position:relative;
   z-index:3;
 }
+
+
+/* Scroll táctil: evitar transformaciones y repintados de tarjetas durante gestos. */
+#tienda-grid .prod-card,
+#tienda-grid .prod-card:active{
+  animation:none !important;
+  transform:none !important;
+  transition:none !important;
+}
+#tienda-grid .prod-card{
+  touch-action:pan-y pinch-zoom;
+  overflow-anchor:auto;
+}
+#tienda-grid .prod-card button,
+#tienda-grid .prod-card a,
+#tienda-grid .prod-card summary{
+  touch-action:manipulation;
+}
+@media (prefers-reduced-motion:reduce){
+  #tienda-grid *{scroll-behavior:auto !important;}
+}
