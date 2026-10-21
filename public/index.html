@@ -785,7 +785,15 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="/admin-v16-visual.css?v=1">
 <link rel="stylesheet" href="/v16-typography.css?v=1">
-</head>
+<style id="ae-admin-polish">
+.prod-card:has(.ae-admin-visibility){position:relative}
+.ae-admin-share-top{position:absolute;top:16px;right:16px;z-index:4;width:36px;height:36px;border:1px solid #bde7ce;border-radius:11px;background:#f0fff5;color:#087c43;font-size:1.3rem;font-weight:900;cursor:pointer;box-shadow:0 2px 6px #0001}
+.ae-admin-visibility{padding-right:42px!important}
+.ae-admin-quickbar button,.ae-admin-edit-actions button,.ae-admin-quickbar summary{border-radius:10px!important;min-height:36px;box-shadow:none!important}
+.ae-admin-edit-actions{gap:5px!important}
+#ae-subir-pro{position:fixed;right:15px;bottom:95px;z-index:1410;width:49px;height:49px;border:0;border-radius:16px;background:#ff7a00;color:white;box-shadow:0 5px 16px #ff7a0059;display:none;align-items:center;justify-content:center;cursor:pointer}
+#ae-subir-pro svg{width:25px;height:25px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+</style></head>
 <body class="en-tienda">
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
@@ -7430,6 +7438,7 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
         +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
         +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
+      card+='<button class="ae-admin-share-top" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp" onclick="event.stopPropagation();compartirProducto('+pid+')">↗</button>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -7615,7 +7624,7 @@ function tiendaCardsHtml(sublista){
       card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
+
       card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
       card+='</div>'; // cierre de barra compacta de accesos existentes
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
@@ -9821,7 +9830,8 @@ function tiendaCatalogoPDF(){
   });
 
   html+='<div class="pdf-foot">AmarangoElectro — Financiación en cuotas fijas · Consultá por WhatsApp<br>Generado el '+hoy+'</div>';
-  html+='</body></html>';
+  html+='<button id="ae-subir-pro" type="button" aria-label="Volver arriba" onclick="window.scrollTo({top:0,behavior:'auto'})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+<script>(function(){var b=document.getElementById('ae-subir-pro');if(!b)return;var update=function(){b.style.display=window.scrollY>300?'flex':'none';};window.addEventListener('scroll',update,{passive:true});update();})();</script></body></html>';
 
   // abrir en ventana nueva y disparar impresión (guardar como PDF)
   var w=window.open('','_blank');
