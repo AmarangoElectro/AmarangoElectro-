@@ -7427,9 +7427,12 @@ function tiendaCardsHtml(sublista){
     // controles de admin (debajo de la foto, no la empujan)
     if(tiendaEsAdmin && !p.esCelu && !vistaPreviaCliente){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
+      card+='<div class="ae-admin-status-row">';
       card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
         +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
         +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
+      card+='<button type="button" class="ae-admin-share-top" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp" onclick="event.preventDefault();event.stopPropagation();compartirProducto('+pid+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8 11 7.5-5M8 13l7.5 5"/></svg></button></div>';
+
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -7614,8 +7617,6 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaVerDesdeMenu('+pid+')">↗ Ver producto</button>';
       card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
-      // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
       card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
       card+='</div>'; // cierre de barra compacta de accesos existentes
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
@@ -9821,7 +9822,22 @@ function tiendaCatalogoPDF(){
   });
 
   html+='<div class="pdf-foot">AmarangoElectro — Financiación en cuotas fijas · Consultá por WhatsApp<br>Generado el '+hoy+'</div>';
-  html+='</body></html>';
+  html+='<style id="ae-admin-compact-20261021">
+#tienda-grid.ae-admin-v16-visual .ae-admin-status-row{display:flex;align-items:center;gap:6px;margin:5px 0 6px;min-width:0}
+#tienda-grid.ae-admin-v16-visual .ae-admin-status-row .ae-admin-visibility{flex:1;min-width:0;margin:0!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-share-top{display:grid;place-items:center;flex:0 0 35px;width:35px;height:35px;border:1px solid #cbdcf4;border-radius:10px;background:#eef5ff;color:#0a4fbf;cursor:pointer;padding:8px;box-shadow:none}
+#tienda-grid.ae-admin-v16-visual .ae-admin-share-top svg{width:19px;height:19px}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;align-items:start}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>*{min-width:0;margin:0!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>details{grid-column:1/-1}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>button{min-height:34px!important;padding:6px 4px!important;font-size:.64rem!important;border-radius:9px!important}
+#ae-admin-orange-top{position:fixed;right:16px;bottom:calc(85px + env(safe-area-inset-bottom,0px));width:45px;height:45px;z-index:12000;border:0;border-radius:15px;background:#ff7a00;color:white;box-shadow:0 5px 18px #a64c004d;display:grid;place-items:center;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .18s,transform .18s;cursor:pointer}
+#ae-admin-orange-top.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
+#ae-admin-orange-top svg{width:23px;height:23px}
+@media(max-width:480px){#tienda-grid.ae-admin-v16-visual{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+</style>
+<script id="ae-admin-orange-top-script">(function(){if(window.__aeOrangeTopInstalled)return;window.__aeOrangeTopInstalled=true;var b=document.createElement('button');b.id='ae-admin-orange-top';b.type='button';b.title='Volver arriba';b.setAttribute('aria-label','Volver arriba');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 6-6 6 6"/><path d="M12 8v12"/></svg>';document.body.appendChild(b);b.addEventListener('click',function(){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});});var ticking=false;function refresh(){ticking=false;var grid=document.getElementById('tienda-grid');b.classList.toggle('is-visible',!!(grid&&grid.classList.contains('ae-admin-v16-visual')&&window.scrollY>350));}window.addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(refresh)}},{passive:true});new MutationObserver(function(){if(!ticking){ticking=true;requestAnimationFrame(refresh)}}).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});refresh()})();</script>
+</body></html>';
 
   // abrir en ventana nueva y disparar impresión (guardar como PDF)
   var w=window.open('','_blank');
