@@ -919,6 +919,57 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
   border-color:#f0c9c5 !important;
 }
 </style>
+<style id="ae-refinamiento-fotos-tipografia">
+/* Fotografías más grandes sin recorte, exclusivamente en tarjetas admin */
+#tienda-grid.ae-admin-v16-visual .prod-card { padding:8px !important; }
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-foto {
+  width:100% !important;
+  height:clamp(174px,49vw,248px) !important;
+  max-height:none !important;
+  aspect-ratio:auto !important;
+  object-fit:contain !important;
+  object-position:center !important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-nombre {
+  font-family:Inter,system-ui,-apple-system,sans-serif !important;
+  font-size:clamp(13px,3.7vw,16px) !important;
+  line-height:1.25 !important;
+  font-weight:800 !important;
+  letter-spacing:-.025em;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-marca {
+  font-size:11px !important;
+  font-weight:800 !important;
+  letter-spacing:.08em !important;
+}
+/* Ventana de producto: tipografía uniforme sin cambiar sus colores */
+#modal-cuotas {
+  font-family:Inter,system-ui,-apple-system,sans-serif;
+  letter-spacing:-.012em;
+}
+#modal-cuotas h3 {
+  font-weight:800 !important;
+  letter-spacing:-.025em;
+  line-height:1.2 !important;
+}
+#modal-cuotas button {
+  font-family:inherit !important;
+  letter-spacing:-.015em;
+}
+#modal-cuotas .ae-finance,
+#modal-cuotas .ae-finance * {
+  font-family:inherit;
+}
+#modal-cuotas .ae-finance-promo-main span {
+  font-weight:850;
+  letter-spacing:-.035em;
+}
+@media(max-width:400px) {
+  #tienda-grid.ae-admin-v16-visual .prod-card .prod-foto {
+    height:clamp(160px,48vw,190px) !important;
+  }
+}
+</style>
 </head>
 <body class="en-tienda">
 
