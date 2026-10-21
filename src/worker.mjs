@@ -1,4 +1,5 @@
 import core from "./worker-core.mjs";
+import { imagenProducto } from "./ai-product-image.mjs";
 
 const IMG_BUCKET_PATH = "/storage/v1/object/public/tienda-fotos/";
 const IMG_RENDER_PATH = "/storage/v1/render/image/public/tienda-fotos/";
@@ -125,8 +126,8 @@ function aplicarUiAdminProfesional(response) {
   const tipo = String(response.headers.get("content-type") || "").toLowerCase();
   if (!tipo.includes("text/html")) return response;
   return new HTMLRewriter()
-    .on("head", { element(el){ el.append(ADMIN_UI_STYLE,{html:true}); } })
-    .on("body", { element(el){ el.append(ADMIN_UI_SCRIPT,{html:true}); } })
+    .on("head", { element(el){ el.append(ADMIN_UI_STYLE+'<link rel="stylesheet" href="/admin-compact-v30.css?v=1">\n',{html:true}); } })
+    .on("body", { element(el){ el.append(ADMIN_UI_SCRIPT+'<script defer src="/admin-compact-v30.js?v=1"></script>\n',{html:true}); } })
     .transform(response);
 }
 
@@ -258,6 +259,7 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (url.pathname === "/api/catalogo-cache") return servirCatalogoCache(request, env, ctx);
+    if (url.pathname === "/api/crear-imagen-producto") return imagenProducto(request, env);
     if (url.pathname === "/api/imagen-tienda") return servirImagenTienda(request, env, ctx);
     const respuesta = await core.fetch(request, env, ctx);
     if (request.method === "GET") {
