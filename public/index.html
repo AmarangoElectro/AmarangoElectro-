@@ -7527,7 +7527,7 @@ function tiendaCardsHtml(sublista){
     }
 
     // controles de admin (debajo de la foto, no la empujan)
-    if(tiendaEsAdmin && !p.esCelu && !vistaPreviaCliente){
+    if(tiendaEsAdmin && !vistaPreviaCliente){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
       card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
         +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
