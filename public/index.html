@@ -8526,6 +8526,8 @@ function tiendaGuardarPrecios(){
       celus[i].precio=Math.round(venta);
       celus[i].caracteristicas=carac;
       celus[i].mayorista=mayorista;
+      // Refrescar la tarjeta desde el mismo dato que se acaba de editar.
+      // El guardado en nube continúa por el circuito de celulares existente.
       try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
       subirCelusNube(celus);
     }
@@ -12757,6 +12759,9 @@ function guardarListaCelus(){
         if(typeof prev.visible!=='undefined') cc.visible=prev.visible;
         if(prev.caracteristicas && !cc.caracteristicas) cc.caracteristicas=prev.caracteristicas;
         if(prev.categoria && !cc.categoria) cc.categoria=prev.categoria;
+        // El mayorista es un dato administrativo: conservarlo al actualizar listas de precios.
+        if(prev.mayorista && !cc.mayorista) cc.mayorista=prev.mayorista;
+        if(prev.costoManual>0 && !cc.costoManual) cc.costoManual=prev.costoManual;
       }
       mapa[k]=cc;
     });
