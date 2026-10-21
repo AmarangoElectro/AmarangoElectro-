@@ -1146,10 +1146,10 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
       <button onclick="toggleVerFavoritos()"><span>♡</span><b>Favoritos</b><i>›</i></button>
     </nav>
 
-    <!-- Buscador debajo de la portada -->
+    <!-- Buscador compacto: una sola entrada visible, filtros existentes intactos -->
     <div class="ae-buscar-fila"><div class="hdr-buscar ae-buscar-banner">
       <span class="hb-lupa">🔍</span>
-      <input id="hdr-buscar-input" placeholder="Buscar: Samsung, iPhone, heladera, TV..." autocomplete="off"
+      <input id="hdr-buscar-input" placeholder="Buscar producto, marca o modelo…" autocomplete="off"
         oninput="hdrBuscarSync()" onfocus="hdrPredictivo()"
         onkeydown="if(event.key==='Enter'){hdrCerrarSugerencias();this.blur();}"
         onblur="setTimeout(hdrCerrarSugerencias,180)">
