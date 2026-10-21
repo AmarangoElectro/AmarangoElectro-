@@ -6979,8 +6979,8 @@ function tiendaVerCategoriaPortada(cat){
   tiendaMostrarCargaCategoria();
   requestAnimationFrame(function(){requestAnimationFrame(function(){
     try{tiendaRender();}finally{tiendaOcultarCargaCategoria();}
-    var destino=document.getElementById('tienda-submarcas')||document.getElementById('tienda-grid');
-    if(destino&&destino.scrollIntoView)destino.scrollIntoView({behavior:'auto',block:'start'});
+    // No forzar scroll: desplazar el viewport mientras el usuario toca
+    // provocaba tirones y aparentes retrocesos de las tarjetas.
   });});
 }
 function tiendaMostrarCargaCategoria(){
