@@ -1,0 +1,47 @@
+name: Validar preview V30
+
+on:
+  push:
+    branches:
+      - "work/tienda-vieja-admin-compacto-ia-20261021"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Descargar código de rama de prueba
+        uses: actions/checkout@v4
+      - name: Comprobar sintaxis y preservación de funciones
+        run: |
+          node --check public/admin-compact-v30.js
+          node --check src/ai-product-image.mjs
+          node --check src/worker.mjs
+          node --test tests/admin-compact-v30.test.mjs
+      - name: Verificar que el despliegue sirva la tienda y sus recursos
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://deploy-preview-22--amarangoelectro.netlify.app"
+          ok=0
+          for i in $(seq 1 18); do
+            if curl --retry 1 --max-time 20 -fsSL "$url/" -o /tmp/preview-v30-index.html &&
+               grep -qi "AmarangoElectro" /tmp/preview-v30-index.html &&
+               curl --retry 1 --max-time 20 -fsSL "$url/admin-compact-v30.css" -o /tmp/preview-v30.css &&
+               curl --retry 1 --max-time 20 -fsSL "$url/admin-compact-v30.js" -o /tmp/preview-v30.js &&
+               grep -q "ae-v30-tools" /tmp/preview-v30.js; then
+              ok=1
+              break
+            fi
+            echo "Intento $i: preview aún no disponible; reintentando..."
+            sleep 10
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::El preview aún devuelve error o no sirve los archivos del admin."
+            exit 1
+          fi
+          echo "PASS: /, CSS y JS de Admin V30 sirven contenido real"
