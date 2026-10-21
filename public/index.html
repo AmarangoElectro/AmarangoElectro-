@@ -7430,7 +7430,6 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
         +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
         +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
-
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
@@ -9822,9 +9821,7 @@ function tiendaCatalogoPDF(){
   });
 
   html+='<div class="pdf-foot">AmarangoElectro — Financiación en cuotas fijas · Consultá por WhatsApp<br>Generado el '+hoy+'</div>';
-  html+='
-
-</body></html>';
+  html+='</body></html>';
 
   // abrir en ventana nueva y disparar impresión (guardar como PDF)
   var w=window.open('','_blank');
@@ -13163,7 +13160,6 @@ try{ tiendaInit(); }catch(e){}
   chequear();
 })();
 </script>
-
 
 </body>
 </html>
