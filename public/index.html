@@ -794,6 +794,15 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 #tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{min-width:0;border-radius:10px!important;box-shadow:none!important}
 #tienda-grid.ae-admin-v16-visual .ae-admin-menu-action{border-radius:9px!important}
 @media(max-width:480px){#tienda-grid.ae-admin-v16-visual{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+/* Administración: tarjetas uniformes; cliente sin cambios */
+#tienda-grid.ae-admin-v16-visual{align-items:stretch!important;grid-auto-flow:row!important}
+#tienda-grid.ae-admin-v16-visual>.prod-card{height:100%!important;min-width:0!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:visible!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .prod-foto{width:100%!important;aspect-ratio:1/1!important;object-fit:contain!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar{margin-top:auto!important;min-width:0!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar button,#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar summary{min-width:0!important;overflow-wrap:anywhere!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details[open]{position:relative!important;z-index:5!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details[open]>div{max-height:55vh!important;overflow-y:auto!important;overscroll-behavior:contain!important}
 </style>
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -7592,6 +7601,9 @@ function tiendaCardsHtml(sublista){
     }
 
     if(tiendaEsAdmin && !vistaPreviaCliente){
+      // botón destacar (estrella) arriba de los otros
+      // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
+      card+='<div class="ae-admin-quickbar">'+botonAmpliarAdmin+'<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true" class="ae-drawer-icon">▤</span><span class="ae-drawer-label">Opciones</span><span aria-hidden="true" class="ae-drawer-chevron">⌄</span></summary><div style="padding-top:6px;">';
       if(tiendaEsPendienteImagenAdmin(p)){
         card+='<div style="background:#EAF2FF;border:1.5px solid #BFD3F5;border-radius:8px;padding:7px 8px;margin-bottom:6px;font-size:.63rem;font-weight:900;color:var(--az);">🖼️ Imagen del proveedor pendiente</div>'
           +'<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:#EAF8EF;color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaAprobarImagenActual('+pid+')">✅ Aprobar imagen actual</button>';
@@ -7607,9 +7619,6 @@ function tiendaCardsHtml(sublista){
         var chequeadoHoy=p.precioChequeadoManual && new Date(p.precioChequeadoManual).toDateString()===new Date().toDateString();
         card+='<button style="width:100%;font-size:.66rem;padding:7px 5px;margin-bottom:6px;background:'+(chequeadoHoy?'#DCFCE7':'#F0FDF4')+';color:#08783E;border:1.5px solid #86D5A9;border-radius:8px;font-weight:900;cursor:pointer;font-family:inherit;" onclick="tiendaConfirmarPrecioManual('+pid+')">'+(chequeadoHoy?'✅ Precio chequeado hoy':'✅ Confirmar mismo precio')+'</button>';
       }
-      // botón destacar (estrella) arriba de los otros
-      // CAJÓN plegable con las opciones de marcado (destacar, del día, etc.)
-      card+='<div class="ae-admin-quickbar">'+botonAmpliarAdmin+'<details id="opts-'+p.id+'" style="margin-bottom:6px;"><summary style="cursor:pointer;list-style:none;padding:8px;background:var(--bg);border:1.5px solid var(--bor);border-radius:8px;font-size:.7rem;font-weight:800;color:var(--az);text-align:center;" title="Opciones del producto" aria-label="Opciones del producto"><span aria-hidden="true" class="ae-drawer-icon">▤</span><span class="ae-drawer-label">Opciones</span><span aria-hidden="true" class="ae-drawer-chevron">⌄</span></summary><div style="padding-top:6px;">';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.destacado?'#fff4e6':'var(--bg)')+';color:'+(p.destacado?'#e08a00':'var(--sub)')+';border:1.5px solid '+(p.destacado?'var(--nar)':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaToggleDestacado('+pid+')">'+(p.destacado?'⭐ Destacado':'☆ Destacar')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.delDia?'#fff9e6':'var(--bg)')+';color:'+(p.delDia?'#c9930a':'var(--sub)')+';border:1.5px solid '+(p.delDia?'#f0c040':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaSetProductoDia('+pid+')">'+(p.delDia?'🌟 Producto del día':'☆ Producto del día')+'</button>';
       card+='<button style="width:100%;font-size:.68rem;padding:7px 4px;margin-bottom:6px;background:'+(p.pocoStock?'#fff0f0':'var(--bg)')+';color:'+(p.pocoStock?'var(--red)':'var(--sub)')+';border:1.5px solid '+(p.pocoStock?'#ffd5d5':'var(--bor)')+';border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="tiendaTogglePocoStock('+pid+')">'+(p.pocoStock?'🔥 Últimas unidades':'☆ Últimas unidades')+'</button>';
