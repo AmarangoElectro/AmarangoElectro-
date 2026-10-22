@@ -1546,11 +1546,19 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
         <summary style="cursor:pointer;font-weight:850;font-size:.78rem;color:var(--az);">Filtrar y ordenar</summary>
         <div style="padding-top:12px;display:grid;gap:9px;">
           <input id="ae-admin-busqueda" placeholder="Buscar producto, mayorista o categoría..." oninput="var b=document.getElementById('tienda-buscar');if(b){b.value=this.value;tiendaRenderDebounce();}" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font:inherit;font-size:.75rem;">
-          <label style="font-size:.7rem;color:var(--sub);">Ordenar
-            <select id="ae-admin-orden" onchange="cajonAplicarOrden(this.value)" style="display:block;width:100%;margin-top:5px;padding:11px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font:inherit;">
-              <option value="">Más recientes</option><option value="menor">Menor precio</option><option value="mayor">Mayor precio</option><option value="az">Nombre A-Z</option><option value="nuevos">Novedades primero</option><option value="ofertas">Ofertas</option>
-            </select>
-          </label>
+          <div style="font-size:.7rem;color:var(--sub);">Ordenar
+            <details id="ae-admin-orden-menu" style="position:relative;margin-top:6px;border:1px solid var(--bor);border-radius:11px;background:var(--bg);color:var(--az);">
+              <summary style="cursor:pointer;list-style:none;padding:12px 14px;font-size:.78rem;font-weight:800;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span id="ae-admin-orden-label">Más recientes</span><span style="color:var(--nar);">⌄</span></summary>
+              <div style="display:grid;gap:3px;padding:5px 7px 8px;border-top:1px solid var(--bor);">
+                <button type="button" data-ae-orden="" onclick="aeAdminElegirOrden('',this)">Más recientes</button>
+                <button type="button" data-ae-orden="menor" onclick="aeAdminElegirOrden('menor',this)">Menor precio</button>
+                <button type="button" data-ae-orden="mayor" onclick="aeAdminElegirOrden('mayor',this)">Mayor precio</button>
+                <button type="button" data-ae-orden="az" onclick="aeAdminElegirOrden('az',this)">Nombre A-Z</button>
+                <button type="button" data-ae-orden="nuevos" onclick="aeAdminElegirOrden('nuevos',this)">Novedades primero</button>
+                <button type="button" data-ae-orden="ofertas" onclick="aeAdminElegirOrden('ofertas',this)">Ofertas</button>
+              </div>
+            </details>
+          </div>
           <button type="button" onclick="abrirCajon()" style="padding:10px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;">Más filtros y mayoristas ›</button>
         </div>
       </details>
@@ -5105,7 +5113,7 @@ function tiendaAplicarModo(){
   var bandejasAdmin=document.getElementById('tienda-bandejas-admin'); if(bandejasAdmin)bandejasAdmin.style.display=tiendaEsAdmin?'grid':'none';
   var instagramPortada=document.getElementById('ae-instagram-portada');if(instagramPortada)instagramPortada.style.display=tiendaEsAdmin?'none':'flex';
   var acordeones=document.getElementById('ae-admin-acordeones');if(acordeones)acordeones.style.display=tiendaEsAdmin?'flex':'none';
-  var adminOrden=document.getElementById('ae-admin-orden'),ordenBase=document.getElementById('tienda-orden');if(adminOrden&&ordenBase&&adminOrden.value!==ordenBase.value)adminOrden.value=ordenBase.value;
+  var ordenBase=document.getElementById('tienda-orden');if(ordenBase&&typeof aeAdminActualizarOrden==='function')aeAdminActualizarOrden(ordenBase.value);
   var adminBusqueda=document.getElementById('ae-admin-busqueda'),busquedaBase=document.getElementById('tienda-buscar');if(adminBusqueda&&busquedaBase&&document.activeElement!==adminBusqueda)adminBusqueda.value=busquedaBase.value;
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
@@ -5850,6 +5858,18 @@ function abrirIngresoRoles(){
 }
 function cerrarIngresoRoles(){
   var ov=document.getElementById('rol-login-overlay'); if(ov)ov.style.display='none';
+}
+// Selector visual propio de Amarango: evita el diálogo nativo gigante de Android.
+function aeAdminActualizarOrden(valor){
+  var etiquetas={'':'Más recientes',menor:'Menor precio',mayor:'Mayor precio',az:'Nombre A-Z',nuevos:'Novedades primero',ofertas:'Ofertas'};
+  var label=document.getElementById('ae-admin-orden-label');if(label)label.textContent=etiquetas[valor]||'Más recientes';
+  var botones=document.querySelectorAll('#ae-admin-orden-menu [data-ae-orden]');
+  botones.forEach(function(b){var activo=b.getAttribute('data-ae-orden')===valor;b.style.background=activo?'rgba(255,122,0,.13)':'transparent';b.style.color=activo?'var(--nar)':'var(--az)';b.style.border='0';b.style.borderRadius='8px';b.style.textAlign='left';b.style.padding='11px 12px';b.style.font='800 .76rem inherit';b.style.cursor='pointer';});
+}
+function aeAdminElegirOrden(valor){
+  var menu=document.getElementById('ae-admin-orden-menu');if(menu)menu.open=false;
+  aeAdminActualizarOrden(valor);
+  cajonAplicarOrden(valor);
 }
 // Aplican orden y precio máximo desde el cajón (espejan los inputs ocultos)
 function cajonAplicarOrden(v){
