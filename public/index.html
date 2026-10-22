@@ -7593,6 +7593,15 @@ function tiendaRender(){
   if(palabras.length && (!orden || orden==='' || orden==='relevancia' || orden==='destacado')){
     lista.sort(function(a,b){ return (b._pj||0)-(a._pj||0); });
   }
+  else if(!orden || orden==='destacado' || orden==='relevancia'){
+    // Por defecto, cada categoría muestra primero los productos recién cargados.
+    // No modifica el orden elegido explícitamente por el usuario.
+    lista.sort(function(a,b){
+      var fechaA=Number(a.creado)||Date.parse(a.creado)||0;
+      var fechaB=Number(b.creado)||Date.parse(b.creado)||0;
+      return fechaB-fechaA;
+    });
+  }
   else if(orden==='menor')      lista.sort(function(a,b){return tiendaPrecioContado(a)-tiendaPrecioContado(b);});
   else if(orden==='mayor') lista.sort(function(a,b){return tiendaPrecioContado(b)-tiendaPrecioContado(a);});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
