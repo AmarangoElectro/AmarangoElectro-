@@ -1083,6 +1083,9 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 .ae-explora-title .ae-explora-contrast{color:#172033}
 body.oscuro .ae-explora-title{color:#fff}
 body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
+</style><style id="ae-mayorista-halo-style">
+#tienda-grid.ae-admin-v16-visual .ae-admin-supplier-label{display:flex;align-items:center;gap:8px}
+#tienda-grid.ae-admin-v16-visual .ae-mayorista-halo{display:inline-block;flex:0 0 13px;width:13px;height:13px;border-radius:50%;background:var(--ae-halo);border:2px solid var(--wh);box-shadow:0 0 0 1px var(--ae-halo),0 0 7px 2px color-mix(in srgb,var(--ae-halo) 45%,transparent)}
 </style></head>
 <body class="en-tienda">
 
@@ -7743,7 +7746,7 @@ function tiendaCardsHtml(sublista){
       }
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && mayoristaUnico){
-      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">🏪 '+escapeHtml(mayoristaUnico)+'</div>';
+      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';"><span class="ae-mayorista-halo" aria-hidden="true" style="--ae-halo:'+colorMayoristaCard.bor+';"></span> '+escapeHtml(mayoristaUnico)+'</div>';
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && p.esCelu){
       card+='<button type="button" class="ae-celu-mayorista-action" onclick="event.stopPropagation();tiendaEditarMayoristaCelu(\''+p.id+'\')" >🏪 '+(mayoristaUnico?'Cambiar mayorista':'Asignar mayorista')+'</button>';
