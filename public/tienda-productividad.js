@@ -97,6 +97,7 @@
       +'.ae-card-copy-name.copied{background:#eaf8ef;border-color:#78d6a1;color:#08783e}\n'
       +'.ae-mayorista-click{cursor:pointer!important;outline:0;position:relative}\n'
       +'.ae-mayorista-click:active{transform:scale(.985)}\n'
+      +'.ae-mayorista-halo{box-shadow:0 0 0 2px color-mix(in srgb,var(--ae-halo-color) 22%,transparent),0 0 8px 2px color-mix(in srgb,var(--ae-halo-color) 52%,transparent)!important}\n'
       +'#ae-mayorista-box{display:flex;flex-direction:column;gap:6px;margin-bottom:2px}\n'
       +'#ae-mayorista-box label{color:rgba(255,255,255,.72);font-size:.62rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase}\n'
       +'#ae-mayorista-select{width:100%;padding:10px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#fff;color:#0B2D6B;font-family:inherit;font-size:.78rem;font-weight:800}\n'
@@ -292,6 +293,20 @@
         var txt=String(el.textContent||'').trim();
         if(txt==='🔄 '+n || txt==='🏪 '+n){
           el.classList.add('ae-mayorista-click');
+          // Resalta exclusivamente el indicador circular existente, respetando su color.
+          var circulos=el.querySelectorAll('span,i,b,em');
+          for(var j=0;j<circulos.length;j++){
+            var punto=circulos[j],est=window.getComputedStyle(punto);
+            var ancho=punto.getBoundingClientRect().width,alto=punto.getBoundingClientRect().height;
+            var color=est.backgroundColor;
+            if(ancho>=5&&ancho<=22&&alto>=5&&alto<=22&&Math.abs(ancho-alto)<4&&
+               (est.borderRadius==='50%'||parseFloat(est.borderRadius)>=ancho/2-1)&&
+               color&&color!=='transparent'&&color!=='rgba(0, 0, 0, 0)'){
+              punto.style.setProperty('--ae-halo-color',color);
+              punto.classList.add('ae-mayorista-halo');
+              break;
+            }
+          }
           el.dataset.aeMayorista=n;
           el.setAttribute('role','button');
           el.setAttribute('tabindex','0');
