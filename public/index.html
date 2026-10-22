@@ -1509,7 +1509,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
     <div id="tienda-saludo-hora" style="display:none;"></div>
 
     <!-- Banner de Instagram: suelto, ovalado, un poco más arriba (a pedido) -->
-    <a href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener"
+    <a id="ae-instagram-portada" href="https://instagram.com/amarangoelectro" target="_blank" rel="noopener"
        style="display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;background:linear-gradient(90deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;font-size:.68rem;font-weight:800;padding:8px 14px;border-radius:30px;margin:0 30px 12px;box-shadow:0 3px 10px rgba(0,0,0,.15);">
       <span style="font-size:.85rem;line-height:1;">📷</span> Seguinos en Instagram <b>@amarangoelectro</b> <span style="opacity:.85;">›</span>
     </a>
@@ -1540,6 +1540,22 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
       <button style="flex:1;font-size:.82rem;padding:12px;background:var(--az);color:#fff;border:none;border-radius:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(11,45,107,.3);" onclick="showTab('celulares')">📱 Cargar celulares</button>
     </div>
 
+    <!-- Cajones compactos de trabajo administrativo; los controles originales conservan sus acciones. -->
+    <div id="ae-admin-acordeones" style="display:none;margin:10px 0;gap:8px;flex-direction:column;">
+      <details id="ae-admin-filtros" style="border:1px solid var(--bor);border-radius:14px;background:var(--wh);padding:12px;">
+        <summary style="cursor:pointer;font-weight:850;font-size:.78rem;color:var(--az);">Filtrar y ordenar</summary>
+        <div style="padding-top:12px;display:grid;gap:9px;">
+          <input id="ae-admin-busqueda" placeholder="Buscar producto, mayorista o categoría..." oninput="var b=document.getElementById('tienda-buscar');if(b){b.value=this.value;tiendaRenderDebounce();}" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font:inherit;font-size:.75rem;">
+          <label style="font-size:.7rem;color:var(--sub);">Ordenar
+            <select id="ae-admin-orden" onchange="cajonAplicarOrden(this.value)" style="display:block;width:100%;margin-top:5px;padding:11px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font:inherit;">
+              <option value="">Más recientes</option><option value="menor">Menor precio</option><option value="mayor">Mayor precio</option><option value="az">Nombre A-Z</option><option value="nuevos">Novedades primero</option><option value="ofertas">Ofertas</option>
+            </select>
+          </label>
+          <button type="button" onclick="abrirCajon()" style="padding:10px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;">Más filtros y mayoristas ›</button>
+        </div>
+      </details>
+      <details id="ae-admin-revision" style="border:1px solid var(--bor);border-radius:14px;background:var(--wh);padding:12px;">
+        <summary style="cursor:pointer;font-weight:850;font-size:.78rem;color:var(--az);">Revisión del catálogo</summary>
     <!-- Bandejas privadas para ordenar el trabajo de Angie y Max -->
     <div id="tienda-bandejas-admin" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px;">
       <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🖼️ Imágenes pendientes <span id="cnt-bandeja-nuevos">0</span></button>
@@ -1551,6 +1567,9 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 
     <!-- Aviso de precios viejos (solo admin) -->
     <div id="tienda-aviso-precios" style="display:none;margin:8px 0;"></div>
+
+      </details>
+    </div>
 
     <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
       📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
@@ -5084,6 +5103,10 @@ function tiendaAplicarModo(){
   document.getElementById('tienda-tanda-bar').style.display = 'none';
   var adminTop=document.getElementById('tienda-admin-top'); if(adminTop)adminTop.style.display = 'none';
   var bandejasAdmin=document.getElementById('tienda-bandejas-admin'); if(bandejasAdmin)bandejasAdmin.style.display=tiendaEsAdmin?'grid':'none';
+  var instagramPortada=document.getElementById('ae-instagram-portada');if(instagramPortada)instagramPortada.style.display=tiendaEsAdmin?'none':'flex';
+  var acordeones=document.getElementById('ae-admin-acordeones');if(acordeones)acordeones.style.display=tiendaEsAdmin?'flex':'none';
+  var adminOrden=document.getElementById('ae-admin-orden'),ordenBase=document.getElementById('tienda-orden');if(adminOrden&&ordenBase&&adminOrden.value!==ordenBase.value)adminOrden.value=ordenBase.value;
+  var adminBusqueda=document.getElementById('ae-admin-busqueda'),busquedaBase=document.getElementById('tienda-buscar');if(adminBusqueda&&busquedaBase&&document.activeElement!==adminBusqueda)adminBusqueda.value=busquedaBase.value;
   // el banner naranja de promos es solo para clientes → refrescar según rol
   if(typeof iniciarBannerRotativo==='function')iniciarBannerRotativo();
   document.getElementById('tienda-btn-cargar').style.display = tiendaEsAdmin?'block':'none';
