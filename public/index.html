@@ -1731,9 +1731,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
     </div>
     <input id="carga-dolar" placeholder="Cotización dólar (si es USD)" inputmode="numeric"
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
-    <label style="display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--sub);margin-bottom:12px;">
-      <input type="checkbox" id="carga-reemplazar"> Reemplazar solamente los productos manuales (conserva los automáticos)
-    </label>
+    <!-- Protección: no permitir reemplazo masivo de productos manuales desde carga habitual. -->
     <button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaProcesarCarga()">✅ Cargar productos</button>
     <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="document.getElementById('modal-carga').style.display='none'">Cancelar</button>
   </div>
@@ -11779,7 +11777,7 @@ async function tiendaProcesarCarga(){
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
   var esUSD=(cargaModo==='usd');
   var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
-  var reemplazar=document.getElementById('carga-reemplazar').checked;
+  var reemplazar=false; // Seguridad: la carga manual nunca reemplaza el catálogo existente.
   // 🏷️ categoría y características (opcionales, se aplican a todos)
   var _cargaCat='', _cargaCarac='', _cargaMayorista='';
   try{
