@@ -1083,7 +1083,9 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 .ae-explora-title .ae-explora-contrast{color:#172033}
 body.oscuro .ae-explora-title{color:#fff}
 body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
-</style></head>
+</style><link rel="stylesheet" href="/supplier-logos.css?v=20261023">
+<script src="/supplier-logos.js?v=20261023"></script>
+</head>
 <body class="en-tienda">
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
@@ -7793,7 +7795,7 @@ function tiendaCardsHtml(sublista){
       }
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && mayoristaUnico){
-      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">🏪 '+escapeHtml(mayoristaUnico)+'</div>';
+      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">'+(typeof aeMayoristaEtiquetaHtml==='function'?aeMayoristaEtiquetaHtml(mayoristaUnico):'🏪 '+escapeHtml(mayoristaUnico))+'</div>';
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && p.esCelu){
       card+='<button type="button" class="ae-celu-mayorista-action" onclick="event.stopPropagation();tiendaEditarMayoristaCelu(\''+p.id+'\')" >🏪 '+(mayoristaUnico?'Cambiar mayorista':'Asignar mayorista')+'</button>';
@@ -8281,6 +8283,8 @@ function tiendaQuitarFoto(id){
 // 🎨 devuelve un color fijo y único por mayorista (mismo nombre = mismo color siempre).
 // Genera un tono a partir del texto, así cada mayorista se distingue de un vistazo.
 function colorMayorista(nombre){
+  var logo=typeof aeMayoristaLogoIdentity==='function'?aeMayoristaLogoIdentity(nombre):null;
+  if(logo)return {txt:logo.light,bg:'#F8FAFC',bor:logo.light};
   var s=(nombre||'').toLowerCase().trim();
   // Colores oficiales para reconocer los mayoristas de un vistazo.
   if(s.indexOf('mega')>-1) return {txt:'#0B4AA2',bg:'#DCEBFF',bor:'#70A9F5'};
