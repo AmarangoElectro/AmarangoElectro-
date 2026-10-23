@@ -1,0 +1,7 @@
+/* Only the existing admin supplier label receives a compact logo. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label{display:flex;align-items:center;gap:8px;}
+.ae-admin-supplier-label .ae-supplier-logo{position:relative;display:inline-flex;flex:0 0 30px;width:30px;height:30px;overflow:hidden;border-radius:8px;border:1px solid var(--ae-logo-light);background:#fff;box-shadow:0 0 0 2px color-mix(in srgb,var(--ae-logo-light) 14%,transparent);}
+.ae-admin-supplier-label .ae-supplier-logo>img{position:absolute;left:0;width:100%;max-width:none;height:auto;display:block;object-fit:initial;}
+.ae-admin-supplier-label .ae-supplier-name{min-width:0;overflow-wrap:anywhere;color:var(--ae-logo-light,inherit);}
+body.oscuro .ae-admin-supplier-label .ae-supplier-name{color:var(--ae-logo-dark,inherit);}
+body.oscuro .ae-admin-supplier-label .ae-supplier-logo{border-color:var(--ae-logo-dark);box-shadow:0 0 0 2px color-mix(in srgb,var(--ae-logo-dark) 16%,transparent);}

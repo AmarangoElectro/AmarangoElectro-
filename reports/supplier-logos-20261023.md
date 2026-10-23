@@ -1,0 +1,11 @@
+# Logos de mayoristas — tienda vieja — 23/10/2026
+
+Destino autorizado por Max: https://amarangoelectro.com.ar/; repositorio AmarangoElectro/AmarangoElectro-, main base f52c22f2e6e4a8a8411eaeb8c9a01b47998465d0, árbol 2005ca497e92ee057dd5b51084703c200b1af61b. Este pedido habilita el cambio de presentación de mayoristas en la tienda vieja; no habilita cambios de datos ni migraciones.
+
+Se incorporan las mismas once imágenes originales enviadas por Max para V16: Electro Impacto, Women, Stagliano, One SI, Mega Electro, New Red, Distribuidora Bruni, Red Lenic, Electrosmart, SofJDistribuidora y ATTAIN. Los archivos originales se encuadran mediante CSS; no se redibujan los logos. Alias explícitos únicamente; los nombres desconocidos conservan su respaldo anterior.
+
+El bloque existente de tarjetas sólo presenta el logo/nombre en Administración y fuera de la vista previa de cliente. Los colores conocidos acompañan el logo, con contorno y halo sutil. Permanece el respaldo de texto/ícono si no carga el módulo opcional. No se agregan consultas, listeners ni escrituras. El HTML existente conserva sus finales de línea y recibe un cambio pequeño: carga de CSS/JS, etiqueta de mayorista y prioridad de colores explícitos en colorMayorista.
+
+Validación: 4/4 pruebas nuevas (once identidades, colores, archivos originales, guardas admin/cliente, escape HTML y respaldo si el módulo falta). Suite existente: 14/16, igual que la base comprobada en copia aislada; dos expectativas antiguas del editor de costo fallan antes y después. Total actual: 18/20, sin nuevas regresiones. JavaScript nuevo y scripts inline existentes sintácticamente válidos; git diff --check correcto. No se modificaron esas pruebas antiguas ni el editor de costo.
+
+No se cambian catálogo, stock, precios, calculadoras, ventas, cobranzas, roles, autenticación, Supabase, sincronización de proveedores ni código de V16. No se crearon proyectos/hosting/DNS ni se consultaron secretos. Cloudflare Workers Builds está conectado al repositorio y su último main base tiene comprobación exitosa para el Worker amarango-electro. La publicación de esta entrega debe comprobarse con el estado del commit y el HTML/recursos del dominio; subir código no se considera por sí solo prueba de publicación. La sesión Android/admin real no fue recorrida en este entorno.
