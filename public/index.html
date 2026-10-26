@@ -6721,16 +6721,13 @@ function tiendaRenderDebounce(){
 var TIENDA_LOTE = 24;          // cuántos productos por lote
 var _tiendaListaFull = [];     // lista completa filtrada/ordenada
 var _tiendaMostrados = 0;      // cuántos hay pintados ahora
-var _tiendaCargandoMas=false;  // evita dos cargas por un mismo toque
 
 function tiendaVerMas(){
-  if(_tiendaCargandoMas)return;
   var cont=document.getElementById('tienda-grid');
   if(!cont) return;
   var desde=_tiendaMostrados;
   var hasta=Math.min(desde+TIENDA_LOTE, _tiendaListaFull.length);
   if(hasta<=desde) return;
-  _tiendaCargandoMas=true;
   var scrollAntes=window.scrollY||window.pageYOffset||0;
   // append (no re-render de lo ya pintado) → rápido y sin parpadeo
   cont.insertAdjacentHTML('beforeend', tiendaCardsHtml(_tiendaListaFull.slice(desde, hasta)));
@@ -6743,7 +6740,6 @@ function tiendaVerMas(){
     if((window.scrollY||window.pageYOffset||0)<scrollAntes-4){
       window.scrollTo({top:scrollAntes,left:0,behavior:'auto'});
     }
-    _tiendaCargandoMas=false;
   });
 }
 
