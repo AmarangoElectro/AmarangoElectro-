@@ -1904,7 +1904,7 @@ function bloquePrecioAntes(p, tam){
 function mejorCuotaDatos(precio, prod){
   var promo=promoMadreDatos(prod);
   if(promo)return {n:3,valor:promo.cuota,sinInteres:true,promoMadre:true,total:promo.total,ahorro:promo.ahorro};
-  if(modoForzado!=='clasica' && prod && prod.sinInteres){
+  if(prod && prod.sinInteres){
     var ns=parseInt(prod.sinInteres,10);
     if(ns>0){ var vcs=Math.round(precio/ns/1000)*1000; return { n:ns, valor:vcs, sinInteres:true }; }
   }
@@ -1925,12 +1925,10 @@ function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
 // Arma las líneas de cuotas según los planes activos, SIEMPRE en orden fijo 2→4→6
 // Si el producto tiene sinInteres, muestra esa cuota especial sin recargo
 function armarCuotasLines(precio, prod, modoForzado){
-  // La Promo Octubre es una propuesta independiente. Cuando Administración
-  // elige explícitamente "Calculadora 1 — Clásica", deben salir los planes
-  // clásicos 2/4/6 aunque el producto también esté incluido en la promoción.
+  // Promo Octubre y Calculadora Clásica son propuestas independientes.
   var promo=modoForzado==='clasica'?null:promoMadreDatos(prod);
   if(promo)return ["💐 3 cuotas SIN INTERÉS de "+fmt(promo.cuota),"💸 Ahorrás "+fmt(promo.ahorro)+" pagando al contado"];
-  if(prod && prod.sinInteres){
+  if(modoForzado!=='clasica' && prod && prod.sinInteres){
     var ns=parseInt(prod.sinInteres,10);
     if(ns>0){
       var vcs=Math.round(precio/ns/1000)*1000;
@@ -6728,19 +6726,10 @@ function tiendaVerMas(){
   var desde=_tiendaMostrados;
   var hasta=Math.min(desde+TIENDA_LOTE, _tiendaListaFull.length);
   if(hasta<=desde) return;
-  var scrollAntes=window.scrollY||window.pageYOffset||0;
   // append (no re-render de lo ya pintado) → rápido y sin parpadeo
   cont.insertAdjacentHTML('beforeend', tiendaCardsHtml(_tiendaListaFull.slice(desde, hasta)));
   _tiendaMostrados=hasta;
   tiendaPintarVerMas();
-  tiendaAplicarVistaYAvisos();
-  // Agregar tarjetas debajo nunca debe mandar al usuario hacia arriba. Algunos
-  // navegadores Android cambian el ancla de scroll al reemplazar el botón.
-  requestAnimationFrame(function(){
-    if((window.scrollY||window.pageYOffset||0)<scrollAntes-4){
-      window.scrollTo({top:scrollAntes,left:0,behavior:'auto'});
-    }
-  });
 }
 
 function tiendaPintarVerMas(){
@@ -6748,7 +6737,7 @@ function tiendaPintarVerMas(){
   if(!box) return;
   var restan=_tiendaListaFull.length-_tiendaMostrados;
   if(restan<=0){ box.innerHTML=''; return; }
-  box.innerHTML='<button type="button" onclick="tiendaVerMas()" aria-label="Cargar '+Math.min(TIENDA_LOTE,restan)+' productos más; quedan '+restan+'" style="background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:12px;padding:11px 22px;font-weight:800;font-family:inherit;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.08);">Ver más productos ('+restan+') ▾</button>';
+  box.innerHTML='<button onclick="tiendaVerMas()" style="background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:12px;padding:11px 22px;font-weight:800;font-family:inherit;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.08);">Ver más productos ('+restan+') ▾</button>';
 }
 
 // Después de editar no perdemos la tarjeta. Si estaba fuera del primer lote,
@@ -7390,34 +7379,7 @@ function tiendaRenderPortadaCategorias(universo,cont){
   tiendaAplicarVistaYAvisos();
 }
 
-// Identifica la vista que la persona está explorando. Si esta clave no cambia,
-// una actualización de nube, stock o estado no debe devolverla al primer lote.
-function tiendaClaveVistaActual(){
-  var buscar=document.getElementById('tienda-buscar');
-  var maximo=document.getElementById('tienda-maxprecio');
-  var orden=document.getElementById('tienda-orden');
-  return JSON.stringify({
-    portada:!!tiendaModoPortada,mostrarTodos:!!tiendaMostrarTodos,
-    categoria:tiendaCategoriaActiva||'',marca:tiendaMarcaActiva||'',subtipo:tiendaSubfiltroActivo||'',
-    busqueda:buscar?buscar.value:'',maximo:maximo?maximo.value:'',orden:orden?orden.value:'',
-    favoritos:!!verSoloFavoritos,ofertas:!!verSoloOfertas,viejos:!!verSoloPreciosViejos,
-    bandeja:tiendaBandejaAdmin||'',admin:!!tiendaEsAdmin,cliente:!!vistaPreviaCliente
-  });
-}
-function tiendaDetallesAbiertos(){
-  return Array.prototype.slice.call(document.querySelectorAll('#tienda-grid details[open][id]')).map(function(x){return x.id;});
-}
-function tiendaReabrirDetalles(ids){
-  (ids||[]).forEach(function(id){var el=document.getElementById(id);if(el)el.open=true;});
-}
-
 function tiendaRender(){
-  var claveVistaRender=tiendaClaveVistaActual();
-  var mismaVista=window._tiendaClaveVistaRender===claveVistaRender && _tiendaMostrados>0;
-  var mostradosAntes=mismaVista?_tiendaMostrados:0;
-  var posicionMismaVista=mismaVista?tiendaCapturarPosicionLista(null):null;
-  var detallesMismaVista=mismaVista?tiendaDetallesAbiertos():[];
-  window._tiendaClaveVistaRender=claveVistaRender;
   var atajosAdmin=document.getElementById('ae-admin-atajos');
   if(atajosAdmin)atajosAdmin.style.display=(tiendaEsAdmin&&!vistaPreviaCliente)?'flex':'none';
   var conservarAutomaticamente=window._tiendaMantenerPosicionHastaSalir && tiendaEsAdmin && tiendaBandejaAdmin && !window._tiendaSuspenderConservacionAutomatica;
@@ -7426,12 +7388,7 @@ function tiendaRender(){
   }
   var posicionAutomatica=conservarAutomaticamente?window._tiendaPosicionAutomaticaPendiente:null;
   function finalizarRender(){
-    // Se aplica a toda la tienda: cliente, vendedor y administración. Conserva
-    // el lugar y los desplegables si el filtro/categoría sigue siendo el mismo.
-    if(posicionMismaVista){
-      tiendaReabrirDetalles(detallesMismaVista);
-      tiendaRestaurarPosicionLista(posicionMismaVista);
-    }else if(posicionAutomatica){
+    if(posicionAutomatica){
       tiendaRestaurarPosicionLista(posicionAutomatica);
       setTimeout(function(){
         if(window._tiendaPosicionAutomaticaPendiente===posicionAutomatica){
@@ -7747,10 +7704,7 @@ function tiendaRender(){
   // ⚡ PAGINACIÓN: no dibujamos los cientos de productos de golpe (eso trababa
   // la apertura). Mostramos de a lotes de 24 y "Ver más" carga el siguiente.
   _tiendaListaFull = lista;
-  // Una actualización de la misma vista conserva todos los lotes que la
-  // persona ya abrió. Sólo una categoría/búsqueda/filtro nuevo vuelve a 24.
-  var cantidadInicial=mismaVista?Math.max(TIENDA_LOTE,mostradosAntes):TIENDA_LOTE;
-  _tiendaMostrados = Math.min(cantidadInicial, lista.length);
+  _tiendaMostrados = Math.min(TIENDA_LOTE, lista.length);
   cont.innerHTML = tiendaCardsHtml(lista.slice(0, _tiendaMostrados));
   tiendaPintarVerMas();
   tiendaAplicarVistaYAvisos();
