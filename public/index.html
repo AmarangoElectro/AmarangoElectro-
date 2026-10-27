@@ -5720,6 +5720,8 @@ function palabraEstrictaCoincide(buscada, encontrada){
   // Los modelos con números siempre son exactos (A17 no debe traer A16).
   if(/[0-9]/.test(buscada) || /[0-9]/.test(encontrada)) return false;
   if(buscada.length<3 || encontrada.length<3) return false;
+  // Encontrar palabras aunque estén al medio del nombre o dentro de otra palabra.
+  if(encontrada.indexOf(buscada)>=0)return true;
   return pluralBusqueda(buscada)===encontrada || pluralBusqueda(encontrada)===buscada;
 }
 function tokensBusquedaEstricta(p){
