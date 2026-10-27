@@ -1092,7 +1092,9 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 
 
 <div id="splash-screen" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#020c2e 0%,#0B2D6B 55%,#1e5bc8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
-  <img src="icon.png" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}" style="width:120px;height:120px;border-radius:50%;box-shadow:0 6px 24px rgba(0,0,0,.4);animation:splashPulse 1.4s ease-in-out infinite;">
+  <div style="width:clamp(176px,48vw,244px);aspect-ratio:1;border-radius:50%;padding:5px;box-sizing:border-box;background:conic-gradient(from 220deg,#0069e8 0%,#0a4fbf 44%,#f57b17 57%,#ffad30 80%,#0069e8 100%);box-shadow:0 0 0 2px rgba(255,255,255,.14),0 12px 36px rgba(0,0,0,.34),0 0 26px rgba(0,91,220,.2);display:grid;place-items:center;overflow:hidden;">
+    <img src="icon.png" alt="AmarangoElectro" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='icon-192.png';}else{this.style.display='none';}" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;background:#fff;border:3px solid #fff;box-sizing:border-box;">
+  </div>
   <div style="color:#fff;font-size:1.4rem;font-weight:900;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.4);">AmarangoElectr<span style="display:inline-block;position:relative;width:.55em;height:.55em;vertical-align:baseline;"><span style="position:absolute;inset:0;border:2.5px solid #fff;border-radius:50%;border-top-color:transparent;"></span><span style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:2.5px;height:45%;background:#fff;border-radius:2px;"></span></span> 🐝</div>
   <div style="color:#ffb968;font-size:.85rem;font-style:italic;font-weight:600;">Equipá tu casa, fácil y en cuotas</div>
   <div style="margin-top:10px;display:flex;gap:6px;">
