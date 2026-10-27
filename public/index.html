@@ -7408,6 +7408,7 @@ function aeVerMayorista(id){
   aeAbrirMayoristas(nombre);
 }
 var aeMayoristaOperacionEnCurso=false;
+function aeNormalizarMayorista(nombre){var n=String(nombre||'').trim().toLocaleLowerCase('es');if(n==='mega'||n==='mega electro')return 'mega electro';if(n==='sofj'||n==='sofjdistribuidora'||n==='sofj distribuidora')return 'sofjdistribuidora';return n;}
 function aeNombreMayorista(p){return String((p&&(p.mayorista||p.proveedor))||'').trim();}
 function aeAbrirMayoristas(nombre){
   if(!tiendaEsAdmin||vistaPreviaCliente)return;
@@ -7417,7 +7418,7 @@ function aeAbrirMayoristas(nombre){
 function aeCerrarMayoristas(){if(aeMayoristaOperacionEnCurso)return;var m=document.getElementById('ae-modal-mayoristas');if(m)m.style.display='none';}
 function aePintarMayoristas(seleccion){
   var lista=document.getElementById('ae-lista-mayoristas');if(!lista)return;
-  var mapa={};(tiendaProductos||[]).forEach(function(p){if(!p||p.eliminado)return;var n=aeNombreMayorista(p);if(!n)return;var k=n.toLocaleLowerCase('es');if(!mapa[k])mapa[k]={nombre:n,productos:[]};mapa[k].productos.push(p);});
+  var mapa={};(tiendaProductos||[]).forEach(function(p){if(!p||p.eliminado)return;var n=aeNombreMayorista(p);if(!n)return;var k=aeNormalizarMayorista(n);if(!mapa[k])mapa[k]={nombre:k==='mega electro'?'Mega Electro':k==='sofjdistribuidora'?'SofJDistribuidora':n,productos:[]};mapa[k].productos.push(p);});
   lista.textContent='';Object.keys(mapa).sort().forEach(function(k){
     var grupo=mapa[k],total=grupo.productos.length,visibles=grupo.productos.filter(function(p){return p.visible===true;}).length;
     var fila=document.createElement('div');fila.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--bor);border-radius:12px;background:var(--bg);';
@@ -7425,7 +7426,7 @@ function aePintarMayoristas(seleccion){
     var titulo=document.createElement('strong');titulo.textContent=grupo.nombre;ver.appendChild(titulo);
     var subt=document.createElement('div');subt.style.cssText='font-size:.7rem;color:var(--sub);margin-top:3px;';subt.textContent=total+' productos · '+visibles+' visibles';ver.appendChild(subt);
     ver.onclick=function(){aeFiltroMayoristaActual=k;aeCerrarMayoristas();tiendaRender();var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});};
-    var boton=document.createElement('button');boton.type='button';boton.setAttribute('role','switch');boton.setAttribute('aria-checked',String(visibles>0));boton.textContent=visibles?'Visible':'Oculto';boton.style.cssText='border:1px solid var(--bor);border-radius:20px;padding:9px 12px;min-width:83px;background:'+(visibles?'#DDF7E8':'#FDE8E8')+';color:'+(visibles?'#08783E':'#991B1B')+';font-weight:800;cursor:pointer;';
+    var boton=document.createElement('button');boton.type='button';boton.setAttribute('role','switch');boton.setAttribute('aria-checked',String(visibles>0));boton.innerHTML='<span aria-hidden="true" style="display:inline-block;vertical-align:middle;width:32px;height:18px;border-radius:12px;background:'+(visibles?'#16A34A':'#9CA3AF')+';padding:2px;box-sizing:border-box;margin-right:5px;"><span style="display:block;width:14px;height:14px;border-radius:50%;background:white;transform:translateX('+(visibles?'14':'0')+'px);transition:transform .2s;"></span></span>'+(visibles?'Visible':'Oculto');boton.style.cssText='border:1px solid var(--bor);border-radius:20px;padding:9px 12px;min-width:83px;background:'+(visibles?'#DDF7E8':'#FDE8E8')+';color:'+(visibles?'#08783E':'#991B1B')+';font-weight:800;cursor:pointer;';
     boton.disabled=aeMayoristaOperacionEnCurso;boton.onclick=function(){aeCambiarVisibilidadMayorista(k,visibles===0);};
     fila.appendChild(ver);fila.appendChild(boton);lista.appendChild(fila);
   });
@@ -7439,7 +7440,7 @@ function aeConfirmarMayorista(mensaje,aceptar){
 function aeCambiarVisibilidadMayorista(clave,mostrar){
   if(!tiendaEsAdmin||vistaPreviaCliente||aeMayoristaOperacionEnCurso)return;
   if(!NUBE_OK||!sbCalc){mostrarToast('⚠️ Sin conexión: no se modificó nada.');return;}
-  var productos=(tiendaProductos||[]).filter(function(p){return p&&!p.eliminado&&aeNombreMayorista(p).toLocaleLowerCase('es')===clave;});
+  var productos=(tiendaProductos||[]).filter(function(p){return p&&!p.eliminado&&aeNormalizarMayorista(aeNombreMayorista(p))===clave;});
   var cambiar=productos.filter(function(p){return mostrar?(p.visible===false&&p.motivoOculto==='mayorista'):(p.visible===true);});
   if(!cambiar.length){mostrarToast('No hay productos para modificar con seguridad.');return;}
   var nombre=aeNombreMayorista(productos[0]);
@@ -7486,7 +7487,7 @@ function tiendaRender(){
   // clientes y vendedores. Lo no publicable vive en carpetas privadas.
   var universo=tiendaProductos.filter(tiendaEstaVisibleYConStock);
   if(tiendaEsAdmin&&aeFiltroMayoristaActual){
-    universo=tiendaProductos.filter(function(p){return String(p.mayorista||p.proveedor||'').trim().toLocaleLowerCase('es')===aeFiltroMayoristaActual;});
+    universo=tiendaProductos.filter(function(p){return aeNormalizarMayorista(aeNombreMayorista(p))===aeFiltroMayoristaActual;});
   }
   if(tiendaEsAdmin && tiendaBandejaAdmin==='nuevos'){
     universo=universo.filter(tiendaEsPendienteImagenAdmin);
@@ -7511,9 +7512,12 @@ function tiendaRender(){
     if(!c || !c.precio)return;
     // En la vidriera principal no se mezclan celulares ocultos o sin stock.
     if(!tiendaBandejaAdmin && (c.ocultoTienda || c.sinStock))return;
+    if(tiendaEsAdmin&&aeFiltroMayoristaActual&&aeNormalizarMayorista(c.mayorista||c.proveedor)!==aeFiltroMayoristaActual)return;
     universo.push({
       id: 'celu_'+i,           // id especial para distinguirlos
       esCelu: true,
+      mayorista:c.mayorista||c.proveedor||'',
+      proveedor:c.proveedor||c.mayorista||'',
       nombre: c.nombre,
       venta: c.precio,
       costo: costoRealCelu(c),
