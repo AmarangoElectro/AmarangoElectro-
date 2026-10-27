@@ -1590,6 +1590,20 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
         <div style="display:flex;gap:10px;justify-content:flex-end;"><button type="button" onclick="document.getElementById('ae-confirmar-mayorista').style.display='none'" style="padding:11px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;">Cancelar</button><button type="button" id="ae-confirmar-mayorista-aceptar" style="padding:11px;border:0;border-radius:10px;background:var(--nar);color:#fff;font-weight:800;">Confirmar</button></div>
       </div>
     </div>
+    <div id="ae-masivo-exito" role="status" aria-live="polite" style="display:none;position:fixed;inset:0;z-index:10020;align-items:center;justify-content:center;background:rgba(7,15,28,.46);padding:20px;pointer-events:none;">
+      <div class="ae-masivo-exito-card" style="width:min(88vw,310px);border-radius:24px;background:var(--wh);color:var(--az);padding:32px 22px;text-align:center;box-shadow:0 20px 65px rgba(0,0,0,.28);border:1px solid var(--bor);">
+        <div class="ae-masivo-exito-check" aria-hidden="true" style="width:94px;height:94px;border-radius:50%;background:#e4f8ec;color:#128047;display:grid;place-items:center;font-size:62px;font-weight:900;margin:0 auto 14px;">✓</div>
+        <strong style="font-size:1.12rem;display:block;">¡Asignación completada!</strong>
+        <p id="ae-masivo-exito-texto" style="font-size:.8rem;color:var(--sub);margin:9px 0 0;"></p>
+      </div>
+    </div>
+    <style>
+      @keyframes aeMasivoEntrada{0%{opacity:0;transform:translateY(20px) scale(.88)}65%{opacity:1;transform:translateY(-3px) scale(1.035)}100%{transform:translateY(0) scale(1)}}
+      @keyframes aeMasivoCheck{0%{opacity:0;transform:scale(.25) rotate(-18deg)}65%{opacity:1;transform:scale(1.16) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+      #ae-masivo-exito .ae-masivo-exito-card{animation:aeMasivoEntrada .5s cubic-bezier(.2,.8,.2,1) both}
+      #ae-masivo-exito .ae-masivo-exito-check{animation:aeMasivoCheck .65s .15s cubic-bezier(.2,.8,.2,1) both}
+      @media(prefers-reduced-motion:reduce){#ae-masivo-exito .ae-masivo-exito-card,#ae-masivo-exito .ae-masivo-exito-check{animation:none}}
+    </style>
     <div id="ae-modal-mayorista-masivo" role="dialog" aria-modal="true" aria-label="Asignar mayorista a varios celulares" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:12px;">
       <div style="width:min(100%,470px);max-height:88vh;display:flex;flex-direction:column;background:var(--wh);border:1px solid var(--bor);border-radius:18px;padding:16px;gap:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;"><strong style="color:var(--az);">🏪 Asignar mayorista a varios celulares</strong><button type="button" onclick="aeCerrarMayoristaMasivo()" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">✕</button></div>
@@ -7444,6 +7458,15 @@ function aeSeleccionarTodosCelularesMasivos(){
 }
 function aeSeleccionarCelularesMasivos(valor){if(valor)aeIndicesCelularesMasivos().forEach(function(x){aeMasivoSeleccionados.add(x.i);});else aeMasivoSeleccionados.clear();aePintarCelularesMasivos();}
 function aeEstadoCelularesMasivos(mensaje){document.getElementById('ae-masivo-estado').textContent=mensaje||aeMasivoSeleccionados.size+' celulares seleccionados';}
+var aeMasivoExitoTimer=null;
+function aeMostrarExitoMasivo(cantidad,nombre){
+  var panel=document.getElementById('ae-masivo-exito');if(!panel)return;
+  var mensaje=document.getElementById('ae-masivo-exito-texto');
+  if(mensaje)mensaje.textContent=cantidad+' celulares asignados a '+nombre;
+  if(aeMasivoExitoTimer)clearTimeout(aeMasivoExitoTimer);
+  panel.style.display='none';void panel.offsetWidth;panel.style.display='flex';
+  aeMasivoExitoTimer=setTimeout(function(){panel.style.display='none';aeMasivoExitoTimer=null;},2700);
+}
 function aeGuardarMayoristaMasivo(){
   if(aeMasivoGuardando||!tiendaEsAdmin||vistaPreviaCliente)return;
   if(!NUBE_OK||!sbCalc){aeEstadoCelularesMasivos('Sin conexión. No se modificó nada.');return;}
@@ -7459,7 +7482,7 @@ function aeGuardarMayoristaMasivo(){
       if(new Set(indices).size!==indices.length)throw Error('Selección duplicada');
       indices.forEach(function(j){remoto[j].mayorista=nombre;});
       return Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:remoto,actualizado:new Date().toISOString()})).then(function(w){if(w&&w.error)throw w.error;return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();});
-    }).then(function(r){if(r&&r.error)throw r.error;var datos=r&&r.data&&r.data.datos;if(!Array.isArray(datos))throw Error('No se confirmó guardado');seleccionados.forEach(function(c){if(!datos.some(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===String(c.nombre||'').trim().toLowerCase()&&Number(x.precio)===Number(c.precio)&&x.mayorista===nombre;}))throw Error('Verificación incompleta: '+c.nombre);});localStorage.setItem('amarango_celulares',JSON.stringify(datos));aeEstadoCelularesMasivos('✓ '+seleccionados.length+' celulares actualizados');aeMasivoSeleccionados.clear();tiendaRender();aePintarCelularesMasivos();}).catch(function(err){aeEstadoCelularesMasivos('⚠️ No se confirmó el cambio: '+err.message);console.warn('Asignación masiva',err);}).finally(function(){aeMasivoGuardando=false;boton.disabled=false;});
+    }).then(function(r){if(r&&r.error)throw r.error;var datos=r&&r.data&&r.data.datos;if(!Array.isArray(datos))throw Error('No se confirmó guardado');seleccionados.forEach(function(c){if(!datos.some(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===String(c.nombre||'').trim().toLowerCase()&&Number(x.precio)===Number(c.precio)&&x.mayorista===nombre;}))throw Error('Verificación incompleta: '+c.nombre);});localStorage.setItem('amarango_celulares',JSON.stringify(datos));aeEstadoCelularesMasivos('✓ '+seleccionados.length+' celulares actualizados');aeMostrarExitoMasivo(seleccionados.length,nombre);aeMasivoSeleccionados.clear();tiendaRender();aePintarCelularesMasivos();}).catch(function(err){aeEstadoCelularesMasivos('⚠️ No se confirmó el cambio: '+err.message);console.warn('Asignación masiva',err);}).finally(function(){aeMasivoGuardando=false;boton.disabled=false;});
   });
 }
 var aeMayoristaOperacionEnCurso=false;
