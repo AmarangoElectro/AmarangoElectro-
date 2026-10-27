@@ -1594,7 +1594,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
       <div style="width:min(100%,470px);max-height:88vh;display:flex;flex-direction:column;background:var(--wh);border:1px solid var(--bor);border-radius:18px;padding:16px;gap:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;"><strong style="color:var(--az);">🏪 Asignar mayorista a varios celulares</strong><button type="button" onclick="aeCerrarMayoristaMasivo()" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">✕</button></div>
         <input id="ae-masivo-buscar" oninput="aePintarCelularesMasivos()" placeholder="Buscar celulares..." style="padding:12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);">
-        <div style="display:flex;gap:8px;align-items:center;"><button type="button" onclick="aeSeleccionarCelularesMasivos(true)" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Seleccionar resultados</button><button type="button" onclick="aeSeleccionarCelularesMasivos(false)" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Limpiar</button></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><button type="button" onclick="aeSeleccionarTodosCelularesMasivos()" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);font-weight:800;">Seleccionar todos</button><button type="button" onclick="aeSeleccionarCelularesMasivos(true)" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Seleccionar resultados</button><button type="button" onclick="aeSeleccionarCelularesMasivos(false)" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Limpiar</button></div>
         <div id="ae-masivo-lista" style="overflow:auto;min-height:80px;display:grid;gap:5px;"></div>
         <label style="font-size:.76rem;color:var(--az);font-weight:800;">Mayorista<input id="ae-masivo-proveedor" list="ae-masivo-proveedores" placeholder="Elegir o escribir mayorista" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);"></label><datalist id="ae-masivo-proveedores"></datalist>
         <div id="ae-masivo-estado" role="status" style="font-size:.75rem;color:var(--sub);">0 seleccionados</div>
@@ -7435,6 +7435,12 @@ function aePintarCelularesMasivos(){
     var chk=document.createElement('input');chk.type='checkbox';chk.checked=aeMasivoSeleccionados.has(x.i);chk.onchange=function(){if(chk.checked)aeMasivoSeleccionados.add(x.i);else aeMasivoSeleccionados.delete(x.i);aeEstadoCelularesMasivos();};
     var texto=document.createElement('span');texto.textContent=x.c.nombre+' · '+(x.c.mayorista||'Sin mayorista');fila.appendChild(chk);fila.appendChild(texto);lista.appendChild(fila);
   });aeEstadoCelularesMasivos();
+}
+function aeSeleccionarTodosCelularesMasivos(){
+  var todos=cargarListaCelus();
+  if(!todos.length){aeEstadoCelularesMasivos('No hay celulares para seleccionar.');return;}
+  todos.forEach(function(c,i){if(c)aeMasivoSeleccionados.add(i);});
+  aePintarCelularesMasivos();
 }
 function aeSeleccionarCelularesMasivos(valor){if(valor)aeIndicesCelularesMasivos().forEach(function(x){aeMasivoSeleccionados.add(x.i);});else aeMasivoSeleccionados.clear();aePintarCelularesMasivos();}
 function aeEstadoCelularesMasivos(mensaje){document.getElementById('ae-masivo-estado').textContent=mensaje||aeMasivoSeleccionados.size+' celulares seleccionados';}
