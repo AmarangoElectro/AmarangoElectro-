@@ -8488,12 +8488,17 @@ function tiendaGuardarCostoInline(id,campo,guardar,cancelar,caja){
     });
     return;
   }
+  // Reutilizar exactamente la calculadora de venta del editor existente.
+  var precioNuevo=Number(markupVentaCRM(nuevo));
+  if(!Number.isFinite(precioNuevo)||precioNuevo<=0){mostrarToast('⚠️ No se pudo calcular el precio de venta.');return;}
+  var ventaAnterior=p.venta;
   var anterior=p.costo;
   var marcaAnterior=p.estadoManualActualizado;
   var posicion=tiendaCapturarPosicionLista(null);
   var marca=Date.now();
   guardar.disabled=true;cancelar.disabled=true;guardar.textContent='Guardando…';
   p.costo=nuevo;
+  p.venta=precioNuevo;
   p.estadoManualActualizado=marca;
   Promise.resolve().then(function(){
     return tiendaGuardarLocal();
@@ -8505,14 +8510,15 @@ function tiendaGuardarCostoInline(id,campo,guardar,cancelar,caja){
     if(res&&res.error)throw res.error;
     var remotos=res&&res.data&&res.data.datos;
     var remoto=Array.isArray(remotos)&&remotos.find(function(x){return x&&String(x.id)===String(id);});
-    if(!remoto || Number(remoto.costo)!==nuevo){
+    if(!remoto || Number(remoto.costo)!==nuevo || Number(remoto.venta)!==precioNuevo){
       throw new Error('La nube no confirmó el costo del producto');
     }
     tiendaRenderMantenerPosicion(posicion);
-    mostrarToast('✅ Costo guardado: '+fmt(nuevo));
+    mostrarToast('✅ Costo, contado y cuotas actualizados');
   }).catch(function(err){
     if(p.costo===nuevo && p.estadoManualActualizado===marca){
       p.costo=anterior;
+      p.venta=ventaAnterior;
       if(marcaAnterior===undefined)delete p.estadoManualActualizado;
       else p.estadoManualActualizado=marcaAnterior;
       try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
