@@ -8662,6 +8662,11 @@ function tiendaGuardarMayoristaCelu(id){
   var aviso=document.getElementById('ae-celu-mayorista-msg');
   if(!c||!campo||!boton)return;
   var nombre=campo.value.trim();
+  if(typeof aeNormalizarMayorista==='function'){
+    var normalizado=aeNormalizarMayorista(nombre);
+    if(normalizado==='mega electro')nombre='Mega Electro';
+    if(normalizado==='sofjdistribuidora')nombre='SofJDistribuidora';
+  }
   if(!nombre){aviso.textContent='Escribí o seleccioná un mayorista.';return;}
   if(!NUBE_OK||!sbCalc){aviso.textContent='Sin conexión a la nube. No se guardó el cambio.';return;}
   // Leer primero la versión remota para no sobrescribir una lista actualizada
@@ -8685,6 +8690,10 @@ function tiendaGuardarMayoristaCelu(id){
       var remoto=r&&r.data&&r.data.datos;
       if(!Array.isArray(remoto)||!remoto.some(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===claveNombre&&String(x.mayorista||'').trim()===nombre;}))throw new Error('Mayorista no confirmado');
       localStorage.setItem('amarango_celulares',JSON.stringify(remoto));
+      // La tarjeta y el filtro usan la lista local: refrescar desde la copia verificada.
+      var confirmado=remoto.find(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===claveNombre&&String(x.mayorista||'').trim()===nombre;});
+      if(confirmado){c.mayorista=nombre;}
+      var modalCelu=document.getElementById('modal-cuotas');if(modalCelu)modalCelu.style.display='none';
       boton.disabled=false;boton.textContent='✓ Guardado';
       aviso.textContent='Mayorista guardado correctamente.';
       tiendaRenderMantenerPosicion(tiendaCapturarPosicionLista(null));
