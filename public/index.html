@@ -1583,6 +1583,13 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
       </details>
     </div>
 
+    <div id="ae-modal-mayoristas" role="dialog" aria-modal="true" aria-label="Mayoristas" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:16px;">
+      <div style="width:min(100%,460px);max-height:82vh;display:flex;flex-direction:column;background:var(--wh);border:1px solid var(--bor);border-radius:20px;padding:18px;box-shadow:0 15px 50px rgba(0,0,0,.25);">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><strong style="color:var(--az);font-size:1.05rem;">🏪 Mayoristas</strong><button type="button" onclick="aeCerrarMayoristas()" aria-label="Cerrar" style="background:var(--bg);color:var(--az);border:1px solid var(--bor);border-radius:10px;padding:9px 12px;">✕</button></div>
+        <p style="font-size:.73rem;color:var(--sub);margin:8px 0 12px;">Tocá un nombre para ver sus productos. Cada interruptor controla únicamente ese mayorista.</p>
+        <div id="ae-lista-mayoristas" style="overflow:auto;display:grid;gap:8px;"></div>
+      </div>
+    </div>
     <div id="ae-admin-filtro-mayorista" style="display:none;align-items:center;justify-content:space-between;gap:8px;padding:10px;margin:8px 0;border:1px solid var(--bor);border-radius:12px;background:var(--wh);font-size:.75rem;"><span>Mayorista: <strong id="ae-admin-filtro-nombre"></strong></span><button type="button" onclick="aeQuitarFiltroMayorista()" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Ver todos</button></div>
     <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
       📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
@@ -7391,10 +7398,48 @@ function aeVerMayorista(id){
   if(!p)return;
   var nombre=String(p.mayorista||p.proveedor||'').trim();
   if(!nombre)return;
-  if(!confirm('¿Ver todos los productos de '+nombre+'?'))return;
-  aeFiltroMayoristaActual=nombre.toLocaleLowerCase('es');
-  tiendaRender();
-  var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});
+  aeAbrirMayoristas(nombre);
+}
+var aeMayoristaOperacionEnCurso=false;
+function aeNombreMayorista(p){return String((p&&(p.mayorista||p.proveedor))||'').trim();}
+function aeAbrirMayoristas(nombre){
+  if(!tiendaEsAdmin||vistaPreviaCliente)return;
+  var modal=document.getElementById('ae-modal-mayoristas');if(!modal)return;
+  modal.style.display='flex';aePintarMayoristas(nombre||'');
+}
+function aeCerrarMayoristas(){if(aeMayoristaOperacionEnCurso)return;var m=document.getElementById('ae-modal-mayoristas');if(m)m.style.display='none';}
+function aePintarMayoristas(seleccion){
+  var lista=document.getElementById('ae-lista-mayoristas');if(!lista)return;
+  var mapa={};(tiendaProductos||[]).forEach(function(p){if(!p||p.eliminado)return;var n=aeNombreMayorista(p);if(!n)return;var k=n.toLocaleLowerCase('es');if(!mapa[k])mapa[k]={nombre:n,productos:[]};mapa[k].productos.push(p);});
+  lista.textContent='';Object.keys(mapa).sort().forEach(function(k){
+    var grupo=mapa[k],total=grupo.productos.length,visibles=grupo.productos.filter(function(p){return p.visible===true;}).length;
+    var fila=document.createElement('div');fila.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--bor);border-radius:12px;background:var(--bg);';
+    var ver=document.createElement('button');ver.type='button';ver.style.cssText='flex:1;text-align:left;border:0;background:none;color:var(--az);font:inherit;cursor:pointer;';
+    var titulo=document.createElement('strong');titulo.textContent=grupo.nombre;ver.appendChild(titulo);
+    var subt=document.createElement('div');subt.style.cssText='font-size:.7rem;color:var(--sub);margin-top:3px;';subt.textContent=total+' productos · '+visibles+' visibles';ver.appendChild(subt);
+    ver.onclick=function(){aeFiltroMayoristaActual=k;aeCerrarMayoristas();tiendaRender();var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});};
+    var boton=document.createElement('button');boton.type='button';boton.setAttribute('role','switch');boton.setAttribute('aria-checked',String(visibles>0));boton.textContent=visibles?'Visible':'Oculto';boton.style.cssText='border:1px solid var(--bor);border-radius:20px;padding:9px 12px;min-width:83px;background:'+(visibles?'#DDF7E8':'#FDE8E8')+';color:'+(visibles?'#08783E':'#991B1B')+';font-weight:800;cursor:pointer;';
+    boton.disabled=aeMayoristaOperacionEnCurso;boton.onclick=function(){aeCambiarVisibilidadMayorista(k,visibles===0);};
+    fila.appendChild(ver);fila.appendChild(boton);lista.appendChild(fila);
+  });
+}
+function aeCambiarVisibilidadMayorista(clave,mostrar){
+  if(!tiendaEsAdmin||vistaPreviaCliente||aeMayoristaOperacionEnCurso)return;
+  if(!NUBE_OK||!sbCalc){mostrarToast('⚠️ Sin conexión: no se modificó nada.');return;}
+  var productos=(tiendaProductos||[]).filter(function(p){return p&&!p.eliminado&&aeNombreMayorista(p).toLocaleLowerCase('es')===clave;});
+  var cambiar=productos.filter(function(p){return mostrar?(p.visible===false&&p.motivoOculto==='mayorista'):(p.visible===true);});
+  if(!cambiar.length){mostrarToast('No hay productos para modificar con seguridad.');return;}
+  var nombre=aeNombreMayorista(productos[0]);
+  var accion=mostrar?'volver a mostrar':'ocultar';
+  if(!window.confirm('¿Querés '+accion+' '+cambiar.length+' productos de '+nombre+'?\\n\\nNo se eliminará ningún producto.'))return;
+  var anteriores=cambiar.map(function(p){return {p:p,visible:p.visible,motivo:p.motivoOculto,manual:p.ocultoManualProveedor,admin:p.ocultoManualAdmin,fecha:p.estadoVisibilidadAdminActualizado};});
+  aeMayoristaOperacionEnCurso=true;mostrarToast('⏳ Guardando '+cambiar.length+' productos...');
+  var ahora=Date.now();cambiar.forEach(function(p){tiendaSetVisibilidadManual(p,mostrar,ahora);if(mostrar){delete p.motivoOculto;}else{p.motivoOculto='mayorista';}});
+  Promise.resolve(tiendaGuardarLocal()).then(function(r){if(r&&r.error)throw r.error;return Promise.all(cambiar.map(function(p){return tiendaGuardarVisibilidadAdminNube(p);}));}).then(function(res){var err=(res||[]).find(function(x){return x&&x.error;});if(err)throw err.error;mostrarToast('✅ Visibilidad guardada para '+cambiar.length+' productos');}).catch(function(err){
+    anteriores.forEach(function(a){a.p.visible=a.visible;a.p.motivoOculto=a.motivo;a.p.ocultoManualProveedor=a.manual;a.p.ocultoManualAdmin=a.admin;a.p.estadoVisibilidadAdminActualizado=a.fecha;});
+    mostrarToast('⚠️ No se confirmó todo el cambio. Revisá la sincronización.');
+    console.error('Mayorista: guardado incompleto',err);
+  }).finally(function(){aeMayoristaOperacionEnCurso=false;aePintarMayoristas(nombre);tiendaRender();});
 }
 function aeQuitarFiltroMayorista(){aeFiltroMayoristaActual='';tiendaRender();}
 function tiendaRender(){
