@@ -8403,6 +8403,14 @@ function tiendaAbrirCostoInline(id, boton){
   campo.setAttribute('aria-label','Nuevo costo en pesos');
   campo.value=Number(p.costo)>0?String(Math.round(Number(p.costo))):'';
   label.appendChild(campo);
+  var vistaVenta=document.createElement('div');
+  vistaVenta.style.cssText='font-size:.72rem;font-weight:800;color:var(--az);padding:8px 0;';
+  function actualizarVistaVenta(){
+    var n=Number(String(campo.value||'').replace(/\\./g,''));
+    vistaVenta.textContent=Number.isSafeInteger(n)&&n>0?'Contado calculado: '+fmt(markupVentaCRM(n)):'Ingresá un costo válido';
+  }
+  campo.addEventListener('input',actualizarVistaVenta);
+  actualizarVistaVenta();
   var acciones=document.createElement('div');
   acciones.className='ae-admin-cost-actions';
   var guardar=document.createElement('button');
@@ -8424,9 +8432,15 @@ function tiendaAbrirCostoInline(id, boton){
     if(e.key==='Enter'){e.preventDefault();guardar.click();}
     if(e.key==='Escape'){e.preventDefault();cancelar.click();}
   });
+  var calcular=document.createElement('button');
+  calcular.type='button';calcular.textContent='Costo → Venta';
+  calcular.className='ae-admin-cost-cancel';
+  calcular.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();actualizarVistaVenta();});
+  acciones.appendChild(calcular);
   acciones.appendChild(guardar);
   acciones.appendChild(cancelar);
   caja.appendChild(label);
+  caja.appendChild(vistaVenta);
   caja.appendChild(acciones);
   campo.focus();campo.select();
 }
