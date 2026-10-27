@@ -1583,6 +1583,13 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
       </details>
     </div>
 
+    <div id="ae-confirmar-mayorista" role="alertdialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;">
+      <div style="width:min(100%,380px);background:var(--wh);border:1px solid var(--bor);border-radius:18px;padding:22px;box-shadow:0 14px 40px rgba(0,0,0,.3);">
+        <strong style="font-size:1rem;color:var(--az);">Confirmar cambio</strong>
+        <p id="ae-confirmar-mayorista-texto" style="color:var(--sub);font-size:.82rem;line-height:1.5;margin:14px 0;"></p>
+        <div style="display:flex;gap:10px;justify-content:flex-end;"><button type="button" onclick="document.getElementById('ae-confirmar-mayorista').style.display='none'" style="padding:11px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;">Cancelar</button><button type="button" id="ae-confirmar-mayorista-aceptar" style="padding:11px;border:0;border-radius:10px;background:var(--nar);color:#fff;font-weight:800;">Confirmar</button></div>
+      </div>
+    </div>
     <div id="ae-modal-mayoristas" role="dialog" aria-modal="true" aria-label="Mayoristas" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:16px;">
       <div style="width:min(100%,460px);max-height:82vh;display:flex;flex-direction:column;background:var(--wh);border:1px solid var(--bor);border-radius:20px;padding:18px;box-shadow:0 15px 50px rgba(0,0,0,.25);">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><strong style="color:var(--az);font-size:1.05rem;">🏪 Mayoristas</strong><button type="button" onclick="aeCerrarMayoristas()" aria-label="Cerrar" style="background:var(--bg);color:var(--az);border:1px solid var(--bor);border-radius:10px;padding:9px 12px;">✕</button></div>
@@ -7423,6 +7430,12 @@ function aePintarMayoristas(seleccion){
     fila.appendChild(ver);fila.appendChild(boton);lista.appendChild(fila);
   });
 }
+function aeConfirmarMayorista(mensaje,aceptar){
+  var dialogo=document.getElementById('ae-confirmar-mayorista');if(!dialogo)return;
+  document.getElementById('ae-confirmar-mayorista-texto').textContent=mensaje;
+  document.getElementById('ae-confirmar-mayorista-aceptar').onclick=function(){dialogo.style.display='none';aceptar();};
+  dialogo.style.display='flex';
+}
 function aeCambiarVisibilidadMayorista(clave,mostrar){
   if(!tiendaEsAdmin||vistaPreviaCliente||aeMayoristaOperacionEnCurso)return;
   if(!NUBE_OK||!sbCalc){mostrarToast('⚠️ Sin conexión: no se modificó nada.');return;}
@@ -7431,7 +7444,10 @@ function aeCambiarVisibilidadMayorista(clave,mostrar){
   if(!cambiar.length){mostrarToast('No hay productos para modificar con seguridad.');return;}
   var nombre=aeNombreMayorista(productos[0]);
   var accion=mostrar?'volver a mostrar':'ocultar';
-  if(!window.confirm('¿Querés '+accion+' '+cambiar.length+' productos de '+nombre+'?\\n\\nNo se eliminará ningún producto.'))return;
+  aeConfirmarMayorista('¿Querés '+accion+' '+cambiar.length+' productos de '+nombre+'? No se eliminará ningún producto.',function(){aeEjecutarCambioMayorista(cambiar,mostrar,nombre);});
+  return;
+}
+function aeEjecutarCambioMayorista(cambiar,mostrar,nombre){
   var anteriores=cambiar.map(function(p){return {p:p,visible:p.visible,motivo:p.motivoOculto,manual:p.ocultoManualProveedor,admin:p.ocultoManualAdmin,fecha:p.estadoVisibilidadAdminActualizado};});
   aeMayoristaOperacionEnCurso=true;mostrarToast('⏳ Guardando '+cambiar.length+' productos...');
   var ahora=Date.now();cambiar.forEach(function(p){tiendaSetVisibilidadManual(p,mostrar,ahora);if(mostrar){delete p.motivoOculto;}else{p.motivoOculto='mayorista';}});
