@@ -1590,10 +1590,22 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
         <div style="display:flex;gap:10px;justify-content:flex-end;"><button type="button" onclick="document.getElementById('ae-confirmar-mayorista').style.display='none'" style="padding:11px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;">Cancelar</button><button type="button" id="ae-confirmar-mayorista-aceptar" style="padding:11px;border:0;border-radius:10px;background:var(--nar);color:#fff;font-weight:800;">Confirmar</button></div>
       </div>
     </div>
+    <div id="ae-modal-mayorista-masivo" role="dialog" aria-modal="true" aria-label="Asignar mayorista a varios celulares" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:12px;">
+      <div style="width:min(100%,470px);max-height:88vh;display:flex;flex-direction:column;background:var(--wh);border:1px solid var(--bor);border-radius:18px;padding:16px;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;"><strong style="color:var(--az);">🏪 Asignar mayorista a varios celulares</strong><button type="button" onclick="aeCerrarMayoristaMasivo()" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">✕</button></div>
+        <input id="ae-masivo-buscar" oninput="aePintarCelularesMasivos()" placeholder="Buscar celulares..." style="padding:12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);">
+        <div style="display:flex;gap:8px;align-items:center;"><button type="button" onclick="aeSeleccionarCelularesMasivos(true)" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Seleccionar resultados</button><button type="button" onclick="aeSeleccionarCelularesMasivos(false)" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Limpiar</button></div>
+        <div id="ae-masivo-lista" style="overflow:auto;min-height:80px;display:grid;gap:5px;"></div>
+        <label style="font-size:.76rem;color:var(--az);font-weight:800;">Mayorista<input id="ae-masivo-proveedor" list="ae-masivo-proveedores" placeholder="Elegir o escribir mayorista" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);"></label><datalist id="ae-masivo-proveedores"></datalist>
+        <div id="ae-masivo-estado" role="status" style="font-size:.75rem;color:var(--sub);">0 seleccionados</div>
+        <button id="ae-masivo-guardar" type="button" onclick="aeGuardarMayoristaMasivo()" style="background:var(--nar);color:white;border:0;border-radius:10px;padding:13px;font-weight:800;">Asignar mayorista</button>
+      </div>
+    </div>
     <div id="ae-modal-mayoristas" role="dialog" aria-modal="true" aria-label="Mayoristas" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:16px;">
       <div style="width:min(100%,460px);max-height:82vh;display:flex;flex-direction:column;background:var(--wh);border:1px solid var(--bor);border-radius:20px;padding:18px;box-shadow:0 15px 50px rgba(0,0,0,.25);">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><strong style="color:var(--az);font-size:1.05rem;">🏪 Mayoristas</strong><button type="button" onclick="aeCerrarMayoristas()" aria-label="Cerrar" style="background:var(--bg);color:var(--az);border:1px solid var(--bor);border-radius:10px;padding:9px 12px;">✕</button></div>
         <p style="font-size:.73rem;color:var(--sub);margin:8px 0 12px;">Tocá un nombre para ver sus productos. Cada interruptor controla únicamente ese mayorista.</p>
+        <button type="button" onclick="aeCerrarMayoristas();aeAbrirMayoristaMasivo();" style="border:1px solid var(--bor);border-radius:10px;padding:11px;margin-bottom:10px;background:var(--bg);color:var(--az);font-weight:800;">☑ Asignar mayorista a varios celulares</button>
         <div id="ae-lista-mayoristas" style="overflow:auto;display:grid;gap:8px;"></div>
       </div>
     </div>
@@ -7406,6 +7418,43 @@ function aeVerMayorista(id){
   var nombre=String(p.mayorista||p.proveedor||'').trim();
   if(!nombre)return;
   aeAbrirMayoristas(nombre);
+}
+var aeMasivoSeleccionados=new Set();var aeMasivoGuardando=false;
+function aeAbrirMayoristaMasivo(){
+  if(!tiendaEsAdmin||vistaPreviaCliente)return;
+  aeMasivoSeleccionados.clear();document.getElementById('ae-masivo-buscar').value='';
+  var usados={};tiendaProductos.concat(cargarListaCelus()).forEach(function(p){if(p&&p.mayorista)usados[p.mayorista]=true;});
+  document.getElementById('ae-masivo-proveedores').innerHTML=Object.keys(usados).sort().map(function(n){return '<option value="'+escapeHtml(n)+'">';}).join('');
+  document.getElementById('ae-modal-mayorista-masivo').style.display='flex';aePintarCelularesMasivos();
+}
+function aeCerrarMayoristaMasivo(){if(aeMasivoGuardando)return;document.getElementById('ae-modal-mayorista-masivo').style.display='none';}
+function aeIndicesCelularesMasivos(){var q=String(document.getElementById('ae-masivo-buscar').value||'').trim().toLocaleLowerCase('es');return cargarListaCelus().map(function(c,i){return {c:c,i:i};}).filter(function(x){return x.c&&String(x.c.nombre||'').toLocaleLowerCase('es').includes(q);});}
+function aePintarCelularesMasivos(){
+  var lista=document.getElementById('ae-masivo-lista');lista.textContent='';aeIndicesCelularesMasivos().forEach(function(x){
+    var fila=document.createElement('label');fila.style.cssText='display:flex;align-items:center;gap:9px;padding:9px;border:1px solid var(--bor);border-radius:9px;font-size:.76rem;color:var(--az);';
+    var chk=document.createElement('input');chk.type='checkbox';chk.checked=aeMasivoSeleccionados.has(x.i);chk.onchange=function(){if(chk.checked)aeMasivoSeleccionados.add(x.i);else aeMasivoSeleccionados.delete(x.i);aeEstadoCelularesMasivos();};
+    var texto=document.createElement('span');texto.textContent=x.c.nombre+' · '+(x.c.mayorista||'Sin mayorista');fila.appendChild(chk);fila.appendChild(texto);lista.appendChild(fila);
+  });aeEstadoCelularesMasivos();
+}
+function aeSeleccionarCelularesMasivos(valor){if(valor)aeIndicesCelularesMasivos().forEach(function(x){aeMasivoSeleccionados.add(x.i);});else aeMasivoSeleccionados.clear();aePintarCelularesMasivos();}
+function aeEstadoCelularesMasivos(mensaje){document.getElementById('ae-masivo-estado').textContent=mensaje||aeMasivoSeleccionados.size+' celulares seleccionados';}
+function aeGuardarMayoristaMasivo(){
+  if(aeMasivoGuardando||!tiendaEsAdmin||vistaPreviaCliente)return;
+  if(!NUBE_OK||!sbCalc){aeEstadoCelularesMasivos('Sin conexión. No se modificó nada.');return;}
+  var nombre=String(document.getElementById('ae-masivo-proveedor').value||'').trim();var k=aeNormalizarMayorista(nombre);
+  if(k==='mega electro')nombre='Mega Electro';if(k==='sofjdistribuidora')nombre='SofJDistribuidora';
+  if(!nombre||!aeMasivoSeleccionados.size){aeEstadoCelularesMasivos('Elegí celulares y un mayorista.');return;}
+  var local=cargarListaCelus(),seleccionados=Array.from(aeMasivoSeleccionados).map(function(i){return local[i];}).filter(Boolean);
+  aeConfirmarMayorista('¿Asignar '+nombre+' a '+seleccionados.length+' celulares? Se reemplazará el mayorista anterior de los seleccionados.',function(){
+    aeMasivoGuardando=true;var boton=document.getElementById('ae-masivo-guardar');boton.disabled=true;aeEstadoCelularesMasivos('Guardando en la nube…');
+    Promise.resolve(sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()).then(function(r){
+      if(r&&r.error)throw r.error;var remoto=r&&r.data&&r.data.datos;if(!Array.isArray(remoto))throw Error('No se pudo leer lista remota');
+      var indices=[];seleccionados.forEach(function(c){var matches=[];remoto.forEach(function(x,j){if(x&&String(x.nombre||'').trim().toLowerCase()===String(c.nombre||'').trim().toLowerCase()&&Number(x.precio)===Number(c.precio))matches.push(j);});if(matches.length!==1)throw Error('Celular ambiguo o ausente: '+c.nombre);indices.push(matches[0]);});
+      if(new Set(indices).size!==indices.length)throw Error('Selección duplicada');
+      indices.forEach(function(j){remoto[j].mayorista=nombre;});
+      return Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:remoto,actualizado:new Date().toISOString()})).then(function(w){if(w&&w.error)throw w.error;return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();});
+    }).then(function(r){if(r&&r.error)throw r.error;var datos=r&&r.data&&r.data.datos;if(!Array.isArray(datos))throw Error('No se confirmó guardado');seleccionados.forEach(function(c){if(!datos.some(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===String(c.nombre||'').trim().toLowerCase()&&Number(x.precio)===Number(c.precio)&&x.mayorista===nombre;}))throw Error('Verificación incompleta: '+c.nombre);});localStorage.setItem('amarango_celulares',JSON.stringify(datos));aeEstadoCelularesMasivos('✓ '+seleccionados.length+' celulares actualizados');aeMasivoSeleccionados.clear();tiendaRender();aePintarCelularesMasivos();}).catch(function(err){aeEstadoCelularesMasivos('⚠️ No se confirmó el cambio: '+err.message);console.warn('Asignación masiva',err);}).finally(function(){aeMasivoGuardando=false;boton.disabled=false;});
+  });
 }
 var aeMayoristaOperacionEnCurso=false;
 function aeNormalizarMayorista(nombre){var n=String(nombre||'').trim().toLocaleLowerCase('es');if(n==='mega'||n==='mega electro')return 'mega electro';if(n==='sofj'||n==='sofjdistribuidora'||n==='sofj distribuidora')return 'sofjdistribuidora';return n;}
