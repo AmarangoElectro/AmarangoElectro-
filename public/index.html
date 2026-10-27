@@ -1583,6 +1583,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
       </details>
     </div>
 
+    <div id="ae-admin-filtro-mayorista" style="display:none;align-items:center;justify-content:space-between;gap:8px;padding:10px;margin:8px 0;border:1px solid var(--bor);border-radius:12px;background:var(--wh);font-size:.75rem;"><span>Mayorista: <strong id="ae-admin-filtro-nombre"></strong></span><button type="button" onclick="aeQuitarFiltroMayorista()" style="border:1px solid var(--bor);border-radius:9px;padding:8px;background:var(--bg);color:var(--az);">Ver todos</button></div>
     <div id="tienda-vacia" style="text-align:center;padding:30px 16px;color:var(--sub);font-size:.8rem;">
       📦 Todavía no hay productos disponibles.<br>Consultá con un administrador.
     </div>
@@ -7383,6 +7384,19 @@ function tiendaRenderPortadaCategorias(universo,cont){
   tiendaAplicarVistaYAvisos();
 }
 
+var aeFiltroMayoristaActual='';
+function aeVerMayorista(id){
+  if(!tiendaEsAdmin||vistaPreviaCliente)return;
+  var p=tiendaProductos.find(function(x){return String(x.id)===String(id);});
+  if(!p)return;
+  var nombre=String(p.mayorista||p.proveedor||'').trim();
+  if(!nombre)return;
+  if(!confirm('¿Ver todos los productos de '+nombre+'?'))return;
+  aeFiltroMayoristaActual=nombre.toLocaleLowerCase('es');
+  tiendaRender();
+  var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function aeQuitarFiltroMayorista(){aeFiltroMayoristaActual='';tiendaRender();}
 function tiendaRender(){
   var atajosAdmin=document.getElementById('ae-admin-atajos');
   if(atajosAdmin)atajosAdmin.style.display=(tiendaEsAdmin&&!vistaPreviaCliente)?'flex':'none';
@@ -7410,6 +7424,9 @@ function tiendaRender(){
   // La vista principal del admin es la misma vidriera publicada que ven
   // clientes y vendedores. Lo no publicable vive en carpetas privadas.
   var universo=tiendaProductos.filter(tiendaEstaVisibleYConStock);
+  if(tiendaEsAdmin&&aeFiltroMayoristaActual){
+    universo=tiendaProductos.filter(function(p){return String(p.mayorista||p.proveedor||'').trim().toLocaleLowerCase('es')===aeFiltroMayoristaActual;});
+  }
   if(tiendaEsAdmin && tiendaBandejaAdmin==='nuevos'){
     universo=universo.filter(tiendaEsPendienteImagenAdmin);
   }else if(tiendaEsAdmin && tiendaBandejaAdmin==='revision'){
@@ -7452,6 +7469,8 @@ function tiendaRender(){
     });
   });
 
+  var avisoMayorista=document.getElementById('ae-admin-filtro-mayorista');
+  if(avisoMayorista){avisoMayorista.style.display=tiendaEsAdmin&&aeFiltroMayoristaActual?'flex':'none';var nombreFiltro=document.getElementById('ae-admin-filtro-nombre');if(nombreFiltro)nombreFiltro.textContent=aeFiltroMayoristaActual;}
   if(!universo.length){
     vacia.style.display='block';
     if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan imágenes de proveedores pendientes de revisar.';
@@ -7800,7 +7819,8 @@ function tiendaCardsHtml(sublista){
       }
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && mayoristaUnico){
-      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">'+(typeof aeMayoristaEtiquetaHtml==='function'?aeMayoristaEtiquetaHtml(mayoristaUnico):'🏪 '+escapeHtml(mayoristaUnico))+'</div>';
+      card+='<div ondblclick="event.stopPropagation();aeVerMayorista('+pid+')" title="Doble toque: ver productos del mayorista" style="cursor:pointer;">';
+      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">'+(typeof aeMayoristaEtiquetaHtml==='function'?aeMayoristaEtiquetaHtml(mayoristaUnico):'🏪 '+escapeHtml(mayoristaUnico))+'</div></div>';
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && p.esCelu){
       card+='<button type="button" class="ae-celu-mayorista-action" onclick="event.stopPropagation();tiendaEditarMayoristaCelu(\''+p.id+'\')" >🏪 '+(mayoristaUnico?'Cambiar mayorista':'Asignar mayorista')+'</button>';
