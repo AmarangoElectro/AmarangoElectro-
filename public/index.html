@@ -7427,6 +7427,8 @@ function aePintarMayoristas(seleccion){
     var subt=document.createElement('div');subt.style.cssText='font-size:.7rem;color:var(--sub);margin-top:3px;';subt.textContent=total+' productos · '+visibles+' visibles';ver.appendChild(subt);
     ver.onclick=function(){aeFiltroMayoristaActual=k;aeCerrarMayoristas();tiendaRender();var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});};
     var boton=document.createElement('button');boton.type='button';boton.setAttribute('role','switch');boton.setAttribute('aria-checked',String(visibles>0));boton.innerHTML='<span aria-hidden="true" style="display:inline-block;vertical-align:middle;width:32px;height:18px;border-radius:12px;background:'+(visibles?'#16A34A':'#9CA3AF')+';padding:2px;box-sizing:border-box;margin-right:5px;"><span style="display:block;width:14px;height:14px;border-radius:50%;background:white;transform:translateX('+(visibles?'14':'0')+'px);transition:transform .2s;"></span></span>'+(visibles?'Visible':'Oculto');boton.style.cssText='border:1px solid var(--bor);border-radius:20px;padding:9px 12px;min-width:83px;background:'+(visibles?'#DDF7E8':'#FDE8E8')+';color:'+(visibles?'#08783E':'#991B1B')+';font-weight:800;cursor:pointer;';
+    // Estado mixto: no afirmar que todos están visibles ni reactivar ocultos por otros motivos.
+    if(visibles>0&&visibles<total){boton.setAttribute('aria-checked','mixed');boton.title='Visibilidad parcial: '+visibles+' de '+total+' productos';}
     boton.disabled=aeMayoristaOperacionEnCurso;boton.onclick=function(){aeCambiarVisibilidadMayorista(k,visibles===0);};
     fila.appendChild(ver);fila.appendChild(boton);lista.appendChild(fila);
   });
@@ -7442,6 +7444,9 @@ function aeCambiarVisibilidadMayorista(clave,mostrar){
   if(!NUBE_OK||!sbCalc){mostrarToast('⚠️ Sin conexión: no se modificó nada.');return;}
   var productos=(tiendaProductos||[]).filter(function(p){return p&&!p.eliminado&&aeNormalizarMayorista(aeNombreMayorista(p))===clave;});
   var cambiar=productos.filter(function(p){return mostrar?(p.visible===false&&p.motivoOculto==='mayorista'):(p.visible===true);});
+  if(mostrar&&productos.some(function(p){return p.visible===false&&p.motivoOculto!=='mayorista';})){
+    mostrarToast('Los productos ocultos individualmente se conservan ocultos.');
+  }
   if(!cambiar.length){mostrarToast('No hay productos para modificar con seguridad.');return;}
   var nombre=aeNombreMayorista(productos[0]);
   var accion=mostrar?'volver a mostrar':'ocultar';
