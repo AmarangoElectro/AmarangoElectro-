@@ -7508,6 +7508,7 @@ function aeCerrarMayoristas(){if(aeMayoristaOperacionEnCurso)return;var m=docume
 function aePintarMayoristas(seleccion){
   var lista=document.getElementById('ae-lista-mayoristas');if(!lista)return;
   var mapa={};(tiendaProductos||[]).forEach(function(p){if(!p||p.eliminado)return;var n=aeNombreMayorista(p);if(!n)return;var k=aeNormalizarMayorista(n);if(!mapa[k])mapa[k]={nombre:k==='mega electro'?'Mega Electro':k==='sofjdistribuidora'?'SofJDistribuidora':n,productos:[]};mapa[k].productos.push(p);});
+  cargarListaCelus().forEach(function(c){if(!c)return;var n=c.mayorista||c.proveedor;if(!n)return;var k=aeNormalizarMayorista(n);if(!mapa[k])mapa[k]={nombre:n,productos:[]};});
   lista.textContent='';Object.keys(mapa).sort().forEach(function(k){
     var grupo=mapa[k],total=grupo.productos.length,visibles=grupo.productos.filter(function(p){return p.visible===true;}).length;
     var fila=document.createElement('div');fila.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--bor);border-radius:12px;background:var(--bg);';
@@ -7520,6 +7521,9 @@ function aePintarMayoristas(seleccion){
     if(visibles>0&&visibles<total){boton.setAttribute('aria-checked','mixed');boton.title='Visibilidad parcial: '+visibles+' de '+total+' productos';}
     boton.disabled=aeMayoristaOperacionEnCurso;boton.onclick=function(){aeCambiarVisibilidadMayorista(k,visibles===0);};
     fila.appendChild(ver);fila.appendChild(boton);lista.appendChild(fila);
+    var cs=cargarListaCelus().filter(function(c){return c&&aeNormalizarMayorista(c.mayorista||c.proveedor)===k;});
+    if(cs.length){var cv=cs.filter(function(c){return !c.ocultoTienda;}).length;var cb=document.createElement('button');cb.type='button';cb.textContent='📱 '+(cv?'Ocultar':'Mostrar')+' celulares ('+cv+'/'+cs.length+')';cb.style.cssText='display:block;width:100%;margin:4px 0 12px;padding:11px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;';cb.onclick=function(){aeCambiarCelularesMayorista(k,cv===0,grupo.nombre);};lista.appendChild(cb);}
+
   });
 }
 function aeConfirmarMayorista(mensaje,aceptar){
@@ -7527,6 +7531,20 @@ function aeConfirmarMayorista(mensaje,aceptar){
   document.getElementById('ae-confirmar-mayorista-texto').textContent=mensaje;
   document.getElementById('ae-confirmar-mayorista-aceptar').onclick=function(){dialogo.style.display='none';aceptar();};
   dialogo.style.display='flex';
+}
+function aeCambiarCelularesMayorista(clave,mostrar,nombre){
+ if(!tiendaEsAdmin||vistaPreviaCliente||aeMayoristaOperacionEnCurso||!NUBE_OK||!sbCalc)return;
+ var cs=cargarListaCelus().filter(function(c){return c&&aeNormalizarMayorista(c.mayorista||c.proveedor)===clave&&Boolean(c.ocultoTienda)===mostrar;});
+ if(!cs.length){mostrarToast('No hay celulares para cambiar.');return;}
+ aeConfirmarMayorista('¿'+(mostrar?'Mostrar':'Ocultar')+' '+cs.length+' celulares de '+nombre+'?',function(){
+ aeMayoristaOperacionEnCurso=true;aePintarMayoristas(nombre);
+ Promise.resolve(sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()).then(function(r){
+ if(r.error)throw r.error;var datos=r.data&&r.data.datos;if(!Array.isArray(datos))throw Error('Lista no disponible');
+ var indices=cs.map(function(c){var matches=[];datos.forEach(function(x,i){if(x&&aeNormalizarMayorista(x.mayorista||x.proveedor)===clave&&String(x.nombre||'').trim().toLowerCase()===String(c.nombre||'').trim().toLowerCase()&&Number(x.precio)===Number(c.precio))matches.push(i);});if(matches.length!==1)throw Error('Celular ambiguo: '+c.nombre);return matches[0];});
+ if(new Set(indices).size!==indices.length)throw Error('Selección duplicada');indices.forEach(function(i){datos[i].ocultoTienda=!mostrar;});
+ return Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:datos,actualizado:new Date().toISOString()})).then(function(w){if(w.error)throw w.error;return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();}).then(function(v){if(v.error)throw v.error;var ver=v.data&&v.data.datos;if(!Array.isArray(ver)||indices.some(function(i){return !ver[i]||Boolean(ver[i].ocultoTienda)!==!mostrar;}))throw Error('Guardado sin verificar');localStorage.setItem('amarango_celulares',JSON.stringify(ver));mostrarToast('✅ Celulares '+(mostrar?'visibles':'ocultos')+' de '+nombre);});
+ }).catch(function(e){console.error(e);mostrarToast('⚠️ No se confirmó el cambio.');}).finally(function(){aeMayoristaOperacionEnCurso=false;aePintarMayoristas(nombre);tiendaRender();});
+ });
 }
 function aeCambiarVisibilidadMayorista(clave,mostrar){
   if(!tiendaEsAdmin||vistaPreviaCliente||aeMayoristaOperacionEnCurso)return;
