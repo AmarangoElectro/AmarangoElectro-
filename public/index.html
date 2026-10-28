@@ -8785,6 +8785,8 @@ function tiendaGuardarMayoristaCelu(id){
   // en otro dispositivo. El índice local puede cambiar al importar celulares.
   boton.disabled=true;boton.textContent='Guardando…';aviso.textContent='';
   var claveNombre=String(c.nombre||'').trim().toLowerCase();
+  var nombreNormalizado=claveNombre.replace(/\\bmoto\\s+(?=60\\s*fusion|70\\s*fusion)/,'edge ');
+  var indiceConfirmado=-1;
   Promise.resolve(sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle())
     .then(function(actual){
       if(actual&&actual.error)throw actual.error;
@@ -8792,7 +8794,9 @@ function tiendaGuardarMayoristaCelu(id){
       if(!Array.isArray(nube))throw new Error('Lista de celulares remota no disponible');
       var indice=nube.findIndex(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===claveNombre&&Number(x.precio)===Number(c.precio);});
       if(indice<0)indice=nube.findIndex(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===claveNombre;});
+      if(indice<0)indice=nube.findIndex(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===nombreNormalizado&&Number(x.precio)===Number(c.precio);});
       if(indice<0)throw new Error('Celular no encontrado en la lista remota');
+      indiceConfirmado=indice;
       nube[indice].mayorista=nombre;
       return sbCalc.from('celulares_lista').upsert({id:'lista',datos:nube,actualizado:new Date().toISOString()});
     })
@@ -8800,10 +8804,10 @@ function tiendaGuardarMayoristaCelu(id){
     .then(function(r){
       if(r&&r.error)throw r.error;
       var remoto=r&&r.data&&r.data.datos;
-      if(!Array.isArray(remoto)||!remoto.some(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===claveNombre&&String(x.mayorista||'').trim()===nombre;}))throw new Error('Mayorista no confirmado');
+      if(!Array.isArray(remoto)||!remoto[indiceConfirmado]||String(remoto[indiceConfirmado].mayorista||'').trim()!==nombre)throw new Error('Mayorista no confirmado');
       localStorage.setItem('amarango_celulares',JSON.stringify(remoto));
       // La tarjeta y el filtro usan la lista local: refrescar desde la copia verificada.
-      var confirmado=remoto.find(function(x){return x&&String(x.nombre||'').trim().toLowerCase()===claveNombre&&String(x.mayorista||'').trim()===nombre;});
+      var confirmado=remoto[indiceConfirmado];
       if(confirmado){c.mayorista=nombre;}
       var modalCelu=document.getElementById('modal-cuotas');if(modalCelu)modalCelu.style.display='none';
       boton.disabled=false;boton.textContent='✓ Guardado';
