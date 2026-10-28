@@ -12619,27 +12619,39 @@ function guardarFotoBanco(nombre, foto){
   if(foto){ banco[k]=foto; } else { delete banco[k]; }
   guardarBancoFotos(banco);
 }
+// Identificación conservadora: modelo, versión y capacidad deben coincidir.
+function aeFirmaFotoModelo(nombre){
+  var n=String(nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  n=n.replace(/([0-9]+)\s*(gb|gigas|giga|g)(?![a-z])/g,' $1gb ');
+  n=n.replace(/\b(samsung|galaxy|sam)\b/g,' samsung ').replace(/\b(motorola|moto)\b/g,' motorola ')
+    .replace(/\b(apple|iphone|ip)\b/g,' iphone ').replace(/\b(xiaomi|redmi)\b/g,' redmi ');
+  n=n.replace(/\b(note|rn)\s*([0-9]+)/g,' note$2 ').replace(/\b(pro\s*plus|pro\+)\b/g,' proplus ');
+  n=n.replace(/\b(negro|black|blanco|white|azul|blue|verde|green|gris|gray|grey|silver|plata|dorado|gold|rosa|pink|violeta|purple)\b/g,' ');
+  n=n.replace(/[^a-z0-9+]+/g,' ').trim();
+  var mem=n.match(/\b(32|64|128|256|512|1024)gb\b/);
+  var capacidad=mem?mem[1]:'';
+  var version=/\bultra\b/.test(n)?'ultra':/\bproplus\b/.test(n)?'proplus':/\bpro\b/.test(n)?'pro':/\bplus\b/.test(n)?'plus':/\blite\b/.test(n)?'lite':'base';
+  var marca=/\bsamsung\b/.test(n)?'samsung':/\bmotorola\b/.test(n)?'motorola':/\biphone\b/.test(n)?'iphone':/\bredmi\b/.test(n)?'redmi':/\bpoco\b/.test(n)?'poco':/\binfinix\b/.test(n)?'infinix':'';
+  var limpio=n.replace(/\b(samsung|galaxy|motorola|iphone|redmi|xiaomi|poco|infinix|gb|proplus|pro|plus|ultra|lite)\b/g,' ').replace(/\b(32|64|128|256|512|1024)gb\b/g,' ').replace(/\s+/g,' ').trim();
+  var modelo=limpio.replace(/\s+/g,'');
+  if(!marca||!modelo||!/[0-9]/.test(modelo))return '';
+  return [marca,modelo,version,capacidad].join('|');
+}
 function reasignarFotosDesdeBanco(lista){
-  var banco=cargarBancoFotos();
-  var claves=Object.keys(banco);
+  var banco=cargarBancoFotos(),claves=Object.keys(banco),firmas={};
+  claves.forEach(function(k){
+    if(!banco[k])return;
+    var firma=aeFirmaFotoModelo(k);
+    if(firma)(firmas[firma]||(firmas[firma]=[])).push(k);
+  });
   (lista||[]).forEach(function(c){
-    if(!c || c.foto) return;
+    if(!c||c.foto)return;
     var k=claveModelo(c.nombre);
-    // 1) coincidencia exacta
-    if(banco[k]){ c.foto=banco[k]; return; }
-    // 2) coincidencia parcial: el modelo guardado está contenido en el nuevo, o al revés.
-    //    Así "iphone13128gb" matchea con "iphone13128gbnegro" (le agregaste el color).
-    //    Elegimos la coincidencia más larga (la más específica) para no confundir modelos.
-    var mejor='', mejorLen=0;
-    for(var i=0;i<claves.length;i++){
-      var kb=claves[i];
-      if(!kb || kb.length<5) continue; // ignorar claves muy cortas que darían falsos positivos
-      if(k.indexOf(kb)!==-1 || kb.indexOf(k)!==-1){
-        var largo=Math.min(k.length, kb.length);
-        if(largo>mejorLen){ mejorLen=largo; mejor=kb; }
-      }
-    }
-    if(mejor && banco[mejor]){ c.foto=banco[mejor]; }
+    if(banco[k]){c.foto=banco[k];return;}
+    var firma=aeFirmaFotoModelo(c.nombre),coincidencias=firma?firmas[firma]||[]:[];
+    // Si existen varias fotos distintas para la misma firma, no elegir arbitrariamente.
+    var fotos=Array.from(new Set(coincidencias.map(function(x){return banco[x];})));
+    if(fotos.length===1)c.foto=fotos[0];
   });
   return lista;
 }
