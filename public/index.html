@@ -1574,8 +1574,8 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
           <button type="button" onclick="abrirCajon()" style="padding:10px;border:1px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--az);font-weight:800;">Más filtros y mayoristas ›</button>
         </div>
       </details>
-      <details id="ae-admin-revision" style="border:1px solid var(--bor);border-radius:14px;background:var(--wh);padding:12px;">
-        <summary style="cursor:pointer;font-weight:850;font-size:.78rem;color:var(--az);">Revisión del catálogo</summary>
+      <section id="ae-admin-revision" style="border:1px solid var(--bor);border-radius:14px;background:var(--wh);padding:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--bor);"><strong style="font-size:.82rem;color:var(--az);">📋 Revisión del catálogo</strong><span style="font-size:.65rem;color:var(--sub);">Accesos rápidos</span></div>
     <!-- Bandejas privadas para ordenar el trabajo de Angie y Max -->
     <div id="tienda-bandejas-admin" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px;">
       <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🖼️ Imágenes pendientes <span id="cnt-bandeja-nuevos">0</span></button>
@@ -1588,7 +1588,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
     <!-- Aviso de precios viejos (solo admin) -->
     <div id="tienda-aviso-precios" style="display:none;margin:8px 0;"></div>
 
-      </details>
+      </section>
     </div>
 
     <div id="ae-confirmar-mayorista" role="alertdialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px;">
