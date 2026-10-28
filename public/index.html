@@ -1063,6 +1063,8 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 <style id="ae-supplier-soft-borders">
 #tienda-grid.ae-admin-v16-visual .prod-card[data-ae-supplier="1"]{border-color:color-mix(in srgb,var(--ae-supplier-border) 24%,var(--bor))!important;box-shadow:0 2px 9px rgba(20,44,76,.035)!important}
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label{border-color:color-mix(in srgb,currentColor 19%,transparent)!important;background:color-mix(in srgb,var(--wh) 78%,transparent)!important}
+</style><style id="ae-mayorista-filtro-bordes">
+#tienda-grid.ae-admin-v16-visual.ae-mayorista-filtrado .prod-card[data-ae-supplier="1"]{border:2px solid var(--ae-supplier-border)!important;box-shadow:0 0 0 1px var(--ae-supplier-border),0 3px 12px rgba(20,44,76,.09)!important}
 </style><style id="ae-admin-celu-fecha">
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-celu-fecha{font-size:10px;font-weight:650;color:var(--sub);margin:4px 0 6px;line-height:1.3}
 </style><style id="ae-celu-mayorista-action">
@@ -7905,6 +7907,7 @@ function tiendaRender(){
   // la apertura). Mostramos de a lotes de 24 y "Ver más" carga el siguiente.
   _tiendaListaFull = lista;
   _tiendaMostrados = Math.min(TIENDA_LOTE, lista.length);
+  cont.classList.toggle('ae-mayorista-filtrado',!!(tiendaEsAdmin&&!vistaPreviaCliente&&aeFiltroMayoristaActual));
   cont.innerHTML = tiendaCardsHtml(lista.slice(0, _tiendaMostrados));
   tiendaPintarVerMas();
   tiendaAplicarVistaYAvisos();
