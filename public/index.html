@@ -1212,6 +1212,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
   <button class="cajon-item cj-admin" id="cajon-capcomp" style="display:none;" onclick="cerrarCajon();abrirCapitalCompartido()"><span class="ci-ic">🧮</span> Calculadora Capital Compartido</button>
   <button class="cajon-item cj-admin" id="cajon-cargar-celu" style="display:none;" onclick="cerrarCajon();showTab('celulares')"><span class="ci-ic">📱</span> Cargar celulares</button>
   <button class="cajon-item cj-admin" id="cajon-ver-cliente" style="display:none;" onclick="cerrarCajon();toggleVistaCliente()"><span class="ci-ic">👁️</span> Ver como cliente</button>
+  <button class="cajon-item cj-admin" id="cajon-ver-asesor" style="display:none;" onclick="cerrarCajon();toggleVistaAsesor()"><span class="ci-ic">🤝</span> Ver como asesor</button>
   <button class="cajon-item cj-admin" id="cajon-ruleta" style="display:none;" onclick="toggleRuleta()"><span class="ci-ic">🎰</span> <span id="cajon-ruleta-txt">Ruleta: apagada</span></button>
 
   <div class="cajon-sep">Cuenta</div>
@@ -2116,7 +2117,8 @@ var adminUnlocked=tiendaSesionAdminVigente();
 var pendingTab=null;
 
 var REV_PASS='Moro6';       // clave de revendedores para las herramientas de cálculo
-var vistaPreviaCliente=false; // cuando true, se previsualiza como lo ve un cliente
+var vistaPreviaCliente=false;
+var vistaPreviaAsesor=false; // vista de catálogo de asesor desde sesión administrativa // cuando true, se previsualiza como lo ve un cliente
 var revUnlocked=(function(){try{return localStorage.getItem('ae_sesion_rev')==='1'||tiendaSesionAdminVigente();}catch(e){return false;}})();
 
 // Acceso "Revendedores": pide Moro6 y abre las herramientas de precios
@@ -5170,7 +5172,26 @@ function tiendaSalirAdmin(){
   tiendaRender();
 }
 // Previsualizar como cliente (sin cerrar sesión): oculta botones de vendedor
+function toggleVistaAsesor(){
+  if(!adminUnlocked)return;
+  vistaPreviaAsesor=!vistaPreviaAsesor;
+  vistaPreviaCliente=false;
+  tiendaEsAdmin=adminUnlocked&&!vistaPreviaAsesor;
+  if(vistaPreviaAsesor){
+    tiendaBandejaAdmin='';aeFiltroMayoristaActual='';
+    tiendaModoPortada=true;tiendaMostrarTodos=false;
+    tiendaCategoriaActiva='';tiendaMarcaActiva='';tiendaSubfiltroActivo='';
+    verSoloFavoritos=false;verSoloOfertas=false;
+  }
+  tiendaAplicarModo();tiendaRender();
+  var b=document.getElementById('tienda-vistaasesor-banner');
+  if(vistaPreviaAsesor){
+    if(!b){b=document.createElement('button');b.type='button';b.id='tienda-vistaasesor-banner';b.style.cssText='position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:#12346c;color:white;border:0;border-radius:22px;padding:10px 14px;font-size:.76rem;font-weight:700;z-index:1500;box-shadow:0 4px 14px #0004;white-space:nowrap;';b.onclick=toggleVistaAsesor;document.body.appendChild(b);}
+    b.textContent='🤝 Vista asesor · Volver a Administración';b.style.display='block';
+  }else if(b)b.style.display='none';
+}
 function toggleVistaCliente(){
+  if(vistaPreviaAsesor){vistaPreviaAsesor=false;var ba=document.getElementById('tienda-vistaasesor-banner');if(ba)ba.style.display='none';}
   vistaPreviaCliente=!vistaPreviaCliente;
   tiendaEsAdmin = adminUnlocked && !vistaPreviaCliente; // en vista cliente, no mostrar herramientas admin
   if(vistaPreviaCliente){
@@ -5229,6 +5250,7 @@ function tiendaAplicarModo(){
   document.getElementById('tienda-admin-banner').style.display = 'none';
   document.getElementById('tienda-tanda-bar').style.display = 'none';
   var adminTop=document.getElementById('tienda-admin-top'); if(adminTop)adminTop.style.display = 'none';
+  var botonAsesor=document.getElementById('cajon-ver-asesor');if(botonAsesor)botonAsesor.style.display=adminUnlocked?'flex':'none';
   var bandejasAdmin=document.getElementById('tienda-bandejas-admin'); if(bandejasAdmin)bandejasAdmin.style.display=tiendaEsAdmin?'grid':'none';
   var instagramPortada=document.getElementById('ae-instagram-portada');if(instagramPortada)instagramPortada.style.display=tiendaEsAdmin?'none':'flex';
   var acordeones=document.getElementById('ae-admin-acordeones');if(acordeones)acordeones.style.display=tiendaEsAdmin?'flex':'none';
