@@ -8205,8 +8205,11 @@ function tiendaCardsHtml(sublista){
       card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
-      card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
-      // Instagram sigue disponible dentro de Opciones, sin repetir accesos principales.
+      card+='<div class="ae-share-social-row" style="display:flex;gap:6px;width:100%;margin-bottom:6px;">'
+        +'<button type="button" style="flex:1;min-width:0;font-size:.72rem;padding:9px 4px;background:#25D366;color:#fff;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp">✉ WhatsApp</button>'
+        +'<button type="button" style="flex:1;min-width:0;font-size:.72rem;padding:9px 4px;background:linear-gradient(120deg,#833AB4,#C13584,#E1306C,#F77737);color:#fff;border:none;border-radius:10px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">◎ Instagram</button>'
+        +'</div>';
+      // Accesos directos a compartir, sin cambiar las funciones existentes.
       card+='</div>'; // cierre de barra compacta de accesos existentes
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
