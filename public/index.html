@@ -4970,7 +4970,15 @@ function tiendaLoginAdmin(){
   // si ya se desbloqueó admin en este equipo, entrar directo sin pedir clave de nuevo
   if(adminUnlocked){
     tiendaEsAdmin=true;
-    tiendaModoPortada=true;
+    tiendaModoPortada=false;
+    tiendaMostrarTodos=true;
+    tiendaCategoriaActiva='';
+    tiendaSubfiltroActivo='';
+    tiendaMarcaActiva='';
+    verSoloOfertas=false;
+    verSoloFavoritos=false;
+    var busquedaAdmin=document.getElementById('tienda-buscar');if(busquedaAdmin)busquedaAdmin.value='';
+    var ordenAdmin=document.getElementById('tienda-orden');if(ordenAdmin)ordenAdmin.value='nuevos';
     tiendaBandejaAdmin='';
     aeFiltroMayoristaActual=''; // mostrar todos los mayoristas al entrar a Administración
     tiendaAplicarModo();
@@ -4996,7 +5004,15 @@ function tiendaConfirmarAdmin(){
     tiendaEsAdmin=true;
     adminUnlocked=true; try{localStorage.setItem("ae_sesion_admin",ADMIN_SESSION_VERSION);}catch(e){}   // clave correcta = acceso admin total
     revUnlocked=true;
-    tiendaModoPortada=true;
+    tiendaModoPortada=false;
+    tiendaMostrarTodos=true;
+    tiendaCategoriaActiva='';
+    tiendaSubfiltroActivo='';
+    tiendaMarcaActiva='';
+    verSoloOfertas=false;
+    verSoloFavoritos=false;
+    var busquedaAdmin=document.getElementById('tienda-buscar');if(busquedaAdmin)busquedaAdmin.value='';
+    var ordenAdmin=document.getElementById('tienda-orden');if(ordenAdmin)ordenAdmin.value='nuevos';
     tiendaBandejaAdmin='';
     aeFiltroMayoristaActual=''; // mostrar todos los mayoristas al entrar a Administración
     document.getElementById('modal-cuotas').style.display='none';
