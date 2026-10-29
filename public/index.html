@@ -1602,7 +1602,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid var(--bor);"><strong style="font-size:.82rem;color:var(--az);">📋 Revisión del catálogo</strong><span style="font-size:.65rem;color:var(--sub);">Accesos rápidos</span></div>
     <!-- Bandejas privadas para ordenar el trabajo de Angie y Max -->
     <div id="tienda-bandejas-admin" style="display:none;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 10px;">
-      <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🖼️ Imágenes pendientes <span id="cnt-bandeja-nuevos">0</span></button>
+      <button id="btn-bandeja-nuevos" onclick="tiendaAbrirBandejaAdmin('nuevos')" style="padding:10px 7px;background:#EAF2FF;color:var(--az);border:1.5px solid #BFD3F5;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🖼️ Productos sin fotos <span id="cnt-bandeja-nuevos">0</span></button>
       <button id="btn-bandeja-revision" onclick="tiendaAbrirBandejaAdmin('revision')" style="padding:10px 7px;background:#FFF7E6;color:#A05200;border:1.5px solid #F0C040;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🕓 Revisar manuales <span id="cnt-bandeja-revision">0</span></button>
       <button id="btn-bandeja-ocultos" onclick="tiendaAbrirBandejaAdmin('ocultos')" style="padding:10px 7px;background:#F3F4F6;color:#374151;border:1.5px solid #D1D5DB;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">🙈 Ocultos <span id="cnt-bandeja-ocultos">0</span></button>
       <button id="btn-bandeja-sinstock" onclick="tiendaAbrirBandejaAdmin('sinstock')" style="padding:10px 7px;background:#FEF2F2;color:#B91C1C;border:1.5px solid #FECACA;border-radius:11px;font-size:.7rem;font-weight:900;cursor:pointer;font-family:inherit;">📦 Sin stock <span id="cnt-bandeja-sinstock">0</span></button>
@@ -7158,11 +7158,10 @@ function tiendaVerificarManualesNube(ids, fotoEsperada){
     });
 }
 function tiendaEsPendienteImagenAdmin(p){
-  // Sólo trabajo realmente pendiente: foto original, publicado y con stock.
-  // Los ocultos/sin stock reaparecen automáticamente si vuelven a estar activos.
-  return !!(p && !p.esCelu && tiendaEsAutomatico(p) &&
-    tiendaEstaVisibleYConStock(p) && !tiendaEsFotoAmarango(p) &&
-    p.imagenProveedorAprobada!==true);
+  // Bandeja privada: productos sin imagen propia cargada en Amarango.
+  // No se cambia su visibilidad persistida ni se borra información.
+  return !!(p && !p.esCelu && tiendaEstaVisibleYConStock(p) &&
+    !tiendaEsFotoAmarango(p) && p.imagenProveedorAprobada!==true);
 }
 function tiendaEsPendienteRevisionManual(p){
   return !!(p && p.eliminado!==true && !p.esCelu && !tiendaEsAutomatico(p) &&
@@ -7652,7 +7651,10 @@ function tiendaRender(){
 
   // La vista principal del admin es la misma vidriera publicada que ven
   // clientes y vendedores. Lo no publicable vive en carpetas privadas.
-  var universo=tiendaProductos.filter(tiendaEstaVisibleYConStock);
+  var universo=tiendaProductos.filter(function(p){
+    return tiendaEstaVisibleYConStock(p) &&
+      (tiendaEsAdmin && tiendaBandejaAdmin==='nuevos' || !tiendaEsPendienteImagenAdmin(p));
+  });
   if(tiendaEsAdmin&&aeFiltroMayoristaActual){
     universo=tiendaProductos.filter(function(p){return aeNormalizarMayorista(aeNombreMayorista(p))===aeFiltroMayoristaActual;});
   }
@@ -7707,7 +7709,7 @@ function tiendaRender(){
   if(avisoMayorista){avisoMayorista.style.display=tiendaEsAdmin&&aeFiltroMayoristaActual?'flex':'none';var nombreFiltro=document.getElementById('ae-admin-filtro-nombre');if(nombreFiltro)nombreFiltro.textContent=aeFiltroMayoristaActual;}
   if(!universo.length){
     vacia.style.display='block';
-    if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan imágenes de proveedores pendientes de revisar.';
+    if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan productos sin fotos pendientes de revisar.';
     else if(tiendaBandejaAdmin==='revision')vacia.innerHTML='✅ No quedan productos manuales pendientes de revisión.';
     else if(tiendaBandejaAdmin==='ocultos')vacia.innerHTML='✅ No hay productos ocultos.';
     else if(tiendaBandejaAdmin==='sinstock')vacia.innerHTML='✅ No hay productos sin stock.';
