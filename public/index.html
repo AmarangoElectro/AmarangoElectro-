@@ -1511,7 +1511,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
         <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
       <div id="tienda-chips" class="cat-grid" style="padding:0;"></div>
-      <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;padding:0 4px;"></div>
+      <div id="tienda-submarcas" style="display:none;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none;padding:0 4px;align-items:flex-start;align-content:flex-start;flex-wrap:wrap;"></div>
       <!-- Cajón con TODAS las categorías (red de seguridad si el buscador falla) -->
       <div id="cajon-cats" onclick="if(event.target===this)cerrarCajonCats()">
         <div id="cajon-cats-panel">
@@ -7863,6 +7863,8 @@ function tiendaRender(){
         listaMarcas+='</div>';
         sHtml+='<div style="flex-basis:100%;width:100%;margin-top:7px;"><details class="ae-marcas-compactas" style="border:1px solid #dce4ef;border-radius:13px;background:#f9fbfe;padding:9px 12px;"><summary style="cursor:pointer;color:#173663;font-weight:800;font-size:.78rem;list-style:none;">🏷️ Marcas <span style="float:right;color:#72849b;">▾</span></summary>'+listaMarcas+'</details></div>';
       }
+      // Mantener las opciones compactas y en una sola línea; el desplegable Marcas va debajo.
+      sHtml=sHtml.replace(/style="flex:0 0 auto;padding:6px 12px;/g,'style="flex:0 0 auto;align-self:flex-start;height:34px;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;');
       subBox.innerHTML=sHtml;
       subBox.style.display='flex';
     }else{
