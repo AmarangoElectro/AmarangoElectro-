@@ -1,0 +1,94 @@
+{
+  "base": "76acde2f21ef12da86329bb1c56e20eced61b0b1",
+  "branch": "audit/rendimiento-tienda-vieja-20261029",
+  "environment": {
+    "browser": "remote Chrome",
+    "viewport": [
+      412,
+      915
+    ],
+    "real_android": false,
+    "four_g_throttling": false
+  },
+  "warm_before": {
+    "open_ms": 1148.9,
+    "photo_ready_ms": 210.1,
+    "verified_ms": 1678.1,
+    "products": 1817,
+    "data_requests": 23,
+    "phone_gets": 2,
+    "incremental_bytes": 2133741,
+    "json_body_bytes": 3313887,
+    "renders": 11,
+    "cls": 0.02373622682074711
+  },
+  "warm_after": {
+    "open_ms": 365.3,
+    "photo_ready_ms": 203.3,
+    "verified_ms": 884.5,
+    "products": 1817,
+    "data_requests": 19,
+    "phone_gets": 1,
+    "incremental_bytes": 2,
+    "json_body_bytes": 1177850,
+    "renders": 9,
+    "cls": 0
+  },
+  "hero_assets": [
+    {
+      "file": "hero-audio-horizontal.png",
+      "before": 2039254,
+      "after": 218650,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "rmse": 3.3990216068757424
+    },
+    {
+      "file": "hero-climatizacion-horizontal.png",
+      "before": 2150862,
+      "after": 274702,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "rmse": 4.0985359961694
+    },
+    {
+      "file": "hero-descanso-horizontal.png",
+      "before": 2251970,
+      "after": 281970,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "rmse": 3.585389021017407
+    },
+    {
+      "file": "hero-hogar-horizontal.png",
+      "before": 2257422,
+      "after": 285104,
+      "dimensions": [
+        1672,
+        941
+      ],
+      "rmse": 3.503441638692355
+    }
+  ],
+  "photos": {
+    "unique_urls": 1675,
+    "verified_200": 66,
+    "inconclusive_network": 1609,
+    "embedded_base64": 2,
+    "candidates_without_photo": 148
+  },
+  "tests": {
+    "base_pass": 12,
+    "base_fail": 8,
+    "after_pass": 18,
+    "after_fail": 8,
+    "new_tests_pass": 6
+  },
+  "production_deployed": false
+}

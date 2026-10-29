@@ -242,6 +242,15 @@ body.oscuro #tienda-chips.cat-grid{background:linear-gradient(180deg,#122442,#0d
 @keyframes splashPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
 @keyframes splashDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-5px);}}
 #splash-screen.oculto{opacity:0;pointer-events:none;transition:opacity .5s;}
+/* El acceso visual no depende de que IndexedDB, el CDN o el script final
+   respondan. Los controles comerciales conservan sus verificaciones. */
+#splash-screen{animation:aeSplashLimite 0s 2.5s forwards;}
+@keyframes aeSplashLimite{to{visibility:hidden;pointer-events:none;}}
+.ae-card-photo .ae-photo-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--wh);color:var(--sub);font-size:.72rem;pointer-events:none;border-radius:13px 13px 0 0;}
+.ae-card-photo .ae-photo-status[hidden]{display:none;}
+/* Reservar el área de catálogo mientras se verifica la copia inicial evita
+   que el pie aparezca un instante y luego salte. No estira las tarjetas. */
+#tienda-grid[aria-busy="true"]{min-height:100vh;align-content:start;}
 /* Fade-in de las tarjetas al cargar */
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
@@ -618,10 +627,10 @@ body.oscuro #tienda-grid .plan-protegido-opcion{background:#fff !important;borde
   .tab-content{width:100% !important;max-width:none !important;padding-left:clamp(24px,3vw,58px) !important;padding-right:clamp(24px,3vw,58px) !important;}
   .ae-hero-slider{width:100% !important;max-width:none !important;aspect-ratio:1672/941 !important;height:auto !important;min-height:0 !important;}
   .ae-hero-slide{background-size:contain !important;background-position:center !important;}
-  .ae-hero-slide-1{background-image:url('hero-descanso-horizontal.png') !important;}
-  .ae-hero-slide-2{background-image:url('hero-hogar-horizontal.png') !important;}
-  .ae-hero-slide-3{background-image:url('hero-audio-horizontal.png') !important;}
-  .ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.png') !important;}
+  .ae-hero-slide-1{background-image:url('hero-descanso-horizontal.webp') !important;}
+  .ae-hero-slide-2{background-image:url('hero-hogar-horizontal.webp') !important;}
+  .ae-hero-slide-3{background-image:url('hero-audio-horizontal.webp') !important;}
+  .ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.webp') !important;}
   .ae-home-links{max-width:720px;}
   #tienda-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr)) !important;}
   #tienda-grid .prod-foto{height:245px !important;}
@@ -635,10 +644,10 @@ body.oscuro #tienda-grid .plan-protegido-opcion{background:#fff !important;borde
 /* ═══ PORTADAS HORIZONTALES EN TODOS LOS DISPOSITIVOS ═══ */
 .ae-hero-slider{width:100% !important;max-width:none !important;aspect-ratio:1672/941 !important;height:auto !important;min-height:0 !important;background:#07172d !important;}
 .ae-hero-slide{background-size:contain !important;background-position:center !important;}
-.ae-hero-slide-1{background-image:url('hero-descanso-horizontal.png') !important;}
-.ae-hero-slide-2{background-image:url('hero-hogar-horizontal.png') !important;}
-.ae-hero-slide-3{background-image:url('hero-audio-horizontal.png') !important;}
-.ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.png') !important;}
+.ae-hero-slide-1{background-image:url('hero-descanso-horizontal.webp') !important;}
+.ae-hero-slide-2{background-image:url('hero-hogar-horizontal.webp') !important;}
+.ae-hero-slide-3{background-image:url('hero-audio-horizontal.webp') !important;}
+.ae-hero-slide-4{background-image:url('hero-climatizacion-horizontal.webp') !important;}
 
 /* ═══ DOS TEMAS REALES PARA LAS TARJETAS ═══
    Claro: blanco luminoso. Oscuro: azul profundo con brillo Amarango. */
@@ -2231,7 +2240,9 @@ function tiendaMarcarSincronizacionInicial(cargando){
     if(!aviso && grid && grid.parentNode){
       aviso=document.createElement('div');
       aviso.id='tienda-sync-inicial';
-      aviso.style.cssText='position:sticky;top:8px;z-index:90;margin:8px auto 12px;max-width:520px;padding:10px 14px;border-radius:12px;background:#EAF2FF;border:1.5px solid #BFD3F5;color:#0B2D6B;text-align:center;font-size:.76rem;font-weight:900;box-shadow:0 4px 14px rgba(11,45,107,.14);';
+      // Indicador fuera del flujo: retirarlo no desplaza las tarjetas que
+      // el cliente ya está mirando durante la verificación de precio/stock.
+      aviso.style.cssText='position:fixed;bottom:calc(76px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:90;margin:0;width:calc(100% - 32px);max-width:520px;padding:10px 14px;border-radius:12px;background:#EAF2FF;border:1.5px solid #BFD3F5;color:#0B2D6B;text-align:center;font-size:.76rem;font-weight:900;box-shadow:0 4px 14px rgba(11,45,107,.14);';
       aviso.textContent='🔄 Actualizando fotos y productos…';
       grid.parentNode.insertBefore(aviso,grid);
     }
@@ -2242,7 +2253,12 @@ function tiendaMarcarSincronizacionInicial(cargando){
 }
 function tiendaEsperarNubeInicial(intentos){
   intentos=intentos||0;
-  if(NUBE_OK && sbCalc)return tiendaBajarNube();
+  if(NUBE_OK && sbCalc){
+    // Fotos de celulares y catálogo avanzan en paralelo, con un único dueño
+    // del arranque. No esperar todas las páginas para mostrar esas fotos.
+    return Promise.all([tiendaBajarNube(),tiendaBajarCelusNube()])
+      .then(function(resultados){return resultados[0];});
+  }
   if(intentos>=40)return Promise.resolve({sinConexion:true});
   return new Promise(function(resolve){setTimeout(resolve,150);})
     .then(function(){return tiendaEsperarNubeInicial(intentos+1);});
@@ -2276,7 +2292,11 @@ function conectarNube(intentos){
       // ya conectados: bajar datos frescos de la nube y refrescar la tienda
       try{
         var cacheLista=_tiendaCacheInicialPromesa||Promise.resolve();
-        cacheLista.then(function(){ tiendaBajarNube(); tiendaBajarCelusNube(); });
+        // tiendaInit es dueña del arranque. No iniciar una segunda descarga
+        // al conectar el SDK: el catálogo y los celulares se verifican allí.
+        if(!_tiendaSincronizacionInicialPromesa){
+          cacheLista.then(function(){ tiendaBajarNube(); tiendaBajarCelusNube(); });
+        }
       }catch(e){}
       return;
     }
@@ -3787,6 +3807,8 @@ function tiendaInit(){
     var versionActual=tiendaVersionIncrementalLocal();
     if(cache&&Array.isArray(cache.productos)&&cache.productos.length&&Number(cache.version||0)>=versionActual){
       tiendaProductos=cache.productos;
+      _tiendaIdsIncrementalesActivos=Array.isArray(cache.idsIncrementalesActivos)
+        ?cache.idsIncrementalesActivos:null;
       tiendaProductos.forEach(function(p){if(typeof p.visible==='undefined')p.visible=true;});
       // La versión pertenece a esta misma copia. Si es anterior, la nube
       // enviará los cambios que falten; nunca conservamos una versión mayor
@@ -3799,7 +3821,6 @@ function tiendaInit(){
   _tiendaSincronizacionInicialPromesa=_tiendaCacheInicialPromesa
     .then(function(){return tiendaEsperarNubeInicial(0);})
     .then(function(resultadoNube){
-      tiendaBajarCelusNube();  // baja los celulares de la nube y refresca la tienda
       tiendaRestaurarEstadoReciente(0);
       // Fix 2026-08-26: antes este paso descartaba el resultado de
       // tiendaEsperarNubeInicial() y devolvía `true` siempre, incluso cuando
@@ -4004,7 +4025,7 @@ function tiendaBajarCelusNube(intentos){
     if(intentos<25){ setTimeout(function(){ tiendaBajarCelusNube(intentos+1); }, 200); }
     return;
   }
-  sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()
+  return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle()
     .then(function(r){
       if(r && r.data && r.data.datos){
         try{ localStorage.setItem('amarango_celulares', JSON.stringify(r.data.datos)); }catch(e){}
@@ -4098,6 +4119,9 @@ var TIENDA_CACHE_FOTOS_VERSION_KEY='ae_tienda_cache_fotos_version';
 var TIENDA_CACHE_FOTOS_VERSION='v25-20260825-proveedores-sin-confirmacion-manual';
 var TIENDA_USAR_INCREMENTAL=true;
 var TIENDA_INCREMENTAL_LOTE=500;
+// IDs del mismo conjunto que cuenta Supabase. El catálogo final también
+// contiene manuales externos a esa tabla; contarlos disparaba recargas falsas.
+var _tiendaIdsIncrementalesActivos=null;
 var _tiendaBajarNubeEnCurso=null;
 var TIENDA_CONTROL_PUBLICACION_ID='control_publicacion';
 var TIENDA_MANUALES_ID='catalogo_manuales';
@@ -4722,20 +4746,32 @@ function tiendaConfirmarReparacionCacheV25(){
 function tiendaCacheGrandeAbrir(){
   return new Promise(function(resolve,reject){
     if(!window.indexedDB){reject(new Error('IndexedDB no disponible'));return;}
+    var terminada=false;
+    var timer=setTimeout(function(){fallar(new Error('IndexedDB no respondió a tiempo'));},1200);
+    function fallar(error){
+      if(terminada)return;
+      terminada=true;clearTimeout(timer);reject(error);
+    }
     var req=indexedDB.open('amarango_tienda_cache',1);
     req.onupgradeneeded=function(){
       var db=req.result;
       if(!db.objectStoreNames.contains('catalogo'))db.createObjectStore('catalogo',{keyPath:'id'});
     };
-    req.onsuccess=function(){resolve(req.result);};
-    req.onerror=function(){reject(req.error||new Error('No se pudo abrir IndexedDB'));};
+    req.onsuccess=function(){
+      if(terminada){req.result.close();return;}
+      terminada=true;clearTimeout(timer);resolve(req.result);
+    };
+    req.onblocked=function(){fallar(new Error('IndexedDB bloqueada'));};
+    req.onerror=function(){fallar(req.error||new Error('No se pudo abrir IndexedDB'));};
   });
 }
 function tiendaCacheGrandeGuardar(productos,version){
+  var idsCopia=Array.isArray(_tiendaIdsIncrementalesActivos)?_tiendaIdsIncrementalesActivos.slice():null;
   return tiendaCacheGrandeAbrir().then(function(db){
     return new Promise(function(resolve,reject){
       var tx=db.transaction('catalogo','readwrite');
-      tx.objectStore('catalogo').put({id:'principal',productos:productos||[],version:Number(version)||0});
+      tx.objectStore('catalogo').put({id:'principal',productos:productos||[],version:Number(version)||0,
+        idsIncrementalesActivos:idsCopia});
       tx.oncomplete=function(){db.close();resolve(true);};
       tx.onerror=function(){db.close();reject(tx.error||new Error('No se pudo guardar el catálogo'));};
     });
@@ -4745,9 +4781,20 @@ function tiendaCacheGrandeCargar(){
   return tiendaCacheGrandeAbrir().then(function(db){
     return new Promise(function(resolve,reject){
       var tx=db.transaction('catalogo','readonly');
+      var terminada=false;
+      var timer=setTimeout(function(){
+        if(terminada)return;
+        terminada=true;db.close();reject(new Error('La lectura de caché no respondió a tiempo'));
+      },1200);
       var req=tx.objectStore('catalogo').get('principal');
-      req.onsuccess=function(){resolve(req.result||null);};
-      req.onerror=function(){reject(req.error||new Error('No se pudo leer el catálogo'));};
+      req.onsuccess=function(){
+        if(terminada)return;
+        terminada=true;clearTimeout(timer);resolve(req.result||null);
+      };
+      req.onerror=function(){
+        if(terminada)return;
+        terminada=true;clearTimeout(timer);reject(req.error||new Error('No se pudo leer el catálogo'));
+      };
       tx.oncomplete=function(){db.close();};
     });
   });
@@ -4763,11 +4810,16 @@ function tiendaGuardarVersionIncremental(v){
 function tiendaAplicarCambiosIncrementales(filas, versionInicial){
   var mapa={};
   (tiendaProductos||[]).forEach(function(p){ if(p&&p.id!=null)mapa[String(p.id)]=p; });
+  var ids={};
+  if(versionInicial>0&&Array.isArray(_tiendaIdsIncrementalesActivos)){
+    _tiendaIdsIncrementalesActivos.forEach(function(id){ids[String(id)]=true;});
+  }
   var maxima=versionInicial||0;
   (filas||[]).forEach(function(f){
     var id=String(f.producto_id);
     maxima=Math.max(maxima,parseInt(f.version,10)||0);
-    if(f.eliminado){ delete mapa[id]; return; }
+    if(f.eliminado){ delete mapa[id]; delete ids[id]; return; }
+    ids[id]=true;
     if(f.datos&&typeof f.datos==='object'){
       var anterior=mapa[id];
       // Una actualización normal del proveedor modifica precio/stock/foto,
@@ -4788,7 +4840,7 @@ function tiendaAplicarCambiosIncrementales(filas, versionInicial){
     localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));
     localStorage.setItem('ae_tienda_catalogo_fecha','incremental:'+maxima);
   }catch(e){}
-  tiendaCacheGrandeGuardar(tiendaProductos,maxima).catch(function(){});
+  _tiendaIdsIncrementalesActivos=Object.keys(ids);
   tiendaGuardarVersionIncremental(maxima);
   tiendaConfirmarReparacionCacheV25();
   return maxima;
@@ -4813,11 +4865,16 @@ function tiendaBajarPaginaIncremental(desdeVersion, pagina, acumuladas){
     });
 }
 function tiendaCantidadLocalIncremental(){
+  // Una caché antigua sin este inventario se reconstruye una sola vez.
+  if(!Array.isArray(_tiendaIdsIncrementalesActivos))return null;
   var ids={};
   (tiendaProductos||[]).forEach(function(p){
     if(p&&p.id!=null)ids[String(p.id)]=true;
   });
-  return Object.keys(ids).length;
+  for(var i=0;i<_tiendaIdsIncrementalesActivos.length;i++){
+    if(!ids[String(_tiendaIdsIncrementalesActivos[i])])return -1;
+  }
+  return _tiendaIdsIncrementalesActivos.length;
 }
 function tiendaContarIncrementalesActivos(){
   return sbCalc.from(TIENDA_INCREMENTAL_TABLA)
@@ -4851,7 +4908,8 @@ function tiendaBajarNube(intentos){
       if(versionLocal>0 && cantidadNube!==null && cantidadLocal!==cantidadNube){
         console.warn('Catálogo local incompleto; reconstruyendo.',cantidadLocal,cantidadNube);
         versionLocal=0;
-        tiendaProductos=[];
+        // Mantener la vista previa hasta completar la descarga. Nunca vaciar
+        // la grilla mientras una conexión lenta reconstruye la copia.
         tiendaGuardarVersionIncremental(0);
       }
       return tiendaBajarPaginaIncremental(versionLocal,0,[]);
@@ -4875,6 +4933,10 @@ function tiendaBajarNube(intentos){
     })
     .then(function(resultado){
       return tiendaBajarControlPublicacion().then(function(){
+        // Guardar la copia final, con manuales y decisiones de publicación,
+        // junto a los IDs de su propia versión incremental.
+        try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(e){}
+        tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){});
         tiendaRender();
         return resultado;
       });
@@ -7835,7 +7897,7 @@ function tiendaRenderPortadaCategorias(universo,cont){
     html+='<section class="portada-cat-seccion">'
       +'<div class="portada-cat-cab"><h3>'+sec.titulo+'</h3>'
       +'<button class="portada-cat-ver" onclick="tiendaVerCategoriaPortada(\''+catJs+'\')">Ver todo ›</button></div>'
-      +'<div class="portada-cat-grid">'+tiendaCardsHtml(productos)+'</div></section>';
+      +'<div class="portada-cat-grid">'+tiendaCardsHtml(productos,false)+'</div></section>';
   });
   if(!html){
     html='<div style="grid-column:1/-1;background:#fff;border-radius:14px;padding:22px;text-align:center;color:var(--az);font-weight:800;">Estamos preparando la vidriera. Tocá una categoría arriba para ver sus productos.</div>';
@@ -8361,7 +8423,20 @@ function tiendaFechaPublicacion(p){
   var d=Date.parse(v);
   return Number.isFinite(d)?d:0;
 }
+function tiendaFotoCargada(img){
+  var estado=img.parentNode.querySelector('.ae-photo-status');
+  if(estado)estado.hidden=true;
+}
+function tiendaFotoFallida(img){
+  var original=img.getAttribute('data-original');
+  if(original&&img.getAttribute('src')!==original&&!img._aeOriginalIntentada){
+    img._aeOriginalIntentada=true;img.src=original;return;
+  }
+  var estado=img.parentNode.querySelector('.ae-photo-status');
+  if(estado){estado.hidden=false;estado.textContent='Foto no disponible';}
+}
 function tiendaCardsHtml(sublista){
+  var priorizar=arguments.length<2?true:arguments[1];
   return sublista.map(function(p, _idx){
     var datosPrecioCard=tiendaDatosPrecio(p);
     var precioVistaCard=datosPrecioCard.contado;
@@ -8410,9 +8485,10 @@ function tiendaCardsHtml(sublista){
 
     var fotoDeCatalogo=(p.fotoOrigen==='catalogo-elektro-pdf');
     var logoFotoCatalogo=(fotoDeCatalogo && p.fotoCatalogoLogo)?String(p.fotoCatalogoLogo):'';
-    card+='<div style="position:relative;margin:-9px -9px 0;">'
+    card+='<div class="ae-card-photo" style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<img class="prod-foto" loading="lazy" decoding="async" src="'+fotoOpt(p.foto,400).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:'+(fotoDeCatalogo?'contain':'cover')+';background:#fff;cursor:pointer;display:block;">'
+        ? '<img class="prod-foto" loading="'+(priorizar!==false&&_idx<2?'eager':'lazy')+'" fetchpriority="'+(priorizar!==false&&_idx<2?'high':'auto')+'" decoding="async" width="400" height="230" data-original="'+escapeHtml(String(p.foto))+'" src="'+fotoOpt(p.foto,400).replace(/"/g,'&quot;')+'" onload="tiendaFotoCargada(this)" onerror="tiendaFotoFallida(this)" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:'+(fotoDeCatalogo?'contain':'cover')+';background:#fff;cursor:pointer;display:block;">'
+          +'<span class="ae-photo-status" aria-live="polite">Cargando foto…</span>'
           +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
@@ -14331,8 +14407,8 @@ try{ tiendaInit(); }catch(e){}
 
 // ═══ OCULTAR "CARGANDO" CUANDO LA TIENDA ESTÁ LISTA DE VERDAD ═══
 // Antes se ocultaba a 1.8s fijos, aunque la tienda no hubiera terminado
-// de cargar → el cliente veía la pantalla trabada. Ahora se oculta recién
-// cuando ya hay productos dibujados (con un tope de seguridad de 6s).
+// de cargar → el cliente veía la pantalla trabada. El acceso visual tiene
+// un límite de 2.5s; la verificación comercial se mantiene independiente.
 (function ocultarSplashCuandoListo(){
   var sp=document.getElementById('splash-screen');
   if(!sp) return;
@@ -14348,9 +14424,9 @@ try{ tiendaInit(); }catch(e){}
     // ¿ya hay productos dibujados en la grilla?
     var grid=document.getElementById('tienda-grid');
     var listo = grid && grid.children && grid.children.length>0;
-    // mínimo 900ms para que no parpadee, o si ya está listo
+    // No imponer 900ms extra cuando la copia local ya está dibujada.
     var pasado=Date.now()-t0;
-    if((listo && pasado>=900) || pasado>=6000){ ocultar(); return; }
+    if((listo && pasado>=150) || pasado>=2500){ ocultar(); return; }
     setTimeout(chequear, 200);
   }
   chequear();
