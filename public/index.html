@@ -1132,6 +1132,27 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 #tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>button,#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{font-weight:750!important;font-size:.72rem!important;letter-spacing:-.02em!important}
 #tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details>summary{font-size:.75rem!important;font-weight:750!important;letter-spacing:-.02em!important}
 </style>
+
+<style>
+/* AE ADMIN CARD REFINEMENT 2026-10-29 */
+/* Tarjetas administrativas premium: sin alterar datos, precios ni imágenes */
+#tienda-grid.ae-admin-v16-visual .prod-card{padding:10px!important;border-radius:19px!important;box-shadow:0 7px 24px rgba(12,29,60,.09)!important;background:var(--wh)!important}
+#tienda-grid.ae-admin-v16-visual .prod-card>div[style*="position:relative"]{border-radius:15px!important;overflow:hidden}
+#tienda-grid.ae-admin-v16-visual .ae-admin-supplier-label{padding:8px 9px!important;background:#fff!important;border-color:#e0e6ed!important;color:#0b1939!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>button[title="Compartir producto"]{background:linear-gradient(180deg,#fff,#fffaf0)!important;color:#0b1939!important;border:1px solid #e6b451!important;box-shadow:none!important;min-height:42px;font-size:.76rem!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details>summary{border-radius:12px!important;box-shadow:none!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{min-width:0!important;min-height:42px!important;white-space:normal;font-size:.7rem!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button[onclick*="tiendaEliminar"]{grid-column:1/-1;background:#fff0f1!important;border-color:#f6c7cc!important;color:#bd1636!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button[onclick*="tiendaQuitarFoto"]{background:#fff5f5!important;border-color:#f4d8db!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar .ae-admin-menu-action{font-family:inherit!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-cost-inline{border-top:1px solid #e7ebf1!important}
+#tienda-grid.ae-admin-v16-visual .ae-cuota-comparativa-item{box-shadow:none!important}
+#tienda-grid.ae-admin-v16-visual .ae-cuota-comparativa-item:first-child{background:#eaf3ff!important}
+#tienda-grid.ae-admin-v16-visual .ae-cuota-comparativa-item:last-child{background:#fff6e9!important}
+#tienda-grid.ae-admin-v16-visual .ae-finance-ahorro{border-radius:10px!important}
+@media(max-width:420px){#tienda-grid.ae-admin-v16-visual .prod-card{padding:8px!important}#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{padding:7px 3px!important}}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -8223,11 +8244,12 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaEditarFoto('+pid+')">▣ Reemplazar foto</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaConfirmarPrecioDesdeMenu('+pid+')">✓ Confirmar precio</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaVerDesdeMenu('+pid+')">↗ Ver producto</button>';
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();compartirInstagram('+pid+')">📸 Compartir en Instagram</button>';
       card+='<div class="ae-admin-menu-more-title">Más herramientas existentes</div>';
       card+='</div></details>';
       // botón COMPARTIR directo (admin lo usa mucho para pasar productos al toque)
       card+='<button style="width:100%;font-size:.72rem;padding:8px 4px;margin-bottom:6px;background:#25D366;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(37,211,102,.3);" onclick="event.stopPropagation();compartirProducto('+pid+')" title="Compartir producto" aria-label="Compartir producto">📤 Compartir</button>';
-      card+='<button style="width:100%;font-size:.7rem;padding:8px 4px;margin-bottom:6px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(225,48,108,.28);" onclick="event.stopPropagation();compartirInstagram('+pid+')" title="Compartir en Instagram" aria-label="Compartir en Instagram">📸 Instagram</button>';
+      // Instagram sigue disponible dentro de Opciones, sin repetir accesos principales.
       card+='</div>'; // cierre de barra compacta de accesos existentes
       card+='<div class="ae-admin-edit-actions" style="display:flex;gap:5px;margin-bottom:5px;">'
         +'<button style="flex:1;font-size:.66rem;padding:8px 4px;background:var(--bg);color:var(--az);border:1.5px solid var(--bor);border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="tiendaEditarPrecio('+pid+')">✏️ Editar</button>'
