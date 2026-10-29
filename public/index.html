@@ -1422,6 +1422,14 @@ body.oscuro #tienda-grid .prod-card button[onclick*="copiar"],
 body.oscuro #tienda-grid .prod-card button[onclick*="Copiar"],
 body.oscuro #tienda-grid .prod-card button[title*="Copiar"]{background:#302219!important;color:#ffcca1!important;border:1px solid #a56b3d!important;border-radius:10px!important}
 </style>
+
+<style id="ae-theme-toggle-top-20261029">
+.ae-theme-toggle-top{position:absolute;top:12px;right:62px;z-index:6;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid rgba(255,148,62,.65);background:rgba(12,12,15,.83);color:#fff;font-size:19px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.24);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ae-theme-toggle-top:focus-visible{outline:2px solid #ff943e;outline-offset:3px}
+.ae-theme-toggle-top:active{transform:scale(.96)}
+body.oscuro .ae-theme-toggle-top{background:rgba(31,24,20,.93);border-color:#ff943e}
+@media(max-width:350px){.ae-theme-toggle-top{right:58px;width:39px;height:39px}}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -1775,6 +1783,7 @@ body.oscuro #tienda-grid .prod-card button[title*="Copiar"]{background:#302219!i
       <div class="ae-hero-slide ae-hero-slide-2" aria-label="Hogar y estilo"></div>
       <div class="ae-hero-slide ae-hero-slide-3" aria-label="Sonido y entretenimiento"></div>
       <div class="ae-hero-slide ae-hero-slide-4" aria-label="Climatización"></div>
+      <button id="ae-theme-toggle-top" class="ae-theme-toggle-top" type="button" onclick="toggleModoOscuro()" aria-label="Activar modo oscuro" title="Cambiar modo claro u oscuro" aria-pressed="false"><span class="ae-theme-toggle-icon" aria-hidden="true">🌙</span></button>
       <button class="ae-hero-menu" onclick="abrirCajon()" aria-label="Abrir menú">☰</button>
       <div class="ae-hero-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </section>
@@ -10857,7 +10866,19 @@ function toggleModoOscuro(){
   try{ localStorage.setItem('ae_modo_oscuro', on?'1':'0'); }catch(e){}
   var b=document.getElementById('btn-modo-oscuro');
   if(b)b.textContent=on?'☀️':'🌙';
+  aeActualizarBotonTemaSuperior();
 }
+function aeActualizarBotonTemaSuperior(){
+  var b=document.getElementById('ae-theme-toggle-top');
+  if(!b)return;
+  var oscuro=document.body.classList.contains('oscuro');
+  var ico=b.querySelector('.ae-theme-toggle-icon');
+  if(ico)ico.textContent=oscuro?'☀️':'🌙';
+  b.setAttribute('aria-label',oscuro?'Activar modo claro':'Activar modo oscuro');
+  b.setAttribute('aria-pressed',oscuro?'true':'false');
+  b.title=oscuro?'Cambiar a modo claro':'Cambiar a modo oscuro';
+}
+document.addEventListener('DOMContentLoaded',aeActualizarBotonTemaSuperior);
 // aplicar la preferencia guardada al cargar
 (function(){
   try{ if(localStorage.getItem('ae_modo_oscuro')==='1'){ document.body.classList.add('oscuro'); } }catch(e){}
