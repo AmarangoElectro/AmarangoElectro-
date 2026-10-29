@@ -8356,7 +8356,7 @@ function tiendaCardsHtml(sublista){
       }
       // Compartir producto disponible también para clientes y vistas previas.
       // Reutiliza la función comercial existente, sin modificar precios ni permisos.
-      if(!revUnlocked || vistaPreviaCliente || !adminUnlocked){
+      if(!((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)){
         card+='<button type="button" class="ae-cliente-share" onclick="event.stopPropagation();compartirProducto('+pid+')" aria-label="Compartir producto">↗ Compartir producto</button>';
       }
       card+='</div>';
