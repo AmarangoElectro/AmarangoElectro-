@@ -1119,28 +1119,31 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 </style>
 <style id="ae-portada-cards-premium-20261029">
 /* Sólo tarjetas de la vidriera; no altera cálculos, administración ni datos. */
-.portada-cat-grid .prod-card{background:#fff;border:1px solid #dce4ee;border-radius:17px;box-shadow:0 5px 18px rgba(14,42,80,.075);padding:11px;display:flex;flex-direction:column;gap:5px;min-width:0;overflow:hidden}
-.portada-cat-grid .prod-card .prod-nombre{color:#142c50!important;font-size:.79rem!important;line-height:1.3!important;font-weight:850!important;letter-spacing:-.02em;min-height:2.1em}
+.portada-cat-grid .prod-card{background:#fff;border:1px solid #dce4ee;border-radius:15px;box-shadow:0 3px 12px rgba(14,42,80,.065);padding:8px;display:flex;flex-direction:column;gap:3px;min-width:0;overflow:hidden}
+.portada-cat-grid .prod-card .prod-nombre{color:#142c50!important;font-size:.79rem!important;line-height:1.3!important;font-weight:850!important;letter-spacing:-.02em;min-height:0}
 .portada-cat-grid .prod-card .prod-marca{color:#b45b10;font-size:.61rem;letter-spacing:.055em;font-weight:850}
-.portada-cat-grid .prod-card .prod-ampliar-btn{border:1px solid #d8e2ed!important;border-radius:11px!important;box-shadow:none!important;background:#f8fafc!important;color:#1b4779!important;font-size:.67rem!important;padding:8px 5px!important;margin:5px 0!important}
-.portada-cat-grid .prod-card .ae-cuota-comparativa{display:grid!important;grid-template-columns:1fr!important;gap:6px!important;background:transparent!important;border:0!important;padding:0!important;margin:6px 0 0!important}
-.portada-cat-grid .prod-card .ae-cuota-comparativa-item{min-width:0!important;width:100%!important;box-sizing:border-box!important;border:1px solid #e0e6ef!important;border-radius:11px!important;background:#f8fafc!important;padding:9px 7px!important;text-align:center!important}
+.portada-cat-grid .prod-card .prod-ampliar-btn{border:1px solid #d8e2ed!important;border-radius:11px!important;box-shadow:none!important;background:#f8fafc!important;color:#1b4779!important;font-size:.67rem!important;padding:7px 5px!important;margin:3px 0!important}
+.portada-cat-grid .prod-card .ae-cuota-comparativa{display:grid!important;grid-template-columns:1fr!important;gap:4px!important;background:transparent!important;border:0!important;padding:0!important;margin:3px 0 0!important}
+.portada-cat-grid .prod-card .ae-cuota-comparativa-item{min-width:0!important;width:100%!important;box-sizing:border-box!important;border:1px solid #e0e6ef!important;border-radius:11px!important;background:#f8fafc!important;padding:6px 5px!important;text-align:center!important}
 .portada-cat-grid .prod-card .ae-cuota-comparativa-etiqueta{font-size:.59rem!important;letter-spacing:.04em!important;color:#6c798b!important;font-weight:850!important}
 .portada-cat-grid .prod-card .ae-cuota-comparativa-item .ae-cuota-monto{font-size:clamp(.92rem,3.8vw,1.25rem)!important;line-height:1.2!important;font-weight:900!important;overflow-wrap:anywhere}
 .portada-cat-grid .prod-card .ae-cuota-comparativa-item:first-child .ae-cuota-monto{color:#142c50!important}
 .portada-cat-grid .prod-card .ae-cuota-comparativa-item:nth-child(2) .ae-cuota-monto{color:#dc6c13!important}
 .portada-cat-grid .prod-card .ae-cuota-comparativa-pie{font-size:.63rem!important;color:#738095!important;text-align:center!important;margin:0 0 4px!important}
 .portada-cat-grid .prod-card .ae-finance-promo{border:1px solid #e1e6ed!important;border-radius:12px!important;overflow:hidden;background:#f8fafc!important;box-shadow:none!important}
-.portada-cat-grid .prod-card .ae-finance-promo-main{padding:11px 9px!important;gap:6px!important}
+.portada-cat-grid .prod-card .ae-finance-promo-main{padding:8px 7px!important;gap:4px!important}
 .portada-cat-grid .prod-card .ae-finance-promo-main b{color:#cc6412!important;font-size:.78rem!important;line-height:1.1!important}
 .portada-cat-grid .prod-card .ae-finance-promo-main span{color:#142c50!important;font-size:1.05rem!important;line-height:1.25!important}
-.portada-cat-grid .prod-card .ae-finance-ahorro{background:#fff!important;color:#667487!important;font-size:.62rem!important;padding:8px!important}
-.portada-cat-grid .prod-card .ae-card-actions{margin-top:auto;padding-top:9px}
+.portada-cat-grid .prod-card .ae-finance-ahorro{background:#fff!important;color:#667487!important;font-size:.62rem!important;padding:6px!important}
+.portada-cat-grid .prod-card .ae-card-actions{margin-top:auto;padding-top:5px}
 .portada-cat-grid .prod-card .ae-card-actions .calc-btn{background:#f5f8fc!important;color:#164c86!important;border:1px solid #dce5f0!important;border-radius:11px!important;box-shadow:none!important;font-weight:850!important;padding:10px 6px!important}
 body.oscuro .portada-cat-grid .prod-card{background:#14243d;border-color:#30445e}
 body.oscuro .portada-cat-grid .prod-card .prod-nombre{color:#f5f8ff!important}
 body.oscuro .portada-cat-grid .prod-card .ae-cuota-comparativa-item{background:#1c304d!important;border-color:#3b4d66!important}
 body.oscuro .portada-cat-grid .prod-card .ae-cuota-comparativa-item:first-child .ae-cuota-monto{color:#fff!important}
+/* Compartir para clientes: botón discreto, sin duplicar Publicar del asesor. */
+.portada-cat-grid .ae-cliente-share{width:100%;border:1px solid #dce5f0;background:#fff;color:#173d6c;border-radius:10px;padding:9px 5px;font:800 .68rem Inter,system-ui,sans-serif;cursor:pointer}
+body.oscuro .portada-cat-grid .ae-cliente-share{background:#1c304d;color:#f5f8ff;border-color:#3b4d66}
 </style>
 </head>
 <body class="en-tienda">
@@ -1532,7 +1535,7 @@ body.oscuro .portada-cat-grid .prod-card .ae-cuota-comparativa-item:first-child 
     <div id="tienda-buscar-wrap" style="position:sticky;top:0;background:var(--wh);padding:0;z-index:20;margin:0 -4px;">
       <!-- El buscador visible ahora vive en el header azul. Este input queda oculto pero funcional (lo usan las funciones de render y se sincroniza con el del header). -->
       <div style="display:none;">
-        <input id="tienda-buscar" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
+        <input id="tienda-buscar" placeholder="Buscar productos o marcas: Samsung, heladera..."
           oninput="tiendaToggleLimpiar();tiendaRenderDebounce()">
         <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
@@ -8350,6 +8353,11 @@ function tiendaCardsHtml(sublista){
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
         card+='<button class="ae-publish-btn" onclick="event.stopPropagation();compartirProducto('+pid+')">↗ Publicar</button>';
+      }
+      // Compartir producto disponible también para clientes y vistas previas.
+      // Reutiliza la función comercial existente, sin modificar precios ni permisos.
+      if(!((revUnlocked||adminUnlocked)&&!vistaPreviaCliente)){
+        card+='<button type="button" class="ae-cliente-share" onclick="event.stopPropagation();compartirProducto('+pid+')" aria-label="Compartir producto">↗ Compartir producto</button>';
       }
       card+='</div>';
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
