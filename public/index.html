@@ -3216,20 +3216,8 @@ function marcaCelu(nombre){
 }
 var tiendaMarcaGeneralActiva='';
 function tiendaMarcaGeneral(p){
-  // Mostrar marcas reconocibles; no interpretar emojis ni tipos de producto como marca.
-  var conocidas=['JBL','Delhi','Goldstar','Dinax','Stage','Philco','Samsung','Motorola','Xiaomi','Redmi','Poco','Apple','iPhone','LG','Sony','TCL','Noblex','Kanji','Kanji Home','Drean','BGH','Whirlpool','Electrolux','Atma','Peabody','Liliana','Oster','Philips','Panasonic','Hisense','RCA','Gadnic','Aiwa','Lenovo','HP','Logitech','Noga','Moonki','Daewoo','Sanyo','Hitachi','Toshiba','Midea','Smartlife','Winco','Tedge','Soul','X-View','Xiaomi'];
-  var limpiar=function(v){return String(v||'').replace(/^[^\\p{L}\\p{N}]+/gu,'').trim();};
-  var explicita=limpiar(p.marca||p.brand||'');
-  if(explicita && /^[\\p{L}\\p{N}][\\p{L}\\p{N} .&-]{1,35}$/u.test(explicita) && !/^(parlantes?|auriculares?|audio|oferta|promo|nuevo|stock|sin marca|otros)$/i.test(explicita))return explicita;
-  var nombre=String(p.nombre||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();
-  var encontrada=conocidas.slice().sort(function(a,b){return b.length-a.length;}).find(function(m){
-    var v=m.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase();
-    return new RegExp('(^|[^a-z0-9])'+v.replace(/[.*+?^$()|[\\]{}]/g,'\\function tiendaMarcaGeneral(p){
   var m=String(p.marca||p.brand||'').trim();
   return m || String(p.nombre||'').trim().split(/\s+/)[0] || '';
-}')+'(?=$|[^a-z0-9])').test(nombre);
-  });
-  return encontrada||'';
 }
 function tiendaFiltrarMarcaGeneral(m){tiendaMarcaGeneralActiva=tiendaMarcaGeneralActiva===m?'':m;tiendaRender();}
 function tiendaFiltrarMarca(mk){ tiendaMarcaActiva=(tiendaMarcaActiva===mk?'':mk); tiendaRender(); }
