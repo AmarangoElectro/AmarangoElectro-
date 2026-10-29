@@ -7440,11 +7440,7 @@ function tiendaRenderPortadaCategorias(universo,cont){
   var html='';
   secciones.forEach(function(sec){
     var productos=universo.filter(function(p){return catProd(p)===sec.cat && tiendaProductoAptoPortada(p);});
-    productos.sort(function(a,b){
-      var da=a.destacado?1:0, db=b.destacado?1:0;
-      if(db!==da)return db-da;
-      return Number(b.creado||0)-Number(a.creado||0);
-    });
+    productos.sort(function(a,b){return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);});
     productos=productos.slice(0,4);
     if(!productos.length)return;
     var catJs=sec.cat.replace(/'/g,"\\'");
@@ -7674,7 +7670,9 @@ function tiendaRender(){
       delDia: c.delDia||false,
       pocoStock: c.pocoStock||false,
       sinInteres: c.sinInteres||0,
-      precioAntes: c.precioAntes||0
+      precioAntes: c.precioAntes||0,
+      creado:c.creado||c.fechaCarga||c.fechaSubida||c.created_at||0,
+      fechaCarga:c.fechaCarga||'', fechaSubida:c.fechaSubida||''
     });
   });
 
@@ -7875,15 +7873,13 @@ function tiendaRender(){
     // Por defecto, cada categoría muestra primero los productos recién cargados.
     // No modifica el orden elegido explícitamente por el usuario.
     lista.sort(function(a,b){
-      var fechaA=Number(a.creado)||Date.parse(a.creado)||0;
-      var fechaB=Number(b.creado)||Date.parse(b.creado)||0;
-      return fechaB-fechaA;
+      return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);
     });
   }
   else if(orden==='menor')      lista.sort(function(a,b){return tiendaPrecioContado(a)-tiendaPrecioContado(b);});
   else if(orden==='mayor') lista.sort(function(a,b){return tiendaPrecioContado(b)-tiendaPrecioContado(a);});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
-  else if(orden==='nuevos')lista.sort(function(a,b){return (b.creado||0)-(a.creado||0);});
+  else if(orden==='nuevos')lista.sort(function(a,b){return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);});
   else if(orden==='sininteres')lista.sort(function(a,b){return (b.sinInteres?1:0)-(a.sinInteres?1:0);});
   else if(orden==='ofertas')lista.sort(function(a,b){
     var oa=(a.precioAntes&&parseFloat(a.precioAntes)>a.venta)?(1-a.venta/parseFloat(a.precioAntes)):0;
@@ -7945,6 +7941,16 @@ function tiendaRender(){
 }
 
 // genera el HTML de un lote de cards (se llama por lotes para no trabar)
+// Fecha original de publicación: no se altera al editar precio, costo o stock.
+function tiendaFechaPublicacion(p){
+  if(!p)return 0;
+  var v=p.creado||p.fechaCarga||p.fechaSubida||p.created_at||p.createdAt||0;
+  if(typeof v==='number')return v<1e11&&v>1e9?v*1000:v;
+  var n=Number(v);
+  if(Number.isFinite(n)&&n>0)return n<1e11&&n>1e9?n*1000:n;
+  var d=Date.parse(v);
+  return Number.isFinite(d)?d:0;
+}
 function tiendaCardsHtml(sublista){
   return sublista.map(function(p, _idx){
     var datosPrecioCard=tiendaDatosPrecio(p);
