@@ -2282,7 +2282,7 @@ function conectarNube(intentos){
       // ya conectados: bajar datos frescos de la nube y refrescar la tienda
       try{
         var cacheLista=_tiendaCacheInicialPromesa||Promise.resolve();
-        cacheLista.then(function(){ tiendaBajarNube(); tiendaBajarCelusNube(); });
+        cacheLista.then(function(){ if(!_tiendaSincronizacionInicialPromesa) tiendaBajarNube(); });
       }catch(e){}
       return;
     }
