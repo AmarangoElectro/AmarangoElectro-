@@ -248,6 +248,9 @@ body.oscuro #tienda-chips.cat-grid{background:linear-gradient(180deg,#122442,#0d
 @keyframes aeSplashLimite{to{visibility:hidden;pointer-events:none;}}
 .ae-card-photo .ae-photo-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--wh);color:var(--sub);font-size:.72rem;pointer-events:none;border-radius:13px 13px 0 0;}
 .ae-card-photo .ae-photo-status[hidden]{display:none;}
+/* Reservar el área de catálogo mientras se verifica la copia inicial evita
+   que el pie aparezca un instante y luego salte. No estira las tarjetas. */
+#tienda-grid[aria-busy="true"]{min-height:100vh;align-content:start;}
 /* Fade-in de las tarjetas al cargar */
 @keyframes cardFade{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card-fade{animation:cardFade .35s ease both;}
@@ -2237,7 +2240,9 @@ function tiendaMarcarSincronizacionInicial(cargando){
     if(!aviso && grid && grid.parentNode){
       aviso=document.createElement('div');
       aviso.id='tienda-sync-inicial';
-      aviso.style.cssText='position:sticky;top:8px;z-index:90;margin:8px auto 12px;max-width:520px;padding:10px 14px;border-radius:12px;background:#EAF2FF;border:1.5px solid #BFD3F5;color:#0B2D6B;text-align:center;font-size:.76rem;font-weight:900;box-shadow:0 4px 14px rgba(11,45,107,.14);';
+      // Indicador fuera del flujo: retirarlo no desplaza las tarjetas que
+      // el cliente ya está mirando durante la verificación de precio/stock.
+      aviso.style.cssText='position:fixed;bottom:calc(76px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:90;margin:0;width:calc(100% - 32px);max-width:520px;padding:10px 14px;border-radius:12px;background:#EAF2FF;border:1.5px solid #BFD3F5;color:#0B2D6B;text-align:center;font-size:.76rem;font-weight:900;box-shadow:0 4px 14px rgba(11,45,107,.14);';
       aviso.textContent='🔄 Actualizando fotos y productos…';
       grid.parentNode.insertBefore(aviso,grid);
     }
