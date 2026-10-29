@@ -7855,18 +7855,17 @@ function tiendaRender(){
         var on=tiendaSubfiltroActivo===st;
         sHtml+='<div onclick="tiendaFiltrarSubtipo(\''+st.replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+st+' ('+subtipos[st]+')</div>';
       });
+      var marcasHtml='';
       if(nombresMarcas.length>0){
         var listaMarcas='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:9px 0 2px;">';
         nombresMarcas.forEach(function(m){var on=tiendaMarcaGeneralActiva===m;
           listaMarcas+='<button type="button" data-marca-general="'+escapeHtml(m).replace(/"/g,'&quot;')+'" style="padding:7px 11px;border-radius:18px;font-size:.72rem;font-weight:750;cursor:pointer;background:'+(on?'#12346c;color:#fff;border:1px solid #12346c':'#fff;color:#203b61;border:1px solid #d9e1ed')+'">'+escapeHtml(m)+' ('+marcasGenerales[m]+')</button>';
         });
         listaMarcas+='</div>';
-        sHtml+='<div style="flex-basis:100%;width:100%;margin-top:7px;"><details class="ae-marcas-compactas" style="border:1px solid #dce4ef;border-radius:13px;background:#f9fbfe;padding:9px 12px;"><summary style="cursor:pointer;color:#173663;font-weight:800;font-size:.78rem;list-style:none;">🏷️ Marcas <span style="float:right;color:#72849b;">▾</span></summary>'+listaMarcas+'</details></div>';
+        marcasHtml='<details class="ae-marcas-compactas" style="display:inline-block;max-width:100%;border:1px solid var(--bor);border-radius:16px;background:var(--wh);padding:6px 12px;"><summary style="cursor:pointer;color:var(--az);font-weight:800;font-size:.66rem;white-space:nowrap;list-style:none;">Marcas ▾</summary>'+listaMarcas+'</details>';
       }
-      // Mantener las opciones compactas y en una sola línea; el desplegable Marcas va debajo.
-      sHtml=sHtml.replace(/style="flex:0 0 auto;padding:6px 12px;/g,'style="flex:0 0 auto;align-self:flex-start;height:34px;display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;');
-      subBox.innerHTML=sHtml;
-      subBox.style.display='flex';
+      subBox.innerHTML='<div style="display:flex;gap:6px;overflow-x:auto;align-items:center;white-space:nowrap;padding:0 2px 3px;">'+sHtml+'</div>'+(marcasHtml?'<div style="margin-top:6px;padding:0 2px;">'+marcasHtml+'</div>':'');
+      subBox.style.display='block';
     }else{
       tiendaSubfiltroActivo='';
       subBox.style.display='none';
