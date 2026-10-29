@@ -1109,6 +1109,13 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"]{display:flex!important;align-items:center!important;justify-content:center!important;position:static!important;transform:none!important;order:1!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:42px!important;height:auto!important;margin:0!important;padding:9px 7px!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;line-height:1.3!important;font-size:.75rem!important;letter-spacing:normal!important;background:#f0fff6!important;color:#09643b!important;border:1px solid #a4dfc0!important;border-radius:11px!important;box-shadow:none!important;font-family:inherit!important;font-weight:800!important}
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"]::before,#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"]::after{content:none!important}
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary{min-height:40px!important}
+/* AE ADMIN COMPACT 2026-10-29: elimina flecha duplicada y reduce altura */
+#tienda-grid .prod-card .ae-admin-quickbar>.prod-ampliar-btn,
+#tienda-grid .prod-card .ae-admin-quickbar>.ae-admin-quickbar>.prod-ampliar-btn{display:none!important}
+#tienda-grid .prod-card .ae-admin-quickbar{row-gap:5px!important;gap:5px!important}
+#tienda-grid .prod-card .ae-share-social-row{margin:0 0 4px!important;gap:6px!important}
+#tienda-grid .prod-card .ae-admin-quickbar>details{margin-bottom:3px!important}
+#tienda-grid .prod-card .ae-admin-edit-actions{margin-bottom:3px!important;gap:5px!important}
 </style>
 </head>
 <body class="en-tienda">
@@ -8591,9 +8598,8 @@ function tiendaAmpliarDesdeMenu(id){
   var p=buscarProd(id);if(!p)return;
   var menu=document.getElementById('opts-'+id);
   var card=menu&&menu.closest('.prod-card');
-  var boton=card&&card.querySelector('.prod-ampliar-btn');
-  if(boton){boton.click();return;}
-  mostrarToast('⚠️ No se encontró la acción de ampliar imagen');
+  if(p.foto){ abrirFotoGrande(p.foto,p.nombre||''); return; }
+  mostrarToast('⚠️ Este producto no tiene imagen');
 }
 function tiendaConfirmarPrecioDesdeMenu(id){
   if(!tiendaExigirAdmin()||vistaPreviaCliente)return;
