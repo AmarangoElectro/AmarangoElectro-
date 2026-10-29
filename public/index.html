@@ -1406,6 +1406,22 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card details summary{
 }
 body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-card-paybtn{background:#302219!important;color:#ffcc9e!important;border-color:#a56b3d!important}
 </style>
+
+<style id="ae-dark-final-controls-20261029">
+body.oscuro #tienda-grid .prod-card .ae-stock-proveedor{background:#173026!important;color:#a4e9bd!important;border:1px solid #488a64!important}
+body.oscuro #tienda-grid .prod-card .ae-stock-proveedor>span{color:#a4e9bd!important}
+body.oscuro #tienda-grid .prod-card .ae-stock-proveedor>span:last-child{background:#234435!important;color:#c0f5d2!important;border:1px solid #477e5d!important}
+body.oscuro #tienda-grid .prod-card .ae-precio-fecha{background:#2c241c!important;border:1px solid #9a693e!important}
+body.oscuro #tienda-grid .prod-card .ae-precio-fecha>span:first-child{color:#ffbc80!important}
+body.oscuro #tienda-grid .prod-card .ae-precio-fecha>span:last-child{color:#ddd1c6!important}
+body.oscuro #tienda-grid .prod-card button[onclick*="tiendaUsarFotoProveedor"]{background:#302219!important;color:#ffcca1!important;border:1px solid #a56b3d!important}
+body.oscuro #tienda-grid .prod-card .ae-admin-cost-inline button,
+body.oscuro #tienda-grid .prod-card button[onclick*="tiendaAbrirCostoInline"]{background:#302219!important;color:#ffcca1!important;border:1px solid #a56b3d!important}
+body.oscuro #tienda-grid .prod-card button[id^="fav-"]{background:#2a2220!important;color:#ffb778!important;border:1px solid #825738!important;border-radius:10px!important;padding:5px!important;min-width:30px!important;min-height:30px!important}
+body.oscuro #tienda-grid .prod-card button[onclick*="copiar"],
+body.oscuro #tienda-grid .prod-card button[onclick*="Copiar"],
+body.oscuro #tienda-grid .prod-card button[title*="Copiar"]{background:#302219!important;color:#ffcca1!important;border:1px solid #a56b3d!important;border-radius:10px!important}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -8430,7 +8446,7 @@ function tiendaCardsHtml(sublista){
       var nombreProveedor=p.proveedor||p.mayorista||'Proveedor';
       var colorProveedor=colorMayorista(nombreProveedor);
       var textoStock=sinStockProveedor?'⛔ SIN STOCK':(stockInfo.informado?'📦 Stock: '+stockProveedor:'✅ Disponible');
-      card+='<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.62rem;font-weight:900;margin-top:5px;color:'+colorProveedor.txt+';background:'+colorProveedor.bg+';border:1.5px solid '+colorProveedor.bor+';border-radius:8px;padding:5px 7px;">'
+      card+='<div class="ae-stock-proveedor" style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:.62rem;font-weight:900;margin-top:5px;color:'+colorProveedor.txt+';background:'+colorProveedor.bg+';border:1.5px solid '+colorProveedor.bor+';border-radius:8px;padding:5px 7px;">'
         +'<span>📦 Stock</span>'
         +'<span style="color:'+(hayStockProveedor?'#08783E':'#B91C1C')+';background:'+(hayStockProveedor?'rgba(255,255,255,.72)':'#fff')+';border-radius:20px;padding:2px 6px;white-space:nowrap;">'+textoStock+'</span>'
         +'</div>';
@@ -11062,7 +11078,7 @@ function etiquetaFechaPrecio(p){
   }else{
     txt='✅ Precio reciente ('+d+'d)'; color='var(--gr)'; bg='#eefaf2'; bor='#b8e6c8'; ico='';
   }
-  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:'+bg+';border:1px solid '+bor+';border-radius:7px;padding:4px 8px;margin-bottom:5px;">'
+  return '<div class="ae-precio-fecha" style="display:flex;align-items:center;justify-content:space-between;gap:6px;background:'+bg+';border:1px solid '+bor+';border-radius:7px;padding:4px 8px;margin-bottom:5px;">'
     +'<span style="font-size:.6rem;font-weight:800;color:'+color+';line-height:1.15;">'+txt+'</span>'
     +'<span style="font-size:.55rem;font-weight:700;color:var(--sub);white-space:nowrap;">'+fechaTxt+'</span>'
     +'</div>';
