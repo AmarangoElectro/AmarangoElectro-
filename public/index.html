@@ -3214,6 +3214,12 @@ function marcaCelu(nombre){
   if(/zte/.test(n))return 'ZTE';
   return 'Otros';
 }
+var tiendaMarcaGeneralActiva='';
+function tiendaMarcaGeneral(p){
+  var m=String(p.marca||p.brand||'').trim();
+  return m || String(p.nombre||'').trim().split(/\s+/)[0] || '';
+}
+function tiendaFiltrarMarcaGeneral(m){tiendaMarcaGeneralActiva=tiendaMarcaGeneralActiva===m?'':m;tiendaRender();}
 function tiendaFiltrarMarca(mk){ tiendaMarcaActiva=(tiendaMarcaActiva===mk?'':mk); tiendaRender(); }
 function tiendaFiltrarSubtipo(tipo){
   tiendaSubfiltroActivo=(tiendaSubfiltroActivo===tipo?'':tipo);
@@ -7834,12 +7840,21 @@ function tiendaRender(){
       if(tiendaCategoriaActiva==='📺 TV y video')return (parseInt(a,10)||999)-(parseInt(b,10)||999);
       return a.localeCompare(b);
     });
+    var marcasGenerales={};
+    universo.forEach(function(p){if(catProd(p)===tiendaCategoriaActiva){var m=tiendaMarcaGeneral(p);if(m)marcasGenerales[m]=(marcasGenerales[m]||0)+1;}});
+    var nombresMarcas=Object.keys(marcasGenerales).sort();
     if(nombresSub.length>1){
       var sHtml='<div onclick="tiendaFiltrarSubtipo(\'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(tiendaSubfiltroActivo===''?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">Todos</div>';
       nombresSub.forEach(function(st){
         var on=tiendaSubfiltroActivo===st;
         sHtml+='<div onclick="tiendaFiltrarSubtipo(\''+st.replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+st+' ('+subtipos[st]+')</div>';
       });
+      if(nombresMarcas.length>1){
+        sHtml+='<span style="align-self:center;font-size:.65rem;font-weight:800;color:var(--sub);">Marcas:</span>';
+        nombresMarcas.forEach(function(m){var on=tiendaMarcaGeneralActiva===m;
+          sHtml+='<div data-marca-general="'+escapeHtml(m).replace(/"/g,'&quot;')+'" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+escapeHtml(m)+' ('+marcasGenerales[m]+')</div>';
+        });
+      }
       subBox.innerHTML=sHtml;
       subBox.style.display='flex';
     }else{
@@ -7852,6 +7867,10 @@ function tiendaRender(){
     tiendaSubfiltroActivo='';
   }
 
+  if(subBox && !subBox.dataset.marcasDelegadas){
+    subBox.dataset.marcasDelegadas='1';
+    subBox.addEventListener('click',function(e){var b=e.target.closest('[data-marca-general]');if(b)tiendaFiltrarMarcaGeneral(b.getAttribute('data-marca-general'));});
+  }
   // Clientes, vendedores y administradores comparten la misma portada.
   var qPortada=(document.getElementById('tienda-buscar').value||'').trim();
   if(tiendaModoPortada && !tiendaBandejaAdmin && !qPortada){
@@ -7876,13 +7895,14 @@ function tiendaRender(){
     var okBusq=pj>0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
     var okSubtipo=!tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
+    var okMarcaGeneral=!tiendaMarcaGeneralActiva || tiendaMarcaGeneral(p)===tiendaMarcaGeneralActiva;
     var okPrecio=!maxPrecio || tiendaPrecioContado(p)<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
     var okViejo=!verSoloPreciosViejos || (!p.esCelu && !tiendaEsAutomatico(p) && ((diasPrecio(p)===null)||(diasPrecio(p)>=30)));
     // filtro "solo ofertas": producto con precio tachado o cuotas sin interés
     var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
-    return okCat && okBusq && okMarca && okSubtipo && okPrecio && okFav && okViejo && okOferta;
+    return okCat && okBusq && okMarca && okSubtipo && okMarcaGeneral && okPrecio && okFav && okViejo && okOferta;
   });
   // 🧠 registrar qué buscó la gente y si encontró algo
   try{ if(q) registrarBusqueda(q, lista.length); }catch(e){}
