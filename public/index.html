@@ -3216,8 +3216,14 @@ function marcaCelu(nombre){
 }
 var tiendaMarcaGeneralActiva='';
 function tiendaMarcaGeneral(p){
-  var m=String(p.marca||p.brand||'').trim();
-  return m || String(p.nombre||'').trim().split(/\s+/)[0] || '';
+  var nombres=['Goldstar','Dinax','Stage','JBL','Delhi','Philco','Sony','LG','Samsung','Motorola','Xiaomi','Redmi','Poco','Apple','Noblex','Kanji','Drean','BGH','Atma','Philips','Panasonic','RCA','Aiwa','Noga','Moonki','Winco','TCL','Hisense','Gadnic'];
+  var texto=String((p&&p.marca)||(p&&p.brand)||'')+' '+String((p&&p.nombre)||'');
+  var limpio=texto.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  for(var i=0;i<nombres.length;i++){
+    var n=nombres[i].toLowerCase();
+    if(new RegExp('(^|[^a-z0-9])'+n+'(?=$|[^a-z0-9])').test(limpio))return nombres[i];
+  }
+  return '';
 }
 function tiendaFiltrarMarcaGeneral(m){tiendaMarcaGeneralActiva=tiendaMarcaGeneralActiva===m?'':m;tiendaRender();}
 function tiendaFiltrarMarca(mk){ tiendaMarcaActiva=(tiendaMarcaActiva===mk?'':mk); tiendaRender(); }
@@ -7849,11 +7855,13 @@ function tiendaRender(){
         var on=tiendaSubfiltroActivo===st;
         sHtml+='<div onclick="tiendaFiltrarSubtipo(\''+st.replace(/'/g,"\\'")+'\')" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+st+' ('+subtipos[st]+')</div>';
       });
-      if(nombresMarcas.length>1){
-        sHtml+='<span style="align-self:center;font-size:.65rem;font-weight:800;color:var(--sub);">Marcas:</span>';
+      if(nombresMarcas.length>0){
+        var listaMarcas='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:9px 0 2px;">';
         nombresMarcas.forEach(function(m){var on=tiendaMarcaGeneralActiva===m;
-          sHtml+='<div data-marca-general="'+escapeHtml(m).replace(/"/g,'&quot;')+'" style="flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:.66rem;font-weight:800;cursor:pointer;white-space:nowrap;background:'+(on?'var(--az);color:#fff':'var(--wh);color:var(--sub);border:1px solid var(--bor)')+'">'+escapeHtml(m)+' ('+marcasGenerales[m]+')</div>';
+          listaMarcas+='<button type="button" data-marca-general="'+escapeHtml(m).replace(/"/g,'&quot;')+'" style="padding:7px 11px;border-radius:18px;font-size:.72rem;font-weight:750;cursor:pointer;background:'+(on?'#12346c;color:#fff;border:1px solid #12346c':'#fff;color:#203b61;border:1px solid #d9e1ed')+'">'+escapeHtml(m)+' ('+marcasGenerales[m]+')</button>';
         });
+        listaMarcas+='</div>';
+        sHtml+='<div style="flex-basis:100%;width:100%;margin-top:7px;"><details class="ae-marcas-compactas" style="border:1px solid #dce4ef;border-radius:13px;background:#f9fbfe;padding:9px 12px;"><summary style="cursor:pointer;color:#173663;font-weight:800;font-size:.78rem;list-style:none;">🏷️ Marcas <span style="float:right;color:#72849b;">▾</span></summary>'+listaMarcas+'</details></div>';
       }
       subBox.innerHTML=sHtml;
       subBox.style.display='flex';
