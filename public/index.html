@@ -1443,6 +1443,12 @@ body.oscuro #tab-placas #placa-off10,body.oscuro #tab-placas #placa-off15{color:
 body.oscuro #tab-placas .clear-btn{background:#242e3d !important;color:#f4f6fa !important;border:1px solid #39485a !important;}
 body.oscuro #tab-placas #res-placa{color:#d5dce7 !important;}
 </style>
+
+<style id="ae-foto-performance">
+/* Sólo fotos de tarjetas: espacio estable durante la descarga. */
+#tienda-grid img.prod-foto{content-visibility:auto;object-position:center;}
+#tienda-grid img.prod-foto:not(.ae-foto-error){background:#172334 !important;}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -8412,7 +8418,7 @@ function tiendaCardsHtml(sublista){
     var logoFotoCatalogo=(fotoDeCatalogo && p.fotoCatalogoLogo)?String(p.fotoCatalogoLogo):'';
     card+='<div style="position:relative;margin:-9px -9px 0;">'
       +(p.foto
-        ? '<img class="prod-foto" loading="lazy" decoding="async" src="'+fotoOpt(p.foto,400).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:'+(fotoDeCatalogo?'contain':'cover')+';background:#fff;cursor:pointer;display:block;">'
+        ? '<img class="prod-foto" loading="'+(pid<6?'eager':'lazy')+'" fetchpriority="'+(pid<4?'high':'auto')+'" decoding="async" src="'+fotoOpt(p.foto,400).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" alt="'+String(p.nombre||'').replace(/"/g,'&quot;')+'" onclick="tiendaVerDetalle('+pid+')" style="width:100%;height:230px;border-radius:13px 13px 0 0;object-fit:'+(fotoDeCatalogo?'contain':'cover')+';background:#fff;cursor:pointer;display:block;">'
           +'<button onclick="event.stopPropagation();abrirFotoGrande(\''+String(p.foto).replace(/'/g,"\\'")+'\',\''+String(p.nombre||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\')" style="position:absolute;bottom:8px;left:8px;background:rgba(11,45,107,.8);border:none;border-radius:50%;width:34px;height:34px;font-size:.92rem;color:#fff;cursor:pointer;backdrop-filter:blur(3px);line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);">🔍</button>'
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
