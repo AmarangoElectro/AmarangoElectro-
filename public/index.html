@@ -7455,6 +7455,15 @@ function tiendaRenderPortadaCategorias(universo,cont){
     {cat:'🌡️ Climatización',titulo:'🌡️ Climatización'},
     {cat:'⚡ Pequeños electro',titulo:'⚡ Pequeños electrodomésticos'}
   ];
+  // Ordenar las secciones por su publicación más reciente, sin priorizar celulares.
+  secciones.sort(function(a,b){
+    function ultima(cat){
+      return universo.reduce(function(max,p){
+        return catProd(p)===cat && tiendaProductoAptoPortada(p)?Math.max(max,tiendaFechaPublicacion(p)):max;
+      },0);
+    }
+    return ultima(b.cat)-ultima(a.cat);
+  });
   var html='';
   secciones.forEach(function(sec){
     var productos=universo.filter(function(p){return catProd(p)===sec.cat && tiendaProductoAptoPortada(p);});
