@@ -1141,6 +1141,9 @@ body.oscuro .portada-cat-grid .prod-card{background:#14243d;border-color:#30445e
 body.oscuro .portada-cat-grid .prod-card .prod-nombre{color:#f5f8ff!important}
 body.oscuro .portada-cat-grid .prod-card .ae-cuota-comparativa-item{background:#1c304d!important;border-color:#3b4d66!important}
 body.oscuro .portada-cat-grid .prod-card .ae-cuota-comparativa-item:first-child .ae-cuota-monto{color:#fff!important}
+/* Compartir para clientes: botón discreto, sin duplicar Publicar del asesor. */
+.portada-cat-grid .ae-cliente-share{width:100%;border:1px solid #dce5f0;background:#fff;color:#173d6c;border-radius:10px;padding:9px 5px;font:800 .68rem Inter,system-ui,sans-serif;cursor:pointer}
+body.oscuro .portada-cat-grid .ae-cliente-share{background:#1c304d;color:#f5f8ff;border-color:#3b4d66}
 </style>
 </head>
 <body class="en-tienda">
@@ -1532,7 +1535,7 @@ body.oscuro .portada-cat-grid .prod-card .ae-cuota-comparativa-item:first-child 
     <div id="tienda-buscar-wrap" style="position:sticky;top:0;background:var(--wh);padding:0;z-index:20;margin:0 -4px;">
       <!-- El buscador visible ahora vive en el header azul. Este input queda oculto pero funcional (lo usan las funciones de render y se sincroniza con el del header). -->
       <div style="display:none;">
-        <input id="tienda-buscar" placeholder="Buscar: Samsung, iPhone, heladera, TV..."
+        <input id="tienda-buscar" placeholder="Buscar productos o marcas: Samsung, heladera..."
           oninput="tiendaToggleLimpiar();tiendaRenderDebounce()">
         <button id="tienda-buscar-x" onclick="tiendaLimpiarBusqueda()">✕</button>
       </div>
@@ -8350,6 +8353,11 @@ function tiendaCardsHtml(sublista){
       // los revendedores también pueden COMPARTIR con foto y formato de precio (igual que admin), salvo en vista previa de cliente
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
         card+='<button class="ae-publish-btn" onclick="event.stopPropagation();compartirProducto('+pid+')">↗ Publicar</button>';
+      }
+      // Compartir producto disponible también para clientes y vistas previas.
+      // Reutiliza la función comercial existente, sin modificar precios ni permisos.
+      if(!revUnlocked || vistaPreviaCliente || !adminUnlocked){
+        card+='<button type="button" class="ae-cliente-share" onclick="event.stopPropagation();compartirProducto('+pid+')" aria-label="Compartir producto">↗ Compartir producto</button>';
       }
       card+='</div>';
       if((revUnlocked||adminUnlocked)&&!vistaPreviaCliente){
