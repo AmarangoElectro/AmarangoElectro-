@@ -7857,14 +7857,14 @@ function tiendaRender(){
       });
       var marcasHtml='';
       if(nombresMarcas.length>0){
-        var listaMarcas='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:9px 0 2px;">';
+        var listaMarcas='<div style="display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;max-width:100%;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:9px 0 2px;">';
         nombresMarcas.forEach(function(m){var on=tiendaMarcaGeneralActiva===m;
-          listaMarcas+='<button type="button" data-marca-general="'+escapeHtml(m).replace(/"/g,'&quot;')+'" style="padding:7px 11px;border-radius:18px;font-size:.72rem;font-weight:750;cursor:pointer;background:'+(on?'#12346c;color:#fff;border:1px solid #12346c':'#fff;color:#203b61;border:1px solid #d9e1ed')+'">'+escapeHtml(m)+' ('+marcasGenerales[m]+')</button>';
+          listaMarcas+='<button type="button" data-marca-general="'+escapeHtml(m).replace(/"/g,'&quot;')+'" style="flex:0 0 auto;white-space:nowrap;padding:7px 11px;border-radius:18px;font-size:.72rem;font-weight:750;cursor:pointer;background:'+(on?'#12346c;color:#fff;border:1px solid #12346c':'#fff;color:#203b61;border:1px solid #d9e1ed')+'">'+escapeHtml(m)+' ('+marcasGenerales[m]+')</button>';
         });
         listaMarcas+='</div>';
         marcasHtml='<details class="ae-marcas-compactas" style="display:inline-block;max-width:100%;border:1px solid var(--bor);border-radius:16px;background:var(--wh);padding:6px 12px;"><summary style="cursor:pointer;color:var(--az);font-weight:800;font-size:.66rem;white-space:nowrap;list-style:none;">Marcas ▾</summary>'+listaMarcas+'</details>';
       }
-      subBox.innerHTML='<div style="display:flex;gap:6px;overflow-x:auto;align-items:center;white-space:nowrap;padding:0 2px 3px;">'+sHtml+'</div>'+(marcasHtml?'<div style="margin-top:6px;padding:0 2px;">'+marcasHtml+'</div>':'');
+      subBox.innerHTML='<div style="display:flex;width:100%;max-width:100%;gap:6px;overflow-x:auto;flex-wrap:nowrap;align-items:center;white-space:nowrap;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 2px 3px;">'+sHtml+'</div>'+(marcasHtml?'<div style="margin-top:6px;padding:0 2px;">'+marcasHtml+'</div>':'');
       subBox.style.display='block';
     }else{
       tiendaSubfiltroActivo='';
