@@ -1099,6 +1099,17 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 
 
 
+
+<style>
+/* AE SHARE BUTTON HOTFIX 2026-10-29 */
+/* Evita solapamiento y texto superpuesto de compartir en tarjetas móviles */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;gap:7px!important;align-items:stretch!important;width:100%!important;min-width:0!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>.prod-ampliar-btn{width:100%!important;max-width:100%!important;min-height:38px!important;box-sizing:border-box!important;position:static!important;transform:none!important;margin:0!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details{width:100%!important;max-width:100%!important;order:2!important;margin:0!important;grid-column:auto!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"]{display:flex!important;align-items:center!important;justify-content:center!important;position:static!important;transform:none!important;order:1!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:42px!important;height:auto!important;margin:0!important;padding:9px 7px!important;box-sizing:border-box!important;white-space:normal!important;overflow:visible!important;line-height:1.3!important;font-size:.75rem!important;letter-spacing:normal!important;background:#f0fff6!important;color:#09643b!important;border:1px solid #a4dfc0!important;border-radius:11px!important;box-shadow:none!important;font-family:inherit!important;font-weight:800!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"]::before,#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"]::after{content:none!important}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>details>summary{min-height:40px!important}
+</style>
 </head>
 <body class="en-tienda">
 
