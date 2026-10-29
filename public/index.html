@@ -7463,7 +7463,8 @@ function tiendaRenderPortadaCategorias(universo,cont){
     }
     return ultima(b.cat)-ultima(a.cat);
   });
-  var html='';
+  var recientes=universo.filter(tiendaProductoAptoPortada).sort(tiendaOrdenVidrieraReciente).slice(0,6);
+  var html=recientes.length?'<section class="portada-cat-seccion"><div class="portada-cat-cab"><h3>🆕 Últimos publicados</h3></div><div class="portada-cat-grid">'+tiendaCardsHtml(recientes)+'</div></section>':'';
   secciones.forEach(function(sec){
     var productos=universo.filter(function(p){return catProd(p)===sec.cat && tiendaProductoAptoPortada(p);});
     productos.sort(tiendaOrdenVidrieraReciente);
@@ -7970,12 +7971,7 @@ function tiendaRender(){
 // genera el HTML de un lote de cards (se llama por lotes para no trabar)
 // Fecha original de publicación: no se altera al editar precio, costo o stock.
 function tiendaOrdenVidrieraReciente(a,b){
-  // Los celulares importados pueden tener fecha de carga reciente sin ser una publicación nueva.
-  // En la vista general, primero los productos fotografiados no celulares.
-  var fotoA=!!(a&&a.foto),fotoB=!!(b&&b.foto);
-  if(fotoA!==fotoB)return fotoA?-1:1;
-  var celuA=!!(a&&a.esCelu),celuB=!!(b&&b.esCelu);
-  if(celuA!==celuB)return celuA?1:-1;
+  // Orden estrictamente cronológico entre todas las categorías.
   return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);
 }
 function tiendaFechaPublicacion(p){
