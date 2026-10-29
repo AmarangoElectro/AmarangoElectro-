@@ -4972,6 +4972,7 @@ function tiendaLoginAdmin(){
     tiendaEsAdmin=true;
     tiendaModoPortada=true;
     tiendaBandejaAdmin='';
+    aeFiltroMayoristaActual=''; // mostrar todos los mayoristas al entrar a Administración
     tiendaAplicarModo();
     tiendaRender();
     tiendaPublicarControlAdmin(true);
@@ -4997,6 +4998,7 @@ function tiendaConfirmarAdmin(){
     revUnlocked=true;
     tiendaModoPortada=true;
     tiendaBandejaAdmin='';
+    aeFiltroMayoristaActual=''; // mostrar todos los mayoristas al entrar a Administración
     document.getElementById('modal-cuotas').style.display='none';
     tiendaAplicarModo();
     tiendaRender();
