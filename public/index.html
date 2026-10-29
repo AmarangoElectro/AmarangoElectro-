@@ -10999,7 +10999,16 @@ function tiendaCatalogoPDF(){
   });
 
   html+='<div class="pdf-foot">AmarangoElectro — Financiación en cuotas fijas · Consultá por WhatsApp<br>Generado el '+hoy+'</div>';
-  html+='</body></html>';
+  html+='<style>
+/* AE: imagen fallida en tarjeta, sin recuadro blanco */
+#tienda-grid .prod-foto.ae-foto-error{display:none!important}
+#tienda-grid .ae-foto-fallback{height:230px;background:#172334;color:#dce6f2;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;font-size:13px;font-weight:700;border-radius:13px 13px 0 0}
+</style>
+<script>
+/* Sólo al fallar la carga real; no modifica URLs ni reemplaza fotos válidas. */
+document.addEventListener('error',function(e){var img=e.target;if(!img||!img.matches||!img.matches('#tienda-grid img.prod-foto')||img.dataset.aeFallback)return;img.dataset.aeFallback='1';img.classList.add('ae-foto-error');var p=document.createElement('div');p.className='ae-foto-fallback';p.textContent='📷 Imagen no disponible';img.insertAdjacentElement('afterend',p);},true);
+</script>
+</body></html>';
 
   // abrir en ventana nueva y disparar impresión (guardar como PDF)
   var w=window.open('','_blank');
