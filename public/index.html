@@ -14365,7 +14365,7 @@ try{ tiendaInit(); }catch(e){}
     var listo = grid && grid.children && grid.children.length>0;
     // mínimo 900ms para que no parpadee, o si ya está listo
     var pasado=Date.now()-t0;
-    if((listo && pasado>=900) || pasado>=6000){ ocultar(); return; }
+    if((listo && pasado>=500) || pasado>=2500){ ocultar(); return; }
     setTimeout(chequear, 200);
   }
   chequear();
