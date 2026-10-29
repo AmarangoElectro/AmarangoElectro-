@@ -1153,6 +1153,36 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 #tienda-grid.ae-admin-v16-visual .ae-finance-ahorro{border-radius:10px!important}
 @media(max-width:420px){#tienda-grid.ae-admin-v16-visual .prod-card{padding:8px!important}#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{padding:7px 3px!important}}
 </style>
+
+<style>
+/* AE REFERENCE MATCH ADMIN CARDS 2026-10-29 */
+/* Replica funcional del diseño de referencia, aplicada solo a tarjetas administrativas. */
+#tienda-grid.ae-admin-v16-visual .prod-card{position:relative!important;border-radius:20px!important;padding:9px!important;gap:4px!important;box-shadow:0 9px 26px rgba(13,30,58,.09)!important;overflow:hidden!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,Roboto,Arial,sans-serif!important}
+#tienda-grid.ae-admin-v16-visual .prod-card>div[style*="position:relative"][style*="margin:-9px"]{margin:-9px -9px 6px!important;border-radius:18px 18px 10px 10px!important;overflow:hidden}
+#tienda-grid.ae-admin-v16-visual .ae-admin-visibility{position:absolute!important;z-index:5!important;top:17px!important;left:15px!important;width:auto!important;min-width:0!important;margin:0!important;padding:7px 10px!important;background:rgba(246,255,250,.95)!important;border:1px solid rgba(161,217,185,.9)!important;border-radius:12px!important;box-shadow:0 2px 9px rgba(0,0,0,.13)!important;font-weight:800!important;font-size:.72rem!important;backdrop-filter:blur(7px)}
+#tienda-grid.ae-admin-v16-visual .prod-marca{color:#f28a00!important;font-size:.68rem!important;font-weight:900!important;letter-spacing:.13em!important;margin-top:7px!important}
+#tienda-grid.ae-admin-v16-visual .prod-nombre{font-size:clamp(.78rem,2.9vw,1.08rem)!important;line-height:1.16!important;font-weight:850!important;letter-spacing:-.045em!important;color:#08183b!important;overflow-wrap:anywhere}
+#tienda-grid.ae-admin-v16-visual .ae-admin-supplier-label{background:#fff!important;color:#0b1c42!important;border:1px solid #e5e9ef!important;border-radius:13px!important;box-shadow:none!important;margin-top:4px!important;padding:9px 7px!important;font-size:.72rem!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-cost-inline{border-top:1px solid #e9edf4!important;padding-top:9px!important;margin-top:7px!important;color:#52637b!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-cost-inline b{color:#0b1c42!important;font-weight:850!important;font-variant-numeric:tabular-nums}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar{display:flex!important;flex-direction:column!important;gap:5px!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>button[title="Compartir producto"]{order:-2!important;background:linear-gradient(180deg,#fff,#fffdf8)!important;color:#0b1c42!important;border:1px solid #e7bd67!important;border-radius:12px!important;min-height:44px!important;box-shadow:none!important;font-size:.77rem!important;font-weight:850!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar>details{order:2!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-quickbar details>summary{border-radius:12px!important;background:#f8fafc!important;color:#14274b!important;border:1px solid #d8e1ed!important;padding:10px 5px!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;margin-top:2px!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{min-height:43px!important;border-radius:12px!important;font-weight:800!important;box-shadow:none!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button[onclick*="tiendaEditarPrecio"]{background:#fff5e4!important;border-color:#f2c474!important;color:#a95500!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button[onclick*="tiendaEditarFoto"]{background:#edf6ff!important;border-color:#9dc6f7!important;color:#155fc1!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button[onclick*="tiendaEliminar"]{grid-column:1/-1!important;background:#fff0f1!important;border-color:#f4bdc5!important;color:#c31b3d!important}
+#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button[onclick*="tiendaQuitarFoto"]{background:#fff7f7!important;border-color:#f5d4d8!important}
+#tienda-grid.ae-admin-v16-visual button[onclick*="tiendaUsarFotoProveedor"]{background:#f8fafc!important;border:1px solid #d7e1ef!important;border-radius:11px!important;color:#223b5c!important;font-weight:750!important;min-height:38px!important}
+#tienda-grid.ae-admin-v16-visual .ae-finance-promo{border:1px solid #f2c777!important;background:#fff9ed!important;border-radius:13px!important;padding:8px!important}
+#tienda-grid.ae-admin-v16-visual .ae-finance-promo-main b{color:#e96d0a!important}
+#tienda-grid.ae-admin-v16-visual .ae-finance-promo-main span{color:#0a1939!important;font-weight:900!important;letter-spacing:-.05em!important}
+#tienda-grid.ae-admin-v16-visual .ae-finance-ahorro{background:#fff5e6!important;border-radius:10px!important}
+#tienda-grid.ae-admin-v16-visual .ae-cuota-comparativa-item{border-radius:12px!important}
+@media(max-width:430px){#tienda-grid.ae-admin-v16-visual .prod-card{padding:7px!important}#tienda-grid.ae-admin-v16-visual .prod-nombre{font-size:.8rem!important}#tienda-grid.ae-admin-v16-visual .ae-admin-edit-actions button{font-size:.65rem!important;padding:7px 3px!important}}
+</style>
 </head>
 <body class="en-tienda">
 
