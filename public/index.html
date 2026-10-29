@@ -7467,7 +7467,7 @@ function tiendaRenderPortadaCategorias(universo,cont){
   var html='';
   secciones.forEach(function(sec){
     var productos=universo.filter(function(p){return catProd(p)===sec.cat && tiendaProductoAptoPortada(p);});
-    productos.sort(function(a,b){return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);});
+    productos.sort(tiendaOrdenVidrieraReciente);
     productos=productos.slice(0,4);
     if(!productos.length)return;
     var catJs=sec.cat.replace(/'/g,"\\'");
@@ -7899,14 +7899,12 @@ function tiendaRender(){
   else if(!orden || orden==='destacado' || orden==='relevancia'){
     // Por defecto, cada categoría muestra primero los productos recién cargados.
     // No modifica el orden elegido explícitamente por el usuario.
-    lista.sort(function(a,b){
-      return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);
-    });
+    lista.sort(tiendaOrdenVidrieraReciente);
   }
   else if(orden==='menor')      lista.sort(function(a,b){return tiendaPrecioContado(a)-tiendaPrecioContado(b);});
   else if(orden==='mayor') lista.sort(function(a,b){return tiendaPrecioContado(b)-tiendaPrecioContado(a);});
   else if(orden==='az')    lista.sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');});
-  else if(orden==='nuevos')lista.sort(function(a,b){return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);});
+  else if(orden==='nuevos')lista.sort(tiendaOrdenVidrieraReciente);
   else if(orden==='sininteres')lista.sort(function(a,b){return (b.sinInteres?1:0)-(a.sinInteres?1:0);});
   else if(orden==='ofertas')lista.sort(function(a,b){
     var oa=(a.precioAntes&&parseFloat(a.precioAntes)>a.venta)?(1-a.venta/parseFloat(a.precioAntes)):0;
@@ -7969,6 +7967,15 @@ function tiendaRender(){
 
 // genera el HTML de un lote de cards (se llama por lotes para no trabar)
 // Fecha original de publicación: no se altera al editar precio, costo o stock.
+function tiendaOrdenVidrieraReciente(a,b){
+  // Los celulares importados pueden tener fecha de carga reciente sin ser una publicación nueva.
+  // En la vista general, primero los productos fotografiados no celulares.
+  var fotoA=!!(a&&a.foto),fotoB=!!(b&&b.foto);
+  if(fotoA!==fotoB)return fotoA?-1:1;
+  var celuA=!!(a&&a.esCelu),celuB=!!(b&&b.esCelu);
+  if(celuA!==celuB)return celuA?1:-1;
+  return tiendaFechaPublicacion(b)-tiendaFechaPublicacion(a);
+}
 function tiendaFechaPublicacion(p){
   if(!p)return 0;
   var v=p.creado||p.fechaCarga||p.fechaSubida||p.created_at||p.createdAt||0;
