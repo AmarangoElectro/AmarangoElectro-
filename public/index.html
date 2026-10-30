@@ -3285,9 +3285,8 @@ function promoMadreDatos(p){
   var costo=Number(p.costo)||0;
   var contado=Math.round(Number(p.venta)||0);
   var esCelular=!!p.esCelu||/celular|smartphone|iphone|motorola|samsung|xiaomi|redmi|moto\s/i.test(String(p.categoria||'')+' '+String(p.nombre||''));
-  // Electro y hogar: costo menor a $100.000. Celulares seleccionados:
-  // costo de hasta $350.000, tal como se definió para esta campaña.
-  var incluido=(costo>0&&costo<100000)||(esCelular&&costo>0&&costo<=350000);
+  // Promo 3 para todos los productos con costo de hasta $250.000 inclusive.
+  var incluido=costo>0&&costo<=250000;
   if(!(incluido&&contado>0))return null;
   var totalPlan2=Math.round(calcularTotalPlan(contado,2));
   // Cuota limpia a centenas y tres pagos exactamente iguales.
@@ -3326,13 +3325,13 @@ function bajarPromoMadreNube(){
 function guardarPromoMadreNube(){
   tiendaGuardarPromoMadreLocal();
   if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión con Supabase'));
-  return sbCalc.from('tienda_catalogo').upsert({id:PROMO_MADRE_ID,datos:{activa:promoMadreActiva,fin:'2026-10-31T23:59:59-03:00',costoMaximo:100000,costoMaximoCelulares:350000,nombre:'Promo Octubre — 3 cuotas'},actualizado:new Date().toISOString()}).select('datos').then(function(r){if(r&&r.error)throw r.error;return true;});
+  return sbCalc.from('tienda_catalogo').upsert({id:PROMO_MADRE_ID,datos:{activa:promoMadreActiva,fin:'2026-10-31T23:59:59-03:00',costoMaximo:250000,costoMaximoCelulares:250000,nombre:'Promo Octubre — 3 cuotas'},actualizado:new Date().toISOString()}).select('datos').then(function(r){if(r&&r.error)throw r.error;return true;});
 }
 function abrirPromoMadre(){
   if(!tiendaEsAdmin)return;
   var vigente=promoMadreVigente();
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1.05rem;">✨ Promo Octubre — 3 cuotas</h3>'
-    +'<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px;margin:10px 0;font-size:.72rem;color:#9f1239;line-height:1.55;"><b>Productos incluidos:</b> electro y hogar con costo menor a $100.000, y celulares seleccionados con costo de hasta $350.000.<br><b>Beneficio:</b> 3 cuotas sin interés usando el total del Plan 2.<br><b>Vigencia:</b> hasta el 31 de octubre inclusive.</div>'
+    +'<div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:12px;margin:10px 0;font-size:.72rem;color:#9f1239;line-height:1.55;"><b>Productos incluidos:</b> todos los productos con costo de hasta $250.000 inclusive.<br><b>Beneficio:</b> 3 cuotas sin interés usando el total del Plan 2.<br><b>Vigencia:</b> hasta el 31 de octubre inclusive.</div>'
     +'<button class="calc-btn" style="width:100%;background:'+(vigente?'#64748b':'linear-gradient(135deg,#ec4899,#FF7A00)')+';" onclick="cambiarPromoMadre('+(!vigente)+')">'+(vigente?'Desactivar promoción':'Activar promoción')+'</button>'
     +'<button class="calc-btn" style="width:100%;margin-top:9px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   tiendaModalAbrir(html);
