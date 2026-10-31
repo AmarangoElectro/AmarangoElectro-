@@ -789,3 +789,7 @@ body.oscuro #ae-category-loading{background:#14243c;border-color:#365478;color:#
   font-size:1rem!important;line-height:1!important;overflow:hidden!important;
   overflow-wrap:normal!important;word-break:normal!important;
 }
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-cost-inline[data-price-confirm]:not(.is-editing){
+  grid-template-columns:minmax(0,1fr) 32px 32px!important;
+  gap:4px!important;
+}
