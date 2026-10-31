@@ -5888,7 +5888,7 @@ function tiendaNormalizarCategoria(cat){
    Verde: hasta 2 semanas · Amarillo: 2 a 4 semanas · Rojo: 4 semanas o más */
 function badgePrecioFecha(p){
   if(!tiendaEsAdmin) return '';
-  var ts = p.precioActualizado || p.fechaPrecio || 0;
+  var ts = Math.max(p.precioActualizado || p.fechaPrecio || 0, p.precioChequeadoManual || 0);
   if(!ts){
     return '<div style="background:#F7F8FA;border-radius:6px;padding:4px 7px;font-size:.58rem;color:var(--sub);font-weight:700;text-align:center;margin-bottom:5px;">🕐 Sin fecha</div>';
   }
@@ -8585,9 +8585,12 @@ function tiendaCardsHtml(sublista){
 
     // Costo de catálogo sólo en Administración; reutiliza el editor existente.
     if(tiendaEsAdmin && !vistaPreviaCliente){
-      card+='<div class="ae-admin-cost-inline"><span>Costo: <b>'
+      var puedeConfirmarPrecio=!p.esCelu && !tiendaEsAutomatico(p);
+      card+='<div class="ae-admin-cost-inline"'+(puedeConfirmarPrecio?' data-price-confirm="true"':'')+'><span>Costo: <b>'
         +(Number(p.costo)>0?fmt(Number(p.costo)):'A confirmar')
-        +'</b></span><button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.preventDefault();event.stopPropagation();tiendaAbrirCostoInline('+pid+',this)">✎</button></div>';
+        +'</b></span>'
+        +(puedeConfirmarPrecio?'<button type="button" class="ae-admin-confirm-price" title="Confirmar mismo precio" aria-label="Confirmar mismo precio" onclick="event.preventDefault();event.stopPropagation();tiendaConfirmarPrecioDesdeMenu('+pid+')">✅</button>':'')
+        +'<button type="button" title="Editar costo" aria-label="Editar costo" onclick="event.preventDefault();event.stopPropagation();tiendaAbrirCostoInline('+pid+',this)">✎</button></div>';
     }
 
     if(tiendaEsAdmin && !vistaPreviaCliente){
