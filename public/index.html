@@ -2375,35 +2375,37 @@ function promoFestivoCuotaSeisFija(p){
 }
 function promoFestivoLineaSeisFijas(p){
   var cuota=promoFestivoCuotaSeisFija(p);
-  return cuota?'💳 *OPCIÓN EN 6 CUOTAS FIJAS*\nCada cuota: *'+fmt(cuota)+'*\nTotal financiado: *'+fmt(cuota*6)+'*':'';
+  return cuota?'💳 *PRECIO FINANCIADO*\n6 cuotas fijas de *'+fmt(cuota)+'*':'';
 }
-function armarMensajePromoMadre(p,link){
+// Plantilla editable desde Administración. Siempre se completan los valores reales.
+var PROMO_WA_TEMPLATE_KEY='ae_promo_wa_plantilla_v1';
+var PROMO_WA_TEMPLATE_DEFAULT='*{producto}*\n\n✨ *3 CUOTAS SIN INTERÉS*\nde *{cuota3}*\n\n{plan6}\n\n{cliente}\n\n🎁 Descuento de *{ahorro}* pagando al contado\n\n{enlace}';
+var promoWhatsappPlantilla=(function(){
+  try{return localStorage.getItem(PROMO_WA_TEMPLATE_KEY)||PROMO_WA_TEMPLATE_DEFAULT;}
+  catch(e){return PROMO_WA_TEMPLATE_DEFAULT;}
+})();
+function promoWhatsappTextoGenerado(p,link,beneficioExclusivo,plantilla){
   var promo=promoMadreDatos(p);if(!promo)return '';
   var beneficio6=promoMadreCliente6Datos(p);
-  var linea6=promoFestivoLineaSeisFijas(p);
-  var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
-    +'✨ *DÍA FESTIVO — 3 CUOTAS*\n\n'
-    +'✨ *3 CUOTAS SIN INTERÉS*\n'
-    +'de *'+fmt(promo.cuota)+'*'
-    +(linea6?'\n\n'+linea6:'')
-    +(beneficio6?'\n\n⭐ *¿Ya sos cliente Amarango?*\nConsultá si ingresás en la promo de *6 cuotas de '+fmt(beneficio6.cuota)+'*.':'')
-    +'\n\n🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
-  if(link)msg+='\n\n🛒 Miralo acá: '+link;
-  return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
+  if(beneficioExclusivo&&!beneficio6)return '';
+  var plan6=beneficioExclusivo
+    ? '💳 *PRECIO FINANCIADO*\n6 cuotas fijas de *'+fmt(beneficio6.cuota)+'*'
+    : promoFestivoLineaSeisFijas(p);
+  var cliente=beneficioExclusivo
+    ? '⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*'
+    : (beneficio6?'⭐ *¿Ya sos cliente Amarango?*\nConsultá si ingresás en la promo de *6 cuotas de '+fmt(beneficio6.cuota)+'*.':'');
+  var valores={
+    producto:String(p.nombre||'PRODUCTO').toUpperCase(),cuota3:fmt(promo.cuota),
+    plan6:plan6,cliente:cliente,ahorro:fmt(promo.ahorro),
+    enlace:link?'🛒 Miralo acá: '+link:''
+  };
+  var texto=String(plantilla||promoWhatsappPlantilla||PROMO_WA_TEMPLATE_DEFAULT)
+    .replace(/\{(producto|cuota3|plan6|cliente|ahorro|enlace)\}/g,function(m,k){return valores[k];})
+    .replace(/\n[ \t]*\n(?:[ \t]*\n)+/g,'\n\n').trim();
+  return (typeof limpiarTexto==='function')?limpiarTexto(texto):texto;
 }
-function armarMensajePromoMadreCliente(p,link){
-  var beneficio=promoMadreCliente6Datos(p);if(!beneficio)return '';
-  var promo=beneficio.promo3;
-  var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
-    +'✨ *DÍA FESTIVO — 3 CUOTAS*\n\n'
-    +'✨ *3 CUOTAS SIN INTERÉS*\n'
-    +'de *'+fmt(promo.cuota)+'*\n\n'
-    +'⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*\n'
-    +'💳 *6 CUOTAS FIJAS*\nCada cuota: *'+fmt(beneficio.cuota)+'*\nTotal financiado: *'+fmt(beneficio.cuota*6)+'*\n\n'
-    +'🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
-  if(link)msg+='\n\n🛒 Miralo acá: '+link;
-  return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
-}
+function armarMensajePromoMadre(p,link){return promoWhatsappTextoGenerado(p,link,false);}
+function armarMensajePromoMadreCliente(p,link){return promoWhatsappTextoGenerado(p,link,true);}
 function armarMensajePlanProtegido(nombre,datos,link){
   if(!datos||datos.modo!=='protegida')return '';
   var cuota3=datos.plan3.cuotas[0]||0;
@@ -3345,6 +3347,7 @@ function tiendaGuardarPromoMadreLocal(){
   try{
     localStorage.setItem(PROMO_MADRE_KEY,promoMadreActiva?'1':'0');
     localStorage.setItem(PROMO_FESTIVO_DIA_KEY,promoFestivoDia);
+    localStorage.setItem(PROMO_WA_TEMPLATE_KEY,promoWhatsappPlantilla);
   }catch(e){}
 }
 function tiendaActualizarBotonPromoMadre(){
@@ -3360,6 +3363,7 @@ function bajarPromoMadreNube(){
     var d=r&&r.data&&r.data.datos;
     if(d&&typeof d.activa==='boolean')promoMadreActiva=d.activa;
     if(d&&Object.prototype.hasOwnProperty.call(d,'dia'))promoFestivoDia=/^\d{4}-\d{2}-\d{2}$/.test(String(d.dia||''))?d.dia:'';
+    if(d&&typeof d.mensajeWhatsapp==='string'&&d.mensajeWhatsapp.trim())promoWhatsappPlantilla=d.mensajeWhatsapp;
     tiendaGuardarPromoMadreLocal();tiendaActualizarBotonPromoMadre();
     _promoFestivoUltimaVigencia=promoMadreVigente();
     if(typeof tiendaRender==='function')tiendaRender();
@@ -3371,7 +3375,7 @@ function guardarPromoMadreNube(){
   if(!NUBE_OK||!sbCalc)return Promise.reject(new Error('Sin conexión con Supabase'));
   return sbCalc.from('tienda_catalogo').upsert({
     id:PROMO_MADRE_ID,
-    datos:{activa:promoMadreActiva,dia:promoFestivoDia||null,fin:null,costoMaximo:250000,costoMaximoCelulares:250000,nombre:'Día Festivo — 3 cuotas'},
+    datos:{activa:promoMadreActiva,dia:promoFestivoDia||null,fin:null,costoMaximo:250000,costoMaximoCelulares:250000,nombre:'Día Festivo — 3 cuotas',mensajeWhatsapp:promoWhatsappPlantilla},
     actualizado:new Date().toISOString()
   }).select('datos').then(function(r){if(r&&r.error)throw r.error;return true;});
 }
@@ -3386,8 +3390,54 @@ function abrirPromoMadre(){
     +'<input type="date" id="ae-promo-dia" value="'+(promoFestivoDia||'')+'" style="width:100%;padding:12px;border:2px solid var(--bor);border-radius:10px;font:inherit;color:var(--txt);background:var(--bg);box-sizing:border-box;">'
     +'<button class="calc-btn" style="width:100%;margin-top:9px;background:var(--az);" onclick="guardarDiaPromoFestivo()">💾 Guardar día (o dejar vacío)</button>'
     +'<button class="calc-btn" style="width:100%;margin-top:9px;background:'+(promoMadreActiva?'#64748b':'linear-gradient(135deg,#FF7A00,#0B2D6B)')+';" onclick="cambiarPromoMadre('+(!promoMadreActiva)+')">'+(promoMadreActiva?'Desactivar promoción':'Activar promoción')+'</button>'
+
+    +'<details open style="margin-top:14px;padding:12px;border-radius:12px;border:1px solid var(--bor);background:var(--bg);">'
+    +'<summary style="font-size:.8rem;font-weight:900;color:var(--az);cursor:pointer;">✏️ Editar mensaje de WhatsApp</summary>'
+    +'<p style="font-size:.67rem;line-height:1.5;color:var(--sub);margin:9px 0;">Editá el mensaje y conservá {producto}, {cuota3}, {plan6}, {ahorro} y {enlace}: se completan solos. {cliente} es opcional.</p>'
+    +'<textarea id="ae-promo-wa-editor" maxlength="1600" rows="9" style="width:100%;box-sizing:border-box;padding:10px;resize:vertical;font:inherit;font-size:.73rem;line-height:1.45;border:1.5px solid var(--bor);border-radius:10px;color:var(--txt);background:var(--wh);">'+escapeHtml(promoWhatsappPlantilla)+'</textarea>'
+    +'<div id="ae-promo-wa-preview" style="display:none;white-space:pre-wrap;overflow-wrap:anywhere;padding:10px;margin-top:8px;border-radius:9px;background:var(--wh);font-size:.72rem;color:var(--txt);border:1px solid var(--bor);"></div>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="verVistaPreviaPromoWhatsapp()">👁️ Vista previa</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--nar);" onclick="guardarMensajePromoWhatsapp()">💾 Guardar mensaje</button>'
+    +'<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--bg);color:var(--sub);border:1px solid var(--bor);" onclick="restablecerMensajePromoWhatsapp()">Restablecer mensaje original</button>'
+    +'</details>'
     +'<button class="calc-btn" style="width:100%;margin-top:9px;background:var(--bg);color:var(--sub);border:2px solid var(--bor);" onclick="document.getElementById(\'modal-cuotas\').style.display=\'none\'">Cerrar</button>';
   tiendaModalAbrir(html);
+}
+function verVistaPreviaPromoWhatsapp(){
+  if(!tiendaEsAdmin)return;
+  var editor=document.getElementById('ae-promo-wa-editor');
+  var preview=document.getElementById('ae-promo-wa-preview');
+  if(!editor||!preview)return;
+  var p={nombre:'PRODUCTO DE EJEMPLO',costo:30000,venta:51998,esCelu:false};
+  var texto=promoWhatsappTextoGenerado(p,'https://amarangoelectro.com.ar/',false,editor.value);
+  preview.textContent=texto||'Promoción inactiva: no es posible generar el ejemplo en este momento.';
+  preview.style.display='block';
+}
+function guardarMensajePromoWhatsapp(){
+  if(!tiendaEsAdmin)return;
+  var editor=document.getElementById('ae-promo-wa-editor');if(!editor)return;
+  var nuevo=String(editor.value||'').trim();
+  if(!nuevo||nuevo.length>1600){alert('Escribí un mensaje de hasta 1600 caracteres.');return;}
+  var obligatorios=['producto','cuota3','plan6','ahorro','enlace'];
+  var faltantes=obligatorios.filter(function(k){return nuevo.indexOf('{'+k+'}')===-1;});
+  if(faltantes.length){alert('Conservá los campos automáticos: '+faltantes.map(function(k){return '{'+k+'}';}).join(', '));return;}
+  if(nuevo===promoWhatsappPlantilla){mostrarToast('✅ Mensaje sin cambios');return;}
+  var anterior=promoWhatsappPlantilla;
+  promoWhatsappPlantilla=nuevo;
+  tiendaGuardarPromoMadreLocal();
+  guardarPromoMadreNube().then(function(){
+    mostrarToast('✅ Mensaje de WhatsApp guardado');
+    abrirPromoMadre();
+  }).catch(function(e){
+    promoWhatsappPlantilla=anterior;tiendaGuardarPromoMadreLocal();
+    alert('No se pudo guardar en la nube. Se restauró el mensaje anterior.\n'+(e.message||e));
+  });
+}
+function restablecerMensajePromoWhatsapp(){
+  if(!tiendaEsAdmin)return;
+  var editor=document.getElementById('ae-promo-wa-editor');
+  if(editor){editor.value=PROMO_WA_TEMPLATE_DEFAULT;verVistaPreviaPromoWhatsapp();}
+  mostrarToast('Mensaje original listo: tocá Guardar mensaje para aplicarlo');
 }
 function promoFestivoDiaIngresado(){
   var input=document.getElementById('ae-promo-dia');
@@ -10574,7 +10624,7 @@ function abrirOpcionesCompartirAdmin(id){
   var promoCliente6=promoMadreCliente6Datos(p);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📤 Compartir producto</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí qué propuesta querés enviar para <b>'+escapeHtml(p.nombre)+'</b>.</p>'
-    +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">✨ Día Festivo — 3 cuotas</button>':'')
+    +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">✨ 3 cuotas sin interés</button>':'')
     +(promoCliente6?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#0B2D6B,#2563EB);" onclick="compartirProducto('+pid+',\'promo_cliente_6\')">⭐ Cliente Amarango — compartir 3 + 6 cuotas</button>':'')
     +'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:var(--az);" onclick="compartirProducto('+pid+',\'clasica\')">Calculadora 1 — Clásica</button>'
     +'<button class="calc-btn" '+(tieneCosto?'':'disabled')+' style="width:100%;margin-bottom:8px;background:'+(tieneCosto?'var(--nar)':'#CBD5E1')+';" onclick="compartirProducto('+pid+',\'protegida\')">Calculadora 2 — Plan Protegido</button>'
