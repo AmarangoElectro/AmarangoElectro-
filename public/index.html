@@ -509,6 +509,8 @@ body,body.rol-admin,body.rol-revendedor{background:var(--ae-soft) !important;col
 .prod-marca{margin:0 1px 4px !important;color:#e36d00 !important;font-size:.56rem !important;}
 #tienda-grid .prod-nombre{font-size:.82rem !important;line-height:1.27 !important;min-height:42px !important;color:#091d43 !important;font-weight:850 !important;}
 .ae-card-badge{background:var(--ae-orange);color:#fff;font-size:.59rem;font-weight:900;padding:5px 9px;border-radius:7px;box-shadow:none;letter-spacing:.25px;}
+/* Leyenda breve y legible en las tarjetas de dos columnas. */
+.ae-card-badge-3si{line-height:1.18;text-align:center;max-width:calc(100% - 10px);box-sizing:border-box;}
 
 .ae-finance{margin:6px 0 8px;border-radius:12px;overflow:hidden;}
 .ae-finance-promo{background:#fff;border:1px solid #edf0f4;}
@@ -8457,7 +8459,7 @@ function tiendaCardsHtml(sublista){
     // superponen sobre ella para no empujarla hacia abajo. ═══
     var etiquetas='';
     if(promoMadreDatos(p)){
-      etiquetas+='<div class="ae-card-badge">DÍA FESTIVO</div>';
+      etiquetas+='<div class="ae-card-badge ae-card-badge-3si">3 CUOTAS<br>SIN INTERÉS</div>';
     }
     if(p.sinStock){
       etiquetas+='<div style="background:#dc2626;color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.4px;box-shadow:0 2px 6px rgba(0,0,0,.2);">SIN STOCK</div>';
@@ -8574,10 +8576,12 @@ function tiendaCardsHtml(sublista){
 
       +(function(){
         if(datosPrecioCard.modo==='promo_madre'){
-          var tieneBeneficio6=!!promoMadreCliente6Datos(p);
+          // La leyenda de 6 cuotas sólo aparece si el plan fijo está habilitado.
+          // Un producto configurado con 6 cuotas sin interés NO lleva la leyenda de recargo.
+          var tieneSeisFijas=!!(planesConfig[6]&&planesConfig[6].activo&&parseInt(p.sinInteres,10)!==6);
           return '<div class="ae-finance ae-finance-promo">'
             +'<div class="ae-finance-promo-main"><b>3 CUOTAS<br>SIN INTERÉS</b><span>'+fmt(datosPrecioCard.cuota)+'<small>por cuota</small></span></div>'
-            +(tieneBeneficio6?'<div class="ae-finance-consulta">▣ Consultá si ingresás en 6 cuotas</div>':'')
+            +(tieneSeisFijas?'<div class="ae-finance-consulta">💳 Mínimo recargo en 6 cuotas</div>':'')
             +'<div class="ae-finance-ahorro">◇ Ahorrás pagando al contado: <b>'+fmt(datosPrecioCard.ahorro)+'</b></div>'
             +'</div>';
         }
