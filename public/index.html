@@ -2375,7 +2375,7 @@ function promoFestivoCuotaSeisFija(p){
 }
 function promoFestivoLineaSeisFijas(p){
   var cuota=promoFestivoCuotaSeisFija(p);
-  return cuota?'💳 Mínimo recargo en 6 cuotas de '+fmt(cuota):'';
+  return cuota?'💳 *OPCIÓN EN 6 CUOTAS FIJAS*\nCada cuota: *'+fmt(cuota)+'*\nTotal financiado: *'+fmt(cuota*6)+'*':'';
 }
 function armarMensajePromoMadre(p,link){
   var promo=promoMadreDatos(p);if(!promo)return '';
@@ -2399,7 +2399,7 @@ function armarMensajePromoMadreCliente(p,link){
     +'✨ *3 CUOTAS SIN INTERÉS*\n'
     +'de *'+fmt(promo.cuota)+'*\n\n'
     +'⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*\n'
-    +'💳 *Mínimo recargo en 6 cuotas de '+fmt(beneficio.cuota)+'*\n\n'
+    +'💳 *6 CUOTAS FIJAS*\nCada cuota: *'+fmt(beneficio.cuota)+'*\nTotal financiado: *'+fmt(beneficio.cuota*6)+'*\n\n'
     +'🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
