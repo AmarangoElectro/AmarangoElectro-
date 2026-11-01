@@ -2343,7 +2343,12 @@ function armarMensajeAmarango(nombre, precio, cuotasLines, lineaExtra){
 function armarCuotasLines(precio, prod, modoForzado){
   // Día Festivo y Calculadora Clásica son propuestas independientes.
   var promo=modoForzado==='clasica'?null:promoMadreDatos(prod);
-  if(promo)return ["🎉 3 cuotas SIN INTERÉS de "+fmt(promo.cuota),"💸 Ahorrás "+fmt(promo.ahorro)+" pagando al contado"];
+  if(promo){
+    var linea6=promoFestivoLineaSeisFijas(prod);
+    return ["🎉 3 cuotas SIN INTERÉS de "+fmt(promo.cuota)]
+      .concat(linea6?[linea6]:[])
+      .concat(["💸 Ahorrás "+fmt(promo.ahorro)+" pagando al contado"]);
+  }
   if(modoForzado!=='clasica' && prod && prod.sinInteres){
     var ns=parseInt(prod.sinInteres,10);
     if(ns>0){
@@ -2359,13 +2364,28 @@ function armarCuotasLines(precio, prod, modoForzado){
   });
   return lines;
 }
+// El mismo plan fijo 6 del catálogo; conservamos tasa y redondeo originales.
+// No se anuncia recargo si el plan 6 no está activo o ya es sin interés.
+function promoFestivoCuotaSeisFija(p){
+  if(!p||!(planesConfig[6]&&planesConfig[6].activo)||parseInt(p.sinInteres,10)===6)return null;
+  var contado=Number(p.venta)||0;
+  if(!(contado>0))return null;
+  var cuota=Math.round(calcularTotalPlan(contado,6)/6/1000)*1000;
+  return cuota>0?cuota:null;
+}
+function promoFestivoLineaSeisFijas(p){
+  var cuota=promoFestivoCuotaSeisFija(p);
+  return cuota?'💳 Mínimo recargo en 6 cuotas de '+fmt(cuota):'';
+}
 function armarMensajePromoMadre(p,link){
   var promo=promoMadreDatos(p);if(!promo)return '';
   var beneficio6=promoMadreCliente6Datos(p);
+  var linea6=promoFestivoLineaSeisFijas(p);
   var msg='*'+String(p.nombre||'PRODUCTO').toUpperCase()+'*\n\n'
     +'✨ *DÍA FESTIVO — 3 CUOTAS*\n\n'
     +'✨ *3 CUOTAS SIN INTERÉS*\n'
     +'de *'+fmt(promo.cuota)+'*'
+    +(linea6?'\n\n'+linea6:'')
     +(beneficio6?'\n\n⭐ *¿Ya sos cliente Amarango?*\nConsultá si ingresás en la promo de *6 cuotas de '+fmt(beneficio6.cuota)+'*.':'')
     +'\n\n🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
@@ -2379,7 +2399,7 @@ function armarMensajePromoMadreCliente(p,link){
     +'✨ *3 CUOTAS SIN INTERÉS*\n'
     +'de *'+fmt(promo.cuota)+'*\n\n'
     +'⭐ *BENEFICIO EXCLUSIVO CLIENTE AMARANGO*\n'
-    +'*6 cuotas de '+fmt(beneficio.cuota)+'*\n\n'
+    +'💳 *Mínimo recargo en 6 cuotas de '+fmt(beneficio.cuota)+'*\n\n'
     +'🎁 Descuento de *'+fmt(promo.ahorro)+'* pagando al contado';
   if(link)msg+='\n\n🛒 Miralo acá: '+link;
   return (typeof limpiarTexto==='function')?limpiarTexto(msg):msg;
@@ -8578,7 +8598,7 @@ function tiendaCardsHtml(sublista){
         if(datosPrecioCard.modo==='promo_madre'){
           // La leyenda de 6 cuotas sólo aparece si el plan fijo está habilitado.
           // Un producto configurado con 6 cuotas sin interés NO lleva la leyenda de recargo.
-          var tieneSeisFijas=!!(planesConfig[6]&&planesConfig[6].activo&&parseInt(p.sinInteres,10)!==6);
+          var tieneSeisFijas=promoFestivoCuotaSeisFija(p)!==null;
           return '<div class="ae-finance ae-finance-promo">'
             +'<div class="ae-finance-promo-main"><b>3 CUOTAS<br>SIN INTERÉS</b><span>'+fmt(datosPrecioCard.cuota)+'<small>por cuota</small></span></div>'
             +(tieneSeisFijas?'<div class="ae-finance-consulta">💳 Mínimo recargo en 6 cuotas</div>':'')
