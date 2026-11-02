@@ -1503,6 +1503,63 @@ body.oscuro #ae-admin-orden-menu{
   background:#241915!important;
 }
 </style>
+
+<style id="ae-finance-filter-visual-polish-20261102">
+/* Cambio visual acotado: cinta 6 cuotas y controles del cajón, ambos temas. */
+body:not(.oscuro) #tienda-grid .ae-finance-consulta,
+body:not(.oscuro) .portada-cat-grid .ae-finance-consulta{
+  background:#fff4e8!important;color:#4a2e1f!important;
+  border-top:1px solid #e2b27a!important;border-bottom:1px solid #e2b27a;
+  font-weight:850!important;letter-spacing:.04px;padding:9px 8px!important;
+}
+body.oscuro #tienda-grid .ae-finance-consulta,
+body.oscuro .portada-cat-grid .ae-finance-consulta{
+  background:#241915!important;color:#fff4e8!important;
+  border-top:1px solid #c97a2b!important;border-bottom:1px solid #885529;
+  font-weight:850!important;letter-spacing:.04px;padding:9px 8px!important;
+}
+#cajon-filtros #cajon-orden,
+#cajon-filtros #cajon-maxprecio,
+#cajon-filtros .ae-cajon-select-trigger{
+  box-sizing:border-box;width:100%;min-height:43px;padding:10px 12px!important;
+  background:#fff8f1!important;color:#4a2e1f!important;
+  border:1.5px solid #e2b27a!important;border-radius:11px!important;
+  font-family:inherit;font-size:.8rem;font-weight:800;
+  box-shadow:inset 0 0 0 1px rgba(255,122,0,.03);
+  outline-offset:2px;
+}
+#cajon-filtros #cajon-maxprecio::placeholder{color:#8c6a55!important;opacity:1;}
+#cajon-filtros #cajon-maxprecio:focus,
+#cajon-filtros .ae-cajon-select-trigger:focus-visible{
+  outline:2px solid #ff7a00;box-shadow:0 0 0 3px rgba(255,122,0,.12);
+}
+#cajon-filtros .ae-cajon-select-trigger{align-items:center;justify-content:space-between;gap:8px;cursor:pointer;text-align:left;}
+#cajon-filtros .ae-cajon-select-trigger .ae-select-arrow{color:#ee750b;font-size:1rem;}
+body.oscuro #cajon-filtros #cajon-orden,
+body.oscuro #cajon-filtros #cajon-maxprecio,
+body.oscuro #cajon-filtros .ae-cajon-select-trigger{
+  background:#241915!important;color:#fff4e8!important;
+  border-color:#a86b35!important;box-shadow:none!important;
+  color-scheme:dark;
+}
+body.oscuro #cajon-filtros #cajon-maxprecio::placeholder{color:#d3b9a4!important;}
+.ae-selector-overlay{position:fixed;inset:0;z-index:10060;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(12,9,7,.68);}
+#ae-cajon-orden-modal[hidden]{display:none!important;}
+.ae-selector-panel{box-sizing:border-box;max-width:420px;width:100%;max-height:min(82vh,620px);overflow-y:auto;border-radius:17px;padding:16px;background:#fff8f1;color:#4a2e1f;border:1.5px solid #e2b27a;box-shadow:0 20px 50px rgba(0,0,0,.28);}
+.ae-selector-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;}
+.ae-selector-heading b{font-size:.98rem;font-weight:900;}
+.ae-selector-close{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:rgba(255,122,0,.1);border:1px solid #e2b27a;color:inherit;font-size:1.1rem;cursor:pointer;}
+.ae-selector-options{display:grid;gap:6px;}
+.ae-selector-option{min-height:47px;display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;width:100%;padding:11px 12px;background:#fff;border:1px solid #e9d5bf;border-radius:11px;color:#4a2e1f;font-family:inherit;font-size:.8rem;font-weight:750;cursor:pointer;}
+.ae-selector-option[aria-pressed="true"]{border:2px solid #ff7a00;background:#fff0df;color:#713506;}
+.ae-selector-option:focus-visible,.ae-selector-close:focus-visible{outline:2px solid #ff7a00;outline-offset:2px;}
+.ae-selector-option .ae-selector-dot{font-size:1rem;color:#ef780b;}
+body.oscuro .ae-selector-panel{background:#241915;color:#fff4e8;border-color:#a86b35;}
+body.oscuro .ae-selector-option{background:#30231c;color:#fff4e8;border-color:#765035;}
+body.oscuro .ae-selector-option[aria-pressed="true"]{background:#3a281d;border-color:#ff943e;color:#ffe8d3;}
+body.oscuro .ae-selector-close{background:#38271c;color:#fff4e8;border-color:#a86b35;}
+@media(prefers-reduced-motion:reduce){.ae-selector-overlay *{transition:none!important;}}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -1580,6 +1637,7 @@ body.oscuro #ae-admin-orden-menu{
       <option value="sininteres">✨ Sin interés primero</option>
       <option value="ofertas">🔥 Ofertas primero</option>
     </select>
+    <button type="button" id="ae-cajon-orden-trigger" class="ae-cajon-select-trigger" style="display:none" onclick="aeAbrirSelectorOrden()" aria-haspopup="dialog" aria-controls="ae-cajon-orden-modal"><span id="ae-cajon-orden-etiqueta">Ordenar por…</span><span class="ae-select-arrow" aria-hidden="true">⌄</span></button>
     <input id="cajon-maxprecio" type="number" inputmode="numeric" placeholder="Precio hasta $…" oninput="cajonAplicarMax(this.value)" style="width:100%;padding:10px;border-radius:10px;border:none;font-family:inherit;font-weight:700;font-size:.8rem;">
   </div>
   <button class="cajon-item cj-admin" id="cajon-favoritos" style="display:none;" onclick="cerrarCajon();toggleVerFavoritos()"><span class="ci-ic">❤️</span> Ver favoritos</button>
@@ -1603,6 +1661,14 @@ body.oscuro #ae-admin-orden-menu{
 
   <div class="cajon-sep">Cuenta</div>
   <button class="cajon-item admin" id="cajon-admin-item" onclick="cerrarCajon();abrirIngresoRoles()"><span class="ci-ic" id="cajon-admin-ic">🔐</span> <span id="cajon-admin-txt">Ingreso del equipo</span></button>
+</div>
+
+<!-- Opciones visuales del mismo selector; no cambia el ordenamiento comercial. -->
+<div id="ae-cajon-orden-modal" class="ae-selector-overlay" hidden onclick="if(event.target===this)aeCerrarSelectorOrden()">
+ <div class="ae-selector-panel" role="dialog" aria-modal="true" aria-labelledby="ae-cajon-orden-titulo">
+  <div class="ae-selector-heading"><b id="ae-cajon-orden-titulo">Ordenar productos</b><button type="button" class="ae-selector-close" aria-label="Cerrar opciones" onclick="aeCerrarSelectorOrden()">✕</button></div>
+  <div id="ae-cajon-orden-opciones" class="ae-selector-options"></div>
+ </div>
 </div>
 
 <div class="install-banner" id="install-banner">
@@ -6498,6 +6564,7 @@ function abrirCajon(){
   // sincronizar orden/precio con el estado actual
   var so=document.getElementById('tienda-orden'), co=document.getElementById('cajon-orden');
   if(so&&co) co.value=so.value;
+  aeActualizarSelectorOrden();
   var sm=document.getElementById('tienda-maxprecio'), cm=document.getElementById('cajon-maxprecio');
   if(sm&&cm) cm.value=sm.value;
   // mostrar secciones según rol
@@ -6519,6 +6586,7 @@ function abrirCajon(){
   if(o)o.classList.add('abierto');
 }
 function cerrarCajon(){
+  aeCerrarSelectorOrden();
   var c=document.getElementById('cajon-lateral');
   var o=document.getElementById('cajon-overlay');
   if(c)c.classList.remove('abierto');
@@ -6551,6 +6619,54 @@ function cajonAplicarMax(v){
   var sm=document.getElementById('tienda-maxprecio'); if(sm){ sm.value=v; }
   if(typeof tiendaRender==='function') tiendaRender();
 }
+
+/* Selector alternativo a Android, solo para Ordenar por… en el cajón lateral.
+   Usa las opciones del SELECT existente y su misma función cajonAplicarOrden. */
+function aeActualizarSelectorOrden(){
+  var sel=document.getElementById('cajon-orden'),boton=document.getElementById('ae-cajon-orden-trigger');
+  var label=document.getElementById('ae-cajon-orden-etiqueta');
+  if(!sel||!boton||!label)return;
+  var elegido=sel.options[sel.selectedIndex]||sel.options[0];
+  label.textContent=elegido?elegido.textContent:'Ordenar por…';
+  boton.style.display='flex';
+  sel.style.display='none'; // Sin JS, el select original sigue disponible.
+}
+function aeAbrirSelectorOrden(){
+  var sel=document.getElementById('cajon-orden'),modal=document.getElementById('ae-cajon-orden-modal');
+  var lista=document.getElementById('ae-cajon-orden-opciones');
+  if(!sel||!modal||!lista)return;
+  lista.replaceChildren();
+  Array.prototype.forEach.call(sel.options,function(opcion){
+    var boton=document.createElement('button');
+    boton.type='button';boton.className='ae-selector-option';
+    boton.textContent=opcion.textContent;
+    var activo=sel.value===opcion.value;
+    boton.setAttribute('aria-pressed',activo?'true':'false');
+    var punto=document.createElement('span');punto.className='ae-selector-dot';
+    punto.setAttribute('aria-hidden','true');punto.textContent=activo?'●':'○';
+    boton.appendChild(punto);
+    boton.addEventListener('click',function(){
+      sel.value=opcion.value;
+      cajonAplicarOrden(opcion.value);
+      aeActualizarSelectorOrden();
+      aeCerrarSelectorOrden();
+    });
+    lista.appendChild(boton);
+  });
+  modal.hidden=false;
+  var activo=lista.querySelector('[aria-pressed="true"]');
+  (activo||lista.querySelector('button'))?.focus();
+}
+function aeCerrarSelectorOrden(){
+  var modal=document.getElementById('ae-cajon-orden-modal');
+  if(!modal||modal.hidden)return;
+  modal.hidden=true;
+  var btn=document.getElementById('ae-cajon-orden-trigger');if(btn)btn.focus();
+}
+document.addEventListener('keydown',function(event){
+  var modal=document.getElementById('ae-cajon-orden-modal');
+  if(event.key==='Escape'&&modal&&!modal.hidden){event.preventDefault();aeCerrarSelectorOrden();}
+});
 // Enciende/apaga la ruleta de descuentos (preferencia del admin, apagada por defecto)
 function toggleRuleta(){
   var on=(localStorage.getItem('ae_ruleta_on')==='1');
