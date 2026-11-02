@@ -1447,20 +1447,20 @@ body.oscuro #tab-placas #res-placa{color:#d5dce7 !important;}
 </style>
 
 <style id="ae-dark-warm-brown-20261102">
-/* Sólo modo oscuro: reemplazar fondos negros con marrón-negro.
+/* Sólo modo oscuro: fondo general negro puro; tarjetas y paneles marrón oscuro.
    No altera fotos, fuentes, precios, contraste del texto o lógica comercial. */
 /* Fondo completo: HTML, lienzo y roles de Administración/Asesor.
-   Neutraliza los degradados con prioridad heredados sin alterar el modo claro. */
+   Conserva los tonos marrones solamente para superficies elevadas. */
 html:has(body.oscuro){
-  background:#120d0b!important;
+  background:#000000!important;
   background-image:none!important;
 }
 body.oscuro,
 body.oscuro.rol-admin,
 body.oscuro.rol-revendedor{
-  --bg:#120d0b!important;
+  --bg:#000000!important;
   --wh:#241915!important;
-  background:#120d0b!important;
+  background:#000000!important;
   background-image:none!important;
   background-attachment:scroll!important;
 }
@@ -1472,7 +1472,7 @@ body.oscuro #tienda-grid,
 body.oscuro .portada-cat-grid,
 body.oscuro #tienda-submarcas,
 body.oscuro #tienda-chips.cat-grid{
-  background-color:#120d0b!important;
+  background-color:#000000!important;
 }
 body.oscuro .header{
   background:linear-gradient(160deg,#120d0b,#241915)!important;
