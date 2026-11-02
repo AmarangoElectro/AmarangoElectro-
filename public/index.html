@@ -1449,13 +1449,23 @@ body.oscuro #tab-placas #res-placa{color:#d5dce7 !important;}
 <style id="ae-dark-warm-brown-20261102">
 /* Sólo modo oscuro: reemplazar fondos negros con marrón-negro.
    No altera fotos, fuentes, precios, contraste del texto o lógica comercial. */
-html:has(body.oscuro){background:#120d0b!important}
-body.oscuro{
+/* Fondo completo: HTML, lienzo y roles de Administración/Asesor.
+   Neutraliza los degradados con prioridad heredados sin alterar el modo claro. */
+html:has(body.oscuro){
+  background:#120d0b!important;
+  background-image:none!important;
+}
+body.oscuro,
+body.oscuro.rol-admin,
+body.oscuro.rol-revendedor{
   --bg:#120d0b!important;
   --wh:#241915!important;
   background:#120d0b!important;
+  background-image:none!important;
+  background-attachment:scroll!important;
 }
 body.oscuro #tab-tienda,
+body.oscuro #tienda-cont,
 body.oscuro .tab-content,
 body.oscuro main,
 body.oscuro #tienda-grid,
