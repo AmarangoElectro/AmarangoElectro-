@@ -1646,6 +1646,95 @@ body.oscuro #modal-cuotas.ae-modern-product-detail #modal-cuotas-body .ae-detail
   outline:2px solid #ff7a00!important;outline-offset:2px!important;
 }
 </style>
+
+<style id="ae-bottom-nav-dark-and-detail-edit-20261102">
+/* Solo apariencia: barra inferior en ambos temas y botón Editar del detalle.
+   Mantiene exactamente las acciones, los emojis por rol y las cotizaciones. */
+#nav-inferior > button {
+  min-width:0 !important;
+  min-height:57px;
+  border-radius:12px !important;
+  color:#57647a !important;
+  font-weight:800;
+  -webkit-tap-highlight-color:transparent;
+}
+#nav-inferior > button > span:last-child{
+  color:inherit!important;
+  font-weight:800!important;
+  line-height:1.15;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+#nav-inferior .ae-nav-emoji{
+  display:grid!important;
+  place-items:center;
+  flex:none;
+  width:35px;
+  height:34px;
+  border-radius:11px;
+  background:#f4f5f8;
+  border:1px solid #e3e7ec;
+  font-size:21px!important;
+  line-height:1!important;
+  filter:none!important;
+}
+body.oscuro #nav-inferior{
+  background:#241915!important;
+  border-top:1.5px solid #a86b35!important;
+  box-shadow:0 -5px 23px rgba(0,0,0,.43)!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  color:#fff4e8!important;
+}
+body.oscuro #nav-inferior > button,
+body.oscuro #nav-inferior > button.nav-item{
+  color:#f2dccc!important;
+  background:transparent!important;
+  opacity:1!important;
+}
+body.oscuro #nav-inferior > button > span:last-child{
+  color:#f2dccc!important;
+  -webkit-text-fill-color:#f2dccc!important;
+}
+body.oscuro #nav-inferior .ae-nav-emoji{
+  background:#35251d!important;
+  border:1px solid #815538!important;
+  box-shadow:inset 0 1px 0 rgba(255,235,209,.06);
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.16))!important;
+}
+body.oscuro #nav-inferior > button:active .ae-nav-emoji{
+  background:#49301e!important;
+  border-color:#ff943e!important;
+}
+body.oscuro #nav-inferior > button:focus-visible{
+  outline:2px solid #ff943e!important;
+  outline-offset:-2px;
+}
+#modal-cuotas.ae-modern-product-detail #modal-cuotas-body button.ae-detail-edit-product{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  min-height:48px!important;
+  background:#fff1dc!important;
+  color:#4a2e1f!important;
+  -webkit-text-fill-color:#4a2e1f!important;
+  border:1.5px solid #d08a46!important;
+  font-weight:900!important;
+  text-shadow:none!important;
+}
+body.oscuro #modal-cuotas.ae-modern-product-detail #modal-cuotas-body button.ae-detail-edit-product{
+  background:#38251a!important;
+  color:#ffe9d1!important;
+  -webkit-text-fill-color:#ffe9d1!important;
+  border:1.5px solid #ff943e!important;
+  text-shadow:none!important;
+}
+#modal-cuotas.ae-modern-product-detail #modal-cuotas-body button.ae-detail-edit-product:focus-visible{
+  outline:2px solid #ff943e!important;
+  outline-offset:3px!important;
+}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -2222,17 +2311,17 @@ body.oscuro #modal-cuotas.ae-modern-product-detail #modal-cuotas-body .ae-detail
     <!-- ===== BARRA DE NAVEGACIÓN INFERIOR (estilo Mercado Libre) ===== -->
     <div id="nav-inferior" style="display:none;position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--wh);border-top:1px solid var(--bor);box-shadow:0 -2px 12px rgba(11,45,107,.10);z-index:1450;padding:6px 4px calc(6px + env(safe-area-inset-bottom));display:flex;justify-content:space-around;align-items:center;">
       <button onclick="ayudaAbrir()" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
-        <span style="font-size:22px;line-height:1;">❓</span><span style="font-size:.62rem;font-weight:700;">Ayuda</span>
+        <span class="ae-nav-emoji" aria-hidden="true" style="font-size:22px;line-height:1;">❓</span><span style="font-size:.62rem;font-weight:700;">Ayuda</span>
       </button>
       <button id="nav-carrito-btn" class="nav-item" onclick="navTienda('carrito')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);position:relative;">
-        <span id="nav-carrito-ic" style="font-size:22px;line-height:1;">🛒</span><span id="nav-carrito-lbl" style="font-size:.62rem;font-weight:700;">Carrito</span>
+        <span id="nav-carrito-ic" class="ae-nav-emoji" aria-hidden="true" style="font-size:22px;line-height:1;">🛒</span><span id="nav-carrito-lbl" style="font-size:.62rem;font-weight:700;">Carrito</span>
         <span id="nav-carrito-badge" style="display:none;position:absolute;top:0;right:calc(50% - 22px);background:var(--red);color:#fff;font-size:.55rem;font-weight:800;min-width:15px;height:15px;line-height:15px;border-radius:8px;text-align:center;padding:0 3px;">0</span>
       </button>
       <button id="nav-favoritos-btn" class="nav-item" onclick="navTienda('favoritos')" style="flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
-        <span style="font-size:22px;line-height:1;">❤️</span><span style="font-size:.62rem;font-weight:700;">Favoritos</span>
+        <span class="ae-nav-emoji" aria-hidden="true" style="font-size:22px;line-height:1;">❤️</span><span style="font-size:.62rem;font-weight:700;">Favoritos</span>
       </button>
       <button id="nav-ofertas-btn" class="nav-item" onclick="navTienda('ofertas')" style="display:flex;flex:1;background:none;border:none;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:inherit;padding:4px 2px;color:var(--sub);">
-        <span style="font-size:22px;line-height:1;">🔥</span><span style="font-size:.62rem;font-weight:700;">Ofertas</span>
+        <span class="ae-nav-emoji" aria-hidden="true" style="font-size:22px;line-height:1;">🔥</span><span style="font-size:.62rem;font-weight:700;">Ofertas</span>
       </button>
     </div>
 
@@ -10680,7 +10769,7 @@ function tiendaVerDetalle(id){
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;border:none;" onclick="compartirInstagram('+pid+')">📸 Compartir en Instagram</button>';
     html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);" onclick="tiendaDescargarImagenProducto('+pid+')">🖼️ Descargar imagen</button>';
     if(tiendaEsAdmin){
-      html+='<button class="calc-btn" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
+      html+='<button class="calc-btn ae-detail-edit-product" style="width:100%;margin-top:8px;background:var(--az);" onclick="tiendaEditarPrecio('+pid+')">🖍️ Editar producto</button>';
     }
   }
   // PRODUCTOS RELACIONADOS: misma categoría, hasta 4
