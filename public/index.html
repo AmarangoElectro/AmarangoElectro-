@@ -8773,6 +8773,7 @@ function tiendaRender(){
     });
   }
 
+  // 🌟 traer los CELULARES a la tienda como productos de la categoría 📱 Celulares
   if(busquedaGlobalAdmin){
     // En Administración se buscan todos los productos cargados, incluidos los
     // ocultos o sin stock; en público nunca se amplían permisos de visibilidad.
@@ -8782,7 +8783,6 @@ function tiendaRender(){
     });
   }
 
-  // 🌟 traer los CELULARES a la tienda como productos de la categoría 📱 Celulares
   var celus=cargarListaCelus();
   celus.forEach(function(c, i){
     if(tiendaEsAdmin && tiendaBandejaAdmin && !busquedaGlobalAdmin){
