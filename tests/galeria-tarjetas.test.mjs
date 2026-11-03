@@ -34,7 +34,7 @@ test('Los medios son de carga diferida, el video no se reproduce desde la tarjet
 });
 
 
-test('Botón Foto/video junto a imagen sólo en Administración, mantiene acceso antiguo',()=>{
+test('Botón Foto/video al lado derecho de Visible/Oculto, sólo en Administración',()=>{
   const card=html.slice(html.indexOf('function tiendaCardsHtml('),html.indexOf('// aplica clases de vista y avisos'));
   assert.match(card,/class="ae-admin-media-add"/);
   assert.match(card,/tiendaEsAdmin&&!vistaPreviaCliente[\s\S]*?class="ae-admin-media-add"/);
@@ -65,4 +65,20 @@ test('Compartir el elemento elegido funciona en tarjetas, visor, detalle y edici
   assert.match(html,/📷 Galería: hasta 3 fotos o video/);
   assert.match(html,/📤 Compartir este producto/);
   assert.match(html,/ae-admin-media-add/);
+});
+
+
+test('Fila de administración 50/50 y galería reposicionada fuera de la imagen',()=>{
+  const card=html.slice(html.indexOf('function tiendaCardsHtml('),html.indexOf('// aplica clases de vista y avisos'));
+  assert.match(card,/card\+='<div class="ae-admin-visibility-media-row">'/);
+  assert.match(card,/card\+='<div class="ae-admin-visibility-media-row">'[\s\S]*?class="ae-admin-visibility [\s\S]*?tiendaToggleVisibilidadDirecta\('\+pid\+'\)[\s\S]*?class="ae-admin-media-add"[\s\S]*?window\.AEGaleria\.abrir\('\+pid\+'\)/);
+  assert.match(html,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)!important/);
+  assert.match(html,/\.ae-admin-visibility-media-row>.ae-admin-visibility/);
+  assert.match(html,/\.ae-admin-visibility-media-row>.ae-admin-media-add/);
+  assert.match(html,/body\.oscuro #tienda-grid\.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row>.ae-admin-media-add/);
+  assert.doesNotMatch(card,/bottom:47px;left:8px;max-width:calc/);
+  assert.match(card,/ae-admin-media-add-icon/);
+  assert.match(card,/window\.AEGaleria\.abrir\('\+pid\+'\)/);
+  assert.match(card,/📷 Galería: hasta 3 fotos o video/);
+  assert.match(card,/↗ Ampliar imagen/);
 });
