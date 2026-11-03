@@ -1735,6 +1735,46 @@ body.oscuro #modal-cuotas.ae-modern-product-detail #modal-cuotas-body button.ae-
   outline-offset:3px!important;
 }
 </style>
+
+<style id="ae-modal-catalogo-temas-20261102">
+/* Vista de catálogo: CSS aislado, sin alterar lógica, precio ni imágenes. */
+#modal-carga>div{background:#fff8f1!important;color:#4a2e1f!important;border:1px solid #e2b27a!important;font-family:Inter,system-ui,sans-serif!important;box-shadow:0 20px 45px #120b0833!important}
+#modal-carga [style*="color:var(--az)"]{color:#59351b!important}
+#modal-carga [style*="background:#f0f4ff"]{background:#fff0df!important;border:1px solid #e7c29c!important}
+#modal-carga [style*="background:#eef4ff"]{background:#fff0df!important;color:#59351b!important;border-color:#c28f61!important}
+#modal-carga :is(textarea,input:not([type="file"]),select){background:#fff!important;color:#35271e!important;border-color:#b68a67!important;font-family:inherit!important;max-width:100%}
+#modal-carga :is(textarea,input)::placeholder{color:#756457!important;opacity:1}
+#modal-carga .carga-modo-btn:not(.on){background:#fff8f1!important;color:#59351b!important;border-color:#d6a675!important}
+#modal-carga .carga-modo-btn.on{background:#0b4fbf!important;color:#fff!important;border-color:#0b4fbf!important}
+body.oscuro #modal-carga{background:rgba(0,0,0,.84)!important}
+body.oscuro #modal-carga>div{background:#17110e!important;color:#fff4e8!important;border:1px solid #9f663b!important;box-shadow:0 22px 54px #000b!important;color-scheme:dark}
+body.oscuro #modal-carga [style*="color:var(--az)"]{color:#ffbd82!important}
+body.oscuro #modal-carga [style*="color:var(--sub)"]{color:#dfcfc2!important}
+body.oscuro #modal-carga [style*="background:#f0f4ff"]{background:#2c211a!important;color:#fff0e5!important;border:1px solid #8e6042!important}
+body.oscuro #modal-carga [style*="background:#eef4ff"]{background:#302219!important;color:#ffd3af!important;border-color:#bd7b4b!important}
+body.oscuro #modal-carga :is(textarea,input:not([type="file"]),select){background:#211813!important;color:#fff4e8!important;border:1.5px solid #a3714e!important;color-scheme:dark}
+body.oscuro #modal-carga :is(textarea,input)::placeholder{color:#c7afa0!important;opacity:1}
+body.oscuro #modal-carga .carga-modo-btn:not(.on){background:#2a201a!important;color:#fff0e5!important;border-color:#966b4e!important}
+body.oscuro #modal-carga .carga-modo-btn.on{background:#ff943e!important;color:#20120b!important;border-color:#ffc08b!important}
+body.oscuro #modal-cuotas:not(.ae-modern-product-detail)>#modal-cuotas-body{background:#211813!important;color:#fff4e8!important;border:1px solid #a3714e!important;color-scheme:dark}
+body.oscuro #modal-cuotas:not(.ae-modern-product-detail)>#modal-cuotas-body :is(input,textarea,select){background:#2c211a!important;color:#fff4e8!important;border-color:#a3714e!important;color-scheme:dark}
+#modal-carga :is(button,input,select,textarea):focus-visible,.ae-brand-select-trigger:focus-visible{outline:2px solid #ff943e!important;outline-offset:2px}
+.ae-brand-select-source{display:none!important}
+.ae-brand-select-trigger{width:100%;min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-sizing:border-box;border:1.5px solid #c6976e;border-radius:11px;background:#fff;color:#443020;font:800 .78rem Inter,system-ui,sans-serif;padding:11px 13px;text-align:left;cursor:pointer}
+.ae-brand-select-trigger:disabled{opacity:.55;cursor:not-allowed}
+.ae-brand-select-trigger .ae-select-arrow{font-size:1.1rem;color:#cc6819}
+body.oscuro .ae-brand-select-trigger{background:#281d17;color:#fff4e8;border-color:#aa754e}
+body.oscuro .ae-brand-select-trigger .ae-select-arrow{color:#ff943e}
+#ae-brand-select-modal[hidden]{display:none!important}
+#ae-brand-select-modal{z-index:10080!important}
+#ae-brand-select-modal .ae-selector-panel{font-family:Inter,system-ui,sans-serif}
+#ae-brand-select-modal .ae-selector-option:disabled{opacity:.4;cursor:not-allowed}
+body.oscuro #ae-brand-select-modal .ae-selector-panel{background:#211813;color:#fff4e8;border-color:#a3714e}
+body.oscuro #ae-brand-select-modal .ae-selector-option{background:#302219;color:#fff4e8;border-color:#82563c}
+body.oscuro #ae-brand-select-modal .ae-selector-option[aria-pressed="true"]{background:#50321d;color:#fff;border-color:#ff943e}
+@media(max-width:480px){#ae-brand-select-modal .ae-selector-panel{max-height:82dvh}}
+</style>
+
 </head>
 <body class="en-tienda">
 
@@ -12793,6 +12833,7 @@ function tiendaAbrirCarga(){
       });
     }
   }catch(e){}
+  if(window.aeSincronizarSelectoresVisuales)window.aeSincronizarSelectoresVisuales();
   // 🏪 llenar sugerencias de mayoristas ya usados (para no reescribir cada vez)
   try{
     var dl=document.getElementById('lista-mayoristas');
@@ -14851,6 +14892,98 @@ try{ tiendaInit(); }catch(e){}
     setTimeout(chequear, 200);
   }
   chequear();
+})();
+</script>
+
+
+<script id="ae-selectores-marca-20261102">
+(function(){
+'use strict';
+/* Mantiene todos los SELECT originales y sus handlers. Sólo cambia el menú visual. */
+var exceptos={'cajon-orden':1,'tienda-orden':1}, modal=null,lista=null,titulo=null,origen=null,regreso=null;
+function sincronizar(sel){
+ if(!sel||!sel._aeBoton||!sel._aeBoton.isConnected)return;
+ var opt=sel.options[sel.selectedIndex]||sel.options[0];
+ var label=sel._aeBoton.querySelector('.ae-brand-select-label');
+ if(label)label.textContent=opt?opt.textContent:'Elegí una opción';
+ sel._aeBoton.disabled=!!sel.disabled;
+}
+function cerrar(){
+ if(!modal||modal.hidden)return;
+ modal.hidden=true;origen=null;
+ var boton=regreso;regreso=null;
+ if(boton&&boton.isConnected)boton.focus({preventScroll:true});
+}
+function abrir(sel){
+ if(!sel||sel.disabled||!modal)return;
+ origen=sel;regreso=sel._aeBoton;lista.replaceChildren();
+ titulo.textContent=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]&&sel.labels[0].textContent.trim())||(sel.id==='carga-categoria'?'Elegí una categoría':'Elegí una opción');
+ Array.prototype.forEach.call(sel.options,function(op){
+  if(op.hidden)return;
+  var b=document.createElement('button');b.type='button';b.className='ae-selector-option';
+  b.disabled=!!op.disabled||!!(op.parentElement&&op.parentElement.disabled);
+  b.setAttribute('aria-pressed',sel.value===op.value?'true':'false');
+  var label=document.createElement('span');label.textContent=op.textContent;
+  var dot=document.createElement('span');dot.className='ae-selector-dot';dot.setAttribute('aria-hidden','true');
+  dot.textContent=sel.value===op.value?'●':'○';b.appendChild(label);b.appendChild(dot);
+  b.addEventListener('click',function(){
+   var cambia=sel.value!==op.value;sel.value=op.value;sincronizar(sel);cerrar();
+   if(cambia){
+    sel.dispatchEvent(new Event('input',{bubbles:true}));
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+   }
+  });
+  lista.appendChild(b);
+ });
+ modal.hidden=false;
+ var focus=lista.querySelector('[aria-pressed="true"]:not(:disabled)')||lista.querySelector('button:not(:disabled)');
+ if(focus)focus.focus({preventScroll:true});
+}
+function equipar(sel){
+ if(sel.dataset.aeSelectorReady||exceptos[sel.id]||sel.multiple||sel.size>1||sel.style.display==='none')return;
+ sel.dataset.aeSelectorReady='1';
+ var b=document.createElement('button');b.type='button';b.className='ae-brand-select-trigger';
+ b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-controls','ae-brand-select-modal');
+ var txt=document.createElement('span');txt.className='ae-brand-select-label';
+ var arrow=document.createElement('span');arrow.className='ae-select-arrow';arrow.setAttribute('aria-hidden','true');
+ arrow.textContent='⌄';b.appendChild(txt);b.appendChild(arrow);
+ if(sel.style.margin)b.style.margin=sel.style.margin;
+ if(sel.style.marginBottom)b.style.marginBottom=sel.style.marginBottom;
+ // Respetar la proporción original si el selector comparte fila con un input.
+ if(sel.style.flex)b.style.flex=sel.style.flex;
+ if(sel.style.maxWidth)b.style.maxWidth=sel.style.maxWidth;
+ sel.insertAdjacentElement('afterend',b);
+ sel._aeBoton=b;sel.classList.add('ae-brand-select-source');
+ sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
+ b.addEventListener('click',function(){sincronizar(sel);abrir(sel)});
+ sincronizar(sel);
+}
+function escanear(){document.querySelectorAll('select:not([data-ae-selector-ready])').forEach(equipar);}
+function iniciar(){
+ modal=document.createElement('div');modal.id='ae-brand-select-modal';modal.className='ae-selector-overlay';modal.hidden=true;
+ modal.innerHTML='<div class="ae-selector-panel" role="dialog" aria-modal="true" aria-labelledby="ae-brand-select-heading"><div class="ae-selector-heading"><b id="ae-brand-select-heading">Elegí una opción</b><button type="button" class="ae-selector-close" aria-label="Cerrar opciones">✕</button></div><div id="ae-brand-select-options" class="ae-selector-options"></div></div>';
+ document.body.appendChild(modal);lista=document.getElementById('ae-brand-select-options');titulo=document.getElementById('ae-brand-select-heading');
+ modal.querySelector('.ae-selector-close').addEventListener('click',cerrar);
+ modal.addEventListener('click',function(e){if(e.target===modal)cerrar()});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden){e.preventDefault();cerrar()}});
+ document.addEventListener('change',function(e){if(e.target&&e.target.tagName==='SELECT')sincronizar(e.target)},true);
+ escanear();
+ var pending=false;
+ new MutationObserver(function(changes){
+  var rescan=false;
+  changes.forEach(function(c){
+   if(c.target&&c.target.tagName==='SELECT')sincronizar(c.target);
+   for(var i=0;i<c.addedNodes.length;i++){
+    var n=c.addedNodes[i];if(n.nodeType===1&&(n.tagName==='SELECT'||(n.querySelector&&n.querySelector('select')))){rescan=true;break;}
+   }
+  });
+  if(rescan&&!pending){pending=true;setTimeout(function(){pending=false;escanear()},90)}
+ }).observe(document.body,{childList:true,subtree:true});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar,{once:true});else iniciar();
+window.aeSincronizarSelectoresVisuales=function(){
+ if(!modal)return;escanear();document.querySelectorAll('select[data-ae-selector-ready]').forEach(sincronizar);
+};
 })();
 </script>
 
