@@ -1,0 +1,236 @@
+/* AmarangoElectro: galería aditiva. No modifica foto principal, precios, cuotas ni sincronización. */
+(function(){
+  'use strict';
+  var TABLA='tienda_media_producto', BUCKET='tienda-fotos';
+  var cache=new Map(), modal=null, visor=null, seleccion=null, ocupado=false;
+  var estilos='.ae-gal-overlay{position:fixed;inset:0;z-index:6700;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,13,32,.8);backdrop-filter:blur(4px)}'
+  +'.ae-gal-panel{width:100%;max-width:460px;max-height:90dvh;overflow-y:auto;background:var(--wh);color:var(--txt);border-radius:17px;padding:17px;box-shadow:0 12px 50px #0005}'
+  +'.ae-gal-panel h3{font-size:1rem;color:var(--az);margin:0 0 8px;font-weight:900}'
+  +'.ae-gal-panel p{font-size:.74rem;color:var(--sub);line-height:1.4;margin:6px 0 12px}'
+  +'.ae-gal-row{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}'
+  +'.ae-gal-thumb{width:72px;height:72px;object-fit:contain;border:1px solid var(--bor);background:#fff;border-radius:9px}'
+  +'.ae-gal-btn{cursor:pointer;border:1px solid var(--bor);background:var(--bg);color:var(--az);padding:9px 10px;border-radius:9px;font-size:.72rem;font-weight:800;font-family:inherit}'
+  +'.ae-gal-btn:disabled{opacity:.45;cursor:not-allowed}'
+  +'.ae-gal-btn-primary{background:var(--az);color:#fff;border-color:var(--az)}'
+  +'.ae-gal-btn-remove{background:#fff0f0;color:#ae1717;border-color:#ffcccc}'
+  +'.ae-gal-preview{display:flex;gap:7px;overflow-x:auto;margin:8px 0 12px;scrollbar-width:thin;padding:3px 0 8px}'
+  +'.ae-gal-preview .ae-gal-btn{width:74px;min-width:74px;padding:4px}'
+  +'.ae-gal-preview img{width:64px;height:62px;display:block;object-fit:contain;border-radius:6px;background:#fff}'
+  +'.ae-gal-visor{position:fixed;inset:0;z-index:6900;background:rgba(3,10,25,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;color:#fff}'
+  +'.ae-gal-visor img,.ae-gal-visor video{display:block;max-width:100%;max-height:73dvh;width:auto;height:auto;object-fit:contain;background:#000;border-radius:10px}'
+  +'.ae-gal-visor .ae-gal-btn{color:#fff;background:#142f5e;border-color:#6b82a4}'
+  +'body.oscuro .ae-gal-panel{background:#122442;color:#e8eef7}'
+  +'body.oscuro .ae-gal-btn{background:#1a3456;color:#e8eef7;border-color:#456081}'
+  +'body.oscuro .ae-gal-btn-primary{background:#1d5cbb;color:#fff}'
+  +'body.oscuro .ae-gal-btn-remove{background:#4a1c22;color:#ffb0b0}';
+  var css=document.createElement('style');css.id='ae-galeria-styles';css.textContent=estilos;document.head.appendChild(css);
+  function nodo(tag,clase,texto){var n=document.createElement(tag);if(clase)n.className=clase;if(texto!==undefined)n.textContent=texto;return n;}
+  function boton(texto,fn,clase){var n=nodo('button','ae-gal-btn '+(clase||''),texto);n.type='button';n.addEventListener('click',fn);return n;}
+  function aviso(msg){if(typeof mostrarToast==='function')mostrarToast(msg);else alert(msg);}
+  function producto(id){return typeof buscarProd==='function'?buscarProd(id):null;}
+  function clave(p){
+    if(p.esCelu||String(p.id).indexOf('celu_')===0)
+      return 'celu:'+String(p.mayorista||'').trim().toLowerCase()+'|'+String(p.nombre||'').trim().toLowerCase();
+    if(typeof tiendaEsAutomatico==='function' && tiendaEsAutomatico(p))
+      return 'proveedor:'+String(p.proveedorClave||p.proveedor||'')+'|'+String(p.proveedorId||p.id);
+    return 'manual:'+String(p.id);
+  }
+  function limpio(d){return {imagenes:Array.isArray(d&&d.imagenes)?d.imagenes.filter(function(v){return typeof v==='string'&&/^https:\/\//.test(v);}).slice(0,3):[],video:typeof(d&&d.video_url)==='string'&&/^https:\/\//.test(d.video_url)?d.video_url:''};}
+  function esperarNube(){return new Promise(function(resolve,reject){var n=0;(function check(){if(typeof sbCalc!=='undefined'&&sbCalc&&typeof sbCalc.from==='function'){resolve(sbCalc);return;}if(++n>24){reject(new Error('No hay conexión a la nube'));return;}setTimeout(check,170);})();});}
+  function leer(p,forzar){
+    var k=clave(p);if(!forzar&&cache.has(k))return Promise.resolve(cache.get(k));
+    return esperarNube().then(function(sb){return sb.from(TABLA).select('imagenes,video_url').eq('clave',k).maybeSingle();})
+      .then(function(r){if(r.error)throw r.error;var data=limpio(r.data);cache.set(k,data);return data;});
+  }
+  function piezas(p,datos){
+    var lista=[];if(p.foto)lista.push({tipo:'imagen',url:p.foto});
+    // No mostrar más de 3 imágenes en total aun si cambió la portada después de cargarlas.
+    datos.imagenes.slice(0,Math.max(0,3-(p.foto?1:0))).forEach(function(url){lista.push({tipo:'imagen',url:url});});
+    if(datos.video)lista.push({tipo:'video',url:datos.video});
+    return lista;
+  }
+  function cerrarVisor(){if(visor){visor.remove();visor=null;}}
+  function abrirVisor(p,datos,indice){
+    cerrarVisor();var lista=piezas(p,datos);if(!lista.length)return;
+    indice=Math.max(0,Math.min(indice,lista.length-1));
+    visor=nodo('div','ae-gal-visor');visor.setAttribute('role','dialog');visor.setAttribute('aria-modal','true');
+    var cerrar=boton('✕ Cerrar',cerrarVisor);cerrar.style.cssText='position:absolute;right:15px;top:13px;';
+    var nombre=nodo('div','',p.nombre||'Producto');nombre.style.cssText='font-size:.82rem;font-weight:800;text-align:center;padding:0 38px';
+    var centro=nodo('div');centro.style.cssText='width:100%;display:flex;align-items:center;justify-content:center;min-height:170px;flex:1;overflow:hidden';
+    var controles=nodo('div','ae-gal-row');controles.style.justifyContent='center';
+    var previo=boton('‹ Anterior',function(){mostrar(indice-1);});
+    var numero=nodo('span');numero.style.cssText='font-size:.75rem;padding:8px;font-weight:800';
+    var siguiente=boton('Siguiente ›',function(){mostrar(indice+1);});
+    controles.append(previo,numero,siguiente);visor.append(cerrar,nombre,centro,controles);document.body.appendChild(visor);
+    function mostrar(i){
+      if(i<0||i>=lista.length)return;indice=i;centro.replaceChildren();
+      var item=lista[i],obj;
+      if(item.tipo==='video'){
+        obj=nodo('video');obj.src=item.url;obj.controls=true;obj.playsInline=true;obj.preload='none';if(p.foto)obj.poster=p.foto;
+      }else{
+        obj=nodo('img');obj.src=item.url;obj.alt=p.nombre||'Foto del producto';
+      }
+      centro.appendChild(obj);numero.textContent=(i+1)+' / '+lista.length;
+      previo.disabled=i===0;siguiente.disabled=i===lista.length-1;
+    }
+    mostrar(indice);
+  }
+  function mostrarEnDetalle(p){
+    if(!p)return;
+    var id=String(p.id),raiz=document.getElementById('modal-cuotas-body');
+    if(!raiz)return;
+    leer(p).then(function(datos){
+      if(String(window._tiendaDetalleId)!==id||!raiz.isConnected)return;
+      var viejo=raiz.querySelector('#ae-galeria-detalle');if(viejo)viejo.remove();
+      var lista=piezas(p,datos);
+      // Sin contenido adicional, el visor de la foto original sigue intacto.
+      if(!datos.imagenes.length&&!datos.video)return;
+      var caja=nodo('div');caja.id='ae-galeria-detalle';
+      var titulo=nodo('div','',datos.video?'🎥 Video del producto':'🖼️ Fotos del producto');
+      titulo.style.cssText='font-size:.72rem;color:var(--az);font-weight:900;margin:7px 0';
+      var fila=nodo('div','ae-gal-preview');
+      lista.forEach(function(item,i){
+        var b=boton(item.tipo==='video'?'▶ Video':'Foto '+(i+1),function(){abrirVisor(p,datos,i);});
+        if(item.tipo==='imagen'){b.textContent='';var img=nodo('img');img.src=item.url;img.loading='lazy';img.alt='Foto '+(i+1);b.append(img);}
+        else b.style.cssText='font-size:.76rem;background:var(--az);color:#fff;';
+        fila.appendChild(b);
+      });
+      caja.append(titulo,fila);
+      var heading=raiz.querySelector('h3.ae-detail-title');
+      if(heading)raiz.insertBefore(caja,heading);else raiz.prepend(caja);
+    }).catch(function(){/* No bloquear productos si la galería no está disponible. */});
+  }
+  function cerrarAdmin(){if(ocupado)return;if(modal){modal.remove();modal=null;}seleccion=null;}
+  function parrafo(txt){return nodo('p','',txt);}
+  function lineaItem(p,datos,url,idx,esVideo){
+    var fila=nodo('div','ae-gal-row');
+    if(esVideo){var play=boton('▶ Ver video',function(){abrirVisor(p,datos,piezas(p,datos).length-1);});fila.appendChild(play);}
+    else{var img=nodo('img','ae-gal-thumb');img.src=url;img.loading='lazy';img.alt='Foto adicional';fila.appendChild(img);}
+    var estado=nodo('span','',esVideo?'Video agregado':'Foto adicional '+(idx+1));
+    estado.style.cssText='flex:1;font-size:.72rem;font-weight:800;min-width:110px';fila.appendChild(estado);
+    var borrar=boton('Quitar',function(){
+      if(!confirm('¿Quitar este contenido adicional de la galería? La foto principal no se modifica.'))return;
+      var nuevo={imagenes:datos.imagenes.slice(),video:datos.video};
+      if(esVideo)nuevo.video='';else nuevo.imagenes.splice(idx,1);
+      guardar(p,nuevo);
+    },'ae-gal-btn-remove');fila.appendChild(borrar);
+    return fila;
+  }
+  function renderAdmin(p,datos,sesion){
+    if(!modal)return;
+    var panel=modal.querySelector('.ae-gal-panel');panel.replaceChildren();
+    var barra=nodo('div','ae-gal-row');barra.style.justifyContent='space-between';
+    barra.append(nodo('h3','','📷 Fotos o video del producto'),boton('✕',cerrarAdmin));
+    panel.append(barra,parrafo(p.nombre||'Producto'));
+    var portada=nodo('div','ae-gal-row');portada.appendChild(nodo('strong','','Foto principal — se conserva'));
+    if(p.foto){var imagen=nodo('img','ae-gal-thumb');imagen.src=p.foto;imagen.alt='Foto principal';portada.appendChild(imagen);}
+    else portada.appendChild(nodo('small','','Sin foto de portada'));
+    panel.appendChild(portada);
+    var maxExtra=Math.max(0,3-(p.foto?1:0));
+    panel.appendChild(parrafo('Máximo 3 imágenes en total (incluida la principal) O un video adicional a la portada. Nada reemplaza tu foto principal.'));
+    datos.imagenes.forEach(function(url,i){panel.appendChild(lineaItem(p,datos,url,i,false));});
+    if(datos.video)panel.appendChild(lineaItem(p,datos,datos.video,0,true));
+    if(!sesion){
+      panel.append(parrafo('Para agregar contenido, conectá primero el administrador seguro de fotos.'));
+      panel.appendChild(boton('🔐 Conectar administrador de fotos',function(){
+        cerrarAdmin();if(typeof tiendaAuthFotosAbrir==='function')tiendaAuthFotosAbrir();
+      },'ae-gal-btn-primary'));
+      return;
+    }
+    var opciones=nodo('div','ae-gal-row');
+    var fotos=boton('➕ Agregar foto',function(){seleccionarArchivo(p,datos,'imagen');},'ae-gal-btn-primary');
+    fotos.disabled=!!datos.video||datos.imagenes.length>=maxExtra;
+    var video=boton('🎥 Agregar video',function(){seleccionarArchivo(p,datos,'video');});
+    video.disabled=!!datos.video||datos.imagenes.length>0;
+    opciones.append(fotos,video);panel.appendChild(opciones);
+    if(datos.video)panel.append(parrafo('Para cargar fotos adicionales, primero quitá el video. La portada queda intacta.'));
+    else if(datos.imagenes.length)panel.append(parrafo('Para cargar un video, primero quitá las fotos adicionales. La portada queda intacta.'));
+    if(datos.imagenes.length>=maxExtra&&!datos.video)panel.append(parrafo('✅ Límite de 3 fotos alcanzado.'));
+    panel.append(parrafo('Imágenes JPG, PNG o WebP. Video MP4 o WebM, hasta 20 MB. El video se reproduce solamente cuando alguien lo toca.'));
+  }
+  function abrir(id){
+    if(typeof tiendaEsAdmin==='undefined'||!tiendaEsAdmin||typeof vistaPreviaCliente!=='undefined'&&vistaPreviaCliente){aviso('🔒 Solo administración puede cambiar la galería.');return;}
+    var p=producto(id);if(!p){aviso('No encontré el producto');return;}
+    if(modal)modal.remove();
+    modal=nodo('div','ae-gal-overlay');modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
+    var panel=nodo('div','ae-gal-panel');panel.append(nodo('h3','','Cargando galería…'),parrafo('Buscando fotos y video del producto.'));
+    modal.appendChild(panel);modal.addEventListener('click',function(e){if(e.target===modal)cerrarAdmin();});
+    document.body.appendChild(modal);
+    Promise.all([leer(p,true),typeof tiendaAuthFotosSesion==='function'?tiendaAuthFotosSesion():Promise.resolve(null)])
+      .then(function(values){if(modal)renderAdmin(p,values[0],values[1]);})
+      .catch(function(e){if(modal){panel.replaceChildren(nodo('h3','','⚠️ No se pudo abrir la galería'),parrafo(e.message||'Error de conexión'),boton('Cerrar',cerrarAdmin));}});
+  }
+  function seleccionarArchivo(p,datos,tipo){
+    if(ocupado)return;
+    var input=nodo('input');input.type='file';input.accept=tipo==='imagen'?'image/jpeg,image/png,image/webp':'video/mp4,video/webm';
+    input.style.display='none';document.body.appendChild(input);
+    input.addEventListener('change',function(){var file=input.files&&input.files[0];input.remove();if(file)subir(p,datos,tipo,file);},{once:true});
+    input.click();
+  }
+  function comprimir(file){return new Promise(function(resolve,reject){
+    var url=URL.createObjectURL(file),img=new Image();
+    img.onload=function(){try{
+      var factor=Math.min(1,1400/Math.max(img.width,img.height));
+      var c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*factor));c.height=Math.max(1,Math.round(img.height*factor));
+      var ctx=c.getContext('2d');ctx.drawImage(img,0,0,c.width,c.height);
+      c.toBlob(function(blob){URL.revokeObjectURL(url);if(blob&&blob.size)resolve(blob);else reject(new Error('No se pudo convertir la imagen'));},'image/jpeg',.84);
+    }catch(e){URL.revokeObjectURL(url);reject(e);}};
+    img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('Formato de imagen no compatible'));};
+    img.src=url;
+  });}
+  function guardar(p,datos){
+    if(ocupado)return Promise.resolve();
+    ocupado=true;
+    return tiendaAuthFotosSesion().then(function(session){
+      if(!session||!session.user)throw new Error('Conectá el administrador seguro de fotos.');
+      if(!sbFotos||typeof sbFotos.from!=='function')throw new Error('Sin conexión segura.');
+      return sbFotos.from(TABLA).upsert({
+        clave:clave(p),imagenes:datos.imagenes,video_url:datos.video||null,
+        editado_por:session.user.id,actualizado:new Date().toISOString()
+      },{onConflict:'clave'}).select('imagenes,video_url').single();
+    }).then(function(r){
+      if(r.error)throw r.error;
+      var confirmado=limpio(r.data);cache.set(clave(p),confirmado);
+      aviso('✅ Galería guardada para todos');
+      return tiendaAuthFotosSesion().then(function(sesion){if(modal)renderAdmin(p,confirmado,sesion);});
+    }).catch(function(e){alert('⚠️ No se pudo guardar la galería: '+(e.message||e));})
+      .finally(function(){ocupado=false;});
+  }
+  function subir(p,datos,tipo,file){
+    if(ocupado)return;
+    var maxExtra=Math.max(0,3-(p.foto?1:0));
+    if(tipo==='imagen'&&(datos.video||datos.imagenes.length>=maxExtra)){aviso('Máximo 3 fotos o un video.');return;}
+    if(tipo==='video'&&(datos.video||datos.imagenes.length)){aviso('Quitá las fotos adicionales antes de elegir un video.');return;}
+    if(tipo==='video'&&(!/^(video\/mp4|video\/webm)$/.test(file.type)||file.size>20*1024*1024)){alert('Elegí un MP4 o WebM de hasta 20 MB.');return;}
+    if(tipo==='imagen'&&(!/^(image\/jpeg|image\/png|image\/webp)$/.test(file.type)||file.size>18*1024*1024)){alert('Elegí una foto JPG, PNG o WebP de hasta 18 MB.');return;}
+    ocupado=true;
+    var panel=modal&&modal.querySelector('.ae-gal-panel'),mensaje=nodo('p','','Subiendo archivo, sin modificar la foto principal…');if(panel)panel.appendChild(mensaje);
+    tiendaAuthFotosSesion().then(function(session){
+      if(!session||!session.user)throw new Error('Conectá el administrador seguro de fotos.');
+      return tipo==='imagen'?comprimir(file):file;
+    }).then(function(blob){
+      var extension=tipo==='imagen'?'jpg':file.type==='video/webm'?'webm':'mp4';
+      var token=typeof tiendaTokenFoto==='function'?tiendaTokenFoto(clave(p)):String(Date.now());
+      var ruta='manual/galeria/'+token+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,9)+'.'+extension;
+      return sbFotos.storage.from(BUCKET).upload(ruta,blob,{contentType:tipo==='imagen'?'image/jpeg':file.type,upsert:false,cacheControl:'31536000'})
+        .then(function(r){if(r.error)throw r.error;return sbFotos.storage.from(BUCKET).getPublicUrl(ruta).data.publicUrl;});
+    }).then(function(url){
+      var nuevo={imagenes:datos.imagenes.slice(),video:datos.video};
+      if(tipo==='imagen')nuevo.imagenes.push(url);else nuevo.video=url;
+      return sbFotos.from(TABLA).upsert({
+        clave:clave(p),imagenes:nuevo.imagenes,video_url:nuevo.video||null,
+        actualizado:new Date().toISOString()
+      },{onConflict:'clave'}).select('imagenes,video_url').single();
+    }).then(function(r){
+      if(r.error)throw r.error;
+      var confirmado=limpio(r.data);cache.set(clave(p),confirmado);
+      aviso('✅ '+(tipo==='imagen'?'Foto':'Video')+' agregado sin reemplazar la portada');
+      return tiendaAuthFotosSesion().then(function(sesion){if(modal)renderAdmin(p,confirmado,sesion);});
+    }).catch(function(e){alert('⚠️ No se completó la carga: '+(e.message||e));})
+      .finally(function(){ocupado=false;if(mensaje&&mensaje.isConnected)mensaje.remove();});
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){if(visor)cerrarVisor();else if(modal)cerrarAdmin();}
+  });
+  window.AEGaleria={abrir:abrir,mostrarEnDetalle:mostrarEnDetalle};
+})();
