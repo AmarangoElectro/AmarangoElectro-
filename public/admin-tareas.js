@@ -179,7 +179,7 @@ function openForm(productId,card){
  box.appendChild(el('p','ae-task-mini','Las anotaciones se guardan sólo en este dispositivo. Evitá incluir información sensible.'));
  var actions=el('div','ae-task-actions');
  actions.appendChild(btn('Guardar tarea',function(){
-  if(!admin())return;var t=title.value.trim(),n=note.value.trim(),d=when.value;
+  if(!admin())return;var t=title.value.trim(),n=note.value.trim(),d=when.getValue();
   if(!t){title.focus();return;}
   if(tasks.length>=MAX){alert('Llegaste al máximo de tareas guardadas. Archivá o eliminá tareas antiguas antes de crear otras.');return;}
   var stamp=Date.now(),item={id:'ae-'+stamp+'-'+Math.random().toString(36).slice(2,9),title:t.slice(0,180),note:n.slice(0,500),productId:productId||null,productName:product||null,stage:productId?'comprar':'pendiente',dueAt:d||null,createdAt:stamp,updatedAt:stamp};
