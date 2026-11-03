@@ -8024,6 +8024,26 @@ function tiendaRenderDebounce(){
 var TIENDA_LOTE = 24;          // cuántos productos por lote
 var _tiendaListaFull = [];     // lista completa filtrada/ordenada
 var _tiendaMostrados = 0;      // cuántos hay pintados ahora
+var _aeBusquedaSeccionActiva=false; // sólo Administración con búsqueda escrita.
+// Mantener visibles, ocultos y sin stock separados aunque se usen lotes de 24.
+function tiendaCardsBusquedaPorEstado(items,desde){
+  if(!_aeBusquedaSeccionActiva)return tiendaCardsHtml(items);
+  var previo=desde>0&&_tiendaListaFull[desde-1]?_tiendaListaFull[desde-1]._aeEstadoBusq:-1;
+  var html='',bloque=[];
+  function vaciar(){if(bloque.length){html+=tiendaCardsHtml(bloque);bloque=[];}}
+  (items||[]).forEach(function(p){
+    var estado=Number(p._aeEstadoBusq)||0;
+    if(estado!==previo){
+      vaciar();
+      var cantidad=_tiendaListaFull.filter(function(x){return Number(x._aeEstadoBusq)===estado;}).length;
+      html+='<div class="ae-busqueda-seccion" data-ae-estado="'+estado+'">'
+        +aeTituloEstadoBusqueda(estado)+' · '+cantidad+' producto'+(cantidad===1?'':'s')+'</div>';
+      previo=estado;
+    }
+    bloque.push(p);
+  });
+  vaciar();return html;
+}
 
 function tiendaVerMas(){
   var cont=document.getElementById('tienda-grid');
@@ -8032,7 +8052,7 @@ function tiendaVerMas(){
   var hasta=Math.min(desde+TIENDA_LOTE, _tiendaListaFull.length);
   if(hasta<=desde) return;
   // append (no re-render de lo ya pintado) → rápido y sin parpadeo
-  cont.insertAdjacentHTML('beforeend', tiendaCardsHtml(_tiendaListaFull.slice(desde, hasta)));
+  cont.insertAdjacentHTML('beforeend', tiendaCardsBusquedaPorEstado(_tiendaListaFull.slice(desde, hasta),desde));
   _tiendaMostrados=hasta;
   tiendaPintarVerMas();
 }
@@ -8861,6 +8881,7 @@ function tiendaRender(){
   }
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
+  _aeBusquedaSeccionActiva=false;
   // Buscar desde una bandeja admin no limita la consulta a esa carpeta.
   var busquedaGlobalAdmin=!!(tiendaEsAdmin&&!vistaPreviaCliente&&String(document.getElementById('tienda-buscar').value||'').trim());
 
@@ -8912,7 +8933,7 @@ function tiendaRender(){
     }
     if(!c || !c.precio)return;
     // En la vidriera principal no se mezclan celulares ocultos o sin stock.
-    if(!tiendaBandejaAdmin && (c.ocultoTienda || c.sinStock) && !busquedaGlobalAdmin)return;
+    if(((!tiendaBandejaAdmin && !busquedaGlobalAdmin)||vistaPreviaCliente) && (c.ocultoTienda || c.sinStock))return;
     if(tiendaEsAdmin&&aeFiltroMayoristaActual&&aeNormalizarMayorista(c.mayorista||c.proveedor)!==aeFiltroMayoristaActual)return;
     universo.push({
       id: 'celu_'+i,           // id especial para distinguirlos
@@ -8925,6 +8946,7 @@ function tiendaRender(){
       categoria: '📱 Celulares',
       colores: c.colores||[],
       visible: !c.ocultoTienda,
+      sinStock:c.sinStock===true,
       foto: c.foto||'',
       caracteristicas: c.caracteristicas||'',
       destacado: c.destacado||false,
@@ -9113,6 +9135,10 @@ function tiendaRender(){
   var maxPrecio=parseFloat(document.getElementById('tienda-maxprecio').value)||0;
   var qNorm=normTxt(q);
   var planBusq=(palabras.length&&window.AEBusqueda)?AEBusqueda.preparar(q):null;
+  // En el modo ver-como-cliente tampoco se consultan los ocultos del administrador.
+  if(vistaPreviaCliente)universo=universo.filter(function(p){
+    return p&&tiendaEstaVisibleYConStock(p)&&(!p.esCelu&&!tiendaEsPendienteImagenAdmin(p)?false:true);
+  });
   var lista=universo.filter(function(p){
     // 🎯 si el cliente escribió algo en el buscador, la BÚSQUEDA MANDA sobre la
     // categoría: busca en toda la tienda aunque esté parado en "Estufas". Así
@@ -9124,6 +9150,7 @@ function tiendaRender(){
       {valor:puntajeBusquedaEstricta(p,palabras,qNorm),tipo:'directo'};
     p._pj=resultadoBusq.valor;
     p._tipoBusq=resultadoBusq.tipo;
+    p._aeEstadoBusq=(palabras.length&&tiendaEsAdmin&&!vistaPreviaCliente)?aeEstadoBuscadoProducto(p):0;
     var okBusq=resultadoBusq.valor>0;
     // Una búsqueda de texto es global dentro del proveedor seleccionado:
     // no debe quedar bloqueada por la categoría o la marca visitada antes.
@@ -9169,6 +9196,12 @@ function tiendaRender(){
     return ob-oa;
   });
 
+  // Administración: primero disponibles, debajo ocultos y finalmente agotados.
+  // Conserva el orden elegido dentro de cada grupo, incluso con "Ver más".
+  _aeBusquedaSeccionActiva=!!(palabras.length&&tiendaEsAdmin&&!vistaPreviaCliente);
+  if(_aeBusquedaSeccionActiva)lista.sort(function(a,b){
+    return (Number(a._aeEstadoBusq)||0)-(Number(b._aeEstadoBusq)||0);
+  });
   if(!lista.length){
     _tiendaListaFull=[]; _tiendaMostrados=0;
     var vm=document.getElementById('tienda-vermas'); if(vm)vm.innerHTML='';
@@ -9235,7 +9268,13 @@ function tiendaRender(){
         +(busquedaGlobalAdmin?' · Búsqueda en todo el catálogo':'')+'</div>';
     }
   }
-  cont.innerHTML = resumenBusqueda+tiendaCardsHtml(lista.slice(0, _tiendaMostrados));
+  if(_aeBusquedaSeccionActiva){
+    var cantidades=[0,0,0];
+    lista.forEach(function(p){cantidades[Number(p._aeEstadoBusq)||0]++;});
+    resumenBusqueda+='<div style="grid-column:1/-1;background:var(--wh);border:1px solid var(--bor);border-radius:10px;padding:9px 11px;color:var(--sub);font-size:.73rem;font-weight:850;">'
+      +'✅ '+cantidades[0]+' visibles · 🙈 '+cantidades[1]+' ocultos · 📦 '+cantidades[2]+' sin stock</div>';
+  }
+  cont.innerHTML = resumenBusqueda+tiendaCardsBusquedaPorEstado(lista.slice(0, _tiendaMostrados),0);
   tiendaPintarVerMas();
   tiendaAplicarVistaYAvisos();
   finalizarRender();
@@ -10836,9 +10875,9 @@ function tiendaFiltrarCat(c, desdeDesplazamiento){
   var buscador=document.getElementById('tienda-buscar');
   var buscadorHeader=document.getElementById('hdr-buscar-input');
   var sugerencias=document.getElementById('hdr-sugerencias');
+  if(typeof hdrCerrarSugerencias==='function')hdrCerrarSugerencias();
   if(buscador) buscador.value='';
   if(buscadorHeader) buscadorHeader.value='';
-  if(sugerencias){ sugerencias.style.display='none'; sugerencias.innerHTML=''; }
   if(typeof _buscarTimer!=='undefined' && _buscarTimer) clearTimeout(_buscarTimer);
   if(typeof tiendaToggleLimpiar==='function') tiendaToggleLimpiar();
   var estabaActiva=(tiendaCategoriaActiva===c);
