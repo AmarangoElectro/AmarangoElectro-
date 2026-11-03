@@ -32,3 +32,16 @@ test('Los medios son de carga diferida, el video no se reproduce desde la tarjet
   assert.match(galeria,/if\(lista\.length<2\)/);
   assert.match(galeria,/refrescarTarjetas\(p,confirmado\)/);
 });
+
+
+test('Botón Foto/video junto a imagen sólo en Administración, mantiene acceso antiguo',()=>{
+  const card=html.slice(html.indexOf('function tiendaCardsHtml('),html.indexOf('// aplica clases de vista y avisos'));
+  assert.match(card,/class="ae-admin-media-add"/);
+  assert.match(card,/tiendaEsAdmin&&!vistaPreviaCliente[\s\S]*?class="ae-admin-media-add"/);
+  assert.match(card,/window\.AEGaleria\.abrir\('\+pid\+'\)/);
+  assert.match(card,/aria-label="Agregar foto o video al producto"/);
+  assert.match(card,/event\.preventDefault\(\);event\.stopPropagation\(\)/);
+  assert.match(card,/Galería|Galería: hasta 3 fotos o video/);
+  assert.match(card,/Reemplazar foto/);
+  assert.match(card,/aria-label="Ampliar imagen"/);
+});
