@@ -32,6 +32,7 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <link rel="stylesheet" href="/price-drop.css?v=20261103-1">
+<link rel="stylesheet" href="/admin-usd-dark.css?v=20261103-1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -9461,9 +9462,11 @@ function tiendaCardsHtml(sublista){
     if(tiendaEsAdmin && esUSDProveedor){
       var usdOriginal=tiendaPrecioOriginalUSD(p,Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||1590);
       var usdCotizacion=Number(p.cotizacionDolarManual)||Number(p.cotizacionDolar)||1590;
-      card+='<div style="font-size:.6rem;font-weight:800;margin-top:5px;color:#b45309;background:#fff7ed;border:1px solid #fed7aa;border-radius:7px;padding:5px 7px;">'
-        +'💵 '+(usdOriginal>0?usdOriginal.toLocaleString('es-AR')+' USD':'Precio indicado en USD')+(usdOriginal>0?' × $'+usdCotizacion.toLocaleString('es-AR'):'')+' '
-        +'<button onclick="event.stopPropagation();tiendaConvertirUSD('+pid+')" style="background:#059669;color:#fff;border:none;border-radius:6px;padding:3px 8px;font-size:.58rem;font-weight:800;cursor:pointer;margin-left:4px;">💵 Convertir a $</button>'
+      card+='<div class="ae-admin-usd-box">'
+        +'<span class="ae-admin-usd-value">💵 '+(usdOriginal>0?usdOriginal.toLocaleString('es-AR')+' USD':'Precio indicado en USD')
+        +(usdOriginal>0?' <span class="ae-admin-usd-exchange">× $'+usdCotizacion.toLocaleString('es-AR')+'</span>':'')+'</span>'
+        +(Number(p.cotizacionDolarManual)>0?'<span class="ae-admin-usd-manual">✓ USD manual</span>':'')
+        +'<button type="button" class="ae-admin-usd-button" onclick="event.stopPropagation();tiendaConvertirUSD('+pid+')">💵 '+(Number(p.cotizacionDolarManual)>0?'Editar dólar':'Convertir a $')+'</button>'
         +'</div>';
     }
 
@@ -15442,5 +15445,6 @@ window.aeSincronizarSelectoresVisuales=function(){
 
 <script src="/tienda-galeria.js?v=20261103-carrusel-compartir" defer></script>
 <script src="/admin-tareas.js?v=20261103-mail1" defer></script>
+<script src="/admin-usd-persist.js?v=20261103-1" defer></script>
 </body>
 </html>
