@@ -9306,6 +9306,8 @@ function tiendaCardsHtml(sublista){
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaAmpliarDesdeMenu('+pid+')">↗ Ampliar imagen</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaEditarPrecio('+pid+')">✎ Editar producto</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaEditarFoto('+pid+')">▣ Reemplazar foto</button>';
+      // Sólo suma el acceso a la galería; reemplazar foto sigue intacto.
+      card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();if(window.AEGaleria)AEGaleria.abrir('+pid+')">📷 Galería: hasta 3 fotos o video</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaConfirmarPrecioDesdeMenu('+pid+')">✓ Confirmar precio</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();tiendaVerDesdeMenu('+pid+')">↗ Ver producto</button>';
       card+='<button type="button" class="ae-admin-menu-action" onclick="event.stopPropagation();compartirInstagram('+pid+')">📸 Compartir en Instagram</button>';
@@ -10982,6 +10984,7 @@ function tiendaVerDetalle(id){
   document.getElementById('modal-cuotas-body').innerHTML=html;
   document.getElementById('modal-cuotas').style.display='block';
   document.getElementById('modal-cuotas').scrollTop=0;
+  if(window.AEGaleria)AEGaleria.mostrarEnDetalle(p);
 }
 
 // Carga una imagen como Blob y la deja lista para dibujarla en un canvas.
@@ -15135,5 +15138,6 @@ window.aeSincronizarSelectoresVisuales=function(){
 })();
 </script>
 
+<script src="/tienda-galeria.js?v=20261103" defer></script>
 </body>
 </html>
