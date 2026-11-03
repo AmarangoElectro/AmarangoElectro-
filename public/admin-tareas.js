@@ -65,7 +65,7 @@ function addPins(){
 }
 function updatePins(){
  var grid=document.getElementById('tienda-grid');if(!grid)return;
- grid.querySelectorAll('.ae-task-pin').forEach(function(b){var id=b.getAttribute('data-product-id');var open=tasks.some(function(t){return t.productId===id&&t.stage!=='completada'});b.classList.toggle('ae-task-active',open);b.textContent=open?'📌 Tarea fijada · agregar otra':'📌 Fijar tarea';});
+ grid.querySelectorAll('.ae-task-pin').forEach(function(b){var id=b.getAttribute('data-product-id');var open=tasks.some(function(t){return t.productId===id&&t.stage!=='completada'});b.classList.toggle('ae-task-active',open);var label=open?'📌 Tarea fijada · agregar otra':'📌 Fijar tarea';if(b.textContent!==label)b.textContent=label;});
 }
 function stageAdvance(t){var expected=t.stage,next=expected==='comprar'?'entregar':'completada';if(!confirm(expected==='comprar'?'¿Ya compraron este producto? Quedará pendiente de entrega.':'¿Marcar esta tarea como finalizada?'))return; t.stage=next;t.updatedAt=Date.now();if(next==='completada')t.completedAt=Date.now();if(!write()){t.stage=expected;return;}refresh();openPanel();}
 function renderPanel(){
@@ -88,6 +88,7 @@ function renderPanel(){
    var line=el('div','ae-task-actions');
    if(t.productId)line.appendChild(btn('Ver producto',function(){jumpToProduct(t)},'ae-task-action'));
    if(t.stage!=='completada')line.appendChild(btn(t.stage==='comprar'?'✅ Comprado':t.stage==='entregar'?'✅ Entregado':'✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
+   if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){if(!confirm('¿Eliminar definitivamente esta tarea finalizada?'))return;var old=tasks;tasks=tasks.filter(function(x){return x.id!==t.id});if(!write()){tasks=old;return;}refresh();},'ae-task-action'));
    item.appendChild(line);box.appendChild(item);
   });
  });
@@ -128,7 +129,7 @@ function remind(){if(!admin()||document.hidden)return;var eligible=tasks.filter(
  if(typeof window.mostrarToast==='function')window.mostrarToast('🔔 Tenés '+eligible.length+' tarea(s) para revisar. Abrí Tareas.');
 }
 function refresh(){addBell();updatePins();if(panel&&!panel.hidden)renderPanel();remind();}
-function scan(){scanQueued=false;ensure();addBell();addPins();}
+function scan(){scanQueued=false;ensure();if(!admin()){close();var grid=document.getElementById('tienda-grid');if(grid)grid.querySelectorAll('.ae-task-pin').forEach(function(b){b.remove()});}addBell();addPins();}
 function scheduleScan(){if(scanQueued)return;scanQueued=true;setTimeout(scan,90);}
 function start(){
  tasks=read();ensure();scan();
