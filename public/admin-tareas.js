@@ -27,6 +27,11 @@ function ensure(){
   style.textContent=[
    '#ae-task-bell{padding:6px 11px;border-radius:11px;background:var(--wh);color:var(--az);border:1px solid var(--bor);font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap}',
    '#ae-task-bell.ae-task-due{border-color:#ff7a00;color:#ae4d00}',
+   '#ae-task-bell{display:inline-flex;align-items:center;gap:7px;justify-content:center;position:relative}',
+   '.ae-task-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#ff7a00;color:#fff;font-size:.71rem;font-weight:950;box-shadow:0 2px 8px rgba(255,122,0,.38);border:1px solid rgba(255,255,255,.52);font-variant-numeric:tabular-nums}',
+   '.ae-task-count.ae-has-due{background:#e64525;box-shadow:0 2px 9px rgba(230,69,37,.46)}',
+   'body.oscuro .ae-task-count{background:#ff8a1f;color:#221409;border-color:#ffb366;box-shadow:0 2px 10px rgba(255,122,0,.48)}',
+   'body.oscuro .ae-task-count.ae-has-due{background:#ff6142;color:#260c08;border-color:#ffad9c}',
    '.ae-task-pin{width:100%;padding:6px 8px;margin:5px 0 3px;background:var(--wh);color:var(--az);border:1px dashed var(--bor);border-radius:9px;cursor:pointer;font-size:.66rem;font-weight:750;text-align:center}',
    '.ae-task-pin.ae-task-active{border-color:#ff7a00;color:#ae4d00;background:#fff7eb}',
    '.ae-task-layer[hidden]{display:none!important}.ae-task-layer{position:fixed;inset:0;z-index:7000;display:flex;align-items:flex-end;justify-content:center;background:rgba(2,10,34,.64);padding:12px}',
@@ -148,7 +153,12 @@ function addBell(){
  var bar=document.getElementById('ae-admin-atajos');if(!bar)return;
  var bell=document.getElementById('ae-task-bell');
  if(!bell){bell=btn('🔔 Tareas',openPanel);bell.id='ae-task-bell';bar.appendChild(bell);}
- var s=summary();bell.textContent='🔔 Tareas'+(s.pending?' ('+s.pending+')':'')+(s.late?' · '+s.late+' ⚠':'');bell.classList.toggle('ae-task-due',s.late>0);
+ var s=summary();bell.replaceChildren();
+ bell.appendChild(el('span','','🔔 Tareas'));
+ if(s.pending){var count=el('span','ae-task-count'+(s.late?' ae-has-due':''),String(s.pending));count.setAttribute('aria-label',s.pending+' pendientes');bell.appendChild(count);}
+ if(s.late)bell.appendChild(el('span','','⚠'));
+ bell.setAttribute('aria-label','Tareas de Maxi y Angie: '+s.pending+' pendientes'+(s.late?', '+s.late+' vencidas':''));
+ bell.classList.toggle('ae-task-due',s.late>0);
  bell.hidden=!admin();
 }
 function idFromCard(card){return card.id&&card.id.indexOf('card-')===0?card.id.slice(5):''}
