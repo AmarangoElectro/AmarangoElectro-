@@ -81,7 +81,7 @@ function queueMailSync(turnOff){
  mailSyncTimer=setTimeout(runMailSync,650);
 }
 function mailRows(userId,enabled){
- return tasks.map(function(t){
+ return tasks.filter(function(t){return !t.creatorUserId||t.creatorUserId===userId;}).map(function(t){
   var date=t.dueAt?new Date(t.dueAt):null;
   var dueAt=date&&!Number.isNaN(date.getTime())?date.toISOString():null;
   return {id:t.id,user_id:userId,product_id:t.productId||null,product_name:t.productName||null,
@@ -148,6 +148,9 @@ function mailInfo(){
  return 'Podés recibir las tareas en el email de la cuenta administradora verificada. Para activarlo conectá primero tu sesión segura (la misma de Fotos).';
 }
 
+function shared(){return window.AEAdminSharedTasks||null}
+function sharedSync(){var s=shared();if(s)s.sync();}
+function sharedChange(action,payload){var s=shared();if(s)s.change(action,payload);}
 function summary(){return {pending:tasks.filter(function(t){return t.stage!=='completada'}).length,late:tasks.filter(due).length}}
 function addBell(){
  var bar=document.getElementById('ae-admin-atajos');if(!bar)return;
@@ -184,7 +187,7 @@ function renderPanel(){
  if(!panel||panel.hidden)return;
  panel.replaceChildren();var box=el('div','ae-task-dialog');box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Tareas de Administración');
  var head=el('div','ae-task-head');head.appendChild(el('h2','','🔔 Tareas y recordatorios'));head.appendChild(btn('✕',close,'ae-task-action'));box.appendChild(head);
- var s=summary();box.appendChild(el('p','ae-task-mini',s.pending+' pendientes · '+s.late+' vencidas. Guardadas únicamente en este navegador.'));
+ var s=summary();box.appendChild(el('p','ae-task-mini',s.pending+' pendientes · '+s.late+' vencidas. '+(shared()?shared().info():'Lista local.')));
  var actions=el('div','ae-task-actions');actions.appendChild(btn('+ Anotar tarea',function(){openForm(null,null)},'ae-task-action ae-task-primary'));
  if('Notification'in window&&Notification.permission!=='granted')actions.appendChild(btn('🔔 Activar avisos',askNotifications,'ae-task-action'));
  actions.appendChild(btn(mailEnabled?'📧 Desactivar correos':'📧 Activar correos',toggleTaskMail,'ae-task-action'));
@@ -210,7 +213,7 @@ function renderPanel(){
  box.appendChild(el('p','ae-task-mini','Los avisos del navegador funcionan solamente mientras la tienda está abierta. Para recordatorios con la app cerrada hace falta un servicio de notificaciones.'));
  panel.appendChild(box);
 }
-function openPanel(){if(!admin())return;ensure();if(form)form.hidden=true;panel.hidden=false;renderPanel();}
+function openPanel(){if(!admin())return;ensure();if(form)form.hidden=true;panel.hidden=false;renderPanel();sharedSync();}
 
 /* Calendario Amarango propio: evita el selector nativo del sistema, que no respeta claro/oscuro. */
 function taskDatePicker(){
@@ -285,7 +288,7 @@ function openForm(productId,card){
   if(!t){title.focus();return;}
   if(tasks.length>=MAX){alert('Llegaste al máximo de tareas guardadas. Archivá o eliminá tareas antiguas antes de crear otras.');return;}
   var stamp=Date.now(),item={id:'ae-'+stamp+'-'+Math.random().toString(36).slice(2,9),title:t.slice(0,180),note:n.slice(0,500),productId:productId||null,productName:product||null,stage:productId?'comprar':'pendiente',dueAt:d||null,createdAt:stamp,updatedAt:stamp};
-  tasks.push(item);if(!write()){tasks.pop();return;}form.hidden=true;refresh();if(typeof window.mostrarToast==='function')window.mostrarToast('📌 Tarea guardada');else openPanel();
+  tasks.push(item);if(!write()){tasks.pop();return;}sharedChange('create',{id:item.id,title:item.title,note:item.note,product_id:item.productId,product_name:item.productName,stage:item.stage,due_at:item.dueAt?new Date(item.dueAt).toISOString():null,created_at:new Date(item.createdAt).toISOString()});form.hidden=true;refresh();if(typeof window.mostrarToast==='function')window.mostrarToast('📌 Tarea registrada');else openPanel();
  },'ae-task-action ae-task-primary'));
  actions.appendChild(btn('Cancelar',close,'ae-task-action'));box.appendChild(actions);form.appendChild(box);title.focus();
 }
