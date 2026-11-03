@@ -31,6 +31,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
+<link rel="stylesheet" href="/price-drop.css?v=20261103-1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2807,6 +2808,32 @@ function mejorCuotaTexto(precio){
   var vc=Math.round(calcularTotalPlan(precio,n)/n/1000)*1000;
   return n+' cuotas de '+fmt(vc);
 }
+
+// Diferencia COMPROBADA por Supabase al bajar el precio real.
+// No inventar precios de referencia ni confundir ofertas ingresadas manualmente.
+function aeBajaReal(p){
+  if(!p)return null;
+  var antes=Number(p.aeBajaAnterior),ahora=Number(p.aeBajaActual),vigente=Number(p.venta);
+  var fecha=Date.parse(p.aeBajaFecha||'');
+  if(!Number.isFinite(antes)||!Number.isFinite(ahora)||!Number.isFinite(vigente)||
+      antes<=ahora||ahora<=0||vigente!==ahora||
+      !Number.isFinite(fecha)||fecha>Date.now()+300000||
+      Date.now()-fecha>14*86400000)return null;
+  // El precioAntes manual sigue vigente con su propio formato y no se duplica.
+  if(Number(p.precioAntes)>vigente)return null;
+  return {antes:antes,ahora:ahora,ahorro:antes-ahora};
+}
+function aeBajaCardHtml(p){
+  var baja=aeBajaReal(p);
+  if(!baja)return '';
+  return '<div class="ae-price-drop-comparison" aria-label="El precio bajó desde '+fmt(baja.antes)+' hasta '+fmt(baja.ahora)+'">'
+    +'<div class="ae-price-drop-prices">'
+    +'<span class="ae-price-drop-was">Antes: <s>'+fmt(baja.antes)+'</s></span>'
+    +'<strong class="ae-price-drop-now">Ahora: '+fmt(baja.ahora)+'</strong>'
+    +'</div><div class="ae-price-drop-savings">⬇ Ahorrás '+fmt(baja.ahorro)+'</div>'
+    +'</div>';
+}
+
 // Devuelve el HTML del precio tachado + % OFF si el producto está en oferta
 function bloquePrecioAntes(p, tam){
   if(!p || !p.precioAntes) return '';
@@ -6944,7 +6971,7 @@ function buscarProd(id){
   if((''+id).indexOf('celu_')===0){
     var i=parseInt((''+id).replace('celu_',''),10);
     var c=cargarListaCelus()[i];
-    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c), categoria:'📱 Celulares', mayorista:c.mayorista||'', fechaCarga:c.fechaCarga||'', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0 };
+    if(c)return { id:id, esCelu:true, nombre:c.nombre, venta:c.precio, costo:costoRealCelu(c), categoria:'📱 Celulares', mayorista:c.mayorista||'', fechaCarga:c.fechaCarga||'', colores:c.colores||[], visible:!c.ocultoTienda, foto:c.foto||'', caracteristicas:c.caracteristicas||'', sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0, aeBajaAnterior:c.aeBajaAnterior||0, aeBajaActual:c.aeBajaActual||0, aeBajaFecha:c.aeBajaFecha||'' };
   }
   return null;
 }
@@ -8953,7 +8980,7 @@ function tiendaRender(){
       delDia: c.delDia||false,
       pocoStock: c.pocoStock||false,
       sinInteres: c.sinInteres||0,
-      precioAntes: c.precioAntes||0,
+      precioAntes: c.precioAntes||0, aeBajaAnterior:c.aeBajaAnterior||0, aeBajaActual:c.aeBajaActual||0, aeBajaFecha:c.aeBajaFecha||'',
       creado:c.creado||c.fechaCarga||c.fechaSubida||c.created_at||0,
       fechaCarga:c.fechaCarga||'', fechaSubida:c.fechaSubida||''
     });
@@ -9329,6 +9356,9 @@ function tiendaCardsHtml(sublista){
       var offEt=Math.round((1-p.venta/parseFloat(p.precioAntes))*100);
       etiquetas+='<div style="background:#e11d48;color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(225,29,72,.35);">-'+offEt+'%</div>';
     }
+    if(aeBajaReal(p)){
+      etiquetas+='<div class="ae-price-drop-badge" title="El precio de venta bajó">↘ ¡BAJAMOS!</div>';
+    }
     if(p.sinInteres){
       etiquetas+='<div style="background:linear-gradient(135deg,var(--nar),#ff9a3d);color:#fff;font-size:.58rem;font-weight:900;padding:3px 8px;border-radius:6px;box-shadow:0 2px 6px rgba(255,122,0,.35);">'+parseInt(p.sinInteres,10)+' S/INTERÉS</div>';
     }
@@ -9445,6 +9475,7 @@ function tiendaCardsHtml(sublista){
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="flex:0 0 auto;background:none;border:none;font-size:1.05rem;cursor:pointer;line-height:1;padding:0;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>'
 
+      +aeBajaCardHtml(p)
       +(function(){
         if(datosPrecioCard.modo==='promo_madre'){
           // La leyenda de 6 cuotas sólo aparece si el plan fijo está habilitado.
@@ -11867,7 +11898,7 @@ function tiendaTodosLosProductos(soloVisibles){
       categoria:'📱 Celulares', mayorista:c.mayorista||'', fechaCarga:c.fechaCarga||'', colores:c.colores||[], visible:!c.ocultoTienda,
       foto:c.foto||'', caracteristicas:c.caracteristicas||'',
       destacado:c.destacado||false, delDia:c.delDia||false,
-      pocoStock:c.pocoStock||false, sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0
+      pocoStock:c.pocoStock||false, sinInteres:c.sinInteres||0, precioAntes:c.precioAntes||0, aeBajaAnterior:c.aeBajaAnterior||0, aeBajaActual:c.aeBajaActual||0, aeBajaFecha:c.aeBajaFecha||''
     });
   });
   return universo;
