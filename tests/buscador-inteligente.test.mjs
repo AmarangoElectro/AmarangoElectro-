@@ -50,7 +50,7 @@ test('Búsqueda global administrativa anula la carpeta pero mantiene filtro de m
   assert.match(html,/var busquedaGlobalAdmin=!!\(tiendaEsAdmin&&!vistaPreviaCliente&&String\(document\.getElementById\('tienda-buscar'\)\.value\|\|''\)\.trim\(\)\);/);
   assert.match(html,/if\(busquedaGlobalAdmin\)\{[\s\S]*?universo=tiendaProductos\.filter\([\s\S]*?if\(aeFiltroMayoristaActual\)universo=universo\.filter/);
   assert.match(html,/if\(tiendaEsAdmin && tiendaBandejaAdmin && !busquedaGlobalAdmin\)/);
-  assert.match(html,/if\(!tiendaBandejaAdmin && \(c\.ocultoTienda \|\| c\.sinStock\) && !busquedaGlobalAdmin\)return/);
+  assert.match(html,/if\(\(\(!tiendaBandejaAdmin && !busquedaGlobalAdmin\)\|\|vistaPreviaCliente\) && \(c\.ocultoTienda \|\| c\.sinStock\)\)return/);
   assert.match(html,/Búsqueda en todo el catálogo/);
 });
 test('Sugerencias en el header y resumen en la grilla comparten el motor',()=>{
