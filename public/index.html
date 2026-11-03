@@ -1094,7 +1094,9 @@ body.oscuro #tienda-grid .ae-cuota-comparativa-item:last-child .ae-cuota-monto{c
 body.oscuro .ae-explora-title{color:#fff}
 body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 </style><link rel="stylesheet" href="/supplier-logos.css?v=20261023">
+<link rel="stylesheet" href="/supplier-percentages.css?v=20261103">
 <script src="/supplier-logos.js?v=20261023"></script>
+<script src="/supplier-percentages.js?v=20261103"></script>
 
 
 
@@ -9087,7 +9089,9 @@ function tiendaCardsHtml(sublista){
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && mayoristaUnico){
       card+='<div ondblclick="event.stopPropagation();aeVerMayorista('+pid+')" title="Doble toque: ver productos del mayorista" style="cursor:pointer;">';
-      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">'+(typeof aeMayoristaEtiquetaHtml==='function'?aeMayoristaEtiquetaHtml(mayoristaUnico):'🏪 '+escapeHtml(mayoristaUnico))+'</div></div>';
+      card+='<div class="ae-admin-supplier-label" style="color:'+colorMayoristaCard.txt+';background:'+colorMayoristaCard.bg+';border-color:'+colorMayoristaCard.bor+';">'
+        +(typeof aeMayoristaEtiquetaHtml==='function'?aeMayoristaEtiquetaHtml(mayoristaUnico):'🏪 '+escapeHtml(mayoristaUnico))
+        +'<button type="button" class="ae-supplier-percent" data-supplier-name="'+escapeHtml(mayoristaUnico)+'" aria-label="Editar porcentaje de '+escapeHtml(mayoristaUnico)+'" title="Porcentaje editable de este mayorista">'+(typeof aeMayoristaPctTexto==='function'?aeMayoristaPctTexto(mayoristaUnico):'5%')+' ✎</button></div></div>';
     }
     if(tiendaEsAdmin && !vistaPreviaCliente && p.esCelu){
       card+='<button type="button" class="ae-celu-mayorista-action" onclick="event.stopPropagation();tiendaEditarMayoristaCelu(\''+p.id+'\')" >🏪 '+(mayoristaUnico?'Cambiar mayorista':'Asignar mayorista')+'</button>';
