@@ -4,10 +4,14 @@
 (function(){
 'use strict';
 var KEY='ae_admin_tasks_v1',NOTIFIED='ae_admin_task_notified_v1',MAX=300;
+var MAIL_ENABLED_KEY='ae_admin_task_mail_enabled_v1',MAIL_OWNER_KEY='ae_admin_task_mail_owner_v1';
+var mailEnabled=false,mailOwner='',mailStatus='not_connected',mailEmail='',mailLastSync=0,mailSyncTimer=null,mailBusy=false,mailResync=false,mailForceOff=false;
 var tasks=[],panel=null,form=null,observed=null,timer=null,scanQueued=false;
+try{mailEnabled=localStorage.getItem(MAIL_ENABLED_KEY)==='yes';mailOwner=localStorage.getItem(MAIL_OWNER_KEY)||'';}catch(e){}
+
 function admin(){return typeof window.tiendaEsAdmin!=='undefined'&&window.tiendaEsAdmin===true&&window.vistaPreviaCliente!==true&&window.vistaPreviaAsesor!==true;}
 function read(){try{var x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x.filter(function(t){return t&&typeof t.id==='string'&&typeof t.title==='string'&&['comprar','entregar','pendiente','completada'].indexOf(t.stage)>=0;}).slice(-MAX):[]}catch(e){return []}}
-function write(){try{localStorage.setItem(KEY,JSON.stringify(tasks));return true;}catch(e){alert('No se pudo guardar la tarea en este dispositivo. Revisá el espacio del navegador.');return false}}
+function write(){try{localStorage.setItem(KEY,JSON.stringify(tasks));if(mailEnabled)queueMailSync();return true;}catch(e){alert('No se pudo guardar la tarea en este dispositivo. Revisá el espacio del navegador.');return false}}
 function el(tag,cls,txt){var n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
 function btn(label,fn,cls){var b=el('button',cls,label);b.type='button';b.addEventListener('click',fn);return b}
 function due(t){return t.stage!=='completada'&&!!t.dueAt&&new Date(t.dueAt).getTime()<=Date.now()}
@@ -55,6 +59,90 @@ function ensure(){
  if(!panel){panel=el('div','ae-task-layer');panel.hidden=true;panel.setAttribute('role','presentation');panel.addEventListener('click',function(e){if(e.target===panel)close()});document.body.appendChild(panel);}
  if(!form){form=el('div','ae-task-layer');form.hidden=true;form.setAttribute('role','presentation');form.addEventListener('click',function(e){if(e.target===form)close()});document.body.appendChild(form);}
 }
+
+/* Mail: opt-in por cuenta autenticada, no por PIN.
+ * Supabase RLS valida rol owner/admin y entrega el correo de auth.users al Worker.
+ * Nunca se envían contraseñas, API keys ni direcciones elegidas por el navegador.
+ */
+function mailClient(){var s=window.sbFotos;return s&&s.auth&&typeof s.auth.getSession==='function'?s:null}
+function mailWriteState(){
+ try{localStorage.setItem(MAIL_ENABLED_KEY,mailEnabled?'yes':'no');if(mailOwner)localStorage.setItem(MAIL_OWNER_KEY,mailOwner);}catch(e){}
+}
+function queueMailSync(turnOff){
+ if(!mailEnabled&&!turnOff)return;
+ if(turnOff)mailForceOff=true;
+ mailResync=true;
+ if(mailSyncTimer)clearTimeout(mailSyncTimer);
+ mailSyncTimer=setTimeout(runMailSync,650);
+}
+function mailRows(userId,enabled){
+ return tasks.map(function(t){
+  var date=t.dueAt?new Date(t.dueAt):null;
+  var dueAt=date&&!Number.isNaN(date.getTime())?date.toISOString():null;
+  return {id:t.id,user_id:userId,product_id:t.productId||null,product_name:t.productName||null,
+   title:String(t.title||'').slice(0,180),note:String(t.note||'').slice(0,500),
+   stage:t.stage,due_at:dueAt,mail_enabled:enabled};
+ }).filter(function(r){return /^ae-[A-Za-z0-9-]{5,87}$/.test(r.id) && r.title && ['comprar','entregar','pendiente','completada'].indexOf(r.stage)>=0});
+}
+async function runMailSync(){
+ if(mailBusy||(!mailEnabled&&!mailForceOff)||!admin()||!mailResync)return;
+ var client=mailClient();
+ if(!client){mailStatus='not_connected';renderPanel();return;}
+ mailBusy=true;mailResync=false;
+ var isStopping=mailForceOff;
+ mailForceOff=false;
+ try{
+  var result=await client.auth.getSession();
+  var session=result&&result.data&&result.data.session;
+  if(!session||!session.user||!session.user.id){mailStatus='not_connected';renderPanel();return;}
+  if(session.user.id!==mailOwner){mailStatus='wrong_account';renderPanel();return;}
+  mailEmail=String(session.user.email||'');
+  var rows=mailRows(mailOwner,mailEnabled&&!isStopping),chunk=40;
+  mailStatus='syncing';renderPanel();
+  for(var i=0;i<rows.length;i+=chunk){
+   var response=await client.from('ae_admin_task_email_reminders').upsert(rows.slice(i,i+chunk),{onConflict:'id'});
+   if(response.error)throw response.error;
+  }
+  mailLastSync=Date.now();mailStatus=mailEnabled&&!isStopping?'ready':'disabled';
+  if(typeof window.mostrarToast==='function'&&mailEnabled&&!isStopping)window.mostrarToast('📧 Recordatorios por mail sincronizados');
+ }catch(error){
+  mailStatus='error';
+  console.warn('No se pudieron guardar avisos por mail de tareas',String(error&&error.message||error).slice(0,120));
+ }finally{
+  mailBusy=false;renderPanel();
+  if(mailResync||mailForceOff)queueMailSync(mailForceOff);
+ }
+}
+async function toggleTaskMail(){
+ if(!admin())return;
+ var client=mailClient();
+ if(!client){alert('Para enviar recordatorios por mail necesitás conectar la cuenta segura de Administracion.');return;}
+ var result;
+ try{result=await client.auth.getSession();}catch(e){result=null;}
+ var session=result&&result.data&&result.data.session;
+ if(!session||!session.user||!session.user.id){
+  close();
+  if(typeof window.tiendaAuthFotosAbrir==='function')window.tiendaAuthFotosAbrir();
+  else alert('Ingresá primero con tu cuenta administradora segura de Supabase.');
+  return;
+ }
+ if(mailEnabled&&mailOwner===session.user.id){
+  mailEnabled=false;mailWriteState();mailStatus='syncing';
+  queueMailSync(true);renderPanel();return;
+ }
+ mailEnabled=true;mailOwner=session.user.id;mailEmail=String(session.user.email||'');
+ mailWriteState();mailStatus='syncing';queueMailSync(false);renderPanel();
+}
+function mailInfo(){
+ if(mailStatus==='error')return '⚠ No se pudieron sincronizar las tareas. Los correos no están confirmados; revisá la conexión y volvé a intentar.';
+ if(mailStatus==='wrong_account')return '⚠ La cuenta conectada no coincide con la que activó los correos. Conectá la cuenta anterior o activá con la nueva.';
+ if(mailStatus==='syncing')return '📧 Guardando tareas en la nube para enviar los correos...';
+ if(mailEnabled&&mailStatus==='ready')return '✅ Correo activo para '+(mailEmail||'tu cuenta administradora')+'. Avisos al vencer, incluso con la tienda cerrada, cuando el servicio de envío esté configurado.';
+ if(mailEnabled)return '📧 Correo solicitado. Para sincronizarlo, conectá tu cuenta administradora segura. No alcanza con el PIN.';
+ if(mailStatus==='disabled')return 'Los avisos por correo están desactivados en esta cuenta. La campanita sigue funcionando.';
+ return 'Podés recibir las tareas en el email de la cuenta administradora verificada. Para activarlo conectá primero tu sesión segura (la misma de Fotos).';
+}
+
 function summary(){return {pending:tasks.filter(function(t){return t.stage!=='completada'}).length,late:tasks.filter(due).length}}
 function addBell(){
  var bar=document.getElementById('ae-admin-atajos');if(!bar)return;
@@ -89,7 +177,10 @@ function renderPanel(){
  var s=summary();box.appendChild(el('p','ae-task-mini',s.pending+' pendientes · '+s.late+' vencidas. Guardadas únicamente en este navegador.'));
  var actions=el('div','ae-task-actions');actions.appendChild(btn('+ Anotar tarea',function(){openForm(null,null)},'ae-task-action ae-task-primary'));
  if('Notification'in window&&Notification.permission!=='granted')actions.appendChild(btn('🔔 Activar avisos',askNotifications,'ae-task-action'));
+ actions.appendChild(btn(mailEnabled?'📧 Desactivar correos':'📧 Activar correos',toggleTaskMail,'ae-task-action'));
+ if(mailStatus==='error'||mailStatus==='not_connected')actions.appendChild(btn('↻ Revisar correo',function(){queueMailSync();},'ae-task-action'));
  box.appendChild(actions);
+ box.appendChild(el('p','ae-task-mini',mailInfo()));
  var list=tasks.slice().sort(order),active=list.filter(function(t){return t.stage!=='completada'}),done=list.filter(function(t){return t.stage==='completada'}).slice(0,25);
  if(!active.length)box.appendChild(el('p','ae-task-mini','No tenés tareas pendientes.'));
  [active,done].forEach(function(group,groupIndex){
@@ -209,10 +300,11 @@ function start(){
  if(observed)new MutationObserver(function(){scheduleScan()}).observe(observed,{childList:true,subtree:true});
  var bar=document.getElementById('ae-admin-atajos');if(bar)new MutationObserver(function(){scheduleScan()}).observe(bar,{attributes:true,attributeFilter:['style','class']});
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&visibleModal())close()});
- window.addEventListener('storage',function(e){if(e.key===KEY){tasks=read();refresh();}});
- window.addEventListener('focus',function(){scheduleScan();remind()});
- document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduleScan();remind()}});
- timer=setInterval(function(){scheduleScan();remind()},30000);
+ window.addEventListener('storage',function(e){if(e.key===KEY){tasks=read();refresh();if(mailEnabled)queueMailSync();}});
+ window.addEventListener('focus',function(){scheduleScan();remind();if(mailEnabled)queueMailSync()});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduleScan();remind();if(mailEnabled)queueMailSync()}});
+ setTimeout(function(){if(mailEnabled)queueMailSync();},1800);
+ timer=setInterval(function(){scheduleScan();remind();if(mailEnabled&&Date.now()-mailLastSync>120000)queueMailSync()},30000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
