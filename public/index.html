@@ -7105,8 +7105,10 @@ function hdrPosicionarSugerencias(){
   var left=Math.max(8,Math.min(rect.left,vWidth-260));
   var width=Math.max(230,Math.min(rect.width, vWidth-left-8));
   var top=Math.min(Math.max(8,rect.bottom+6),Math.max(8,vHeight-155));
-  box.style.left=Math.round(left)+'px';box.style.top=Math.round(top)+'px';
-  box.style.width=Math.round(width)+'px';box.style.maxHeight=Math.max(110,Math.min(560,vHeight-top-12))+'px';
+  box.style.setProperty('--ae-pred-left',Math.round(left)+'px');
+  box.style.setProperty('--ae-pred-top',Math.round(top)+'px');
+  box.style.setProperty('--ae-pred-width',Math.round(width)+'px');
+  box.style.setProperty('--ae-pred-max-height',Math.max(110,Math.min(560,vHeight-top-12))+'px');
 }
 function hdrPredictivo(){
   if(_aePredictivoTimer)clearTimeout(_aePredictivoTimer);
@@ -7149,7 +7151,9 @@ function hdrTeclasSugerencias(event){
     if(!abierto)hdrPredictivoMostrar();
     if(box&&box.style.display!=='none'){
       event.preventDefault();
-      hdrSeleccionarOpcion(_aePredIndice+(event.key==='ArrowDown'?1:-1));
+      var opciones=box.querySelectorAll('[data-ae-id],[data-ae-texto]');
+      if(_aePredIndice===-1)hdrSeleccionarOpcion(event.key==='ArrowDown'?0:opciones.length-1);
+      else hdrSeleccionarOpcion(_aePredIndice+(event.key==='ArrowDown'?1:-1));
     }
     return;
   }
