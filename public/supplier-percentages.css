@@ -1,0 +1,47 @@
+/* Porcentaje compacto a la derecha del logo del mayorista, sólo vista admin. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label .ae-supplier-percent{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  margin-left:auto;min-width:45px;min-height:30px;padding:5px 6px;
+  border:1px solid #bfa389;border-radius:9px;
+  background:#fff8f1;color:#35271e;font:850 11px Inter,system-ui,sans-serif;
+  white-space:nowrap;cursor:pointer;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label .ae-supplier-percent{
+  background:#34251a;color:#fff4e8;border-color:#b27a4b;
+}
+#tienda-grid .ae-supplier-percent:focus-visible{outline:2px solid #ff943e;outline-offset:2px}
+#ae-supplier-pct-dialog{
+  width:min(370px,calc(100vw - 26px));max-height:90dvh;padding:20px;
+  border:1.5px solid #d6a77b;border-radius:20px;
+  background:#fff8f1;color:#35271e;font-family:Inter,system-ui,sans-serif;
+  box-shadow:0 18px 56px rgba(0,0,0,.42);
+}
+#ae-supplier-pct-dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(3px)}
+#ae-supplier-pct-dialog form{display:grid;gap:10px}
+#ae-supplier-pct-dialog h3{font-size:18px;line-height:1.35;margin:0}
+#ae-supplier-pct-dialog p{font-size:12px;line-height:1.5;margin:0;color:inherit}
+#ae-supplier-pct-dialog label{display:grid;gap:7px;font-size:13px;font-weight:800}
+#ae-supplier-pct-dialog input{
+  width:100%;min-height:46px;padding:10px;border-radius:11px;
+  border:1.5px solid #b98c63;background:#fff;color:#35271e;
+  font:700 16px Inter,system-ui,sans-serif;
+}
+#ae-supplier-pct-dialog .ae-pct-actions{display:flex;gap:8px;justify-content:flex-end}
+#ae-supplier-pct-dialog .ae-pct-actions button{
+  min-height:44px;padding:10px 12px;border:1px solid #b98c63;
+  border-radius:11px;background:#fff;color:#35271e;
+  font:800 13px Inter,system-ui,sans-serif;
+}
+#ae-supplier-pct-dialog .ae-pct-actions button[type=submit]{
+  background:#ff943e;color:#23140c;border-color:#eb7c20;
+}
+body.oscuro #ae-supplier-pct-dialog{
+  background:#241915;color:#fff4e8;border-color:#a3714e;color-scheme:dark;
+}
+body.oscuro #ae-supplier-pct-dialog input,
+body.oscuro #ae-supplier-pct-dialog .ae-pct-actions button:not([type=submit]){
+  background:#302219;color:#fff4e8;border-color:#a3714e;
+}
+#ae-supplier-pct-dialog :is(input,button):focus-visible{
+  outline:2px solid #ff943e;outline-offset:2px;
+}
