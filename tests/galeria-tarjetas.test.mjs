@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const galeria=readFileSync('public/tienda-galeria.js','utf8');
+const html=readFileSync('public/index.html','utf8');
+
+test('El carrusel de tarjetas conserva la sintaxis y se activa para todos los roles',()=>{
+  assert.doesNotThrow(()=>new Function(galeria));
+  assert.match(html,/tienda-galeria\.js\?v=20261103-carrusel/);
+  assert.match(galeria,/function iniciarCarruselTarjetas\(/);
+  assert.match(galeria,/getElementById\('tienda-grid'\)/);
+  assert.match(galeria,/new MutationObserver\(/);
+  assert.match(galeria,/new IntersectionObserver\(/);
+  assert.doesNotMatch(galeria.slice(galeria.indexOf('function aeTarjetaPintar'),galeria.indexOf('function aeTarjetasCargarCola')),/tiendaEsAdmin|revUnlocked|vistaPreviaCliente/);
+});
+
+test('Contador, desplazamiento táctil y ampliación del elemento elegido',()=>{
+  assert.match(galeria,/\(i\+1\)\+' de '\+estado\.lista\.length/);
+  assert.match(galeria,/addEventListener\('touchstart'/);
+  assert.match(galeria,/addEventListener\('touchend'/);
+  assert.match(galeria,/Math\.abs\(dx\)>35/);
+  assert.match(galeria,/abrirVisor\(estado\.p,estado\.datos,estado\.indice\)/);
+  assert.match(galeria,/estado\.play\.hidden=!esVideo/);
+});
+
+test('Los medios son de carga diferida, el video no se reproduce desde la tarjeta',()=>{
+  const card=galeria.slice(galeria.indexOf('function aeTarjetaPintar'),galeria.indexOf('function aeTarjetasCargarCola'));
+  assert.doesNotMatch(card,/createElement\('video'\)|nodo\('video'\)/);
+  assert.match(galeria,/\.in\('clave',llaves\)/);
+  assert.match(galeria,/rootMargin:'260px 0px'/);
+  assert.match(galeria,/if\(lista\.length<2\)/);
+  assert.match(galeria,/refrescarTarjetas\(p,confirmado\)/);
+});
