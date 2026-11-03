@@ -49,6 +49,81 @@
     if(datos.video)lista.push({tipo:'video',url:datos.video});
     return lista;
   }
+
+  // Compartir el elemento elegido, sin modificar el botón comercial "Compartir producto".
+  // Si el navegador no permite enviar el archivo, se ofrece su enlace público.
+  function enlaceMedio(item){
+    if(!item||!item.url)return '';
+    try{
+      var url=new URL(item.url,window.location.href);
+      return (url.protocol==='https:'||url.protocol==='http:')?url.href:'';
+    }catch(e){return '';}
+  }
+  function nombreMedio(p,item,mime){
+    var base=String((p&&p.nombre)||'AmarangoElectro').trim()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,54)||'AmarangoElectro';
+    var ext=item.tipo==='video'?(mime==='video/webm'?'webm':'mp4'):
+      (mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg');
+    return base+'.'+ext;
+  }
+  function copiarMedio(url){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(url).then(function(){
+        aviso('🔗 Enlace del archivo copiado');
+      }).catch(function(){
+        window.prompt('Copiá el enlace de la foto o video:',url);
+      });
+    }
+    window.prompt('Copiá el enlace de la foto o video:',url);
+    return Promise.resolve();
+  }
+  function compartirMedio(p,item,btn){
+    var url=enlaceMedio(item);
+    if(!url){aviso('⚠️ Esta foto o video no tiene un enlace para compartir.');return;}
+    var video=item.tipo==='video',nombre=String((p&&p.nombre)||'Producto AmarangoElectro');
+    var original=btn?btn.textContent:'';
+    if(btn){if(btn.disabled)return;btn.disabled=true;btn.textContent='Preparando…';}
+    var restaurar=function(){if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=original;}};
+    var compartirEnlace=function(){
+      if(navigator.share){
+        return navigator.share({title:nombre,text:video?'🎥 Video del producto':'🖼️ Foto del producto',url:url})
+          .catch(function(err){
+            if(err&&err.name==='AbortError')return;
+            return copiarMedio(url);
+          });
+      }
+      return copiarMedio(url);
+    };
+    // Los archivos grandes no se descargan automáticamente al navegar la tienda.
+    // Preparar medios únicamente al tocar Compartir mantiene rápida la apertura.
+    var preparar=function(){
+      if(!navigator.share||!navigator.canShare||typeof File!=='function')return Promise.resolve(null);
+      var controlador=typeof AbortController==='function'?new AbortController():null;
+      var espera=setTimeout(function(){if(controlador)controlador.abort();},6500);
+      return fetch(url,{mode:'cors',signal:controlador?controlador.signal:undefined})
+        .then(function(res){if(!res.ok)throw new Error('No se puede descargar el archivo');return res.blob();})
+        .then(function(blob){
+          if(!blob||!blob.size||blob.size>(video?21:12)*1024*1024)return null;
+          var mime=blob.type||(video?'video/mp4':'image/jpeg');
+          if(video?!/^video\/(mp4|webm)$/.test(mime):!/^image\/(jpeg|png|webp)$/.test(mime))return null;
+          var file=new File([blob],nombreMedio(p,item,mime),{type:mime});
+          return navigator.canShare({files:[file]})?file:null;
+        }).catch(function(){return null;})
+        .finally(function(){clearTimeout(espera);});
+    };
+    preparar().then(function(file){
+      if(file){
+        return navigator.share({files:[file],title:nombre}).catch(function(err){
+          if(err&&err.name==='AbortError')return;
+          return compartirEnlace();
+        });
+      }
+      return compartirEnlace();
+    }).catch(function(){return copiarMedio(url);})
+      .finally(restaurar);
+  }
+
   function cerrarVisor(){if(visor){visor.remove();visor=null;}}
   function abrirVisor(p,datos,indice){
     cerrarVisor();var lista=piezas(p,datos);if(!lista.length)return;
@@ -61,7 +136,8 @@
     var previo=boton('‹ Anterior',function(){mostrar(indice-1);});
     var numero=nodo('span');numero.style.cssText='font-size:.75rem;padding:8px;font-weight:800';
     var siguiente=boton('Siguiente ›',function(){mostrar(indice+1);});
-    controles.append(previo,numero,siguiente);visor.append(cerrar,nombre,centro,controles);document.body.appendChild(visor);
+    var compartir=boton('📤 Compartir foto',function(){compartirMedio(p,lista[indice],compartir);},'ae-gal-share-visor');
+    controles.append(previo,numero,siguiente,compartir);visor.append(cerrar,nombre,centro,controles);document.body.appendChild(visor);
     function mostrar(i){
       if(i<0||i>=lista.length)return;indice=i;centro.replaceChildren();
       var item=lista[i],obj;
@@ -72,6 +148,7 @@
       }
       centro.appendChild(obj);numero.textContent=(i+1)+' / '+lista.length;
       previo.disabled=i===0;siguiente.disabled=i===lista.length-1;
+      compartir.textContent=item.tipo==='video'?'📤 Compartir video':'📤 Compartir foto';
     }
     mostrar(indice);
   }
@@ -79,6 +156,13 @@
     if(!p)return;
     var id=String(p.id),raiz=document.getElementById('modal-cuotas-body');
     if(!raiz)return;
+    // La foto principal también se puede compartir si es la única del producto.
+    var fotoDetalle=raiz.querySelector('img[style*="max-height:340px"]');
+    if(p.foto&&fotoDetalle&&!raiz.querySelector('.ae-gal-share-detalle')){
+      var fotoBtn=boton('📤 Compartir esta foto',function(){compartirMedio(p,{tipo:'imagen',url:p.foto},fotoBtn);},'ae-gal-share-detalle');
+      fotoBtn.style.cssText='display:block;width:max-content;max-width:100%;margin:-4px auto 12px;background:var(--az);color:#fff;border-color:var(--az);';
+      fotoDetalle.parentElement.insertAdjacentElement('afterend',fotoBtn);
+    }
     leer(p).then(function(datos){
       if(String(window._tiendaDetalleId)!==id||!raiz.isConnected)return;
       var viejo=raiz.querySelector('#ae-galeria-detalle');if(viejo)viejo.remove();
@@ -108,6 +192,8 @@
     else{var img=nodo('img','ae-gal-thumb');img.src=url;img.loading='lazy';img.alt='Foto adicional';fila.appendChild(img);}
     var estado=nodo('span','',esVideo?'Video agregado':'Foto adicional '+(idx+1));
     estado.style.cssText='flex:1;font-size:.72rem;font-weight:800;min-width:110px';fila.appendChild(estado);
+    var compartirFila=boton('📤 Compartir',function(){compartirMedio(p,{tipo:esVideo?'video':'imagen',url:url},compartirFila);});
+    fila.appendChild(compartirFila);
     var borrar=boton('Quitar',function(){
       if(!confirm('¿Quitar este contenido adicional de la galería? La foto principal no se modifica.'))return;
       var nuevo={imagenes:datos.imagenes.slice(),video:datos.video};
@@ -123,7 +209,8 @@
     barra.append(nodo('h3','','📷 Fotos o video del producto'),boton('✕',cerrarAdmin));
     panel.append(barra,parrafo(p.nombre||'Producto'));
     var portada=nodo('div','ae-gal-row');portada.appendChild(nodo('strong','','Foto principal — se conserva'));
-    if(p.foto){var imagen=nodo('img','ae-gal-thumb');imagen.src=p.foto;imagen.alt='Foto principal';portada.appendChild(imagen);}
+    if(p.foto){var imagen=nodo('img','ae-gal-thumb');imagen.src=p.foto;imagen.alt='Foto principal';portada.appendChild(imagen);
+      var compartirPortada=boton('📤 Compartir',function(){compartirMedio(p,{tipo:'imagen',url:p.foto},compartirPortada);});portada.appendChild(compartirPortada);}
     else portada.appendChild(nodo('small','','Sin foto de portada'));
     panel.appendChild(portada);
     var maxExtra=Math.max(0,3-(p.foto?1:0));
@@ -242,7 +329,9 @@
     '.ae-gal-card-prev{left:5px}.ae-gal-card-next{right:5px}' +
     '.ae-gal-card-arrow:disabled{opacity:.24;cursor:default}' +
     '.ae-gal-card-play{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(8,22,48,.86);border:2px solid #fff;color:#fff;font-size:25px;box-shadow:0 2px 14px #0008;pointer-events:none}' +
-    '.ae-gal-card-count[hidden],.ae-gal-card-arrow[hidden],.ae-gal-card-play[hidden]{display:none!important}';
+    '.ae-gal-card-count[hidden],.ae-gal-card-arrow[hidden],.ae-gal-card-play[hidden]{display:none!important}' +
+    '.ae-gal-card-share{position:absolute;z-index:7;right:8px;top:44px;padding:7px 9px;border-radius:10px;border:1px solid rgba(255,255,255,.65);background:rgba(8,22,48,.9)!important;color:#fff!important;font-size:11px;font-weight:800;font-family:inherit;white-space:nowrap;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px #0004}' +
+    '.ae-gal-card-share:disabled{opacity:.6;cursor:wait}';
   document.head.appendChild(aeCardsCss);
 
   function aeTarjetaMostrar(estado,i){
@@ -258,11 +347,41 @@
     estado.anterior.disabled=i===0;
     estado.siguiente.disabled=i===estado.lista.length-1;
     estado.play.hidden=!esVideo;
+    if(estado.compartir)estado.compartir.textContent=esVideo?'📤 Video':'📤 Foto';
+  }
+
+  // Disponible también con una sola foto; no exige que el carrusel esté activo.
+  function aeTarjetaCompartir(card,p,lista){
+    var img=card.querySelector('img.prod-foto'),envoltorio=img&&img.parentElement;
+    if(!envoltorio){
+      envoltorio=Array.prototype.slice.call(card.children).find(function(el){
+        return el.style&&el.style.position==='relative'&&el.querySelector('[onclick^="tiendaVerDetalle"]');
+      });
+    }
+    if(!envoltorio)return null;
+    var compartir=envoltorio.querySelector('.ae-gal-card-share');
+    if(!lista.length){if(compartir)compartir.remove();return null;}
+    card._aeShareMedios={p:p,lista:lista};
+    if(!compartir){
+      compartir=boton('📤 Foto',function(e){
+        e.preventDefault();e.stopPropagation();
+        var data=card._aeShareMedios,estado=aeCardsEstado.get(card);
+        if(!data||!data.lista.length)return;
+        var indice=estado&&estado.activo?estado.indice:0;
+        compartirMedio(data.p,data.lista[indice]||data.lista[0],compartir);
+      },'ae-gal-card-share');
+      compartir.setAttribute('aria-label','Compartir la foto o video seleccionado');
+      envoltorio.appendChild(compartir);
+    }
+    compartir.textContent=lista[0].tipo==='video'?'📤 Video':'📤 Foto';
+    return compartir;
   }
 
   function aeTarjetaPintar(card,p,datos){
     if(!card||!card.isConnected)return;
     var lista=piezas(p,datos),estado=aeCardsEstado.get(card);
+    var compartir=aeTarjetaCompartir(card,p,lista);
+    if(estado)estado.compartir=compartir;
     if(lista.length<2){
       if(estado){
         estado.activo=false;
@@ -290,7 +409,7 @@
       img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;border-radius:13px 13px 0 0;cursor:zoom-in';
       envoltorio.appendChild(img);
     }
-    estado={p:p,datos:datos,lista:lista,img:img,indice:0,activo:true,
+    estado={p:p,datos:datos,lista:lista,img:img,indice:0,activo:true,compartir:compartir,
       portadaUrl:img.getAttribute('src')||'',objectFit:img.style.objectFit||'cover'};
     aeCardsEstado.set(card,estado);
     estado.numero=nodo('span','ae-gal-card-count');
