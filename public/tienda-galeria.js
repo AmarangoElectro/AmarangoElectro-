@@ -237,7 +237,7 @@
   var aeCardsTimer=0, aeCardsRenderPendiente=false;
   var aeCardsCss=document.createElement('style');
   aeCardsCss.textContent=
-    '.ae-gal-card-count{position:absolute;z-index:5;right:8px;top:8px;padding:5px 9px;border-radius:18px;background:rgba(8,22,48,.87);color:#fff;font:800 11px/1.15 inherit;box-shadow:0 2px 9px #0005;pointer-events:none;white-space:nowrap}' +
+    '.ae-gal-card-count{position:absolute;z-index:5;right:8px;top:8px;padding:5px 9px;border-radius:18px;background:rgba(8,22,48,.87);color:#fff;font-size:11px;font-weight:800;line-height:1.15;font-family:inherit;box-shadow:0 2px 9px #0005;pointer-events:none;white-space:nowrap}' +
     '.ae-gal-card-arrow{position:absolute;z-index:5;top:50%;transform:translateY(-50%);width:29px;height:34px;border:0;border-radius:12px;background:rgba(8,22,48,.72)!important;color:#fff!important;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-size:24px;line-height:1;touch-action:manipulation}' +
     '.ae-gal-card-prev{left:5px}.ae-gal-card-next{right:5px}' +
     '.ae-gal-card-arrow:disabled{opacity:.24;cursor:default}' +
