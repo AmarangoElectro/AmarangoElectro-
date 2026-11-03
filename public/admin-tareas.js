@@ -182,7 +182,7 @@ function updatePins(){
  var grid=document.getElementById('tienda-grid');if(!grid)return;
  grid.querySelectorAll('.ae-task-pin').forEach(function(b){var id=b.getAttribute('data-product-id');var open=tasks.some(function(t){return t.productId===id&&t.stage!=='completada'});b.classList.toggle('ae-task-active',open);var label=open?'📌 Tarea fijada · agregar otra':'📌 Fijar tarea';if(b.textContent!==label)b.textContent=label;});
 }
-function stageAdvance(t){var expected=t.stage,next=expected==='comprar'?'entregar':'completada';if(!confirm(expected==='comprar'?'¿Ya compraron este producto? Quedará pendiente de entrega.':'¿Marcar esta tarea como finalizada?'))return; t.stage=next;t.updatedAt=Date.now();if(next==='completada')t.completedAt=Date.now();if(!write()){t.stage=expected;return;}refresh();openPanel();}
+function stageAdvance(t){var expected=t.stage,next=expected==='comprar'?'entregar':'completada';if(!confirm(expected==='comprar'?'¿Ya compraron este producto? Quedará pendiente de entrega.':'¿Marcar esta tarea como finalizada?'))return; t.stage=next;t.updatedAt=Date.now();if(next==='completada')t.completedAt=Date.now();if(!write()){t.stage=expected;return;}sharedChange('advance',{id:t.id,expected_stage:expected});refresh();openPanel();}
 function renderPanel(){
  if(!panel||panel.hidden)return;
  panel.replaceChildren();var box=el('div','ae-task-dialog');box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Tareas de Administración');
@@ -206,7 +206,7 @@ function renderPanel(){
    var line=el('div','ae-task-actions');
    if(t.productId)line.appendChild(btn('Ver producto',function(){jumpToProduct(t)},'ae-task-action'));
    if(t.stage!=='completada')line.appendChild(btn(t.stage==='comprar'?'✅ Comprado':t.stage==='entregar'?'✅ Entregado':'✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
-   if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){if(!confirm('¿Eliminar definitivamente esta tarea finalizada?'))return;var old=tasks;tasks=tasks.filter(function(x){return x.id!==t.id});if(!write()){tasks=old;return;}refresh();},'ae-task-action'));
+   if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){if(!confirm('¿Eliminar definitivamente esta tarea finalizada?'))return;var old=tasks;tasks=tasks.filter(function(x){return x.id!==t.id});if(!write()){tasks=old;return;}sharedChange('delete',{id:t.id});refresh();},'ae-task-action'));
    item.appendChild(line);box.appendChild(item);
   });
  });
@@ -281,7 +281,7 @@ function openForm(productId,card){
  var title=field('Tarea','text',productId?'Comprar y entregar: '+product:'',180);
  var note=field('Nota (opcional)','textarea','',500);note.rows=3;note.placeholder='Cliente o indicaciones para la entrega';
  var when=taskDatePicker();box.appendChild(when.element);
- box.appendChild(el('p','ae-task-mini','Las anotaciones se guardan sólo en este dispositivo. Evitá incluir información sensible.'));
+ box.appendChild(el('p','ae-task-mini','Se comparte con Maxi y Angie cuando la cuenta administradora está conectada. Evitá incluir datos sensibles.'));
  var actions=el('div','ae-task-actions');
  actions.appendChild(btn('Guardar tarea',function(){
   if(!admin())return;var t=title.value.trim(),n=note.value.trim(),d=when.getValue();
@@ -309,15 +309,16 @@ function scan(){scanQueued=false;ensure();if(!admin()){close();var grid=document
 function scheduleScan(){if(scanQueued)return;scanQueued=true;setTimeout(scan,90);}
 function start(){
  tasks=read();ensure();scan();
+ var link=shared();if(link){link.init({canAccess:admin,get:function(){return tasks.slice()},set:function(next){tasks=next;try{localStorage.setItem(KEY,JSON.stringify(tasks));}catch(e){}},refresh:refresh});setTimeout(sharedSync,1200);}
  observed=document.getElementById('tienda-grid');
  if(observed)new MutationObserver(function(){scheduleScan()}).observe(observed,{childList:true,subtree:true});
  var bar=document.getElementById('ae-admin-atajos');if(bar)new MutationObserver(function(){scheduleScan()}).observe(bar,{attributes:true,attributeFilter:['style','class']});
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&visibleModal())close()});
  window.addEventListener('storage',function(e){if(e.key===KEY){tasks=read();refresh();if(mailEnabled)queueMailSync();}});
- window.addEventListener('focus',function(){scheduleScan();remind();if(mailEnabled)queueMailSync()});
- document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduleScan();remind();if(mailEnabled)queueMailSync()}});
+ window.addEventListener('focus',function(){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync()});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync()}});
  setTimeout(function(){if(mailEnabled)queueMailSync();},1800);
- timer=setInterval(function(){scheduleScan();remind();if(mailEnabled&&Date.now()-mailLastSync>120000)queueMailSync()},30000);
+ timer=setInterval(function(){scheduleScan();remind();sharedSync();if(mailEnabled&&Date.now()-mailLastSync>120000)queueMailSync()},30000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
