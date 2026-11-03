@@ -1,9 +1,11 @@
 /* Predictivo accesible: el panel permanece abierto al recorrer resultados.
    Sólo se cierra por selección, Escape, consulta vacía o toque fuera. */
 #hdr-sugerencias.ae-predictivo{
-  position:fixed!important;left:auto!important;transform:none!important;
+  position:fixed!important;left:var(--ae-pred-left,12px)!important;
+  top:var(--ae-pred-top,90px)!important;transform:none!important;
   z-index:99999!important;box-sizing:border-box!important;
-  width:auto!important;max-width:none!important;max-height:min(62dvh,560px)!important;
+  width:var(--ae-pred-width,360px)!important;max-width:none!important;
+  max-height:var(--ae-pred-max-height,55dvh)!important;
   overflow-y:auto!important;overscroll-behavior-y:contain!important;
   touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;
   background:var(--wh,#fff)!important;color:var(--txt,#14213a)!important;
@@ -58,4 +60,4 @@
 body.oscuro #hdr-sugerencias.ae-predictivo .ae-pred-status[data-ae-estado="0"]{color:#b3f0cc;background:#193f30}
 body.oscuro #hdr-sugerencias.ae-predictivo .ae-pred-status[data-ae-estado="1"]{color:#ffd59a;background:#49331e}
 body.oscuro #hdr-sugerencias.ae-predictivo .ae-pred-status[data-ae-estado="2"]{color:#ffc0c0;background:#452124}
-@media(max-width:480px){#hdr-sugerencias.ae-predictivo{max-height:55dvh!important}}
+@media(max-width:480px){#hdr-sugerencias.ae-predictivo{border-radius:13px!important}}
