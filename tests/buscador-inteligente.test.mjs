@@ -74,3 +74,13 @@ test('El motor es aislado y no cambia descuentos, cuotas ni productos de Supabas
   assert.match(html,/function tiendaGuardarLocal\(/);
   assert.match(html,/function tiendaGuardarVisibilidadAdminNube\(/);
 });
+
+
+test('El buscador ignora categorías anteriores, sin mezclar mayoristas seleccionados',()=>{
+  assert.match(html,/var okMarca=palabras\.length \|\| !tiendaMarcaActiva/);
+  assert.match(html,/var okSubtipo=palabras\.length \|\| !tiendaSubfiltroActivo/);
+  assert.match(html,/var okMarcaGeneral=palabras\.length \|\| !tiendaMarcaGeneralActiva/);
+  assert.match(html,/if\(admin&&aeFiltroMayoristaActual&&aeNormalizarMayorista\(aeNombreMayorista\(p\)\)!==aeFiltroMayoristaActual\)return/);
+  assert.match(html,/if\(admin&&aeFiltroMayoristaActual&&aeNormalizarMayorista\(c\.mayorista\|\|c\.proveedor\)!==aeFiltroMayoristaActual\)return/);
+  assert.match(html,/var okMarcaSug=true/);
+});
