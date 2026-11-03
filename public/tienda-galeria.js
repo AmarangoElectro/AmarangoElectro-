@@ -84,7 +84,7 @@
     var video=item.tipo==='video',nombre=String((p&&p.nombre)||'Producto AmarangoElectro');
     var original=btn?btn.textContent:'';
     if(btn){if(btn.disabled)return;btn.disabled=true;btn.textContent='Preparando…';}
-    var restaurar=function(){if(btn&&btn.isConnected){btn.disabled=false;btn.textContent=original;}};
+    var restaurar=function(){if(btn&&btn.isConnected){btn.disabled=false;if(btn.textContent==='Preparando…')btn.textContent=original;}};
     var compartirEnlace=function(){
       if(navigator.share){
         return navigator.share({title:nombre,text:video?'🎥 Video del producto':'🖼️ Foto del producto',url:url})
