@@ -44,7 +44,8 @@
   }
   function piezas(p,datos){
     var lista=[];if(p.foto)lista.push({tipo:'imagen',url:p.foto});
-    datos.imagenes.forEach(function(url){lista.push({tipo:'imagen',url:url});});
+    // No mostrar más de 3 imágenes en total aun si cambió la portada después de cargarlas.
+    datos.imagenes.slice(0,Math.max(0,3-(p.foto?1:0))).forEach(function(url){lista.push({tipo:'imagen',url:url});});
     if(datos.video)lista.push({tipo:'video',url:datos.video});
     return lista;
   }
