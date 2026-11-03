@@ -7236,7 +7236,7 @@ function hdrPredictivoMostrar(){
       if(admin)html+='<div class="ae-pred-section" role="presentation">'+aeTituloEstadoBusqueda(estado)+' · '+grupo.length+'</div>';
       grupo.slice(0,limit).forEach(function(x){
         var p=x.p,id=escapeHtml(String(p.id)).replace(/"/g,'&quot;'),nombre=escapeHtml(String(p.nombre||''));
-        var foto=p.foto?('<img loading="lazy" decoding="async" src="'+escapeHtml(fotoOpt(p.foto,80)).replace(/"/g,'&quot;')+'" alt="" style="width:42px;height:42px;border-radius:8px;object-fit:contain;background:#fff;flex:0 0 auto;">'):'<span aria-hidden="true" style="width:42px;height:42px;display:grid;place-items:center;border-radius:8px;background:var(--bg);flex:0 0 auto;">📦</span>';
+        var foto=p.foto?('<img loading="lazy" decoding="async" src="'+escapeHtml(fotoOpt(p.foto,80)).replace(/"/g,'&quot;')+'" data-ae-original="'+escapeHtml(String(p.foto)).replace(/"/g,'&quot;')+'" onerror="if(this.dataset.aeOriginal){this.onerror=null;this.src=this.dataset.aeOriginal;}" alt="" style="width:42px;height:42px;border-radius:8px;object-fit:contain;background:#fff;flex:0 0 auto;">'):'<span aria-hidden="true" style="width:42px;height:42px;display:grid;place-items:center;border-radius:8px;background:var(--bg);flex:0 0 auto;">📦</span>';
         var etiqueta=x.tipo==='similar'?'💡 Producto similar':'Coincidencia directa';
         html+='<button type="button" role="option" aria-selected="false" tabindex="-1" id="ae-pred-'+optIndex+++'" data-ae-id="'+id+'">'
           +foto+'<span style="flex:1;min-width:0"><span class="ae-pred-label">'+nombre+'</span>'
