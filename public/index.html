@@ -1902,6 +1902,40 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card img.prod-foto {
 }
 </style>
 
+<style id="ae-admin-visibility-media-row-css">
+/* Sólo Administración: el botón Visible/Oculto y el acceso a galería comparten 50/50. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px!important;align-items:stretch!important;order:-1!important;
+  width:100%!important;min-width:0!important;box-sizing:border-box!important;
+  margin:0 0 6px!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row>.ae-admin-visibility{
+  width:100%!important;min-width:0!important;min-height:39px!important;
+  margin:0!important;box-sizing:border-box!important;
+  padding:6px 7px!important;justify-content:flex-start!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row>.ae-admin-media-add{
+  width:100%!important;min-width:0!important;min-height:39px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  gap:3px!important;box-sizing:border-box!important;padding:6px 4px!important;
+  border:1px solid #b9cfe8!important;border-radius:7px!important;
+  background:#eff6ff!important;color:#124685!important;
+  font:800 clamp(9px,2.6vw,11px) Inter,system-ui,-apple-system,sans-serif!important;
+  line-height:1.2!important;white-space:nowrap!important;
+  cursor:pointer!important;touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row>.ae-admin-media-add .ae-admin-media-add-icon{
+  font-size:20px!important;font-weight:900!important;line-height:1!important;
+}
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row>.ae-admin-media-add:focus-visible{
+  outline:2px solid var(--nar)!important;outline-offset:2px!important;
+}
+body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-media-row>.ae-admin-media-add{
+  background:#1d3047!important;color:#c5e3ff!important;border-color:#5b83ad!important;
+}
+</style>
 </head>
 <body class="en-tienda">
 
@@ -9110,10 +9144,6 @@ function tiendaCardsHtml(sublista){
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
-      // Acceso directo aditivo: la carga de medios es exclusivamente administrativa.
-      +(tiendaEsAdmin&&!vistaPreviaCliente
-        ? '<button type="button" class="ae-admin-media-add" title="Agregar foto o video" aria-label="Agregar foto o video al producto" onclick="event.preventDefault();event.stopPropagation();if(window.AEGaleria)window.AEGaleria.abrir('+pid+')" style="position:absolute;z-index:8;bottom:47px;left:8px;max-width:calc(100% - 16px);padding:7px 9px;min-height:32px;box-sizing:border-box;border:1px solid rgba(255,255,255,.72);border-radius:9px;background:rgba(11,45,107,.91);color:#fff;font-size:.62rem;font-weight:900;font-family:inherit;white-space:nowrap;cursor:pointer;box-shadow:0 2px 9px rgba(0,0,0,.22);touch-action:manipulation;">➕ Foto / video</button>'
-        : '')
       +'</div>';
 
     var botonAmpliarAdmin='';
@@ -9126,9 +9156,15 @@ function tiendaCardsHtml(sublista){
     // controles de admin (debajo de la foto, no la empujan)
     if(tiendaEsAdmin && !vistaPreviaCliente){
       var checked2=tiendaMarcadosSet[p.id]?'checked':'';
-      card+='<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
-        +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
-        +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>';
+      // Fila compacta 50/50: visibilidad conserva su acción y el + abre la galería.
+      // El acceso previo sobre la foto se reubica acá, sin perder herramientas.
+      card+='<div class="ae-admin-visibility-media-row">'
+        +'<button type="button" class="ae-admin-visibility '+(p.visible?'is-visible':'is-hidden')+'" aria-label="Visibilidad: '+(p.visible?'visible':'oculto')+'" aria-pressed="'+(p.visible?'true':'false')+'" onclick="event.preventDefault();event.stopPropagation();tiendaToggleVisibilidadDirecta('+pid+')">'
+          +'<span class="ae-admin-visibility-dot" aria-hidden="true">'+(p.visible?'✓':'○')+'</span>'
+          +'<span>'+(p.visible?'Visible':'Oculto')+'</span></button>'
+        +'<button type="button" class="ae-admin-media-add" title="Agregar otra foto o video" aria-label="Agregar foto o video al producto" onclick="event.preventDefault();event.stopPropagation();if(window.AEGaleria)window.AEGaleria.abrir('+pid+')">'
+          +'<span class="ae-admin-media-add-icon" aria-hidden="true">＋</span><span>Foto / video</span></button>'
+        +'</div>';
       // Motivo del ocultamiento visible para el admin: sin esto no había forma
       // de saber, a simple vista, por qué un producto con stock quedaba oculto.
       if(!p.visible || tiendaEstaOcultoAdmin(p)){
