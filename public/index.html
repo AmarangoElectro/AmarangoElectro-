@@ -1840,6 +1840,37 @@ body.oscuro #cajon-tools-body>button[style*="background:#fff1f2"]{
 }
 #cajon-tools-body>button:focus-visible{outline:2px solid #ff943e!important;outline-offset:3px}
 </style>
+<style id="ae-fix-contraste-tools-cliente-20261102-v2">
+/* Selector por ID, no por atributo style: CSSOM puede reescribir "background: var(...)". */
+body.oscuro #cajon-tools-body :is(
+  #tienda-btn-cargar,#tienda-btn-celus,#tienda-btn-carac,
+  #tienda-btn-stats,#tienda-btn-fmtcuota,#tienda-btn-subs,
+  #tienda-btn-pdf,#btn-reclasificar
+){
+  background:#352318!important;
+  color:#fff4e8!important;
+  border:1.5px solid #b27a4b!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.oscuro #cajon-tools-body :is(
+  #tienda-btn-cargar,#tienda-btn-celus,#tienda-btn-carac,
+  #tienda-btn-stats,#tienda-btn-fmtcuota,#tienda-btn-subs,
+  #tienda-btn-pdf,#btn-reclasificar
+) :is(span,small,b,strong){color:#fff4e8!important;opacity:1!important;}
+body.oscuro #cajon-tools-body :is(
+  #tienda-btn-cargar,#tienda-btn-celus,#tienda-btn-carac,
+  #tienda-btn-stats,#tienda-btn-fmtcuota,#tienda-btn-subs,
+  #tienda-btn-pdf,#btn-reclasificar
+):focus-visible{outline:3px solid #ff943e!important;outline-offset:3px;}
+/* También en claro: si la variable --az queda oscura, que su texto sea blanco. */
+body:not(.oscuro) #cajon-tools-body :is(
+  #tienda-btn-cargar,#tienda-btn-celus,#tienda-btn-carac,
+  #tienda-btn-stats,#tienda-btn-fmtcuota,#tienda-btn-subs,
+  #tienda-btn-pdf,#btn-reclasificar
+){background:#0b4fbf!important;color:#fff!important;}
+</style>
+
 </head>
 <body class="en-tienda">
 
@@ -6064,6 +6095,18 @@ function toggleVistaAsesor(){
     b.textContent='🤝 Vista asesor · Volver a Administración';b.style.display='block';
   }else if(b)b.style.display='none';
 }
+
+// Asegura contraste efectivo del aviso incluso si un tema reescribe estilos CSS.
+function tiendaActualizarContrasteVistaCliente(){
+  var cartel=document.getElementById('tienda-vistaprev-banner');
+  if(!cartel)return;
+  var oscuro=document.body.classList.contains('oscuro');
+  cartel.style.setProperty('background',oscuro?'#2b1c14':'#fff8f1','important');
+  cartel.style.setProperty('color',oscuro?'#fff4e8':'#472918','important');
+  cartel.style.setProperty('border','1.5px solid '+(oscuro?'#ff943e':'#d78c48'),'important');
+  cartel.style.setProperty('box-shadow',oscuro?'0 8px 28px rgba(0,0,0,.7)':'0 8px 24px rgba(38,22,10,.3)','important');
+}
+
 function toggleVistaCliente(){
   if(vistaPreviaAsesor){vistaPreviaAsesor=false;var ba=document.getElementById('tienda-vistaasesor-banner');if(ba)ba.style.display='none';}
   vistaPreviaCliente=!vistaPreviaCliente;
@@ -6094,6 +6137,7 @@ function toggleVistaCliente(){
     }
     b.textContent='👁️ Estás viendo como CLIENTE — tocá para volver a admin';
     b.style.display='block';
+    tiendaActualizarContrasteVistaCliente();
   }else if(b){ b.style.display='none'; }
 }
 // CERRAR SESIÓN: borra el acceso admin y revendedor. Al volver, pide clave de nuevo.
@@ -11482,6 +11526,7 @@ function toggleModoOscuro(){
   var b=document.getElementById('btn-modo-oscuro');
   if(b)b.textContent=on?'☀️':'🌙';
   aeActualizarBotonTemaSuperior();
+  tiendaActualizarContrasteVistaCliente();
 }
 function aeActualizarBotonTemaSuperior(){
   var b=document.getElementById('ae-theme-toggle-top');
