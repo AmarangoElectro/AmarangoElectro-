@@ -1097,6 +1097,7 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 <link rel="stylesheet" href="/supplier-percentages.css?v=20261103-mayorista-color">
 <script src="/supplier-logos.js?v=20261023"></script>
 <script src="/supplier-percentages.js?v=20261103"></script>
+<script defer src="/busqueda-inteligente.js?v=20261103-global1"></script>
 
 
 
@@ -7074,54 +7075,67 @@ function hdrCerrarSugerencias(){
   if(box){ box.style.display='none'; box.innerHTML=''; }
 }
 // PREDICTIVO: muestra abajo del buscador los productos que coinciden mientras escribís
+// Compartir el mismo ranking en las sugerencias instantáneas y en la grilla.
+var _aePredictivoTimer=null;
 function hdrPredictivo(){
-  var h=document.getElementById('hdr-buscar-input');
-  var box=document.getElementById('hdr-sugerencias');
-  if(!h||!box) return;
+  if(_aePredictivoTimer)clearTimeout(_aePredictivoTimer);
+  _aePredictivoTimer=setTimeout(function(){_aePredictivoTimer=null;hdrPredictivoMostrar();},95);
+}
+function tiendaUsarSugerenciaBuscador(texto){
+  texto=String(texto||'').slice(0,100);
+  var h=document.getElementById('hdr-buscar-input'),inp=document.getElementById('tienda-buscar');
+  if(h)h.value=texto;
+  if(inp)inp.value=texto;
+  tiendaModoPortada=false;
+  hdrCerrarSugerencias();
+  tiendaRender();
+}
+function hdrPredictivoMostrar(){
+  var h=document.getElementById('hdr-buscar-input'),box=document.getElementById('hdr-sugerencias');
+  if(!h||!box)return;
   var q=normTxt(h.value||'');
-  if(q.length<2){ box.style.display='none'; box.innerHTML=''; return; }
-  var palabras=q.split(' ').filter(Boolean);
-  // juntar productos reales + celulares visibles
+  if(q.length<2){hdrCerrarSugerencias();return;}
+  var palabras=q.split(' ').filter(Boolean),plan=window.AEBusqueda?AEBusqueda.preparar(q):null;
   var universo=[];
-  try{ tiendaProductos.forEach(function(p){ if(p && p.nombre && p.eliminado!==true && (tiendaEsAdmin || tiendaEstaVisibleYConStock(p))) universo.push(p); }); }catch(e){}
-  // Primero se muestran únicamente coincidencias exactas de palabra.
-  var res=[];
-  for(var i=0;i<universo.length;i++){
-    var p=universo[i];
-    var pj=puntajeBusquedaEstricta(p, palabras, q);
-    if(pj>0) res.push({p:p, pj:pj});
+  var admin=tiendaEsAdmin&&!vistaPreviaCliente;
+  try{
+    tiendaProductos.forEach(function(p){
+      if(p&&p.nombre&&!p.eliminado&&(admin||tiendaEstaVisibleYConStock(p)))universo.push(p);
+    });
+    cargarListaCelus().forEach(function(c,i){
+      if(!c||!c.nombre||!c.precio)return;
+      if(!admin&&(c.ocultoTienda||c.sinStock))return;
+      universo.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,foto:c.foto||'',categoria:'📱 Celulares',marca:c.marca||''});
+    });
+  }catch(e){}
+  var resultados=[];
+  universo.forEach(function(p){
+    var r=plan?AEBusqueda.puntuar(p,plan):{valor:puntajeBusquedaEstricta(p,palabras,q),tipo:'directo'};
+    if(r.valor>0)resultados.push({p:p,pj:r.valor,tipo:r.tipo});
+  });
+  resultados.sort(function(a,b){return b.pj-a.pj;});
+  var mejores=resultados.slice(0,8),correccion=plan?AEBusqueda.sugerir(plan,mejores.map(function(x){return x.p;})):'';
+  if(!mejores.length&&!correccion){hdrCerrarSugerencias();return;}
+  var html='';
+  if(correccion&&correccion!==q){
+    html+='<button type="button" data-ae-texto="'+escapeHtml(correccion).replace(/"/g,'&quot;')+'" style="display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #FED7AA;background:#FFF7ED;color:#88440C;font-size:.76rem;font-weight:800;cursor:pointer;">💡 Quizás quisiste decir: '+escapeHtml(correccion)+'</button>';
   }
-  var sonSugerencias=false;
-  // Sólo si no existe ninguna coincidencia exacta, ofrecer alternativas
-  // parecidas (errores de escritura, palabras relacionadas o parciales).
-  if(!res.length){
-    sonSugerencias=true;
-    for(var j=0;j<universo.length;j++){
-      var ps=universo[j];
-      var pjs=puntajeBusqueda(ps, palabras, q);
-      if(pjs>0) res.push({p:ps, pj:pjs});
-    }
+  if(mejores.some(function(x){return x.tipo==='similar';})){
+    html+='<div style="padding:7px 12px;background:var(--bg);color:var(--sub);font-size:.68rem;font-weight:750;">🔎 Coincidencias y productos similares</div>';
   }
-  res.sort(function(a,b){ return b.pj-a.pj; });
-  res = res.slice(0,8).map(function(x){ return x.p; });
-  if(!res.length){ box.style.display='none'; box.innerHTML=''; return; }
-  var html=sonSugerencias
-    ? '<div style="padding:8px 12px;background:#FFF7ED;color:#9A4A00;font-size:.72rem;font-weight:900;border-bottom:1px solid #FED7AA;">💡 Quizás quisiste decir…</div>'
-    : '';
-  res.forEach(function(p){
-    var foto=p.foto?('<img loading="lazy" decoding="async" src="'+fotoOpt(p.foto,80).replace(/"/g,'&quot;')+'" onerror="this.onerror=null;this.src=\''+String(p.foto).replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\'" style="width:38px;height:38px;border-radius:8px;object-fit:cover;background:#f2f2f2;flex:0 0 auto;display:block;">'):('<div style="width:38px;height:38px;border-radius:8px;background:#eef;display:flex;align-items:center;justify-content:center;flex:0 0 auto;">📦</div>');
-    html+='<div onclick="hdrElegirSug(\''+p.id+'\')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;-webkit-tap-highlight-color:transparent;">'
-      +foto
-      +'<div style="flex:1;min-width:0;"><div style="font-size:.82rem;font-weight:700;color:#0B2D6B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+p.nombre+'</div>'
-      +'<div style="font-size:.72rem;color:#FF7A00;font-weight:800;">$'+(p.venta||0).toLocaleString('es-AR')+'</div></div>'
-      +'<span style="color:#bbb;font-size:1rem;">↗</span></div>';
+  mejores.forEach(function(x){
+    var p=x.p,nom=escapeHtml(p.nombre||''),id=escapeHtml(String(p.id)).replace(/"/g,'&quot;');
+    var foto=p.foto?('<img loading="lazy" decoding="async" src="'+escapeHtml(fotoOpt(p.foto,80)).replace(/"/g,'&quot;')+'" alt="" style="width:38px;height:38px;border-radius:8px;object-fit:contain;background:#fff;flex:0 0 auto;">'):'<div style="width:38px;height:38px;display:grid;place-items:center;background:#eef;border-radius:8px;">📦</div>';
+    html+='<button type="button" data-ae-id="'+id+'" style="display:flex;width:100%;gap:10px;align-items:center;text-align:left;padding:9px 12px;cursor:pointer;border:0;border-bottom:1px solid var(--bor);background:var(--wh);color:var(--az);">'
+      +foto+'<span style="flex:1;min-width:0;"><span style="display:block;font-size:.8rem;font-weight:750;line-height:1.3;">'+nom+'</span>'
+      +'<span style="display:block;font-size:.68rem;color:var(--nar);font-weight:800;">'+(x.tipo==='similar'?'💡 Similar · ':'')+'$'+(Number(p.venta)||0).toLocaleString('es-AR')+'</span></span><span aria-hidden="true">↗</span></button>';
   });
   box.innerHTML=html;
-  // posicionar el panel justo debajo del buscador (el header tiene overflow hidden)
-  try{
-    var wrap=document.querySelector('.hdr-buscar');
-    if(wrap){ var r=wrap.getBoundingClientRect(); box.style.top=(r.bottom+4)+'px'; }
-  }catch(e){}
+  box.onclick=function(event){
+    var b=event.target.closest('[data-ae-texto]');if(b){tiendaUsarSugerenciaBuscador(b.getAttribute('data-ae-texto'));return;}
+    var item=event.target.closest('[data-ae-id]');if(item)hdrElegirSug(item.getAttribute('data-ae-id'));
+  };
+  try{var wrap=document.querySelector('.hdr-buscar');if(wrap){var rect=wrap.getBoundingClientRect();box.style.top=(rect.bottom+4)+'px';}}catch(e){}
   box.style.display='block';
 }
 function hdrElegirSug(id){
@@ -8729,6 +8743,8 @@ function tiendaRender(){
   }
   var cont=document.getElementById('tienda-grid');
   var vacia=document.getElementById('tienda-vacia');
+  // Buscar desde una bandeja admin no limita la consulta a esa carpeta.
+  var busquedaGlobalAdmin=!!(tiendaEsAdmin&&!vistaPreviaCliente&&String(document.getElementById('tienda-buscar').value||'').trim());
 
   if(tiendaEsAdmin)tiendaPrepararBandejasAdmin();
   tiendaActualizarBandejasAdmin();
@@ -8757,10 +8773,19 @@ function tiendaRender(){
     });
   }
 
+  if(busquedaGlobalAdmin){
+    // En Administración se buscan todos los productos cargados, incluidos los
+    // ocultos o sin stock; en público nunca se amplían permisos de visibilidad.
+    universo=tiendaProductos.filter(function(p){return p&&p.nombre&&!p.eliminado;});
+    if(aeFiltroMayoristaActual)universo=universo.filter(function(p){
+      return aeNormalizarMayorista(aeNombreMayorista(p))===aeFiltroMayoristaActual;
+    });
+  }
+
   // 🌟 traer los CELULARES a la tienda como productos de la categoría 📱 Celulares
   var celus=cargarListaCelus();
   celus.forEach(function(c, i){
-    if(tiendaEsAdmin && tiendaBandejaAdmin){
+    if(tiendaEsAdmin && tiendaBandejaAdmin && !busquedaGlobalAdmin){
       if(tiendaBandejaAdmin==='ocultos' && c && c.ocultoTienda){
         // continúa para incorporarlo a la carpeta de ocultos
       }else if(tiendaBandejaAdmin==='sinstock' && c && c.sinStock && !c.ocultoTienda){
@@ -8769,7 +8794,7 @@ function tiendaRender(){
     }
     if(!c || !c.precio)return;
     // En la vidriera principal no se mezclan celulares ocultos o sin stock.
-    if(!tiendaBandejaAdmin && (c.ocultoTienda || c.sinStock))return;
+    if(!tiendaBandejaAdmin && (c.ocultoTienda || c.sinStock) && !busquedaGlobalAdmin)return;
     if(tiendaEsAdmin&&aeFiltroMayoristaActual&&aeNormalizarMayorista(c.mayorista||c.proveedor)!==aeFiltroMayoristaActual)return;
     universo.push({
       id: 'celu_'+i,           // id especial para distinguirlos
@@ -8969,15 +8994,19 @@ function tiendaRender(){
   var palabras=normTxt(q).split(/\s+/).filter(function(w){return w;});
   var maxPrecio=parseFloat(document.getElementById('tienda-maxprecio').value)||0;
   var qNorm=normTxt(q);
+  var planBusq=(palabras.length&&window.AEBusqueda)?AEBusqueda.preparar(q):null;
   var lista=universo.filter(function(p){
     // 🎯 si el cliente escribió algo en el buscador, la BÚSQUEDA MANDA sobre la
     // categoría: busca en toda la tienda aunque esté parado en "Estufas". Así
     // "Samsung A17" aparece aunque estés en otra categoría (ya no queda atrapado).
     var okCat = palabras.length ? true : (!tiendaCategoriaActiva || catProd(p)===tiendaCategoriaActiva);
-    // Coincidencia por palabra completa: "termo" no trae "termotanque".
-    var pj=puntajeBusquedaEstricta(p, palabras, qNorm);
-    p._pj=pj; // guardo el puntaje para ordenar después
-    var okBusq=pj>0;
+    // Directos primero; después sinónimos, plurales, errores de escritura y modelos relacionados.
+    // No cambia costos, precios, stock ni la visibilidad del producto.
+    var resultadoBusq=planBusq?AEBusqueda.puntuar(p,planBusq):
+      {valor:puntajeBusquedaEstricta(p,palabras,qNorm),tipo:'directo'};
+    p._pj=resultadoBusq.valor;
+    p._tipoBusq=resultadoBusq.tipo;
+    var okBusq=resultadoBusq.valor>0;
     var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
     var okSubtipo=!tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
     var okMarcaGeneral=!tiendaMarcaGeneralActiva || tiendaMarcaGeneral(p)===tiendaMarcaGeneralActiva;
@@ -9024,7 +9053,7 @@ function tiendaRender(){
     _tiendaListaFull=[]; _tiendaMostrados=0;
     var vm=document.getElementById('tienda-vermas'); if(vm)vm.innerHTML='';
     var cntVacio=document.getElementById('tienda-contador');
-    if(cntVacio) cntVacio.textContent=palabras.length?'Sin resultados exactos':'Sin resultados';
+    if(cntVacio) cntVacio.textContent=palabras.length?'Sin productos relacionados':'Sin resultados';
 
     // Las coincidencias aproximadas se calculan aparte y sólo aparecen cuando
     // la búsqueda exacta quedó vacía. Respetan los demás filtros elegidos.
@@ -9046,8 +9075,12 @@ function tiendaRender(){
 
     var qSeguro=escapeHtml(q);
     var vacioHtml='<div style="grid-column:1/3;text-align:center;color:var(--sub);font-size:.85rem;padding:30px 20px 18px;">'
-      +'🔍 No encontramos una coincidencia exacta'+(q?' para "<b>'+qSeguro+'</b>"':'')+(maxPrecio?' hasta '+fmt(maxPrecio):'')
+      +'🔍 No encontramos productos relacionados'+(q?' con "<b>'+qSeguro+'</b>"':'')+(maxPrecio?' hasta '+fmt(maxPrecio):'')
       +'<br><br><button onclick="tiendaLimpiarBusqueda()" style="background:var(--nar);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:800;cursor:pointer;font-family:inherit;font-size:.8rem;">Ver todos los productos</button></div>';
+    var sugerenciaVacia=planBusq?AEBusqueda.sugerir(planBusq,sugeridas):'';
+    if(sugerenciaVacia&&sugerenciaVacia!==qNorm){
+      vacioHtml+='<button type="button" data-ae-texto="'+escapeHtml(sugerenciaVacia).replace(/"/g,'&quot;')+'" onclick="tiendaUsarSugerenciaBuscador(this.getAttribute(\'data-ae-texto\'))" style="grid-column:1/-1;text-align:left;padding:11px;border:1px solid #F0C27B;border-radius:10px;background:#FFF7ED;color:#8C490C;font-weight:800;cursor:pointer;">💡 Quizás quisiste decir: '+escapeHtml(sugerenciaVacia)+'</button>';
+    }
     if(sugeridas.length){
       vacioHtml+='<div style="grid-column:1/3;background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 12px;color:#9A4A00;font-size:.78rem;font-weight:900;">💡 Quizás quisiste decir…<div style="font-size:.67rem;font-weight:600;color:#A86120;margin-top:2px;">Estos productos son parecidos, pero no coinciden exactamente con lo escrito.</div></div>';
       vacioHtml+=tiendaCardsHtml(sugeridas);
@@ -9067,7 +9100,22 @@ function tiendaRender(){
   _tiendaListaFull = lista;
   _tiendaMostrados = Math.min(TIENDA_LOTE, lista.length);
   cont.classList.toggle('ae-mayorista-filtrado',!!(tiendaEsAdmin&&!vistaPreviaCliente&&aeFiltroMayoristaActual));
-  cont.innerHTML = tiendaCardsHtml(lista.slice(0, _tiendaMostrados));
+  var resumenBusqueda='';
+  if(palabras.length){
+    var directos=lista.filter(function(p){return p._tipoBusq==='directo';}).length;
+    var similares=lista.length-directos;
+    var corregido=planBusq?AEBusqueda.sugerir(planBusq,lista.slice(0,12)):'';
+    if(corregido&&corregido!==qNorm){
+      resumenBusqueda+='<button type="button" data-ae-texto="'+escapeHtml(corregido).replace(/"/g,'&quot;')+'" onclick="tiendaUsarSugerenciaBuscador(this.getAttribute(\'data-ae-texto\'))" style="grid-column:1/-1;text-align:left;border:1px solid #F0C27B;background:#FFF7ED;border-radius:11px;padding:10px 12px;color:#92400E;font-size:.76rem;font-weight:850;cursor:pointer;">💡 Quizás quisiste decir: '+escapeHtml(corregido)+'</button>';
+    }
+    if(similares||busquedaGlobalAdmin){
+      resumenBusqueda+='<div style="grid-column:1/-1;border:1px solid var(--bor);background:var(--wh);color:var(--sub);border-radius:10px;padding:8px 11px;font-size:.72rem;font-weight:800;">'
+        +'🔎 '+directos+' coincidencia'+(directos===1?'':'s')+' directa'+(directos===1?'':'s')
+        +(similares?' · '+similares+' producto'+(similares===1?'':'s')+' similar'+(similares===1?'':'es'):'')
+        +(busquedaGlobalAdmin?' · Búsqueda en todo el catálogo':'')+'</div>';
+    }
+  }
+  cont.innerHTML = resumenBusqueda+tiendaCardsHtml(lista.slice(0, _tiendaMostrados));
   tiendaPintarVerMas();
   tiendaAplicarVistaYAvisos();
   finalizarRender();
