@@ -7078,7 +7078,7 @@ function aeEstadoBuscadoProducto(p){
   if(!p)return 2;
   if(p.esCelu)return p.sinStock===true?2:(p.visible!==true?1:0);
   if(tiendaTieneSinStock(p))return 2;
-  if(!tiendaEstaVisibleYConStock(p)||tiendaEsPendienteImagenAdmin(p))return 1;
+  if(p.visible===false||p.ocultoManualProveedor===true||p.ocultoPorDuplicado===true||!tiendaEstaVisibleYConStock(p)||tiendaEsPendienteImagenAdmin(p))return 1;
   return 0;
 }
 function aeNombreEstadoBusqueda(n){
