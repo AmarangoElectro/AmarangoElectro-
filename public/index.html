@@ -9189,7 +9189,7 @@ function tiendaRender(){
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
     var okViejo=!verSoloPreciosViejos || (!p.esCelu && !tiendaEsAutomatico(p) && ((diasPrecio(p)===null)||(diasPrecio(p)>=30)));
     // filtro "solo ofertas": producto con precio tachado o cuotas sin interés
-    var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
+    var okOferta=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0) || !!aeBajaReal(p);
     return okCat && okBusq && okMarca && okSubtipo && okMarcaGeneral && okPrecio && okFav && okViejo && okOferta;
   });
   // 🧠 registrar qué buscó la gente y si encontró algo
@@ -9244,7 +9244,7 @@ function tiendaRender(){
         var okPrecioSug=!maxPrecio || p.venta<=maxPrecio;
         var okFavSug=!verSoloFavoritos || esFavorito(p.id);
         var okViejoSug=!verSoloPreciosViejos || (!p.esCelu && (diasPrecio(p)||0)>=30);
-        var okOfertaSug=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0);
+        var okOfertaSug=!verSoloOfertas || (p.precioAntes && parseFloat(p.precioAntes)>parseFloat(p.venta)) || (p.sinInteres && parseInt(p.sinInteres,10)>0) || !!aeBajaReal(p);
         if(!okMarcaSug || !okPrecioSug || !okFavSug || !okViejoSug || !okOfertaSug) return;
         var pjSug=puntajeBusqueda(p, palabras, qNorm);
         if(pjSug>0) sugeridas.push({p:p,pj:pjSug});
@@ -11164,6 +11164,9 @@ function tiendaVerDetalle(id){
     +'<div class="ae-detail-views" style="display:flex;align-items:center;gap:5px;margin:4px 0 10px;font-size:.64rem;color:var(--sub);font-weight:600;">👀 '+visitasProducto(p.id)+' personas vieron esto</div>';
 
   var datosPrecioDetalle=tiendaDatosPrecio(p);
+  if(aeBajaReal(p)){
+    html+='<div style="display:flex;justify-content:flex-start;margin:5px 0 7px;"><span class="ae-price-drop-badge">↘ ¡BAJAMOS!</span></div>'+aeBajaCardHtml(p);
+  }
   var esVendedorDetalle=!tiendaEsAdmin&&!vistaPreviaCliente&&revUnlocked;
   if(esVendedorDetalle && tiendaEsAutomatico(p)){
     var stockDetalle=tiendaLeerStockProveedor(p);
