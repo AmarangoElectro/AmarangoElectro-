@@ -45,3 +45,24 @@ test('Botón Foto/video junto a imagen sólo en Administración, mantiene acceso
   assert.match(card,/Reemplazar foto/);
   assert.match(card,/aria-label="Ampliar imagen"/);
 });
+
+
+test('Compartir el elemento elegido funciona en tarjetas, visor, detalle y edición, para los tres roles',()=>{
+  assert.match(galeria,/function compartirMedio\(p,item,btn\)/);
+  assert.match(galeria,/navigator\.share\(\{files:\[file\],title:nombre\}\)/);
+  assert.match(galeria,/navigator\.share\(\{title:nombre,text:video\?/);
+  assert.match(galeria,/copiarMedio\(url\)/);
+  assert.match(galeria,/compartirMedio\(p,lista\[indice\],compartir\)/);
+  assert.match(galeria,/compartirMedio\(data\.p,data\.lista\[indice\]\|\|data\.lista\[0\],compartir\)/);
+  assert.match(galeria,/function aeTarjetaCompartir\(card,p,lista\)/);
+  assert.match(galeria,/aeTarjetaCompartir\(card,p,lista\);\s*if\(estado\)estado\.compartir=compartir;\s*if\(lista\.length<2\)/);
+  assert.match(galeria,/class="ae-gal-share-detalle"|,'ae-gal-share-detalle'/);
+  assert.match(galeria,/compartirFila=boton\('📤 Compartir'/);
+  assert.match(galeria,/compartirPortada=boton\('📤 Compartir'/);
+  const shareCard=galeria.slice(galeria.indexOf('function aeTarjetaCompartir'),galeria.indexOf('function aeTarjetaPintar'));
+  assert.doesNotMatch(shareCard,/tiendaEsAdmin|revUnlocked|vistaPreviaCliente/);
+  assert.match(html,/tienda-galeria\.js\?v=20261103-carrusel-compartir/);
+  assert.match(html,/📷 Galería: hasta 3 fotos o video/);
+  assert.match(html,/📤 Compartir este producto/);
+  assert.match(html,/ae-admin-media-add/);
+});
