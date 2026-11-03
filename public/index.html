@@ -9094,6 +9094,10 @@ function tiendaCardsHtml(sublista){
         : '<div onclick="tiendaVerDetalle('+pid+')" style="height:190px;display:flex;align-items:center;justify-content:center;font-size:3rem;cursor:pointer;background:#f7f9fc;border-radius:13px 13px 0 0;">'+catProd(p).split(' ')[0]+'</div>')
       +(logoFotoCatalogo?'<img src="'+logoFotoCatalogo.replace(/"/g,'&quot;')+'" alt="Amarango Electro" style="position:absolute;bottom:8px;right:8px;width:48px;height:48px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.92);padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.2);pointer-events:none;">':'')
       +(etiquetas?'<div style="position:absolute;top:7px;left:7px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;">'+etiquetas+'</div>':'')
+      // Acceso directo aditivo: la carga de medios es exclusivamente administrativa.
+      +(tiendaEsAdmin&&!vistaPreviaCliente
+        ? '<button type="button" class="ae-admin-media-add" title="Agregar foto o video" aria-label="Agregar foto o video al producto" onclick="event.preventDefault();event.stopPropagation();if(window.AEGaleria)window.AEGaleria.abrir('+pid+')" style="position:absolute;z-index:8;bottom:47px;left:8px;max-width:calc(100% - 16px);padding:7px 9px;min-height:32px;box-sizing:border-box;border:1px solid rgba(255,255,255,.72);border-radius:9px;background:rgba(11,45,107,.91);color:#fff;font-size:.62rem;font-weight:900;font-family:inherit;white-space:nowrap;cursor:pointer;box-shadow:0 2px 9px rgba(0,0,0,.22);touch-action:manipulation;">➕ Foto / video</button>'
+        : '')
       +'</div>';
 
     var botonAmpliarAdmin='';
