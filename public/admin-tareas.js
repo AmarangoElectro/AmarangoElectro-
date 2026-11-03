@@ -118,7 +118,7 @@ function openForm(productId,card){
 }
 function askNotifications(){if(!admin()||!('Notification'in window))return;Notification.requestPermission().then(function(state){if(state!=='granted')alert('Los avisos del navegador no fueron habilitados. Las tareas siguen visibles en la campanita.');renderPanel();}).catch(function(){alert('El navegador no permite activar avisos en este momento.');});}
 function jumpToProduct(t){if(!admin()||!t.productId)return;close();var card=document.getElementById('card-'+t.productId);
- if(card){card.scrollIntoView({behavior:'smooth',block:'center'});return;}
+ if(card&&nameFor(t.productId,card).toLowerCase()===(t.productName||'').toLowerCase()){card.scrollIntoView({behavior:'smooth',block:'center'});return;}
  var input=document.getElementById('tienda-buscar');if(input&&typeof window.tiendaRender==='function'){input.value=t.productName||t.title;window.tiendaRender();setTimeout(function(){var c=document.getElementById('card-'+t.productId);if(c)c.scrollIntoView({behavior:'smooth',block:'center'});},150);}
 }
 function remind(){if(!admin()||document.hidden)return;var eligible=tasks.filter(due);if(!eligible.length)return;
