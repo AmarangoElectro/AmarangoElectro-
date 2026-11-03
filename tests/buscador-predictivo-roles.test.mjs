@@ -54,11 +54,11 @@ test('Separadores en grilla y paginación no repiten grupos por lote',()=>{
 
 test('Clientes, asesores y vista previa de cliente nunca consultan ocultos ni agotados',()=>{
   assert.match(html,/var admin=tiendaEsAdmin&&!vistaPreviaCliente;/);
-  assert.match(html,/if\(!admin&&\(!tiendaEstaVisibleYConStock\(p\)\|\|tiendaEsPendienteImagenAdmin\(p\)\)\)return;/);
+  assert.match(html,/if\(!admin&&!aeProductoBuscablePublico\(p\)\)return;/);
   assert.match(html,/if\(!admin&&\(c\.ocultoTienda\|\|c\.sinStock\)\)return;/);
   assert.match(html,/if\(!admin&&estado!==0\)return;/);
   assert.match(html,/if\(vistaPreviaCliente\)universo=universo\.filter\(function\(p\)\{/);
-  assert.match(html,/p\.esCelu\|\|!tiendaEsPendienteImagenAdmin\(p\)/);
+  assert.match(html,/return aeProductoBuscablePublico\(p\);/);
   assert.match(html,/sinStock:c\.sinStock===true/);
 });
 
