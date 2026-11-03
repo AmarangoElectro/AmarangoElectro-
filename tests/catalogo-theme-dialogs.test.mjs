@@ -12,7 +12,7 @@ test('Carga catálogo tiene ambos temas sin alterar sus formularios',()=>{
   assert.match(html,/onclick="tiendaProcesarCarga\(\)"/);
 });
 test('El selector Amarango funciona en claro y oscuro y conserva onchange nativo',()=>{
-  assert.match(html,/id="ae-brand-select-modal"/);
+  assert.match(html,/modal\.id='ae-brand-select-modal'/);
   assert.match(html,/body\.oscuro #ae-brand-select-modal \.ae-selector-panel/);
   assert.match(html,/sel\.dispatchEvent\(new Event\('change',\{bubbles:true\}\)\)/);
   assert.match(html,/sel\.value=op\.value/);
