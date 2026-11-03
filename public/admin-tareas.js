@@ -34,6 +34,19 @@ function ensure(){
    '.ae-task-action.ae-task-primary{background:#ff7a00;border-color:#ff7a00;color:#fff}.ae-task-item{border:1px solid var(--bor);border-radius:12px;padding:11px;margin:8px 0;background:var(--bg)}',
    '.ae-task-item strong{display:block;overflow-wrap:anywhere}.ae-task-item.due{border-color:#ff7a00}.ae-task-note{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.77rem;margin-top:5px}',
    'body.oscuro .ae-task-pin.ae-task-active{background:#4f321c;color:#ffd0a5}body.oscuro #ae-task-bell.ae-task-due{color:#ffba76}',
+   ".ae-task-date-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;font:inherit;font-size:.8rem;font-weight:800;border:1.5px solid var(--bor);border-radius:12px;background:var(--wh);color:var(--txt);padding:11px 12px;cursor:pointer;margin-top:6px}",
+   ".ae-task-date-trigger span{color:var(--nar);font-size:.95rem}.ae-task-date-trigger:focus-visible,.ae-task-calendar button:focus-visible,.ae-task-calendar select:focus-visible{outline:2px solid var(--nar);outline-offset:2px}",
+   ".ae-task-calendar[hidden]{display:none!important}.ae-task-calendar{--ae-date-bg:var(--wh);--ae-date-text:var(--txt);--ae-date-muted:var(--sub);--ae-date-line:var(--bor);margin-top:8px;padding:12px;border:1.5px solid var(--bor);border-radius:16px;background:var(--ae-date-bg);color:var(--ae-date-text);box-shadow:0 6px 24px rgba(5,22,55,.10)}",
+   ".ae-task-calendar-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:10px}.ae-task-calendar-head strong{font-size:.83rem;text-transform:capitalize;color:var(--ae-date-text)}",
+   ".ae-task-calendar button{font-family:inherit;cursor:pointer}.ae-task-calendar .ae-task-nav{width:34px;height:34px;flex-shrink:0;border:1px solid var(--ae-date-line);border-radius:10px;background:var(--bg);color:var(--ae-date-text);font-size:1rem}",
+   ".ae-task-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.ae-task-calendar-weekday{padding:5px 0;text-align:center;font-size:.66rem;font-weight:850;color:var(--ae-date-muted)}",
+   ".ae-task-calendar-day{width:100%;min-height:38px;padding:3px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--ae-date-text);font-size:.75rem;font-weight:750}",
+   ".ae-task-calendar-day.ae-outside{opacity:.32}.ae-task-calendar-day.ae-today:not(.ae-selected){border-color:var(--nar)}.ae-task-calendar-day.ae-selected{background:var(--nar);border-color:var(--nar);color:#fff;box-shadow:0 3px 10px rgba(255,122,0,.27)}",
+   ".ae-task-time-row{display:flex;align-items:flex-end;gap:9px;margin-top:13px;padding-top:10px;border-top:1px solid var(--ae-date-line)}.ae-task-time-row label{flex:1;min-width:0;font-size:.72rem;font-weight:800}",
+   ".ae-task-time-row select{display:block;width:100%;min-width:0;margin-top:5px;border:1px solid var(--ae-date-line);border-radius:10px;background:var(--bg);color:var(--ae-date-text);padding:9px;font-size:.85rem;font-weight:800}",
+   ".ae-task-date-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:12px}.ae-task-date-bottom button{border:1px solid var(--ae-date-line);border-radius:9px;background:var(--bg);color:var(--ae-date-text);font-size:.74rem;font-weight:800;padding:8px 10px}.ae-task-date-bottom .ae-task-date-done{background:var(--nar);border-color:var(--nar);color:#fff}",
+   "body.oscuro .ae-task-calendar{--ae-date-bg:#122442;--ae-date-text:#edf4ff;--ae-date-muted:#b1c5e6;--ae-date-line:#365575;box-shadow:0 8px 24px rgba(0,0,0,.24)}",
+   "body.oscuro .ae-task-date-trigger{background:#122442;color:#edf4ff;border-color:#365575}",
    '@media(min-width:650px){.ae-task-layer{align-items:center}}'
   ].join('\n');
   document.head.appendChild(style);
@@ -96,6 +109,64 @@ function renderPanel(){
  panel.appendChild(box);
 }
 function openPanel(){if(!admin())return;ensure();if(form)form.hidden=true;panel.hidden=false;renderPanel();}
+
+/* Calendario Amarango propio: evita el selector nativo del sistema, que no respeta claro/oscuro. */
+function taskDatePicker(){
+ var wrap=el('div','ae-task-date-picker'),caption=el('span','ae-task-label','Recordarme el día y hora (opcional)');
+ var trigger=btn('📅 Elegir fecha y hora',function(){calendar.hidden=!calendar.hidden;trigger.setAttribute('aria-expanded',String(!calendar.hidden));if(!calendar.hidden)render();},'ae-task-date-trigger');
+ trigger.setAttribute('aria-expanded','false');
+ var calendar=el('div','ae-task-calendar');calendar.hidden=true;
+ var month=new Date(),selected='',hour='09',minute='00';
+ month=new Date(month.getFullYear(),month.getMonth(),1);
+ function pad(n){return String(n).padStart(2,'0');}
+ function iso(y,m,d){return y+'-'+pad(m+1)+'-'+pad(d);}
+ function updateLabel(){trigger.textContent=selected?'📅 '+fmtDate(selected+'T'+hour+':'+minute)+' · Editar':'📅 Elegir fecha y hora';trigger.appendChild(el('span','','▾'));}
+ function dateGrid(){
+  var grid=el('div','ae-task-calendar-grid');
+  ['Lu','Ma','Mi','Ju','Vi','Sa','Do'].forEach(function(day){grid.appendChild(el('span','ae-task-calendar-weekday',day));});
+  var y=month.getFullYear(),m=month.getMonth(),offset=(new Date(y,m,1).getDay()+6)%7;
+  for(var i=0;i<42;i++){
+   var d=new Date(y,m,1-offset+i),stamp=iso(d.getFullYear(),d.getMonth(),d.getDate());
+   var day=btn(String(d.getDate()),function(){selected=this.getAttribute('data-date');updateLabel();render();},'ae-task-calendar-day');
+   day.setAttribute('data-date',stamp);day.setAttribute('aria-label',d.toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+   day.setAttribute('aria-pressed',String(stamp===selected));
+   if(d.getMonth()!==m)day.classList.add('ae-outside');
+   if(stamp===selected)day.classList.add('ae-selected');
+   var now=new Date();if(stamp===iso(now.getFullYear(),now.getMonth(),now.getDate()))day.classList.add('ae-today');
+   grid.appendChild(day);
+  }
+  return grid;
+ }
+ function timeSelect(label,max,value,changed){
+  var holder=el('label','',label),select=el('select');
+  select.setAttribute('aria-label',label);
+  for(var i=0;i<=max;i++){var option=el('option','',pad(i));option.value=pad(i);select.appendChild(option);}
+  select.value=value;
+  select.addEventListener('change',function(){changed(select.value);if(!selected){var d=new Date();selected=iso(d.getFullYear(),d.getMonth(),d.getDate());month=new Date(d.getFullYear(),d.getMonth(),1);render();}updateLabel();});
+  holder.appendChild(select);return holder;
+ }
+ function render(){
+  calendar.replaceChildren();
+  var head=el('div','ae-task-calendar-head');
+  head.appendChild(btn('‹',function(){month=new Date(month.getFullYear(),month.getMonth()-1,1);render();},'ae-task-nav'));
+  head.appendChild(el('strong','',month.toLocaleDateString('es-AR',{month:'long',year:'numeric'})));
+  head.appendChild(btn('›',function(){month=new Date(month.getFullYear(),month.getMonth()+1,1);render();},'ae-task-nav'));
+  calendar.appendChild(head);calendar.appendChild(dateGrid());
+  var time=el('div','ae-task-time-row');
+  time.appendChild(timeSelect('Hora',23,hour,function(v){hour=v}));
+  time.appendChild(timeSelect('Minutos',59,minute,function(v){minute=v}));
+  calendar.appendChild(time);
+  var actions=el('div','ae-task-date-bottom');
+  actions.appendChild(btn('Hoy',function(){var n=new Date();selected=iso(n.getFullYear(),n.getMonth(),n.getDate());month=new Date(n.getFullYear(),n.getMonth(),1);updateLabel();render();}));
+  actions.appendChild(btn('Sin aviso',function(){selected='';updateLabel();calendar.hidden=true;trigger.setAttribute('aria-expanded','false');trigger.focus();}));
+  actions.appendChild(btn('Listo',function(){calendar.hidden=true;trigger.setAttribute('aria-expanded','false');trigger.focus();},'ae-task-date-done'));
+  calendar.appendChild(actions);
+ }
+ wrap.appendChild(caption);wrap.appendChild(trigger);wrap.appendChild(calendar);
+ updateLabel();
+ return {element:wrap,getValue:function(){return selected?selected+'T'+hour+':'+minute:''}};
+}
+
 function openForm(productId,card){
  if(!admin())return;ensure();panel.hidden=true;form.hidden=false;form.replaceChildren();
  var product=productId?nameFor(productId,card):'',box=el('div','ae-task-dialog');box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Anotar tarea');
@@ -103,8 +174,8 @@ function openForm(productId,card){
  if(productId)box.appendChild(el('p','ae-task-mini','Producto: '+product));
  function field(label,type,value,max){var wrap=el('label','ae-task-label',label),input=el(type==='textarea'?'textarea':'input','ae-task-input');if(type!=='textarea')input.type=type;input.value=value||'';if(max)input.maxLength=max;wrap.appendChild(input);box.appendChild(wrap);return input}
  var title=field('Tarea','text',productId?'Comprar y entregar: '+product:'',180);
- var note=field('Nota (opcional)','textarea','',500);note.rows=3;note.placeholder='Mayorista, cliente o detalles de la entrega';
- var when=field('Avisarme el día y hora (opcional)','datetime-local','');
+ var note=field('Nota (opcional)','textarea','',500);note.rows=3;note.placeholder='Cliente o indicaciones para la entrega';
+ var when=taskDatePicker();box.appendChild(when.element);
  box.appendChild(el('p','ae-task-mini','Las anotaciones se guardan sólo en este dispositivo. Evitá incluir información sensible.'));
  var actions=el('div','ae-task-actions');
  actions.appendChild(btn('Guardar tarea',function(){
