@@ -7100,11 +7100,14 @@ function hdrPredictivoMostrar(){
   var admin=tiendaEsAdmin&&!vistaPreviaCliente;
   try{
     tiendaProductos.forEach(function(p){
-      if(p&&p.nombre&&!p.eliminado&&(admin||tiendaEstaVisibleYConStock(p)))universo.push(p);
+      if(!p||!p.nombre||p.eliminado||(!admin&&!tiendaEstaVisibleYConStock(p)))return;
+      if(admin&&aeFiltroMayoristaActual&&aeNormalizarMayorista(aeNombreMayorista(p))!==aeFiltroMayoristaActual)return;
+      universo.push(p);
     });
     cargarListaCelus().forEach(function(c,i){
       if(!c||!c.nombre||!c.precio)return;
       if(!admin&&(c.ocultoTienda||c.sinStock))return;
+      if(admin&&aeFiltroMayoristaActual&&aeNormalizarMayorista(c.mayorista||c.proveedor)!==aeFiltroMayoristaActual)return;
       universo.push({id:'celu_'+i,esCelu:true,nombre:c.nombre,venta:c.precio,foto:c.foto||'',categoria:'📱 Celulares',marca:c.marca||''});
     });
   }catch(e){}
@@ -9007,9 +9010,11 @@ function tiendaRender(){
     p._pj=resultadoBusq.valor;
     p._tipoBusq=resultadoBusq.tipo;
     var okBusq=resultadoBusq.valor>0;
-    var okMarca=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
-    var okSubtipo=!tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
-    var okMarcaGeneral=!tiendaMarcaGeneralActiva || tiendaMarcaGeneral(p)===tiendaMarcaGeneralActiva;
+    // Una búsqueda de texto es global dentro del proveedor seleccionado:
+    // no debe quedar bloqueada por la categoría o la marca visitada antes.
+    var okMarca=palabras.length || !tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
+    var okSubtipo=palabras.length || !tiendaSubfiltroActivo || tiendaSubtipoProducto(p,catProd(p))===tiendaSubfiltroActivo;
+    var okMarcaGeneral=palabras.length || !tiendaMarcaGeneralActiva || tiendaMarcaGeneral(p)===tiendaMarcaGeneralActiva;
     var okPrecio=!maxPrecio || tiendaPrecioContado(p)<=maxPrecio;
     var okFav=!verSoloFavoritos || esFavorito(p.id);
     // filtro "solo precios viejos" (solo admin): productos propios con 30+ días
@@ -9060,7 +9065,7 @@ function tiendaRender(){
     var sugeridas=[];
     if(palabras.length){
       universo.forEach(function(p){
-        var okMarcaSug=!tiendaMarcaActiva || (catProd(p)==='📱 Celulares' && marcaCelu(p.nombre)===tiendaMarcaActiva);
+        var okMarcaSug=true; // sugerencias en todo el catálogo, sin filtro de marca anterior
         var okPrecioSug=!maxPrecio || p.venta<=maxPrecio;
         var okFavSug=!verSoloFavoritos || esFavorito(p.id);
         var okViejoSug=!verSoloPreciosViejos || (!p.esCelu && (diasPrecio(p)||0)>=30);
