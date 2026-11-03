@@ -34,6 +34,7 @@ create table public.ae_admin_task_email_reminders(
   updated_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+create index ae_admin_task_email_user_idx on public.ae_admin_task_email_reminders(user_id);
 create index ae_admin_task_email_due_idx on public.ae_admin_task_email_reminders(due_at)
 where mail_enabled and stage<>'completada';
 alter table public.ae_admin_task_email_reminders enable row level security;
