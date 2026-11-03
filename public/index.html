@@ -8589,7 +8589,7 @@ function aePintarMayoristas(seleccion){
     var ver=document.createElement('button');ver.type='button';ver.style.cssText='flex:1;text-align:left;border:0;background:none;color:var(--az);font:inherit;cursor:pointer;';
     var titulo=document.createElement('strong');titulo.textContent=grupo.nombre;ver.appendChild(titulo);
     var subt=document.createElement('div');subt.style.cssText='font-size:.7rem;color:var(--sub);margin-top:3px;';subt.textContent=total+' productos · '+visibles+' visibles';ver.appendChild(subt);
-    ver.onclick=function(){aeFiltroMayoristaActual=k;aeCerrarMayoristas();tiendaRender();var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});};
+    ver.onclick=function(){aeFiltroMayoristaActual=k;tiendaBandejaAdmin='';tiendaModoPortada=false;tiendaMostrarTodos=true;tiendaCategoriaActiva='';tiendaMarcaActiva='';tiendaSubfiltroActivo='';verSoloFavoritos=false;verSoloOfertas=false;verSoloPreciosViejos=false;var b=document.getElementById('tienda-buscar');if(b)b.value='';aeCerrarMayoristas();tiendaRender();var panel=document.getElementById('ae-admin-filtro-mayorista');if(panel)panel.scrollIntoView({block:'center',behavior:'smooth'});};
     var boton=document.createElement('button');boton.type='button';boton.setAttribute('role','switch');boton.setAttribute('aria-checked',String(visibles>0));boton.innerHTML='<span aria-hidden="true" style="display:inline-block;vertical-align:middle;width:32px;height:18px;border-radius:12px;background:'+(visibles?'#16A34A':'#9CA3AF')+';padding:2px;box-sizing:border-box;margin-right:5px;"><span style="display:block;width:14px;height:14px;border-radius:50%;background:white;transform:translateX('+(visibles?'14':'0')+'px);transition:transform .2s;"></span></span>'+(visibles?'Visible':'Oculto');boton.style.cssText='border:1px solid var(--bor);border-radius:20px;padding:9px 12px;min-width:83px;background:'+(visibles?'#DDF7E8':'#FDE8E8')+';color:'+(visibles?'#08783E':'#991B1B')+';font-weight:800;cursor:pointer;';
     // Estado mixto: no afirmar que todos están visibles ni reactivar ocultos por otros motivos.
     if(visibles>0&&visibles<total){boton.setAttribute('aria-checked','mixed');boton.title='Visibilidad parcial: '+visibles+' de '+total+' productos';}
@@ -8675,9 +8675,6 @@ function tiendaRender(){
     return tiendaEstaVisibleYConStock(p) &&
       (tiendaEsAdmin && tiendaBandejaAdmin==='nuevos' || !tiendaEsPendienteImagenAdmin(p));
   });
-  if(tiendaEsAdmin&&aeFiltroMayoristaActual){
-    universo=tiendaProductos.filter(function(p){return aeNormalizarMayorista(aeNombreMayorista(p))===aeFiltroMayoristaActual;});
-  }
   if(tiendaEsAdmin && tiendaBandejaAdmin==='nuevos'){
     universo=universo.filter(tiendaEsPendienteImagenAdmin);
   }else if(tiendaEsAdmin && tiendaBandejaAdmin==='revision'){
@@ -8686,6 +8683,14 @@ function tiendaRender(){
     universo=tiendaProductos.filter(tiendaEstaOcultoAdmin);
   }else if(tiendaEsAdmin && tiendaBandejaAdmin==='sinstock'){
     universo=tiendaProductos.filter(tiendaEstaSinStockAdmin);
+  }
+  // Aplicar el mayorista AL FINAL: ninguna bandeja (ocultos, sin stock,
+  // revisión) puede reemplazar el filtro ni mostrar productos de otros.
+  if(tiendaEsAdmin&&aeFiltroMayoristaActual){
+    if(!tiendaBandejaAdmin)universo=tiendaProductos;
+    universo=universo.filter(function(p){
+      return aeNormalizarMayorista(aeNombreMayorista(p))===aeFiltroMayoristaActual;
+    });
   }
 
   // 🌟 traer los CELULARES a la tienda como productos de la categoría 📱 Celulares
