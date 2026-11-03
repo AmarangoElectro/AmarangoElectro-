@@ -1,4 +1,5 @@
 import base from "./worker.mjs";
+import { dispatchAdminTaskMail } from "./admin-task-mail.mjs";
 
 const PRO_UX_HEAD = `
 <link rel="stylesheet" href="/professional-ux.css?v=20260823-2">
@@ -244,6 +245,14 @@ export default {
     return rescatada;
   },
   async scheduled(controller, env, ctx) {
+    // No modifica los cron existentes de sincronización de proveedores.
+    // El correo sólo se despacha con el cron dedicado y credenciales secretas presentes.
+    if (controller?.cron === "*/5 * * * *") {
+      ctx.waitUntil(dispatchAdminTaskMail(env).catch((error) => {
+        console.warn("Admin task mail scheduler unavailable", String(error?.message || error).slice(0, 90));
+      }));
+      return;
+    }
     if (base && typeof base.scheduled === "function") {
       return base.scheduled(controller, env, ctx);
     }
