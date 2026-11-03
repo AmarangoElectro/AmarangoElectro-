@@ -55,3 +55,23 @@ test('Código aislado, sin escrituras remotas ni cálculos de precios',()=>{
   assert.match(css,/body\.oscuro #tienda-grid/);
   assert.match(css,/body\.oscuro #ae-supplier-pct-dialog/);
 });
+
+
+test('Porcentaje usa el mismo color del mayorista en temas claro y oscuro',()=>{
+  const start=html.indexOf('    if(tiendaEsAdmin && !vistaPreviaCliente && mayoristaUnico){');
+  const end=html.indexOf('    if(tiendaEsAdmin && !vistaPreviaCliente && p.esCelu){',start);
+  const block=html.slice(start,end);
+  assert.match(block,/--ae-pct-accent-light:'\+colorMayoristaCard\.txt/);
+  assert.match(block,/--ae-pct-accent-dark:'\+\(identidadColorMayorista\?identidadColorMayorista\.dark:colorMayoristaCard\.txt\)/);
+  assert.match(css,/color:var\(--ae-pct-accent-light,inherit\)/);
+  assert.match(css,/border-color:var\(--ae-pct-accent-light,currentColor\)/);
+  assert.match(css,/background:color-mix\(in srgb,var\(--ae-pct-accent-light,currentColor\) 9%,var\(--wh\)\)/);
+  assert.match(css,/body\.oscuro[\s\S]*?\.ae-supplier-percent\{\s*color:var\(--ae-pct-accent-dark,/);
+  assert.match(html,/supplier-percentages\.css\?v=20261103-mayorista-color/);
+  assert.match(js,/root\.aeMayoristaPctTexto=label/);
+  assert.match(js,/root\.aeEditarPorcentajeMayorista=edit/);
+  const sandbox={};
+  runInContext(logos,createContext(sandbox));
+  assert.equal(sandbox.aeMayoristaLogoIdentity('Electro Impacto').light,'#15803d');
+  assert.equal(sandbox.aeMayoristaLogoIdentity('Electro Impacto').dark,'#4ade80');
+});

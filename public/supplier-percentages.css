@@ -2,12 +2,18 @@
 #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label .ae-supplier-percent{
   display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
   margin-left:auto;min-width:45px;min-height:30px;padding:5px 6px;
-  border:1px solid #bfa389;border-radius:9px;
-  background:#fff8f1;color:#35271e;font:850 11px Inter,system-ui,sans-serif;
+  border:1px solid currentColor;border-radius:9px;
+  /* Mismo acento que el nombre/logo del proveedor, sin modificar su porcentaje. */
+  color:var(--ae-pct-accent-light,inherit);
+  border-color:var(--ae-pct-accent-light,currentColor);
+  background:color-mix(in srgb,var(--ae-pct-accent-light,currentColor) 9%,var(--wh));
+  font:850 11px Inter,system-ui,sans-serif;
   white-space:nowrap;cursor:pointer;
 }
 body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-supplier-label .ae-supplier-percent{
-  background:#34251a;color:#fff4e8;border-color:#b27a4b;
+  color:var(--ae-pct-accent-dark,var(--ae-pct-accent-light,inherit));
+  border-color:var(--ae-pct-accent-dark,var(--ae-pct-accent-light,currentColor));
+  background:color-mix(in srgb,var(--ae-pct-accent-dark,var(--ae-pct-accent-light,currentColor)) 15%,#181c25);
 }
 #tienda-grid .ae-supplier-percent:focus-visible{outline:2px solid #ff943e;outline-offset:2px}
 #ae-supplier-pct-dialog{
