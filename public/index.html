@@ -14036,10 +14036,22 @@ function bajarBancoFotosNube(){
     .then(function(r){ if(r && r.data && r.data.datos){ try{localStorage.setItem('ae_banco_fotos_celus',JSON.stringify(r.data.datos));}catch(e){} } })
     .catch(function(){});
 }
-// Las fotos se comprimen antes de subirlas. Se usa directamente la URL pública
-// para evitar consumir Storage Image Transformations de Supabase.
+// Fotos de Supabase: usar el proxy de Cloudflare ya existente (caché en edge
+// y miniaturas por ancho); si falla, el onerror de cada tarjeta usa la original.
+// Nunca proxificar imágenes externas ni data: URLs.
 function fotoOpt(url, ancho){
-  return url || '';
+  var original=String(url||'');
+  if(!original||!/^https:\/\//i.test(original))return original;
+  try{
+    var ruta=new URL(original).pathname;
+    var delBucket=ruta.indexOf('/storage/v1/object/public/tienda-fotos/')===0;
+    var delRender=ruta.indexOf('/storage/v1/render/image/public/tienda-fotos/')===0;
+    if(delBucket||delRender){
+      var anchoReal=Math.max(80,Math.min(1400,Math.round(Number(ancho)||400)));
+      return '/api/imagen-tienda?src='+encodeURIComponent(original)+'&w='+anchoReal;
+    }
+  }catch(e){}
+  return original;
 }
 function guardarFotoBanco(nombre, foto){
   if(!nombre)return;
