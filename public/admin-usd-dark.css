@@ -1,0 +1,50 @@
+/* AmarangoElectro tienda vieja · precio en USD y cotización manual (sólo admin) */
+.ae-admin-usd-box{
+  display:flex;flex-wrap:wrap;align-items:center;gap:5px 7px;
+  margin-top:5px;padding:7px 9px;
+  border:1.5px solid #f4be87;border-radius:9px;
+  background:#fff7ed;color:#874409;
+  font-size:.65rem;line-height:1.35;font-weight:850;
+  min-width:0;overflow-wrap:anywhere;
+}
+.ae-admin-usd-box .ae-admin-usd-value{min-width:0;flex:1 1 120px}
+.ae-admin-usd-box .ae-admin-usd-exchange{font-weight:950;white-space:nowrap}
+.ae-admin-usd-box .ae-admin-usd-manual{
+  display:inline-flex;align-items:center;padding:3px 6px;
+  border-radius:6px;background:#e4f6eb;color:#116439;
+  border:1px solid #a7dfc0;font-size:.58rem;font-weight:900;
+}
+.ae-admin-usd-box .ae-admin-usd-button{
+  border:1px solid rgba(255,255,255,.18);
+  background:#08794e;color:#fff;cursor:pointer;
+  padding:6px 9px;border-radius:7px;
+  font:900 .64rem/1.2 inherit;
+  font-family:inherit;font-weight:900;font-size:.64rem;
+  box-shadow:0 2px 5px rgba(0,0,0,.10);
+  max-width:100%;white-space:normal;text-align:center;
+}
+.ae-admin-usd-box .ae-admin-usd-button:disabled{
+  opacity:.5;cursor:wait;
+}
+.ae-admin-usd-box .ae-admin-usd-button:focus-visible{
+  outline:2px solid #ff7a00;outline-offset:2px;
+}
+/* El modo oscuro debe ser oscuro de verdad y no un bloque blanco / beige. */
+body.oscuro .ae-admin-usd-box{
+  background:#29201b;color:#f9e8d9;
+  border:1px solid #79543b;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+body.oscuro .ae-admin-usd-box .ae-admin-usd-exchange{
+  color:#ffb978;
+}
+body.oscuro .ae-admin-usd-box .ae-admin-usd-manual{
+  color:#b3efd1;background:#19392e;border-color:#3c8762;
+}
+body.oscuro .ae-admin-usd-box .ae-admin-usd-button{
+  background:#0b6543;border-color:#398666;color:#fff;
+}
+@media(max-width:380px){
+ .ae-admin-usd-box{padding:6px 7px;gap:4px 5px;font-size:.60rem}
+ .ae-admin-usd-box .ae-admin-usd-button{padding:6px 7px;font-size:.58rem}
+}
