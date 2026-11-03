@@ -1,5 +1,5 @@
-/* Porcentaje informativo editable por mayorista — tienda vieja.
- * Inicia en 5%; se guarda sólo en este dispositivo. No afecta precios/comisiones. */
+/* Anotación informativa del porcentaje de compra por transferencia, por mayorista.
+ * Inicia en 5%, sólo Administración y este dispositivo. NO afecta cálculos comerciales. */
 (function(root){
 'use strict';
 var KEY='amarango_mayoristas_porcentajes_v1', cache=null, returnFocus=null;
@@ -45,10 +45,10 @@ function edit(name,trigger){
     d.id='ae-supplier-pct-dialog';
     d.setAttribute('aria-labelledby','ae-pct-title');
     d.innerHTML='<form novalidate>'
-      +'<h3 id="ae-pct-title">✎ Porcentaje del mayorista</h3>'
+      +'<h3 id="ae-pct-title">✎ Recargo por transferencia</h3>'
       +'<p id="ae-pct-name"></p>'
-      +'<label for="ae-pct-input">Porcentaje (%)<input id="ae-pct-input" type="number" inputmode="decimal" min="0" max="100" step="0.01" required></label>'
-      +'<p>Solo informativo: no modifica costos, cuotas, precios ni comisiones.</p>'
+      +'<label for="ae-pct-input">Porcentaje que cobra el mayorista (%)<input id="ae-pct-input" type="number" inputmode="decimal" min="0" max="100" step="0.01" required></label>'
+      +'<p>Solo anotación para Administración sobre el costo de pagar al mayorista por transferencia. No se aplica a costos, precios, cuotas ni comisiones. Guardado en este dispositivo.</p>'
       +'<p id="ae-pct-message" role="status" aria-live="polite"></p>'
       +'<div class="ae-pct-actions"><button type="button" id="ae-pct-cancel">Cancelar</button><button type="submit">Guardar</button></div></form>';
     document.body.appendChild(d);
