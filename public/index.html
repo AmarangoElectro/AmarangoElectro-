@@ -7079,6 +7079,16 @@ var _buscarTimer=null;
 var _cerrarSugTimer=null;
 // Clasificación única para tarjeta y predictivo. Sólo el administrador puede
 // consultar productos ocultos/agotados; el público nunca los recibe.
+// La vista pública debe ser segura aunque un complemento de administración
+// permita visualizar productos ocultos en el backoffice.
+function aeProductoBuscablePublico(p){
+  if(!p||p.eliminado===true)return false;
+  if(p.esCelu)return p.visible===true&&p.sinStock!==true;
+  if(p.visible!==true||p.sinStock===true||p.estadoProveedor==='sin_stock'||
+     p.ocultoManualProveedor===true||p.ocultoPorDuplicado===true)return false;
+  if(tiendaEsPendienteImagenAdmin(p))return false;
+  return tiendaEstaVisibleYConStock(p);
+}
 function aeEstadoBuscadoProducto(p){
   if(!p)return 2;
   if(p.esCelu)return p.sinStock===true?2:(p.visible!==true?1:0);
@@ -7183,7 +7193,7 @@ function hdrPredictivoMostrar(){
   try{
     tiendaProductos.forEach(function(p){
       if(!p||!p.nombre||p.eliminado===true)return;
-      if(!admin&&(!tiendaEstaVisibleYConStock(p)||tiendaEsPendienteImagenAdmin(p)))return;
+      if(!admin&&!aeProductoBuscablePublico(p))return;
       if(admin&&aeFiltroMayoristaActual&&aeNormalizarMayorista(aeNombreMayorista(p))!==aeFiltroMayoristaActual)return;
       universo.push(p);
     });
@@ -8964,6 +8974,10 @@ function tiendaRender(){
     });
   });
 
+  // Ver como cliente debe respetar visibilidad y stock incluso cuando
+  // Administración está abierta. Nunca basta con ocultar la etiqueta.
+  if(vistaPreviaCliente)universo=universo.filter(aeProductoBuscablePublico);
+
   var avisoMayorista=document.getElementById('ae-admin-filtro-mayorista');
   if(avisoMayorista){avisoMayorista.style.display=tiendaEsAdmin&&aeFiltroMayoristaActual?'flex':'none';var nombreFiltro=document.getElementById('ae-admin-filtro-nombre');if(nombreFiltro)nombreFiltro.textContent=aeFiltroMayoristaActual;}
   if(!universo.length){
@@ -9142,7 +9156,7 @@ function tiendaRender(){
   var planBusq=(palabras.length&&window.AEBusqueda)?AEBusqueda.preparar(q):null;
   // En el modo ver-como-cliente tampoco se consultan los ocultos del administrador.
   if(vistaPreviaCliente)universo=universo.filter(function(p){
-    return p&&tiendaEstaVisibleYConStock(p)&&(p.esCelu||!tiendaEsPendienteImagenAdmin(p));
+    return aeProductoBuscablePublico(p);
   });
   var lista=universo.filter(function(p){
     // 🎯 si el cliente escribió algo en el buscador, la BÚSQUEDA MANDA sobre la
