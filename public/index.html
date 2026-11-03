@@ -14949,6 +14949,9 @@ function equipar(sel){
  arrow.textContent='⌄';b.appendChild(txt);b.appendChild(arrow);
  if(sel.style.margin)b.style.margin=sel.style.margin;
  if(sel.style.marginBottom)b.style.marginBottom=sel.style.marginBottom;
+ // Respetar la proporción original si el selector comparte fila con un input.
+ if(sel.style.flex)b.style.flex=sel.style.flex;
+ if(sel.style.maxWidth)b.style.maxWidth=sel.style.maxWidth;
  sel.insertAdjacentElement('afterend',b);
  sel._aeBoton=b;sel.classList.add('ae-brand-select-source');
  sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
