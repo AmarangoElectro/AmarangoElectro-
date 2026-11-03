@@ -149,7 +149,7 @@ function mailInfo(){
 }
 
 function shared(){return window.AEAdminSharedTasks||null}
-function sharedSync(){var s=shared();if(s)s.sync();}
+function sharedSync(force){var s=shared();if(s)s.sync(!!force);}
 function sharedChange(action,payload){var s=shared();if(s)s.change(action,payload);}
 function summary(){return {pending:tasks.filter(function(t){return t.stage!=='completada'}).length,late:tasks.filter(due).length}}
 function addBell(){
@@ -190,6 +190,7 @@ function renderPanel(){
  var s=summary();box.appendChild(el('p','ae-task-mini',s.pending+' pendientes · '+s.late+' vencidas. '+(shared()?shared().info():'Lista local.')));
  var actions=el('div','ae-task-actions');actions.appendChild(btn('+ Anotar tarea',function(){openForm(null,null)},'ae-task-action ae-task-primary'));
  if('Notification'in window&&Notification.permission!=='granted')actions.appendChild(btn('🔔 Activar avisos',askNotifications,'ae-task-action'));
+ actions.appendChild(btn('↻ Actualizar tareas',function(){sharedSync(true);},'ae-task-action'));
  actions.appendChild(btn(mailEnabled?'📧 Desactivar correos':'📧 Activar correos',toggleTaskMail,'ae-task-action'));
  if(mailStatus==='error'||mailStatus==='not_connected')actions.appendChild(btn('↻ Revisar correo',function(){queueMailSync();},'ae-task-action'));
  box.appendChild(actions);
@@ -213,7 +214,7 @@ function renderPanel(){
  box.appendChild(el('p','ae-task-mini','Los avisos del navegador funcionan solamente mientras la tienda está abierta. Para recordatorios con la app cerrada hace falta un servicio de notificaciones.'));
  panel.appendChild(box);
 }
-function openPanel(){if(!admin())return;ensure();if(form)form.hidden=true;panel.hidden=false;renderPanel();sharedSync();}
+function openPanel(){if(!admin())return;ensure();if(form)form.hidden=true;panel.hidden=false;renderPanel();sharedSync(true);}
 
 /* Calendario Amarango propio: evita el selector nativo del sistema, que no respeta claro/oscuro. */
 function taskDatePicker(){
@@ -315,7 +316,7 @@ function start(){
  var bar=document.getElementById('ae-admin-atajos');if(bar)new MutationObserver(function(){scheduleScan()}).observe(bar,{attributes:true,attributeFilter:['style','class']});
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&visibleModal())close()});
  window.addEventListener('storage',function(e){if(e.key===KEY){tasks=read();refresh();if(mailEnabled)queueMailSync();}});
- window.addEventListener('focus',function(){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync()});
+ window.addEventListener('focus',function(){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync(true)});
  document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync()}});
  setTimeout(function(){if(mailEnabled)queueMailSync();},1800);
  timer=setInterval(function(){scheduleScan();remind();sharedSync();if(mailEnabled&&Date.now()-mailLastSync>120000)queueMailSync()},30000);
