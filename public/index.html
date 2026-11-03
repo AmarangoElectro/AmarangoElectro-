@@ -9137,7 +9137,7 @@ function tiendaRender(){
   var planBusq=(palabras.length&&window.AEBusqueda)?AEBusqueda.preparar(q):null;
   // En el modo ver-como-cliente tampoco se consultan los ocultos del administrador.
   if(vistaPreviaCliente)universo=universo.filter(function(p){
-    return p&&tiendaEstaVisibleYConStock(p)&&(!p.esCelu&&!tiendaEsPendienteImagenAdmin(p)?false:true);
+    return p&&tiendaEstaVisibleYConStock(p)&&(p.esCelu||!tiendaEsPendienteImagenAdmin(p));
   });
   var lista=universo.filter(function(p){
     // 🎯 si el cliente escribió algo en el buscador, la BÚSQUEDA MANDA sobre la
