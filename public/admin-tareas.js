@@ -6,7 +6,7 @@
 var KEY='ae_admin_tasks_v1',NOTIFIED='ae_admin_task_notified_v1',MAX=300;
 var MAIL_ENABLED_KEY='ae_admin_task_mail_enabled_v1',MAIL_OWNER_KEY='ae_admin_task_mail_owner_v1';
 var mailEnabled=false,mailOwner='',mailStatus='not_connected',mailEmail='',mailLastSync=0,mailSyncTimer=null,mailBusy=false,mailResync=false,mailForceOff=false;
-var tasks=[],panel=null,form=null,observed=null,timer=null,scanQueued=false;
+var tasks=[],panel=null,form=null,confirmBox=null,confirmFocus=null,observed=null,timer=null,scanQueued=false;
 try{mailEnabled=localStorage.getItem(MAIL_ENABLED_KEY)==='yes';mailOwner=localStorage.getItem(MAIL_OWNER_KEY)||'';}catch(e){}
 
 function admin(){return typeof window.tiendaEsAdmin!=='undefined'&&window.tiendaEsAdmin===true&&window.vistaPreviaCliente!==true&&window.vistaPreviaAsesor!==true;}
@@ -18,8 +18,34 @@ function due(t){return t.stage!=='completada'&&!!t.dueAt&&new Date(t.dueAt).getT
 function order(a,b){if(a.stage==='completada'&&b.stage!=='completada')return 1;if(b.stage==='completada'&&a.stage!=='completada')return -1;return (a.dueAt?new Date(a.dueAt).getTime():Infinity)-(b.dueAt?new Date(b.dueAt).getTime():Infinity)||(b.createdAt||0)-(a.createdAt||0)}
 function status(t){return t.stage==='comprar'?'🛒 Falta comprar':t.stage==='entregar'?'🚚 Falta entregar':t.stage==='completada'?'✅ Finalizada':'📋 Pendiente'}
 function fmtDate(v){if(!v)return 'Sin fecha';var d=new Date(v);return Number.isNaN(d.getTime())?'Sin fecha':d.toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
-function visibleModal(){return panel&&!panel.hidden||form&&!form.hidden}
-function close(){if(panel)panel.hidden=true;if(form)form.hidden=true;}
+function visibleModal(){return panel&&!panel.hidden||form&&!form.hidden||confirmBox&&!confirmBox.hidden}
+function dismissConfirm(){
+ if(!confirmBox||confirmBox.hidden)return;
+ confirmBox.hidden=true;confirmBox.replaceChildren();
+ var focus=confirmFocus;confirmFocus=null;
+ if(focus&&focus.isConnected)focus.focus();
+}
+function close(){dismissConfirm();if(panel)panel.hidden=true;if(form)form.hidden=true;}
+function taskConfirm(opts){
+ if(!admin())return;ensure();dismissConfirm();
+ confirmFocus=document.activeElement;
+ confirmBox.replaceChildren();
+ var card=el('div','ae-task-confirm-card');card.setAttribute('role','alertdialog');card.setAttribute('aria-modal','true');
+ var heading=el('h2','ae-task-confirm-heading',opts.title||'Confirmar acción');heading.id='ae-task-confirm-title';
+ card.setAttribute('aria-labelledby',heading.id);
+ card.appendChild(el('div','ae-task-confirm-symbol',opts.symbol||'📋'));
+ card.appendChild(heading);
+ var msg=el('p','ae-task-confirm-message',opts.message||'');msg.id='ae-task-confirm-description';
+ card.setAttribute('aria-describedby',msg.id);card.appendChild(msg);
+ var actions=el('div','ae-task-confirm-actions');
+ var cancel=btn('Cancelar',dismissConfirm,'ae-task-confirm-cancel');
+ var accept=btn(opts.actionLabel||'Confirmar',function(){
+  dismissConfirm();
+  if(admin()&&typeof opts.onAccept==='function')opts.onAccept();
+ },'ae-task-confirm-accept');
+ actions.append(cancel,accept);card.appendChild(actions);
+ confirmBox.appendChild(card);confirmBox.hidden=false;accept.focus();
+}
 function ensure(){
  if(!document.body)return;
  if(!document.getElementById('ae-admin-tasks-css')){
@@ -42,6 +68,21 @@ function ensure(){
    '.ae-task-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.ae-task-action{padding:8px 11px;border:1px solid var(--bor);border-radius:9px;background:var(--bg);color:var(--az);font-weight:800;font-size:.74rem;cursor:pointer}',
    '.ae-task-action.ae-task-primary{background:#ff7a00;border-color:#ff7a00;color:#fff}.ae-task-item{border:1px solid var(--bor);border-radius:12px;padding:11px;margin:8px 0;background:var(--bg)}',
    '.ae-task-item strong{display:block;overflow-wrap:anywhere}.ae-task-item.due{border-color:#ff7a00}.ae-task-note{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.77rem;margin-top:5px}',
+   '.ae-task-step-done{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 11px;border:1px solid #8acc96;border-radius:9px;background:#eaf8ee;color:#17602c;font-size:.74rem;font-weight:850;white-space:nowrap}',
+   '.ae-task-action:disabled{opacity:.52;cursor:not-allowed;box-shadow:none}.ae-task-action.ae-task-deliver{background:#0a4fbf;color:#fff;border-color:#0a4fbf}',
+   'body.oscuro .ae-task-step-done{background:#163a2a;border-color:#367651;color:#a9eab8}body.oscuro .ae-task-action.ae-task-deliver{background:#2563c9;border-color:#4c80dc;color:#fff}',
+   '.ae-task-confirm-layer[hidden]{display:none!important}.ae-task-confirm-layer{position:fixed;inset:0;z-index:7600;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,10,34,.70);backdrop-filter:blur(3px)}',
+   '.ae-task-confirm-card{box-sizing:border-box;width:100%;max-width:395px;padding:22px 18px 18px;background:var(--wh);color:var(--txt);border:1px solid var(--bor);border-radius:19px;box-shadow:0 18px 50px rgba(0,0,0,.35);font-family:inherit;text-align:center}',
+   '.ae-task-confirm-symbol{display:flex;align-items:center;justify-content:center;width:50px;height:50px;margin:0 auto 11px;border-radius:14px;background:#fff0db;font-size:26px}',
+   '.ae-task-confirm-heading{margin:0;font-size:1.06rem;line-height:1.3;font-weight:900;color:var(--az)}',
+   '.ae-task-confirm-message{font-size:.85rem;line-height:1.55;color:var(--txt);overflow-wrap:anywhere;margin:11px 0 21px}',
+   '.ae-task-confirm-actions{display:grid;grid-template-columns:1fr 1.2fr;gap:9px}',
+   '.ae-task-confirm-actions button{min-height:44px;padding:11px 8px;border-radius:11px;border:1px solid var(--bor);font:inherit;font-size:.81rem;font-weight:850;cursor:pointer}',
+   '.ae-task-confirm-cancel{background:var(--bg);color:var(--txt)}.ae-task-confirm-accept{background:#ff7a00!important;color:#fff!important;border-color:#ff7a00!important}',
+   '.ae-task-confirm-actions button:focus-visible{outline:2px solid #ff7a00;outline-offset:3px}',
+   'body.oscuro .ae-task-confirm-card{background:#122442;color:#edf4ff;border-color:#365575}body.oscuro .ae-task-confirm-heading{color:#fff}',
+   'body.oscuro .ae-task-confirm-message{color:#dbe7fb}body.oscuro .ae-task-confirm-symbol{background:#3b2b22}',
+   'body.oscuro .ae-task-confirm-cancel{background:#1f3554;color:#edf4ff;border-color:#365575}',
    'body.oscuro .ae-task-pin.ae-task-active{background:#4f321c;color:#ffd0a5}body.oscuro #ae-task-bell.ae-task-due{color:#ffba76}',
    ".ae-task-date-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;font:inherit;font-size:.8rem;font-weight:800;border:1.5px solid var(--bor);border-radius:12px;background:var(--wh);color:var(--txt);padding:11px 12px;cursor:pointer;margin-top:6px}",
    ".ae-task-date-trigger span{color:var(--nar);font-size:.95rem}.ae-task-date-trigger:focus-visible,.ae-task-calendar button:focus-visible,.ae-task-calendar select:focus-visible{outline:2px solid var(--nar);outline-offset:2px}",
@@ -63,6 +104,7 @@ function ensure(){
  }
  if(!panel){panel=el('div','ae-task-layer');panel.hidden=true;panel.setAttribute('role','presentation');panel.addEventListener('click',function(e){if(e.target===panel)close()});document.body.appendChild(panel);}
  if(!form){form=el('div','ae-task-layer');form.hidden=true;form.setAttribute('role','presentation');form.addEventListener('click',function(e){if(e.target===form)close()});document.body.appendChild(form);}
+ if(!confirmBox){confirmBox=el('div','ae-task-confirm-layer');confirmBox.hidden=true;confirmBox.addEventListener('click',function(e){if(e.target===confirmBox)dismissConfirm();});document.body.appendChild(confirmBox);}
 }
 
 /* Mail: opt-in por cuenta autenticada, no por PIN.
@@ -182,7 +224,37 @@ function updatePins(){
  var grid=document.getElementById('tienda-grid');if(!grid)return;
  grid.querySelectorAll('.ae-task-pin').forEach(function(b){var id=b.getAttribute('data-product-id');var open=tasks.some(function(t){return t.productId===id&&t.stage!=='completada'});b.classList.toggle('ae-task-active',open);var label=open?'📌 Tarea fijada · agregar otra':'📌 Fijar tarea';if(b.textContent!==label)b.textContent=label;});
 }
-function stageAdvance(t){var expected=t.stage,next=expected==='comprar'?'entregar':'completada';if(!confirm(expected==='comprar'?'¿Ya compraron este producto? Quedará pendiente de entrega.':'¿Marcar esta tarea como finalizada?'))return; t.stage=next;t.updatedAt=Date.now();if(next==='completada')t.completedAt=Date.now();if(!write()){t.stage=expected;return;}sharedChange('advance',{id:t.id,expected_stage:expected});refresh();openPanel();}
+function stageAdvance(t){
+ if(!admin()||!t||t.stage==='completada')return;
+ var expected=t.stage,product=t.productName||t.title;
+ var options=expected==='comprar'?
+  {symbol:'🛒',title:'Confirmar compra',message:'¿Ya compraron "'+product+'"? Quedará marcada como comprada, pero pendiente de entrega.',actionLabel:'✅ Sí, comprado'}:
+  expected==='entregar'?
+  {symbol:'🚚',title:'Confirmar entrega',message:'¿Ya entregaron "'+product+'"? Al confirmar, esta tarea quedará finalizada.',actionLabel:'✅ Entregado y finalizar'}:
+  {symbol:'✅',title:'Finalizar tarea',message:'¿Marcar esta tarea como realizada?',actionLabel:'✅ Finalizar'};
+ options.onAccept=function(){
+  var current=tasks.find(function(item){return item.id===t.id;});
+  if(!current||current.stage!==expected){
+   refresh();if(typeof window.mostrarToast==='function')window.mostrarToast('La tarea cambió. Revisá su estado actual.');return;
+  }
+  var previous={stage:current.stage,updatedAt:current.updatedAt,completedAt:current.completedAt};
+  var next=expected==='comprar'?'entregar':'completada';
+  current.stage=next;current.updatedAt=Date.now();
+  current.completedAt=next==='completada'?current.updatedAt:null;
+  if(!write()){current.stage=previous.stage;current.updatedAt=previous.updatedAt;current.completedAt=previous.completedAt;return;}
+  sharedChange('advance',{id:current.id,expected_stage:expected});
+  refresh();openPanel();
+  if(typeof window.mostrarToast==='function')window.mostrarToast(expected==='comprar'?'✅ Comprado. Falta entregar.':expected==='entregar'?'✅ Entregado. Tarea finalizada.':'✅ Tarea finalizada.');
+ };
+ taskConfirm(options);
+}
+function deleteFinishedTask(t){
+ taskConfirm({symbol:'🗑️',title:'Eliminar del historial',message:'¿Eliminar definitivamente la tarea finalizada "'+t.title+'"?',actionLabel:'Eliminar',onAccept:function(){
+  var existing=tasks.some(function(item){return item.id===t.id&&item.stage==='completada';});if(!existing)return;
+  var old=tasks;tasks=tasks.filter(function(item){return item.id!==t.id;});
+  if(!write()){tasks=old;return;}sharedChange('delete',{id:t.id});refresh();openPanel();
+ }});
+}
 function renderPanel(){
  if(!panel||panel.hidden)return;
  panel.replaceChildren();var box=el('div','ae-task-dialog');box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Tareas de Administración');
@@ -206,8 +278,20 @@ function renderPanel(){
    if(t.note)item.appendChild(el('p','ae-task-note',t.note));
    var line=el('div','ae-task-actions');
    if(t.productId)line.appendChild(btn('Ver producto',function(){jumpToProduct(t)},'ae-task-action'));
-   if(t.stage!=='completada')line.appendChild(btn(t.stage==='comprar'?'✅ Comprado':t.stage==='entregar'?'✅ Entregado':'✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
-   if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){if(!confirm('¿Eliminar definitivamente esta tarea finalizada?'))return;var old=tasks;tasks=tasks.filter(function(x){return x.id!==t.id});if(!write()){tasks=old;return;}sharedChange('delete',{id:t.id});refresh();},'ae-task-action'));
+   if(t.productId&&t.stage==='comprar'){
+    line.appendChild(btn('✅ Comprado',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
+    var deliverPending=btn('🚚 Entregar',function(){},'ae-task-action ae-task-deliver');
+    deliverPending.disabled=true;deliverPending.title='Primero marcá el producto como comprado';line.appendChild(deliverPending);
+   }else if(t.productId&&t.stage==='entregar'){
+    line.appendChild(el('span','ae-task-step-done','✓ Comprado'));
+    line.appendChild(btn('🚚 Entregar',function(){stageAdvance(t)},'ae-task-action ae-task-deliver'));
+   }else if(t.stage==='completada'&&t.productId){
+    line.appendChild(el('span','ae-task-step-done','✓ Comprado'));
+    line.appendChild(el('span','ae-task-step-done','✓ Entregado'));
+   }else if(t.stage!=='completada'){
+    line.appendChild(btn('✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
+   }
+   if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){deleteFinishedTask(t)},'ae-task-action'));
    item.appendChild(line);box.appendChild(item);
   });
  });
@@ -314,7 +398,7 @@ function start(){
  observed=document.getElementById('tienda-grid');
  if(observed)new MutationObserver(function(){scheduleScan()}).observe(observed,{childList:true,subtree:true});
  var bar=document.getElementById('ae-admin-atajos');if(bar)new MutationObserver(function(){scheduleScan()}).observe(bar,{attributes:true,attributeFilter:['style','class']});
- document.addEventListener('keydown',function(e){if(e.key==='Escape'&&visibleModal())close()});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&confirmBox&&!confirmBox.hidden){e.preventDefault();dismissConfirm();return;}if(e.key==='Escape'&&visibleModal())close()});
  window.addEventListener('storage',function(e){if(e.key===KEY){tasks=read();refresh();if(mailEnabled)queueMailSync();}});
  window.addEventListener('focus',function(){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync(true)});
  document.addEventListener('visibilitychange',function(){if(!document.hidden){scheduleScan();remind();if(mailEnabled)queueMailSync();sharedSync()}});
