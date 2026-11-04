@@ -2687,8 +2687,8 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
     <input id="carga-dolar" placeholder="Cotización dólar (si es USD)" inputmode="numeric"
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
     <!-- Protección: no permitir reemplazo masivo de productos manuales desde carga habitual. -->
-    <button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaProcesarCarga()">✅ Cargar productos</button>
-    <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="document.getElementById('modal-carga').style.display='none'">Cancelar</button>
+    <button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaProcesarCarga()">✅ Confirmar y cargar productos</button>
+    <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="document.getElementById('modal-carga').style.display='none';if(window.AECargaMultimedia)AECargaMultimedia.limpiar()">Cancelar</button>
   </div>
 </div>
 
@@ -13690,6 +13690,12 @@ async function tiendaProcesarCarga(){
     window._cargaResumen={actualizados:actualizados, agregados:agregados, dudas:dudas};
   }
 
+  // Con archivos seleccionados, liberar inmediatamente la ventana de carga.
+  // El trabajo continúa en esta página sin perder los campos si falla Supabase.
+  if(hayAdjuntos){
+    document.getElementById('modal-carga').style.display='none';
+    mostrarToast('⏳ Confirmando producto en la nube. Después suben fotos/video…');
+  }
   var resultadoGuardado=await tiendaGuardarLocal();
   if(resultadoGuardado&&resultadoGuardado.error)throw resultadoGuardado.error;
   await tiendaVerificarManualesNube(idsManualesTocados);
@@ -13744,6 +13750,7 @@ async function tiendaProcesarCarga(){
     alert(msg);
   }
  }catch(err){
+  document.getElementById('modal-carga').style.display='block';
   alert('❌ No se pudo confirmar el producto en la nube. El formulario quedó abierto para que puedas reintentar.\n\nDetalle: '+(err.message||err));
  }finally{
   window._tiendaCargaManualEnCurso=false;
