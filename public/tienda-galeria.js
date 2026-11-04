@@ -717,5 +717,5 @@
   window.addEventListener('beforeunload',function(e){
     if(ocupado){e.preventDefault();e.returnValue='';}
   });
-  window.AEGaleria={abrir:abrir,mostrarEnDetalle:mostrarEnDetalle,cargarCreacion:cargarCreacion};
+  window.AEGaleria={abrir:abrir,mostrarEnDetalle:mostrarEnDetalle,cargarCreacion:cargarCreacion,estadoCarga:estadoUpload};
 })();
