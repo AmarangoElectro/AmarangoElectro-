@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   var TABLA='tienda_media_producto', BUCKET='tienda-fotos';
-  var cache=new Map(), modal=null, visor=null, seleccion=null, ocupado=false;
+  var cache=new Map(), modal=null, visor=null, seleccion=null, ocupado=false, trabajos=Promise.resolve();
   var estilos='.ae-gal-overlay{position:fixed;inset:0;z-index:6700;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,13,32,.8);backdrop-filter:blur(4px)}'
   +'.ae-gal-panel{width:100%;max-width:460px;max-height:90dvh;overflow-y:auto;background:var(--wh);color:var(--txt);border-radius:17px;padding:17px;box-shadow:0 12px 50px #0005}'
   +'.ae-gal-panel h3{font-size:1rem;color:var(--az);margin:0 0 8px;font-weight:900}'
@@ -23,6 +23,10 @@
   +'body.oscuro .ae-gal-btn{background:#1a3456;color:#e8eef7;border-color:#456081}'
   +'body.oscuro .ae-gal-btn-primary{background:#1d5cbb;color:#fff}'
   +'body.oscuro .ae-gal-btn-remove{background:#4a1c22;color:#ffb0b0}';
+  estilos+=
+   '.ae-gal-selected{display:flex;gap:7px;overflow:auto;padding:7px 0;scrollbar-width:thin}.ae-gal-select-item{position:relative;flex:0 0 86px;display:flex;flex-direction:column;gap:4px;align-items:center;padding:5px;background:var(--bg);border:1px solid var(--bor);border-radius:10px;font-size:.66rem;font-weight:800;min-width:0}.ae-gal-select-item img{width:76px;height:74px;object-fit:contain;background:#fff;border-radius:7px}.ae-gal-selected-confirm{width:100%;background:#ff7a00!important;color:#fff!important;border-color:#ff7a00!important;padding:12px;font-size:.83rem}.ae-gal-selected-hint{font-size:.72rem;font-weight:750;color:var(--sub)}' +
+   '.ae-media-upload-state{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:6998;width:min(92vw,440px);display:flex;align-items:center;gap:9px;padding:12px 14px;border:1px solid #ffb16f;border-radius:14px;background:#172b4b;color:#fff;box-shadow:0 9px 28px #0006;font-size:.73rem;font-weight:800;line-height:1.35}.ae-media-upload-state:before{content:"↻";color:#ffa450;font-size:1rem}.ae-media-upload-state.is-finished:before{content:"✅"}.ae-media-upload-state.is-error:before{content:"⚠️"}.ae-media-upload-state.is-error{border-color:#e85540}' +
+   'body.oscuro .ae-gal-select-item{background:#192f50;border-color:#51708d;color:#eaf1ff}body.oscuro .ae-gal-selected-hint{color:#c3d3e9}';
   var css=document.createElement('style');css.id='ae-galeria-styles';css.textContent=estilos;document.head.appendChild(css);
   function nodo(tag,clase,texto){var n=document.createElement(tag);if(clase)n.className=clase;if(texto!==undefined)n.textContent=texto;return n;}
   function boton(texto,fn,clase){var n=nodo('button','ae-gal-btn '+(clase||''),texto);n.type='button';n.addEventListener('click',fn);return n;}
@@ -184,7 +188,11 @@
       if(heading)raiz.insertBefore(caja,heading);else raiz.prepend(caja);
     }).catch(function(){/* No bloquear productos si la galería no está disponible. */});
   }
-  function cerrarAdmin(){if(ocupado)return;if(modal){modal.remove();modal=null;}seleccion=null;}
+  function limpiarSeleccion(){
+    if(seleccion&&seleccion.urls)seleccion.urls.forEach(function(u){URL.revokeObjectURL(u);});
+    seleccion=null;
+  }
+  function cerrarAdmin(){if(modal){modal.remove();modal=null;}limpiarSeleccion();}
   function parrafo(txt){return nodo('p','',txt);}
   function lineaItem(p,datos,url,idx,esVideo){
     var fila=nodo('div','ae-gal-row');
@@ -225,11 +233,34 @@
       return;
     }
     var opciones=nodo('div','ae-gal-row');
-    var fotos=boton('➕ Agregar foto',function(){seleccionarArchivo(p,datos,'imagen');},'ae-gal-btn-primary');
+    var fotos=boton('➕ Elegir 1, 2 o 3 fotos',function(){seleccionarArchivo(p,datos,'imagen',sesion);},'ae-gal-btn-primary');
     fotos.disabled=!!datos.video||datos.imagenes.length>=maxExtra;
-    var video=boton('🎥 Agregar video',function(){seleccionarArchivo(p,datos,'video');});
+    var video=boton('🎥 Elegir video',function(){seleccionarArchivo(p,datos,'video',sesion);});
     video.disabled=!!datos.video||datos.imagenes.length>0;
     opciones.append(fotos,video);panel.appendChild(opciones);
+    if(seleccion && seleccion.files && seleccion.files.length){
+      var count=seleccion.files.length;
+      panel.appendChild(nodo('p','ae-gal-selected-hint',seleccion.tipo==='imagen'?
+        count+' foto(s) seleccionada(s). Podés elegirlas juntas o agregar más hasta el límite.':
+        'Video seleccionado: '+seleccion.files[0].name));
+      var preview=nodo('div','ae-gal-selected');
+      seleccion.files.forEach(function(file,i){
+        var item=nodo('div','ae-gal-select-item');
+        if(seleccion.tipo==='imagen'){
+          var img=nodo('img');var url=URL.createObjectURL(file);seleccion.urls.push(url);img.src=url;img.alt='Imagen elegida '+(i+1);item.appendChild(img);
+        }
+        item.appendChild(nodo('span','',seleccion.tipo==='imagen'?'Foto '+(i+1):'🎥 Video'));
+        var quitar=boton('Quitar',function(){seleccion.files.splice(i,1);limpiarURLsSeleccion();if(!seleccion.files.length)seleccion=null;renderAdmin(p,datos,sesion);});
+        item.appendChild(quitar);preview.appendChild(item);
+      });
+      panel.appendChild(preview);
+      panel.appendChild(boton('✅ Confirmar y subir · cerrar ventana',function(){
+        var archivo=seleccion.files.slice(),tipo=seleccion.tipo;
+        cerrarAdmin();
+        subirLote(p,archivo,tipo).catch(function(e){aviso('⚠️ No se completó la carga: '+(e.message||e));});
+      },'ae-gal-btn-primary ae-gal-selected-confirm'));
+      panel.appendChild(nodo('p','ae-gal-selected-hint','La ventana se cierra al confirmar y la subida continúa mientras la tienda esté abierta.'));
+    }
     if(datos.video)panel.append(parrafo('Para cargar fotos adicionales, primero quitá el video. La portada queda intacta.'));
     else if(datos.imagenes.length)panel.append(parrafo('Para cargar un video, primero quitá las fotos adicionales. La portada queda intacta.'));
     if(datos.imagenes.length>=maxExtra&&!datos.video)panel.append(parrafo('✅ Límite de 3 fotos alcanzado.'));
@@ -247,12 +278,40 @@
       .then(function(values){if(modal)renderAdmin(p,values[0],values[1]);})
       .catch(function(e){if(modal){panel.replaceChildren(nodo('h3','','⚠️ No se pudo abrir la galería'),parrafo(e.message||'Error de conexión'),boton('Cerrar',cerrarAdmin));}});
   }
-  function seleccionarArchivo(p,datos,tipo){
-    if(ocupado)return;
+  function limpiarURLsSeleccion(){
+    if(seleccion&&seleccion.urls){
+      seleccion.urls.forEach(function(url){URL.revokeObjectURL(url);});
+      seleccion.urls=[];
+    }
+  }
+  function seleccionarArchivo(p,datos,tipo,sesion){
+    if(ocupado){aviso('⏳ Hay una carga multimedia en progreso.');return;}
     var input=nodo('input');input.type='file';input.accept=tipo==='imagen'?'image/jpeg,image/png,image/webp':'video/mp4,video/webm';
+    input.multiple=tipo==='imagen';
     input.style.display='none';document.body.appendChild(input);
-    input.addEventListener('change',function(){var file=input.files&&input.files[0];input.remove();if(file)subir(p,datos,tipo,file);},{once:true});
+    input.addEventListener('change',function(){
+      var files=Array.from(input.files||[]);input.remove();if(!files.length)return;
+      var limit=Math.max(0,3-(p.foto?1:0)-datos.imagenes.length);
+      if(tipo==='imagen' && (datos.video || files.some(function(f){return !validarArchivo(f,'imagen');}))){
+        aviso('Elegí JPG, PNG o WebP, de hasta 18 MB por imagen. No mezcles con video.');return;
+      }
+      if(tipo==='video' && (datos.video||datos.imagenes.length||files.length!==1||!validarArchivo(files[0],'video'))){
+        aviso('Elegí un video MP4 o WebM de hasta 20 MB, sin fotos adicionales.');return;
+      }
+      var prev=seleccion&&seleccion.tipo===tipo?seleccion.files:[];
+      if(tipo==='imagen' && prev.length+files.length>limit){
+        aviso('Quedan '+Math.max(0,limit-prev.length)+' fotos disponibles (máximo 3 en total).');return;
+      }
+      limpiarURLsSeleccion();
+      seleccion={tipo:tipo,files:tipo==='imagen'?prev.concat(files):files.slice(0,1),urls:[]};
+      renderAdmin(p,datos,sesion);
+    },{once:true});
     input.click();
+  }
+  function validarArchivo(file,tipo){
+    return !!(file&&file.size>0&&(
+      tipo==='imagen' ? /^(image\/jpeg|image\/png|image\/webp)$/.test(file.type)&&file.size<=18*1024*1024 :
+      /^(video\/mp4|video\/webm)$/.test(file.type)&&file.size<=20*1024*1024));
   }
   function comprimir(file){return new Promise(function(resolve,reject){
     var url=URL.createObjectURL(file),img=new Image();
@@ -265,6 +324,127 @@
     img.onerror=function(){URL.revokeObjectURL(url);reject(new Error('Formato de imagen no compatible'));};
     img.src=url;
   });}
+  // Cargas secuenciales: una sola escritura de la galería para cada lote.
+  // La vista se puede cerrar y seguir usando la app; no es subida con app cerrada.
+  function encolar(proceso){
+    var ticket=trabajos.catch(function(){}).then(proceso);
+    trabajos=ticket.catch(function(){});
+    return ticket;
+  }
+  function estadoUpload(texto,estado){
+    var box=document.getElementById('ae-media-upload-state');
+    if(!box){box=nodo('div','ae-media-upload-state');box.id='ae-media-upload-state';box.setAttribute('role','status');box.setAttribute('aria-live','polite');document.body.appendChild(box);}
+    box.className='ae-media-upload-state'+(estado==='ok'?' is-finished':estado==='error'?' is-error':'');
+    box.textContent=texto;
+    if(estado==='ok'||estado==='error'){
+      var actual=box;setTimeout(function(){if(actual.isConnected&&actual.textContent===texto)actual.remove();},estado==='ok'?4000:9000);
+    }
+  }
+  function subirObjeto(p,file,tipo){
+    if(!validarArchivo(file,tipo))return Promise.reject(new Error('Archivo incompatible o demasiado grande'));
+    return Promise.resolve(tipo==='imagen'?comprimir(file):file).then(function(blob){
+      var ext=tipo==='imagen'?'jpg':file.type==='video/webm'?'webm':'mp4';
+      var token=typeof tiendaTokenFoto==='function'?tiendaTokenFoto(clave(p)):String(p.id);
+      var ruta='manual/galeria/'+token+'/'+Date.now()+'_'+Math.random().toString(36).slice(2,10)+'.'+ext;
+      return sbFotos.storage.from(BUCKET).upload(ruta,blob,{contentType:tipo==='imagen'?'image/jpeg':file.type,upsert:false,cacheControl:'31536000'})
+        .then(function(r){if(r.error)throw r.error;return sbFotos.storage.from(BUCKET).getPublicUrl(ruta).data.publicUrl;});
+    });
+  }
+  async function loteInterno(p,files,tipo,session,offset){
+    var datos=await leer(p,true);
+    var maxExtra=Math.max(0,3-(p.foto?1:0));
+    if(tipo==='imagen' && (datos.video || files.length+datos.imagenes.length>maxExtra))
+      throw new Error('No hay espacio: máximo 3 imágenes incluyendo portada.');
+    if(tipo==='video' && (datos.video||datos.imagenes.length||files.length!==1))
+      throw new Error('El video no se puede mezclar con fotos adicionales.');
+    var urls=[];
+    for(var i=0;i<files.length;i++){
+      estadoUpload('⏳ Subiendo '+(offset+i+1)+' de '+(offset+files.length)+' archivos…');
+      urls.push(await subirObjeto(p,files[i],tipo));
+    }
+    // Una escritura para las fotos elegidas juntas, evitando reemplazar otra carga.
+    var actual=await leer(p,true);
+    if(tipo==='imagen' && (actual.video||actual.imagenes.length+urls.length>maxExtra))
+      throw new Error('La galería cambió mientras subías los archivos. Volvé a abrirla.');
+    if(tipo==='video'&&(actual.video||actual.imagenes.length))
+      throw new Error('El producto ahora tiene otro contenido multimedia.');
+    var nuevos={imagenes:tipo==='imagen'?actual.imagenes.concat(urls):actual.imagenes,
+      video:tipo==='video'?urls[0]:actual.video};
+    var res=await sbFotos.from(TABLA).upsert({
+      clave:clave(p),imagenes:nuevos.imagenes,video_url:nuevos.video||null,
+      editado_por:session.user.id,actualizado:new Date().toISOString()
+    },{onConflict:'clave'}).select('imagenes,video_url').single();
+    if(res.error)throw res.error;
+    var confirmado=limpio(res.data);
+    if(tipo==='imagen' && confirmado.imagenes.length<nuevos.imagenes.length)
+      throw new Error('La nube no confirmó todas las imágenes');
+    if(tipo==='video' && confirmado.video!==urls[0])
+      throw new Error('La nube no confirmó el video');
+    cache.set(clave(p),confirmado);
+    refrescarTarjetas(p,confirmado);
+    return confirmado;
+  }
+  function subirLote(p,files,tipo){
+    return encolar(async function(){
+      ocupado=true;
+      try{
+        var session=await tiendaAuthFotosSesion();
+        if(!session||!session.user)throw new Error('Iniciá sesión segura de fotos en Administración.');
+        if(!sbFotos)throw new Error('No hay conexión a fotos.');
+        await loteInterno(p,files,tipo,session,0);
+        estadoUpload('✅ '+(tipo==='video'?'Video agregado':'Fotos agregadas')+' y guardado en la nube','ok');
+        aviso('✅ Galería actualizada: '+files.length+' archivo(s)');
+        return true;
+      }catch(e){
+        estadoUpload('⚠️ No se pudo completar la carga de '+(p.nombre||'producto'),'error');
+        throw e;
+      }finally{ocupado=false;}
+    });
+  }
+  // Al crear: primera foto = portada, restantes = galería. Si ya existe portada,
+  // nunca se reemplaza: las seleccionadas se agregan sólo si queda espacio.
+  function cargarCreacion(p,seleccionNueva){
+    var fotos=Array.isArray(seleccionNueva&&seleccionNueva.fotos)?seleccionNueva.fotos.slice(0,3):[];
+    var video=seleccionNueva&&seleccionNueva.video;
+    if(!fotos.length&&!video)return Promise.resolve(false);
+    return encolar(async function(){
+      ocupado=true;
+      try{
+        var session=await tiendaAuthFotosSesion();
+        if(!session||!session.user)throw new Error('Conectá la sesión segura de fotos.');
+        if(!sbFotos)throw new Error('Sin conexión para cargar imágenes.');
+        var extras=fotos.slice(),total=fotos.length+(video?1:0);
+        if(extras.length&&!p.foto){
+          estadoUpload('⏳ Subiendo portada · 1 de '+total+'…');
+          var url=await subirObjeto(p,extras.shift(),'imagen');
+          var fotoAnterior=p.foto||'',marcaAnterior=p.estadoManualActualizado;
+          p.foto=url;p.fotoActualizadaManual=Date.now();p.estadoManualActualizado=p.fotoActualizadaManual;
+          try{
+            var guardado=await tiendaGuardarLocal();
+            if(guardado&&guardado.error)throw guardado.error;
+            await tiendaVerificarManualesNube([p.id],url);
+          }catch(e){
+            p.foto=fotoAnterior;p.estadoManualActualizado=marcaAnterior;
+            throw e;
+          }
+        }
+        if(extras.length){
+          var actual=await leer(p,true),restante=Math.max(0,3-(p.foto?1:0)-actual.imagenes.length);
+          if(extras.length>restante)throw new Error('El producto existente ya tiene fotos. Solo quedan '+restante+' espacios de galería.');
+          await loteInterno(p,extras,'imagen',session,fotos.length-extras.length);
+        }
+        if(video)await loteInterno(p,[video],'video',session,0);
+        estadoUpload('✅ Multimedia cargada para '+(p.nombre||'el producto'),'ok');
+        aviso('✅ Fotos/video confirmados en la nube');
+        if(typeof tiendaRender==='function')tiendaRender();
+        return true;
+      }catch(e){
+        estadoUpload('⚠️ Carga multimedia incompleta: '+(p.nombre||'producto'),'error');
+        aviso('⚠️ El producto quedó creado, pero alguna foto/video no se confirmó: '+(e.message||e));
+        throw e;
+      }finally{ocupado=false;}
+    });
+  }
   function guardar(p,datos){
     if(ocupado)return Promise.resolve();
     ocupado=true;
@@ -532,5 +712,5 @@
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){if(visor)cerrarVisor();else if(modal)cerrarAdmin();}
   });
-  window.AEGaleria={abrir:abrir,mostrarEnDetalle:mostrarEnDetalle};
+  window.AEGaleria={abrir:abrir,mostrarEnDetalle:mostrarEnDetalle,cargarCreacion:cargarCreacion};
 })();
