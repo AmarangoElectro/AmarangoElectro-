@@ -69,6 +69,7 @@ function ensure(){
    '.ae-task-action.ae-task-primary{background:#ff7a00;border-color:#ff7a00;color:#fff}.ae-task-item{border:1px solid var(--bor);border-radius:12px;padding:11px;margin:8px 0;background:var(--bg)}',
    '.ae-task-item strong{display:block;overflow-wrap:anywhere}.ae-task-item.due{border-color:#ff7a00}.ae-task-note{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.77rem;margin-top:5px}',
    '.ae-task-step-done{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 11px;border:1px solid #8acc96;border-radius:9px;background:#eaf8ee;color:#17602c;font-size:.74rem;font-weight:850;white-space:nowrap}',
+   '.ae-task-step-row{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ae-task-step-row .ae-task-action,.ae-task-step-row .ae-task-step-done{min-width:0;width:100%;box-sizing:border-box;text-align:center}',
    '.ae-task-action:disabled{opacity:.52;cursor:not-allowed;box-shadow:none}.ae-task-action.ae-task-deliver{background:#0a4fbf;color:#fff;border-color:#0a4fbf}',
    'body.oscuro .ae-task-step-done{background:#163a2a;border-color:#367651;color:#a9eab8}body.oscuro .ae-task-action.ae-task-deliver{background:#2563c9;border-color:#4c80dc;color:#fff}',
    '.ae-task-confirm-layer[hidden]{display:none!important}.ae-task-confirm-layer{position:fixed;inset:0;z-index:7600;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,10,34,.70);backdrop-filter:blur(3px)}',
@@ -278,16 +279,18 @@ function renderPanel(){
    if(t.note)item.appendChild(el('p','ae-task-note',t.note));
    var line=el('div','ae-task-actions');
    if(t.productId)line.appendChild(btn('Ver producto',function(){jumpToProduct(t)},'ae-task-action'));
-   if(t.productId&&t.stage==='comprar'){
-    line.appendChild(btn('✅ Comprado',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
-    var deliverPending=btn('🚚 Entregar',function(){},'ae-task-action ae-task-deliver');
-    deliverPending.disabled=true;deliverPending.title='Primero marcá el producto como comprado';line.appendChild(deliverPending);
-   }else if(t.productId&&t.stage==='entregar'){
-    line.appendChild(el('span','ae-task-step-done','✓ Comprado'));
-    line.appendChild(btn('🚚 Entregar',function(){stageAdvance(t)},'ae-task-action ae-task-deliver'));
-   }else if(t.stage==='completada'&&t.productId){
-    line.appendChild(el('span','ae-task-step-done','✓ Comprado'));
-    line.appendChild(el('span','ae-task-step-done','✓ Entregado'));
+   if(t.productId&&['comprar','entregar','completada'].indexOf(t.stage)>=0){
+    var stepRow=el('div','ae-task-step-row');
+    if(t.stage==='comprar'){
+     stepRow.appendChild(btn('✅ Comprado',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
+     var deliverPending=btn('🚚 Entregar',function(){},'ae-task-action ae-task-deliver');
+     deliverPending.disabled=true;deliverPending.title='Primero marcá el producto como comprado';stepRow.appendChild(deliverPending);
+    }else{
+     stepRow.appendChild(el('span','ae-task-step-done','✓ Comprado'));
+     if(t.stage==='entregar')stepRow.appendChild(btn('🚚 Entregar',function(){stageAdvance(t)},'ae-task-action ae-task-deliver'));
+     else stepRow.appendChild(el('span','ae-task-step-done','✓ Entregado'));
+    }
+    line.appendChild(stepRow);
    }else if(t.stage!=='completada'){
     line.appendChild(btn('✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
    }
