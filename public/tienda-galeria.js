@@ -712,5 +712,10 @@
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape'){if(visor)cerrarVisor();else if(modal)cerrarAdmin();}
   });
+  // Android puede interrumpir las subidas si se cierra por completo la página.
+  // Este aviso solo se muestra si hay archivos realmente cargándose.
+  window.addEventListener('beforeunload',function(e){
+    if(ocupado){e.preventDefault();e.returnValue='';}
+  });
   window.AEGaleria={abrir:abrir,mostrarEnDetalle:mostrarEnDetalle,cargarCreacion:cargarCreacion};
 })();
