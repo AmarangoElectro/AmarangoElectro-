@@ -1969,6 +1969,9 @@ body.oscuro #btn-arriba{
 }
 @media(hover:hover){#btn-arriba:hover{transform:translateY(-2px)}}
 @media(prefers-reduced-motion:reduce){#btn-arriba{transition:none!important}}
+/* Fiabilidad: el botón NO depende del scroll ni del JS para aparecer. */
+body.en-tienda #btn-arriba{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+body:not(.en-tienda) #btn-arriba{display:none!important}
 </style>
 </head>
 <body class="en-tienda">
@@ -11857,17 +11860,12 @@ function volverArriba(){
   var scheduled=false;
   function chequear(){
     var b=document.getElementById('btn-arriba');
-    var tab=document.getElementById('tab-tienda');
-    if(!b||!tab)return;
-    // El scroll principal es el de la ventana; revisar además la pestaña por compatibilidad.
-    var root=document.scrollingElement||document.documentElement;
-    var sc=Math.max(window.scrollY||window.pageYOffset||0,
-      root&&root.scrollTop||0,document.body.scrollTop||0,tab.scrollTop||0);
-    var active=tab.classList.contains('on');
-    var show=active&&sc>240;
-    b.style.display=show?'flex':'none';
-    b.setAttribute('aria-hidden',show?'false':'true');
-    b.tabIndex=show?0:-1;
+    if(!b)return;
+    // La visibilidad la resuelve CSS según el espacio Tienda.
+    // No volver a esconderla al desplazarse en Android.
+    var tienda=document.body.classList.contains('en-tienda');
+    b.setAttribute('aria-hidden',tienda?'false':'true');
+    b.tabIndex=tienda?0:-1;
   }
   function actualizar(){
     if(scheduled)return;
