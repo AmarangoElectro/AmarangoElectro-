@@ -2663,8 +2663,8 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
     <div id="ae-carga-media-selector" style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
       <div style="font-size:.74rem;color:var(--az);font-weight:900;margin-bottom:6px;">📷 Fotos o video (opcional)</div>
       <div class="ae-carga-media-note">Seleccioná una, dos o tres fotos juntas, o agregalas de a una. La primera será portada del primer producto de esta carga si todavía no tiene foto.</div>
-      <input type="file" multiple id="carga-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="window.AECargaMultimedia&&AECargaMultimedia.agregarFotos(this.files);this.value=''">
-      <input type="file" id="carga-video-input" accept="video/mp4,video/webm" style="display:none;" onchange="window.AECargaMultimedia&&AECargaMultimedia.agregarVideo(this.files);this.value=''">
+      <input type="file" multiple id="carga-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="if(window.AECargaMultimedia)window.AECargaMultimedia.agregarFotos(this.files);this.value=''">
+      <input type="file" id="carga-video-input" accept="video/mp4,video/webm" style="display:none;" onchange="if(window.AECargaMultimedia)window.AECargaMultimedia.agregarVideo(this.files);this.value=''">
       <div class="ae-carga-media-buttons">
         <button type="button" onclick="document.getElementById('carga-foto-input').click()">➕ Elegir 1, 2 o 3 fotos</button>
         <button type="button" onclick="document.getElementById('carga-video-input').click()">🎥 Elegir video</button>
@@ -15459,7 +15459,7 @@ window.aeSincronizarSelectoresVisuales=function(){
 })();
 </script>
 
-<script src="/tienda-galeria.js?v=20261104-multi3" defer></script>
+<script src="/tienda-galeria.js?v=20261104-multi4" defer></script>
 <script src="/tienda-carga-multimedia.js?v=20261104-1" defer></script>
 <script src="/admin-tareas-compartidas.js?v=20261103-2" defer></script>
 <script src="/admin-tareas.js?v=20261103-shared3" defer></script>
