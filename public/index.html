@@ -32,6 +32,7 @@
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <link rel="stylesheet" href="/price-drop.css?v=20261103-1">
+<link rel="stylesheet" href="/tienda-carga-multimedia.css?v=20261104-1">
 <link rel="stylesheet" href="/admin-usd-dark.css?v=20261103-1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -2659,14 +2660,18 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
         <button type="button" id="modo-usd" class="carga-modo-btn" onclick="setCargaModo('usd')" style="flex:1;padding:9px 4px;font-size:.68rem;font-weight:800;border-radius:8px;border:2px solid var(--az);background:#fff;color:var(--az);cursor:pointer;">💵 USD<br><span style="font-size:.56rem;font-weight:600;opacity:.8;">(paso a pesos)</span></button>
       </div>
     </div>
-    <div style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
-      <div style="font-size:.7rem;color:var(--az);font-weight:800;margin-bottom:6px;">📷 Foto (opcional)</div>
-      <div style="font-size:.64rem;color:var(--sub);margin-bottom:8px;">Se le pone al primer producto de la lista. A los demás les ponés la foto después con el botón "Foto" de cada uno.</div>
-      <input type="file" id="carga-foto-input" accept="image/*" style="display:none;" onchange="cargaFotoElegida(event)">
-      <button type="button" class="calc-btn" style="width:100%;background:#eef4ff;color:var(--az);border:1.5px solid var(--az);font-size:.72rem;padding:8px;" onclick="document.getElementById('carga-foto-input').click()">🖼️ Elegir foto</button>
-      <div id="carga-foto-preview" style="margin-top:8px;text-align:center;"></div>
+    <div id="ae-carga-media-selector" style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
+      <div style="font-size:.74rem;color:var(--az);font-weight:900;margin-bottom:6px;">📷 Fotos o video (opcional)</div>
+      <div class="ae-carga-media-note">Seleccioná una, dos o tres fotos juntas, o agregalas de a una. La primera será portada del primer producto de esta carga si todavía no tiene foto.</div>
+      <input type="file" multiple id="carga-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="window.AECargaMultimedia&&AECargaMultimedia.agregarFotos(this.files);this.value=''">
+      <input type="file" id="carga-video-input" accept="video/mp4,video/webm" style="display:none;" onchange="window.AECargaMultimedia&&AECargaMultimedia.agregarVideo(this.files);this.value=''">
+      <div class="ae-carga-media-buttons">
+        <button type="button" onclick="document.getElementById('carga-foto-input').click()">➕ Elegir 1, 2 o 3 fotos</button>
+        <button type="button" onclick="document.getElementById('carga-video-input').click()">🎥 Elegir video</button>
+      </div>
+      <div id="carga-foto-preview" aria-live="polite"></div>
     </div>
-    <div style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
+        <div style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
       <div style="font-size:.7rem;color:var(--az);font-weight:800;margin-bottom:6px;">🏷️ Categoría y detalles (opcional)</div>
       <div style="font-size:.64rem;color:var(--sub);margin-bottom:8px;">Se aplica a todos los productos de esta carga. Si dejás la categoría en automático, la detecto por el nombre.</div>
       <select id="carga-categoria" style="width:100%;padding:10px;border:1.5px solid var(--bor);border-radius:10px;font-family:inherit;font-size:.78rem;background:#fff;margin-bottom:8px;">
@@ -13300,32 +13305,13 @@ function tiendaAbrirCarga(){
     }
   }catch(e){}
 }
-window._cargaFotoData = null;
+// Compatibilidad con llamadas antiguas: la selección ahora admite varias fotos.
+window._cargaFotoData=null;
 function cargaFotoElegida(e){
-  var file=e.target.files && e.target.files[0];
-  if(!file){ return; }
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    var img=new Image();
-    img.onload=function(){
-      var maxW=600, escala=Math.min(1, maxW/img.width);
-      var w=Math.round(img.width*escala), h=Math.round(img.height*escala);
-      var canvas=document.createElement('canvas');
-      canvas.width=w; canvas.height=h;
-      var _ctx=canvas.getContext('2d');
-      _ctx.imageSmoothingEnabled=true; _ctx.imageSmoothingQuality='high';
-      _ctx.drawImage(img,0,0,w,h);
-      window._cargaFotoData = canvas.toDataURL('image/jpeg', 0.88);
-      var prev=document.getElementById('carga-foto-preview');
-      if(prev) prev.innerHTML='<img src="'+window._cargaFotoData+'" style="max-width:120px;max-height:120px;border-radius:8px;border:2px solid var(--az);"><div style="font-size:.62rem;color:var(--gr);font-weight:700;margin-top:4px;">✅ Foto lista</div>';
-    };
-    img.onerror=function(){ alert('No pude leer esa imagen. Probá con otra.'); };
-    img.src=ev.target.result;
-  };
-  reader.readAsDataURL(file);
+ if(window.AECargaMultimedia)window.AECargaMultimedia.agregarFotos(e&&e.target&&e.target.files);
 }
 
-// Modo de carga de precio: 'costo' (aplica fórmula), 'venta' (precio tal cual), 'usd' (convierte y aplica fórmula)
+// // Modo de carga de precio: 'costo' (aplica fórmula), 'venta' (precio tal cual), 'usd' (convierte y aplica fórmula)
 var cargaModo='costo';
 function setCargaModo(m){
   cargaModo=m;
@@ -13518,6 +13504,18 @@ async function tiendaProcesarCarga(){
     alert('⚠️ La nube todavía no terminó de cargar. Esperá unos segundos y volvé a tocar Guardar.');
     return;
   }
+  var adjuntosCarga=window.AECargaMultimedia?window.AECargaMultimedia.seleccion():{fotos:[],video:null};
+  var hayAdjuntos=!!(adjuntosCarga.fotos.length||adjuntosCarga.video);
+  if(hayAdjuntos){
+    if(!window.AEGaleria||typeof window.AEGaleria.cargarCreacion!=='function'){
+      alert('⚠️ La galería todavía no terminó de cargar. Volvé a intentar.');return;
+    }
+    var sesionFotos=typeof tiendaAuthFotosSesion==='function'?await tiendaAuthFotosSesion():null;
+    if(!sesionFotos||!sesionFotos.user){
+      alert('🔐 Para subir las fotos o el video, conectá primero tu sesión segura de fotos en Administración. No se creó ningún producto.');
+      return;
+    }
+  }
   var texto=document.getElementById('carga-texto').value||'';
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
   var esUSD=(cargaModo==='usd');
@@ -13695,24 +13693,27 @@ async function tiendaProcesarCarga(){
   var resultadoGuardado=await tiendaGuardarLocal();
   if(resultadoGuardado&&resultadoGuardado.error)throw resultadoGuardado.error;
   await tiendaVerificarManualesNube(idsManualesTocados);
-  // Si se eligió una foto, asignarla al PRIMER producto nuevo cargado
+  // El catálogo se confirmó primero. El modal se cierra y la multimedia se
+  // envía en una cola de la aplicación, sin bloquear el uso de la tienda.
   var avisoFotoCarga='';
-  if(window._cargaFotoData && primerProductoCarga){
-    try{
-      var blob=dataURLaBlob(window._cargaFotoData);
-      if(blob){
-        var resultadoFoto=await subirFotoStorage(blob, primerProductoCarga.id);
-        if(resultadoFoto&&resultadoFoto.error)throw resultadoFoto.error;
-        if(resultadoFoto&&resultadoFoto.authRequerida)avisoFotoCarga='\n\n📷 El producto quedó guardado. Falta iniciar la sesión de fotos para terminar de subir la imagen.';
-      }
-    }catch(e){
-      avisoFotoCarga='\n\n⚠️ El producto quedó guardado, pero la foto no pudo confirmarse: '+(e.message||e);
+  var mediaParaSubir=null;
+  if(hayAdjuntos){
+    if(primerProductoCarga){
+      mediaParaSubir=window.AECargaMultimedia.tomar();
+      avisoFotoCarga='\n\n📷 Fotos/video: carga en curso. Mantené abierta la aplicación hasta ver la confirmación.';
+    }else{
+      avisoFotoCarga='\n\n⚠️ No se identificó producto para asignar la multimedia; no se borró la selección.';
     }
-    window._cargaFotoData=null;
-    var prev=document.getElementById('carga-foto-preview'); if(prev) prev.innerHTML='';
   }
   document.getElementById('modal-carga').style.display='none';
   document.getElementById('carga-texto').value='';
+  if(mediaParaSubir && primerProductoCarga){
+    // No esperar las fotos para liberar la pantalla. Una falla se notifica
+    // después, pero nunca se informa que el archivo quedó publicado sin prueba.
+    window.AEGaleria.cargarCreacion(primerProductoCarga,mediaParaSubir).catch(function(error){
+      console.warn('Carga multimedia de producto incompleta',String(error&&error.message||error).slice(0,130));
+    });
+  }
   tiendaRender();
   // Ubicar y resaltar el primer producto nuevo despues del guardado exitoso.
   if(primerProductoCarga && primerProductoCarga.id!=null){
@@ -13736,7 +13737,12 @@ async function tiendaProcesarCarga(){
   msg+='\n\nTotal en la tienda: '+tiendaProductos.length;
   msg+=avisoFotoCarga;
   if(descartadas>0)msg+='\n\n('+descartadas+' líneas no se entendieron y se saltearon)';
-  alert(msg);
+  if(mediaParaSubir){
+    mostrarToast('✅ Producto guardado · 📷 Subiendo multimedia');
+    if(window._cargaResumen)window._cargaResumen=null;
+  }else{
+    alert(msg);
+  }
  }catch(err){
   alert('❌ No se pudo confirmar el producto en la nube. El formulario quedó abierto para que puedas reintentar.\n\nDetalle: '+(err.message||err));
  }finally{
@@ -15443,7 +15449,8 @@ window.aeSincronizarSelectoresVisuales=function(){
 })();
 </script>
 
-<script src="/tienda-galeria.js?v=20261103-carrusel-compartir" defer></script>
+<script src="/tienda-galeria.js?v=20261104-multi1" defer></script>
+<script src="/tienda-carga-multimedia.js?v=20261104-1" defer></script>
 <script src="/admin-tareas-compartidas.js?v=20261103-2" defer></script>
 <script src="/admin-tareas.js?v=20261103-shared3" defer></script>
 <script src="/admin-usd-persist.js?v=20261103-1" defer></script>
