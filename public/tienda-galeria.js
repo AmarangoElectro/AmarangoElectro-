@@ -417,14 +417,18 @@
         if(extras.length&&!p.foto){
           estadoUpload('⏳ Subiendo portada · 1 de '+total+'…');
           var url=await subirObjeto(p,extras.shift(),'imagen');
-          var fotoAnterior=p.foto||'',marcaAnterior=p.estadoManualActualizado;
+          var fotoAnterior=p.foto||'',marcaAnterior=p.estadoManualActualizado,
+              fotoFechaAnterior=p.fotoActualizadaManual;
           p.foto=url;p.fotoActualizadaManual=Date.now();p.estadoManualActualizado=p.fotoActualizadaManual;
           try{
             var guardado=await tiendaGuardarLocal();
             if(guardado&&guardado.error)throw guardado.error;
             await tiendaVerificarManualesNube([p.id],url);
           }catch(e){
-            p.foto=fotoAnterior;p.estadoManualActualizado=marcaAnterior;
+            p.foto=fotoAnterior;p.estadoManualActualizado=marcaAnterior;p.fotoActualizadaManual=fotoFechaAnterior;
+            // Si falló la confirmación de portada, no dejar una imagen fantasma
+            // almacenada solamente en el navegador.
+            try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(ignore){}
             throw e;
           }
         }
