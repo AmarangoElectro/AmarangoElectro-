@@ -513,14 +513,17 @@
     '.ae-gal-card-arrow{position:absolute;z-index:5;top:50%;transform:translateY(-50%);width:29px;height:34px;border:0;border-radius:12px;background:rgba(8,22,48,.72)!important;color:#fff!important;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-size:24px;line-height:1;touch-action:manipulation}' +
     '.ae-gal-card-prev{left:5px}.ae-gal-card-next{right:5px}' +
     '.ae-gal-card-arrow:disabled{opacity:.24;cursor:default}' +
+    '.ae-gal-card-hint{position:absolute;z-index:5;left:50%;bottom:7px;transform:translateX(-50%);padding:3px 7px;border-radius:8px;background:rgba(255,255,255,.78);color:#43516a;font-size:9px;font-weight:500;line-height:1.2;font-family:inherit;white-space:nowrap;pointer-events:none}' +
     '.ae-gal-card-play{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(8,22,48,.86);border:2px solid #fff;color:#fff;font-size:25px;box-shadow:0 2px 14px #0008;pointer-events:none}' +
-    '.ae-gal-card-count[hidden],.ae-gal-card-arrow[hidden],.ae-gal-card-play[hidden]{display:none!important}' +
+    '.ae-gal-card-count[hidden],.ae-gal-card-arrow[hidden],.ae-gal-card-play[hidden],.ae-gal-card-hint[hidden]{display:none!important}' +
     '.ae-gal-card-share{position:absolute;z-index:7;right:8px;top:44px;padding:7px 9px;border-radius:10px;border:1px solid rgba(255,255,255,.65);background:rgba(8,22,48,.9)!important;color:#fff!important;font-size:11px;font-weight:800;font-family:inherit;white-space:nowrap;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px #0004}' +
     '.ae-gal-card-share:disabled{opacity:.6;cursor:wait}';
   document.head.appendChild(aeCardsCss);
 
   function aeTarjetaMostrar(estado,i){
     if(!estado.activo||i<0||i>=estado.lista.length)return;
+    if(i!==estado.indice)estado.recorrida=true;
+    estado.indicacion.hidden=!!estado.recorrida;
     estado.indice=i;
     var item=estado.lista[i],esVideo=item.tipo==='video';
     var nuevaUrl=esVideo?(estado.p.foto?estado.portadaUrl:(estado.lista.find(function(a){return a.tipo==='imagen';})||{}).url):
@@ -570,7 +573,7 @@
     if(lista.length<2){
       if(estado){
         estado.activo=false;
-        [estado.numero,estado.anterior,estado.siguiente,estado.play].forEach(function(el){el.hidden=true;});
+        [estado.numero,estado.anterior,estado.siguiente,estado.play,estado.indicacion].forEach(function(el){el.hidden=true;});
         if(estado.portadaUrl)estado.img.setAttribute('src',estado.portadaUrl);
         estado.img.style.objectFit=estado.objectFit;
       }
@@ -599,13 +602,14 @@
     aeCardsEstado.set(card,estado);
     estado.numero=nodo('span','ae-gal-card-count');
     estado.numero.setAttribute('aria-live','polite');
+    estado.indicacion=nodo('span','ae-gal-card-hint','↔ Deslizá');
     estado.anterior=boton('‹',function(e){e.stopPropagation();aeTarjetaMostrar(estado,estado.indice-1);},'ae-gal-card-arrow ae-gal-card-prev');
     estado.siguiente=boton('›',function(e){e.stopPropagation();aeTarjetaMostrar(estado,estado.indice+1);},'ae-gal-card-arrow ae-gal-card-next');
     estado.anterior.setAttribute('aria-label','Foto o video anterior');
     estado.siguiente.setAttribute('aria-label','Foto o video siguiente');
     estado.play=nodo('span','ae-gal-card-play','▶');
     estado.play.setAttribute('aria-hidden','true');
-    envoltorio.append(estado.numero,estado.anterior,estado.siguiente,estado.play);
+    envoltorio.append(estado.numero,estado.anterior,estado.siguiente,estado.play,estado.indicacion);
     img.style.touchAction='pan-y';
     // Interceptar sólo la imagen/zoom con galería: el resto de la tarjeta sigue igual.
     var x=0,y=0,suprimirHasta=0;
