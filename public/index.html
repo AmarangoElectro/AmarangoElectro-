@@ -1941,41 +1941,8 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
   background:#1d3047!important;color:#c5e3ff!important;border-color:#5b83ad!important;
 }
 </style>
-<style id="ae-back-to-top-orb-20261104">
-/* Esfera naranja Amarango: un único controlador, fuera de paneles con scroll. */
-#btn-arriba{
-  appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;position:fixed;bottom:calc(215px + env(safe-area-inset-bottom,0px));right:18px;z-index:1390;
-  width:52px;height:52px;padding:0;box-sizing:border-box;overflow:hidden;isolation:isolate;
-  border-radius:50%!important;border:1.5px solid rgba(255,235,205,.9)!important;
-  background:radial-gradient(circle at 29% 20%,#ffba75 0%,#ff9637 25%,#ff7a00 58%,#dc5b00 100%)!important;
-  color:#fff!important;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;
-  box-shadow:inset 0 2px 3px rgba(255,255,255,.50),inset 0 -5px 9px rgba(125,41,0,.32),0 0 0 3px rgba(255,122,0,.14),0 7px 18px rgba(102,38,0,.29)!important;
-  transition:transform .18s ease,box-shadow .18s ease;will-change:transform;
-}
-#btn-arriba::before{
-  content:"";position:absolute;pointer-events:none;top:5px;left:20%;width:60%;height:28%;
-  border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.46),rgba(255,255,255,0));
-}
-#btn-arriba svg{
-  position:absolute;top:50%;left:50%;width:23px;height:23px;display:block;
-  transform:translate(-50%,-50%);fill:none;stroke:#fff;stroke-width:2.7;
-  stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 1px rgba(77,31,0,.34));
-}
-#btn-arriba:active{transform:scale(.93)}
-#btn-arriba:focus-visible{outline:3px solid #0a4fbf;outline-offset:4px}
-body.oscuro #btn-arriba{
-  border-color:rgba(255,192,128,.82)!important;
-  box-shadow:inset 0 2px 3px rgba(255,255,255,.45),inset 0 -5px 9px rgba(125,41,0,.35),0 0 0 3px rgba(255,122,0,.22),0 8px 22px rgba(0,0,0,.56)!important;
-}
-@media(hover:hover){#btn-arriba:hover{transform:translateY(-2px)}}
-@media(prefers-reduced-motion:reduce){#btn-arriba{transition:none!important}}
-/* Fiabilidad: el botón NO depende del scroll ni del JS para aparecer. */
-body.en-tienda #btn-arriba{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
-body:not(.en-tienda) #btn-arriba{display:none!important}
-</style>
 </head>
 <body class="en-tienda">
-  <button id="btn-arriba" data-ae-orb="20261104-1" type="button" aria-label="Volver arriba" title="Volver arriba" onclick="volverArriba()"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
 
@@ -2543,6 +2510,7 @@ body:not(.en-tienda) #btn-arriba{display:none!important}
     <div id="tienda-destacados" style="display:none;margin-top:12px;"></div>
     <div id="tienda-contador" style="font-size:.68rem;color:var(--sub);font-weight:600;margin-top:10px;"></div>
     
+    <button id="btn-arriba" onclick="volverArriba()" style="display:none;position:fixed;bottom:215px;right:18px;z-index:1390;background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:50%;width:44px;height:44px;font-size:1.1rem;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.2);">⬆️</button>
     <button id="carrito-flotante" onclick="abrirCarrito()" style="display:none !important;position:fixed;bottom:78px;right:18px;z-index:1400;background:var(--nar);color:#fff;border:none;border-radius:50px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(255,122,0,.45);align-items:center;gap:8px;">🛒 <span id="carrito-count">0</span></button>
 
     <!-- 🎰 Ruleta de descuentos -->
@@ -11850,36 +11818,24 @@ function tiendaCompartirEnCadena(prods, i){
 // junta el texto de todos (para el fallback sin compartir nativo)
 function tiendaTextoVariosViejo(prods){ return tiendaTextoVarios(prods); }
 
-// Botón "volver arriba" - esfera flotante fuera de los paneles con scroll.
+// Botón "volver arriba"
 function volverArriba(){
   var tab=document.getElementById('tab-tienda');
-  if(tab&&tab.scrollTop)tab.scrollTo({top:0,behavior:'smooth'});
+  if(tab)tab.scrollTo({top:0,behavior:'smooth'});
   window.scrollTo({top:0,behavior:'smooth'});
 }
+// mostrar/ocultar el botón según el scroll
 (function(){
-  var scheduled=false;
   function chequear(){
     var b=document.getElementById('btn-arriba');
     if(!b)return;
-    // La visibilidad la resuelve CSS según el espacio Tienda.
-    // No volver a esconderla al desplazarse en Android.
-    var tienda=document.body.classList.contains('en-tienda');
-    b.setAttribute('aria-hidden',tienda?'false':'true');
-    b.tabIndex=tienda?0:-1;
+    var tab=document.getElementById('tab-tienda');
+    var sc=(tab&&tab.scrollTop)||window.scrollY||document.documentElement.scrollTop||0;
+    b.style.display = (sc>300 && tab && tab.classList.contains('on'))?'block':'none';
   }
-  function actualizar(){
-    if(scheduled)return;
-    scheduled=true;
-    requestAnimationFrame(function(){scheduled=false;chequear();});
-  }
-  window.addEventListener('scroll',actualizar,true);
-  window.addEventListener('resize',actualizar,{passive:true});
-  window.addEventListener('pageshow',actualizar);
-  document.addEventListener('DOMContentLoaded',actualizar,{once:true});
-  // Cambio de pestaña sin scroll: actualizar visibilidad igualmente.
-  document.addEventListener('click',function(){requestAnimationFrame(actualizar);},true);
-  actualizar();
+  window.addEventListener('scroll', chequear, true);
 })();
+
 // Genera el código QR de la tienda
 function mostrarQR(){
   if(!adminUnlocked){ alert('🔒 El código QR está disponible únicamente para administradores.'); return; }
