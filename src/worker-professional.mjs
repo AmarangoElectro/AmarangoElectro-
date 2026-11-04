@@ -11,7 +11,7 @@ const PRO_UX_HEAD = `
 const PRO_UX_BODY = `
 <script src="/professional-ux.js?v=20260823-1" defer></script>
 <script src="/professional-dialogs.js?v=20260823-1" defer></script>
-<script src="/tienda-productividad.js?v=20260824-1" defer></script>
+<script src="/tienda-productividad.js?v=20261104-orb-1" defer></script>
 `;
 
 const MARGARITA_RESCUE_PROMPT = `

@@ -1942,9 +1942,9 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
 }
 </style>
 <style id="ae-back-to-top-orb-20261104">
-/* Esfera naranja Amarango: visual solamente. Conserva click y visibilidad por scroll. */
+/* Esfera naranja Amarango: un único controlador, fuera de paneles con scroll. */
 #btn-arriba{
-  appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;position:fixed;bottom:215px;right:18px;z-index:1390;
+  appearance:none;-webkit-appearance:none;display:flex;align-items:center;justify-content:center;position:fixed;bottom:calc(215px + env(safe-area-inset-bottom,0px));right:18px;z-index:1390;
   width:52px;height:52px;padding:0;box-sizing:border-box;overflow:hidden;isolation:isolate;
   border-radius:50%!important;border:1.5px solid rgba(255,235,205,.9)!important;
   background:radial-gradient(circle at 29% 20%,#ffba75 0%,#ff9637 25%,#ff7a00 58%,#dc5b00 100%)!important;
@@ -1975,7 +1975,7 @@ body:not(.en-tienda) #btn-arriba{display:none!important}
 </style>
 </head>
 <body class="en-tienda">
-  <button id="btn-arriba" type="button" aria-label="Volver arriba" title="Volver arriba" onclick="volverArriba()"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+  <button id="btn-arriba" data-ae-orb="20261104-1" type="button" aria-label="Volver arriba" title="Volver arriba" onclick="volverArriba()"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 
 <button id="btn-atras" onclick="volverAtras()">← Atrás</button>
 

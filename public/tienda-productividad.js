@@ -127,25 +127,8 @@
       }
     }catch(e){}
 
-    var btn=document.getElementById('btn-arriba');
-    if(btn && btn.id==='btn-arriba'){
-      // El listener inline anterior busca #btn-arriba en cada scroll y escribe
-      // display de forma síncrona. Renombrarlo lo vuelve inerte sin tocar su onclick.
-      btn.id='btn-arriba-ae';
-      var visible=null,raf=0;
-      var pintar=function(){
-        raf=0;
-        var tab=document.getElementById('tab-tienda');
-        var sc=(tab&&tab.scrollTop)||window.scrollY||document.documentElement.scrollTop||0;
-        var mostrar=!!(sc>300 && tab && tab.classList.contains('on'));
-        if(mostrar!==visible){btn.style.display=mostrar?'block':'none';visible=mostrar;}
-      };
-      var pedir=function(){if(raf)return;raf=requestAnimationFrame(pintar);};
-      window.addEventListener('scroll',pedir,{passive:true});
-      var tab=document.getElementById('tab-tienda');
-      if(tab)tab.addEventListener('scroll',pedir,{passive:true});
-      pintar();
-    }
+    // #btn-arriba conserva su ID, diseño y visibilidad del index.
+    // No instalar otro controlador que lo renombre u oculte en Android.
   }
 
   function decorarCopiarNombre(){
