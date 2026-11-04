@@ -13695,6 +13695,7 @@ async function tiendaProcesarCarga(){
   // El trabajo continúa en esta página sin perder los campos si falla Supabase.
   if(hayAdjuntos){
     document.getElementById('modal-carga').style.display='none';
+    if(window.AEGaleria&&window.AEGaleria.estadoCarga)window.AEGaleria.estadoCarga('⏳ Guardando producto en la nube. Luego se subirán fotos/video…');
     mostrarToast('⏳ Confirmando producto en la nube. Después suben fotos/video…');
   }
   var resultadoGuardado=await tiendaGuardarLocal();
@@ -13752,6 +13753,7 @@ async function tiendaProcesarCarga(){
   }
  }catch(err){
   document.getElementById('modal-carga').style.display='block';
+  if(window.AEGaleria&&window.AEGaleria.estadoCarga)window.AEGaleria.estadoCarga('⚠️ No se guardó el producto. Revisá el formulario.','error');
   alert('❌ No se pudo confirmar el producto en la nube. El formulario quedó abierto para que puedas reintentar.\n\nDetalle: '+(err.message||err));
  }finally{
   window._tiendaCargaManualEnCurso=false;
@@ -15457,7 +15459,7 @@ window.aeSincronizarSelectoresVisuales=function(){
 })();
 </script>
 
-<script src="/tienda-galeria.js?v=20261104-multi2" defer></script>
+<script src="/tienda-galeria.js?v=20261104-multi3" defer></script>
 <script src="/tienda-carga-multimedia.js?v=20261104-1" defer></script>
 <script src="/admin-tareas-compartidas.js?v=20261103-2" defer></script>
 <script src="/admin-tareas.js?v=20261103-shared3" defer></script>
