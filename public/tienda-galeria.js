@@ -513,7 +513,7 @@
     '.ae-gal-card-arrow{position:absolute;z-index:5;top:50%;transform:translateY(-50%);width:29px;height:34px;border:0;border-radius:12px;background:rgba(8,22,48,.72)!important;color:#fff!important;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-size:24px;line-height:1;touch-action:manipulation}' +
     '.ae-gal-card-prev{left:5px}.ae-gal-card-next{right:5px}' +
     '.ae-gal-card-arrow:disabled{opacity:.24;cursor:default}' +
-    '.ae-gal-card-hint{position:absolute;z-index:5;left:50%;bottom:7px;transform:translateX(-50%);padding:3px 7px;border-radius:8px;background:rgba(255,255,255,.78);color:#43516a;font-size:9px;font-weight:500;line-height:1.2;font-family:inherit;white-space:nowrap;pointer-events:none}' +
+    '.ae-gal-card-hint{position:absolute;z-index:5;left:50%;bottom:8px;transform:translateX(-50%);max-width:calc(100% - 16px);box-sizing:border-box;padding:5px 10px;border:1px solid rgba(255,122,0,.5);border-radius:20px;background:rgba(255,240,215,.96);color:#9a4300;font-size:11px;font-weight:750;line-height:1.25;font-family:inherit;text-align:center;box-shadow:0 2px 7px #0002;pointer-events:none}' +
     '.ae-gal-card-play{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(8,22,48,.86);border:2px solid #fff;color:#fff;font-size:25px;box-shadow:0 2px 14px #0008;pointer-events:none}' +
     '.ae-gal-card-count[hidden],.ae-gal-card-arrow[hidden],.ae-gal-card-play[hidden],.ae-gal-card-hint[hidden]{display:none!important}' +
     '.ae-gal-card-share{position:absolute;z-index:7;right:8px;top:44px;padding:7px 9px;border-radius:10px;border:1px solid rgba(255,255,255,.65);background:rgba(8,22,48,.9)!important;color:#fff!important;font-size:11px;font-weight:800;font-family:inherit;white-space:nowrap;cursor:pointer;touch-action:manipulation;box-shadow:0 2px 8px #0004}' +
@@ -602,7 +602,7 @@
     aeCardsEstado.set(card,estado);
     estado.numero=nodo('span','ae-gal-card-count');
     estado.numero.setAttribute('aria-live','polite');
-    estado.indicacion=nodo('span','ae-gal-card-hint','↔ Deslizá');
+    estado.indicacion=nodo('span','ae-gal-card-hint','↔ Deslizá para ver más');
     estado.anterior=boton('‹',function(e){e.stopPropagation();aeTarjetaMostrar(estado,estado.indice-1);},'ae-gal-card-arrow ae-gal-card-prev');
     estado.siguiente=boton('›',function(e){e.stopPropagation();aeTarjetaMostrar(estado,estado.indice+1);},'ae-gal-card-arrow ae-gal-card-next');
     estado.anterior.setAttribute('aria-label','Foto o video anterior');
