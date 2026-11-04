@@ -233,7 +233,8 @@
       return;
     }
     var opciones=nodo('div','ae-gal-row');
-    var fotos=boton('➕ Elegir 1, 2 o 3 fotos',function(){seleccionarArchivo(p,datos,'imagen',sesion);},'ae-gal-btn-primary');
+    var disponibles=Math.max(0,maxExtra-datos.imagenes.length);
+    var fotos=boton('➕ Elegir hasta '+disponibles+' foto'+(disponibles===1?'':'s'),function(){seleccionarArchivo(p,datos,'imagen',sesion);},'ae-gal-btn-primary');
     fotos.disabled=!!datos.video||datos.imagenes.length>=maxExtra;
     var video=boton('🎥 Elegir video',function(){seleccionarArchivo(p,datos,'video',sesion);});
     video.disabled=!!datos.video||datos.imagenes.length>0;
