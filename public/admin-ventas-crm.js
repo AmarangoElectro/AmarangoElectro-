@@ -61,6 +61,9 @@ function initStyle(){
  '.ae-crm-sale-save{background:#ff7a00;color:#fff;border-color:#ff7a00!important}.ae-crm-sale-cancel{background:var(--bg);color:var(--txt)}',
  '.ae-crm-sale-save:disabled{opacity:.56;cursor:wait}',
  '.ae-crm-sale-info{margin-top:8px;color:var(--sub);font-size:.69rem;line-height:1.45}',
+ '.ae-crm-sale-delivery-title{font-size:.88rem;font-weight:900;color:var(--az);margin:15px 0 4px;border-top:1px solid var(--bor);padding-top:12px}',
+ '.ae-crm-sale-map-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}',
+ '.ae-crm-sale-map-actions button{flex:1 1 140px;min-height:40px;padding:7px;border-radius:10px;border:1px solid var(--bor);background:var(--bg);color:var(--az);font-weight:800;font-family:inherit;font-size:.73rem}',
  'body.oscuro .ae-crm-sale-dialog{background:#241915;border-color:#5f4537;color:#fff3ea}body.oscuro .ae-crm-sale-suggestions{background:#241915;border-color:#5f4537}',
  '@media(prefers-reduced-motion:reduce){.ae-crm-sale-layer{backdrop-filter:none}}'
  ].join('\n');
@@ -179,6 +182,47 @@ function open(id,card){
   installOptions.appendChild(choose);
  });
  box.appendChild(installTrigger);box.appendChild(installOptions);box.appendChild(other);
+ // Logística: dato de contacto y dirección de entrega. La ubicación sólo se
+ // obtiene al tocar el botón, nunca automáticamente al abrir el formulario.
+ box.appendChild(node('div','ae-crm-sale-delivery-title','🚚 Datos para la entrega'));
+ function deliveryField(label,placeholder,max,type){
+  var wrap=node('label','ae-crm-sale-label',label);
+  var field=node('input','ae-crm-sale-input');field.type=type||'text';
+  field.maxLength=max;field.placeholder=placeholder;field.autocomplete='off';
+  wrap.appendChild(field);box.appendChild(wrap);return field;
+ }
+ var deliveryPhone=deliveryField('Teléfono alternativo para la entrega *','Ej.: 11 5555-1234',30,'tel');
+ deliveryPhone.inputMode='tel';
+ var deliveryAddress=deliveryField('Calle y altura para entregar *','Ej.: Av. Luro 3250, piso / departamento',180);
+ var deliveryCross=deliveryField('Entre calles *','Ej.: entre Av. Rivadavia y Perú',160);
+ var deliveryLocality=deliveryField('Localidad *','Ej.: San Justo, Buenos Aires',100);
+ var deliveryMap=deliveryField('📍 Enlace de Google Maps (recomendado)','Pegá acá el enlace de Compartir ubicación de Maps',500,'url');
+ deliveryMap.inputMode='url';
+ box.appendChild(node('p','ae-crm-sale-info','En Google Maps elegí el punto de entrega → Compartir → Copiar vínculo, y pegalo arriba. Confirmá las entrecalles y la localidad: un GPS puede no señalar la puerta exacta.'));
+ var mapActions=node('div','ae-crm-sale-map-actions');
+ var locate=button('📍 Usar ubicación actual',function(){
+  if(!navigator.geolocation){geoStatus.textContent='Este teléfono no ofrece acceso a ubicación. Pegá el vínculo de Google Maps.';return;}
+  locate.disabled=true;geoStatus.textContent='Solicitando permiso de ubicación al teléfono…';
+  navigator.geolocation.getCurrentPosition(function(p){
+   locate.disabled=false;
+   var latitude=p.coords.latitude.toFixed(6),longitude=p.coords.longitude.toFixed(6);
+   deliveryMap.value='https://www.google.com/maps?q='+latitude+','+longitude;
+   deliveryAccuracy=Math.round(p.coords.accuracy||0)||null;
+   geoStatus.textContent='✅ Coordenadas capturadas (precisión aproximada: '+(deliveryAccuracy||'desconocida')+' m). Revisá que correspondan al destino de entrega.';
+  },function(e){
+   locate.disabled=false;
+   geoStatus.textContent=e&&e.code===1?'Permiso denegado. Podés compartir el enlace desde Google Maps.':'No se pudo obtener la ubicación. Pegá el enlace de Maps.';
+  },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+ },'ae-crm-sale-map-button');
+ mapActions.appendChild(locate);
+ var openMaps=button('🗺️ Abrir Google Maps',function(){
+  window.open('https://www.google.com/maps','_blank','noopener,noreferrer');
+ },'ae-crm-sale-map-button');
+ mapActions.appendChild(openMaps);box.appendChild(mapActions);
+ var deliveryAccuracy=null;
+ var geoStatus=node('p','ae-crm-sale-info','La ubicación GPS sólo se obtiene si autorizás el permiso. También podés enviar un pin por enlace.');
+ geoStatus.setAttribute('aria-live','polite');box.appendChild(geoStatus);
+ deliveryMap.addEventListener('input',function(){deliveryAccuracy=null;});
  var notesLabel=node('label','ae-crm-sale-label','Observaciones (opcional)');
  var notes=node('textarea','ae-crm-sale-input');notes.rows=2;notes.maxLength=140;notes.placeholder='Ej.: entrega a coordinar';notesLabel.appendChild(notes);box.appendChild(notesLabel);
  var issue=node('p','ae-crm-sale-info','');issue.setAttribute('aria-live','polite');box.appendChild(issue);
@@ -215,6 +259,21 @@ function open(id,card){
   var count=Number(selectedInstallments==='other'?other.value:selectedInstallments);
   if(name.length<2){issue.textContent='Ingresá el nombre del cliente.';input.focus();return;}
   if(!Number.isInteger(count)||count<1||count>60){issue.textContent='Elegí una cantidad válida de cuotas.';(selectedInstallments==='other'?other:installTrigger).focus();return;}
+  var phone=deliveryPhone.value.trim(),address=deliveryAddress.value.trim();
+  var cross=deliveryCross.value.trim(),locality=deliveryLocality.value.trim();
+  var mapUrl=deliveryMap.value.trim();
+  var digits=phone.replace(/\\D/g,'');
+  if(digits.length<8||digits.length>15){issue.textContent='Indicá un teléfono alternativo válido para la entrega.';deliveryPhone.focus();return;}
+  if(address.length<5){issue.textContent='Completá calle y altura de la entrega.';deliveryAddress.focus();return;}
+  if(cross.length<4){issue.textContent='Indicá entre qué calles se entrega.';deliveryCross.focus();return;}
+  if(locality.length<3){issue.textContent='Completá la localidad de entrega.';deliveryLocality.focus();return;}
+  if(mapUrl){
+   try{
+    var parsed=new URL(mapUrl);
+    var host=parsed.hostname.toLowerCase();
+    if(parsed.protocol!=='https:'||!['google.com','www.google.com','maps.google.com','maps.app.goo.gl','goo.gl'].includes(host))throw Error('invalid_maps');
+   }catch(e){issue.textContent='Pegá un enlace válido de Google Maps (Compartir → Copiar vínculo).';deliveryMap.focus();return;}
+  }
   issue.textContent='';save.disabled=true;
   if(advisor){
    var who=advisorInput&&advisorInput.value.trim().replace(/\s+/g,' ');
@@ -227,7 +286,10 @@ function open(id,card){
    var payload={advisor_name:who.slice(0,100),
     advisor_id:(function(){try{return String(localStorage.getItem('ae_asesor_id')||'').slice(0,100)||null;}catch(e){return null;}})(),
     customer_name:name.slice(0,120),product_id:id.slice(0,180),product_name:product,
-    installments:count,note:notes.value.trim().slice(0,140),source:'tienda_asesores'};
+    installments:count,note:notes.value.trim().slice(0,140),source:'tienda_asesores',
+    delivery_phone:phone,delivery_address:address,delivery_cross_streets:cross,
+    delivery_locality:locality,delivery_maps_url:mapUrl||null,
+    delivery_accuracy_m:mapUrl&&deliveryAccuracy?deliveryAccuracy:null};
    try{
     var response=await api.from('ae_advisor_sale_submissions').insert(payload);
     if(response.error)throw response.error;
@@ -261,7 +323,9 @@ function open(id,card){
   }
   var res=tasks.createCrmDraft({cliente:crmClient?clientName(crmClient):name,
    numeroCrm:crmClient&&crmClient.num,clienteId:crmClient&&crmClient.id,
-   clienteRegistrado:!!crmClient,producto:product,productoId:id,cuotas:count,nota:notes.value});
+   clienteRegistrado:!!crmClient,producto:product,productoId:id,cuotas:count,nota:notes.value,
+   telefonoEntrega:phone,direccionEntrega:address,entreCalles:cross,
+   localidadEntrega:locality,ubicacionMaps:mapUrl,precisionGps:deliveryAccuracy});
   if(!res||!res.ok){issue.textContent='⚠️ '+(res&&res.error||'No se pudo guardar la tarea');save.disabled=false;return;}
   close();queueScan();notify(createError?'🧾 Venta pendiente guardada. Cliente aún pendiente de alta en CRM.':'🧾 Venta pendiente guardada en Tareas.');
   if(focus&&focus.isConnected)focus.focus();
