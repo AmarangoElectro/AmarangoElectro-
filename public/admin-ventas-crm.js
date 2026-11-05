@@ -81,6 +81,7 @@ function initStyle(){
  '.ae-crm-sale-label{display:block;margin:12px 0 4px;font-size:.74rem;font-weight:800;color:var(--txt)}',
  '.ae-crm-sale-input{box-sizing:border-box;width:100%;min-height:43px;border:1.5px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--txt);padding:10px;font-size:.87rem;font-family:inherit}',
  '.ae-crm-sale-input:focus-visible{outline:2px solid #ff7a00;outline-offset:1px}',
+ '.ae-crm-sale-customer-phone,.ae-crm-sale-customer-phone::placeholder{font-size:.78rem!important;letter-spacing:0!important}',
  '.ae-crm-sale-suggestions[hidden]{display:none!important}.ae-crm-sale-suggestions{max-height:min(38dvh,340px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;border:1px solid var(--bor);border-radius:10px;margin-top:3px;background:var(--wh);scrollbar-width:thin}',
  '.ae-crm-sale-option{display:block;box-sizing:border-box;width:100%;text-align:left;padding:10px;border:0;border-bottom:1px solid var(--bor);background:transparent;color:var(--txt);font-family:inherit;font-size:.78rem;cursor:pointer}',
  '.ae-crm-sale-option:last-child{border-bottom:0}.ae-crm-sale-option:active{background:var(--bg)}',
@@ -253,6 +254,7 @@ function open(id,card){
   wrap.appendChild(field);container.appendChild(wrap);return field;
  }
  var customerPhone=deliveryField(box,'📱 Celular del cliente *','Ej.: 11 5555-1234',30,'tel');
+ customerPhone.classList.add('ae-crm-sale-customer-phone');
  customerPhone.inputMode='tel';
  var deliveryPhone=deliveryField(box,'Otro teléfono para recibir la entrega (opcional)','Si alguien más la recibe',30,'tel');
  deliveryPhone.inputMode='tel';
