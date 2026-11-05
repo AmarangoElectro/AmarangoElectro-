@@ -513,8 +513,10 @@ body,body.rol-admin,body.rol-revendedor{background:var(--ae-soft) !important;col
 #tienda-grid .prod-nombre{font-size:.82rem !important;line-height:1.27 !important;min-height:42px !important;color:#091d43 !important;font-weight:850 !important;}
 .ae-card-badge{background:var(--ae-orange);color:#fff;font-size:.59rem;font-weight:900;padding:5px 9px;border-radius:7px;box-shadow:none;letter-spacing:.25px;}
 /* Leyenda breve y legible en las tarjetas de dos columnas. */
-.ae-card-badge-3si{background:#08774b;line-height:1.18;text-align:center;max-width:calc(100% - 10px);box-sizing:border-box;}
-body.oscuro .ae-card-badge-3si{background:#174e37;color:#d8f7e5;}
+.ae-card-badge-interest-free{background:#08774b;line-height:1.18;text-align:center;max-width:calc(100% - 10px);box-sizing:border-box;}
+body.oscuro .ae-card-badge-interest-free{background:#174e37;color:#d8f7e5;}
+.ae-card-badge-interest-free.ae-card-badge-3si{background:#fff;color:#b84e00;border:1px solid #ffb374;}
+body.oscuro .ae-card-badge-interest-free.ae-card-badge-3si{background:#302218;color:#ffa65f;border-color:#a36134;}
 
 .ae-finance{margin:6px 0 8px;border-radius:12px;overflow:hidden;}
 .ae-finance-promo{background:#fff;border:1px solid #edf0f4;}
@@ -776,11 +778,15 @@ body.oscuro #tienda-grid .prod-card button[onclick*="compartirInstagram"]{backgr
 .ae-card-installments-cash{margin-top:3px;font-size:.68rem;font-weight:600;line-height:1.3;color:#536276;}
 .ae-card-installments.is-interest-free{background:#eef9f2;border-color:#cbe8d6;border-inline-start-color:#27885a;color:#146440;}
 .ae-card-installments.is-interest-free .ae-card-installments-amount{color:inherit;}
-.ae-finance-promo .ae-card-installments{margin:0;border:0;border-inline-start:2px solid #27885a;border-radius:0;}
+.ae-finance-promo .ae-card-installments{margin:0;border:0;border-inline-start:2px solid #ff7a00;border-radius:0;}
 body.oscuro .ae-card-installments{background:#2d231d;border-color:#594133;border-inline-start-color:#ef9250;color:#f2dbc8;}
 body.oscuro .ae-card-installments-amount{color:#ffb479;}
 body.oscuro .ae-card-installments-cash{color:#ddc9b9;}
 body.oscuro .ae-card-installments.is-interest-free{background:#1e3026;border-color:#395847;border-inline-start-color:#70c898;color:#a6eac1;}
+.ae-card-installments.is-three-interest-free{background:#fff;border-color:#f5d3b8;border-inline-start-color:#ff7a00;color:#b84e00;}
+.ae-card-installments-promo-title{display:block;font-size:clamp(1rem,13cqi,1.3rem);font-weight:850;line-height:1.14;letter-spacing:-.02em;}
+.ae-card-installments-per-payment{margin-top:4px;font-size:.74rem;font-weight:750;line-height:1.25;}
+body.oscuro .ae-card-installments.is-three-interest-free{background:#302218;border-color:#805337;border-inline-start-color:#ff9c52;color:#ffa65f;}
 
 .ae-cuota-simple,.ae-cuota-destacada,.ae-cuota-comparativa,.ae-cuota-ahorro{width:100%;min-width:0;max-width:100%;overflow:hidden;}
 .ae-cuota-monto{max-width:100%;font-size:clamp(.9rem,1.5vw,1.35rem);font-weight:900;line-height:1.08;overflow-wrap:anywhere;word-break:normal;}
@@ -2925,9 +2931,14 @@ function mejorCuotaDatos(precio, prod){
   return { n:n, valor:vc };
 }
 function tiendaBloqueCuotaCard(cuota, contado){
-  return '<div class="ae-card-installments'+(cuota.sinInteres?' is-interest-free':'')+'">'
-    +'<div class="ae-card-installments-heading"><strong class="ae-card-installments-amount">'+fmt(cuota.valor)+'</strong> '
-    +'<span class="ae-card-installments-plan">en '+cuota.n+' cuotas'+(cuota.sinInteres?' sin interés':'')+'</span></div>'
+  var tresSinInteres=cuota.sinInteres&&cuota.n===3;
+  var clase=tresSinInteres?' is-three-interest-free':(cuota.sinInteres?' is-interest-free':'');
+  return '<div class="ae-card-installments'+clase+'">'
+    +(tresSinInteres
+      ? '<strong class="ae-card-installments-promo-title">3 cuotas sin interés</strong>'
+        +'<div class="ae-card-installments-per-payment">'+fmt(cuota.valor)+' por cuota</div>'
+      : '<div class="ae-card-installments-heading"><strong class="ae-card-installments-amount">'+fmt(cuota.valor)+'</strong> '
+        +'<span class="ae-card-installments-plan">en '+cuota.n+' cuotas'+(cuota.sinInteres?' sin interés':'')+'</span></div>')
     +'<div class="ae-card-installments-cash">Contado: '+fmt(contado)+'</div>'
     +'</div>';
 }
@@ -9417,10 +9428,11 @@ function tiendaCardsHtml(sublista){
     // ═══ ESTILO MERCADO LIBRE: la foto va PRIMERO y grande; las etiquetas se
     // superponen sobre ella para no empujarla hacia abajo. ═══
     var etiquetas='';
-    if(datosPrecioCard.modo==='promo_madre'){
-      etiquetas+='<div class="ae-card-badge ae-card-badge-3si">3 CUOTAS<br>SIN INTERÉS</div>';
+    var cantidadSinInteres=parseInt(p.sinInteres,10);
+    if(datosPrecioCard.modo==='promo_madre'||cantidadSinInteres===3){
+      etiquetas+='<div class="ae-card-badge ae-card-badge-interest-free ae-card-badge-3si">3 CUOTAS<br>SIN INTERÉS</div>';
     }else if(p.sinInteres){
-      etiquetas+='<div class="ae-card-badge ae-card-badge-3si">'+parseInt(p.sinInteres,10)+' S/INTERÉS</div>';
+      etiquetas+='<div class="ae-card-badge ae-card-badge-interest-free">'+cantidadSinInteres+' S/INTERÉS</div>';
     }
     if(p.sinStock){
       etiquetas+='<div style="background:#dc2626;color:#fff;font-size:.6rem;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:.4px;box-shadow:0 2px 6px rgba(0,0,0,.2);">SIN STOCK</div>';
@@ -9577,7 +9589,7 @@ function tiendaCardsHtml(sublista){
         var cd=mejorCuotaDatos(p.venta, p);
         if(cd){
           var esSI=cd.sinInteres;
-          if(tiendaFormatoCuota==='simple'||tiendaFormatoCuota==='destacado'){
+          if(tiendaFormatoCuota==='simple'||tiendaFormatoCuota==='destacado'||(esSI&&cd.n===3&&tiendaFormatoCuota!=='caja')){
             return tiendaBloqueCuotaCard(cd,p.venta)+bloquePrecioAntes(p);
           }
           if(tiendaFormatoCuota==='comparativo'){
