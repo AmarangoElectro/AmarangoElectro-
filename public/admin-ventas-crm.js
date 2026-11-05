@@ -36,9 +36,15 @@ function initStyle(){
  '.ae-crm-sale-label{display:block;margin:12px 0 4px;font-size:.74rem;font-weight:800;color:var(--txt)}',
  '.ae-crm-sale-input{box-sizing:border-box;width:100%;min-height:43px;border:1.5px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--txt);padding:10px;font-size:.87rem;font-family:inherit}',
  '.ae-crm-sale-input:focus-visible{outline:2px solid #ff7a00;outline-offset:1px}',
- '.ae-crm-sale-suggestions[hidden]{display:none!important}.ae-crm-sale-suggestions{max-height:174px;overflow-y:auto;border:1px solid var(--bor);border-radius:10px;margin-top:3px;background:var(--wh)}',
+ '.ae-crm-sale-suggestions[hidden]{display:none!important}.ae-crm-sale-suggestions{max-height:min(38dvh,340px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;border:1px solid var(--bor);border-radius:10px;margin-top:3px;background:var(--wh);scrollbar-width:thin}',
  '.ae-crm-sale-option{display:block;box-sizing:border-box;width:100%;text-align:left;padding:10px;border:0;border-bottom:1px solid var(--bor);background:transparent;color:var(--txt);font-family:inherit;font-size:.78rem;cursor:pointer}',
  '.ae-crm-sale-option:last-child{border-bottom:0}.ae-crm-sale-option:active{background:var(--bg)}',
+ '.ae-crm-sale-install-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;gap:8px;cursor:pointer;font-weight:800}',
+ '.ae-crm-sale-install-trigger:focus-visible{outline:2px solid #ff7a00;outline-offset:2px}',
+ '.ae-crm-sale-install-options[hidden]{display:none!important}.ae-crm-sale-install-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}',
+ '.ae-crm-sale-install-option{min-height:43px;padding:10px 7px;background:var(--wh);color:var(--txt);border:1px solid var(--bor);border-radius:10px;font-size:.78rem;font-weight:800;font-family:inherit;text-align:center;cursor:pointer}',
+ '.ae-crm-sale-install-option[aria-pressed="true"]{background:#fff0df;color:#8d4400;border-color:#ff7a00}',
+ 'body.oscuro .ae-crm-sale-install-option[aria-pressed="true"]{background:#4b301f;color:#ffd5a9;border-color:#ff9b42}',
  '.ae-crm-sale-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:16px}',
  '.ae-crm-sale-actions button{min-height:43px;border-radius:11px;border:1px solid var(--bor);font:inherit;font-weight:850;font-size:.8rem;cursor:pointer}',
  '.ae-crm-sale-save{background:#ff7a00;color:#fff;border-color:#ff7a00!important}.ae-crm-sale-cancel{background:var(--bg);color:var(--txt)}',
@@ -114,9 +120,9 @@ function open(id,card){
  'Se guarda como tarea pendiente para copiar y cargar en CRM. La venta no se registra automáticamente.'));
  var advisorInput=null;
  if(advisor){
-  var al=node('label','ae-crm-sale-label','Asesor que realizó la venta');
+  var al=node('label','ae-crm-sale-label','Nombre del asesor *');
   advisorInput=node('input','ae-crm-sale-input');
-  advisorInput.type='text';advisorInput.maxLength=100;advisorInput.value=advisorIdentity();
+  advisorInput.type='text';advisorInput.maxLength=100;advisorInput.required=true;advisorInput.autocomplete='name';advisorInput.value=advisorIdentity();
   advisorInput.placeholder='Tu nombre de asesor';al.appendChild(advisorInput);box.appendChild(al);
  }
 
@@ -129,11 +135,39 @@ function open(id,card){
   'Consultando clientes del CRM...');
  box.appendChild(clientMessage);
  var installmentLabel=node('label','ae-crm-sale-label','¿En cuántas cuotas se vendió?');
- var select=node('select','ae-crm-sale-input');
- [['','Elegí las cuotas'],['1','Contado (1 pago)'],['3','3 cuotas'],['6','6 cuotas'],['12','12 cuotas'],['other','Otro número']].forEach(function(a){var opt=node('option','',a[1]);opt.value=a[0];select.appendChild(opt)});
- installmentLabel.appendChild(select);box.appendChild(installmentLabel);
- var other=node('input','ae-crm-sale-input');other.type='number';other.min='1';other.max='60';other.step='1';other.placeholder='Cantidad de cuotas (1 a 60)';other.hidden=true;other.style.marginTop='7px';box.appendChild(other);
- select.addEventListener('change',function(){other.hidden=select.value!=='other';if(!other.hidden)other.focus();});
+ box.appendChild(installmentLabel);
+ // Selector propio dentro de este formulario: evita el selector global del catálogo.
+ var selectedInstallments='';
+ var installOptions=node('div','ae-crm-sale-install-options');
+ installOptions.hidden=true;
+ installOptions.setAttribute('role','group');
+ installOptions.setAttribute('aria-label','Opciones de pago');
+ var installTrigger=button('Elegí las cuotas',function(){
+  installOptions.hidden=!installOptions.hidden;
+  installTrigger.setAttribute('aria-expanded',String(!installOptions.hidden));
+ },'ae-crm-sale-input ae-crm-sale-install-trigger');
+ installTrigger.setAttribute('aria-haspopup','true');
+ installTrigger.setAttribute('aria-expanded','false');
+ var other=node('input','ae-crm-sale-input');
+ other.type='number';other.min='1';other.max='60';other.step='1';
+ other.inputMode='numeric';other.placeholder='¿Cuántas cuotas? (1 a 60)';
+ other.hidden=true;other.style.marginTop='7px';
+ [['1','Contado'],['2','2 cuotas'],['3','3 cuotas'],['4','4 cuotas'],['6','6 cuotas'],['other','Más cuotas']].forEach(function(opt){
+  var choose=button(opt[1],function(){
+   selectedInstallments=opt[0];
+   installTrigger.textContent=opt[0]==='other'?'Más cuotas: indicar cantidad':opt[1];
+   installOptions.hidden=true;
+   installTrigger.setAttribute('aria-expanded','false');
+   installOptions.querySelectorAll('.ae-crm-sale-install-option').forEach(function(b){
+    b.setAttribute('aria-pressed',String(b===choose));
+   });
+   other.hidden=opt[0]!=='other';
+   if(!other.hidden)other.focus();
+  },'ae-crm-sale-install-option');
+  choose.setAttribute('aria-pressed','false');
+  installOptions.appendChild(choose);
+ });
+ box.appendChild(installTrigger);box.appendChild(installOptions);box.appendChild(other);
  var notesLabel=node('label','ae-crm-sale-label','Observaciones (opcional)');
  var notes=node('textarea','ae-crm-sale-input');notes.rows=2;notes.maxLength=140;notes.placeholder='Ej.: entrega a coordinar';notesLabel.appendChild(notes);box.appendChild(notesLabel);
  var issue=node('p','ae-crm-sale-info','');issue.setAttribute('aria-live','polite');box.appendChild(issue);
@@ -141,13 +175,14 @@ function open(id,card){
  actions.appendChild(button('Cancelar',close,'ae-crm-sale-cancel'));
  var save=button('✅ Guardar pendiente',function(){saveDraft();},'ae-crm-sale-save');actions.appendChild(save);box.appendChild(actions);
  overlay.appendChild(box);
- var selected=null,activeList=[],loaded=false,disposed=false;
+ var selected=null,loaded=false;
  function filter(){
   if(overlay.hidden||!box.isConnected)return;
   suggestions.replaceChildren();
-  var q=norm(input.value),hits=q?clients.filter(function(c){return norm(clientName(c)).includes(q)||String(c.num||'').includes(q)}).slice(0,9):clients.slice(0,5);
-  activeList=hits;
+  // Mostrar la lista completa ordenada, sin recortar resultados; se desliza dentro del panel.
+  var q=norm(input.value),hits=q?clients.filter(function(c){return norm(clientName(c)).includes(q)||String(c.num||'').includes(q)||String(c.telefono||'').includes(q)}):clients.slice();
   if(!loaded||!hits.length){suggestions.hidden=true;return;}
+  suggestions.scrollTop=0;
   hits.forEach(function(c){
    var option=button(clientLabel(c),function(){
     selected=c;input.value=clientName(c);suggestions.hidden=true;
@@ -166,9 +201,9 @@ function open(id,card){
  async function saveDraft(){
   if(!hasSaleAccess()||advisor!==isAdvisor())return;
   var name=input.value.trim().replace(/\s+/g,' ');
-  var count=Number(select.value==='other'?other.value:select.value);
+  var count=Number(selectedInstallments==='other'?other.value:selectedInstallments);
   if(name.length<2){issue.textContent='Ingresá el nombre del cliente.';input.focus();return;}
-  if(!Number.isInteger(count)||count<1||count>60){issue.textContent='Elegí una cantidad válida de cuotas.';select.focus();return;}
+  if(!Number.isInteger(count)||count<1||count>60){issue.textContent='Elegí una cantidad válida de cuotas.';(selectedInstallments==='other'?other:installTrigger).focus();return;}
   issue.textContent='';save.disabled=true;
   if(advisor){
    var who=advisorInput&&advisorInput.value.trim().replace(/\s+/g,' ');
@@ -185,6 +220,7 @@ function open(id,card){
    try{
     var response=await api.from('ae_advisor_sale_submissions').insert(payload);
     if(response.error)throw response.error;
+    try{localStorage.setItem('ae_nombre_asesor',who.slice(0,100));}catch(e){}
     close();
     notify('✅ Venta informada. Quedó pendiente para Administración.');
    }catch(err){
