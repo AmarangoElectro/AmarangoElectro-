@@ -14,7 +14,7 @@ function ready(){return active;}
 function state(){return active?'ready':auth?'offline':'auth';}
 function toRow(t){
  var due=t.dueAt?new Date(t.dueAt):null,created=new Date(t.createdAt||Date.now());
- return {id:t.id,title:String(t.title||'').slice(0,180),note:String(t.note||'').slice(0,500),
+ return {id:t.id,title:String(t.title||'').slice(0,180),note:String(t.note||'').slice(0,1600),
   product_id:t.productId||null,product_name:t.productName||null,stage:t.stage,
   due_at:due&&!Number.isNaN(due.getTime())?due.toISOString():null,
   created_at:created.toISOString()};
