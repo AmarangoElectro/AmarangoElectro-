@@ -451,8 +451,28 @@ function open(id,card){
    localidadEntrega:locality,ubicacionMaps:mapUrl,precisionGps:deliveryAccuracy});
   if(!res||!res.ok){issue.textContent='⚠️ '+(res&&res.error||'No se pudo guardar la tarea');save.disabled=false;return;}
   rememberDelivery(name,customerMobile,{alternative:phone,map:mapUrl,address:address,cross:cross,locality:locality,mode:deliveryMode});
-  close();queueScan();notify(createError?'🧾 Venta pendiente guardada. Cliente aún pendiente de alta en CRM.':'🧾 Venta pendiente guardada en Tareas.');
+  // Copia persistente entre dispositivos de Administración, bajo RLS.
+  // Si falla, la tarea de venta ya guardada conserva igualmente los datos.
+  var profileWarning='';
+  try{
+   var secure=window.sbFotos;
+   if(!secure||!secure.auth)throw Error('Sin sesión administrativa');
+   var session=await secure.auth.getSession();
+   if(!session||!session.data||!session.data.session)throw Error('Sin sesión administrativa');
+   var profile={
+    client_key:customerDeliveryKey(name,customerMobile),
+    customer_name:name.slice(0,120),customer_phone:customerMobile,
+    alternate_phone:phone||null,maps_url:mapUrl||null,
+    street_address:address||null,cross_streets:cross||null,
+    locality:locality||null,updated_at:new Date().toISOString()
+   };
+   var store=await secure.from('ae_customer_delivery_profiles').upsert(profile,{onConflict:'client_key'});
+   if(store.error)throw store.error;
+  }catch(e){profileWarning=' · El domicilio quedó en la tarea, pero no se sincronizó con el historial de clientes.';}
+  close();queueScan();notify((createError?'🧾 Venta pendiente guardada. Cliente aún pendiente de alta en CRM.':'🧾 Venta pendiente guardada en Tareas.')+profileWarning);
   if(focus&&focus.isConnected)focus.focus();
+  return;
+
  }
  setTimeout(function(){if(!overlay.hidden)input.focus();},0);
 }
