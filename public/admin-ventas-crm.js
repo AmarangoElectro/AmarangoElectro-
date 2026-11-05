@@ -50,12 +50,22 @@ function initStyle(){
  '.ae-crm-sale-suggestions[hidden]{display:none!important}.ae-crm-sale-suggestions{max-height:min(38dvh,340px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;border:1px solid var(--bor);border-radius:10px;margin-top:3px;background:var(--wh);scrollbar-width:thin}',
  '.ae-crm-sale-option{display:block;box-sizing:border-box;width:100%;text-align:left;padding:10px;border:0;border-bottom:1px solid var(--bor);background:transparent;color:var(--txt);font-family:inherit;font-size:.78rem;cursor:pointer}',
  '.ae-crm-sale-option:last-child{border-bottom:0}.ae-crm-sale-option:active{background:var(--bg)}',
- '.ae-crm-sale-install-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;text-align:left;gap:8px;cursor:pointer;font-weight:800}',
- '.ae-crm-sale-install-trigger:focus-visible{outline:2px solid #ff7a00;outline-offset:2px}',
- '.ae-crm-sale-install-options[hidden]{display:none!important}.ae-crm-sale-install-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}',
- '.ae-crm-sale-install-option{min-height:43px;padding:10px 7px;background:var(--wh);color:var(--txt);border:1px solid var(--bor);border-radius:10px;font-size:.78rem;font-weight:800;font-family:inherit;text-align:center;cursor:pointer}',
- '.ae-crm-sale-install-option[aria-pressed="true"]{background:#fff0df;color:#8d4400;border-color:#ff7a00}',
- 'body.oscuro .ae-crm-sale-install-option[aria-pressed="true"]{background:#4b301f;color:#ffd5a9;border-color:#ff9b42}',
+ '.ae-crm-sale-install-heading{font-size:.88rem;font-weight:900;letter-spacing:-.025em;margin-top:16px;margin-bottom:4px;color:var(--az)}',
+ '.ae-crm-sale-install-help{font-size:.69rem;color:var(--sub);line-height:1.45;margin:0 0 10px}',
+ '.ae-crm-sale-install-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 9px}',
+ '.ae-crm-sale-install-option{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:77px;padding:10px 4px;gap:2px;border:1.5px solid #d7e0ec;border-radius:13px;background:#f8fafc;color:#183b68;font-family:Inter,system-ui,sans-serif;cursor:pointer;transition:border-color .12s,background .12s,box-shadow .12s}',
+ '.ae-crm-sale-install-number{font-size:1.45rem;font-weight:900;letter-spacing:-.055em;line-height:1.1;font-variant-numeric:tabular-nums}',
+ '.ae-crm-sale-install-name{font-size:.64rem;font-weight:800;letter-spacing:-.01em;line-height:1.2}',
+ '.ae-crm-sale-install-option[aria-pressed="true"]{background:#fff0dd;border:2px solid #ff7a00;color:#903d02;box-shadow:0 0 0 2px rgba(255,122,0,.11)}',
+ '.ae-crm-sale-install-option:focus-visible{outline:3px solid #0a4fbf;outline-offset:2px}',
+ '.ae-crm-sale-install-selection{min-height:20px;margin:2px 0 4px;color:var(--sub);font-size:.69rem;font-weight:750}',
+ '.ae-crm-sale-install-custom{margin:3px 0 9px;font-size:16px!important}',
+ '.ae-crm-sale-install-custom[hidden]{display:none!important}',
+ 'body.oscuro .ae-crm-sale-install-option{background:#2d2521;border-color:#6a5145;color:#f6e9df}',
+ 'body.oscuro .ae-crm-sale-install-option[aria-pressed="true"]{background:#56321d;border-color:#ff932c;color:#ffdbb4}',
+ 'body.oscuro .ae-crm-sale-install-selection{color:#d4baac}',
+ '@media(max-width:340px){.ae-crm-sale-install-options{grid-template-columns:repeat(2,minmax(0,1fr))}}',
+ '@media(prefers-reduced-motion:reduce){.ae-crm-sale-install-option{transition:none}}',
  '.ae-crm-sale-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:8px;margin-top:16px}',
  '.ae-crm-sale-actions button{min-height:43px;border-radius:11px;border:1px solid var(--bor);font:inherit;font-weight:850;font-size:.8rem;cursor:pointer}',
  '.ae-crm-sale-save{background:#ff7a00;color:#fff;border-color:#ff7a00!important}.ae-crm-sale-cancel{background:var(--bg);color:var(--txt)}',
@@ -148,40 +158,45 @@ function open(id,card){
   'Administración confirmará o dará de alta al cliente en CRM. Los datos del CRM no se muestran a asesores.':
   'Consultando clientes del CRM...');
  box.appendChild(clientMessage);
- var installmentLabel=node('label','ae-crm-sale-label','¿En cuántas cuotas se vendió?');
- box.appendChild(installmentLabel);
- // Selector propio dentro de este formulario: evita el selector global del catálogo.
+ var installmentLabel=node('div','ae-crm-sale-label ae-crm-sale-install-heading','¿Cómo se pagó esta venta?');
+ installmentLabel.id='ae-crm-sale-install-label';box.appendChild(installmentLabel);
+ box.appendChild(node('p','ae-crm-sale-install-help','Elegí la cantidad de cuotas. Tocá una opción para seleccionarla.'));
+ // Opciones visibles: accesibles con un toque, sin abrir otro menú.
+ // Se conserva la equivalencia Contado=1 y Más cuotas=1..60 para el CRM.
  var selectedInstallments='';
  var installOptions=node('div','ae-crm-sale-install-options');
- installOptions.hidden=true;
  installOptions.setAttribute('role','group');
- installOptions.setAttribute('aria-label','Opciones de pago');
- var installTrigger=button('Elegí las cuotas',function(){
-  installOptions.hidden=!installOptions.hidden;
-  installTrigger.setAttribute('aria-expanded',String(!installOptions.hidden));
- },'ae-crm-sale-input ae-crm-sale-install-trigger');
- installTrigger.setAttribute('aria-haspopup','true');
- installTrigger.setAttribute('aria-expanded','false');
- var other=node('input','ae-crm-sale-input');
+ installOptions.setAttribute('aria-labelledby',installmentLabel.id);
+ var selectionSummary=node('p','ae-crm-sale-install-selection','Seleccioná una opción para continuar.');
+ selectionSummary.setAttribute('aria-live','polite');
+ var other=node('input','ae-crm-sale-input ae-crm-sale-install-custom');
  other.type='number';other.min='1';other.max='60';other.step='1';
- other.inputMode='numeric';other.placeholder='¿Cuántas cuotas? (1 a 60)';
- other.hidden=true;other.style.marginTop='7px';
- [['1','Contado'],['2','2 cuotas'],['3','3 cuotas'],['4','4 cuotas'],['6','6 cuotas'],['other','Más cuotas']].forEach(function(opt){
-  var choose=button(opt[1],function(){
+ other.inputMode='numeric';other.placeholder='Escribí la cantidad de cuotas (1 a 60)';
+ other.setAttribute('aria-label','Cantidad personalizada de cuotas');
+ other.hidden=true;
+ var buttons=[];
+ [['1','1','Contado'],['2','2','cuotas'],['3','3','cuotas'],['4','4','cuotas'],['6','6','cuotas'],['other','+','Más cuotas']].forEach(function(opt){
+  var choose=button('',function(){
    selectedInstallments=opt[0];
-   installTrigger.textContent=opt[0]==='other'?'Más cuotas: indicar cantidad':opt[1];
-   installOptions.hidden=true;
-   installTrigger.setAttribute('aria-expanded','false');
-   installOptions.querySelectorAll('.ae-crm-sale-install-option').forEach(function(b){
-    b.setAttribute('aria-pressed',String(b===choose));
-   });
+   buttons.forEach(function(b){b.setAttribute('aria-pressed',String(b===choose));});
    other.hidden=opt[0]!=='other';
+   selectionSummary.textContent=opt[0]==='other'?'Elegí cuántas cuotas querés registrar.':
+    opt[0]==='1'?'✓ Seleccionaste: Contado (un pago)':'✓ Seleccionaste: '+opt[0]+' cuotas';
    if(!other.hidden)other.focus();
   },'ae-crm-sale-install-option');
+  choose.type='button';
   choose.setAttribute('aria-pressed','false');
-  installOptions.appendChild(choose);
+  choose.setAttribute('aria-label',opt[0]==='1'?'Contado, un pago':opt[0]==='other'?'Más cuotas':opt[0]+' cuotas');
+  choose.appendChild(node('span','ae-crm-sale-install-number',opt[1]));
+  choose.appendChild(node('span','ae-crm-sale-install-name',opt[2]));
+  buttons.push(choose);installOptions.appendChild(choose);
  });
- box.appendChild(installTrigger);box.appendChild(installOptions);box.appendChild(other);
+ other.addEventListener('input',function(){
+  var v=Number(other.value);
+  selectionSummary.textContent=Number.isInteger(v)&&v>=1&&v<=60?
+   '✓ Seleccionaste: '+v+' cuotas':'Ingresá una cantidad entre 1 y 60 cuotas.';
+ });
+ box.appendChild(installOptions);box.appendChild(other);box.appendChild(selectionSummary);
  // Logística: dato de contacto y dirección de entrega. La ubicación sólo se
  // obtiene al tocar el botón, nunca automáticamente al abrir el formulario.
  box.appendChild(node('div','ae-crm-sale-delivery-title','🚚 Datos para la entrega'));
@@ -258,7 +273,7 @@ function open(id,card){
   var name=input.value.trim().replace(/\s+/g,' ');
   var count=Number(selectedInstallments==='other'?other.value:selectedInstallments);
   if(name.length<2){issue.textContent='Ingresá el nombre del cliente.';input.focus();return;}
-  if(!Number.isInteger(count)||count<1||count>60){issue.textContent='Elegí una cantidad válida de cuotas.';(selectedInstallments==='other'?other:installTrigger).focus();return;}
+  if(!Number.isInteger(count)||count<1||count>60){issue.textContent='Elegí una cantidad válida de cuotas.';(selectedInstallments==='other'?other:buttons[0]).focus();return;}
   var phone=deliveryPhone.value.trim(),address=deliveryAddress.value.trim();
   var cross=deliveryCross.value.trim(),locality=deliveryLocality.value.trim();
   var mapUrl=deliveryMap.value.trim();
