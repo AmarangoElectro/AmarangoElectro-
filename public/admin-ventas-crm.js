@@ -7,7 +7,13 @@
 var clients=[],listReady=false,clientApi=null,overlay=null,scanTimer=0,rootObserver=null;
 var STYLE_ID='ae-crm-sale-style-20261104';
 function isAdmin(){return window.tiendaEsAdmin===true&&window.vistaPreviaCliente!==true&&window.vistaPreviaAsesor!==true;}
-function isAdvisor(){return !isAdmin()&&window.adminUnlocked!==true&&window.revUnlocked===true&&window.vistaPreviaCliente!==true&&window.vistaPreviaAsesor!==true;}
+function isAdvisor(){
+ // "Ver como asesor" funciona desde una sesión admin. Debe mostrar las
+ // herramientas del asesor, SIN permitir acceder al CRM ni a las tareas admin.
+ if(window.vistaPreviaCliente===true)return false;
+ if(window.vistaPreviaAsesor===true)return true;
+ return window.tiendaEsAdmin!==true&&window.adminUnlocked!==true&&window.revUnlocked===true;
+}
 function hasSaleAccess(){return isAdmin()||isAdvisor();}
 function advisorIdentity(){
  var name='';
@@ -26,6 +32,8 @@ function initStyle(){
  css.textContent=[
  '.ae-crm-sale-trigger{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;min-height:33px;padding:6px 8px;margin:3px 0 5px;border-radius:9px;border:1px solid #8dc9a0;background:#eef9f2;color:#176333;font-family:inherit;font-size:.69rem;font-weight:850;cursor:pointer}',
  '.ae-crm-sale-trigger:focus-visible{outline:2px solid #ff7a00;outline-offset:2px}',
+ '#tienda-grid .prod-card > .ae-crm-sale-trigger{flex-shrink:0;align-self:stretch;box-sizing:border-box;margin-top:8px;margin-bottom:6px;order:0}',
+ 'body.oscuro #tienda-grid .prod-card > .ae-crm-sale-trigger{box-shadow:0 1px 8px rgba(0,0,0,.18)}',
  'body.oscuro .ae-crm-sale-trigger{background:#19382d;border-color:#367353;color:#bbf3cc}',
  '.ae-crm-sale-trigger.ae-crm-sale-pending{border-color:#f4b45e;background:#fff1d9;color:#815017}',
  'body.oscuro .ae-crm-sale-trigger.ae-crm-sale-pending{background:#413024;border-color:#c48c51;color:#ffd39d}',
@@ -277,7 +285,10 @@ function inject(){
   }
   var id=card.id.slice(5);
   var target=isAdvisor()?
-    (card.querySelector('.prod-precio')||card.querySelector('.prod-nombre')||card.querySelector('.prod-info')||card.querySelector('.prod-foto')):
+    // La fila que contiene el título es display:flex: insertar dentro de ella
+    // comprimía el botón. Insertar DESPUÉS de la fila, a ancho completo.
+    ((card.querySelector('.prod-nombre')&&card.querySelector('.prod-nombre').parentElement)
+      ||card.querySelector('.prod-foto')||card.lastElementChild):
     (card.querySelector('.ae-task-pin')||card.querySelector('.ae-admin-cost-inline')||card.querySelector('.ae-admin-quickbar'));
   if(!target||!id)return;
   var b=button(isAdvisor()?'✅ Informar venta':'✅ Venta',function(e){e.preventDefault();e.stopPropagation();open(id,card);},'ae-crm-sale-trigger');
