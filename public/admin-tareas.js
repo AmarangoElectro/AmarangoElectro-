@@ -460,6 +460,9 @@ function start(){
  setTimeout(function(){if(mailEnabled)queueMailSync();},1800);
  timer=setInterval(function(){scheduleScan();remind();sharedSync();if(mailEnabled&&Date.now()-mailLastSync>120000)queueMailSync()},30000);
 }
-window.AEAdminTasks={createCrmDraft:createCrmDraft,openPanel:openPanel,refresh:refresh};
+function crmDraftCount(productId){
+ return tasks.filter(function(t){return isCrmDraft(t)&&t.stage!=='completada'&&String(t.productId||'')===String(productId||'')}).length;
+}
+window.AEAdminTasks={createCrmDraft:createCrmDraft,openPanel:openPanel,refresh:refresh,crmDraftCount:crmDraftCount};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
