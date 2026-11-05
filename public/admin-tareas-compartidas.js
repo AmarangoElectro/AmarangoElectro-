@@ -44,6 +44,22 @@ async function sync(force){
  try{
   var remote=await call('list',{});
   if(!Array.isArray(remote))throw Error('Lista compartida no disponible');
+  // Traer avisos de venta de asesores como tareas privadas. El RPC en servidor
+  // verifica rol de Administración y usa IDs estables para evitar duplicados.
+  try{
+   var incomingClient=client();
+   if(incomingClient){
+    var importResult=await incomingClient.rpc('ae_admin_ingest_advisor_sales');
+    if(importResult.error)throw importResult.error;
+    if(importResult.data&&Number(importResult.data.imported)>0){
+     remote=await call('list',{});
+     if(!Array.isArray(remote))throw Error('No se pudo actualizar la lista de ventas');
+     report('🧾 '+Number(importResult.data.imported)+' venta(s) de asesores pendiente(s) para revisar');
+    }
+   }
+  }catch(ingestError){
+   console.warn('Avisos de venta de asesores todavía no importados:',String(ingestError.message||ingestError).slice(0,140));
+  }
   var remoteIds=new Set(remote.map(function(t){return t.id;}));
   var local=hooks.get(),toImport=local.filter(function(t){
     return t&&typeof t.id==='string'&&!remoteIds.has(t.id)&&!known[t.id];
