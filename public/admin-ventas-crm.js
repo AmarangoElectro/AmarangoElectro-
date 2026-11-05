@@ -464,7 +464,8 @@ function open(id,card){
     customer_name:name.slice(0,120),customer_phone:customerMobile,
     alternate_phone:phone||null,maps_url:mapUrl||null,
     street_address:address||null,cross_streets:cross||null,
-    locality:locality||null,updated_at:new Date().toISOString()
+    locality:locality||null,updated_at:new Date().toISOString(),
+    verified_at:new Date().toISOString()
    };
    var store=await secure.from('ae_customer_delivery_profiles').upsert(profile,{onConflict:'client_key'});
    if(store.error)throw store.error;
