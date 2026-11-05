@@ -1123,6 +1123,25 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 #tienda-grid .prod-card .ae-admin-quickbar>.ae-admin-quickbar>.prod-ampliar-btn{display:none!important}
 #tienda-grid .prod-card .ae-admin-quickbar{row-gap:5px!important;gap:5px!important}
 #tienda-grid .prod-card .ae-share-social-row{margin:0 0 4px!important;gap:6px!important}
+
+/* Botones sociales de marca: SOLO Administración en modo claro.
+   Mantener los colores vigentes del modo oscuro. */
+body:not(.oscuro) #tienda-grid.ae-admin-v16-visual .prod-card .ae-share-social-row > button[title="Compartir por WhatsApp"] {
+  background:#25D366!important;
+  background-image:none!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  border:1px solid #1EA952!important;
+  box-shadow:0 3px 9px rgba(37,211,102,.16)!important;
+}
+body:not(.oscuro) #tienda-grid.ae-admin-v16-visual .prod-card .ae-share-social-row > button[title="Compartir en Instagram"] {
+  background:linear-gradient(110deg,#833AB4 0%,#C13584 27%,#E1306C 50%,#FD1D1D 68%,#F77737 85%,#FCAF45 100%)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  border:1px solid #C13584!important;
+  box-shadow:0 3px 9px rgba(193,53,132,.16)!important;
+}
+
 #tienda-grid .prod-card .ae-admin-quickbar>details{margin-bottom:3px!important}
 #tienda-grid .prod-card .ae-admin-edit-actions{margin-bottom:3px!important;gap:5px!important}
 </style>
