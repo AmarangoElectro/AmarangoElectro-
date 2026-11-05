@@ -196,12 +196,13 @@ function inject(){
   if(!shareRow)return;
   var id=card.id.slice(5);if(!id)return;
   var p=product(id);if(!p||!quote(p,10))return;
-  var b=button('🏷️ Compartir con −10% o −15%',function(e){
+  var b=button('🏷️ Enviar con descuento (10% o 15%)',function(e){
    e.preventDefault();e.stopPropagation();open(id);
   },'ae-admin-discount-entry');
   b.title='Enviar esta ficha con descuento privado del 10% o 15%';
   b.setAttribute('aria-label','Compartir '+String(p.nombre||'producto')+' con 10 o 15 por ciento de descuento');
-  shareRow.insertAdjacentElement('afterend',b);
+  // Última opción visible de la tarjeta; debajo de todas las herramientas de administración.
+  card.appendChild(b);
  });
 }
 function schedule(){
