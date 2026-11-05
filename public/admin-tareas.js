@@ -67,6 +67,8 @@ function ensure(){
    '.ae-task-mini{color:var(--sub);font-size:.69rem;line-height:1.45;margin:6px 0}.ae-task-label{display:block;font-weight:750;font-size:.75rem;margin-top:10px}',
    '.ae-task-input{display:block;width:100%;background:var(--bg);color:var(--txt);border:1px solid var(--bor);border-radius:10px;padding:11px;margin-top:4px;font:inherit;font-size:.85rem}',
    '.ae-task-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.ae-task-action{padding:8px 11px;border:1px solid var(--bor);border-radius:9px;background:var(--bg);color:var(--az);font-weight:800;font-size:.74rem;cursor:pointer}',
+   '.ae-task-action.ae-task-danger{color:#b42525;border-color:#e6b2b2;background:#fff2f2}',
+   'body.oscuro .ae-task-action.ae-task-danger{background:#411f1f;border-color:#934949;color:#ffd5d5}',
    '.ae-task-action.ae-task-primary{background:#ff7a00;border-color:#ff7a00;color:#fff}.ae-task-item{border:1px solid var(--bor);border-radius:12px;padding:11px;margin:8px 0;background:var(--bg)}',
    '.ae-task-item strong{display:block;overflow-wrap:anywhere}.ae-task-item.due{border-color:#ff7a00}.ae-task-note{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.77rem;margin-top:5px}',
    '.ae-task-step-done{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 11px;border:1px solid #8acc96;border-radius:9px;background:#eaf8ee;color:#17602c;font-size:.74rem;font-weight:850;white-space:nowrap}',
@@ -194,7 +196,16 @@ function mailInfo(){
 
 function shared(){return window.AEAdminSharedTasks||null}
 function sharedSync(force){var s=shared();if(s)s.sync(!!force);}
-function sharedChange(action,payload){var s=shared();if(s)s.change(action,payload);}
+function sharedChange(action,payload){var s=shared();return s?s.change(action,payload):Promise.resolve(false);}
+function canModifyShared(t){
+ var s=shared();return !!(admin()&&s&&s.ready()&&t&&t.updatedAtIso);
+}
+function requireTaskOnline(t){
+ if(canModifyShared(t))return true;
+ if(typeof window.mostrarToast==='function')window.mostrarToast('⚠️ Conectá las tareas compartidas y tocá Actualizar para editar o borrar.');
+ else alert('Conectá las tareas compartidas y actualizá antes de editar o borrar.');
+ sharedSync(true);return false;
+}
 function summary(){return {pending:tasks.filter(function(t){return t.stage!=='completada'}).length,late:tasks.filter(due).length}}
 function addBell(){
  var bar=document.getElementById('ae-admin-atajos');if(!bar)return;
@@ -315,12 +326,55 @@ function createCrmDraft(data){
  refresh();openPanel();
  return {ok:true,id:task.id};
 }
-function deleteFinishedTask(t){
- taskConfirm({symbol:'🗑️',title:'Eliminar del historial',message:'¿Eliminar definitivamente la tarea finalizada "'+t.title+'"?',actionLabel:'Eliminar',onAccept:function(){
-  var existing=tasks.some(function(item){return item.id===t.id&&item.stage==='completada';});if(!existing)return;
-  var old=tasks;tasks=tasks.filter(function(item){return item.id!==t.id;});
-  if(!write()){tasks=old;return;}sharedChange('delete',{id:t.id});refresh();openPanel();
- }});
+function deleteTask(t){
+ if(!admin()||!requireTaskOnline(t))return;
+ var isSale=isCrmDraft(t);
+ taskConfirm({symbol:'🗑️',title:'Eliminar tarea',message:(isSale?
+  '¿Eliminar la tarea de venta pendiente "'+t.title+'"? El aviso original no volverá a generarla y no se modificará el CRM.':
+  '¿Eliminar la tarea "'+t.title+'" de Maxi y Angie? No volverá a aparecer en las tareas compartidas.'),
+  actionLabel:'🗑️ Sí, eliminar',onAccept:async function(){
+   if(!admin()||!requireTaskOnline(t))return;
+   var ok=await sharedChange('delete',{id:t.id,expected_updated_at:t.updatedAtIso});
+   if(ok){
+    tasks=tasks.filter(function(item){return item.id!==t.id});
+    write();refresh();
+    if(typeof window.mostrarToast==='function')window.mostrarToast('🗑️ Tarea eliminada de la lista compartida');
+   }else if(typeof window.mostrarToast==='function')window.mostrarToast('⚠️ No se eliminó. Revisá la conexión e intentá de nuevo.');
+   sharedSync(true);
+  }});
+}
+function editTask(t){
+ if(!admin()||!requireTaskOnline(t))return;
+ ensure();panel.hidden=true;form.hidden=false;form.replaceChildren();
+ var box=el('div','ae-task-dialog');box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','Editar tarea');
+ var head=el('div','ae-task-head');head.appendChild(el('h2','','✏️ Editar tarea'));
+ head.appendChild(btn('✕',function(){form.hidden=true;openPanel();},'ae-task-action'));box.appendChild(head);
+ function field(label,tag,value,max){
+  var holder=el('label','ae-task-label',label),input=el(tag,'ae-task-input');
+  if(tag==='input')input.type='text';input.value=value||'';input.maxLength=max;holder.appendChild(input);box.appendChild(holder);return input;
+ }
+ var title=field('Nombre de la tarea','input',t.title,180);
+ var note=field('Notas, cliente o indicaciones','textarea',t.note,1600);note.rows=5;
+ var when=taskDatePicker(t.dueAt);box.appendChild(when.element);
+ var info=el('p','ae-task-mini','Los cambios se guardan para Maxi y Angie, sin alterar el catálogo, los productos ni el CRM.');box.appendChild(info);
+ var actions=el('div','ae-task-actions');
+ var save=btn('✅ Guardar cambios',async function(){
+  if(!admin()||!requireTaskOnline(t))return;
+  var n=title.value.trim(),memo=note.value.trim(),due=when.getValue();
+  if(!n||n.length>180){title.focus();return;}
+  if(isCrmDraft(t)&&n.indexOf('🧾 Venta CRM · ')!==0){
+   if(typeof window.mostrarToast==='function')window.mostrarToast('Conservá el prefijo de la tarea de venta CRM.');
+   title.focus();return;
+  }
+  save.disabled=true;
+  var payload={id:t.id,title:n,note:memo,due_at:due?new Date(due).toISOString():null,
+   expected_stage:t.stage,expected_updated_at:t.updatedAtIso};
+  var ok=await sharedChange('edit',payload);
+  if(ok){form.hidden=true;refresh();openPanel();if(typeof window.mostrarToast==='function')window.mostrarToast('✅ Tarea editada para todos los administradores');}
+  else{info.textContent='⚠️ No se guardaron los cambios. Puede que otro administrador haya editado esta tarea. Actualizá y volvé a intentarlo.';save.disabled=false;}
+ },'ae-task-action ae-task-primary');
+ actions.appendChild(save);actions.appendChild(btn('Cancelar',function(){form.hidden=true;openPanel();},'ae-task-action'));
+ box.appendChild(actions);form.appendChild(box);title.focus();
 }
 function renderPanel(){
  if(!panel||panel.hidden)return;
@@ -365,7 +419,9 @@ function renderPanel(){
    }else if(t.stage!=='completada'){
     line.appendChild(btn(isCrmDraft(t)?'✅ Cargada en CRM':'✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
    }
-   if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){deleteFinishedTask(t)},'ae-task-action'));
+   line.appendChild(btn('✏️ Editar',function(){editTask(t)},'ae-task-action'));
+   line.appendChild(btn('🗑️ Eliminar',function(){deleteTask(t)},'ae-task-action ae-task-danger'));
+
    item.appendChild(line);box.appendChild(item);
   });
  });
@@ -375,12 +431,20 @@ function renderPanel(){
 function openPanel(){if(!admin())return;ensure();if(form)form.hidden=true;panel.hidden=false;renderPanel();sharedSync(true);}
 
 /* Calendario Amarango propio: evita el selector nativo del sistema, que no respeta claro/oscuro. */
-function taskDatePicker(){
+function taskDatePicker(initialDue){
  var wrap=el('div','ae-task-date-picker'),caption=el('span','ae-task-label','Recordarme el día y hora (opcional)');
  var trigger=btn('📅 Elegir fecha y hora',function(){calendar.hidden=!calendar.hidden;trigger.setAttribute('aria-expanded',String(!calendar.hidden));if(!calendar.hidden)render();},'ae-task-date-trigger');
  trigger.setAttribute('aria-expanded','false');
  var calendar=el('div','ae-task-calendar');calendar.hidden=true;
  var month=new Date(),selected='',hour='09',minute='00';
+ if(initialDue){
+  var initial=new Date(initialDue);
+  if(!Number.isNaN(initial.getTime())){
+   month=new Date(initial.getFullYear(),initial.getMonth(),1);
+   selected=initial.getFullYear()+'-'+String(initial.getMonth()+1).padStart(2,'0')+'-'+String(initial.getDate()).padStart(2,'0');
+   hour=String(initial.getHours()).padStart(2,'0');minute=String(initial.getMinutes()).padStart(2,'0');
+  }
+ }
  month=new Date(month.getFullYear(),month.getMonth(),1);
  function pad(n){return String(n).padStart(2,'0');}
  function iso(y,m,d){return y+'-'+pad(m+1)+'-'+pad(d);}
