@@ -444,7 +444,7 @@ function remind(){if(!admin()||document.hidden)return;var eligible=tasks.filter(
  if('Notification'in window&&Notification.permission==='granted'){try{new Notification('🐝 AmarangoElectro · '+fresh.length+' tarea(s)',{body:fresh.slice(0,2).map(function(t){return t.title}).join(' · '),tag:'amarango-admin-tasks'});}catch(e){}}
  if(typeof window.mostrarToast==='function')window.mostrarToast('🔔 Tenés '+eligible.length+' tarea(s) para revisar. Abrí Tareas.');
 }
-function refresh(){addBell();updatePins();if(panel&&!panel.hidden)renderPanel();remind();}
+function refresh(){addBell();updatePins();if(panel&&!panel.hidden)renderPanel();remind();window.dispatchEvent(new Event('ae-admin-tasks-changed'));}
 function scan(){scanQueued=false;ensure();if(!admin()){close();var grid=document.getElementById('tienda-grid');if(grid)grid.querySelectorAll('.ae-task-pin').forEach(function(b){b.remove()});}addBell();addPins();}
 function scheduleScan(){if(scanQueued)return;scanQueued=true;setTimeout(scan,90);}
 function start(){
