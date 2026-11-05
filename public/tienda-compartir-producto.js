@@ -65,6 +65,13 @@
   }
   function ajustarCard(card){
     if(!card)return;
+    // Administración ya tiene WhatsApp e Instagram en la tarjeta.
+    // Evitar el botón flotante redundante que en móvil aparecía como un cuadrado.
+    if(window.tiendaEsAdmin===true && window.vistaPreviaCliente!==true && window.vistaPreviaAsesor!==true){
+      var extra=card.querySelector('.ae-share-product');
+      if(extra)extra.remove();
+      return;
+    }
     var zoom=buscarZoom(card);if(!zoom)return;
     var b=card.querySelector('.ae-share-product');
     if(!b){
