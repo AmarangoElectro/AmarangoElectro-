@@ -414,15 +414,22 @@
         var session=await tiendaAuthFotosSesion();
         if(!session||!session.user)throw new Error('Conectá la sesión segura de fotos.');
         if(!sbFotos)throw new Error('Sin conexión para cargar imágenes.');
+        p=buscarProd(p.id);
+        if(!p||p.eliminado===true)throw new Error('El producto ya no está disponible.');
         var extras=fotos.slice(),total=fotos.length+(video?1:0);
         if(extras.length&&!p.foto){
           estadoUpload('⏳ Subiendo portada · 1 de '+total+'…');
           var url=await subirObjeto(p,extras.shift(),'imagen');
+          // La sincronización puede sustituir el objeto del catálogo durante la subida.
+          var vigente=buscarProd(p.id);
+          if(!vigente||vigente.eliminado===true||vigente.foto)
+            throw new Error('El producto o su portada cambió durante la carga. Volvé a abrir su galería.');
+          p=vigente;
           var fotoAnterior=p.foto||'',marcaAnterior=p.estadoManualActualizado,
               fotoFechaAnterior=p.fotoActualizadaManual;
           p.foto=url;p.fotoActualizadaManual=Date.now();p.estadoManualActualizado=p.fotoActualizadaManual;
           try{
-            var guardado=await tiendaGuardarLocal();
+            var guardado=await tiendaGuardarLocal([p]);
             if(guardado&&guardado.error)throw guardado.error;
             await tiendaVerificarManualesNube([p.id],url);
           }catch(e){
@@ -444,7 +451,7 @@
         if(typeof tiendaRender==='function')tiendaRender();
         return true;
       }catch(e){
-        estadoUpload('⚠️ Carga multimedia incompleta: '+(p.nombre||'producto'),'error');
+        estadoUpload('⚠️ Carga multimedia incompleta: '+((p&&p.nombre)||'producto'),'error');
         aviso('⚠️ El producto quedó creado, pero alguna foto/video no se confirmó: '+(e.message||e));
         throw e;
       }finally{ocupado=false;}

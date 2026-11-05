@@ -5295,52 +5295,46 @@ function tiendaFusionarManualesPorVersion(manualesServidor, manualesLocales){
   });
   return Object.keys(porId).map(function(k){return porId[k];});
 }
-function tiendaSubirManualesNube(intento, manualesProtegidos){
-  if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
-  intento=Number(intento)||0;
-  var manualesLocal=(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
-  if(Array.isArray(manualesProtegidos) && manualesProtegidos.length){
-    manualesLocal=manualesLocal.concat(manualesProtegidos);
+async function tiendaLeerFilaManualesNube(){
+  if(!NUBE_OK||!sbCalc)throw new Error('Sin conexión a Supabase');
+  var lectura=await sbCalc.from('tienda_catalogo').select('datos,actualizado')
+    .eq('id',TIENDA_MANUALES_ID).maybeSingle();
+  if(lectura.error)throw lectura.error;
+  if(lectura.data&&!Array.isArray(lectura.data.datos))throw new Error('La nube devolvió un catálogo manual inválido');
+  return lectura.data;
+}
+
+async function tiendaSubirManualesNube(productos){
+  if(!NUBE_OK||!sbCalc){
+    if(productos)throw new Error('Sin conexión a Supabase');
+    return {data:null,error:null};
   }
-  return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
-    .then(function(res){
-      // Nunca interpretar un error de lectura como "no hay manuales". Ese
-      // comportamiento reemplazaba la fila por la copia parcial del equipo y
-      // podía borrar productos cargados desde otro celular o PC.
-      if(res&&res.error)throw res.error;
-      var manualesServidor=(res && !res.error && res.data && Array.isArray(res.data.datos))?res.data.datos:[];
-      var fusionado=tiendaFusionarManualesPorVersion(manualesServidor,manualesLocal);
-      return sbCalc.from('tienda_catalogo').upsert({
-        id:TIENDA_MANUALES_ID,
-        datos:fusionado,
-        actualizado:new Date().toISOString()
-      }).select('actualizado').then(function(guardado){
-        if(guardado&&guardado.error)throw guardado.error;
-        // Confirmar el conjunto completo, no sólo el producto recién tocado.
-        // Si dos equipos guardaron casi al mismo tiempo, reintentamos la unión
-        // para que la última escritura no pierda manuales de la otra.
-        return sbCalc.from('tienda_catalogo').select('datos').eq('id',TIENDA_MANUALES_ID).maybeSingle()
-          .then(function(verificacion){
-            if(verificacion&&verificacion.error)throw verificacion.error;
-            var confirmados=(verificacion&&verificacion.data&&Array.isArray(verificacion.data.datos))
-              ?verificacion.data.datos:[];
-            var porIdConfirmado={};
-            confirmados.forEach(function(p){if(p&&p.id!=null)porIdConfirmado[String(p.id)]=p;});
-            var faltan=fusionado.filter(function(p){
-              if(!p||p.id==null)return false;
-              var remoto=porIdConfirmado[String(p.id)];
-              return !remoto || tiendaMarcaTiempoProducto(remoto)<tiendaMarcaTiempoProducto(p);
-            });
-            if(faltan.length && intento<2){
-              return tiendaSubirManualesNube(intento+1,fusionado);
-            }
-            if(faltan.length){
-              throw new Error('La nube no confirmó el catálogo manual completo ('+faltan.length+' producto(s) pendientes)');
-            }
-            return guardado;
-          });
-      });
-    });
+  var manualesLocal=productos||(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
+  for(var intento=0;intento<5;intento++){
+    var fila=await tiendaLeerFilaManualesNube();
+    var manualesServidor=fila?fila.datos:[];
+    var fusionado=tiendaFusionarManualesPorVersion(manualesServidor,manualesLocal);
+    if(fila&&JSON.stringify(fusionado)===JSON.stringify(manualesServidor)){
+      return {data:[{actualizado:fila.actualizado}],error:null};
+    }
+    // La versión sólo cambia si nadie escribió desde que leímos. PostgreSQL
+    // comprueba el filtro al escribir, incluso si otra sesión tiene la fila bloqueada.
+    var versionAnterior=fila&&fila.actualizado;
+    var actualizado=new Date(Math.max(Date.now(),(Date.parse(versionAnterior)||0)+1)).toISOString();
+    var tabla=sbCalc.from('tienda_catalogo');
+    var escritura;
+    if(fila){
+      escritura=tabla.update({datos:fusionado,actualizado:actualizado}).eq('id',TIENDA_MANUALES_ID);
+      escritura=versionAnterior===null?escritura.is('actualizado',null):escritura.eq('actualizado',versionAnterior);
+    }else{
+      // En la primera carga otro equipo también puede estar creando esta fila.
+      escritura=tabla.upsert({id:TIENDA_MANUALES_ID,datos:fusionado,actualizado:actualizado},{onConflict:'id',ignoreDuplicates:true});
+    }
+    var guardado=await escritura.select('actualizado');
+    if(guardado.error)throw guardado.error;
+    if(guardado.data&&guardado.data.length===1)return guardado;
+  }
+  throw new Error('El catálogo cambió varias veces mientras guardabas. Volvé a intentar.');
 }
 function tiendaGuardarNubeLiviano(){
   if(!NUBE_OK||!sbCalc)return Promise.resolve({data:null,error:null});
@@ -5355,9 +5349,9 @@ function tiendaGuardarNubeLiviano(){
 // una solicitud vieja podía terminar última, pisando la confirmación nueva.
 // La cola conserva el orden y cada turno toma el estado más reciente.
 var _tiendaGuardadoNubeCola=Promise.resolve();
-function tiendaEncolarGuardadoNube(){
+function tiendaEncolarGuardadoNube(manuales){
   var turno=_tiendaGuardadoNubeCola.catch(function(){return null;}).then(function(){
-    return tiendaGuardarNubeLiviano();
+    return manuales?tiendaSubirManualesNube(manuales):tiendaGuardarNubeLiviano();
   }).then(function(r){
     if(r&&r.error)throw r.error;
     return r;
@@ -5426,7 +5420,7 @@ function tiendaBajarControlPublicacion(){
       }
       var finalizarDescarga=function(resultadoCambio){
         if(!manualesPendientesRecuperar.length||!manualesFusionadosDescarga)return Promise.resolve(resultadoCambio);
-        return tiendaSubirManualesNube(0,manualesFusionadosDescarga).then(function(){
+        return tiendaSubirManualesNube(manualesPendientesRecuperar).then(function(){
           console.info('Catálogo manual incompleto reparado desde la copia del administrador:',manualesPendientesRecuperar.length);
           return true;
         }).catch(function(errorRecuperacion){
@@ -6422,7 +6416,7 @@ function tiendaCargarLocal(){
   // compatibilidad: productos viejos sin campo "visible" se consideran visibles
   tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
 }
-function tiendaGuardarLocal(){
+function tiendaGuardarLocal(manuales){
   tiendaActualizarMotivosOcultos();
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
   try{ tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){}); }catch(e){}
@@ -6431,13 +6425,14 @@ function tiendaGuardarLocal(){
   // cancelaba esa operación por statement_timeout. Subimos solamente los
   // manuales y las decisiones administrativas de publicación.
   if(NUBE_OK && sbCalc){
-    var subida=tiendaEncolarGuardadoNube();
+    var subida=tiendaEncolarGuardadoNube(manuales);
     // La mayoría de los botones guardan sin bloquear la interfaz. Marcamos la
     // promesa como atendida, pero la devolvemos para las acciones (como fotos)
     // que necesitan confirmar que la nube terminó bien.
     subida.catch(function(){});
     return subida;
   }
+  if(manuales)return Promise.reject(new Error('Sin conexión a Supabase'));
   return Promise.resolve({data:null,error:null});
 }
 
@@ -13343,6 +13338,7 @@ function tiendaVerCuotas(id){
 // ---- carga de catálogo por pegado ----
 function tiendaAbrirCarga(){
   if(!tiendaExigirAdmin())return;
+  if(window._tiendaCargaManualEnCurso){mostrarToast('⏳ Ya se está guardando el producto…');return;}
   document.getElementById('modal-carga').style.display='block';
   setCargaModo('costo');  // arranca en modo Costo por defecto
   // 🏷️ llenar el selector con todas las categorías
@@ -13552,19 +13548,23 @@ function tiendaLimpiarDuplicados(){
   try{ tiendaRender(); }catch(e){}
   alert('✅ Listo!\n\n• Borré '+(antes-despues)+' duplicados\n• Quedaron '+despues+' productos\n\nSe guardó un backup por si necesitás volver atrás (🛟 Copias de seguridad).');
 }
+function tiendaNuevoIdManual(usados){
+  // Identificador numérico seguro para los botones antiguos, con 51 bits
+  // aleatorios para que dos dispositivos no generen el mismo lote de IDs.
+  var random=new Uint32Array(2);
+  var id;
+  do{
+    crypto.getRandomValues(random);
+    id=2251799813685248+(random[0]&0x7ffff)*4294967296+random[1];
+  }while(usados.has(String(id)));
+  usados.add(String(id));
+  return id;
+}
 async function tiendaProcesarCarga(){
  if(!tiendaExigirAdmin())return;
  if(window._tiendaCargaManualEnCurso){mostrarToast('⏳ Ya se está guardando el producto…');return;}
  window._tiendaCargaManualEnCurso=true;
  try{
-  // No crear sobre una copia local todavía incompleta. Antes el formulario
-  // cerraba y decía "Listo" aunque Supabase aún no estuviera disponible.
-  var sincronizada=await ((window._tiendaSincronizacionInicialPromesa&&typeof window._tiendaSincronizacionInicialPromesa.then==='function')
-    ?window._tiendaSincronizacionInicialPromesa:Promise.resolve(false));
-  if(!sincronizada||!NUBE_OK||!sbCalc){
-    alert('⚠️ La nube todavía no terminó de cargar. Esperá unos segundos y volvé a tocar Guardar.');
-    return;
-  }
   var adjuntosCarga=window.AECargaMultimedia?window.AECargaMultimedia.seleccion():{fotos:[],video:null};
   var hayAdjuntos=!!(adjuntosCarga.fotos.length||adjuntosCarga.video);
   if(hayAdjuntos){
@@ -13582,7 +13582,6 @@ async function tiendaProcesarCarga(){
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
   var esUSD=(cargaModo==='usd');
   var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
-  var reemplazar=false; // Seguridad: la carga manual nunca reemplaza el catálogo existente.
   // 🏷️ categoría y características (opcionales, se aplican a todos)
   var _cargaCat='', _cargaCarac='', _cargaMayorista='';
   try{
@@ -13595,20 +13594,7 @@ async function tiendaProcesarCarga(){
 
   var lineas=texto.split(/\r?\n/);
   var nuevos=[];
-  // Los proveedores usan también ids de texto. Math.max con uno de esos ids
-  // devolvía NaN y JSON lo convertía en null; dos cargas manuales podían
-  // terminar con el mismo id. Para manuales usamos sólo ids numéricos válidos.
-  var maxId=tiendaProductos.reduce(function(a,p){
-    var n=Number(p&&p.id);
-    return Number.isFinite(n) && n>0 ? Math.max(a,Math.floor(n)) : a;
-  },0);
-  // Cada dispositivo debe poder crear sin reutilizar el mismo ID que otro.
-  // Seguimos usando números para no romper botones históricos que esperan IDs
-  // numéricos, pero el valor combina tiempo y azar y es seguro en JavaScript.
-  maxId=Math.max(maxId,Date.now()*1000+Math.floor(Math.random()*1000));
   var descartadas=0;
-  var idsManualesTocados=[];
-  var primerProductoCarga=null;
 
   lineas.forEach(function(l){
     l=(l||'').trim(); if(!l)return;
@@ -13621,7 +13607,7 @@ async function tiendaProcesarCarga(){
     var nombre=(partes[0]||'').trim();
     var numRaw=(partes[1]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
     var num=parseFloat(numRaw);
-    if(isNaN(num)||num<=0||!nombre){ descartadas++; return; }
+    if(!Number.isFinite(num)||num<=0||!nombre){ descartadas++; return; }
 
     var costo, venta;
     if(cargaModo==='venta'){
@@ -13636,7 +13622,7 @@ async function tiendaProcesarCarga(){
     }
     var ahoraManual=Date.now();
     var _prod={
-      id:++maxId, nombre:nombre, costo:Math.round(costo), venta:venta,
+      nombre:nombre, costo:Math.round(costo), venta:venta,
       creado:ahoraManual, precioActualizado:ahoraManual, precioChequeadoManual:ahoraManual,
       estadoManualActualizado:ahoraManual, estadoRevisionActualizado:ahoraManual,
       visible:true, pendienteRevisionManual:false
@@ -13653,104 +13639,75 @@ async function tiendaProcesarCarga(){
     return;
   }
 
-  if(reemplazar){
-    var automaticosConservados=tiendaProductos.filter(tiendaEsAutomatico);
-    var manualesAnteriores=tiendaProductos.length-automaticosConservados.length;
-    if(!confirm('⚠️ Vas a reemplazar '+manualesAnteriores+' producto(s) manual(es) por los '+nuevos.length+' de esta carga.\n\nLos productos automáticos de proveedores se conservan. ¿Continuar?'))return;
-    // La copia debe tomarse ANTES de reemplazar. Así la recuperación no
-    // depende de Papelera y conserva también fotos y estados anteriores.
-    tiendaBackupAuto();
-    tiendaProductos=automaticosConservados.concat(nuevos);
-    idsManualesTocados=nuevos.map(function(p){return p.id;});
-    primerProductoCarga=nuevos[0]||null;
-  }else{
-    // CARGA INTELIGENTE v3: emparejar reconociendo PARECIDOS con más fuerza. Conserva fotos, avisa dudas.
-    function claveProd(nom){
-      var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      // sacar emojis y símbolos varios que a veces vienen adelante/atrás del nombre
-      s=s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,'');
-      s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');
-      s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');
-      s=s.replace(/(\d)\s*(cm|centimetros)\b/g,'$1cm');
-      s=s.replace(/(\d)\s*(w|watts|watt)\b/g,'$1w');
-      s=s.replace(/(\d)\s*(pulgadas|pulg|"|'')/g,'$1pulg');
-      s=s.replace(/[x\u00d7\u00b7*]/g,'x');
-      s=s.replace(/[^a-z0-9]/g,'');
-      return s;
-    }
-    var actualizados=0, agregados=0;
-    var dudas=[];
-    nuevos.forEach(function(n){
-      var kn=claveProd(n.nombre);
-      // 1) match por clave normalizada FUERTE (ignora emojis, espacios, símbolos) — es el principal ahora
-      var existe=null;
-      if(kn.length>=3){
-        // Una carga manual sólo puede actualizar otra carga manual. Si se
-        // empareja con un artículo automático, el proveedor lo reemplaza en
-        // la siguiente sincronización y parece que la publicación desapareció.
-        existe=tiendaProductos.find(function(p){ return !tiendaEsAutomatico(p) && claveProd(p.nombre)===kn; });
-      }
-      // 2) si no, match suave por nombre casi idéntico
-      if(!existe){
-        var normSuave=(n.nombre||'').toLowerCase().replace(/\s+/g,' ').trim();
-        existe=tiendaProductos.find(function(p){
-          return !tiendaEsAutomatico(p) && (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===normSuave;
-        });
-      }
-      var esParecido=false;
-      // 3) si sigue sin match, buscar PARECIDO (uno contenido en el otro) → duda
-      if(!existe && kn.length>=6){
-        var mejor=null, mejorLen=0;
-        tiendaProductos.forEach(function(p){
-          if(tiendaEsAutomatico(p))return;
-          var kp=claveProd(p.nombre);
-          if(!kp || kp.length<6) return;
-          if((kn.indexOf(kp)!==-1 || kp.indexOf(kn)!==-1) &&
-             tiendaPuedenSerDuplicados(n,p)){
-            var largo=Math.min(kn.length,kp.length);
-            if(largo>mejorLen){ mejorLen=largo; mejor=p; }
-          }
-        });
-        if(mejor){ existe=mejor; esParecido=true; }
-      }
-      if(existe){
-        if(!primerProductoCarga)primerProductoCarga=existe;
-        if(Math.round(existe.venta)!==Math.round(n.venta) || Math.round(existe.costo||0)!==Math.round(n.costo||0)){
-          existe.precioActualizado=Date.now();
-        }
-        existe.costo=n.costo; existe.venta=n.venta;
-        if(!tiendaEsAutomatico(existe)){
-          var ahoraControlManual=Date.now();
-          // Volver a cargar su precio cuenta como controlarlo hoy, aunque el
-          // número sea el mismo. Recién volverá a revisión dentro de 30 días.
-          existe.precioActualizado=ahoraControlManual;
-          existe.precioChequeadoManual=ahoraControlManual;
-          existe.estadoRevisionActualizado=ahoraControlManual;
-          existe.estadoManualActualizado=ahoraControlManual;
-          existe.pendienteRevisionManual=false;
-          delete existe.visibleAntesRevisionManual;
-          if(existe.eliminado!==true && !tiendaTieneSinStock(existe) &&
-             existe.ocultoManualAdmin!==true && existe.ocultoManualProveedor!==true){
-            existe.visible=true;
-          }
-          idsManualesTocados.push(existe.id);
-        }
-        actualizados++;
-        if(esParecido){ dudas.push({nuevo:n.nombre, viejo:existe.nombre}); }
-      }else{
-        // El precio recién cargado ya fue controlado hoy: se publica ahora y
-        // recién pasa a "Revisar manuales" si cumple 30 días sin control.
-        n.visible=true;
-        n.pendienteRevisionManual=false;
-        delete n.visibleAntesRevisionManual;
-        tiendaProductos.push(n);
-        if(!primerProductoCarga)primerProductoCarga=n;
-        idsManualesTocados.push(n.id);
-        agregados++;
-      }
-    });
-    window._cargaResumen={actualizados:actualizados, agregados:agregados, dudas:dudas};
+  // Si la sincronización inicial falló, una lectura nueva de los manuales
+  // permite reintentar sin recargar la app.
+  await window._tiendaSincronizacionInicialPromesa;
+  var filaManuales=await tiendaLeerFilaManualesNube();
+  if(filaManuales){
+    var automaticos=tiendaProductos.filter(tiendaEsAutomatico);
+    var locales=tiendaProductos.filter(function(p){return !tiendaEsAutomatico(p);});
+    tiendaProductos=automaticos.concat(tiendaFusionarManualesPorVersion(filaManuales.datos,locales));
   }
+  var idsUsados=new Set(tiendaProductos.map(function(p){return String(p.id);}));
+
+  // Solo actualizar coincidencias exactas normalizadas de productos activos.
+  // Un nombre parecido puede ser otra medida, color o modelo.
+  function claveProd(nom){
+    var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    // sacar emojis y símbolos varios que a veces vienen adelante/atrás del nombre
+    s=s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,'');
+    s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');
+    s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');
+    s=s.replace(/(\d)\s*(cm|centimetros)\b/g,'$1cm');
+    s=s.replace(/(\d)\s*(w|watts|watt)\b/g,'$1w');
+    s=s.replace(/(\d)\s*(pulgadas|pulg|"|'')/g,'$1pulg');
+    s=s.replace(/[x\u00d7\u00b7*]/g,'x');
+    s=s.replace(/[^a-z0-9]/g,'');
+    return s;
+  }
+  var actualizados=0, agregados=0;
+  var manualesTocados=new Map();
+  var primerProductoCarga=null;
+  nuevos.forEach(function(n){
+    var kn=claveProd(n.nombre);
+    var nombreExacto=n.nombre.toLowerCase().replace(/\s+/g,' ').trim();
+    var mayorista=aeNormalizarMayorista(n.mayorista);
+    var existe=tiendaProductos.find(function(p){
+      if(tiendaEsAutomatico(p)||p.eliminado===true)return false;
+      var mayoristaExistente=aeNormalizarMayorista(p.mayorista||p.proveedor);
+      if(mayorista&&mayoristaExistente&&mayorista!==mayoristaExistente)return false;
+      return kn.length>=3
+        ? claveProd(p.nombre)===kn
+        : (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===nombreExacto;
+    });
+    if(existe){
+      if(!primerProductoCarga)primerProductoCarga=existe;
+      var ahoraControlManual=Date.now();
+      existe.costo=n.costo; existe.venta=n.venta;
+      existe.precioActualizado=ahoraControlManual;
+      existe.precioChequeadoManual=ahoraControlManual;
+      existe.estadoRevisionActualizado=ahoraControlManual;
+      existe.estadoManualActualizado=ahoraControlManual;
+      existe.pendienteRevisionManual=false;
+      delete existe.visibleAntesRevisionManual;
+      if(!tiendaTieneSinStock(existe)&&existe.ocultoManualAdmin!==true&&existe.ocultoManualProveedor!==true){
+        existe.visible=true;
+      }
+      manualesTocados.set(String(existe.id),existe);
+      actualizados++;
+    }else{
+      // El precio recién cargado ya fue controlado hoy: se publica ahora y
+      // recién pasa a "Revisar manuales" si cumple 30 días sin control.
+      n.visible=true;
+      n.pendienteRevisionManual=false;
+      delete n.visibleAntesRevisionManual;
+      n.id=tiendaNuevoIdManual(idsUsados);
+      tiendaProductos.push(n);
+      if(!primerProductoCarga)primerProductoCarga=n;
+      manualesTocados.set(String(n.id),n);
+      agregados++;
+    }
+  });
 
   // Con archivos seleccionados, liberar inmediatamente la ventana de carga.
   // El trabajo continúa en esta página sin perder los campos si falla Supabase.
@@ -13759,9 +13716,9 @@ async function tiendaProcesarCarga(){
     if(window.AEGaleria&&window.AEGaleria.estadoCarga)window.AEGaleria.estadoCarga('⏳ Guardando producto en la nube. Luego se subirán fotos/video…');
     mostrarToast('⏳ Confirmando producto en la nube. Después suben fotos/video…');
   }
-  var resultadoGuardado=await tiendaGuardarLocal();
+  var resultadoGuardado=await tiendaGuardarLocal(Array.from(manualesTocados.values()));
   if(resultadoGuardado&&resultadoGuardado.error)throw resultadoGuardado.error;
-  await tiendaVerificarManualesNube(idsManualesTocados);
+  await tiendaVerificarManualesNube(Array.from(manualesTocados.keys()));
   // El catálogo se confirmó primero. El modal se cierra y la multimedia se
   // envía en una cola de la aplicación, sin bloquear el uso de la tienda.
   var avisoFotoCarga='';
@@ -13788,27 +13745,13 @@ async function tiendaProcesarCarga(){
   if(primerProductoCarga && primerProductoCarga.id!=null){
     tiendaEnfocarProducto(primerProductoCarga.id,false);
   }
-  var msg;
-  if(window._cargaResumen){
-    var r=window._cargaResumen;
-    msg='✅ Listo:\n\n• '+r.actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+r.agregados+' producto(s) nuevo(s)';
-    if(r.agregados>0)msg+='\n\n👁️ Los productos nuevos quedaron publicados. Pasarán a "Revisar manuales" recién después de 30 días sin controlar el precio.';
-    if(r.dudas && r.dudas.length){
-      msg+='\n\n⚠️ REVISÁ ESTOS '+r.dudas.length+' (los emparejé por parecido, no idéntico):\n';
-      msg+=r.dudas.slice(0,12).map(function(d){return '• "'+d.nuevo+'" → lo tomé como "'+d.viejo+'"';}).join('\n');
-      if(r.dudas.length>12) msg+='\n...y '+(r.dudas.length-12)+' más.';
-      msg+='\n\n👉 Si alguno NO era el mismo, editá ese producto a mano. Las fotos NO se movieron.';
-    }
-    window._cargaResumen=null;
-  }else{
-    msg='✅ Se cargaron '+nuevos.length+' productos (reemplazó todo el catálogo).';
-  }
+  var msg='✅ Listo:\n\n• '+actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+agregados+' producto(s) nuevo(s)';
+  if(agregados>0)msg+='\n\n👁️ Los productos nuevos quedaron publicados. Pasarán a "Revisar manuales" recién después de 30 días sin controlar el precio.';
   msg+='\n\nTotal en la tienda: '+tiendaProductos.length;
   msg+=avisoFotoCarga;
   if(descartadas>0)msg+='\n\n('+descartadas+' líneas no se entendieron y se saltearon)';
   if(mediaParaSubir){
     mostrarToast('✅ Producto guardado · 📷 Subiendo multimedia');
-    if(window._cargaResumen)window._cargaResumen=null;
   }else{
     alert(msg);
   }
@@ -15520,7 +15463,7 @@ window.aeSincronizarSelectoresVisuales=function(){
 })();
 </script>
 
-<script src="/tienda-galeria.js?v=20261104-desliza3" defer></script>
+<script src="/tienda-galeria.js?v=20261105-portada-manual" defer></script>
 <script src="/tienda-carga-multimedia.js?v=20261104-1" defer></script>
 <script src="/admin-tareas-compartidas.js?v=20261105-notes-v2" defer></script>
 <script src="/admin-tareas.js?v=20261105-cliente-phone-v4" defer></script>
