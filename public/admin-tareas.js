@@ -294,6 +294,7 @@ function createCrmDraft(data){
   'Cliente CRM: '+(confirmado?'registrado':'alta pendiente de verificar'),
   cid?'ID cliente CRM: '+cid:null,
   'Producto: '+producto,'Cuotas: '+n,'Fecha: '+fecha,
+  data.celularCliente?'Celular del cliente: '+String(data.celularCliente).slice(0,30):null,
   data.telefonoEntrega?'Teléfono alternativo de entrega: '+String(data.telefonoEntrega).slice(0,30):null,
   data.direccionEntrega?'Domicilio de entrega: '+String(data.direccionEntrega).slice(0,180):null,
   data.entreCalles?'Entre calles: '+String(data.entreCalles).slice(0,160):null,
