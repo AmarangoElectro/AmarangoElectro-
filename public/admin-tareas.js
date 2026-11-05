@@ -16,7 +16,8 @@ function el(tag,cls,txt){var n=document.createElement(tag);if(cls)n.className=cl
 function btn(label,fn,cls){var b=el('button',cls,label);b.type='button';b.addEventListener('click',fn);return b}
 function due(t){return t.stage!=='completada'&&!!t.dueAt&&new Date(t.dueAt).getTime()<=Date.now()}
 function order(a,b){if(a.stage==='completada'&&b.stage!=='completada')return 1;if(b.stage==='completada'&&a.stage!=='completada')return -1;return (a.dueAt?new Date(a.dueAt).getTime():Infinity)-(b.dueAt?new Date(b.dueAt).getTime():Infinity)||(b.createdAt||0)-(a.createdAt||0)}
-function status(t){return t.stage==='comprar'?'🛒 Falta comprar':t.stage==='entregar'?'🚚 Falta entregar':t.stage==='completada'?'✅ Finalizada':'📋 Pendiente'}
+function isCrmDraft(t){return !!t&&typeof t.title==='string'&&t.title.indexOf('🧾 Venta CRM · ')===0}
+function status(t){if(isCrmDraft(t))return t.stage==='completada'?'✅ Cargada en CRM':'🧾 Venta pendiente de cargar en CRM';return t.stage==='comprar'?'🛒 Falta comprar':t.stage==='entregar'?'🚚 Falta entregar':t.stage==='completada'?'✅ Finalizada':'📋 Pendiente'}
 function fmtDate(v){if(!v)return 'Sin fecha';var d=new Date(v);return Number.isNaN(d.getTime())?'Sin fecha':d.toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
 function visibleModal(){return panel&&!panel.hidden||form&&!form.hidden||confirmBox&&!confirmBox.hidden}
 function dismissConfirm(){
@@ -223,7 +224,7 @@ function addPins(){
 }
 function updatePins(){
  var grid=document.getElementById('tienda-grid');if(!grid)return;
- grid.querySelectorAll('.ae-task-pin').forEach(function(b){var id=b.getAttribute('data-product-id');var open=tasks.some(function(t){return t.productId===id&&t.stage!=='completada'});b.classList.toggle('ae-task-active',open);var label=open?'📌 Tarea fijada · agregar otra':'📌 Fijar tarea';if(b.textContent!==label)b.textContent=label;});
+ grid.querySelectorAll('.ae-task-pin').forEach(function(b){var id=b.getAttribute('data-product-id');var open=tasks.some(function(t){return t.productId===id&&!isCrmDraft(t)&&t.stage!=='completada'});b.classList.toggle('ae-task-active',open);var label=open?'📌 Tarea fijada · agregar otra':'📌 Fijar tarea';if(b.textContent!==label)b.textContent=label;});
 }
 function stageAdvance(t){
  if(!admin()||!t||t.stage==='completada')return;
@@ -232,6 +233,8 @@ function stageAdvance(t){
   {symbol:'🛒',title:'Confirmar compra',message:'¿Ya compraron "'+product+'"? Quedará marcada como comprada, pero pendiente de entrega.',actionLabel:'✅ Sí, comprado'}:
   expected==='entregar'?
   {symbol:'🚚',title:'Confirmar entrega',message:'¿Ya entregaron "'+product+'"? Al confirmar, esta tarea quedará finalizada.',actionLabel:'✅ Entregado y finalizar'}:
+  isCrmDraft(t)?
+  {symbol:'🧾',title:'Confirmar registro en CRM',message:'¿Ya cargaste esta venta en el CRM? Sólo confirmá después de verificar que quedó registrada. La tarea pasará al historial.',actionLabel:'✅ Ya está cargada en CRM'}:
   {symbol:'✅',title:'Finalizar tarea',message:'¿Marcar esta tarea como realizada?',actionLabel:'✅ Finalizar'};
  options.onAccept=function(){
   var current=tasks.find(function(item){return item.id===t.id;});
@@ -245,9 +248,57 @@ function stageAdvance(t){
   if(!write()){current.stage=previous.stage;current.updatedAt=previous.updatedAt;current.completedAt=previous.completedAt;return;}
   sharedChange('advance',{id:current.id,expected_stage:expected});
   refresh();openPanel();
-  if(typeof window.mostrarToast==='function')window.mostrarToast(expected==='comprar'?'✅ Comprado. Falta entregar.':expected==='entregar'?'✅ Entregado. Tarea finalizada.':'✅ Tarea finalizada.');
+  if(typeof window.mostrarToast==='function')window.mostrarToast(expected==='comprar'?'✅ Comprado. Falta entregar.':expected==='entregar'?'✅ Entregado. Tarea finalizada.':isCrmDraft(t)?'✅ Venta marcada como cargada en CRM.':'✅ Tarea finalizada.');
  };
  taskConfirm(options);
+}
+function crmDraftText(t){
+ return String(t.note||'')+'\n\nReferencia: '+String(t.id||'');
+}
+function copyCrmDraft(t){
+ if(!admin()||!isCrmDraft(t))return;
+ var value=crmDraftText(t);
+ function ok(){if(typeof window.mostrarToast==='function')window.mostrarToast('📋 Venta copiada para cargar en CRM');}
+ function fallback(){
+  var input=el('textarea');input.value=value;input.style.cssText='position:fixed;top:-1000px;opacity:0';
+  document.body.appendChild(input);input.select();
+  try{if(document.execCommand('copy'))ok();else alert('No se pudo copiar. Seleccioná el texto de la tarea.');}
+  catch(e){alert('No se pudo copiar. Seleccioná el texto de la tarea.');}
+  input.remove();
+ }
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(ok,fallback);}
+ else fallback();
+}
+function createCrmDraft(data){
+ if(!admin())return {ok:false,error:'Acceso exclusivo de Administración'};
+ var nombre=String(data&&data.cliente||'').trim().slice(0,120);
+ var producto=String(data&&data.producto||'').trim().slice(0,170);
+ var n=Number(data&&data.cuotas);
+ if(!nombre||!producto||!Number.isInteger(n)||n<1||n>60)return {ok:false,error:'Completá el cliente, producto y cuotas'};
+ if(tasks.length>=MAX)return {ok:false,error:'Llegaste al límite de tareas'};
+ var nro=data.numeroCrm!=null&&String(data.numeroCrm).trim()?' · #'+String(data.numeroCrm).trim().slice(0,12):'';
+ var cid=String(data.clienteId||'').trim().slice(0,100);
+ var nombreCliente=nombre+nro;
+ var fecha=new Date().toLocaleDateString('es-AR');
+ var nota=String(data.nota||'').trim().slice(0,140);
+ var confirmado=data.clienteRegistrado===true;
+ var lines=['🧾 VENTA PENDIENTE DE CARGAR EN CRM','Cliente: '+nombreCliente,
+  'Cliente CRM: '+(confirmado?'registrado':'alta pendiente de verificar'),
+  cid?'ID cliente CRM: '+cid:null,
+  'Producto: '+producto,'Cuotas: '+n,'Fecha: '+fecha,
+  nota?'Observaciones: '+nota:null].filter(Boolean);
+ var stamp=Date.now();
+ var task={id:'ae-'+stamp+'-'+Math.random().toString(36).slice(2,9),
+  title:('🧾 Venta CRM · '+nombre).slice(0,180),
+  note:lines.join('\n').slice(0,500),
+  productId:String(data.productoId||'').slice(0,180)||null,
+  productName:producto,
+  stage:'pendiente',dueAt:null,createdAt:stamp,updatedAt:stamp};
+ tasks.push(task);
+ if(!write()){tasks.pop();return {ok:false,error:'No se pudo guardar la tarea en el dispositivo'};}
+ sharedChange('create',{id:task.id,title:task.title,note:task.note,product_id:task.productId,product_name:task.productName,stage:task.stage,due_at:null,created_at:new Date(stamp).toISOString()});
+ refresh();openPanel();
+ return {ok:true,id:task.id};
 }
 function deleteFinishedTask(t){
  taskConfirm({symbol:'🗑️',title:'Eliminar del historial',message:'¿Eliminar definitivamente la tarea finalizada "'+t.title+'"?',actionLabel:'Eliminar',onAccept:function(){
@@ -279,7 +330,8 @@ function renderPanel(){
    if(t.note)item.appendChild(el('p','ae-task-note',t.note));
    var line=el('div','ae-task-actions');
    if(t.productId)line.appendChild(btn('Ver producto',function(){jumpToProduct(t)},'ae-task-action'));
-   if(t.productId&&['comprar','entregar','completada'].indexOf(t.stage)>=0){
+   if(isCrmDraft(t))line.appendChild(btn('📋 Copiar para CRM',function(){copyCrmDraft(t)},'ae-task-action'));
+   if(t.productId&&!isCrmDraft(t)&&['comprar','entregar','completada'].indexOf(t.stage)>=0){
     var stepRow=el('div','ae-task-step-row');
     if(t.stage==='comprar'){
      stepRow.appendChild(btn('✅ Comprado',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
@@ -292,7 +344,7 @@ function renderPanel(){
     }
     line.appendChild(stepRow);
    }else if(t.stage!=='completada'){
-    line.appendChild(btn('✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
+    line.appendChild(btn(isCrmDraft(t)?'✅ Cargada en CRM':'✅ Hecha',function(){stageAdvance(t)},'ae-task-action ae-task-primary'));
    }
    if(t.stage==='completada')line.appendChild(btn('Borrar historial',function(){deleteFinishedTask(t)},'ae-task-action'));
    item.appendChild(line);box.appendChild(item);
@@ -408,5 +460,6 @@ function start(){
  setTimeout(function(){if(mailEnabled)queueMailSync();},1800);
  timer=setInterval(function(){scheduleScan();remind();sharedSync();if(mailEnabled&&Date.now()-mailLastSync>120000)queueMailSync()},30000);
 }
+window.AEAdminTasks={createCrmDraft:createCrmDraft,openPanel:openPanel,refresh:refresh};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
