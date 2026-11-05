@@ -25,6 +25,40 @@ function button(text,fn,cls){var x=node('button',cls,text);x.type='button';x.add
 function notify(message){if(typeof window.mostrarToast==='function')window.mostrarToast(message);}
 function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLowerCase();}
 function clientName(c){return String(c&&c.nombre||'').trim();}
+// Registro local del asesor: reutilización exacta por nombre completo + celular.
+// Los asesores no reciben permisos de lectura sobre perfiles privados de otros usuarios.
+var DELIVERY_KEY='ae_delivery_client_history_v1';
+function phoneDigits(v){return String(v||'').replace(/\D/g,'');}
+function customerDeliveryKey(n,p){return String(n||'').trim().toLowerCase().replace(/\s+/g,' ')+'|'+phoneDigits(p);}
+function mapsLink(v){
+ try{
+  var u=new URL(String(v||'').trim()),host=u.hostname.toLowerCase();
+  return u.protocol==='https:'&&['google.com','www.google.com','maps.google.com','maps.app.goo.gl','goo.gl'].includes(host);
+ }catch(e){return false;}
+}
+function readDeliveryHistory(){
+ try{
+  var data=JSON.parse(localStorage.getItem(DELIVERY_KEY)||'{}');
+  if(!data||typeof data!=='object'||Array.isArray(data))return {};
+  var fresh={};Object.keys(data).slice(-60).forEach(function(k){
+   var d=data[k];
+   if(d&&Number(d.savedAt)>Date.now()-90*86400000)fresh[k]=d;
+  });return fresh;
+ }catch(e){return {};}
+}
+function rememberDelivery(n,phone,record){
+ var k=customerDeliveryKey(n,phone);if(k.length<12)return;
+ try{
+  var data=readDeliveryHistory();
+  data[k]={phone:phone,alternative:record.alternative||'',map:record.map||'',
+   address:record.address||'',cross:record.cross||'',locality:record.locality||'',
+   mode:record.mode,savedAt:Date.now()};
+  var keys=Object.keys(data).sort(function(a,b){return data[b].savedAt-data[a].savedAt;}).slice(0,40);
+  var limited={};keys.forEach(function(x){limited[x]=data[x];});
+  localStorage.setItem(DELIVERY_KEY,JSON.stringify(limited));
+ }catch(e){}
+}
+
 function close(){if(overlay){overlay.hidden=true;overlay.replaceChildren();}}
 function initStyle(){
  if(document.getElementById(STYLE_ID))return;
@@ -74,6 +108,19 @@ function initStyle(){
  '.ae-crm-sale-delivery-title{font-size:.88rem;font-weight:900;color:var(--az);margin:15px 0 4px;border-top:1px solid var(--bor);padding-top:12px}',
  '.ae-crm-sale-map-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}',
  '.ae-crm-sale-map-actions button{flex:1 1 140px;min-height:40px;padding:7px;border-radius:10px;border:1px solid var(--bor);background:var(--bg);color:var(--az);font-weight:800;font-family:inherit;font-size:.73rem}',
+ '.ae-crm-delivery-tip{font-size:.76rem;line-height:1.5;color:var(--txt);background:#f2f7ff;border:1px solid #d4e3fa;border-radius:12px;padding:11px;margin:8px 0}',
+ '.ae-crm-delivery-card{background:var(--bg);border:1px solid var(--bor);border-radius:13px;padding:10px;margin-top:9px}',
+ '.ae-crm-delivery-card .ae-crm-sale-label{margin-top:6px}',
+ '.ae-crm-delivery-heading{font-size:.8rem;font-weight:850;color:var(--az);margin-bottom:5px}',
+ '.ae-crm-delivery-paste{font-family:inherit;font-size:.76rem;font-weight:850;color:#fff;background:#0a4fbf;border:1px solid #0a4fbf;border-radius:10px;min-height:40px;padding:8px 12px;cursor:pointer}',
+ '.ae-crm-delivery-manual{width:100%;text-align:left;font-family:inherit;font-weight:800;color:var(--az);background:var(--bg);border:1px solid var(--bor);border-radius:10px;padding:12px;margin-top:9px;cursor:pointer}',
+ '.ae-crm-delivery-manual[aria-expanded="true"]{border-color:#ff7a00}',
+ '.ae-crm-delivery-manual-panel[hidden],.ae-crm-delivery-map-panel[hidden],.ae-crm-delivery-reuse[hidden]{display:none!important}',
+ '.ae-crm-delivery-reuse{margin-top:9px;border:1px solid #a4dab5;border-radius:11px;padding:10px;background:#f0fbf3;color:#17633d;font-size:.73rem}',
+ '.ae-crm-delivery-reuse button{font:800 .74rem Inter,system-ui;min-height:36px;padding:6px 10px;margin-top:8px;border-radius:9px;border:1px solid #16824a;background:#e7f8ed;color:#14633b;cursor:pointer}',
+ '.ae-crm-delivery-status{font-size:.73rem;min-height:20px;margin:8px 0 0;font-weight:750;overflow-wrap:anywhere}',
+ 'body.oscuro .ae-crm-delivery-tip{background:#30251f;border-color:#684a39;color:#f6e7dd}',
+ 'body.oscuro .ae-crm-delivery-reuse{background:#19382d;border-color:#367353;color:#bbf3cc}',
  'body.oscuro .ae-crm-sale-dialog{background:#241915;border-color:#5f4537;color:#fff3ea}body.oscuro .ae-crm-sale-suggestions{background:#241915;border-color:#5f4537}',
  '@media(prefers-reduced-motion:reduce){.ae-crm-sale-layer{backdrop-filter:none}}'
  ].join('\n');
@@ -197,47 +244,106 @@ function open(id,card){
    '✓ Seleccionaste: '+v+' cuotas':'Ingresá una cantidad entre 1 y 60 cuotas.';
  });
  box.appendChild(installOptions);box.appendChild(other);box.appendChild(selectionSummary);
- // Logística: dato de contacto y dirección de entrega. La ubicación sólo se
- // obtiene al tocar el botón, nunca automáticamente al abrir el formulario.
- box.appendChild(node('div','ae-crm-sale-delivery-title','🚚 Datos para la entrega'));
- function deliveryField(label,placeholder,max,type){
+ // Entrega: pedir la ubicación al cliente antes que una dirección extensa.
+ box.appendChild(node('div','ae-crm-sale-delivery-title','🚚 ¿Dónde se entrega?'));
+ function deliveryField(container,label,placeholder,max,type){
   var wrap=node('label','ae-crm-sale-label',label);
   var field=node('input','ae-crm-sale-input');field.type=type||'text';
   field.maxLength=max;field.placeholder=placeholder;field.autocomplete='off';
-  wrap.appendChild(field);box.appendChild(wrap);return field;
+  wrap.appendChild(field);container.appendChild(wrap);return field;
  }
- var deliveryPhone=deliveryField('Teléfono alternativo para la entrega *','Ej.: 11 5555-1234',30,'tel');
+ var customerPhone=deliveryField(box,'📱 Celular del cliente *','Ej.: 11 5555-1234',30,'tel');
+ customerPhone.inputMode='tel';
+ var deliveryPhone=deliveryField(box,'Otro teléfono para recibir la entrega (opcional)','Si alguien más la recibe',30,'tel');
  deliveryPhone.inputMode='tel';
- var deliveryAddress=deliveryField('Calle y altura para entregar *','Ej.: Av. Luro 3250, piso / departamento',180);
- var deliveryCross=deliveryField('Entre calles *','Ej.: entre Av. Rivadavia y Perú',160);
- var deliveryLocality=deliveryField('Localidad *','Ej.: San Justo, Buenos Aires',100);
- var deliveryMap=deliveryField('📍 Enlace de Google Maps (recomendado)','Pegá acá el enlace de Compartir ubicación de Maps',500,'url');
+ box.appendChild(node('p','ae-crm-delivery-tip',
+  '📍 Pedile al cliente que te mande por WhatsApp su ubicación de Google Maps. Copiá el enlace y pegalo acá. ¡No hace falta escribir calle ni entrecalles!'));
+ var mapPanel=node('div','ae-crm-delivery-card ae-crm-delivery-map-panel');
+ mapPanel.appendChild(node('div','ae-crm-delivery-heading','Opción recomendada · Ubicación del cliente'));
+ var deliveryMap=deliveryField(mapPanel,'Enlace de Google Maps *','Mantené presionado y pegá el vínculo del cliente',500,'url');
  deliveryMap.inputMode='url';
- box.appendChild(node('p','ae-crm-sale-info','En Google Maps elegí el punto de entrega → Compartir → Copiar vínculo, y pegalo arriba. Confirmá las entrecalles y la localidad: un GPS puede no señalar la puerta exacta.'));
  var mapActions=node('div','ae-crm-sale-map-actions');
- var locate=button('📍 Usar ubicación actual',function(){
-  if(!navigator.geolocation){geoStatus.textContent='Este teléfono no ofrece acceso a ubicación. Pegá el vínculo de Google Maps.';return;}
-  locate.disabled=true;geoStatus.textContent='Solicitando permiso de ubicación al teléfono…';
-  navigator.geolocation.getCurrentPosition(function(p){
-   locate.disabled=false;
-   var latitude=p.coords.latitude.toFixed(6),longitude=p.coords.longitude.toFixed(6);
-   deliveryMap.value='https://www.google.com/maps?q='+latitude+','+longitude;
-   deliveryAccuracy=Math.round(p.coords.accuracy||0)||null;
-   geoStatus.textContent='✅ Coordenadas capturadas (precisión aproximada: '+(deliveryAccuracy||'desconocida')+' m). Revisá que correspondan al destino de entrega.';
-  },function(e){
-   locate.disabled=false;
-   geoStatus.textContent=e&&e.code===1?'Permiso denegado. Podés compartir el enlace desde Google Maps.':'No se pudo obtener la ubicación. Pegá el enlace de Maps.';
-  },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+ var pasteMap=button('📋 Pegar ubicación',async function(){
+  try{
+   if(!navigator.clipboard||!navigator.clipboard.readText)throw Error('clipboard');
+   var clip=(await navigator.clipboard.readText()).trim();
+   if(!mapsLink(clip))throw Error('invalid');
+   deliveryMap.value=clip;deliveryMap.dispatchEvent(new Event('input',{bubbles:true}));
+  }catch(e){
+   deliveryMap.focus();mapStatus.textContent='Mantené presionado el campo y elegí Pegar (en Android).';
+  }
+ },'ae-crm-delivery-paste');
+ mapActions.appendChild(pasteMap);
+ var copyRequest=button('💬 Copiar pedido al cliente',async function(){
+  var msg='Hola 👋 Para coordinar la entrega de AmarangoElectro 🐝, ¿podés enviarme tu ubicación desde Google Maps? Abrí Maps, marcá el domicilio de entrega, tocá Compartir y mandame el enlace por WhatsApp. ¡Gracias!';
+  try{await navigator.clipboard.writeText(msg);mapStatus.textContent='✅ Mensaje copiado. Pegalo en el WhatsApp del cliente.';}
+  catch(e){mapStatus.textContent='Pedile que abra Google Maps, marque el domicilio y toque Compartir → WhatsApp.';}
  },'ae-crm-sale-map-button');
- mapActions.appendChild(locate);
- var openMaps=button('🗺️ Abrir Google Maps',function(){
-  window.open('https://www.google.com/maps','_blank','noopener,noreferrer');
- },'ae-crm-sale-map-button');
- mapActions.appendChild(openMaps);box.appendChild(mapActions);
- var deliveryAccuracy=null;
- var geoStatus=node('p','ae-crm-sale-info','La ubicación GPS sólo se obtiene si autorizás el permiso. También podés enviar un pin por enlace.');
- geoStatus.setAttribute('aria-live','polite');box.appendChild(geoStatus);
- deliveryMap.addEventListener('input',function(){deliveryAccuracy=null;});
+ mapActions.appendChild(copyRequest);mapPanel.appendChild(mapActions);
+ var mapStatus=node('p','ae-crm-delivery-status','');
+ mapStatus.setAttribute('aria-live','polite');mapPanel.appendChild(mapStatus);
+ box.appendChild(mapPanel);
+ var manualToggle=button('▸ No me enviaron ubicación · Cargar dirección manualmente',function(){
+  setDeliveryMode(deliveryMode==='manual'?'map':'manual');
+ },'ae-crm-delivery-manual');
+ manualToggle.setAttribute('aria-expanded','false');box.appendChild(manualToggle);
+ var manualPanel=node('div','ae-crm-delivery-card ae-crm-delivery-manual-panel');
+ manualPanel.hidden=true;
+ var deliveryAddress=deliveryField(manualPanel,'Calle y altura *','Ej.: Av. Luro 3250, piso o departamento',180);
+ var deliveryCross=deliveryField(manualPanel,'Entre calles *','Ej.: entre Rivadavia y Perú',160);
+ var deliveryLocality=deliveryField(manualPanel,'Localidad *','Ej.: San Justo, Buenos Aires',100);
+ box.appendChild(manualPanel);
+ var reuse=node('div','ae-crm-delivery-reuse');reuse.hidden=true;box.appendChild(reuse);
+ var deliveryMode='map',deliveryAccuracy=null,rememberedKey='',savedProfile=null;
+ function setDeliveryMode(m){
+  deliveryMode=m==='manual'?'manual':'map';
+  manualPanel.hidden=deliveryMode!=='manual';
+  mapPanel.hidden=deliveryMode!=='map';
+  manualToggle.setAttribute('aria-expanded',String(deliveryMode==='manual'));
+  manualToggle.textContent=deliveryMode==='manual'?'▾ Dirección manual · Volver a pedir ubicación':'▸ No me enviaron ubicación · Cargar dirección manualmente';
+ }
+ deliveryMap.addEventListener('input',function(){
+  mapStatus.textContent=deliveryMap.value.trim()?(mapsLink(deliveryMap.value)?'✅ Ubicación lista para enviar a Administración.':'Revisá que sea un enlace de Google Maps.'):'';
+ });
+ async function checkSavedDelivery(){
+  var key=customerDeliveryKey(input.value,customerPhone.value);
+  if(!input.value.trim()||phoneDigits(customerPhone.value).length<8||key===rememberedKey)return;
+  rememberedKey=key;savedProfile=null;reuse.hidden=true;reuse.replaceChildren();
+  var local=readDeliveryHistory()[key];
+  if(local)savedProfile=local;
+  if(!advisor&&!savedProfile){
+   try{
+    var secure=window.sbFotos;
+    if(secure&&secure.auth){
+     var session=await secure.auth.getSession();
+     if(session&&session.data&&session.data.session){
+      var result=await secure.from('ae_customer_delivery_profiles')
+       .select('alternate_phone,maps_url,street_address,cross_streets,locality')
+       .eq('client_key',key).maybeSingle();
+      if(!result.error&&result.data)savedProfile={alternative:result.data.alternate_phone||'',map:result.data.maps_url||'',address:result.data.street_address||'',cross:result.data.cross_streets||'',locality:result.data.locality||'',mode:result.data.maps_url?'map':'manual'};
+     }
+    }
+   }catch(e){}
+  }
+  if(key!==customerDeliveryKey(input.value,customerPhone.value)||!savedProfile)return;
+  reuse.hidden=false;
+  reuse.appendChild(node('div','','✅ Encontré un domicilio anterior para este nombre y celular.'));
+  reuse.appendChild(node('div','','Confirmá con el cliente que sigue siendo su dirección de entrega.'));
+  reuse.appendChild(button('Usar ubicación guardada',function(){
+   if(!savedProfile)return;
+   deliveryPhone.value=savedProfile.alternative||'';
+   deliveryMap.value=savedProfile.map||'';
+   deliveryAddress.value=savedProfile.address||'';
+   deliveryCross.value=savedProfile.cross||'';
+   deliveryLocality.value=savedProfile.locality||'';
+   setDeliveryMode(savedProfile.mode);
+   mapStatus.textContent=deliveryMap.value?'✅ Se cargó el enlace guardado. Confirmá que siga siendo el correcto.':'';
+   reuse.hidden=true;
+  },'ae-crm-delivery-reuse-button'));
+ }
+ customerPhone.addEventListener('blur',checkSavedDelivery);
+ input.addEventListener('blur',checkSavedDelivery);
+ customerPhone.addEventListener('change',checkSavedDelivery);
  var notesLabel=node('label','ae-crm-sale-label','Observaciones (opcional)');
  var notes=node('textarea','ae-crm-sale-input');notes.rows=2;notes.maxLength=140;notes.placeholder='Ej.: entrega a coordinar';notesLabel.appendChild(notes);box.appendChild(notesLabel);
  var issue=node('p','ae-crm-sale-info','');issue.setAttribute('aria-live','polite');box.appendChild(issue);
@@ -274,20 +380,20 @@ function open(id,card){
   var count=Number(selectedInstallments==='other'?other.value:selectedInstallments);
   if(name.length<2){issue.textContent='Ingresá el nombre del cliente.';input.focus();return;}
   if(!Number.isInteger(count)||count<1||count>60){issue.textContent='Elegí una cantidad válida de cuotas.';(selectedInstallments==='other'?other:buttons[0]).focus();return;}
-  var phone=deliveryPhone.value.trim(),address=deliveryAddress.value.trim();
-  var cross=deliveryCross.value.trim(),locality=deliveryLocality.value.trim();
-  var mapUrl=deliveryMap.value.trim();
-  var digits=phone.replace(/\\D/g,'');
-  if(digits.length<8||digits.length>15){issue.textContent='Indicá un teléfono alternativo válido para la entrega.';deliveryPhone.focus();return;}
-  if(address.length<5){issue.textContent='Completá calle y altura de la entrega.';deliveryAddress.focus();return;}
-  if(cross.length<4){issue.textContent='Indicá entre qué calles se entrega.';deliveryCross.focus();return;}
-  if(locality.length<3){issue.textContent='Completá la localidad de entrega.';deliveryLocality.focus();return;}
-  if(mapUrl){
-   try{
-    var parsed=new URL(mapUrl);
-    var host=parsed.hostname.toLowerCase();
-    if(parsed.protocol!=='https:'||!['google.com','www.google.com','maps.google.com','maps.app.goo.gl','goo.gl'].includes(host))throw Error('invalid_maps');
-   }catch(e){issue.textContent='Pegá un enlace válido de Google Maps (Compartir → Copiar vínculo).';deliveryMap.focus();return;}
+  var customerMobile=customerPhone.value.trim(),phone=deliveryPhone.value.trim();
+  var address=deliveryMode==='manual'?deliveryAddress.value.trim():'';
+  var cross=deliveryMode==='manual'?deliveryCross.value.trim():'';
+  var locality=deliveryMode==='manual'?deliveryLocality.value.trim():'';
+  var mapUrl=deliveryMode==='map'?deliveryMap.value.trim():'';
+  var digits=phoneDigits(customerMobile);
+  if(digits.length<8||digits.length>15){issue.textContent='Ingresá el celular del cliente para identificar y recordar su domicilio.';customerPhone.focus();return;}
+  if(phone&&[phoneDigits(phone).length<8,phoneDigits(phone).length>15].some(Boolean)){issue.textContent='Revisá el teléfono alternativo.';deliveryPhone.focus();return;}
+  if(deliveryMode==='map'){
+   if(!mapsLink(mapUrl)){issue.textContent='Pedile al cliente la ubicación y pegá un enlace válido de Google Maps, o abrí Dirección manual.';deliveryMap.focus();return;}
+  }else{
+   if(address.length<5){issue.textContent='Indicá calle y altura.';deliveryAddress.focus();return;}
+   if(cross.length<4){issue.textContent='Indicá las entrecalles.';deliveryCross.focus();return;}
+   if(locality.length<3){issue.textContent='Indicá la localidad.';deliveryLocality.focus();return;}
   }
   issue.textContent='';save.disabled=true;
   if(advisor){
@@ -302,13 +408,15 @@ function open(id,card){
     advisor_id:(function(){try{return String(localStorage.getItem('ae_asesor_id')||'').slice(0,100)||null;}catch(e){return null;}})(),
     customer_name:name.slice(0,120),product_id:id.slice(0,180),product_name:product,
     installments:count,note:notes.value.trim().slice(0,140),source:'tienda_asesores',
-    delivery_phone:phone,delivery_address:address,delivery_cross_streets:cross,
-    delivery_locality:locality,delivery_maps_url:mapUrl||null,
+    customer_phone:customerMobile,
+    delivery_phone:phone||null,delivery_address:address||null,delivery_cross_streets:cross||null,
+    delivery_locality:locality||null,delivery_maps_url:mapUrl||null,
     delivery_accuracy_m:mapUrl&&deliveryAccuracy?deliveryAccuracy:null};
    try{
     var response=await api.from('ae_advisor_sale_submissions').insert(payload);
     if(response.error)throw response.error;
     try{localStorage.setItem('ae_nombre_asesor',who.slice(0,100));}catch(e){}
+    rememberDelivery(name,customerMobile,{alternative:phone,map:mapUrl,address:address,cross:cross,locality:locality,mode:deliveryMode});
     close();
     notify('✅ Venta informada. Quedó pendiente para Administración.');
    }catch(err){
@@ -339,9 +447,10 @@ function open(id,card){
   var res=tasks.createCrmDraft({cliente:crmClient?clientName(crmClient):name,
    numeroCrm:crmClient&&crmClient.num,clienteId:crmClient&&crmClient.id,
    clienteRegistrado:!!crmClient,producto:product,productoId:id,cuotas:count,nota:notes.value,
-   telefonoEntrega:phone,direccionEntrega:address,entreCalles:cross,
+   celularCliente:customerMobile,telefonoEntrega:phone,direccionEntrega:address,entreCalles:cross,
    localidadEntrega:locality,ubicacionMaps:mapUrl,precisionGps:deliveryAccuracy});
   if(!res||!res.ok){issue.textContent='⚠️ '+(res&&res.error||'No se pudo guardar la tarea');save.disabled=false;return;}
+  rememberDelivery(name,customerMobile,{alternative:phone,map:mapUrl,address:address,cross:cross,locality:locality,mode:deliveryMode});
   close();queueScan();notify(createError?'🧾 Venta pendiente guardada. Cliente aún pendiente de alta en CRM.':'🧾 Venta pendiente guardada en Tareas.');
   if(focus&&focus.isConnected)focus.focus();
  }
