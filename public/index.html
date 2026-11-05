@@ -11473,6 +11473,7 @@ function abrirOpcionesCompartirAdmin(id){
   var promoCliente6=promoMadreCliente6Datos(p);
   var html='<h3 style="color:var(--az);font-weight:900;font-size:1rem;">📤 Compartir producto</h3>'
     +'<p style="font-size:.75rem;color:var(--sub);margin:6px 0 12px;">Elegí qué propuesta querés enviar para <b>'+escapeHtml(p.nombre)+'</b>.</p>'
+    +'<button class="calc-btn" type="button" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#FF7A00,#cc5500);color:#fff;" onclick="event.stopPropagation();if(window.AEDescuentoAdmin)window.AEDescuentoAdmin.abrir('+pid+')">🏷️ Enviar con descuento del 10% o 15%</button>'
     +(promo?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#ec4899,#FF7A00);" onclick="compartirProducto('+pid+',\'promo\')">✨ 3 cuotas sin interés</button>':'')
     +(promoCliente6?'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:linear-gradient(135deg,#0B2D6B,#2563EB);" onclick="compartirProducto('+pid+',\'promo_cliente_6\')">⭐ Cliente Amarango — compartir 3 + 6 cuotas</button>':'')
     +'<button class="calc-btn" style="width:100%;margin-bottom:8px;background:var(--az);" onclick="compartirProducto('+pid+',\'clasica\')">Calculadora 1 — Clásica</button>'
@@ -15465,7 +15466,7 @@ window.aeSincronizarSelectoresVisuales=function(){
 <script src="/admin-tareas-compartidas.js?v=20261104-asesores-v1" defer></script>
 <script src="/admin-tareas.js?v=20261104-crm-pendientes-v1" defer></script>
 <script src="/admin-ventas-crm.js?v=20261104-asesor-visible-v5" defer></script>
-<script src="/admin-compartir-descuento.js?v=20261104-admin-10-15-v1" defer></script>
+<script src="/admin-compartir-descuento.js?v=20261104-admin-10-15-v2" defer></script>
 <script src="/admin-usd-persist.js?v=20261103-1" defer></script>
 </body>
 </html>
