@@ -33,6 +33,9 @@ function initStyle(){
  '.ae-crm-sale-trigger{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;min-height:33px;padding:6px 8px;margin:3px 0 5px;border-radius:9px;border:1px solid #8dc9a0;background:#eef9f2;color:#176333;font-family:inherit;font-size:.69rem;font-weight:850;cursor:pointer}',
  '.ae-crm-sale-trigger:focus-visible{outline:2px solid #ff7a00;outline-offset:2px}',
  '#tienda-grid .prod-card > .ae-crm-sale-trigger{flex-shrink:0;align-self:stretch;box-sizing:border-box;margin-top:8px;margin-bottom:6px;order:0}',
+ '/* Asesores: botón arriba del par Ver producto / Publicar, alineados al pie de tarjeta. */',
+ '#tienda-grid .prod-card > .ae-crm-sale-trigger.ae-crm-sale-advisor{margin-top:auto!important;margin-bottom:4px!important}',
+ '#tienda-grid .prod-card > .ae-crm-sale-trigger.ae-crm-sale-advisor + .ae-card-actions{margin-top:0!important;padding-top:2px}',
  'body.oscuro #tienda-grid .prod-card > .ae-crm-sale-trigger{box-shadow:0 1px 8px rgba(0,0,0,.18)}',
  'body.oscuro .ae-crm-sale-trigger{background:#19382d;border-color:#367353;color:#bbf3cc}',
  '.ae-crm-sale-trigger.ae-crm-sale-pending{border-color:#f4b45e;background:#fff1d9;color:#815017}',
@@ -276,6 +279,12 @@ function inject(){
  cards.forEach(function(card){
   var previous=card.querySelector('.ae-crm-sale-trigger');
   if(previous){
+   if(isAdvisor()){
+    // También reubicar botones ya montados sin duplicarlos ni mover el título.
+    var actions=card.querySelector('.ae-card-actions');
+    if(actions && (previous.nextElementSibling!==actions || previous.parentElement!==actions.parentElement))actions.insertAdjacentElement('beforebegin',previous);
+    previous.classList.add('ae-crm-sale-advisor');
+   }else previous.classList.remove('ae-crm-sale-advisor');
    var amount=isAdmin()&&window.AEAdminTasks&&typeof window.AEAdminTasks.crmDraftCount==='function'?window.AEAdminTasks.crmDraftCount(card.id.slice(5)):0;
    var label=isAdvisor()?'✅ Informar venta':amount?'🧾 Vendido · CRM ('+amount+')':'✅ Venta';
    if(previous.textContent!==label)previous.textContent=label;
@@ -284,17 +293,18 @@ function inject(){
    return;
   }
   var id=card.id.slice(5);
-  var target=isAdvisor()?
-    // La fila que contiene el título es display:flex: insertar dentro de ella
-    // comprimía el botón. Insertar DESPUÉS de la fila, a ancho completo.
-    ((card.querySelector('.prod-nombre')&&card.querySelector('.prod-nombre').parentElement)
-      ||card.querySelector('.prod-foto')||card.lastElementChild):
-    (card.querySelector('.ae-task-pin')||card.querySelector('.ae-admin-cost-inline')||card.querySelector('.ae-admin-quickbar'));
+  var advisor=isAdvisor();
+  var target=advisor
+    ? card.querySelector('.ae-card-actions') // delante de «Ver producto» y «Publicar»
+    : (card.querySelector('.ae-task-pin')||card.querySelector('.ae-admin-cost-inline')||card.querySelector('.ae-admin-quickbar'));
   if(!target||!id)return;
   var b=button(isAdvisor()?'✅ Informar venta':'✅ Venta',function(e){e.preventDefault();e.stopPropagation();open(id,card);},'ae-crm-sale-trigger');
   b.title='Registrar venta pendiente de cargar al CRM';
   b.setAttribute('aria-label','Registrar venta del producto '+cardProduct(id,card));
-  target.insertAdjacentElement('afterend',b);
+  if(advisor){
+   b.classList.add('ae-crm-sale-advisor');
+   target.insertAdjacentElement('beforebegin',b);
+  }else target.insertAdjacentElement('afterend',b);
   var amount=isAdmin()&&window.AEAdminTasks&&typeof window.AEAdminTasks.crmDraftCount==='function'?window.AEAdminTasks.crmDraftCount(id):0;
   if(amount){b.textContent='🧾 Vendido · CRM ('+amount+')';b.classList.add('ae-crm-sale-pending');b.title='Venta anotada, pendiente de cargar en CRM. Tocá para registrar otra.';}
  });
