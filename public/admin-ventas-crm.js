@@ -172,7 +172,7 @@ function open(id,card){
    numeroCrm:crmClient&&crmClient.num,clienteId:crmClient&&crmClient.id,
    clienteRegistrado:!!crmClient,producto:product,productoId:id,cuotas:count,nota:notes.value});
   if(!res||!res.ok){issue.textContent='⚠️ '+(res&&res.error||'No se pudo guardar la tarea');save.disabled=false;return;}
-  close();notify(createError?'🧾 Venta pendiente guardada. Cliente aún pendiente de alta en CRM.':'🧾 Venta pendiente guardada en Tareas.');
+  close();queueScan();notify(createError?'🧾 Venta pendiente guardada. Cliente aún pendiente de alta en CRM.':'🧾 Venta pendiente guardada en Tareas.');
   if(focus&&focus.isConnected)focus.focus();
  }
  setTimeout(function(){if(!overlay.hidden)input.focus();},0);
@@ -186,7 +186,15 @@ function inject(){
  var grid=document.getElementById('tienda-grid');if(!grid)return;
  var cards=grid.querySelectorAll('.prod-card[id^="card-"]');
  cards.forEach(function(card){
-  if(card.querySelector('.ae-crm-sale-trigger'))return;
+  var previous=card.querySelector('.ae-crm-sale-trigger');
+  if(previous){
+   var amount=window.AEAdminTasks&&typeof window.AEAdminTasks.crmDraftCount==='function'?window.AEAdminTasks.crmDraftCount(card.id.slice(5)):0;
+   var label=amount?'🧾 Vendido · CRM ('+amount+')':'✅ Venta';
+   if(previous.textContent!==label)previous.textContent=label;
+   previous.classList.toggle('ae-crm-sale-pending',amount>0);
+   previous.title=amount?'Venta anotada, pendiente de cargar en CRM. Tocá para registrar otra.':'Registrar venta pendiente de cargar al CRM';
+   return;
+  }
   var id=card.id.slice(5);
   var target=card.querySelector('.ae-task-pin')||card.querySelector('.ae-admin-cost-inline')||card.querySelector('.ae-admin-quickbar');
   if(!target||!id)return;
@@ -194,6 +202,8 @@ function inject(){
   b.title='Registrar venta pendiente de cargar al CRM';
   b.setAttribute('aria-label','Registrar venta del producto '+cardProduct(id,card));
   target.insertAdjacentElement('afterend',b);
+  var amount=window.AEAdminTasks&&typeof window.AEAdminTasks.crmDraftCount==='function'?window.AEAdminTasks.crmDraftCount(id):0;
+  if(amount){b.textContent='🧾 Vendido · CRM ('+amount+')';b.classList.add('ae-crm-sale-pending');b.title='Venta anotada, pendiente de cargar en CRM. Tocá para registrar otra.';}
  });
 }
 function queueScan(){if(scanTimer)return;scanTimer=setTimeout(function(){scanTimer=0;inject();},120);}
@@ -203,6 +213,7 @@ function start(){
  if(grid){rootObserver=new MutationObserver(queueScan);rootObserver.observe(grid,{childList:true,subtree:true});}
  new MutationObserver(queueScan).observe(document.body,{attributes:true,attributeFilter:['class']});
  window.addEventListener('focus',queueScan);
+ window.addEventListener('ae-admin-tasks-changed',queueScan);
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&overlay&&!overlay.hidden){e.preventDefault();close();}});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
