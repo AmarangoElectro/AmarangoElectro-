@@ -1124,6 +1124,11 @@ body.oscuro .ae-explora-title .ae-explora-contrast{color:#FF7A00}
 #tienda-grid .prod-card .ae-admin-quickbar{row-gap:5px!important;gap:5px!important}
 #tienda-grid .prod-card .ae-share-social-row{margin:0 0 4px!important;gap:6px!important}
 
+/* El acceso cuadrado es un botón directo sobrante dentro de la barra.
+   Las acciones funcionales siguen en el cajón Opciones y en la fila WhatsApp/Instagram. */
+#tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar > button:not([data-keep-quickbar-action]) {
+  display:none!important;
+}
 /* Botones sociales de marca: SOLO Administración en modo claro.
    Mantener los colores vigentes del modo oscuro. */
 body:not(.oscuro) #tienda-grid.ae-admin-v16-visual .prod-card .ae-share-social-row > button[title="Compartir por WhatsApp"] {
