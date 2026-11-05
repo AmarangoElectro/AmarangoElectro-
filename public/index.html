@@ -749,6 +749,34 @@ body.oscuro #tienda-grid .prod-card button[onclick*="compartirProducto"]{backgro
 body.oscuro #tienda-grid .prod-card button[onclick*="compartirInstagram"]{background:#fff !important;color:#08224f !important;border-color:#9db4d3 !important;}
 
 /* Todas las vistas de cuotas deben cerrar dentro de la tarjeta. */
+.ae-card-installments{
+  box-sizing:border-box;
+  container-type:inline-size;
+  min-width:0;
+  margin:6px 0 8px;
+  padding:9px 8px;
+  border:1px solid #ffd8b8;
+  border-radius:10px;
+  background:#fff5ea;
+  color:#172743;
+  overflow-wrap:anywhere;
+}
+.ae-card-installments-amount{
+  display:block;
+  font-size:clamp(1.125rem,6.6vw,2rem);
+  font-size:clamp(1.125rem,17cqi,2rem);
+  font-weight:900;
+  line-height:1.05;
+  letter-spacing:-.035em;
+  color:#a34400;
+}
+.ae-card-installments-plan{margin-top:3px;font-size:.78rem;font-weight:800;line-height:1.25;}
+.ae-card-installments-cash{margin-top:5px;font-size:.67rem;font-weight:650;line-height:1.3;color:#565162;}
+.ae-finance-promo .ae-card-installments{margin:0;border:0;border-radius:0;}
+body.oscuro .ae-card-installments{background:#30231b;border-color:#725035;color:#fff3e8;}
+body.oscuro .ae-card-installments-amount{color:#ff9a47;}
+body.oscuro .ae-card-installments-cash{color:#e2cdbd;}
+
 .ae-cuota-simple,.ae-cuota-destacada,.ae-cuota-comparativa,.ae-cuota-ahorro{width:100%;min-width:0;max-width:100%;overflow:hidden;}
 .ae-cuota-monto{max-width:100%;font-size:clamp(.9rem,1.5vw,1.35rem);font-weight:900;line-height:1.08;overflow-wrap:anywhere;word-break:normal;}
 .ae-cuota-simple .ae-cuota-monto,.ae-cuota-ahorro .ae-cuota-monto{color:var(--nar);}
@@ -2890,6 +2918,13 @@ function mejorCuotaDatos(precio, prod){
   var n=activos[activos.length-1];
   var vc=Math.round(calcularTotalPlan(precio,n)/n/1000)*1000;
   return { n:n, valor:vc };
+}
+function tiendaBloqueCuotaCard(cuota, contado){
+  return '<div class="ae-card-installments">'
+    +'<strong class="ae-card-installments-amount">'+fmt(cuota.valor)+'</strong>'
+    +'<div class="ae-card-installments-plan">en '+cuota.n+(cuota.sinInteres?' cuotas sin interés':' cuotas fijas')+'</div>'
+    +'<div class="ae-card-installments-cash">Contado: '+fmt(contado)+'</div>'
+    +'</div>';
 }
 // ═══ FUNCIÓN CENTRAL: arma el mensaje de WhatsApp con el formato único de toda la app ═══
 // nombre: texto del producto (puede tener variante). precio: contado. cuotasLines: array "💳 N cuotas fijas de $X"
@@ -9507,14 +9542,13 @@ function tiendaCardsHtml(sublista){
       +'<button id="fav-'+p.id+'" onclick="event.stopPropagation();toggleFavorito(\''+p.id+'\',this)" style="flex:0 0 auto;background:none;border:none;font-size:1.05rem;cursor:pointer;line-height:1;padding:0;transition:transform .15s ease;">'+(esFavorito(p.id)?'❤️':'🤍')+'</button>'
       +'</div>'
 
-      +aeBajaCardHtml(p)
       +(function(){
         if(datosPrecioCard.modo==='promo_madre'){
           // La leyenda de 6 cuotas sólo aparece si el plan fijo está habilitado.
           // Un producto configurado con 6 cuotas sin interés NO lleva la leyenda de recargo.
           var tieneSeisFijas=promoFestivoCuotaSeisFija(p)!==null;
           return '<div class="ae-finance ae-finance-promo">'
-            +'<div class="ae-finance-promo-main"><b>3 CUOTAS<br>SIN INTERÉS</b><span>'+fmt(datosPrecioCard.cuota)+'<small>por cuota</small></span></div>'
+            +tiendaBloqueCuotaCard({n:3,valor:datosPrecioCard.cuota,sinInteres:true},datosPrecioCard.contado)
             +(tieneSeisFijas?'<div class="ae-finance-consulta">💳 Mínimo recargo en 6 cuotas</div>':'')
             +'<div class="ae-finance-ahorro">◇ Ahorrás pagando al contado: <b>'+fmt(datosPrecioCard.ahorro)+'</b></div>'
             +'</div>';
@@ -9540,12 +9574,7 @@ function tiendaCardsHtml(sublista){
         if(cd){
           var esSI=cd.sinInteres;
           if(tiendaFormatoCuota==='simple'){
-            // formato SIMPLE: cuota grande naranja + texto
-            return '<div class="ae-cuota-simple">'
-              +'<div class="ae-cuota-monto">'+fmt(cd.valor)+'</div>'
-              +'<div class="ae-cuota-subtexto">en '+cd.n+(esSI?' cuotas · SIN INTERÉS':' cuotas fijas')+'</div>'
-              +'<div class="ae-cuota-contado">Contado: '+fmt(p.venta)+' '+bloquePrecioAntes(p)+'</div>'
-              +'</div>';
+            return tiendaBloqueCuotaCard(cd,p.venta)+bloquePrecioAntes(p);
           }
           if(tiendaFormatoCuota==='destacado'){
             return '<div class="ae-cuota-destacada">'
@@ -9582,16 +9611,15 @@ function tiendaCardsHtml(sublista){
               +'<div class="ae-cuota-subtexto">o '+cd.n+' cuotas de '+fmt(cd.valor)+(esSI?' · SIN INTERÉS':'')+'</div>'
               +'</div>';
           }
-          // formato CAJA profesional: misma identidad limpia de la nueva tienda
-          return '<div class="ae-card-price">Contado: <b>'+fmt(p.venta)+'</b></div>'
-            +'<div class="ae-card-paycopy">Consultá opciones de pago</div>'
+          return tiendaBloqueCuotaCard(cd,p.venta)
             +'<button class="ae-card-paybtn" onclick="event.stopPropagation();tiendaVerDetalle('+pid+')">Ver opciones de cuotas</button>'
             +(p.precioAntes?'<div style="margin-top:5px;">'+bloquePrecioAntes(p)+'</div>':'');
         }else{
           return '<div style="font-size:1.2rem;font-weight:900;color:var(--nar);margin-bottom:2px;">'+fmt(p.venta)+'</div>'
             +'<div style="margin-bottom:6px;">'+bloquePrecioAntes(p)+'</div>';
         }
-      })();
+      })()
+      +aeBajaCardHtml(p);
 
     // Costo de catálogo sólo en Administración; reutiliza el editor existente.
     if(tiendaEsAdmin && !vistaPreviaCliente){
