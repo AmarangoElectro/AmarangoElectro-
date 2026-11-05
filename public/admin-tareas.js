@@ -252,6 +252,14 @@ function stageAdvance(t){
  };
  taskConfirm(options);
 }
+function crmDraftMapsUrl(t){
+ var line=String(t&&t.note||'').split(String.fromCharCode(10)).find(function(row){return row.indexOf('Ubicación Google Maps: ')===0;});
+ if(!line)return '';
+ try{
+  var u=new URL(line.slice('Ubicación Google Maps: '.length).trim()),hostname=u.hostname.toLowerCase();
+  return u.protocol==='https:'&&['google.com','www.google.com','maps.google.com','maps.app.goo.gl','goo.gl'].includes(hostname)?u.href:'';
+ }catch(e){return '';}
+}
 function crmDraftText(t){
  return String(t.note||'')+'\n\nReferencia: '+String(t.id||'');
 }
@@ -336,7 +344,11 @@ function renderPanel(){
    if(t.note)item.appendChild(el('p','ae-task-note',t.note));
    var line=el('div','ae-task-actions');
    if(t.productId)line.appendChild(btn('Ver producto',function(){jumpToProduct(t)},'ae-task-action'));
-   if(isCrmDraft(t))line.appendChild(btn('📋 Copiar para CRM',function(){copyCrmDraft(t)},'ae-task-action'));
+   if(isCrmDraft(t)){
+    line.appendChild(btn('📋 Copiar para CRM',function(){copyCrmDraft(t)},'ae-task-action'));
+    var mapsUrl=crmDraftMapsUrl(t);
+    if(mapsUrl)line.appendChild(btn('📍 Abrir ubicación Maps',function(){window.open(mapsUrl,'_blank','noopener,noreferrer');},'ae-task-action'));
+   }
    if(t.productId&&!isCrmDraft(t)&&['comprar','entregar','completada'].indexOf(t.stage)>=0){
     var stepRow=el('div','ae-task-step-row');
     if(t.stage==='comprar'){
