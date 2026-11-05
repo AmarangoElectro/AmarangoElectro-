@@ -100,6 +100,8 @@ function open(id){
  var check=quote(p,10);
  if(!check){if(typeof window.mostrarToast==='function')window.mostrarToast('No hay precio de contado válido para cotizar');return;}
  makeStyle();currentId=String(id);chosen=10;
+ // Al invocar desde el menú existente de Compartir, cerrar la capa anterior.
+ var original=document.getElementById('modal-cuotas');if(original)original.style.display='none';
  if(!layer){
   layer=elem('div','ae-discount-layer');layer.hidden=true;layer.addEventListener('click',function(e){if(e.target===layer)close();});
   document.body.appendChild(layer);
@@ -214,5 +216,6 @@ function start(){
  window.addEventListener('focus',schedule);
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&layer&&!layer.hidden){e.preventDefault();close();}});
 }
+window.AEDescuentoAdmin={abrir:open};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
