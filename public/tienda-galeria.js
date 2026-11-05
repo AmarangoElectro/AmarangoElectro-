@@ -420,25 +420,8 @@
         if(extras.length&&!p.foto){
           estadoUpload('⏳ Subiendo portada · 1 de '+total+'…');
           var url=await subirObjeto(p,extras.shift(),'imagen');
-          // La sincronización puede sustituir el objeto del catálogo durante la subida.
-          var vigente=buscarProd(p.id);
-          if(!vigente||vigente.eliminado===true||vigente.foto)
-            throw new Error('El producto o su portada cambió durante la carga. Volvé a abrir su galería.');
-          p=vigente;
-          var fotoAnterior=p.foto||'',marcaAnterior=p.estadoManualActualizado,
-              fotoFechaAnterior=p.fotoActualizadaManual;
-          p.foto=url;p.fotoActualizadaManual=Date.now();p.estadoManualActualizado=p.fotoActualizadaManual;
-          try{
-            var guardado=await tiendaGuardarLocal([p]);
-            if(guardado&&guardado.error)throw guardado.error;
-            await tiendaVerificarManualesNube([p.id],url);
-          }catch(e){
-            p.foto=fotoAnterior;p.estadoManualActualizado=marcaAnterior;p.fotoActualizadaManual=fotoFechaAnterior;
-            // Si falló la confirmación de portada, no dejar una imagen fantasma
-            // almacenada solamente en el navegador.
-            try{localStorage.setItem('ae_tienda_catalogo',JSON.stringify(tiendaProductos));}catch(ignore){}
-            throw e;
-          }
+          // Guardar sólo la portada sobre la versión más reciente del mismo ID.
+          p=await tiendaGuardarPortadaCarga(p.id,url);
         }
         if(extras.length){
           var actual=await leer(p,true),restante=Math.max(0,3-(p.foto?1:0)-actual.imagenes.length);

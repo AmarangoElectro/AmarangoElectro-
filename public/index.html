@@ -2711,9 +2711,15 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
     </p>
     <div style="background:#f0f4ff;border-radius:8px;padding:8px 10px;font-size:.68rem;color:var(--az);margin-bottom:10px;font-family:monospace;">
       Heladera No Frost 300L | 310000<br>
-      Batidora Yelmo | 180000 | 320000<br>
+      Batidora Yelmo | 180000<br>
       Yogurtera Delhi | 45000
     </div>
+    <fieldset id="carga-campos" style="min-width:0;margin:0;padding:0;border:0;">
+    <label for="carga-accion" style="display:block;color:var(--az);font-size:.72rem;font-weight:800;">¿Qué querés hacer?</label>
+    <select id="carga-accion" style="width:100%;margin:4px 0 10px;padding:8px;border:1.5px solid var(--bor);border-radius:10px;background:var(--wh);color:var(--txt);font:inherit;font-size:.78rem;">
+      <option value="nuevos">Publicar productos nuevos</option>
+      <option value="precios">Actualizar precios de productos existentes</option>
+    </select>
     <textarea id="carga-texto" rows="8" placeholder="Pegá acá tus productos..."
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;font-family:monospace;font-size:.8rem;"></textarea>
     <div style="margin:10px 0;">
@@ -2726,7 +2732,7 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
     </div>
     <div id="ae-carga-media-selector" style="background:#f0f4ff;border-radius:10px;padding:10px;margin:8px 0;">
       <div style="font-size:.74rem;color:var(--az);font-weight:900;margin-bottom:6px;">📷 Fotos o video (opcional)</div>
-      <div class="ae-carga-media-note">Seleccioná una, dos o tres fotos juntas, o agregalas de a una. La primera será portada del primer producto de esta carga si todavía no tiene foto.</div>
+      <div class="ae-carga-media-note">Si elegís fotos o video, cargá un solo producto. La primera foto será su portada.</div>
       <input type="file" multiple id="carga-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="if(window.AECargaMultimedia)window.AECargaMultimedia.agregarFotos(this.files);this.value=''">
       <input type="file" id="carga-video-input" accept="video/mp4,video/webm" style="display:none;" onchange="if(window.AECargaMultimedia)window.AECargaMultimedia.agregarVideo(this.files);this.value=''">
       <div class="ae-carga-media-buttons">
@@ -2752,7 +2758,8 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
       style="width:100%;padding:10px;border:2px solid var(--bor);border-radius:10px;margin-bottom:10px;display:none;">
     <!-- Protección: no permitir reemplazo masivo de productos manuales desde carga habitual. -->
     <button class="calc-btn" style="width:100%;background:var(--gr);" onclick="tiendaProcesarCarga()">✅ Confirmar y cargar productos</button>
-    <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="document.getElementById('modal-carga').style.display='none';if(window.AECargaMultimedia)AECargaMultimedia.limpiar()">Cancelar</button>
+    <button class="calc-btn" style="width:100%;background:var(--bg);color:var(--sub);border:2px solid var(--bor);margin-top:8px;" onclick="tiendaCerrarCarga()">Cancelar</button>
+    </fieldset>
   </div>
 </div>
 
@@ -5309,13 +5316,14 @@ async function tiendaSubirManualesNube(productos){
     if(productos)throw new Error('Sin conexión a Supabase');
     return {data:null,error:null};
   }
+  var preparar=typeof productos==='function'?productos:null;
   var manualesLocal=productos||(tiendaProductos||[]).filter(function(p){return p&&!tiendaEsAutomatico(p);});
   for(var intento=0;intento<5;intento++){
     var fila=await tiendaLeerFilaManualesNube();
     var manualesServidor=fila?fila.datos:[];
-    var fusionado=tiendaFusionarManualesPorVersion(manualesServidor,manualesLocal);
+    var fusionado=tiendaFusionarManualesPorVersion(manualesServidor,preparar?preparar(manualesServidor):manualesLocal);
     if(fila&&JSON.stringify(fusionado)===JSON.stringify(manualesServidor)){
-      return {data:[{actualizado:fila.actualizado}],error:null};
+      return {data:[{actualizado:fila.actualizado}],error:null,manuales:fusionado};
     }
     // La versión sólo cambia si nadie escribió desde que leímos. PostgreSQL
     // comprueba el filtro al escribir, incluso si otra sesión tiene la fila bloqueada.
@@ -5332,7 +5340,7 @@ async function tiendaSubirManualesNube(productos){
     }
     var guardado=await escritura.select('actualizado');
     if(guardado.error)throw guardado.error;
-    if(guardado.data&&guardado.data.length===1)return guardado;
+    if(guardado.data&&guardado.data.length===1)return {data:guardado.data,error:null,manuales:fusionado};
   }
   throw new Error('El catálogo cambió varias veces mientras guardabas. Volvé a intentar.');
 }
@@ -6416,11 +6424,14 @@ function tiendaCargarLocal(){
   // compatibilidad: productos viejos sin campo "visible" se consideran visibles
   tiendaProductos.forEach(function(p){ if(typeof p.visible==='undefined')p.visible=true; });
 }
-function tiendaGuardarLocal(manuales){
+function tiendaGuardarCacheLocal(){
   tiendaActualizarMotivosOcultos();
   try{ localStorage.setItem('ae_tienda_catalogo', JSON.stringify(tiendaProductos)); }catch(e){}
   try{ tiendaCacheGrandeGuardar(tiendaProductos,tiendaVersionIncrementalLocal()).catch(function(){}); }catch(e){}
   tiendaBackupAuto();  // copia de seguridad automática del catálogo
+}
+function tiendaGuardarLocal(manuales){
+  tiendaGuardarCacheLocal();
   // Guardado liviano: no reescribe el JSON gigante del catálogo. Supabase
   // cancelaba esa operación por statement_timeout. Subimos solamente los
   // manuales y las decisiones administrativas de publicación.
@@ -8479,6 +8490,32 @@ function tiendaVerificarManualesNube(ids, fotoEsperada){
       }
       return true;
     });
+}
+async function tiendaGuardarPortadaCarga(id,url){
+  var versionAnterior;
+  var guardado=await tiendaEncolarGuardadoNube(function(servidor){
+    var vigente=servidor.find(function(p){return p&&String(p.id)===String(id);});
+    if(!vigente||vigente.eliminado===true||tiendaEsAutomatico(vigente)){
+      throw new Error('El producto ya no está disponible.');
+    }
+    versionAnterior=tiendaMarcaTiempoProducto(vigente);
+    if(vigente.foto&&vigente.foto!==url)throw new Error('El producto ya tiene otra portada.');
+    if(vigente.foto===url)return [vigente];
+    var fecha=Math.max(Date.now(),versionAnterior+1);
+    return [Object.assign({},vigente,{foto:url,fotoActualizadaManual:fecha,estadoManualActualizado:fecha})];
+  });
+  var remoto=guardado.manuales.find(function(p){return String(p.id)===String(id);});
+  var local=buscarProd(id);
+  if(local&&local.eliminado!==true&&!local.foto){
+    if(tiendaMarcaTiempoProducto(local)<=versionAnterior){
+      tiendaProductos[tiendaProductos.indexOf(local)]=remoto;
+    }else{
+      local.foto=remoto.foto;
+      local.fotoActualizadaManual=remoto.fotoActualizadaManual;
+    }
+    tiendaGuardarCacheLocal();
+  }
+  return remoto;
 }
 function tiendaEsPendienteImagenAdmin(p){
   // Bandeja privada: productos sin imagen propia cargada en Amarango.
@@ -13560,28 +13597,92 @@ function tiendaNuevoIdManual(usados){
   usados.add(String(id));
   return id;
 }
+var tiendaBorradorCarga=null;
+function tiendaCerrarCarga(){
+  if(window._tiendaCargaManualEnCurso)return;
+  tiendaLimpiarCarga();
+}
+function tiendaLimpiarCarga(){
+  tiendaBorradorCarga=null;
+  document.getElementById('modal-carga').style.display='none';
+  ['carga-texto','carga-categoria','carga-caracteristicas','carga-mayorista'].forEach(function(id){
+    document.getElementById(id).value='';
+  });
+  document.getElementById('carga-accion').value='nuevos';
+  if(window.AECargaMultimedia)window.AECargaMultimedia.limpiar();
+}
+function tiendaNombreExactoCarga(p){
+  return String(p.nombre||'').normalize('NFC').trim().replace(/\s+/g,' ').toLowerCase();
+}
+function tiendaLeerPrecioCarga(texto,permitirDecimalPunto){
+  var valor=String(texto||'').trim().replace(/^\$\s*/,'');
+  if(permitirDecimalPunto&&/^\d+\.\d{1,2}$/.test(valor))return Number(valor);
+  if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d+)?$/.test(valor))return NaN;
+  return Number(valor.replace(/\./g,'').replace(',','.'));
+}
+function tiendaPrepararCargaManuales(nuevos,servidor,actualizarPrecios){
+  var porNombre=new Map();
+  var porId=new Map();
+  servidor.forEach(function(p){
+    if(!p||p.id==null)return;
+    porId.set(String(p.id),p);
+    if(p.eliminado===true||tiendaEsAutomatico(p))return;
+    var clave=tiendaNombreExactoCarga(p);
+    if(!porNombre.has(clave))porNombre.set(clave,[]);
+    porNombre.get(clave).push(p);
+  });
+  var nombresVistos=new Set();
+  return nuevos.map(function(n){
+    var nombre=tiendaNombreExactoCarga(n);
+    if(nombresVistos.has(nombre))throw new Error('El nombre «'+n.nombre+'» aparece dos veces en la carga.');
+    nombresVistos.add(nombre);
+    var mayorista=aeNormalizarMayorista(n.mayorista);
+    var coincidencias=porNombre.get(nombre)||[];
+    var exactas=coincidencias.filter(function(p){
+      return aeNormalizarMayorista(p.mayorista||p.proveedor)===mayorista;
+    });
+    if(actualizarPrecios){
+      if(exactas.length!==1||(!mayorista&&coincidencias.length!==1)){
+        throw new Error('No hay una coincidencia única para «'+n.nombre+'». Revisá el nombre y el mayorista, o abrí la tarjeta para editarla.');
+      }
+      var anterior=exactas[0];
+      var fecha=Math.max(Date.now(),tiendaMarcaTiempoProducto(anterior)+1);
+      var estado=Object.assign({},anterior,{
+        costo:n.costo,venta:n.venta,precioActualizado:fecha,precioChequeadoManual:fecha,
+        estadoRevisionActualizado:fecha,estadoManualActualizado:fecha,pendienteRevisionManual:false
+      });
+      delete estado.visibleAntesRevisionManual;
+      if(!tiendaTieneSinStock(estado)&&estado.ocultoManualAdmin!==true&&estado.ocultoManualProveedor!==true){
+        estado.visible=true;
+      }
+      return estado;
+    }
+    var guardado=porId.get(String(n.id));
+    if(guardado){
+      if(guardado.eliminado!==true&&tiendaNombreExactoCarga(guardado)===nombre&&exactas.includes(guardado)&&guardado.creado===n.creado)return guardado;
+      throw new Error('El identificador de «'+n.nombre+'» ya está en uso. Cancelá y volvé a abrir la carga.');
+    }
+    if(exactas.length||coincidencias.some(function(p){return !mayorista||!aeNormalizarMayorista(p.mayorista||p.proveedor);})){
+      throw new Error('Ya existe un producto con el nombre «'+n.nombre+'». Si es una variante, aclarala en el nombre. Para cambiar el precio, elegí «Actualizar precios».');
+    }
+    return n;
+  });
+}
 async function tiendaProcesarCarga(){
  if(!tiendaExigirAdmin())return;
  if(window._tiendaCargaManualEnCurso){mostrarToast('⏳ Ya se está guardando el producto…');return;}
  window._tiendaCargaManualEnCurso=true;
+ var campos=document.getElementById('carga-campos');
+ campos.disabled=true;
  try{
   var adjuntosCarga=window.AECargaMultimedia?window.AECargaMultimedia.seleccion():{fotos:[],video:null};
   var hayAdjuntos=!!(adjuntosCarga.fotos.length||adjuntosCarga.video);
-  if(hayAdjuntos){
-    if(!window.AEGaleria||typeof window.AEGaleria.cargarCreacion!=='function'){
-      alert('⚠️ La galería todavía no terminó de cargar. Volvé a intentar.');return;
-    }
-    var sesionFotos=typeof tiendaAuthFotosSesion==='function'?await tiendaAuthFotosSesion():null;
-    if(!sesionFotos||!sesionFotos.user){
-      alert('🔐 Para subir las fotos o el video, conectá primero tu sesión segura de fotos en Administración. No se creó ningún producto.');
-      if(typeof tiendaAuthFotosAbrir==='function')tiendaAuthFotosAbrir();
-      return;
-    }
-  }
+  var actualizarPrecios=document.getElementById('carga-accion').value==='precios';
   var texto=document.getElementById('carga-texto').value||'';
   if(!texto.trim()){ alert('Pegá al menos un producto en el recuadro.'); return; }
-  var esUSD=(cargaModo==='usd');
-  var dolar=parseFloat((document.getElementById('carga-dolar').value||'').replace(/\./g,'').replace(/,/g,'.'))||0;
+  var modo=cargaModo;
+  var esUSD=(modo==='usd');
+  var dolar=tiendaLeerPrecioCarga(document.getElementById('carga-dolar').value,false);
   // 🏷️ categoría y características (opcionales, se aplican a todos)
   var _cargaCat='', _cargaCarac='', _cargaMayorista='';
   try{
@@ -13590,42 +13691,38 @@ async function tiendaProcesarCarga(){
     var _cm=document.getElementById('carga-mayorista'); if(_cm) _cargaMayorista=(_cm.value||'').trim();
   }catch(e){}
 
-  if(esUSD && dolar<=0){ alert('Elegiste USD. Cargá la cotización del dólar para convertir los precios.'); return; }
+  if(esUSD && (!Number.isFinite(dolar)||dolar<=0)){ alert('Elegiste USD. Cargá la cotización del dólar para convertir los precios.'); return; }
 
   var lineas=texto.split(/\r?\n/);
   var nuevos=[];
-  var descartadas=0;
+  var invalidas=[];
 
-  lineas.forEach(function(l){
+  lineas.forEach(function(l,indice){
     l=(l||'').trim(); if(!l)return;
-    var partes=l.split(/\s*[|¦;\t]\s*|\s{2,}/);
-    if(partes.length<2){
-      var mm=l.match(/^(.*?)[\s\-:]+\$?([\d\.]{4,})\s*$/);
-      if(mm){ partes=[mm[1], mm[2]]; }
+    var partes=l.split(/[|¦;\t]/);
+    if(partes.length===1){
+      var separacion=l.match(/^(.+?)\s{2,}(\$?\s*[\d.,]+)$/);
+      if(separacion)partes=separacion.slice(1);
     }
-    if(partes.length<2){ descartadas++; return; }
+    if(partes.length!==2){ invalidas.push(indice+1); return; }
     var nombre=(partes[0]||'').trim();
-    var numRaw=(partes[1]||'').trim().replace(/\$/g,'').replace(/\./g,'').replace(/,/g,'.');
-    var num=parseFloat(numRaw);
-    if(!Number.isFinite(num)||num<=0||!nombre){ descartadas++; return; }
+    var num=tiendaLeerPrecioCarga(partes[1],esUSD);
+    if(!Number.isFinite(num)||num<=0||!nombre){ invalidas.push(indice+1); return; }
 
     var costo, venta;
-    if(cargaModo==='venta'){
+    if(modo==='venta'){
       venta = Math.round(num);   // precio final tal cual
       costo = 0;
-    } else if(cargaModo==='usd'){
+    } else if(modo==='usd'){
       costo = num*dolar;          // USD -> pesos
       venta = markupVentaCRM(costo); // fórmula Amarango
     } else {
       costo = num;                // costo directo
       venta = markupVentaCRM(costo); // fórmula Amarango
     }
-    var ahoraManual=Date.now();
+    if(!Number.isSafeInteger(Math.round(costo))||!Number.isSafeInteger(venta)||venta<=0){ invalidas.push(indice+1); return; }
     var _prod={
-      nombre:nombre, costo:Math.round(costo), venta:venta,
-      creado:ahoraManual, precioActualizado:ahoraManual, precioChequeadoManual:ahoraManual,
-      estadoManualActualizado:ahoraManual, estadoRevisionActualizado:ahoraManual,
-      visible:true, pendienteRevisionManual:false
+      nombre:nombre, costo:Math.round(costo), venta:venta
     };
     // 🏷️ categoría y características elegidas en el formulario
     if(_cargaCat){ _prod.categoria=_cargaCat; _prod.categoriaManualFijada=true; }
@@ -13634,132 +13731,70 @@ async function tiendaProcesarCarga(){
     nuevos.push(_prod);
   });
 
-  if(!nuevos.length){
-    alert('⚠️ No pude leer ningún producto.\n\nRevisá que cada línea sea así:\nNombre del producto | 310000\n\n(nombre, una barra |, y el costo)');
-    return;
-  }
+  if(invalidas.length)throw new Error('Revisá las líneas '+invalidas.join(', ')+'. Usá Nombre | Precio, con un solo precio por línea.');
 
-  // Si la sincronización inicial falló, una lectura nueva de los manuales
-  // permite reintentar sin recargar la app.
-  await window._tiendaSincronizacionInicialPromesa;
-  var filaManuales=await tiendaLeerFilaManualesNube();
-  if(filaManuales){
-    var automaticos=tiendaProductos.filter(tiendaEsAutomatico);
-    var locales=tiendaProductos.filter(function(p){return !tiendaEsAutomatico(p);});
-    tiendaProductos=automaticos.concat(tiendaFusionarManualesPorVersion(filaManuales.datos,locales));
+  if(hayAdjuntos&&(actualizarPrecios||nuevos.length!==1)){
+    throw new Error(actualizarPrecios?'Para agregar fotos o video a un producto existente, abrí «Foto / video» en su tarjeta.':'Con fotos o video, confirmá un solo producto por vez.');
   }
-  var idsUsados=new Set(tiendaProductos.map(function(p){return String(p.id);}));
-
-  // Solo actualizar coincidencias exactas normalizadas de productos activos.
-  // Un nombre parecido puede ser otra medida, color o modelo.
-  function claveProd(nom){
-    var s=(nom||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    // sacar emojis y símbolos varios que a veces vienen adelante/atrás del nombre
-    s=s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\uFE0F]/gu,'');
-    s=s.replace(/(\d)\s*(lts|lt|litros|litro|l)\b/g,'$1l');
-    s=s.replace(/(\d)\s*(kg|kgs|kilos|kilo|k)\b/g,'$1kg');
-    s=s.replace(/(\d)\s*(cm|centimetros)\b/g,'$1cm');
-    s=s.replace(/(\d)\s*(w|watts|watt)\b/g,'$1w');
-    s=s.replace(/(\d)\s*(pulgadas|pulg|"|'')/g,'$1pulg');
-    s=s.replace(/[x\u00d7\u00b7*]/g,'x');
-    s=s.replace(/[^a-z0-9]/g,'');
-    return s;
-  }
-  var actualizados=0, agregados=0;
-  var manualesTocados=new Map();
-  var primerProductoCarga=null;
-  nuevos.forEach(function(n){
-    var kn=claveProd(n.nombre);
-    var nombreExacto=n.nombre.toLowerCase().replace(/\s+/g,' ').trim();
-    var mayorista=aeNormalizarMayorista(n.mayorista);
-    var existe=tiendaProductos.find(function(p){
-      if(tiendaEsAutomatico(p)||p.eliminado===true)return false;
-      var mayoristaExistente=aeNormalizarMayorista(p.mayorista||p.proveedor);
-      if(mayorista&&mayoristaExistente&&mayorista!==mayoristaExistente)return false;
-      return kn.length>=3
-        ? claveProd(p.nombre)===kn
-        : (p.nombre||'').toLowerCase().replace(/\s+/g,' ').trim()===nombreExacto;
-    });
-    if(existe){
-      if(!primerProductoCarga)primerProductoCarga=existe;
-      var ahoraControlManual=Date.now();
-      existe.costo=n.costo; existe.venta=n.venta;
-      existe.precioActualizado=ahoraControlManual;
-      existe.precioChequeadoManual=ahoraControlManual;
-      existe.estadoRevisionActualizado=ahoraControlManual;
-      existe.estadoManualActualizado=ahoraControlManual;
-      existe.pendienteRevisionManual=false;
-      delete existe.visibleAntesRevisionManual;
-      if(!tiendaTieneSinStock(existe)&&existe.ocultoManualAdmin!==true&&existe.ocultoManualProveedor!==true){
-        existe.visible=true;
-      }
-      manualesTocados.set(String(existe.id),existe);
-      actualizados++;
-    }else{
-      // El precio recién cargado ya fue controlado hoy: se publica ahora y
-      // recién pasa a "Revisar manuales" si cumple 30 días sin control.
-      n.visible=true;
-      n.pendienteRevisionManual=false;
-      delete n.visibleAntesRevisionManual;
-      n.id=tiendaNuevoIdManual(idsUsados);
-      tiendaProductos.push(n);
-      if(!primerProductoCarga)primerProductoCarga=n;
-      manualesTocados.set(String(n.id),n);
-      agregados++;
+  if(hayAdjuntos){
+    if(!window.AEGaleria||typeof window.AEGaleria.cargarCreacion!=='function'){
+      throw new Error('La galería todavía no terminó de cargar. Volvé a intentar.');
     }
-  });
+    var sesionFotos=typeof tiendaAuthFotosSesion==='function'?await tiendaAuthFotosSesion():null;
+    if(!sesionFotos||!sesionFotos.user){
+      alert('🔐 Para subir las fotos o el video, conectá primero tu sesión segura de fotos en Administración.');
+      if(typeof tiendaAuthFotosAbrir==='function')tiendaAuthFotosAbrir();
+      return;
+    }
+  }
 
-  // Con archivos seleccionados, liberar inmediatamente la ventana de carga.
-  // El trabajo continúa en esta página sin perder los campos si falla Supabase.
+  await window._tiendaSincronizacionInicialPromesa;
+  if(!actualizarPrecios){
+    var claveBorrador=JSON.stringify(nuevos);
+    if(!tiendaBorradorCarga||tiendaBorradorCarga.clave!==claveBorrador){
+      var idsUsados=new Set(tiendaProductos.filter(Boolean).map(function(p){return String(p.id);}));
+      var fecha=Date.now();
+      tiendaBorradorCarga={clave:claveBorrador,productos:nuevos.map(function(n){
+        return Object.assign({},n,{
+          id:tiendaNuevoIdManual(idsUsados),creado:fecha,precioActualizado:fecha,precioChequeadoManual:fecha,
+          estadoManualActualizado:fecha,estadoRevisionActualizado:fecha,visible:true,pendienteRevisionManual:false
+        });
+      })};
+    }
+    nuevos=tiendaBorradorCarga.productos;
+  }
+
   if(hayAdjuntos){
     document.getElementById('modal-carga').style.display='none';
-    if(window.AEGaleria&&window.AEGaleria.estadoCarga)window.AEGaleria.estadoCarga('⏳ Guardando producto en la nube. Luego se subirán fotos/video…');
-    mostrarToast('⏳ Confirmando producto en la nube. Después suben fotos/video…');
+    mostrarToast('⏳ Guardando producto. Después suben fotos o video…');
   }
-  var resultadoGuardado=await tiendaGuardarLocal(Array.from(manualesTocados.values()));
-  if(resultadoGuardado&&resultadoGuardado.error)throw resultadoGuardado.error;
-  await tiendaVerificarManualesNube(Array.from(manualesTocados.keys()));
-  // El catálogo se confirmó primero. El modal se cierra y la multimedia se
-  // envía en una cola de la aplicación, sin bloquear el uso de la tienda.
-  var avisoFotoCarga='';
-  var mediaParaSubir=null;
+  var tocados;
+  var guardado=await tiendaEncolarGuardadoNube(function(servidor){
+    tocados=tiendaPrepararCargaManuales(nuevos,servidor,actualizarPrecios);
+    return tocados;
+  });
+  var automaticos=tiendaProductos.filter(tiendaEsAutomatico);
+  var locales=tiendaProductos.filter(function(p){return p&&!tiendaEsAutomatico(p);});
+  var manuales=tiendaFusionarManualesPorVersion(locales,guardado.manuales);
+  tiendaProductos=automaticos.concat(manuales);
+  tiendaGuardarCacheLocal();
+  var primero=buscarProd(tocados[0].id);
+  tiendaLimpiarCarga();
   if(hayAdjuntos){
-    if(primerProductoCarga){
-      mediaParaSubir=window.AECargaMultimedia.tomar();
-      avisoFotoCarga='\n\n📷 Fotos/video: carga en curso. Mantené abierta la aplicación hasta ver la confirmación.';
-    }else{
-      avisoFotoCarga='\n\n⚠️ No se identificó producto para asignar la multimedia; no se borró la selección.';
-    }
-  }
-  document.getElementById('modal-carga').style.display='none';
-  document.getElementById('carga-texto').value='';
-  if(mediaParaSubir && primerProductoCarga){
-    // No esperar las fotos para liberar la pantalla. Una falla se notifica
-    // después, pero nunca se informa que el archivo quedó publicado sin prueba.
-    window.AEGaleria.cargarCreacion(primerProductoCarga,mediaParaSubir).catch(function(error){
-      console.warn('Carga multimedia de producto incompleta',String(error&&error.message||error).slice(0,130));
+    window.AEGaleria.cargarCreacion(primero,adjuntosCarga).catch(function(error){
+      console.warn('Carga multimedia incompleta:',error);
     });
-  }
-  tiendaRender();
-  // Ubicar y resaltar el primer producto nuevo despues del guardado exitoso.
-  if(primerProductoCarga && primerProductoCarga.id!=null){
-    tiendaEnfocarProducto(primerProductoCarga.id,false);
-  }
-  var msg='✅ Listo:\n\n• '+actualizados+' precio(s) actualizado(s) (sin tocar fotos ni características)\n• '+agregados+' producto(s) nuevo(s)';
-  if(agregados>0)msg+='\n\n👁️ Los productos nuevos quedaron publicados. Pasarán a "Revisar manuales" recién después de 30 días sin controlar el precio.';
-  msg+='\n\nTotal en la tienda: '+tiendaProductos.length;
-  msg+=avisoFotoCarga;
-  if(descartadas>0)msg+='\n\n('+descartadas+' líneas no se entendieron y se saltearon)';
-  if(mediaParaSubir){
     mostrarToast('✅ Producto guardado · 📷 Subiendo multimedia');
   }else{
-    alert(msg);
+    mostrarToast(actualizarPrecios?'✅ Precios actualizados: '+tocados.length:'✅ Productos publicados: '+tocados.length);
   }
+  tiendaRender();
+  tiendaEnfocarProducto(primero.id,false);
  }catch(err){
   document.getElementById('modal-carga').style.display='block';
-  if(window.AEGaleria&&window.AEGaleria.estadoCarga)window.AEGaleria.estadoCarga('⚠️ No se guardó el producto. Revisá el formulario.','error');
-  alert('❌ No se pudo confirmar el producto en la nube. El formulario quedó abierto para que puedas reintentar.\n\nDetalle: '+(err.message||err));
+  alert('⚠️ '+(err.message||err)+'\n\nTus datos quedaron en el formulario.');
  }finally{
+  campos.disabled=false;
   window._tiendaCargaManualEnCurso=false;
  }
 }
@@ -15463,7 +15498,7 @@ window.aeSincronizarSelectoresVisuales=function(){
 })();
 </script>
 
-<script src="/tienda-galeria.js?v=20261105-portada-manual" defer></script>
+<script src="/tienda-galeria.js?v=20261105-portada-por-id" defer></script>
 <script src="/tienda-carga-multimedia.js?v=20261104-1" defer></script>
 <script src="/admin-tareas-compartidas.js?v=20261105-edit-delete-v3" defer></script>
 <script src="/admin-tareas.js?v=20261105-edit-delete-v5" defer></script>
