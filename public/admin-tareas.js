@@ -286,11 +286,17 @@ function createCrmDraft(data){
   'Cliente CRM: '+(confirmado?'registrado':'alta pendiente de verificar'),
   cid?'ID cliente CRM: '+cid:null,
   'Producto: '+producto,'Cuotas: '+n,'Fecha: '+fecha,
+  data.telefonoEntrega?'Teléfono alternativo de entrega: '+String(data.telefonoEntrega).slice(0,30):null,
+  data.direccionEntrega?'Domicilio de entrega: '+String(data.direccionEntrega).slice(0,180):null,
+  data.entreCalles?'Entre calles: '+String(data.entreCalles).slice(0,160):null,
+  data.localidadEntrega?'Localidad: '+String(data.localidadEntrega).slice(0,100):null,
+  data.ubicacionMaps?'Ubicación Google Maps: '+String(data.ubicacionMaps).slice(0,500):null,
+  data.precisionGps?'Precisión GPS aproximada: '+Number(data.precisionGps)+' m':null,
   nota?'Observaciones: '+nota:null].filter(Boolean);
  var stamp=Date.now();
  var task={id:'ae-'+stamp+'-'+Math.random().toString(36).slice(2,9),
   title:('🧾 Venta CRM · '+nombre).slice(0,180),
-  note:lines.join('\n').slice(0,500),
+  note:lines.join('\n').slice(0,1600),
   productId:String(data.productoId||'').slice(0,180)||null,
   productName:producto,
   stage:'pendiente',dueAt:null,createdAt:stamp,updatedAt:stamp};
