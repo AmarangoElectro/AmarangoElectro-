@@ -23,7 +23,7 @@ function fromRow(t){
  return {id:t.id,title:t.title,note:t.note||'',productId:t.product_id||null,
   productName:t.product_name||null,stage:t.stage,dueAt:t.due_at||null,
   createdAt:Date.parse(t.created_at)||Date.now(),
-  updatedAt:Date.parse(t.updated_at)||Date.now(),
+  updatedAt:Date.parse(t.updated_at)||Date.now(),updatedAtIso:t.updated_at||null,
   completedAt:t.completed_at?Date.parse(t.completed_at):null,
   creatorUserId:t.creator_user_id||null};
 }
@@ -103,7 +103,7 @@ function change(action,payload){
  }).catch(function(err){
    mutating=false;active=false;
    console.warn('Cambio de tarea compartida sin confirmar',String(err.message||err).slice(0,100));
-   report('⚠️ Cambio pendiente de sincronización entre Maxi y Angie');
+   report('⚠️ El cambio no se confirmó entre dispositivos. Revisá la tarea e intentá nuevamente.');
    lastSync=0;return sync(true).then(function(){return false;});
  });
  return queue;
