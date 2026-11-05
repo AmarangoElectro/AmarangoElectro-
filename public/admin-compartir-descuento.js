@@ -67,6 +67,7 @@ function makeStyle(){
  css.textContent=[
  '#tienda-grid .prod-card .ae-admin-discount-entry{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-height:38px!important;padding:8px 7px!important;margin:0 0 6px!important;box-sizing:border-box!important;border-radius:10px!important;border:1.5px solid #f6aa4c!important;background:#fff2df!important;color:#8b460c!important;font-family:inherit!important;font-size:.69rem!important;line-height:1.3!important;font-weight:850!important;cursor:pointer!important;gap:6px!important;flex-shrink:0!important}',
  'body.oscuro #tienda-grid .prod-card .ae-admin-discount-entry{background:#3d2a21!important;border-color:#e1914a!important;color:#ffe1bf!important}',
+ '/* Acceso duplicado sin etiqueta (cuadrado azul) oculto en Administración. */ #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-quickbar>button[title="Compartir producto"], #tienda-grid.ae-admin-v16-visual .prod-card .ae-share-product{display:none!important}',
  '.ae-discount-layer[hidden]{display:none!important}.ae-discount-layer{position:fixed;inset:0;z-index:8100;display:flex;align-items:center;justify-content:center;padding:14px;background:rgba(4,9,22,.73);backdrop-filter:blur(4px)}',
  '.ae-discount-dialog{width:min(100%,440px);max-height:92dvh;overflow-y:auto;overscroll-behavior:contain;background:#fff;color:#152544;border:1px solid #f4c48b;border-radius:20px;padding:18px;box-sizing:border-box;font-family:Inter,system-ui,sans-serif;box-shadow:0 24px 65px #0006}',
  '.ae-discount-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.ae-discount-title{font-size:1.05rem;font-weight:900;color:#0b2d6b}',
@@ -182,28 +183,9 @@ function open(id){
  paint();
 }
 function inject(){
- if(!document.body)return;
- if(!admin()){
-  document.querySelectorAll('.ae-admin-discount-entry').forEach(function(b){b.remove();});
-  if(layer&&!layer.hidden)close();
-  return;
- }
- makeStyle();
- var grid=document.getElementById('tienda-grid');if(!grid)return;
- grid.querySelectorAll('.prod-card[id^="card-"]').forEach(function(card){
-  if(card.querySelector('.ae-admin-discount-entry'))return;
-  var shareRow=card.querySelector('.ae-share-social-row');
-  if(!shareRow)return;
-  var id=card.id.slice(5);if(!id)return;
-  var p=product(id);if(!p||!quote(p,10))return;
-  var b=button('🏷️ Enviar con descuento (10% o 15%)',function(e){
-   e.preventDefault();e.stopPropagation();open(id);
-  },'ae-admin-discount-entry');
-  b.title='Enviar esta ficha con descuento privado del 10% o 15%';
-  b.setAttribute('aria-label','Compartir '+String(p.nombre||'producto')+' con 10 o 15 por ciento de descuento');
-  // Última opción visible de la tarjeta; debajo de todas las herramientas de administración.
-  card.appendChild(b);
- });
+ // Descuento exclusivamente desde el diálogo de compartir del administrador.
+ document.querySelectorAll('.ae-admin-discount-entry').forEach(function(b){b.remove();});
+ if(!admin()&&layer&&!layer.hidden)close();
 }
 function schedule(){
  if(scanScheduled)return;scanScheduled=true;
