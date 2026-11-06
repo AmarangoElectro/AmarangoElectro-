@@ -10441,63 +10441,60 @@ function tiendaRecalcCosto(){
   }
   document.getElementById('edit-costo').value=mejor;
 }
-function tiendaGuardarPrecios(){
+async function tiendaGuardarPrecios(){
   if(!tiendaExigirAdmin())return;
+  var boton=document.getElementById('btn-guardar-precios');
+  if(!boton||boton.disabled)return;
   var venta=_num('edit-venta'), costo=_num('edit-costo');
-  if(venta<=0){ alert('El precio de venta no puede quedar vacío.'); return; }
+  if(!Number.isFinite(venta)||venta<=0){ alert('El precio de venta tiene que ser mayor a cero.'); return; }
   var nombre=(document.getElementById('edit-nombre').value||'').trim();
   var cat=document.getElementById('edit-cat').value;
   var carac=(document.getElementById('edit-carac').value||'').trim();
   var mayEl=document.getElementById('edit-mayorista');
   var mayorista=mayEl?(mayEl.value||'').trim():'';
+  var sistemaEl=document.getElementById('edit-sistema-precio');
+  var sistemaElegido=sistemaEl?sistemaEl.value:'general';
+  if(sistemaElegido==='protegida'&&costo<=0){
+    alert('Para usar el Plan Protegido en este producto primero cargá su costo real.');
+    return;
+  }
+  var id=window._tiendaEditId, esCelu=window._tiendaEditEsCelu;
+  var celus=esCelu?cargarListaCelus():null;
+  var indice=esCelu?parseInt(String(id).replace('celu_',''),10):-1;
+  var p=esCelu?celus[indice]:tiendaProductos.find(function(x){return x.id==id;});
+  if(!p){alert('No se encontró el producto. Volvé a abrir su ficha.');return;}
 
-  var cambioCategoria=false;
-  var liberoRevision=false;
-  if(window._tiendaEditEsCelu){
-    // editar un celular: se guarda en la lista de celulares
-    var i=parseInt((''+window._tiendaEditId).replace('celu_',''),10);
-    var celus=cargarListaCelus();
-    if(celus[i]){
-      if(nombre)celus[i].nombre=nombre;
-      celus[i].precio=Math.round(venta);
-      celus[i].caracteristicas=carac;
-      celus[i].mayorista=mayorista;
-      // No inventar fecha histórica al editar un celular existente.
-      // Refrescar la tarjeta desde el mismo dato que se acaba de editar.
-      // El guardado en nube continúa por el circuito de celulares existente.
-      try{ localStorage.setItem('amarango_celulares', JSON.stringify(celus)); }catch(e){}
-      if(NUBE_OK && sbCalc){
-        var indiceGuardado=i, mayoristaGuardado=mayorista;
-        var botonMay=document.getElementById('btn-guardar-precios');
-        if(botonMay){botonMay.disabled=true;botonMay.textContent='Guardando…';}
-        Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:celus,actualizado:new Date().toISOString()}))
-          .then(function(res){if(res&&res.error)throw res.error;return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();})
+  var modal=document.getElementById('modal-cuotas');
+  var posicion=window._tiendaEditPosicion;
+  var nube=NUBE_OK&&sbCalc;
+  boton.disabled=true;
+  modal.style.display='none';
+  mostrarToast('⏳ Guardando producto…');
+
+  try{
+    var tareas=[];
+    if(esCelu){
+      if(nombre)p.nombre=nombre;
+      p.precio=Math.round(venta);
+      p.caracteristicas=carac;
+      p.mayorista=mayorista;
+      try{localStorage.setItem('amarango_celulares',JSON.stringify(celus));}catch(e){}
+      if(nube){
+        tareas.push(Promise.resolve(sbCalc.from('celulares_lista').upsert({id:'lista',datos:celus,actualizado:new Date().toISOString()}))
           .then(function(res){
             if(res&&res.error)throw res.error;
-            var listaConfirmada=res&&res.data&&res.data.datos;
-            if(!Array.isArray(listaConfirmada)||!listaConfirmada[indiceGuardado]||String(listaConfirmada[indiceGuardado].mayorista||'').trim()!==mayoristaGuardado)throw new Error('Mayorista no confirmado');
-            if(botonMay){botonMay.disabled=false;botonMay.textContent='✅ Guardado';}
-            mostrarToast('✅ Mayorista del celular guardado');
-            tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
-          }).catch(function(err){
-            if(botonMay){botonMay.disabled=false;botonMay.textContent='Reintentar guardar';}
-            mostrarToast('⚠️ No se pudo confirmar el mayorista en la nube');
-            console.warn('Error guardando mayorista celular',err);
-          });
-      }else{
-        mostrarToast('⚠️ Sin conexión a la nube: cambio solo en este dispositivo');
+            return sbCalc.from('celulares_lista').select('datos').eq('id','lista').maybeSingle();
+          }).then(function(res){
+            if(res&&res.error)throw res.error;
+            var lista=res&&res.data&&res.data.datos;
+            var confirmado=Array.isArray(lista)&&lista[indice];
+            if(!confirmado||confirmado.nombre!==p.nombre||Number(confirmado.precio)!==p.precio||
+               String(confirmado.caracteristicas||'')!==carac||String(confirmado.mayorista||'').trim()!==mayorista){
+              throw new Error('La nube no confirmó los cambios del celular.');
+            }
+          }));
       }
-    }
-  }else{
-    var p=tiendaProductos.find(function(x){return x.id==window._tiendaEditId;});
-    if(p){
-      var sistemaEl=document.getElementById('edit-sistema-precio');
-      var sistemaElegido=sistemaEl?sistemaEl.value:'general';
-      if(sistemaElegido==='protegida' && costo<=0){
-        alert('Para usar el Plan Protegido en este producto primero cargá su costo real.');
-        return;
-      }
-      cambioCategoria=window._tiendaEditCategoriaOriginal!==cat;
+    }else{
       if(nombre)p.nombre=nombre;
       // sellar fecha SOLO si cambió el precio de venta o el costo
       if(Math.round(p.venta)!==Math.round(venta) || Math.round(p.costo||0)!==Math.round(costo)){
@@ -10513,44 +10510,29 @@ function tiendaGuardarPrecios(){
         p.precioChequeadoManual=ahoraRevision;
         p.precioActualizado=ahoraRevision;
         p.estadoRevisionActualizado=ahoraRevision;
-        if(p.pendienteRevisionManual){ tiendaLiberarRevisionManual(p,true); liberoRevision=true; }
+        if(p.pendienteRevisionManual)tiendaLiberarRevisionManual(p,true);
       }
-      tiendaGuardarLocal();
-      tiendaGuardarCategoriaAdminNube(p,false).then(function(res){
-        if(res&&res.error)throw res.error;
-      }).catch(function(err){
-        alert('⚠️ El producto se guardó, pero Supabase no confirmó la categoría.\n\nVolvé a guardar con conexión.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
-      });
-      guardarSistemaPrecioProducto(p.id,sistemaElegido).catch(function(err){
-        alert('⚠️ El producto se guardó, pero la nube no confirmó su sistema de precios.\n\nDetalle: '+((err&&err.message)||err||'error desconocido'));
-      });
-      if(!tiendaEsAutomatico(p))tiendaGuardarRevisionManualNube(p).catch(function(){});
+      tareas.push(tiendaGuardarLocal(),tiendaGuardarCategoriaAdminNube(p,false),guardarSistemaPrecioProducto(p.id,sistemaElegido));
+      if(!tiendaEsAutomatico(p))tareas.push(tiendaGuardarRevisionManualNube(p));
     }
-  }
-  // Fix 2026-08-26: antes se cerraba el dialogo solo al guardar, y la unica
-  // señal de que el guardado funciono era el modal desapareciendo — si
-  // alguien miraba el boton en vez de la pantalla, no se daba cuenta.
-  // Ahora el dialogo se queda abierto, el boton avisa "Guardado" un rato, y
-  // el admin cierra cuando quiere (para seguir editando otra cosa del mismo
-  // producto sin tener que volver a abrirlo).
-  var botonGuardar=document.getElementById('btn-guardar-precios');
-  if(botonGuardar){
-    var textoOriginal=botonGuardar.textContent;
-    botonGuardar.textContent='✅ Guardado';
-    setTimeout(function(){ if(botonGuardar)botonGuardar.textContent=textoOriginal; }, 2500);
-  }
-  if(liberoRevision){
-    // Fix 2026-08-26: mismo problema que en tiendaConfirmarPrecioManual —
-    // tiendaRender() a secas mandaba el scroll arriba de todo al confirmar
-    // desde el diálogo de edición.
-    tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
-    mostrarToast('✅ Precio corregido y producto publicado');
-  }else if(cambioCategoria){
-    tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
-    mostrarToast('✅ Guardado');
-  }else{
-    tiendaRenderMantenerPosicion(window._tiendaEditPosicion);
-    mostrarToast('✅ Guardado');
+    var guardado=Promise.allSettled(tareas);
+    tiendaRenderMantenerPosicion(posicion);
+    var resultados=await guardado;
+    if(!nube)throw new Error('Sin conexión. Los cambios quedaron en este dispositivo.');
+    for(var resultado of resultados){
+      if(resultado.status==='rejected')throw resultado.reason;
+      if(resultado.value&&resultado.value.error)throw resultado.value.error;
+    }
+    mostrarToast('✅ Producto guardado');
+  }catch(err){
+    // El editor conserva sus campos. Si se abrió otro cartel, dejarlo intacto.
+    if(document.getElementById('btn-guardar-precios')===boton&&modal.style.display==='none'){
+      modal.style.display='block';
+    }
+    mostrarToast(nube?'⚠️ No se pudo confirmar el guardado. Volvé a intentar.':'⚠️ Sin conexión: cambio solo en este dispositivo.');
+    console.warn('No se confirmó la edición del producto',err);
+  }finally{
+    boton.disabled=false;
   }
 }
 
