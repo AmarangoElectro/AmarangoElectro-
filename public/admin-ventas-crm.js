@@ -29,6 +29,11 @@ function clientName(c){return String(c&&c.nombre||'').trim();}
 // Los asesores no reciben permisos de lectura sobre perfiles privados de otros usuarios.
 var DELIVERY_KEY='ae_delivery_client_history_v1';
 function phoneDigits(v){return String(v||'').replace(/\D/g,'');}
+function validContactPhone(v){
+ var phone=String(v||'').trim();
+ var digits=phoneDigits(phone);
+ return phone.length<=30&&digits.length>=8&&digits.length<=15;
+}
 function customerDeliveryKey(n,p){return String(n||'').trim().toLowerCase().replace(/\s+/g,' ')+'|'+phoneDigits(p);}
 function mapsLink(v){
  try{
@@ -82,6 +87,7 @@ function initStyle(){
  '.ae-crm-sale-input{box-sizing:border-box;width:100%;min-height:43px;border:1.5px solid var(--bor);border-radius:10px;background:var(--bg);color:var(--txt);padding:10px;font-size:.87rem;font-family:inherit}',
  '.ae-crm-sale-input:focus-visible{outline:2px solid #ff7a00;outline-offset:1px}',
  '.ae-crm-sale-customer-phone,.ae-crm-sale-customer-phone::placeholder{font-size:.78rem!important;letter-spacing:0!important}',
+ '.ae-crm-sale-phone-choices{margin:5px 0 0}.ae-crm-sale-phone-choices .ae-crm-sale-option{min-height:40px}',
  '.ae-crm-sale-suggestions[hidden]{display:none!important}.ae-crm-sale-suggestions{max-height:min(38dvh,340px);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;border:1px solid var(--bor);border-radius:10px;margin-top:3px;background:var(--wh);scrollbar-width:thin}',
  '.ae-crm-sale-option{display:block;box-sizing:border-box;width:100%;text-align:left;padding:10px;border:0;border-bottom:1px solid var(--bor);background:transparent;color:var(--txt);font-family:inherit;font-size:.78rem;cursor:pointer}',
  '.ae-crm-sale-option:last-child{border-bottom:0}.ae-crm-sale-option:active{background:var(--bg)}',
@@ -256,6 +262,54 @@ function open(id,card){
  var customerPhone=deliveryField(box,'📱 Celular del cliente *','Ej.: 11 5555-1234',30,'tel');
  customerPhone.classList.add('ae-crm-sale-customer-phone');
  customerPhone.inputMode='tel';
+ var phoneFromCrm='',devicePhones=[];
+ var phoneChoices=node('div','ae-crm-sale-suggestions ae-crm-sale-phone-choices');
+ phoneChoices.hidden=true;box.appendChild(phoneChoices);
+ function showPhoneChoices(){
+  phoneChoices.replaceChildren();
+  var current=phoneDigits(customerPhone.value);
+  var crmPhone=String(selected&&selected.telefono||'').trim();
+  if(validContactPhone(crmPhone)&&phoneDigits(crmPhone)!==current){
+   phoneChoices.appendChild(button('Usar celular del CRM · '+crmPhone,function(){
+    useCustomerPhone(crmPhone,true);
+   },'ae-crm-sale-option'));
+  }
+  devicePhones.forEach(function(phone){
+   if(phoneDigits(phone)===current||phoneDigits(phone)===phoneDigits(crmPhone))return;
+   phoneChoices.appendChild(button('Usar '+phone,function(){useCustomerPhone(phone,false);},'ae-crm-sale-option'));
+  });
+  phoneChoices.hidden=!phoneChoices.childElementCount;
+ }
+ function useCustomerPhone(phone,fromCrm){
+  customerPhone.value=phone;phoneFromCrm=fromCrm?phone:'';devicePhones=[];
+  showPhoneChoices();checkSavedDelivery();
+ }
+ var contactPicker=navigator.contacts;
+ if(contactPicker&&typeof contactPicker.select==='function'){
+  var contactActions=node('div','ae-crm-sale-map-actions');
+  var contactStatus=node('div','ae-crm-sale-info');
+  contactStatus.setAttribute('aria-live','polite');
+  var pickContact=button('📇 Elegir de mis contactos',async function(){
+   var before=customerPhone.value,customer=input.value;
+   contactStatus.textContent='';pickContact.disabled=true;
+   try{
+    var contacts=await contactPicker.select(['tel'],{multiple:false});
+    if(!box.isConnected||customerPhone.value!==before||input.value!==customer||!contacts.length)return;
+    var seen=new Set();
+    devicePhones=(contacts[0].tel||[]).map(function(v){return String(v).trim();}).filter(function(v){
+     var digits=phoneDigits(v);
+     if(!validContactPhone(v)||seen.has(digits))return false;
+     seen.add(digits);return true;
+    });
+    if(devicePhones.length===1){useCustomerPhone(devicePhones[0],false);return;}
+    showPhoneChoices();
+    contactStatus.textContent=devicePhones.length?'Elegí el número que vas a usar.':'Ese contacto no tiene un celular disponible. Podés escribirlo acá.';
+   }catch(e){
+    if(e&&e.name!=='AbortError')contactStatus.textContent='Podés escribir el celular a mano.';
+   }finally{pickContact.disabled=false;}
+  },'ae-crm-sale-map-button');
+  contactActions.appendChild(pickContact);box.appendChild(contactActions);box.appendChild(contactStatus);
+ }
  var deliveryPhone=deliveryField(box,'Otro teléfono para recibir la entrega (opcional)','Si alguien más la recibe',30,'tel');
  deliveryPhone.inputMode='tel';
  box.appendChild(node('p','ae-crm-delivery-tip',
@@ -309,11 +363,10 @@ function open(id,card){
  });
  async function checkSavedDelivery(){
   var key=customerDeliveryKey(input.value,customerPhone.value);
-  if(!input.value.trim()||phoneDigits(customerPhone.value).length<8||key===rememberedKey)return;
+  if(!input.value.trim()||!validContactPhone(customerPhone.value)||key===rememberedKey)return;
   rememberedKey=key;savedProfile=null;reuse.hidden=true;reuse.replaceChildren();
-  var local=readDeliveryHistory()[key];
-  if(local)savedProfile=local;
-  if(!advisor&&!savedProfile){
+  var profile=readDeliveryHistory()[key];
+  if(!advisor&&!profile){
    try{
     var secure=window.sbFotos;
     if(secure&&secure.auth){
@@ -322,12 +375,13 @@ function open(id,card){
       var result=await secure.from('ae_customer_delivery_profiles')
        .select('alternate_phone,maps_url,street_address,cross_streets,locality')
        .eq('client_key',key).maybeSingle();
-      if(!result.error&&result.data)savedProfile={alternative:result.data.alternate_phone||'',map:result.data.maps_url||'',address:result.data.street_address||'',cross:result.data.cross_streets||'',locality:result.data.locality||'',mode:result.data.maps_url?'map':'manual'};
+      if(!result.error&&result.data)profile={alternative:result.data.alternate_phone||'',map:result.data.maps_url||'',address:result.data.street_address||'',cross:result.data.cross_streets||'',locality:result.data.locality||'',mode:result.data.maps_url?'map':'manual'};
      }
     }
    }catch(e){}
   }
-  if(key!==customerDeliveryKey(input.value,customerPhone.value)||!savedProfile)return;
+  if(!box.isConnected||key!==rememberedKey||key!==customerDeliveryKey(input.value,customerPhone.value)||!profile)return;
+  savedProfile=profile;
   reuse.hidden=false;
   reuse.appendChild(node('div','','✅ Encontré un domicilio anterior para este nombre y celular.'));
   reuse.appendChild(node('div','','Confirmá con el cliente que sigue siendo su dirección de entrega.'));
@@ -344,6 +398,7 @@ function open(id,card){
   },'ae-crm-delivery-reuse-button'));
  }
  customerPhone.addEventListener('blur',checkSavedDelivery);
+ customerPhone.addEventListener('input',function(){resetPhoneSuggestion(false);showPhoneChoices();});
  input.addEventListener('blur',checkSavedDelivery);
  customerPhone.addEventListener('change',checkSavedDelivery);
  var notesLabel=node('label','ae-crm-sale-label','Observaciones (opcional)');
@@ -363,14 +418,21 @@ function open(id,card){
   suggestions.scrollTop=0;
   hits.forEach(function(c){
    var option=button(clientLabel(c),function(){
+    resetPhoneSuggestion();
     selected=c;input.value=clientName(c);suggestions.hidden=true;
+    showPhoneChoices();
     clientMessage.textContent='✅ Cliente del CRM seleccionado: '+clientLabel(c);
    },'ae-crm-sale-option');
    suggestions.appendChild(option);
   });
   suggestions.hidden=false;
  }
- input.addEventListener('input',function(){selected=null;clientMessage.textContent=loaded?'Seleccioná un cliente sugerido o ingresá un nombre nuevo.':'Clientes del CRM no disponibles; se guardará el nombre en la tarea.';filter();});
+ function resetPhoneSuggestion(clearCrmPhone){
+  if(clearCrmPhone!==false&&phoneFromCrm&&customerPhone.value===phoneFromCrm)customerPhone.value='';
+  phoneFromCrm='';devicePhones=[];
+  reuse.hidden=true;reuse.replaceChildren();rememberedKey='';savedProfile=null;
+ }
+ input.addEventListener('input',function(){resetPhoneSuggestion();selected=null;showPhoneChoices();clientMessage.textContent=loaded?'Seleccioná un cliente sugerido o ingresá un nombre nuevo.':'Clientes del CRM no disponibles; se guardará el nombre en la tarea.';filter();});
  input.addEventListener('focus',filter);
  (async function(){
   try{if(advisor)return;await loadClients();loaded=true;clientMessage.textContent='✅ CRM conectado: '+clients.length+' clientes disponibles para buscar.';filter();}
