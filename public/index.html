@@ -2392,7 +2392,7 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
 
     <!-- Atajos de navegación para administración, sin duplicar buscadores -->
     <div id="ae-admin-atajos" style="display:none;gap:7px;align-items:center;flex-wrap:wrap;margin:8px 0 10px;">
-      <span style="font-size:.72rem;color:var(--sub);">24 productos por lote · tocá Ver más para continuar</span>
+      <span style="font-size:.72rem;color:var(--sub);">Deslizá para seguir viendo productos</span>
     </div>
     <!-- Banner modo admin (oculto por defecto) -->
     <div id="tienda-admin-banner" style="display:none;background:#fff4e6;border:1px solid var(--nar);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.72rem;color:var(--az);font-weight:700;">
@@ -2612,8 +2612,11 @@ body.oscuro #tienda-grid.ae-admin-v16-visual .prod-card .ae-admin-visibility-med
       </div>
     </div>
     <div id="tienda-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;align-items:start;justify-items:stretch;width:100%;padding-bottom:10px;"></div>
-    <div id="tienda-vermas" style="text-align:center;padding:4px 0 70px;"></div>
-    <div id="tienda-sentinela" style="height:1px;"></div>
+    <div id="tienda-sentinela" aria-hidden="true" hidden style="height:1px;"></div>
+    <div id="tienda-vermas" style="text-align:center;padding:4px 0 70px;">
+      <button id="tienda-vermas-boton" type="button" hidden onclick="tiendaVerMas()" style="background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:12px;padding:11px 22px;font-weight:800;font-family:inherit;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.08);">Ver más productos</button>
+      <p id="tienda-fin-resultados" role="status" hidden style="color:var(--sub);font-size:.75rem;">Llegaste al final de los resultados</p>
+    </div>
 
     <!-- Cartelito suave: dejá tu mail (opcional) -->
     <div id="mail-suscribir" style="display:none;background:var(--wh);border:1.5px dashed var(--nar);border-radius:12px;padding:10px 12px;margin:16px 0 10px;">
@@ -8139,6 +8142,9 @@ function tiendaRenderDebounce(){
 var TIENDA_LOTE = 24;          // cuántos productos por lote
 var _tiendaListaFull = [];     // lista completa filtrada/ordenada
 var _tiendaMostrados = 0;      // cuántos hay pintados ahora
+var _tiendaFirmaPaginacion='';
+var _tiendaObservadorLotes=null;
+var TIENDA_ANTICIPO_LOTE=520;
 var _aeBusquedaSeccionActiva=false; // sólo Administración con búsqueda escrita.
 // Mantener visibles, ocultos y sin stock separados aunque se usen lotes de 24.
 function tiendaCardsBusquedaPorEstado(items,desde){
@@ -8173,11 +8179,36 @@ function tiendaVerMas(){
 }
 
 function tiendaPintarVerMas(){
-  var box=document.getElementById('tienda-vermas');
-  if(!box) return;
+  var boton=document.getElementById('tienda-vermas-boton');
+  var fin=document.getElementById('tienda-fin-resultados');
+  var sentinela=document.getElementById('tienda-sentinela');
+  if(!boton||!fin||!sentinela)return;
   var restan=_tiendaListaFull.length-_tiendaMostrados;
-  if(restan<=0){ box.innerHTML=''; return; }
-  box.innerHTML='<button onclick="tiendaVerMas()" style="background:var(--wh);color:var(--az);border:1.5px solid var(--bor);border-radius:12px;padding:11px 22px;font-weight:800;font-family:inherit;font-size:.8rem;cursor:pointer;box-shadow:0 2px 8px rgba(11,45,107,.08);">Ver más productos ('+restan+') ▾</button>';
+  boton.hidden=restan<=0;
+  if(restan>0)boton.textContent='Ver más productos ('+restan+') ▾';
+  fin.hidden=restan>0||_tiendaListaFull.length<=TIENDA_LOTE;
+  sentinela.hidden=restan<=0;
+  if(_tiendaObservadorLotes){
+    _tiendaObservadorLotes.unobserve(sentinela);
+    _tiendaObservadorLotes.takeRecords();
+  }
+  if(restan<=0||!('IntersectionObserver' in window))return;
+  if(!_tiendaObservadorLotes){
+    _tiendaObservadorLotes=new IntersectionObserver(function(entradas){
+      if(!entradas.some(function(entrada){return entrada.isIntersecting;})||sentinela.hidden||!sentinela.getClientRects().length)return;
+      var rect=sentinela.getBoundingClientRect();
+      if(rect.bottom>=0&&rect.top<=window.innerHeight+TIENDA_ANTICIPO_LOTE)tiendaVerMas();
+    },{rootMargin:'0px 0px '+TIENDA_ANTICIPO_LOTE+'px 0px'});
+  }
+  // Volver a medir tras añadir tarjetas, también si el lote es corto.
+  _tiendaObservadorLotes.observe(sentinela);
+}
+
+function tiendaReiniciarPaginacion(){
+  _tiendaListaFull=[];
+  _tiendaMostrados=0;
+  _tiendaFirmaPaginacion='';
+  tiendaPintarVerMas();
 }
 
 // Después de editar no perdemos la tarjeta. Si estaba fuera del primer lote,
@@ -8759,20 +8790,6 @@ function tiendaLiberarRevisionManual(p, publicar){
   delete p.visibleAntesRevisionManual;
 }
 
-// scroll infinito: cuando el usuario se acerca al final, carga el próximo lote
-(function(){
-  if(!('IntersectionObserver' in window)) return;
-  var arranca=function(){
-    var sent=document.getElementById('tienda-sentinela');
-    if(!sent){ setTimeout(arranca,500); return; }
-    var io=new IntersectionObserver(function(entradas){
-      if(entradas[0] && entradas[0].isIntersecting && !tiendaEsAdmin){ tiendaVerMas(); }
-    }, {rootMargin:'600px'});
-    io.observe(sent);
-  };
-  if(document.readyState!=='loading') arranca(); else document.addEventListener('DOMContentLoaded', arranca);
-})();
-
 function tiendaProductoAptoPortada(p){
   if(!p || !p.foto || p.visible===false || p.sinStock===true || p.estadoProveedor==='sin_stock')return false;
   var stock=tiendaLeerStockProveedor(p);
@@ -8842,10 +8859,8 @@ function tiendaRenderPortadaCategorias(universo,cont){
     html='<div class="ae-explora-title">Explorá <span class="ae-explora-contrast">nuestros</span> productos</div>'+html;
     html+='<div style="grid-column:1/-1;text-align:center;margin:0 0 28px;"><button onclick="tiendaModoPortada=false;tiendaMostrarTodos=true;tiendaRender();" style="background:var(--nar);color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:.78rem;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(255,122,0,.28);">Ver todos los productos</button></div>';
   }
-  _tiendaListaFull=[];
-  _tiendaMostrados=0;
+  tiendaReiniciarPaginacion();
   cont.innerHTML=html;
-  var vm=document.getElementById('tienda-vermas');if(vm)vm.innerHTML='';
   var cnt=document.getElementById('tienda-contador');if(cnt)cnt.textContent='Elegí una categoría para ver más';
   tiendaAplicarVistaYAvisos();
 }
@@ -9103,6 +9118,7 @@ function tiendaRender(){
   var avisoMayorista=document.getElementById('ae-admin-filtro-mayorista');
   if(avisoMayorista){avisoMayorista.style.display=tiendaEsAdmin&&aeFiltroMayoristaActual?'flex':'none';var nombreFiltro=document.getElementById('ae-admin-filtro-nombre');if(nombreFiltro)nombreFiltro.textContent=aeFiltroMayoristaActual;}
   if(!universo.length){
+    tiendaReiniciarPaginacion();
     vacia.style.display='block';
     if(tiendaBandejaAdmin==='nuevos')vacia.innerHTML='✅ No quedan productos sin fotos pendientes de revisar.';
     else if(tiendaBandejaAdmin==='revision')vacia.innerHTML='✅ No quedan productos manuales pendientes de revisión.';
@@ -9344,8 +9360,7 @@ function tiendaRender(){
     return (Number(a._aeEstadoBusq)||0)-(Number(b._aeEstadoBusq)||0);
   });
   if(!lista.length){
-    _tiendaListaFull=[]; _tiendaMostrados=0;
-    var vm=document.getElementById('tienda-vermas'); if(vm)vm.innerHTML='';
+    tiendaReiniciarPaginacion();
     var cntVacio=document.getElementById('tienda-contador');
     if(cntVacio) cntVacio.textContent=palabras.length?'Sin productos relacionados':'Sin resultados';
 
@@ -9389,10 +9404,16 @@ function tiendaRender(){
   var cntEl=document.getElementById('tienda-contador');
   if(cntEl)cntEl.textContent='Mostrando '+lista.length+' producto'+(lista.length===1?'':'s');
 
-  // ⚡ PAGINACIÓN: no dibujamos los cientos de productos de golpe (eso trababa
-  // la apertura). Mostramos de a lotes de 24 y "Ver más" carga el siguiente.
+  // Si la misma vista se actualiza en segundo plano, mantener lo ya recorrido.
+  var selectorMayorista=document.getElementById('ae-mayorista-select');
+  var firmaPaginacion=JSON.stringify([q,maxPrecio,orden,tiendaCategoriaActiva,tiendaMarcaActiva,
+    tiendaSubfiltroActivo,tiendaMarcaGeneralActiva,tiendaBandejaAdmin,aeFiltroMayoristaActual,
+    selectorMayorista&&selectorMayorista.value,tiendaEsAdmin,vistaPreviaCliente,revUnlocked,
+    verSoloFavoritos,verSoloOfertas,verSoloPreciosViejos]);
+  var cantidadAnterior=firmaPaginacion===_tiendaFirmaPaginacion?_tiendaMostrados:0;
+  _tiendaFirmaPaginacion=firmaPaginacion;
   _tiendaListaFull = lista;
-  _tiendaMostrados = Math.min(TIENDA_LOTE, lista.length);
+  _tiendaMostrados = Math.min(Math.max(TIENDA_LOTE,cantidadAnterior),lista.length);
   cont.classList.toggle('ae-mayorista-filtrado',!!(tiendaEsAdmin&&!vistaPreviaCliente&&aeFiltroMayoristaActual));
   var resumenBusqueda='';
   if(palabras.length){
