@@ -1,0 +1,27 @@
+name: Verificar centro de asesores
+
+on:
+  push:
+    branches:
+      - agent/asesores-centro-margarita
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+
+      - name: Validar Worker sin desplegar
+        run: npm run check
