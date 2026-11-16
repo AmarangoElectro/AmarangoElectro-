@@ -9,7 +9,7 @@ guardado en Supabase.
 - El dominio `amarangoelectro.com.ar`.
 - Las herramientas de administrador y vendedores.
 - El catálogo de Supabase.
-- La sincronización horaria de Mega Electro y Electro Impacto.
+- La sincronización horaria de Electro Impacto (Mega Electro se retiró el 16/11/2026).
 - El puente de imágenes utilizado al compartir productos.
 - Las redirecciones antiguas de `/calculadora.html` y `/index.html`.
 

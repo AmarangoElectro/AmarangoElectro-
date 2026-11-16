@@ -4,12 +4,11 @@
 //   incrementales cada hora, de 09:00 a 18:00 (lunes a sábado).
 // - Los controles horarios consultan sólo registros cuyo updatedAt cambió y
 //   aplican un delta dentro de Supabase; no descargan el catálogo completo.
-// - Toma precio y stock publicados por Mega Electro y Electro Impacto.
+// - Toma precio y stock publicados por Electro Impacto (Mega Electro retirado el 16/11/2026).
 // - Calcula el precio de venta con la misma fórmula de calculadora.html.
 // - Nunca borra productos: cuando se agotan, los oculta; cuando vuelven,
 //   los muestra nuevamente.
 // - Conserva intactos todos los productos cargados manualmente.
-// - Mega Boutique, Perfumes y Relojes quedan excluidos.
 
 const PARSE_URL = "https://ecured.ecunegocio.com/parse/classes";
 const PARSE_APP_ID = "Ecu_Al@2019o_0708777z8A31qProt";
@@ -34,18 +33,11 @@ function configurarEntorno(env = {}) {
     Number.isFinite(cotizacion) && cotizacion > 0 ? cotizacion : 1590;
 }
 
+// Mega Electro se retiró como proveedor el 16/11/2026: ya no se consulta ni se importa.
+// Sus productos automáticos se dieron de baja en Supabase (respaldo
+// "respaldo_retiro_mega_20261116" en public.tienda_catalogo) y el trigger
+// trg_ae_filtrar_mega_retirado impide que vuelvan a entrar.
 const PROVEEDORES = [
-  {
-    clave: "mega",
-    nombre: "Mega Electro",
-    owner: "KIpPe9qXMa",
-    minimoEsperado: 10,
-    categoriasExcluidas: new Set([
-      "MEGA BOUTIQUE",
-      "PERFUMES",
-      "RELOJES",
-    ]),
-  },
   {
     clave: "impacto",
     nombre: "Electro Impacto",
