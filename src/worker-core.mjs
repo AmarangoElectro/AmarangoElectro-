@@ -1,4 +1,3 @@
-import { ejecutarSincronizacionProgramadaSegura } from "./proveedores-sync.mjs";
 
 const HOSTS_IMAGEN_PERMITIDOS = new Set(["cdn.catalog-store.link"]);
 const TIPOS_IMAGEN_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
@@ -350,7 +349,8 @@ export default {
     return env.ASSETS.fetch(request);
   },
   async scheduled(controller, env, ctx) {
-    const tipo=controller&&controller.cron==="0 12-21 * * 1-6"?"incremental":"completa";
-    ctx.waitUntil(ejecutarSincronizacionProgramadaSegura(env,tipo));
+    // Carga automática de proveedores APAGADA en la tienda vieja (Max, 19/11/2026: «que solo quede activa en la V16»).
+    // Electro Impacto se trae sólo desde V16. Si quedara alguna tarea programada vieja en el panel, no hace nada.
+    console.log("proveedores_auto_apagado_tienda_vieja", controller&&controller.cron);
   },
 };
