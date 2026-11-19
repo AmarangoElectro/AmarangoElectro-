@@ -1,6 +1,8 @@
 import base from "./worker.mjs";
 import { dispatchAdminTaskMail } from "./admin-task-mail.mjs";
 
+const TASK_MAIL_CRONS = new Set(["30 12 * * *", "0 15 * * *"]);
+
 const PRO_UX_HEAD = `
 <link rel="stylesheet" href="/professional-ux.css?v=20260823-2">
 <link rel="stylesheet" href="/professional-dialogs.css?v=20260823-1">
@@ -247,7 +249,9 @@ export default {
   async scheduled(controller, env, ctx) {
     // No modifica los cron existentes de sincronización de proveedores.
     // El correo sólo se despacha con el cron dedicado y credenciales secretas presentes.
-    if (controller?.cron === "*/5 * * * *") {
+    // Correos de tareas sólo a las 9:30 y a las 12:00 de Argentina (12:30 y 15:00 UTC), pedido de Max 19/11/2026.
+    // Antes salían cada 5 minutos.
+    if (TASK_MAIL_CRONS.has(controller?.cron)) {
       ctx.waitUntil(dispatchAdminTaskMail(env).catch((error) => {
         console.warn("Admin task mail scheduler unavailable", String(error?.message || error).slice(0, 90));
       }));

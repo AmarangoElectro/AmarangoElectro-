@@ -94,12 +94,17 @@ export async function dispatchAdminTaskMail(env){
  const from=String(env.ADMIN_TASK_MAIL_FROM);
  if(!/^[^<]*<?[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+>?$/.test(from))
   return {configured:false,reason:"invalid_sender"};
- const claims=await rpc(env,"ae_admin_task_mail_claim",{p_limit:20});
- if(!Array.isArray(claims))throw Error("invalid_mail_claims");
- let sent=0;
- for(let i=0;i<claims.length;i+=4){
-  const outcomes=await Promise.all(claims.slice(i,i+4).map(task=>sendOne(task,env)));
-  sent+=outcomes.filter(Boolean).length;
+ // Sólo 2 envíos por día (9:30 y 12:00): se mandan todas las pendientes, de a 20, hasta 10 tandas.
+ let sent=0,claimed=0;
+ for(let round=0;round<10;round++){
+  const claims=await rpc(env,"ae_admin_task_mail_claim",{p_limit:20});
+  if(!Array.isArray(claims))throw Error("invalid_mail_claims");
+  claimed+=claims.length;
+  for(let i=0;i<claims.length;i+=4){
+   const outcomes=await Promise.all(claims.slice(i,i+4).map(task=>sendOne(task,env)));
+   sent+=outcomes.filter(Boolean).length;
+  }
+  if(claims.length<20)break;
  }
- return {configured:true,claimed:claims.length,sent};
+ return {configured:true,claimed,sent};
 }
